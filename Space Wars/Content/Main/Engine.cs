@@ -4,6 +4,8 @@ using Microsoft.Xna.Framework.Input;
 using System.Collections.Generic;
 using System;
 using Space_Wars.Content.Main.Entities;
+using Myra;
+using Myra.Graphics2D.UI;
 
 using System.Diagnostics;
 
@@ -13,6 +15,7 @@ namespace Space_Wars.Content.Main
     {
         private GraphicsDeviceManager graphics;
         private SpriteBatch spriteBatch;
+        private UIManager _UIManager;
         public static Vector2 screenSize;
         public static Vector2 screenPosition;
 
@@ -30,6 +33,8 @@ namespace Space_Wars.Content.Main
         {
             base.Initialize();
 
+            MyraEnvironment.Game = this;
+
             graphics.PreferredBackBufferWidth = 1280;  // set this value to the desired width of your window
             graphics.PreferredBackBufferHeight = 720;   // set this value to the desired height of your window
             graphics.ApplyChanges();
@@ -41,6 +46,7 @@ namespace Space_Wars.Content.Main
 
             //Generates a new player at the center of the screen
             EntityManager.Initialize();
+            _UIManager = new UIManager();
             screenPosition = new Vector2(screenSize.X / 2, screenSize.Y / 2);
 
             IsMouseVisible = false;
@@ -82,6 +88,7 @@ namespace Space_Wars.Content.Main
                     spriteBatch.Draw(line, new Rectangle((int)0, (int)(y * 50 + screenPosition.Y), (int)screenSize.X, 1), Color.Black);
                 }
             }
+            _UIManager.Draw(spriteBatch);
             EntityManager.Draw(spriteBatch);
             spriteBatch.Draw(Assets.Sprites["Cursor"], new Vector2(Mouse.GetState().X, Mouse.GetState().Y), Color.White);
             spriteBatch.End();
