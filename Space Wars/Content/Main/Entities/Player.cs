@@ -140,6 +140,7 @@ namespace Space_Wars.Content.Main.Entities
                 if (docked == false)
                 {
                     Move(mothership.Angle, 1);
+                    mothership.Dock();
                 }
                 if (docked == true)
                 {
@@ -150,6 +151,7 @@ namespace Space_Wars.Content.Main.Entities
                         EntityManager.Collide(leashedMaterial, mothership);
                         leashedMaterial = null;
                     }
+                    mothership.Dock();
                 }
             }
         }

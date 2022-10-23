@@ -18,10 +18,11 @@ namespace Space_Wars.Content.Main
         private UIManager _UIManager;
         public static Vector2 screenSize;
         public static Vector2 screenPosition;
-
+        private KeyboardState oldState;
         public static float deltaSeconds;
         public static Texture2D line;
         public static bool debugMode;
+        public static bool playingGame = true;       
 
         public Engine()
         {
@@ -46,7 +47,7 @@ namespace Space_Wars.Content.Main
 
             //Generates a new player at the center of the screen
             EntityManager.Initialize();
-            _UIManager = new UIManager();
+            _UIManager = new UIManager(this);
             screenPosition = new Vector2(screenSize.X / 2, screenSize.Y / 2);
 
             IsMouseVisible = false;
@@ -61,14 +62,21 @@ namespace Space_Wars.Content.Main
 
         protected override void Update(GameTime gameTime)
         {
+            KeyboardState newState = Keyboard.GetState();
+            if (oldState.IsKeyUp(Keys.Escape) && newState.IsKeyDown(Keys.Escape))
+            {
+                UIManager.PauseMenu();
+                playingGame = !playingGame;
+            }
 
-            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
-                Exit();
+            if (playingGame == true)
+            {
+                EntityManager.Update();
 
-            EntityManager.Update();
-
-            deltaSeconds = (float)gameTime.ElapsedGameTime.TotalSeconds;
-            base.Update(gameTime);
+                deltaSeconds = (float)gameTime.ElapsedGameTime.TotalSeconds;
+                base.Update(gameTime);
+            }
+            oldState = newState;
         }
 
         protected override void Draw(GameTime gameTime)
@@ -88,8 +96,8 @@ namespace Space_Wars.Content.Main
                     spriteBatch.Draw(line, new Rectangle((int)0, (int)(y * 50 + screenPosition.Y), (int)screenSize.X, 1), Color.Black);
                 }
             }
-            _UIManager.Draw(spriteBatch);
             EntityManager.Draw(spriteBatch);
+            _UIManager.Draw(spriteBatch);
             spriteBatch.Draw(Assets.Sprites["Cursor"], new Vector2(Mouse.GetState().X, Mouse.GetState().Y), Color.White);
             spriteBatch.End();
             //Sends a spritebatch through to the entity manager every draw update

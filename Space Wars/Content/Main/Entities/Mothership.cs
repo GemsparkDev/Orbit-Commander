@@ -47,6 +47,10 @@ namespace Space_Wars.Content.Main.Entities
                 EntityManager.player.ClampVelocity(2);
             }
         }
+        public void Dock()
+        {
+            UIManager.mothershipInventory(resources);
+        }
         public override void Collide(int damage)
         {
             Health -= damage;
