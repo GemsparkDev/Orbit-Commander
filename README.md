@@ -37,3 +37,6 @@ Space Wars is a game made using C# in monogame.
  0.0.3 - a.1  
   -Added Myra support and references  
   -Added basic framework for creating UI boxes  
+ 10/23/2022: Added two ui menus  
+  -Pause menu with quit button  
+  -Mothership resource menu display  
