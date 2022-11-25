@@ -39,6 +39,6 @@ Space Wars is a game made using C# in monogame.
   -Added basic framework for creating UI boxes  
  10/23/2022: Added two ui menus  
   -Pause menu with quit button  
-  -Mothership resource menu display
- 11/25/2022: Corrected mothership resource display
-  -resource amounts are no longer able to be changed directly from the menu
+  -Mothership resource menu display  
+ 11/25/2022: Corrected mothership resource display  
+  -resource amounts are no longer able to be changed directly from the menu  
