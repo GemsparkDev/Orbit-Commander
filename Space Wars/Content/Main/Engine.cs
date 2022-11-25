@@ -35,6 +35,7 @@ namespace Space_Wars.Content.Main
             base.Initialize();
 
             MyraEnvironment.Game = this;
+            _UIManager = new UIManager(this);
 
             graphics.PreferredBackBufferWidth = 1280;  // set this value to the desired width of your window
             graphics.PreferredBackBufferHeight = 720;   // set this value to the desired height of your window
@@ -47,7 +48,6 @@ namespace Space_Wars.Content.Main
 
             //Generates a new player at the center of the screen
             EntityManager.Initialize();
-            _UIManager = new UIManager(this);
             screenPosition = new Vector2(screenSize.X / 2, screenSize.Y / 2);
 
             IsMouseVisible = false;
