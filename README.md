@@ -43,7 +43,7 @@ Space Wars is a game made using C# in monogame.
  11/25/2022: Corrected mothership resource display  
   	-resource amounts are no longer able to be changed directly from the menu  
 
-1/16/2023: Reimplimented enemy typing system
+1/16/2023: Reimplimented enemy typing system  
 0.0.4 - a.1
 	-Added cruiser drone
 	-Fixed only able to pick up one item bug
