@@ -15,7 +15,7 @@ Space Wars is a game made using C# in monogame.
   	-Alpha sprites for various entities  
   	-Wave timer  
   	-Debug mode  
-
+  
 10/16/2022: added basic motherdrone systems  
 0.0.1 - a.1  
   	-Docking with motherdrone  
@@ -23,7 +23,7 @@ Space Wars is a game made using C# in monogame.
  	-Player can carry 1 material at a time and input in motherdrone  
  	-Can move motherdrone when docked  
 	-Velocity clamp for various entities  
- 
+   
 10/17/2022: Velocity arrow for player  
 0.0.2 - a.1  
   	-Velocity arrow for player  
@@ -42,9 +42,9 @@ Space Wars is a game made using C# in monogame.
   	-Mothership resource menu display  
  11/25/2022: Corrected mothership resource display  
   	-resource amounts are no longer able to be changed directly from the menu  
-
+  
 1/16/2023: Reimplimented enemy typing system  
-0.0.4 - a.1
-	-Added cruiser drone
+0.0.4 - a.1  
+	-Added cruiser drone  
 	-Fixed issue #0003
 
