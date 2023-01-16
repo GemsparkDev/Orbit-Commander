@@ -72,7 +72,14 @@ namespace Space_Wars.Content.Main.Entities
 
         public override void AI()
         {
-            if (EntityManager.player.leashedMaterial == this)
+            if (EntityManager.player.leashedMaterial == null)
+            {
+                if (EntityManager.DistanceSqr(EntityManager.player, this) < 1250)
+                {
+                    EntityManager.player.leashedMaterial = this;
+                }
+            }
+            else if (EntityManager.player.leashedMaterial == this)
             {
                 if (EntityManager.DistanceSqr(this, EntityManager.player) > 1250)
                 {
@@ -82,15 +89,8 @@ namespace Space_Wars.Content.Main.Entities
                 {
                     Velocity = EntityManager.player.Velocity / 1.1f;
                 }
+                ClampVelocity(MathF.Sqrt(MathF.Pow(EntityManager.player.Velocity.X, 2) + MathF.Pow(EntityManager.player.Velocity.Y, 2)) + 1);
             }
-            else if (EntityManager.player.leashedMaterial == null)
-            {
-                if (EntityManager.DistanceSqr(EntityManager.player, this) < 1250)
-                {
-                    EntityManager.player.leashedMaterial = this;
-                }
-            }
-            ClampVelocity(MathF.Sqrt(MathF.Pow(EntityManager.player.Velocity.X, 2) + MathF.Pow(EntityManager.player.Velocity.Y, 2)) + 1);
         }
     }
 

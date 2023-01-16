@@ -52,9 +52,8 @@ namespace Space_Wars.Content.Main
             player.mothership = Mothership;
             Add(Mothership);
             enemySpawner = new EnemySpawner(Player);
+            Enemy.NewCarrier(new Vector2(100, 100), Player.Velocity, 0, 0);
 
-            Add(new Enemy(new Vector2(100, 100), Vector2.Zero, 0, 0, 5, Assets.Sprites["Fighter"]));
-            
         }
         public static void Update()
         {

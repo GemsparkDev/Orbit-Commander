@@ -141,6 +141,7 @@ namespace Space_Wars.Content.Main.Entities
                 {
                     Move(mothership.Angle, 1);
                     mothership.Dock();
+                    leashedMaterial = null;
                 }
                 if (docked == true)
                 {

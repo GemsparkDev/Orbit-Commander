@@ -18,7 +18,7 @@ namespace Space_Wars.Content.Main
             Sprites.Add("Fighter", Content.Load<Texture2D>("Images/Entity_1"));
             Sprites.Add("Player", Content.Load<Texture2D>("Images/Entity_2"));
             Sprites.Add("Asteroid", Content.Load<Texture2D>("Images/Entity_3"));
-            Sprites.Add("CruiserDrone", Content.Load<Texture2D>("Images/Entity_4"));
+            Sprites.Add("Cruiser", Content.Load<Texture2D>("Images/Entity_4"));
             Sprites.Add("Metal Scrap", Content.Load<Texture2D>("Images/Entity_5"));
             Sprites.Add("Mothership", Content.Load<Texture2D>("Images/Entity_6"));
             Sprites.Add("Arrow", Content.Load<Texture2D>("Images/Entity_7"));
@@ -28,6 +28,7 @@ namespace Space_Wars.Content.Main
             SoundFX.Add("Fire_1", Content.Load<SoundEffect>("Sounds/Fire_1"));
             SoundFX.Add("Hit", Content.Load<SoundEffect>("Sounds/Hit"));
             SoundFX.Add("Death", Content.Load<SoundEffect>("Sounds/Death"));
+            SoundFX.Add("Fire_2", Content.Load<SoundEffect>("Sounds/Fire_2"));
         }
     }
 }

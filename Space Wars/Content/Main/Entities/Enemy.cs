@@ -5,6 +5,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Audio;
+using System.Reflection.Metadata;
 
 namespace Space_Wars.Content.Main.Entities
 {
@@ -29,9 +30,8 @@ namespace Space_Wars.Content.Main.Entities
             IsFriendly = false;
             Texture = texture;
             Color = Color.Red;
-            Health = (int)(10);
+            Health = (10);
             MaxHealth = Health;
-            AddBehaviour(Fighter());
         }
         IEnumerable<int> Fighter()
         {
@@ -67,6 +67,63 @@ namespace Space_Wars.Content.Main.Entities
 
                 yield return 0;
             }
+        }
+        IEnumerable<int> Carrier()
+        {
+            while (true)
+            {
+                TargetAngle = ((player.Position - Position) + (player.Velocity - Velocity)).ToDirection(0);
+                if (EntityManager.DistanceSqr(this, player) > MathF.Pow(150, 2))
+                {
+                    GoToEntity(player, 1);
+                }
+                else if(EntityManager.DistanceSqr(this, player) < MathF.Pow(75, 2))
+                {
+                    GoToEntity(player, -1);
+                    if (Cooldown <= 0)
+                    {
+                        EntityManager.Add(new PulseShot(Position, Angle.ToUnitVector(0) * 8, Angle, 0, false));
+                        Assets.SoundFX["Fire_1"].Play();
+                        Cooldown = 0.25f;
+                    }
+                }
+                else
+                {
+                    if (Cooldown <= 0)
+                    {
+                        NewFighter(Position, Angle.ToUnitVector(0) * 8, Angle, 0);
+                        Assets.SoundFX["Fire_2"].Play();
+                        Cooldown = 5;
+                    }
+                }
+                RotateTowards(TargetAngle);
+                LowerCooldown();
+
+                if (Health < 0)
+                {
+                    IsExpired = true;
+                    Assets.SoundFX["Death"].Play();
+                    EntityManager.Add(new Scrap(Position, Velocity, Angle, AngularVelocity));
+                }
+                if (Health > MaxHealth)
+                {
+                    Health = MaxHealth;
+                }
+
+                yield return 0;
+            }
+        }
+        public static void NewFighter(Vector2 position, Vector2 velocity, float angle, float angularVelocity)
+        {
+            Enemy enemy = new Enemy(position, velocity, angle, angularVelocity, 10, Assets.Sprites["Fighter"]);
+            enemy.AddBehaviour(enemy.Fighter());
+            EntityManager.Add(enemy);
+        }
+        public static void NewCarrier(Vector2 position, Vector2 velocity, float angle, float angularVelocity)
+        {
+            Enemy enemy = new Enemy(position, velocity, angle, angularVelocity, 10, Assets.Sprites["Cruiser"]);
+            enemy.AddBehaviour(enemy.Carrier());
+            EntityManager.Add(enemy);
         }
 
         public void LowerCooldown()

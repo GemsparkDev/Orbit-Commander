@@ -145,6 +145,12 @@
 /processorParam:Quality=Best
 /build:Sounds/Fire_1.wav
 
+#begin Sounds/Fire_2.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Sounds/Fire_2.wav
+
 #begin Sounds/Hit.wav
 /importer:WavImporter
 /processor:SoundEffectProcessor

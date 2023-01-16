@@ -55,7 +55,7 @@ namespace Space_Wars.Content.Main
                 }
                 */
                 Vector2 spawnLocation = NewSpawnLocation();
-                EntityManager.Add(new Enemy(spawnLocation, Player.Velocity, 0, 0, 5, Assets.Sprites["FighterDrone"]));
+                Enemy.NewFighter(spawnLocation, Player.Velocity, 0, 0);
                 wave++;
                 waveTimer = 60;
             }
