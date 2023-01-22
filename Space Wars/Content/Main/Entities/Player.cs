@@ -65,10 +65,11 @@ namespace Space_Wars.Content.Main.Entities
         }
         public void ControlShip()
         {
+            TargetVector = (new Vector2(Mouse.GetState().X - Engine.screenPosition.X - Position.X, Mouse.GetState().Y - Engine.screenPosition.Y - Position.Y).ToUnitVector(0));
+            Angle = TargetVector.ToDirection(0);
             if (Mouse.GetState().LeftButton == ButtonState.Pressed && Cooldown <= 0)
             {
-                TargetVector = (new Vector2(Mouse.GetState().X - Engine.screenPosition.X - Position.X, Mouse.GetState().Y - Engine.screenPosition.Y - Position.Y).ToUnitVector(0));
-                EntityManager.Add(new PulseShot(Position, TargetVector * 8, TargetVector.ToDirection(0), 0, true));
+                EntityManager.Add(new PulseShot(Position, TargetVector * 8, Angle, 0, true));
                 Assets.SoundFX["Fire_1"].Play();
                 Cooldown = 0.25f;
             }
@@ -92,12 +93,6 @@ namespace Space_Wars.Content.Main.Entities
                         break;
                     case Keys.D:
                         Move(0, 10);
-                        break;
-                    case Keys.Q:
-                        Rotate(-0.1f);
-                        break;
-                    case Keys.E:
-                        Rotate(0.1f);
                         break;
                     default:
                         break;
@@ -166,18 +161,6 @@ namespace Space_Wars.Content.Main.Entities
             {
                 mothership.Velocity += angle.ToUnitVector(0) / speed / 2;
                 Velocity += angle.ToUnitVector(0) / speed / 2;
-            }
-        }
-        private void Rotate(float speed)
-        {
-            if(docked == false)
-            {
-                AngularVelocity += speed;
-            }
-            if (docked == true)
-            {
-                mothership.AngularVelocity += speed / 2;
-                AngularVelocity += speed / 2;
             }
         }
     }

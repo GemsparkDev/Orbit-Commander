@@ -52,7 +52,7 @@ namespace Space_Wars.Content.Main
             player.mothership = Mothership;
             Add(Mothership);
             enemySpawner = new EnemySpawner(Player);
-            Enemy.NewCarrier(new Vector2(100, 100), Player.Velocity, 0, 0);
+            //Enemy.NewCarrier(new Vector2(100, 100), Player.Velocity, 0, 0);
 
         }
         public static void Update()
