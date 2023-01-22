@@ -50,6 +50,6 @@ Space Wars is a game made using C# in monogame.
 	  
 1/22/2023: Wave system initial implementation
 0.0.5 - a.1  
-	-Started implementation of the wave system
-	-Made player turn towards the mouse
+	-Started implementation of the wave system  
+	-Made player turn towards the mouse  
 
