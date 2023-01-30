@@ -34,12 +34,10 @@ namespace Space_Wars.Content.Main
         {
             base.Initialize();
 
-            MyraEnvironment.Game = this;
-            _UIManager = new UIManager(this);
-
             graphics.PreferredBackBufferWidth = 1280;  // set this value to the desired width of your window
             graphics.PreferredBackBufferHeight = 720;   // set this value to the desired height of your window
             graphics.ApplyChanges();
+
 
             debugMode = false;
             screenSize = new Vector2(graphics.PreferredBackBufferWidth, graphics.PreferredBackBufferHeight);
@@ -48,7 +46,8 @@ namespace Space_Wars.Content.Main
 
             //Generates a new player at the center of the screen
             EntityManager.Initialize();
-            screenPosition = new Vector2(screenSize.X / 2, screenSize.Y / 2);
+            MyraEnvironment.Game = this;
+            _UIManager = new UIManager(this, new Desktop());
 
             IsMouseVisible = false;
         }
@@ -81,7 +80,7 @@ namespace Space_Wars.Content.Main
 
         protected override void Draw(GameTime gameTime)
         {
-            GraphicsDevice.Clear(Color.White);
+            GraphicsDevice.Clear(Color.Black);
 
             spriteBatch.Begin();
             //Generates a grid
@@ -97,7 +96,7 @@ namespace Space_Wars.Content.Main
                 }
             }
             EntityManager.Draw(spriteBatch);
-            _UIManager.Draw(spriteBatch);
+            _UIManager.Draw();
             spriteBatch.Draw(Assets.Sprites["Cursor"], new Vector2(Mouse.GetState().X, Mouse.GetState().Y), Color.White);
             spriteBatch.End();
             //Sends a spritebatch through to the entity manager every draw update

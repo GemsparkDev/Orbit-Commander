@@ -30,5 +30,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Content\Main\Entities\" />
+    <Folder Include="Content\Main\UI Elements\" />
   </ItemGroup>
 </Project>

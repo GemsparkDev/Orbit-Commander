@@ -18,18 +18,32 @@ namespace Space_Wars.Content.Main
     {
         private static Desktop desktop;
         private static Engine root;
-        private static Window pauseMenu;
-        private static Window mothershipMenu;
+        private static Grid screen;
+        private static Panel pauseMenu;
+        private static Panel mothershipMenu;
+        private static Panel playerMenu;
         private static Dictionary<ListItem, ListItem> listItemPairs;
         private static List<ListItem> UIitems;
-        public UIManager(Engine Root)
+        public UIManager(Engine Root, Desktop Desktop)
         {
-            desktop = new Desktop();
+            desktop = Desktop;
             root = Root;
             GenerateMenu();
         }
         private void GenerateMenu()
         {
+
+            screen = new Grid
+            {
+                RowSpacing = 8,
+                ColumnSpacing = 8,
+                HorizontalAlignment = HorizontalAlignment.Center,
+                VerticalAlignment = VerticalAlignment.Center
+            };
+
+            screen.ColumnsProportions.Add(new Proportion(ProportionType.Auto));
+            screen.RowsProportions.Add(new Proportion(ProportionType.Auto));
+
             UIitems = new List<ListItem>();
             UIitems.Add(new ListItem() { Text = "0", });
             UIitems.Add(new ListItem() { Text = "0", });
@@ -37,37 +51,39 @@ namespace Space_Wars.Content.Main
             listItemPairs.Add(new ListItem { Text = "Scrap" }, UIitems[0]);
             listItemPairs.Add(new ListItem { Text = "Copper" }, UIitems[1]);
 
-            pauseMenu = new Window()
+            pauseMenu = new Panel()
             {
                 Background = DefaultAssets.UITextureRegionAtlas["button"],
                 Width = 250,
                 Height = 100,
                 HorizontalAlignment = HorizontalAlignment.Center,
                 VerticalAlignment = VerticalAlignment.Center,
+                Visible = false,
                 Enabled = false,
+                ZIndex = 6
             };
-            var paddedCenteredButton = new TextButton();
-            paddedCenteredButton.Text = "Quit";
-            paddedCenteredButton.HorizontalAlignment = HorizontalAlignment.Center;
-            paddedCenteredButton.VerticalAlignment = VerticalAlignment.Center;
-            paddedCenteredButton.TouchDown += (s, a) =>
+            var quitButton = new TextButton()
+            {
+                Text = "Quit",
+                HorizontalAlignment = HorizontalAlignment.Center,
+                VerticalAlignment = VerticalAlignment.Center,
+            };
+            quitButton.TouchDown += (s, a) =>
             {
                 root.Exit();
             };
-            pauseMenu.Closed += (s, a) =>
-            {
-                Engine.playingGame = true;
-            };
-            pauseMenu.Content = paddedCenteredButton;
+            pauseMenu.Widgets.Add(quitButton);
 
-            mothershipMenu = new Window()
+            mothershipMenu = new Panel()
             {
                 Background = DefaultAssets.UITextureRegionAtlas["button"],
                 Width = 250,
                 Height = 100,
                 HorizontalAlignment = HorizontalAlignment.Center,
                 VerticalAlignment = VerticalAlignment.Center,
+                Visible = false,
                 Enabled = false,
+                ZIndex = 4
             };
             var grid = new Grid()
             {
@@ -79,7 +95,6 @@ namespace Space_Wars.Content.Main
             grid.ColumnsProportions.Add(new Proportion());
             grid.ColumnsProportions.Add(new Proportion());
             grid.RowsProportions.Add(new Proportion());
-            grid.RowsProportions.Add(new Proportion());
             var listBox1 = new ListBox() { SelectionMode = SelectionMode.Multiple };
             var listBox2 = new ListBox() { SelectionMode = SelectionMode.Multiple };
             foreach (KeyValuePair<ListItem, ListItem> entry in listItemPairs)
@@ -90,7 +105,24 @@ namespace Space_Wars.Content.Main
             listBox2.GridColumn = 1;
             grid.Widgets.Add(listBox1);
             grid.Widgets.Add(listBox2);
-            mothershipMenu.Content = grid;
+            mothershipMenu.Widgets.Add(grid);
+
+            playerMenu = new Panel()
+            {
+                Background = DefaultAssets.UITextureRegionAtlas["button"],
+                Width = 250,
+                Height = 100,
+                HorizontalAlignment = HorizontalAlignment.Center,
+                VerticalAlignment = VerticalAlignment.Center,
+                Visible = false,
+                Enabled = false,
+                ZIndex = 5
+            };
+
+            screen.Widgets.Add(pauseMenu);
+            screen.Widgets.Add(mothershipMenu);
+            //screen.Widgets.Add(playerMenu);
+            desktop.Root = screen;
         }
         public static void MainMenu()
         {
@@ -98,15 +130,17 @@ namespace Space_Wars.Content.Main
         }
         public static void PauseMenu()
         {
-            if (pauseMenu.Enabled == false)
+            if (pauseMenu.Visible == false)
             {
-                desktop.Root = pauseMenu;
+                pauseMenu.Visible = true;
                 pauseMenu.Enabled = true;
+                Engine.playingGame = true;
             }
             else
             {
-                desktop.Root = null;
+                pauseMenu.Visible = false;
                 pauseMenu.Enabled = false;
+                Engine.playingGame = false;
             }
 
         }
@@ -115,19 +149,33 @@ namespace Space_Wars.Content.Main
             listItemPairs.ElementAt(0).Value.Text = resources.scrap.ToString();
             listItemPairs.ElementAt(1).Value.Text = resources.copper.ToString();
 
-            if (mothershipMenu.Enabled == false)
+            if (mothershipMenu.Visible == false)
             {
-                desktop.Root = mothershipMenu;
+                mothershipMenu.Visible = true;
                 mothershipMenu.Enabled = true;
             }
             else
             {
-                desktop.Root = null;
+                mothershipMenu.Visible = false;
                 mothershipMenu.Enabled = false;
             }
         }
 
-        public void Draw(SpriteBatch spritebatch)
+        public static void playerInventory()
+        {
+            if (playerMenu.Visible == false)
+            {
+                playerMenu.Visible = true;
+                playerMenu.Enabled = true;
+            }
+            else
+            {
+                playerMenu.Visible = false;
+                playerMenu.Enabled = false;
+            }
+        }
+
+        public void Draw()
         {
             desktop.Render();
         }
