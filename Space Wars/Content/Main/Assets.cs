@@ -11,6 +11,7 @@ namespace Space_Wars.Content.Main
     {
         public static Dictionary<string, Texture2D> Sprites = new Dictionary<string, Texture2D>();
         public static Dictionary<string, SoundEffect> SoundFX = new Dictionary<string, SoundEffect>();
+        public static string imageFileDirectory = "C:\\Users\\Lou\\Downloads\\Cactus Stuff\\Cactus Armor Template_Body.png";
         //Loads all assets in the images folder to the dictionary with a specific sprite keyword
         public static void LoadAssets(Microsoft.Xna.Framework.Content.ContentManager Content)
         {
@@ -24,6 +25,10 @@ namespace Space_Wars.Content.Main
             Sprites.Add("Arrow", Content.Load<Texture2D>("Images/Entity_7"));
             Sprites.Add("PulseShot", Content.Load<Texture2D>("Images/Projectile_1"));
             Sprites.Add("Cursor", Content.Load<Texture2D>("Images/Cursor"));
+            Sprites.Add("Stars", Content.Load<Texture2D>("Images/Background_1"));
+            Sprites.Add("Planet", Content.Load<Texture2D>("Images/Background_2"));
+            Sprites.Add("Moon", Content.Load<Texture2D>("Images/Background_3"));
+            Sprites.Add("Player UI", Content.Load<Texture2D>("Images/UI_1"));
 
             SoundFX.Add("Fire_1", Content.Load<SoundEffect>("Sounds/Fire_1"));
             SoundFX.Add("Hit", Content.Load<SoundEffect>("Sounds/Hit"));

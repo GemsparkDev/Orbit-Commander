@@ -78,7 +78,7 @@ namespace Space_Wars.Content.Main
         public void Draw(SpriteBatch spriteBatch)
         {
             spriteBatch.Draw(Engine.line, new Vector2(Engine.screenSize.X/50, Engine.screenSize.Y/50), new Rectangle(0, 0, (int)Engine.screenSize.X - (int)Engine.screenSize.X / 25, 1), 
-                Color.Black, 0, Vector2.Zero, new Vector2(waveTimer / 60, 1), SpriteEffects.None, 1);
+                Color.White, 0, Vector2.Zero, new Vector2(waveTimer / 60, 1), SpriteEffects.None, 1);
         }
     }
 }

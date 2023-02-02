@@ -83,6 +83,9 @@ namespace Space_Wars.Content.Main
             GraphicsDevice.Clear(Color.Black);
 
             spriteBatch.Begin();
+            var backgroundParallax = -EntityManager.player.Position/100;
+            spriteBatch.Draw(Assets.Sprites["Stars"], Vector2.Zero, null, Color.White, 0, Vector2.Zero, 1, SpriteEffects.None, 0);
+            spriteBatch.Draw(Assets.Sprites["Moon"], new Vector2(screenSize.X/5f, -100) + backgroundParallax, null, Color.White, 0, Vector2.Zero, 1.2f, SpriteEffects.None, 0.1f);
             //Generates a grid
             if (debugMode == true)
             {
