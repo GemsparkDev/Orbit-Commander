@@ -104,6 +104,11 @@ namespace Space_Wars.Content.Main.Entities
                 Dock();
             }
 
+            if (oldState.IsKeyUp(Keys.Q) && newState.IsKeyDown(Keys.Q))
+            {
+                UIManager.playerInventory();
+            }
+
             if (oldState.IsKeyUp(Keys.OemTilde) && newState.IsKeyDown(Keys.OemTilde))
             {
                 Engine.debugMode = !Engine.debugMode;
