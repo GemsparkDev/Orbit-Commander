@@ -11,6 +11,7 @@ using Myra.Graphics2D.UI.Properties;
 using System.Numerics;
 using Myra.Graphics2D.UI.Styles;
 using System.Diagnostics;
+using Myra.Graphics2D;
 
 namespace Space_Wars.Content.Main
 {
@@ -117,6 +118,11 @@ namespace Space_Wars.Content.Main
                 Visible = false,
                 Enabled = false,
                 ZIndex = 5
+            };
+
+            var image = new Image()
+            {
+                //Renderable = MyraEnvironment.DefaultAssetManager.Load<TextureRegion>()
             };
 
             screen.Widgets.Add(pauseMenu);
