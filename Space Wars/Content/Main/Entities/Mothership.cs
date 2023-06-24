@@ -30,7 +30,7 @@ namespace Space_Wars.Content.Main.Entities
             if (Health <= 0)
             {
                 IsExpired = true;
-                Assets.SoundFX["Death"].Play();
+                Engine.PlaySound(Assets.SoundFX["Death"], Position);
             }
             if (Health > MaxHealth)
             {
@@ -49,14 +49,14 @@ namespace Space_Wars.Content.Main.Entities
         }
         public void Dock()
         {
-            UIManager.mothershipInventory(resources);
+            
         }
         public override void Collide(int damage)
         {
             Health -= damage;
             if (damage > 0)
             {
-                Assets.SoundFX["Hit"].Play();
+                Engine.PlaySound(Assets.SoundFX["Hit"], Position);
             }
         }
     }

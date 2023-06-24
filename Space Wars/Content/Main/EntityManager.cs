@@ -18,6 +18,7 @@ namespace Space_Wars.Content.Main
         private static List<Enemy> enemies = new List<Enemy>();
         private static List<Projectile> projectiles = new List<Projectile>();
         public static Player player;
+        public static Mothership mothership;
         private static EnemySpawner enemySpawner;
 
         public static void Add(Entity entity)
@@ -47,12 +48,11 @@ namespace Space_Wars.Content.Main
         public static void Initialize()
         {
             Player Player = new Player(Vector2.Zero, Vector2.Zero, 0f, 0f);
-            Mothership Mothership = new Mothership(Vector2.Zero, Vector2.Zero, 0f, 0f);
+            mothership = new Mothership(Vector2.Zero, Vector2.Zero, 0f, 0f);
             player = Player;
-            player.mothership = Mothership;
-            Add(Mothership);
+            player.mothership = mothership;
+            Add(mothership);
             enemySpawner = new EnemySpawner(Player);
-            //Enemy.NewCarrier(new Vector2(100, 100), Player.Velocity, 0, 0);
 
         }
         public static void Update()
@@ -78,6 +78,19 @@ namespace Space_Wars.Content.Main
             entities = entities.Where(x => !x.IsExpired).ToList(); 
             projectiles = projectiles.Where(x => !x.IsExpired).ToList();
             enemies = enemies.Where(x => !x.IsExpired).ToList();
+
+            if(player.IsExpired == true)
+            {
+                entities = new List<Entity>();
+                addedEntities = new List<Entity>();
+                enemies = new List<Enemy>();
+                projectiles = new List<Projectile>();
+                player = new Player(Vector2.Zero, Vector2.Zero, 0f, 0f);
+                entities.Add(mothership = new Mothership(Vector2.Zero, Vector2.Zero, 0f, 0f));
+                player.mothership = mothership;
+                enemySpawner.playerRespawn(player);
+
+            }
 
             isUpdating = false;
 
@@ -130,12 +143,8 @@ namespace Space_Wars.Content.Main
         }
         public static float DistanceSqr(Entity entity1, Entity entity2)
         {
-            if(entity1 == null || entity2 == null)
-            {
-                return 0;
-            }
-            Vector2 Target = new Vector2(entity2.Position.X - entity1.Position.X, entity2.Position.Y - entity1.Position.Y);
-            return MathF.Pow(Target.X, 2) + MathF.Pow(Target.Y, 2);
+            Vector2 Target = entity2.Position - entity1.Position;
+            return Target.X * Target.X + Target.Y * Target.Y;
         }
     }
 }

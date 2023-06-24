@@ -13,21 +13,28 @@ namespace Space_Wars.Content.Main
     class EnemySpawner
     {
         private int wave;
-        private int waveBatches;
-        private List<IEnumerator> batches = new List<IEnumerator>();
-        private Enemy[] enemies;
+        private List<IEnumerator> batches = new();
+        private List<Enemy> enemiesAlive = new();
         private float waveTimer;
         private float difficulty;
         private Vector2 spawnLocation;
         private Player Player;
         private Random random;
         private int randomValue;
+        private int enemiesSpawned = 0;
         public EnemySpawner(Player player)
         {
             wave = 0;
-            waveTimer = 10;
+            waveTimer = 5;
             Player = player;
             random = new Random();
+        }
+
+        public void playerRespawn(Player player)
+        {
+            wave = 0;
+            waveTimer = 5;
+            Player = player;
         }
 
         public Vector2 NewSpawnLocation()
@@ -42,25 +49,17 @@ namespace Space_Wars.Content.Main
             if (waveTimer <= 0)
             {
                 wave++;
-                difficulty = MathF.Sqrt(wave);
-                randomValue = (random.Next((int)(3 * difficulty), (int)(5 * difficulty)));
-                if (difficulty < 1)
+                if (wave < 50)
                 {
-                    difficulty = 1;
+                    difficulty = (MathF.Pow(wave, 2) / 200) + 1;
                 }
-                for (int i = 0; i < randomValue; i++)
+                else
                 {
-                    SpawnWaveBatch(1);
+                    difficulty = wave / 2 - 11.5f;
                 }
-                if(wave > 5)
-                {
-                    for (int i = 0; i < difficulty; i++)
-                    {
-                        //Vector2 spawnLocation = NewSpawnLocation();
-                        //GenerateDrone(new EnemyCruiser(spawnLocation, Player.Velocity, 0, 0, Player, difficulty));
-                    }
-                }
-                waveTimer = 60;
+                randomValue = random.Next((int)(3 * difficulty), (int)(5 * difficulty));
+                SpawnWaveBatch(randomValue);
+                waveTimer = 5f;
             }
 
             waveTimer -= Engine.deltaSeconds;
@@ -72,13 +71,27 @@ namespace Space_Wars.Content.Main
             {
                 spawnLocation = NewSpawnLocation();
                 Enemy.NewFighter(spawnLocation, Player.Velocity, 0, 0);
+                enemiesSpawned++;
+                if (wave > 10)
+                {
+                    randomValue = (random.Next(0, (int)difficulty + 4));
+                    if(randomValue >= 5)
+                    {
+                        spawnLocation = NewSpawnLocation();
+                        Enemy.NewCarrier(spawnLocation, Player.Velocity, 0, 0);
+                        enemiesSpawned++;
+                    }
+                }
             }
+            Engine.WriteLine(enemiesSpawned);
+            enemiesSpawned = 0;
         }
 
         public void Draw(SpriteBatch spriteBatch)
         {
             spriteBatch.Draw(Engine.line, new Vector2(Engine.screenSize.X/50, Engine.screenSize.Y/50), new Rectangle(0, 0, (int)Engine.screenSize.X - (int)Engine.screenSize.X / 25, 1), 
-                Color.White, 0, Vector2.Zero, new Vector2(waveTimer / 60, 1), SpriteEffects.None, 1);
+                Color.White, 0, Vector2.Zero, new Vector2(waveTimer / 60, 1), SpriteEffects.None, 0);
+
         }
     }
 }

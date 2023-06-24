@@ -94,9 +94,9 @@ namespace Space_Wars.Content.Main.Entities
         }
     }
 
-    public class VelocityArrow : Projectile
+    public class MothershipArrow : Projectile
     {
-        public VelocityArrow(Vector2 position, Vector2 velocity, float angle, float angularVelocity, bool isfriendly)
+        public MothershipArrow(Vector2 position, Vector2 velocity, float angle, float angularVelocity, bool isfriendly)
         {
             Position = position;
             Velocity = velocity;

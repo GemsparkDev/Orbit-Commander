@@ -30,14 +30,14 @@ namespace Space_Wars.Content.Main.Entities
             IsFriendly = false;
             Texture = texture;
             Color = Color.Red;
-            Health = (10);
+            Health = 10;
             MaxHealth = Health;
         }
         IEnumerable<int> Fighter()
         {
             while (true)
             {
-                TargetAngle = ((player.Position - Position) + (player.Velocity - Velocity)).ToDirection(0);
+                TargetAngle = (player.Position - Position + (player.Velocity - Velocity)).ToDirection(0);
                 if (EntityManager.DistanceSqr(this, player) > MathF.Pow(75, 2))
                 {
                     GoToEntity(player, 1);
@@ -47,7 +47,7 @@ namespace Space_Wars.Content.Main.Entities
                     if (Cooldown <= 0)
                     {
                         EntityManager.Add(new PulseShot(Position, Angle.ToUnitVector(0) * 8, Angle, 0, false));
-                        Assets.SoundFX["Fire_1"].Play();
+                        Engine.PlaySound(Assets.SoundFX["Fire_1"], Position);
                         Cooldown = 1;
                     }
                 }
@@ -57,8 +57,8 @@ namespace Space_Wars.Content.Main.Entities
                 if (Health < 0)
                 {
                     IsExpired = true;
-                    Assets.SoundFX["Death"].Play();
-                    EntityManager.Add(new Scrap(Position, Velocity, Angle, AngularVelocity));
+                    Engine.PlaySound(Assets.SoundFX["Death"], Position);
+                    EntityManager.Add(new Scrap(Position, Vector2.Zero, Angle, AngularVelocity));
                 }
                 if (Health > MaxHealth)
                 {
@@ -83,7 +83,7 @@ namespace Space_Wars.Content.Main.Entities
                     if (Cooldown <= 0)
                     {
                         EntityManager.Add(new PulseShot(Position, Angle.ToUnitVector(0) * 8, Angle, 0, false));
-                        Assets.SoundFX["Fire_1"].Play();
+                        Engine.PlaySound(Assets.SoundFX["Fire_1"], Position);
                         Cooldown = 0.25f;
                     }
                 }
@@ -92,7 +92,7 @@ namespace Space_Wars.Content.Main.Entities
                     if (Cooldown <= 0)
                     {
                         NewFighter(Position, Angle.ToUnitVector(0) * 8, Angle, 0);
-                        Assets.SoundFX["Fire_2"].Play();
+                        Engine.PlaySound(Assets.SoundFX["Fire_2"], Position);
                         Cooldown = 5;
                     }
                 }
@@ -102,7 +102,7 @@ namespace Space_Wars.Content.Main.Entities
                 if (Health < 0)
                 {
                     IsExpired = true;
-                    Assets.SoundFX["Death"].Play();
+                    Engine.PlaySound(Assets.SoundFX["Death"], Position);
                     EntityManager.Add(new Scrap(Position, Velocity, Angle, AngularVelocity));
                 }
                 if (Health > MaxHealth)
@@ -113,17 +113,19 @@ namespace Space_Wars.Content.Main.Entities
                 yield return 0;
             }
         }
-        public static void NewFighter(Vector2 position, Vector2 velocity, float angle, float angularVelocity)
+        public static Enemy NewFighter(Vector2 position, Vector2 velocity, float angle, float angularVelocity)
         {
             Enemy enemy = new Enemy(position, velocity, angle, angularVelocity, 10, Assets.Sprites["Fighter"]);
             enemy.AddBehaviour(enemy.Fighter());
             EntityManager.Add(enemy);
+            return enemy;
         }
-        public static void NewCarrier(Vector2 position, Vector2 velocity, float angle, float angularVelocity)
+        public static Enemy NewCarrier(Vector2 position, Vector2 velocity, float angle, float angularVelocity)
         {
             Enemy enemy = new Enemy(position, velocity, angle, angularVelocity, 10, Assets.Sprites["Cruiser"]);
             enemy.AddBehaviour(enemy.Carrier());
             EntityManager.Add(enemy);
+            return enemy;
         }
 
         public void LowerCooldown()
@@ -192,7 +194,7 @@ namespace Space_Wars.Content.Main.Entities
             Health -= damage;
             if (damage > 0)
             {
-                Assets.SoundFX["Hit"].Play();
+                Engine.PlaySound(Assets.SoundFX["Hit"], Position);
             }
         }
     }

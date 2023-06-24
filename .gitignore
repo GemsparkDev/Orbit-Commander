@@ -361,3 +361,5 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+/Space Wars/Content/Fonts/Roboto Mono/static
+/Space Wars/Content/Fonts/Roboto Mono

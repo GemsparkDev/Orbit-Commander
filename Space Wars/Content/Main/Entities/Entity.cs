@@ -59,19 +59,19 @@ namespace Space_Wars.Content.Main.Entities
         public void Draw(SpriteBatch spriteBatch)
         {
             //Draws itself on the given spritebatch, position is offset by the screen position offset
-            spriteBatch.Draw(Texture, Position + Engine.screenPosition, null, Color, _Angle, (Size / 2), 1, 0, 0);
+            spriteBatch.Draw(Texture, Position + Engine.screenPosition, null, Color, _Angle, (Size / 2), 1, 0, 0.1f);
 
             if (Engine.debugMode == true)
             {
                 //Draws a line in the direction of motion for X
-                spriteBatch.Draw(Engine.line, Position + Engine.screenPosition, new Rectangle((int)Position.X, (int)Position.Y, 10, 1), Color.Black,
-                    new Vector2(Velocity.X, 0).ToDirection(0), Vector2.Zero, new Vector2(MathF.Abs(Velocity.X), 1), SpriteEffects.None, 1);
+                spriteBatch.Draw(Engine.line, Position + Engine.screenPosition, new Rectangle((int)Position.X, (int)Position.Y, 10, 1), Color.White,
+                    new Vector2(Velocity.X, 0).ToDirection(0), Vector2.Zero, new Vector2(MathF.Abs(Velocity.X), 1), SpriteEffects.None, 0.2f);
                 //Draws a line in the direction of motion for Y
-                spriteBatch.Draw(Engine.line, Position + Engine.screenPosition, new Rectangle((int)Position.X, (int)Position.Y, 10, 1), Color.Black,
-                    new Vector2(0, Velocity.Y).ToDirection(0), Vector2.Zero, new Vector2(MathF.Abs(Velocity.Y), 1), SpriteEffects.None, 1);
+                spriteBatch.Draw(Engine.line, Position + Engine.screenPosition, new Rectangle((int)Position.X, (int)Position.Y, 10, 1), Color.White,
+                    new Vector2(0, Velocity.Y).ToDirection(0), Vector2.Zero, new Vector2(MathF.Abs(Velocity.Y), 1), SpriteEffects.None, 0.2f);
                 //Draws a line in the direction the entity is pointing
                 spriteBatch.Draw(Engine.line, Position + Engine.screenPosition, new Rectangle((int)Position.X, (int)Position.Y, 10, 1), Color.Red,
-                    _Angle - MathF.PI / 2, Vector2.Zero, Vector2.One, SpriteEffects.None, 1);
+                    _Angle - MathF.PI / 2, Vector2.Zero, Vector2.One, SpriteEffects.None, 0.2f);
             }
         }
     }

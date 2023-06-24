@@ -26,11 +26,8 @@
   <ItemGroup>
     <PackageReference Include="MonoGame.Framework.DesktopGL" Version="3.8.0.1641" />
     <PackageReference Include="MonoGame.Content.Builder.Task" Version="3.8.0.1641" />
-    <PackageReference Include="Myra" Version="1.4.4" />
-    <PackageReference Include="Myra.Content.Pipeline" Version="0.5.6.113" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Content\Main\Entities\" />
-    <Folder Include="Content\Main\UI Elements\" />
   </ItemGroup>
 </Project>

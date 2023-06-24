@@ -20,9 +20,8 @@ namespace Space_Wars.Content.Main.Entities
         private Vector2 TargetVector;
         public bool docked = false;
         public Projectile leashedMaterial;
-        private Projectile velocityArrow;
+        private Projectile mothershipArrow;
 
-        //Player constructor
         public Player(Vector2 position, Vector2 velocity, float angle, float angularVelocity)
         {
             Position = position;
@@ -33,8 +32,8 @@ namespace Space_Wars.Content.Main.Entities
             Health = 100;
             MaxHealth = Health;
             IsFriendly = true;
-            velocityArrow = new VelocityArrow(Position, Velocity, Angle, AngularVelocity, true);
-            EntityManager.Add(velocityArrow);
+            mothershipArrow = new MothershipArrow(Position, Velocity, Angle, AngularVelocity, true);
+            EntityManager.Add(mothershipArrow);
         }
         public override void Update()
         {
@@ -52,15 +51,15 @@ namespace Space_Wars.Content.Main.Entities
                 ControlShip();
             }
 
-            velocityArrow.Angle = Velocity.ToDirection(0);
-            velocityArrow.Position = Position + velocityArrow.Angle.ToUnitVector(0) * ColliderRadius * 1.5f;
+            mothershipArrow.Angle = (mothership.Position - Position).ToDirection(0);
+            mothershipArrow.Position = Position + mothershipArrow.Angle.ToUnitVector(0) * ColliderRadius * 1.5f;
         }
         public override void Collide(int damage)
         {
             Health -= damage;
             if (damage > 0)
             {
-                Assets.SoundFX["Hit"].Play();
+                Engine.PlaySound(Assets.SoundFX["Hit"], Position);
             }
         }
         public void ControlShip()
@@ -70,14 +69,13 @@ namespace Space_Wars.Content.Main.Entities
             if (Mouse.GetState().LeftButton == ButtonState.Pressed && Cooldown <= 0)
             {
                 EntityManager.Add(new PulseShot(Position, TargetVector * 8, Angle, 0, true));
-                Assets.SoundFX["Fire_1"].Play();
+                Engine.PlaySound(Assets.SoundFX["Fire_1"], Position);
                 Cooldown = 0.25f;
             }
 
             pressedKey = Keyboard.GetState().GetPressedKeys();
             KeyboardState newState = Keyboard.GetState();
 
-            //Checks for player input and moves the character using said input
             for (int i = 0; i < pressedKey.Length; i++)
             {
                 switch (pressedKey[i])
@@ -106,12 +104,7 @@ namespace Space_Wars.Content.Main.Entities
 
             if (oldState.IsKeyUp(Keys.Q) && newState.IsKeyDown(Keys.Q))
             {
-                UIManager.playerInventory();
-            }
-
-            if (oldState.IsKeyUp(Keys.OemTilde) && newState.IsKeyDown(Keys.OemTilde))
-            {
-                Engine.debugMode = !Engine.debugMode;
+                
             }
 
             oldState = newState;
@@ -164,8 +157,7 @@ namespace Space_Wars.Content.Main.Entities
             }
             if (docked == true)
             {
-                mothership.Velocity += angle.ToUnitVector(0) / speed / 2;
-                Velocity += angle.ToUnitVector(0) / speed / 2;
+
             }
         }
     }
