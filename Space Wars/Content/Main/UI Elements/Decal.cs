@@ -1,50 +1,45 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Space_Wars.Content.Main.UI_Elements
 {
     public class Decal : Widget
     {
-        public Decal(Vector2 offset, Texture2D texture, string text, Color textColor)
+        public Decal(Vector2 _offset, Texture2D _texture, string _text, Color _textColor)
         {
-            Offset = offset;
-            Texture = texture;
-            Text = text;
-            _Size = new Vector2(texture.Width, texture.Height);
-            TextColor = textColor;
+            offset = _offset;
+            texture = _texture;
+            text = _text;
+            size = new Vector2(_texture.Width, _texture.Height);
+            textColor = _textColor;
         }
-        public Decal(Vector2 offset, Texture2D texture)
+        public Decal(Vector2 _offset, Texture2D _texture)
         {
-            Offset = offset;
-            Texture = texture;
-            Text = null;
-            _Size = new Vector2(texture.Width, texture.Height);
-            TextColor = Color.White;
+            offset = _offset;
+            texture = _texture;
+            text = null;
+            size = new Vector2(_texture.Width, _texture.Height);
+            textColor = Color.White;
         }
-        public Decal(Vector2 offset, string text, Color textColor)
+        public Decal(Vector2 _offset, string _text, Color _textColor)
         {
-            Offset = offset;
-            Texture = null;
-            Text = text;
-            _Size = new Vector2(text.Length*4, 12);
-            TextColor = textColor;
+            offset = _offset;
+            texture = null;
+            text = _text;
+            size = new Vector2(_text.Length * 4, 12);
+            textColor = _textColor;
         }
         public override void Initialize()
         {
-            
+
         }
         public override void Draw(SpriteBatch spriteBatch, Vector2 parentPosition)
         {
-            if (Text != null)
+            if (text != null)
             {
-                Vector2 textMiddlePoint = Assets.textFont.MeasureString(Text) / 2;
-                Vector2 textPosition = parentPosition + Offset;
-                spriteBatch.DrawString(Assets.textFont, Text, textPosition, TextColor, 0, textMiddlePoint, Engine.UIScale, SpriteEffects.None, 0.45f);
+                Vector2 textMiddlePoint = Assets.textFont.MeasureString(text) / 2;
+                Vector2 textPosition = parentPosition + offset;
+                spriteBatch.DrawString(Assets.textFont, text, textPosition, textColor, 0, textMiddlePoint, Engine.UIScale, SpriteEffects.None, 0.45f);
             }
         }
     }

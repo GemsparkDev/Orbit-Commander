@@ -8,7 +8,7 @@ namespace Space_Wars.Content.Main
         static void Main()
         {
             using var game = new Engine();
-                game.Run();
+            game.Run();
         }
     }
 }

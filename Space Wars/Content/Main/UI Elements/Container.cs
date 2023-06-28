@@ -1,40 +1,35 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using System.Diagnostics;
+using System.Collections.Generic;
 
 namespace Space_Wars.Content.Main.UI_Elements
 {
     public abstract class Container
     {
 
-        public List<Widget> Children;
-        public List<IFunctional> FunctionalChildren;
-        protected Vector2 _Size;
+        public List<Widget> children;
+        public List<IFunctional> functionalChildren;
+        protected Vector2 size;
+        public Vector2 position;
+        public bool enabled;
+        public Texture2D texture;
         public Vector2 Size
         {
-            get { return _Size * Engine.UIScale; }
+            get { return size * Engine.UIScale; }
         }
-        public Vector2 Position;
-        public bool Enabled;
-        public Texture2D Texture;
         public void AddWidget(Widget widget)
         {
-            Children.Add(widget);
+            children.Add(widget);
         }
         public void AddWidget(IFunctional widget)
         {
-            FunctionalChildren.Add(widget);
+            functionalChildren.Add(widget);
         }
         public bool GetMouseOver()
         {
             Vector2 mousePosition = new(Mouse.GetState().X, Mouse.GetState().Y);
-            if (Position.X <= mousePosition.X && mousePosition.X <= Position.X + Size.X && Position.Y <= mousePosition.Y && mousePosition.Y <= Position.Y + Size.Y)
+            if (position.X <= mousePosition.X && mousePosition.X <= position.X + Size.X && position.Y <= mousePosition.Y && mousePosition.Y <= position.Y + Size.Y)
             {
                 return true;
             }

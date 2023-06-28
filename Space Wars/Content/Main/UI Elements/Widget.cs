@@ -1,30 +1,25 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Space_Wars.Content.Main.UI_Elements
 {
     public abstract class Widget
     {
-        protected Vector2 _Size;
-        public Vector2 Offset;
-        public string Text;
-        public Color TextColor;
+        protected Vector2 size;
+        public Vector2 offset;
+        public string text;
+        public Color textColor;
+        public Texture2D texture;
         public Vector2 Size
         {
-            get { return _Size * Engine.UIScale; }
+            get { return size * Engine.UIScale; }
         }
-        public Texture2D Texture;
         public Widget()
         {
-            Offset = Vector2.Zero;
-            Texture = null;
+            offset = Vector2.Zero;
+            texture = null;
         }
         public abstract void Initialize();
-        public abstract void Draw(SpriteBatch spriteBatch, Vector2 parentPositon);
+        public abstract void Draw(SpriteBatch _spriteBatch, Vector2 _parentPositon);
     }
 }

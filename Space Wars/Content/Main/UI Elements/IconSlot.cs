@@ -1,48 +1,40 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Runtime.Intrinsics;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml.Linq;
 
 namespace Space_Wars.Content.Main.UI_Elements
 {
     public class IconSlot : Widget, IFunctional
     {
-        private DraggableIcon DaughterIcon;
-        private UIManager _UIManager;
-        public IconSlot(Vector2 offset, Texture2D texture, UIManager UImanager)
+        private DraggableIcon daughterIcon;
+        private UIManager UIManager;
+        public IconSlot(Vector2 _offset, Texture2D _texture, UIManager _UImanager)
         {
-            _Size = new Vector2(texture.Width, texture.Height);
-            Offset = offset - Size / 2;
-            Texture = texture;
-            DaughterIcon = null;
-            _UIManager = UImanager;
+            size = new Vector2(texture.Width, texture.Height);
+            offset = _offset - Size / 2;
+            texture = _texture;
+            daughterIcon = null;
+            UIManager = _UImanager;
         }
-        public IconSlot(Vector2 offset, Texture2D texture, DraggableIcon daughterIcon, UIManager UImanager)
+        public IconSlot(Vector2 _offset, Texture2D _texture, DraggableIcon _daughterIcon, UIManager _UImanager)
         {
-            _Size = new Vector2(texture.Width, texture.Height);
-            Offset = offset - Size / 2;
-            Texture = texture;
-            DaughterIcon = daughterIcon;
-            _UIManager = UImanager;
+            size = new Vector2(_texture.Width, _texture.Height);
+            offset = _offset - Size / 2;
+            texture = _texture;
+            daughterIcon = _daughterIcon;
+            UIManager = _UImanager;
         }
-        public void Interact() 
+        public void Interact()
         {
-            (DaughterIcon, _UIManager.selectedIcon) = (_UIManager.selectedIcon, DaughterIcon);
+            (daughterIcon, UIManager.selectedIcon) = (UIManager.selectedIcon, daughterIcon);
         }
         public void AddBehaviour(DelegateMethod func) { }
         public void ApplyBehaviours() { }
         public override void Initialize() { }
         public override void Draw(SpriteBatch spriteBatch, Vector2 parentPositon)
         {
-            if(DaughterIcon != null)
+            if (daughterIcon != null)
             {
-                spriteBatch.Draw(DaughterIcon.Texture, parentPositon+Offset, null, Color.White, 0, Vector2.One / 2, Engine.UIScale, SpriteEffects.None, 0.35f);
+                spriteBatch.Draw(daughterIcon.texture, parentPositon + offset, null, Color.White, 0, Vector2.One / 2, Engine.UIScale, SpriteEffects.None, 0.35f);
             }
         }
     }

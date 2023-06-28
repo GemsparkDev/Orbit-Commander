@@ -1,37 +1,30 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using System;
 
 namespace Space_Wars.Content.Main.Entities
 {
-    public enum EntityType { Projectile, Enemy, None } 
+    public enum EntityType { Projectile, Enemy, None }
     public abstract class Entity
     {
-        protected Texture2D Texture;
-        protected Color Color = Color.White;
-        public Vector2 Position;
-        public Vector2 Velocity;
-        public float AngularVelocity;
-        public bool IsExpired;
-        public bool IsFriendly;
-        private float _Angle;
+        protected Texture2D texture;
+        protected Color color = Color.White;
+        public Vector2 position;
+        public Vector2 velocity;
+        public float angularVelocity;
+        public bool isExpired;
+        public bool isFriendly;
+        public float angle;
         public EntityType entityType;
-        public int Damage;
+        public int damage;
         public float ColliderRadius
         {
-            get { return (Texture.Height + Texture.Width) / 2; }
+            get { return (texture.Height + texture.Width) / 2; }
 
-        }
-        public float Angle
-        {
-            get { return _Angle - MathF.PI / 2; }
-            set { _Angle = value + MathF.PI / 2; }
         }
         public Vector2 Size
         {
-            get { return Texture == null ? Vector2.Zero : new Vector2(Texture.Width, Texture.Height); }
+            get { return texture == null ? Vector2.Zero : new Vector2(texture.Width, texture.Height); }
         }
 
         public abstract void Update();
@@ -39,39 +32,39 @@ namespace Space_Wars.Content.Main.Entities
 
         public void ClampVelocity(float speed)
         {
-            if(Velocity.X > speed)
+            if (velocity.X > speed)
             {
-                Velocity.X = speed;
+                velocity.X = speed;
             }
-            if (Velocity.X < -speed)
+            if (velocity.X < -speed)
             {
-                Velocity.X = -speed;
+                velocity.X = -speed;
             }
-            if (Velocity.Y > speed)
+            if (velocity.Y > speed)
             {
-                Velocity.Y = speed;
+                velocity.Y = speed;
             }
-            if (Velocity.Y < -speed)
+            if (velocity.Y < -speed)
             {
-                Velocity.Y = -speed;
+                velocity.Y = -speed;
             }
         }
         public void Draw(SpriteBatch spriteBatch)
         {
             //Draws itself on the given spritebatch, position is offset by the screen position offset
-            spriteBatch.Draw(Texture, Position + Engine.screenPosition, null, Color, _Angle, (Size / 2), 1, 0, 0.2f);
+            spriteBatch.Draw(texture, position + Engine.screenPosition, null, color, angle, Size / 2, 1, 0, 0.2f);
 
             if (Engine.debugMode == true)
             {
                 //Draws a line in the direction of motion for X
-                spriteBatch.Draw(Engine.line, Position + Engine.screenPosition, new Rectangle((int)Position.X, (int)Position.Y, 10, 1), Color.White,
-                    new Vector2(Velocity.X, 0).ToDirection(0), Vector2.Zero, new Vector2(MathF.Abs(Velocity.X), 1), SpriteEffects.None, 0.4f);
+                spriteBatch.Draw(Engine.line, position + Engine.screenPosition, new Rectangle((int)position.X, (int)position.Y, 10, 1), Color.White,
+                    MathF.Atan2(0, velocity.X), Vector2.Zero, new Vector2(MathF.Abs(velocity.X), 1), SpriteEffects.None, 0.4f);
                 //Draws a line in the direction of motion for Y
-                spriteBatch.Draw(Engine.line, Position + Engine.screenPosition, new Rectangle((int)Position.X, (int)Position.Y, 10, 1), Color.White,
-                    new Vector2(0, Velocity.Y).ToDirection(0), Vector2.Zero, new Vector2(MathF.Abs(Velocity.Y), 1), SpriteEffects.None, 0.4f);
+                spriteBatch.Draw(Engine.line, position + Engine.screenPosition, new Rectangle((int)position.X, (int)position.Y, 10, 1), Color.White,
+                    MathF.Atan2(velocity.Y, 0), Vector2.Zero, new Vector2(MathF.Abs(velocity.Y), 1), SpriteEffects.None, 0.4f);
                 //Draws a line in the direction the entity is pointing
-                spriteBatch.Draw(Engine.line, Position + Engine.screenPosition, new Rectangle((int)Position.X, (int)Position.Y, 10, 1), Color.Red,
-                    _Angle - MathF.PI / 2, Vector2.Zero, Vector2.One, SpriteEffects.None, 0.4f);
+                spriteBatch.Draw(Engine.line, position + Engine.screenPosition, new Rectangle((int)position.X, (int)position.Y, 10, 1), Color.Red,
+                    angle - MathF.PI / 2, Vector2.Zero, Vector2.One, SpriteEffects.None, 0.4f);
             }
         }
     }

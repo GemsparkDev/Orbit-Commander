@@ -1,10 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
-
-using System.Diagnostics;
+﻿using Microsoft.Xna.Framework;
+using System;
 
 namespace Space_Wars.Content.Main.Entities
 {
@@ -15,37 +10,37 @@ namespace Space_Wars.Content.Main.Entities
         {
             AI();
 
-            Position += Velocity;
-            Angle += AngularVelocity;
+            position += velocity;
+            angle += angularVelocity;
         }
         public abstract void AI();
     }
 
     public class PulseShot : Projectile
     {
-        public PulseShot(Vector2 position, Vector2 velocity, float angle, float angularVelocity, bool isFriendly)
+        public PulseShot(Vector2 _position, Vector2 _velocity, float _angle, float _angularVelocity, bool _isFriendly)
         {
-            Position = position;
-            Velocity = velocity;
-            Angle = angle;
-            AngularVelocity = angularVelocity;
-            IsFriendly = isFriendly;
+            position = _position;
+            velocity = _velocity;
+            angle = _angle;
+            angularVelocity = _angularVelocity;
+            isFriendly = _isFriendly;
             entityType = EntityType.Projectile;
-            Texture = Assets.Sprites["PulseShot"];
-            Damage = 5;
+            texture = Assets.Sprites["PulseShot"];
+            damage = 5;
         }
         public override void Collide(int damage)
         {
-            IsExpired = true;
+            isExpired = true;
         }
 
         public override void AI()
         {
-            if (IsFriendly == true)
+            if (isFriendly == true)
             {
                 EntityManager.Collide(this, EntityManager.NearestEnemy(this));
             }
-            if (IsFriendly == false)
+            if (isFriendly == false)
             {
                 EntityManager.Collide(this, EntityManager.player);
             }
@@ -53,43 +48,51 @@ namespace Space_Wars.Content.Main.Entities
     }
     public class Scrap : Projectile
     {
-        public Scrap(Vector2 position, Vector2 velocity, float angle, float angularVelocity)
+        public Scrap(Vector2 _position, Vector2 _velocity, float _angle, float _angularVelocity)
         {
-            Position = position;
-            Velocity = velocity;
-            Angle = angle;
-            AngularVelocity = angularVelocity;
-            IsFriendly = false;
+            position = _position;
+            velocity = _velocity;
+            angle = _angle;
+            angularVelocity = _angularVelocity;
+            isFriendly = false;
             entityType = EntityType.Projectile;
-            Texture = Assets.Sprites["Metal Scrap"];
-            Damage = 0;
+            texture = Assets.Sprites["Metal Scrap"];
+            damage = 0;
         }
         public override void Collide(int damage)
         {
-            IsExpired = true;
+            isExpired = true;
         }
 
         public override void AI()
-        {   
-            if(!EntityManager.player.leashedMaterials.Contains(this))
+        {
+            if (!EntityManager.player.leashedMaterials.Contains(this))
             {
-                if (EntityManager.DistanceSqr(EntityManager.player, this) < 1250 && EntityManager.player.leashedMaterials.Count < 2 && EntityManager.player.canGatherResources == true)
+                if (EntityManager.DistanceSqr(EntityManager.player, this) < 1250 && EntityManager.player.leashedMaterials.Count < 3 && EntityManager.player.canGatherResources == true)
                 {
                     EntityManager.player.leashedMaterials.Add(this);
+                    if (EntityManager.player.leashedMaterials.Count < 3)
+                    {
+                        Engine.PlaySound(Assets.SoundFX["Interact"], position);
+                    }
+                    else
+                    {
+                        Engine.PlaySound(Assets.SoundFX["Full"], position);
+                    }
                 }
             }
             else
             {
-                Vector2 playerVelocity = EntityManager.player.Velocity;
-                Vector2 leashPosition = EntityManager.player.Position-EntityManager.player.Angle.ToUnitVector(0)*25;
-                float distance = EntityManager.DistanceSqr(Position, leashPosition);
-                if(distance > 16)
+                Vector2 playerVelocity = EntityManager.player.velocity;
+                Vector2 leashPosition = EntityManager.player.position - Engine.ToUnitVector(EntityManager.player.angle) * 25;
+                float distance = EntityManager.DistanceSqr(position, leashPosition);
+                if (distance > 16)
                 {
-                    Velocity += (leashPosition - Position).ToUnitVector(0) * Engine.deltaSeconds * distance;
+                    velocity += Vector2.Normalize(leashPosition - position) * Engine.deltaSeconds * distance;
                 }
                 else
                 {
-                    Velocity += (playerVelocity - Velocity) / 2;
+                    velocity += (playerVelocity - velocity) / 2;
                 }
                 ClampVelocity(MathF.Sqrt(playerVelocity.X * playerVelocity.X + playerVelocity.Y * playerVelocity.Y) + 1);
             }
@@ -98,16 +101,16 @@ namespace Space_Wars.Content.Main.Entities
 
     public class MothershipArrow : Projectile
     {
-        public MothershipArrow(Vector2 position, Vector2 velocity, float angle, float angularVelocity, bool isfriendly)
+        public MothershipArrow(Vector2 _position, Vector2 _velocity, float _angle, float _angularVelocity, bool _isfriendly)
         {
-            Position = position;
-            Velocity = velocity;
-            Angle = angle;
-            AngularVelocity = angularVelocity;
-            IsFriendly = isfriendly;
+            position = _position;
+            velocity = _velocity;
+            angle = _angle;
+            angularVelocity = _angularVelocity;
+            isFriendly = _isfriendly;
             entityType = EntityType.Projectile;
-            Texture = Assets.Sprites["Arrow"];
-            Damage = 0;
+            texture = Assets.Sprites["Arrow"];
+            damage = 0;
         }
         public override void Collide(int damage)
         {

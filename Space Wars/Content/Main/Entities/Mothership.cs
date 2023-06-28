@@ -1,52 +1,47 @@
 ﻿using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Input;
-using System.Collections.Generic;
-using System;
-using Space_Wars.Content.Main.Entities;
 
 namespace Space_Wars.Content.Main.Entities
 {
     public class Mothership : Entity
     {
-        private float Health;
-        private float MaxHealth;
+        private float health;
+        private float maxHealth;
         public int scrap;
-        public Mothership(Vector2 position, Vector2 velocity, float angle, float angularVelocity)
+        public Mothership(Vector2 _position, Vector2 _velocity, float _angle, float _angularVelocity)
         {
-            Position = position;
-            Velocity = velocity;
-            Angle = angle;
-            AngularVelocity = angularVelocity;
-            Texture = Assets.Sprites["Mothership"];
-            Health = 100;
-            MaxHealth = Health;
-            IsFriendly = true;
+            position = _position;
+            velocity = _velocity;
+            angle = _angle;
+            angularVelocity = _angularVelocity;
+            texture = Assets.Sprites["Mothership"];
+            health = 100;
+            maxHealth = health;
+            isFriendly = true;
             entityType = EntityType.None;
         }
 
         public override void Update()
         {
-            if (Health <= 0)
+            if (health <= 0)
             {
-                IsExpired = true;
-                Engine.PlaySound(Assets.SoundFX["Death"], Position);
+                isExpired = true;
+                Engine.PlaySound(Assets.SoundFX["Death"], position);
             }
-            if (Health > MaxHealth)
+            if (health > maxHealth)
             {
-                Health = MaxHealth;
+                health = maxHealth;
             }
 
-            Position += Velocity;
-            Angle += AngularVelocity;
-            AngularVelocity = 0;
+            position += velocity;
+            angle += angularVelocity;
+            angularVelocity = 0;
         }
         public override void Collide(int damage)
         {
-            Health -= damage;
+            health -= damage;
             if (damage > 0)
             {
-                Engine.PlaySound(Assets.SoundFX["Hit"], Position);
+                Engine.PlaySound(Assets.SoundFX["Hit"], position);
             }
         }
     }

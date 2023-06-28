@@ -1,16 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Audio;
+using System.Collections.Generic;
 
 namespace Space_Wars.Content.Main
 {
     public static class Assets
     {
-        public readonly static Dictionary<string, Texture2D> Sprites = new();
-        public readonly static Dictionary<string, SoundEffect> SoundFX = new();
+        public static Dictionary<string, Texture2D> Sprites { get; } = new();
+        public static Dictionary<string, SoundEffect> SoundFX { get; } = new();
         public static SpriteFont textFont;
         //public static Effect textOutline;
         //Loads all assets in the images folder to the dictionary with a specific sprite keyword
@@ -49,6 +46,7 @@ namespace Space_Wars.Content.Main
             SoundFX.Add("Close Menu", Content.Load<SoundEffect>("Sounds/CloseMenu"));
             SoundFX.Add("Dock", Content.Load<SoundEffect>("Sounds/Dock"));
             SoundFX.Add("Undock", Content.Load<SoundEffect>("Sounds/Undock"));
+            SoundFX.Add("Full", Content.Load<SoundEffect>("Sounds/Full"));
 
             textFont = Content.Load<SpriteFont>("Fonts/RobotoMono");
             //textOutline = Content.Load<Effect>("Fonts/FontOutline");

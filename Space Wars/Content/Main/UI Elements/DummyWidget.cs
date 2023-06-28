@@ -1,12 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Linq;
-using System.Runtime.Intrinsics;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Space_Wars.Content.Main.UI_Elements
 {
@@ -18,8 +11,8 @@ namespace Space_Wars.Content.Main.UI_Elements
         }
         public DummyWidget()
         {
-            Offset = Vector2.Zero;
-            Texture = null;
+            offset = Vector2.Zero;
+            texture = null;
         }
         public void Interact() { }
         public void AddBehaviour(DelegateMethod func) { }

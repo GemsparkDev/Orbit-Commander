@@ -1,43 +1,36 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Input;
-using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace Space_Wars.Content.Main.UI_Elements
 {
     internal class Button : Widget, IFunctional
     {
         private List<DelegateMethod> behaviours = new();
-        public Button(Vector2 offset, Texture2D texture)
+        public Button(Vector2 _offset, Texture2D _texture)
         {
-            _Size = new Vector2(texture.Width, texture.Height);
-            Offset = offset - Size/2;
-            Texture = texture;
-            Text = null;
-            TextColor = Color.White;
+            size = new Vector2(_texture.Width, _texture.Height);
+            offset = _offset - Size / 2;
+            texture = _texture;
+            text = null;
+            textColor = Color.White;
         }
 
-        public Button(Vector2 offset, Texture2D texture, string text, Color textColor)
+        public Button(Vector2 _offset, Texture2D _texture, string _text, Color _textColor)
         {
-            _Size = new Vector2(texture.Width, texture.Height);
-            Offset = offset - Size/2;
-            Texture = texture;
-            Text = text;
-            TextColor = textColor;
+            size = new Vector2(_texture.Width, _texture.Height);
+            offset = _offset - Size / 2;
+            texture = _texture;
+            text = _text;
+            textColor = _textColor;
         }
-        public Button(Vector2 offset, string text, Color textColor)
+        public Button(Vector2 _offset, string _text, Color _textColor)
         {
-            _Size = new Vector2(text.Length * 4, 12);
-            Offset = offset - Size/2;
-            Texture = null;
-            Text = text;
-            TextColor = textColor;
+            size = new Vector2(_text.Length * 4, 12);
+            offset = _offset - Size / 2;
+            texture = null;
+            text = _text;
+            textColor = _textColor;
         }
 
         public void Interact()
@@ -61,15 +54,15 @@ namespace Space_Wars.Content.Main.UI_Elements
         }
         public override void Initialize()
         {
-            
+
         }
         public override void Draw(SpriteBatch spriteBatch, Vector2 parentPosition)
         {
-            if (Text != null)
+            if (text != null)
             {
-                Vector2 textMiddlePoint = Assets.textFont.MeasureString(Text) / 2;
-                Vector2 textPosition = parentPosition + Offset + Size/2;
-                spriteBatch.DrawString(Assets.textFont, Text, textPosition, TextColor, 0, textMiddlePoint, Engine.UIScale, SpriteEffects.None, 0.45f);
+                Vector2 textMiddlePoint = Assets.textFont.MeasureString(text) / 2;
+                Vector2 textPosition = parentPosition + offset + Size / 2;
+                spriteBatch.DrawString(Assets.textFont, text, textPosition, textColor, 0, textMiddlePoint, Engine.UIScale, SpriteEffects.None, 0.45f);
             }
         }
     }

@@ -326,6 +326,12 @@
 /processorParam:Quality=Best
 /build:Sounds/Fire_3.wav
 
+#begin Sounds/Full.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Sounds/Full.wav
+
 #begin Sounds/Hit.wav
 /importer:WavImporter
 /processor:SoundEffectProcessor

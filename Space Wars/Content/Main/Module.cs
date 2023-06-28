@@ -1,23 +1,20 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Microsoft.Xna.Framework.Graphics;
+﻿using Microsoft.Xna.Framework.Graphics;
 
 namespace Space_Wars.Content.Main
 {
     internal struct Module
     {
-        public float Health;
-        public readonly float[] Cost;
-        public readonly Texture2D Texture;
-        public readonly string Name;
+        public float health;
+        public readonly float[] cost;
+        public readonly Texture2D texture;
+        public readonly string name;
 
-        public Module(float health, float[] cost, Texture2D texture, string name)
+        public Module(float _health, float[] _cost, Texture2D _texture, string _name)
         {
-            Health = health;
-            Cost = cost;
-            Texture = texture;
-            Name = name;
+            health = _health;
+            cost = _cost;
+            texture = _texture;
+            name = _name;
         }
     }
 }

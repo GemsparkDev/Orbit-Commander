@@ -1,24 +1,16 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Input;
-using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Linq;
-using System.Runtime.Intrinsics;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Space_Wars.Content.Main.UI_Elements
 {
     public class DraggableIcon : Widget
     {
-        public DraggableIcon(Texture2D texture)
+        public DraggableIcon(Texture2D _texture)
         {
-            Offset = Vector2.Zero;
-            Texture = texture;
+            offset = Vector2.Zero;
+            texture = _texture;
         }
         public override void Initialize() { }
-        public override void Draw(SpriteBatch spriteBatch, Vector2 parentPositon) { }
+        public override void Draw(SpriteBatch _spriteBatch, Vector2 _parentPositon) { }
     }
 }

@@ -1,12 +1,9 @@
 ﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using Microsoft.Xna.Framework.Audio;
-using System.Collections.Generic;
 using System;
-using Space_Wars.Content.Main.Entities;
-
-using System.Diagnostics;
+using System.Collections.Generic;
 
 namespace Space_Wars.Content.Main
 {
@@ -73,7 +70,7 @@ namespace Space_Wars.Content.Main
             {
                 if (oldState.IsKeyUp(Keys.Escape) && newState.IsKeyDown(Keys.Escape))
                 {
-                    if(_UIManager.PauseMenuTrigger())
+                    if (_UIManager.PauseMenuTrigger())
                     {
                         playingGame = !playingGame;
                     }
@@ -100,19 +97,19 @@ namespace Space_Wars.Content.Main
         {
             String stringLog = arg?.ToString();
             debugLog.Insert(0, $"{messageCount}: {stringLog}");
-            if(debugLog.Count > 10)
+            if (debugLog.Count > 10)
             {
-                debugLog.RemoveAt(10); 
+                debugLog.RemoveAt(10);
             }
             messageCount++;
         }
 
         public static void PlaySound(SoundEffect sound, Vector2 playLocation)
         {
-            Vector2 listenerLocation = EntityManager.player.Position;
-            float distance = MathF.Sqrt(MathF.Pow(playLocation.X-listenerLocation.X, 2)+MathF.Pow(playLocation.Y - listenerLocation.Y, 2));
-            float volume = -MathF.Pow(distance/800, 2) + 1;
-            if(volume < 0)
+            Vector2 listenerLocation = EntityManager.player.position;
+            float distance = MathF.Sqrt(MathF.Pow(playLocation.X - listenerLocation.X, 2) + MathF.Pow(playLocation.Y - listenerLocation.Y, 2));
+            float volume = -MathF.Pow(distance / 800, 2) + 1;
+            if (volume < 0)
             {
                 volume = 0;
             }
@@ -123,6 +120,11 @@ namespace Space_Wars.Content.Main
             sound.Play(1, 0, 0);
         }
 
+        public static Vector2 ToUnitVector(float _angle)
+        {
+            return new Vector2(MathF.Sin(_angle), -MathF.Cos(_angle));
+        }
+
         protected override void Draw(GameTime gameTime)
         {
             GraphicsDevice.Clear(Color.Black);
@@ -130,7 +132,7 @@ namespace Space_Wars.Content.Main
 
             if (startedGame == true)
             {
-                var backgroundParallax = -EntityManager.player.Position / 100;
+                var backgroundParallax = -EntityManager.player.position / 100;
                 spriteBatch.Draw(Assets.Sprites["Stars"], Vector2.Zero, null, Color.White, 0, Vector2.Zero, 1, SpriteEffects.None, 0f);
                 spriteBatch.Draw(Assets.Sprites["Moon"], new Vector2(screenSize.X / 5f, -100) + backgroundParallax, null, Color.White, 0, Vector2.Zero, 1.2f, SpriteEffects.None, 0.05f);
                 EntityManager.Draw(spriteBatch);
@@ -156,10 +158,6 @@ namespace Space_Wars.Content.Main
                     Vector2 textPosition = new(10, 10 + 15 * i * UIScale);
                     spriteBatch.DrawString(Assets.textFont, debugLog[i], textPosition, Color.White, 0, Vector2.Zero, UIScale, SpriteEffects.None, 0.45f);
                 }
-
-                //Displays a centering line
-                spriteBatch.Draw(line, new Vector2(0, screenSize.Y / 2), new Rectangle(0, (int)screenPosition.Y, (int)screenSize.X, 1), Color.Gray);
-                spriteBatch.Draw(line, new Vector2(screenSize.X / 2, 0), new Rectangle((int)screenPosition.X, 0, 1, (int)screenSize.Y), Color.Gray);
             }
             _UIManager.Draw(spriteBatch);
             spriteBatch.Draw(Assets.Sprites["Cursor"], new Vector2(Mouse.GetState().X, Mouse.GetState().Y), null, Color.White, 0, Vector2.Zero, 1, 0, 0.5f);

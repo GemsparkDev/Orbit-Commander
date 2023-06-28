@@ -1,10 +1,9 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using Space_Wars.Content.Main.UI_Elements;
 using System.Collections.Generic;
 using System.Linq;
-using Space_Wars.Content.Main.Entities;
-using Space_Wars.Content.Main.UI_Elements;
 
 namespace Space_Wars.Content.Main
 {
@@ -22,21 +21,21 @@ namespace Space_Wars.Content.Main
         private MouseState oldState;
         private static readonly List<Container> containers = new();
         private Container focusedContainer;
-        public Container PauseMenu { get; } = new Window(Engine.screenSize / 2, Assets.Sprites["Player UI"]) { Enabled = false };
-        public Container MainMenu { get; } = new Window(Engine.screenSize / 2, Assets.Sprites["Player UI"]) { Enabled = true };
-        public Container PlayerMenu { get; } = new Window(Engine.screenSize / 2, Assets.Sprites["Player UI"]) { Enabled = false };
-        public Container MothershipMenu { get; } = new Window(Engine.screenSize / 2, Assets.Sprites["Large Panel"]) { Enabled = false };
-        public IFunctional ExitButton;
-        public IFunctional SingleplayerButton;
-        public IFunctional RepairButton;
-        public IFunctional TestSlot;
-        public Decal PlayerEngineHealth;
-        public Decal PlayerGunsHealth;
-        public Decal PlayerSensorsHealth;
-        public Decal PlayerHullHealth;
-        public Decal PlayerCoreHealth;
-        public Decal MothershipScrap;
-        public DraggableIcon TestIcon;
+        public Container PauseMenu { get; } = new Window(Engine.screenSize / 2, Assets.Sprites["Player UI"]) { enabled = false };
+        public Container MainMenu { get; } = new Window(Engine.screenSize / 2, Assets.Sprites["Player UI"]) { enabled = true };
+        public Container PlayerMenu { get; } = new Window(Engine.screenSize / 2, Assets.Sprites["Player UI"]) { enabled = false };
+        public Container MothershipMenu { get; } = new Window(Engine.screenSize / 2, Assets.Sprites["Large Panel"]) { enabled = false };
+        public IFunctional exitButton;
+        public IFunctional singleplayerButton;
+        public IFunctional repairButton;
+        public IFunctional testSlot;
+        public Decal playerEngineHealth;
+        public Decal playerGunsHealth;
+        public Decal playerSensorsHealth;
+        public Decal playerHullHealth;
+        public Decal playerCoreHealth;
+        public Decal mothershipScrap;
+        public DraggableIcon testIcon;
         public DraggableIcon selectedIcon;
 
         public UIManager(Engine root)
@@ -46,56 +45,56 @@ namespace Space_Wars.Content.Main
             containers.Add(MainMenu);
             containers.Add(PlayerMenu);
             containers.Add(MothershipMenu);
-            ExitButton = new Button(MainMenu.Size/2, Assets.Sprites["Button"], "Exit", Color.White);
-            SingleplayerButton = new Button(MainMenu.Size/2, Assets.Sprites["Button"], "Singleplayer", Color.White);
-            RepairButton = new Button(new Vector2(MainMenu.Size.X / 2 - Assets.Sprites["Button"].Width, MainMenu.Size.Y / 2), Assets.Sprites["Button"], "Repair", Color.LightBlue);
-            PlayerHullHealth = new(new Vector2(MainMenu.Size.X / 2, 6), "20", Color.White);
-            PlayerGunsHealth = new(new Vector2(MainMenu.Size.X / 2, 18), "20", Color.White);
-            PlayerEngineHealth = new(new Vector2(MainMenu.Size.X / 2, 30), "20", Color.White);
-            PlayerSensorsHealth = new(new Vector2(MainMenu.Size.X / 2, 42), "20", Color.White);
-            PlayerCoreHealth = new(new Vector2(MainMenu.Size.X / 2, 54), "20", Color.Yellow);
-            MothershipScrap = new(new Vector2(MainMenu.Size.X / 2 + 30, 30), "0", Color.Gray);
-            TestIcon = new DraggableIcon(Assets.Sprites["Upgrade 1"]);
-            TestSlot = new IconSlot(new Vector2(MainMenu.Size.X / 2 + 30, 75), Assets.Sprites["Empty Slot"], TestIcon, this);
-            PauseMenu.AddWidget(ExitButton);
-            MainMenu.AddWidget(SingleplayerButton);
-            PlayerMenu.AddWidget(PlayerHullHealth);
-            PlayerMenu.AddWidget(PlayerGunsHealth);
-            PlayerMenu.AddWidget(PlayerEngineHealth);
-            PlayerMenu.AddWidget(PlayerSensorsHealth);
-            PlayerMenu.AddWidget(PlayerCoreHealth);
-            MothershipMenu.AddWidget(RepairButton);
-            MothershipMenu.AddWidget(PlayerHullHealth);
-            MothershipMenu.AddWidget(PlayerGunsHealth);
-            MothershipMenu.AddWidget(PlayerEngineHealth);
-            MothershipMenu.AddWidget(PlayerSensorsHealth);
-            MothershipMenu.AddWidget(PlayerCoreHealth);
-            MothershipMenu.AddWidget(MothershipScrap);
-            MothershipMenu.AddWidget(TestSlot);
-            ExitButton.AddBehaviour(new DelegateMethod(Exit));
-            SingleplayerButton.AddBehaviour(new DelegateMethod(Startgame));
-            RepairButton.AddBehaviour(new DelegateMethod(RepairShip));
+            exitButton = new Button(MainMenu.Size / 2, Assets.Sprites["Button"], "Exit", Color.White);
+            singleplayerButton = new Button(MainMenu.Size / 2, Assets.Sprites["Button"], "Singleplayer", Color.White);
+            repairButton = new Button(new Vector2(MainMenu.Size.X / 2 - Assets.Sprites["Button"].Width, MainMenu.Size.Y / 2), Assets.Sprites["Button"], "Repair", Color.LightBlue);
+            playerHullHealth = new(new Vector2(MainMenu.Size.X / 2, 6), "20", Color.White);
+            playerGunsHealth = new(new Vector2(MainMenu.Size.X / 2, 18), "20", Color.White);
+            playerEngineHealth = new(new Vector2(MainMenu.Size.X / 2, 30), "20", Color.White);
+            playerSensorsHealth = new(new Vector2(MainMenu.Size.X / 2, 42), "20", Color.White);
+            playerCoreHealth = new(new Vector2(MainMenu.Size.X / 2, 54), "20", Color.Yellow);
+            mothershipScrap = new(new Vector2(MainMenu.Size.X / 2 + 30, 30), "0", Color.Gray);
+            testIcon = new DraggableIcon(Assets.Sprites["Upgrade 1"]);
+            testSlot = new IconSlot(new Vector2(MainMenu.Size.X / 2 + 30, 75), Assets.Sprites["Empty Slot"], testIcon, this);
+            PauseMenu.AddWidget(exitButton);
+            MainMenu.AddWidget(singleplayerButton);
+            PlayerMenu.AddWidget(playerHullHealth);
+            PlayerMenu.AddWidget(playerGunsHealth);
+            PlayerMenu.AddWidget(playerEngineHealth);
+            PlayerMenu.AddWidget(playerSensorsHealth);
+            PlayerMenu.AddWidget(playerCoreHealth);
+            MothershipMenu.AddWidget(repairButton);
+            MothershipMenu.AddWidget(playerHullHealth);
+            MothershipMenu.AddWidget(playerGunsHealth);
+            MothershipMenu.AddWidget(playerEngineHealth);
+            MothershipMenu.AddWidget(playerSensorsHealth);
+            MothershipMenu.AddWidget(playerCoreHealth);
+            MothershipMenu.AddWidget(mothershipScrap);
+            MothershipMenu.AddWidget(testSlot);
+            exitButton.AddBehaviour(new DelegateMethod(Exit));
+            singleplayerButton.AddBehaviour(new DelegateMethod(Startgame));
+            repairButton.AddBehaviour(new DelegateMethod(RepairShip));
         }
         public static void ToggleMenu(Container container)
         {
-            container.Enabled = !container.Enabled;
+            container.enabled = !container.enabled;
         }
         public static void ToggleMenu(Containers containerType)
         {
             Container container = GetContainer(containerType);
-            container.Enabled = !container.Enabled;
+            container.enabled = !container.enabled;
         }
         public bool PauseMenuTrigger()
         {
             foreach (Container container in containers)
             {
-                if(container.Enabled == true && container != PauseMenu)
+                if (container.enabled == true && container != PauseMenu)
                 {
                     ToggleMenu(container);
                     return false;
                 }
             }
-            if(PauseMenu.Enabled == true)
+            if (PauseMenu.enabled == true)
             {
                 Engine.PlayGlobalSound(Assets.SoundFX["Close Menu"]);
             }
@@ -109,7 +108,7 @@ namespace Space_Wars.Content.Main
 
         public void Update()
         {
-            focusedContainer = containers.Where(c => c.Enabled && c.GetMouseOver())
+            focusedContainer = containers.Where(c => c.enabled && c.GetMouseOver())
                                           .FirstOrDefault() ?? new DummyWindow();
             focusedContainer ??= new DummyWindow();
 
@@ -133,14 +132,14 @@ namespace Space_Wars.Content.Main
 
         public void Draw(SpriteBatch spriteBatch)
         {
-            foreach (Container container in containers.Where(c => c.Enabled))
+            foreach (Container container in containers.Where(c => c.enabled))
             {
-                spriteBatch.Draw(container.Texture, container.Position, null, Color.White, 0, Vector2.One / 2, Engine.UIScale, SpriteEffects.None, 0.35f);
+                spriteBatch.Draw(container.texture, container.position, null, Color.White, 0, Vector2.One / 2, Engine.UIScale, SpriteEffects.None, 0.35f);
                 container.Draw(spriteBatch);
             }
-            if(selectedIcon != null)
+            if (selectedIcon != null)
             {
-                spriteBatch.Draw(selectedIcon.Texture, new Vector2(Mouse.GetState().X - selectedIcon.Texture.Width/2, Mouse.GetState().Y - selectedIcon.Texture.Height/2), null, Color.White, 0, Vector2.One / 2, Engine.UIScale, SpriteEffects.None, 0.35f);
+                spriteBatch.Draw(selectedIcon.texture, new Vector2(Mouse.GetState().X - selectedIcon.texture.Width / 2, Mouse.GetState().Y - selectedIcon.texture.Height / 2), null, Color.White, 0, Vector2.One / 2, Engine.UIScale, SpriteEffects.None, 0.35f);
             }
         }
 
