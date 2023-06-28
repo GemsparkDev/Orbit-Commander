@@ -1,5 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -10,20 +11,13 @@ using System.Threading.Tasks;
 
 namespace Space_Wars.Content.Main.UI_Elements
 {
-    public class DummyWidget : Widget, IFunctional
+    public class DraggableIcon : Widget
     {
-        public new Vector2 Size
-        {
-            get { return Vector2.Zero; }
-        }
-        public DummyWidget()
+        public DraggableIcon(Texture2D texture)
         {
             Offset = Vector2.Zero;
-            Texture = null;
+            Texture = texture;
         }
-        public void Interact() { }
-        public void AddBehaviour(DelegateMethod func) { }
-        public void ApplyBehaviours() { }
         public override void Initialize() { }
         public override void Draw(SpriteBatch spriteBatch, Vector2 parentPositon) { }
     }

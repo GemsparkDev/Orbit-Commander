@@ -12,6 +12,8 @@ namespace Space_Wars.Content.Main.UI_Elements
     {
         protected Vector2 _Size;
         public Vector2 Offset;
+        public string Text;
+        public Color TextColor;
         public Vector2 Size
         {
             get { return _Size * Engine.UIScale; }
@@ -22,6 +24,7 @@ namespace Space_Wars.Content.Main.UI_Elements
             Offset = Vector2.Zero;
             Texture = null;
         }
+        public abstract void Initialize();
         public abstract void Draw(SpriteBatch spriteBatch, Vector2 parentPositon);
     }
 }

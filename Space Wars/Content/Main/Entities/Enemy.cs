@@ -11,7 +11,7 @@ namespace Space_Wars.Content.Main.Entities
 {
     public class Enemy : Entity
     {
-        private List<IEnumerator<int>> behaviours = new List<IEnumerator<int>>();
+        private List<IEnumerator<int>> behaviours = new();
         public float TargetAngle = 0;
         public Player player = EntityManager.player;
         public float Cooldown;
@@ -19,28 +19,29 @@ namespace Space_Wars.Content.Main.Entities
         public int MaxHealth;
         public Vector2 TargetVelocity = Vector2.Zero;
         public Vector2 TargetVector;
-        public Enemy(Vector2 position, Vector2 velocity, float angle, float angularVelocity, int Damage, Texture2D texture)
+        public Enemy(Vector2 position, Vector2 velocity, float angle, float angularVelocity, int damage, int health, Texture2D texture)
         {
             Position = position;
             Velocity = velocity;
             Angle = angle;
             AngularVelocity = angularVelocity;
             entityType = EntityType.Enemy;
-            damage = Damage;
+            Damage = damage;
             IsFriendly = false;
             Texture = texture;
-            Color = Color.Red;
-            Health = 10;
+            Color = Color.Yellow;
+            Health = health;
             MaxHealth = Health;
+            Cooldown = 2.5f;
         }
         IEnumerable<int> Fighter()
         {
             while (true)
             {
                 TargetAngle = (player.Position - Position + (player.Velocity - Velocity)).ToDirection(0);
-                if (EntityManager.DistanceSqr(this, player) > MathF.Pow(75, 2))
+                if (EntityManager.DistanceSqr(this, player) > MathF.Pow(150, 2))
                 {
-                    GoToEntity(player, 1);
+                    GoToEntity(player, 2);
                 }
                 else
                 {
@@ -73,7 +74,7 @@ namespace Space_Wars.Content.Main.Entities
             while (true)
             {
                 TargetAngle = ((player.Position - Position) + (player.Velocity - Velocity)).ToDirection(0);
-                if (EntityManager.DistanceSqr(this, player) > MathF.Pow(150, 2))
+                if (EntityManager.DistanceSqr(this, player) > MathF.Pow(225, 2))
                 {
                     GoToEntity(player, 1);
                 }
@@ -103,7 +104,52 @@ namespace Space_Wars.Content.Main.Entities
                 {
                     IsExpired = true;
                     Engine.PlaySound(Assets.SoundFX["Death"], Position);
-                    EntityManager.Add(new Scrap(Position, Velocity, Angle, AngularVelocity));
+                    EntityManager.Add(new Scrap(Position, Vector2.Zero, Angle, AngularVelocity));
+                }
+                if (Health > MaxHealth)
+                {
+                    Health = MaxHealth;
+                }
+
+                yield return 0;
+            }
+        }
+        IEnumerable<int> Sniper()
+        {
+            while (true)
+            {
+                float timeToHit = 0;
+                float prevTimeToHit = 0;
+                Vector2 playerIterativePosition = player.Position;
+                for(int i = 0; i < 1; i++)
+                {
+                    timeToHit = MathF.Sqrt(EntityManager.DistanceSqr(Position, playerIterativePosition))/16;
+                    playerIterativePosition += player.Velocity * (timeToHit - prevTimeToHit);
+                    prevTimeToHit = timeToHit;
+                }
+                Engine.WriteLine(timeToHit);
+                TargetAngle = (playerIterativePosition - Position).ToDirection(0);
+                if (EntityManager.DistanceSqr(this, player) > MathF.Pow(400, 2))
+                {
+                    GoToEntity(player, 1);
+                }
+                else
+                {
+                    if (Cooldown <= 0 && MathF.Abs(TargetAngle-Angle) < 0.1f)
+                    {
+                        EntityManager.Add(new PulseShot(Position, Angle.ToUnitVector(0) * 16, Angle, 0, false));
+                        Engine.PlaySound(Assets.SoundFX["Fire_3"], Position);
+                        Cooldown = 2.5f;
+                    }
+                }
+                RotateTowards(TargetAngle);
+                LowerCooldown();
+
+                if (Health < 0)
+                {
+                    IsExpired = true;
+                    Engine.PlaySound(Assets.SoundFX["Death"], Position);
+                    EntityManager.Add(new Scrap(Position, Vector2.Zero, Angle, AngularVelocity));
                 }
                 if (Health > MaxHealth)
                 {
@@ -115,15 +161,22 @@ namespace Space_Wars.Content.Main.Entities
         }
         public static Enemy NewFighter(Vector2 position, Vector2 velocity, float angle, float angularVelocity)
         {
-            Enemy enemy = new Enemy(position, velocity, angle, angularVelocity, 10, Assets.Sprites["Fighter"]);
+            Enemy enemy = new(position, velocity, angle, angularVelocity, 10, 10, Assets.Sprites["Fighter"]);
             enemy.AddBehaviour(enemy.Fighter());
             EntityManager.Add(enemy);
             return enemy;
         }
         public static Enemy NewCarrier(Vector2 position, Vector2 velocity, float angle, float angularVelocity)
         {
-            Enemy enemy = new Enemy(position, velocity, angle, angularVelocity, 10, Assets.Sprites["Cruiser"]);
+            Enemy enemy = new(position, velocity, angle, angularVelocity, 10, 20, Assets.Sprites["Cruiser"]);
             enemy.AddBehaviour(enemy.Carrier());
+            EntityManager.Add(enemy);
+            return enemy;
+        }
+        public static Enemy NewSniper(Vector2 position, Vector2 velocity, float angle, float angularVelocity)
+        {
+            Enemy enemy = new(position, velocity, angle, angularVelocity, 25, 10, Assets.Sprites["Sniper"]);
+            enemy.AddBehaviour(enemy.Sniper());
             EntityManager.Add(enemy);
             return enemy;
         }

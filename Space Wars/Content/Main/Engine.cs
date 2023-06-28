@@ -55,7 +55,7 @@ namespace Space_Wars.Content.Main
         public void Startgame()
         {
             EntityManager.Initialize();
-            _UIManager.MainMenuToggle();
+            UIManager.ToggleMenu(_UIManager.MainMenu);
             startedGame = true;
         }
 
@@ -73,8 +73,10 @@ namespace Space_Wars.Content.Main
             {
                 if (oldState.IsKeyUp(Keys.Escape) && newState.IsKeyDown(Keys.Escape))
                 {
-                    _UIManager.PauseMenuToggle();
-                    playingGame = !playingGame;
+                    if(_UIManager.PauseMenuTrigger())
+                    {
+                        playingGame = !playingGame;
+                    }
                 }
 
                 if (playingGame == true)
@@ -115,30 +117,33 @@ namespace Space_Wars.Content.Main
                 volume = 0;
             }
             sound.Play(volume, 0, 0);
-            WriteLine(volume);
+        }
+        public static void PlayGlobalSound(SoundEffect sound)
+        {
+            sound.Play(1, 0, 0);
         }
 
         protected override void Draw(GameTime gameTime)
         {
             GraphicsDevice.Clear(Color.Black);
-            spriteBatch.Begin();
+            spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, null, null);
 
             if (startedGame == true)
             {
                 var backgroundParallax = -EntityManager.player.Position / 100;
-                spriteBatch.Draw(Assets.Sprites["Stars"], Vector2.Zero, null, Color.White, 0, Vector2.Zero, 1, SpriteEffects.None, 0.3f);
-                spriteBatch.Draw(Assets.Sprites["Moon"], new Vector2(screenSize.X / 5f, -100) + backgroundParallax, null, Color.White, 0, Vector2.Zero, 1.2f, SpriteEffects.None, 0.3f);
+                spriteBatch.Draw(Assets.Sprites["Stars"], Vector2.Zero, null, Color.White, 0, Vector2.Zero, 1, SpriteEffects.None, 0f);
+                spriteBatch.Draw(Assets.Sprites["Moon"], new Vector2(screenSize.X / 5f, -100) + backgroundParallax, null, Color.White, 0, Vector2.Zero, 1.2f, SpriteEffects.None, 0.05f);
                 EntityManager.Draw(spriteBatch);
                 if (debugMode == true)
                 {
                     //Generates a grid
                     for (int x = (int)-screenPosition.X / 50; x < -screenPosition.X / 50 + screenSize.X / 50; x++)
                     {
-                        spriteBatch.Draw(line, new Vector2(x * 50 + screenPosition.X, 0), new Rectangle((int)(x * 50 + screenPosition.X), 0, 1, (int)screenSize.Y), Color.White, 0, Vector2.Zero, 1, SpriteEffects.None, 0.2f);
+                        spriteBatch.Draw(line, new Vector2(x * 50 + screenPosition.X, 0), new Rectangle((int)(x * 50 + screenPosition.X), 0, 1, (int)screenSize.Y), Color.White, 0, Vector2.Zero, 1, SpriteEffects.None, 0.4f);
                     }
                     for (int y = (int)-screenPosition.Y / 50; y < -screenPosition.Y / 50 + screenSize.Y / 50; y++)
                     {
-                        spriteBatch.Draw(line, new Vector2(0, y * 50 + screenPosition.Y), new Rectangle(0, (int)(y * 50 + screenPosition.Y), (int)screenSize.X, 1), Color.White, 0, Vector2.Zero, 1, SpriteEffects.None, 0.2f);
+                        spriteBatch.Draw(line, new Vector2(0, y * 50 + screenPosition.Y), new Rectangle(0, (int)(y * 50 + screenPosition.Y), (int)screenSize.X, 1), Color.White, 0, Vector2.Zero, 1, SpriteEffects.None, 0.4f);
                     }
                 }
             }
@@ -149,7 +154,7 @@ namespace Space_Wars.Content.Main
                 for (int i = 0; i < debugLog.Count; i++)
                 {
                     Vector2 textPosition = new(10, 10 + 15 * i * UIScale);
-                    spriteBatch.DrawString(Assets.textFont, debugLog[i], textPosition, Color.White, 0, Vector2.Zero, UIScale, SpriteEffects.None, 0);
+                    spriteBatch.DrawString(Assets.textFont, debugLog[i], textPosition, Color.White, 0, Vector2.Zero, UIScale, SpriteEffects.None, 0.45f);
                 }
 
                 //Displays a centering line
@@ -157,7 +162,7 @@ namespace Space_Wars.Content.Main
                 spriteBatch.Draw(line, new Vector2(screenSize.X / 2, 0), new Rectangle((int)screenPosition.X, 0, 1, (int)screenSize.Y), Color.Gray);
             }
             _UIManager.Draw(spriteBatch);
-            spriteBatch.Draw(Assets.Sprites["Cursor"], new Vector2(Mouse.GetState().X, Mouse.GetState().Y), Color.White);
+            spriteBatch.Draw(Assets.Sprites["Cursor"], new Vector2(Mouse.GetState().X, Mouse.GetState().Y), null, Color.White, 0, Vector2.Zero, 1, 0, 0.5f);
             spriteBatch.End();
             //Sends a spritebatch through to the entity manager every draw update
 

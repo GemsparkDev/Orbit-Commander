@@ -32,7 +32,7 @@ namespace Space_Wars.Content.Main.Entities
             IsFriendly = isFriendly;
             entityType = EntityType.Projectile;
             Texture = Assets.Sprites["PulseShot"];
-            damage = 10;
+            Damage = 5;
         }
         public override void Collide(int damage)
         {
@@ -62,34 +62,36 @@ namespace Space_Wars.Content.Main.Entities
             IsFriendly = false;
             entityType = EntityType.Projectile;
             Texture = Assets.Sprites["Metal Scrap"];
-            damage = 0;
+            Damage = 0;
         }
         public override void Collide(int damage)
         {
             IsExpired = true;
-            EntityManager.player.mothership.resources.scrap += 1;
         }
 
         public override void AI()
-        {
-            if (EntityManager.player.leashedMaterial == null)
+        {   
+            if(!EntityManager.player.leashedMaterials.Contains(this))
             {
-                if (EntityManager.DistanceSqr(EntityManager.player, this) < 1250)
+                if (EntityManager.DistanceSqr(EntityManager.player, this) < 1250 && EntityManager.player.leashedMaterials.Count < 2 && EntityManager.player.canGatherResources == true)
                 {
-                    EntityManager.player.leashedMaterial = this;
+                    EntityManager.player.leashedMaterials.Add(this);
                 }
             }
-            else if (EntityManager.player.leashedMaterial == this)
+            else
             {
-                if (EntityManager.DistanceSqr(this, EntityManager.player) > 1250)
+                Vector2 playerVelocity = EntityManager.player.Velocity;
+                Vector2 leashPosition = EntityManager.player.Position-EntityManager.player.Angle.ToUnitVector(0)*25;
+                float distance = EntityManager.DistanceSqr(Position, leashPosition);
+                if(distance > 16)
                 {
-                    Velocity += (EntityManager.player.Position - Position).ToUnitVector(0) / 8;
+                    Velocity += (leashPosition - Position).ToUnitVector(0) * Engine.deltaSeconds * distance;
                 }
                 else
                 {
-                    Velocity = EntityManager.player.Velocity / 1.1f;
+                    Velocity += (playerVelocity - Velocity) / 2;
                 }
-                ClampVelocity(MathF.Sqrt(MathF.Pow(EntityManager.player.Velocity.X, 2) + MathF.Pow(EntityManager.player.Velocity.Y, 2)) + 1);
+                ClampVelocity(MathF.Sqrt(playerVelocity.X * playerVelocity.X + playerVelocity.Y * playerVelocity.Y) + 1);
             }
         }
     }
@@ -105,7 +107,7 @@ namespace Space_Wars.Content.Main.Entities
             IsFriendly = isfriendly;
             entityType = EntityType.Projectile;
             Texture = Assets.Sprites["Arrow"];
-            damage = 0;
+            Damage = 0;
         }
         public override void Collide(int damage)
         {

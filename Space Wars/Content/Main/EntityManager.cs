@@ -88,7 +88,7 @@ namespace Space_Wars.Content.Main
                 player = new Player(Vector2.Zero, Vector2.Zero, 0f, 0f);
                 entities.Add(mothership = new Mothership(Vector2.Zero, Vector2.Zero, 0f, 0f));
                 player.mothership = mothership;
-                enemySpawner.playerRespawn(player);
+                enemySpawner.PlayerRespawn(player);
 
             }
 
@@ -121,8 +121,8 @@ namespace Space_Wars.Content.Main
             }
             if (DistanceSqr(entity, targetEntity) <= MathF.Pow(entity.ColliderRadius + targetEntity.ColliderRadius, 2) && entity.IsFriendly != targetEntity.IsFriendly)
             {
-                entity.Collide(targetEntity.damage);
-                targetEntity.Collide(entity.damage);
+                entity.Collide(targetEntity.Damage);
+                targetEntity.Collide(entity.Damage);
             }
         }
         public static Enemy NearestEnemy(Entity entity)
@@ -144,6 +144,11 @@ namespace Space_Wars.Content.Main
         public static float DistanceSqr(Entity entity1, Entity entity2)
         {
             Vector2 Target = entity2.Position - entity1.Position;
+            return Target.X * Target.X + Target.Y * Target.Y;
+        }
+        public static float DistanceSqr(Vector2 vectorOne, Vector2 vectorTwo)
+        {
+            Vector2 Target = vectorTwo - vectorOne;
             return Target.X * Target.X + Target.Y * Target.Y;
         }
     }

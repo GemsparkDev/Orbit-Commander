@@ -40,16 +40,30 @@ namespace Space_Wars.Content.Main.UI_Elements
         {
             foreach (var widget in Children)
             {
-                spriteBatch.Draw(widget.Texture, Position + widget.Offset, null, Color.White, 0, Vector2.One / 2, Engine.UIScale, 0, 0);
-                widget.Draw(spriteBatch, Position);
+                if (widget.Texture != null)
+                {
+                    spriteBatch.Draw(widget.Texture, Position + widget.Offset, null, Color.White, 0, Vector2.One / 2, Engine.UIScale, SpriteEffects.None, 0.4f);
+                    widget.Draw(spriteBatch, Position);
+                }
+                else
+                {
+                    widget.Draw(spriteBatch, Position);
+                }
             }
             foreach (var functionalWidget in FunctionalChildren)
             {
                 Widget widget = functionalWidget as Widget;
                 if (widget != null)
                 {
-                    spriteBatch.Draw(widget.Texture, Position + widget.Offset, null, Color.White, 0, Vector2.One / 2, Engine.UIScale, 0, 0);
-                    widget.Draw(spriteBatch, Position);
+                    if (widget.Texture != null)
+                    {
+                        spriteBatch.Draw(widget.Texture, Position + widget.Offset, null, Color.White, 0, Vector2.One / 2, Engine.UIScale, SpriteEffects.None, 0.4f);
+                        widget.Draw(spriteBatch, Position);
+                    }
+                    else
+                    {
+                        widget.Draw(spriteBatch, Position);
+                    }
                 }
             }
         }

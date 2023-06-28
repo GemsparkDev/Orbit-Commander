@@ -10,7 +10,7 @@ namespace Space_Wars.Content.Main
         //Converts a vector 2 to degrees in radians
         public static float ToDirection(this Vector2 vector, float offset)
         {
-            return MathF.Atan2(vector.X, -vector.Y) - MathF.PI / 2 + offset;
+            return MathF.Atan2(vector.X, -vector.Y) - MathF.PI/2 + offset;
         }
 
         //Converts an angle in radians to a corresponding vector 2 on the unit circle
@@ -23,7 +23,7 @@ namespace Space_Wars.Content.Main
         public static Vector2 ToUnitVector(this Vector2 vector, float offset)
         {
             float angle;
-            angle = MathF.Atan2(vector.X, -vector.Y) - MathF.PI / 2 + offset;
+            angle = MathF.Atan2(vector.X, -vector.Y) - MathF.PI/2 + offset;
             return new Vector2(MathF.Cos(angle), MathF.Sin(angle));
         }
     }

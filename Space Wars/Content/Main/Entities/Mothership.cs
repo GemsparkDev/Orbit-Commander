@@ -11,7 +11,7 @@ namespace Space_Wars.Content.Main.Entities
     {
         private float Health;
         private float MaxHealth;
-        public PlayerResources resources;
+        public int scrap;
         public Mothership(Vector2 position, Vector2 velocity, float angle, float angularVelocity)
         {
             Position = position;
@@ -40,16 +40,6 @@ namespace Space_Wars.Content.Main.Entities
             Position += Velocity;
             Angle += AngularVelocity;
             AngularVelocity = 0;
-
-            ClampVelocity(2);
-            if (EntityManager.player.docked == true)
-            {
-                EntityManager.player.ClampVelocity(2);
-            }
-        }
-        public void Dock()
-        {
-            
         }
         public override void Collide(int damage)
         {
@@ -59,11 +49,5 @@ namespace Space_Wars.Content.Main.Entities
                 Engine.PlaySound(Assets.SoundFX["Hit"], Position);
             }
         }
-    }
-    public struct PlayerResources
-    {
-        public int scrap;
-        public int titanium;
-        public int copper;
     }
 }
