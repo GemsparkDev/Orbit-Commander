@@ -1,9 +1,9 @@
 # Space Wars  
-
-Space Wars is a game made using C# in monogame.  
-
+  
+Space Wars is a game made using C# in monogame. It is a 2D top down wave based shooter where you must repair and upgrade your ship by salvaging from enemies you defeat.  
+  
 # Changelog  
-
+  
 10/3/2022: Started changelog, current content  
 0.0.0 - a.1  
 	-Basic engine  
@@ -53,15 +53,28 @@ Space Wars is a game made using C# in monogame.
 	-Started implementation of the wave system  
 	-Made player turn towards the mouse  
 1/29/2023: fixed bug #4  
-    
+	
 2/1/2023: Upgraded framework + packages, added programmer graphics  
 0.0.6 - a.1  
         -Added background  
 	-Changed framework to .net 6.0  
 	-Begun implimentation of the module system  
+   
  6/24/2023: Changed Myra for custom GUI library, added various utility functions  
  0.0.7 - a.1  
          -New GUI library and font  
          -2 new menus, pause menu and main menu  
 	 -Better debug menu, w/ debug log  
 	 -Various utility functions such as player respawn, sound falloff, and better distance function  
+  	 -Fixed issues #1 and #2  
+  
+   6/28/2023: More assets, better player health mechanics
+   Update 0.0.8 - a.1   
+   	 -Various new UI and Sound assets  
+     	 -New enemy type (sniper)  
+         -New player weapon type (shotgun)  
+	 -New UI type (Draggable icon)  
+  	 -A set of player health statistics that affect player abilities  
+         -Repair system   
+	 -various other code improvements
+    
