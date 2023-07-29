@@ -9,7 +9,7 @@ namespace Space_Wars.Content.Main
         public static Dictionary<string, Texture2D> Sprites { get; } = new();
         public static Dictionary<string, SoundEffect> SoundFX { get; } = new();
         public static SpriteFont textFont;
-        //public static Effect textOutline;
+        //public static Effect bloomShader;
         //Loads all assets in the images folder to the dictionary with a specific sprite keyword
         public static void LoadAssets(Microsoft.Xna.Framework.Content.ContentManager Content)
         {
@@ -33,8 +33,17 @@ namespace Space_Wars.Content.Main
             Sprites.Add("Empty Bar", Content.Load<Texture2D>("Images/UI_4"));
             Sprites.Add("Full Bar", Content.Load<Texture2D>("Images/UI_5"));
             Sprites.Add("Empty Slot", Content.Load<Texture2D>("Images/UI_6"));
-            Sprites.Add("Upgrade 1", Content.Load<Texture2D>("Images/UI_7"));
+            Sprites.Add("Hull Module", Content.Load<Texture2D>("Images/UI_7"));
             Sprites.Add("Large Panel", Content.Load<Texture2D>("Images/UI_8"));
+            Sprites.Add("Engine Module", Content.Load<Texture2D>("Images/UI_9"));
+            Sprites.Add("Gun Module", Content.Load<Texture2D>("Images/UI_10"));
+            Sprites.Add("Sensor Module", Content.Load<Texture2D>("Images/UI_11"));
+            Sprites.Add("Core Module", Content.Load<Texture2D>("Images/UI_12"));
+            Sprites.Add("Selected Tab", Content.Load<Texture2D>("Images/UI_13"));
+            Sprites.Add("Tab", Content.Load<Texture2D>("Images/UI_14"));
+            Sprites.Add("Item Slot", Content.Load<Texture2D>("Images/UI_15"));
+            Sprites.Add("Knob", Content.Load<Texture2D>("Images/UI_16"));
+            Sprites.Add("Slider Slot", Content.Load<Texture2D>("Images/UI_17"));
 
             SoundFX.Add("Fire_1", Content.Load<SoundEffect>("Sounds/Fire_1"));
             SoundFX.Add("Fire_2", Content.Load<SoundEffect>("Sounds/Fire_2"));
@@ -49,7 +58,7 @@ namespace Space_Wars.Content.Main
             SoundFX.Add("Full", Content.Load<SoundEffect>("Sounds/Full"));
 
             textFont = Content.Load<SpriteFont>("Fonts/RobotoMono");
-            //textOutline = Content.Load<Effect>("Fonts/FontOutline");
+            //bloomShader = Content.Load<Effect>("Shaders/BloomShader");
         }
     }
 }

@@ -1,0 +1,116 @@
+﻿
+using Space_Wars.Content.Main.Entities;
+using Space_Wars.Content.Main.UI_Elements;
+
+namespace Space_Wars.Content.Main
+{
+    public static class EventHandler
+    {
+        public static Player player;
+        public static Mothership mothership;
+        public static UIManager UIManager;
+        public static Engine root;
+        public static void Initialize(Player _player, Mothership _mothership)
+        {
+            player = _player;
+            mothership = _mothership;
+        }
+        public static void PairPlayerUIManager()
+        {
+            for (int i = 0; i < 5; i++)
+            {
+                ItemSlot slot = UIManager.PlayerMenu.GetFuncWidget(i) as ItemSlot;
+                slot.daughterItem = player.modules[i];
+                slot.daughterItem.parent = slot;
+            }
+            UIManager.selectedIcon = null;
+        }
+        public static void Exit()
+        {
+            root.Exit();
+            Engine.PlayGlobalSound(Assets.SoundFX["Interact"]);
+        }
+        public static void Startgame()
+        {
+            root.Startgame();
+            Engine.PlayGlobalSound(Assets.SoundFX["Interact"]);
+        }
+        public static void RepairModule()
+        {
+            ItemSlot slot = UIManager.repairSlot as ItemSlot;
+            Module daughterModule;
+            if (slot.daughterItem != null)
+            {
+                daughterModule = slot.daughterItem as Module;
+            }
+            else
+            {
+                return;
+            }
+            if (daughterModule.health < 20 && EntityManager.player.mothership.scrap >= 5)
+            {
+                daughterModule.health = 20;
+                EntityManager.player.mothership.scrap -= 5;
+                Engine.PlayGlobalSound(Assets.SoundFX["Full"]);
+                UpdateRepairText();
+                UIManager.mothershipScrap.text = EntityManager.player.mothership.scrap.ToString();
+            }
+            else
+            {
+                Engine.PlayGlobalSound(Assets.SoundFX["Close Menu"]);
+            }
+        }
+        public static void UpdateRepairText()
+        {
+            ItemSlot slot = UIManager.repairSlot as ItemSlot;
+            Module daughterModule = slot.daughterItem as Module;
+            if (slot.daughterItem != null)
+            {
+                UIManager.repairText.text = daughterModule.health.ToString();
+            }
+            else
+            {
+                UIManager.repairText.text = "None";
+            }
+        }
+
+        public static void UpdateInventoryUI()
+        {
+            for (int y = 0; y < UIManager.inventorySlots.GetLength(1); y++)
+            {
+                for (int x = 0; x < UIManager.inventorySlots.GetLength(0); x++)
+                {
+                    UIManager.inventorySlots[x, y].daughterItem = mothership.inventory[x, y];
+                    if(UIManager.inventorySlots[x, y].daughterItem != null)
+                    {
+                        UIManager.inventorySlots[x, y].daughterItem.parent = UIManager.inventorySlots[x, y];
+                    }
+                }
+            }
+        }
+        public static void UpdateInventory()
+        {
+            for (int y = 0; y < mothership.inventory.GetLength(1); y++)
+            {
+                for (int x = 0; x < mothership.inventory.GetLength(0); x++)
+                {
+                    mothership.inventory[x, y] = UIManager.inventorySlots[x, y].daughterItem;
+                }
+            }
+        }
+        public static void UpdateFurnaceUI(float _value, float _maxValue)
+        {
+            UIManager.furnaceSlot.daughterItem = mothership.furnaceItem;
+            if (UIManager.furnaceSlot.daughterItem != null)
+            {
+                UIManager.furnaceSlot.daughterItem.parent = UIManager.furnaceSlot;
+            }
+            UIManager.furnaceSlider.SetInterval(_value, _maxValue);
+            UIManager.mothershipScrap.text = EntityManager.player.mothership.scrap.ToString();
+        }
+        public static void UpdateFurnace()
+        {
+            mothership.furnaceItem = UIManager.furnaceSlot.daughterItem;
+        }
+    }
+}

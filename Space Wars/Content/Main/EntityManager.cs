@@ -1,5 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
 using Space_Wars.Content.Main.Entities;
 using System;
 using System.Collections.Generic;
@@ -16,7 +17,10 @@ namespace Space_Wars.Content.Main
         private static List<Projectile> projectiles = new();
         public static Player player;
         public static Mothership mothership;
+        public static Engine root;
         private static EnemySpawner enemySpawner;
+        private static Random random = new();
+        private static float[] currentKarma = { 0, 0, 0 };
 
         public static void Add(Entity entity)
         {
@@ -42,18 +46,19 @@ namespace Space_Wars.Content.Main
             //Moves entities to the inactive list to prevent modifying a list while iterating
         }
 
-        public static void Initialize()
+        public static void Initialize(Engine _root)
         {
-            Player Player = new(Vector2.Zero, Vector2.Zero, 0f, 0f);
+            root = _root;
+            player = new(Vector2.Zero, Vector2.Zero, 0f, 0f);
             mothership = new Mothership(Vector2.Zero, Vector2.Zero, 0f, 0f);
-            player = Player;
             player.mothership = mothership;
             Add(mothership);
-            enemySpawner = new EnemySpawner(Player);
-
+            enemySpawner = new EnemySpawner(player);
+            EventHandler.Initialize(player, mothership);
         }
         public static void Update()
         {
+            Engine.mousePositionOffset = new Vector2(Mouse.GetState().X - Engine.screenSize.X/2, Mouse.GetState().Y - Engine.screenSize.Y/2) / 20;
             player.Update();
             Engine.screenPosition = new Vector2(Engine.screenSize.X / 2 - player.position.X, Engine.screenSize.Y / 2 - player.position.Y);
             enemySpawner.Update();
@@ -86,7 +91,9 @@ namespace Space_Wars.Content.Main
                 entities.Add(mothership = new Mothership(Vector2.Zero, Vector2.Zero, 0f, 0f));
                 player.mothership = mothership;
                 enemySpawner.PlayerRespawn(player);
-
+                EventHandler.Initialize(player, mothership);
+                EventHandler.PairPlayerUIManager();
+                EventHandler.UpdateInventoryUI();
             }
 
             isUpdating = false;
@@ -138,15 +145,33 @@ namespace Space_Wars.Content.Main
             }
             return returnEnemy;
         }
-        public static float DistanceSqr(Entity entity1, Entity entity2)
+        public static float DistanceSqr(Entity _entity1, Entity _entity2)
         {
-            Vector2 Target = entity2.position - entity1.position;
+            Vector2 Target = _entity2.position - _entity1.position;
             return Target.X * Target.X + Target.Y * Target.Y;
         }
-        public static float DistanceSqr(Vector2 vectorOne, Vector2 vectorTwo)
+        public static float DistanceSqr(Vector2 _vectorOne, Vector2 _vectorTwo)
         {
-            Vector2 Target = vectorTwo - vectorOne;
+            Vector2 Target = _vectorTwo - _vectorOne;
             return Target.X * Target.X + Target.Y * Target.Y;
+        }
+
+        public static bool RandomWithKarma(float _rarity)
+        {
+            int karmaType;
+            if (_rarity <= 1) { return true; }
+            else if (5 >= _rarity && _rarity > 1) { karmaType = 0; }
+            else if (50 >= _rarity && _rarity > 5) { karmaType = 1; }
+            else { karmaType = 2; }
+            float randomNum = (float)random.NextDouble();
+            float karmaBonus = (_rarity-1) / (_rarity + _rarity * MathF.Exp(-10 * currentKarma[karmaType] + 12.5f));
+            if (randomNum < (1/_rarity) + karmaBonus)
+            {
+                currentKarma[karmaType] = 0;
+                return true;
+            }
+            currentKarma[karmaType] += 1 / _rarity;
+            return false;
         }
     }
 }

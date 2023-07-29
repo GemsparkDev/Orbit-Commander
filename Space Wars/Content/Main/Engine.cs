@@ -4,6 +4,8 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using System;
 using System.Collections.Generic;
+using Space_Wars.Content.Main.UI_Elements;
+using Space_Wars.Content.Main.Entities;
 
 namespace Space_Wars.Content.Main
 {
@@ -14,8 +16,10 @@ namespace Space_Wars.Content.Main
         private UIManager _UIManager;
         public static Vector2 screenSize;
         public static Vector2 screenPosition;
+        public static Vector2 mousePositionOffset;
         private KeyboardState oldState;
         public static float deltaSeconds;
+        public static float timeScale = 1.0f;
         public static Texture2D line;
         public static bool debugMode;
         public static bool playingGame = true;
@@ -23,6 +27,7 @@ namespace Space_Wars.Content.Main
         public static List<string> debugLog = new();
         private static int messageCount = 0;
         public static int UIScale = 1;
+        public static int targetFramerate = 60;
 
         public Engine()
         {
@@ -34,9 +39,13 @@ namespace Space_Wars.Content.Main
         {
             base.Initialize();
 
-            graphics.PreferredBackBufferWidth = 1280;  // set this value to the desired width of your window
-            graphics.PreferredBackBufferHeight = 720;   // set this value to the desired height of your window
+            graphics.PreferredBackBufferWidth = GraphicsDevice.Adapter.CurrentDisplayMode.Width;
+            graphics.PreferredBackBufferHeight = GraphicsDevice.Adapter.CurrentDisplayMode.Height;
+            graphics.IsFullScreen = false;
             graphics.ApplyChanges();
+
+            IsFixedTimeStep = true;
+            TargetElapsedTime = TimeSpan.FromSeconds(1d / (double)targetFramerate);
 
 
             debugMode = false;
@@ -45,15 +54,18 @@ namespace Space_Wars.Content.Main
             line.SetData(new[] { Color.White });
 
             _UIManager = new UIManager(this);
+            EventHandler.root = this;
+            EventHandler.UIManager = _UIManager;
 
             IsMouseVisible = false;
         }
 
         public void Startgame()
         {
-            EntityManager.Initialize();
+            EntityManager.Initialize(this);
             UIManager.ToggleMenu(_UIManager.MainMenu);
             startedGame = true;
+            EventHandler.PairPlayerUIManager();
         }
 
         protected override void LoadContent()
@@ -65,6 +77,7 @@ namespace Space_Wars.Content.Main
 
         protected override void Update(GameTime gameTime)
         {
+            _UIManager.Update();
             KeyboardState newState = Keyboard.GetState();
             if (startedGame == true)
             {
@@ -80,7 +93,7 @@ namespace Space_Wars.Content.Main
                 {
                     EntityManager.Update();
 
-                    deltaSeconds = (float)gameTime.ElapsedGameTime.TotalSeconds;
+                    deltaSeconds = (float)gameTime.ElapsedGameTime.TotalSeconds * timeScale;
                     base.Update(gameTime);
                 }
             }
@@ -89,7 +102,6 @@ namespace Space_Wars.Content.Main
             {
                 debugMode = !debugMode;
             }
-            _UIManager.Update();
             oldState = newState;
         }
 
@@ -108,12 +120,13 @@ namespace Space_Wars.Content.Main
         {
             Vector2 listenerLocation = EntityManager.player.position;
             float distance = MathF.Sqrt(MathF.Pow(playLocation.X - listenerLocation.X, 2) + MathF.Pow(playLocation.Y - listenerLocation.Y, 2));
-            float volume = -MathF.Pow(distance / 800, 2) + 1;
-            if (volume < 0)
-            {
-                volume = 0;
-            }
-            sound.Play(volume, 0, 0);
+            float volume = -(distance / 1000) + 1;
+            //float pan = -(listenerLocation.X - playLocation.X) / (screenSize.X);
+            //Monogame issue, audio cannot pan smoothly
+            if (volume < 0) { volume = 0; }
+            SoundEffectInstance soundInstance = sound.CreateInstance();
+            soundInstance.Volume = volume;
+            soundInstance.Play();
         }
         public static void PlayGlobalSound(SoundEffect sound)
         {
@@ -132,20 +145,22 @@ namespace Space_Wars.Content.Main
 
             if (startedGame == true)
             {
-                var backgroundParallax = -EntityManager.player.position / 100;
-                spriteBatch.Draw(Assets.Sprites["Stars"], Vector2.Zero, null, Color.White, 0, Vector2.Zero, 1, SpriteEffects.None, 0f);
-                spriteBatch.Draw(Assets.Sprites["Moon"], new Vector2(screenSize.X / 5f, -100) + backgroundParallax, null, Color.White, 0, Vector2.Zero, 1.2f, SpriteEffects.None, 0.05f);
+                //var backgroundParallax = -EntityManager.player.position / 100;
+                //spriteBatch.Draw(Assets.Sprites["Stars"], Vector2.Zero, null, Color.White, 0, Vector2.Zero, 1, SpriteEffects.None, 0f);
+                //spriteBatch.Draw(Assets.Sprites["Moon"], new Vector2(screenSize.X * 2 / 3 - Assets.Sprites["Moon"].Width/2, -100) + backgroundParallax, null, Color.White, 0, Vector2.Zero, 1.2f, SpriteEffects.None, 0.05f);
                 EntityManager.Draw(spriteBatch);
                 if (debugMode == true)
                 {
                     //Generates a grid
-                    for (int x = (int)-screenPosition.X / 50; x < -screenPosition.X / 50 + screenSize.X / 50; x++)
+                    for (int x = (int)(-screenPosition.X) / 50 - 1; x < (-screenPosition.X + screenSize.X) / 50 + 1; x++)
                     {
-                        spriteBatch.Draw(line, new Vector2(x * 50 + screenPosition.X, 0), new Rectangle((int)(x * 50 + screenPosition.X), 0, 1, (int)screenSize.Y), Color.White, 0, Vector2.Zero, 1, SpriteEffects.None, 0.4f);
+                        spriteBatch.Draw(line, new Vector2(x * 50 + screenPosition.X - mousePositionOffset.X, 0), new Rectangle((int)(x * 50 + screenPosition.X), 0, 1, (int)screenSize.Y ), Color.White, 0, Vector2.Zero, 1, SpriteEffects.None, 0.4f);
+                        spriteBatch.DrawString(Assets.textFont, ((int)x).ToString(), new Vector2(x * 50 + screenPosition.X - mousePositionOffset.X, 0), Color.White, 0, Vector2.Zero, 1, SpriteEffects.None, 0.4f);
                     }
-                    for (int y = (int)-screenPosition.Y / 50; y < -screenPosition.Y / 50 + screenSize.Y / 50; y++)
+                    for (int y = (int)(-screenPosition.Y) / 50 - 1; y < (-screenPosition.Y + screenSize.Y) / 50 + 1; y++)
                     {
-                        spriteBatch.Draw(line, new Vector2(0, y * 50 + screenPosition.Y), new Rectangle(0, (int)(y * 50 + screenPosition.Y), (int)screenSize.X, 1), Color.White, 0, Vector2.Zero, 1, SpriteEffects.None, 0.4f);
+                        spriteBatch.Draw(line, new Vector2(0, y * 50 + screenPosition.Y - mousePositionOffset.Y), new Rectangle(0, (int)(y * 50 + screenPosition.Y), (int)screenSize.X, 1), Color.White, 0, Vector2.Zero, 1, SpriteEffects.None, 0.4f);
+                        spriteBatch.DrawString(Assets.textFont, ((int)y).ToString(), new Vector2(0, y * 50 + screenPosition.Y - mousePositionOffset.Y), Color.White, 0, Vector2.Zero, 1, SpriteEffects.None, 0.4f);
                     }
                 }
             }
@@ -159,10 +174,13 @@ namespace Space_Wars.Content.Main
                     spriteBatch.DrawString(Assets.textFont, debugLog[i], textPosition, Color.White, 0, Vector2.Zero, UIScale, SpriteEffects.None, 0.45f);
                 }
             }
+            spriteBatch.DrawString(Assets.textFont, $"{(int)(1/gameTime.ElapsedGameTime.TotalSeconds)}", new Vector2((int)(screenSize.X/1.25f), 0), Color.White, 0, Vector2.Zero, UIScale, SpriteEffects.None, 0.45f);
             _UIManager.Draw(spriteBatch);
-            spriteBatch.Draw(Assets.Sprites["Cursor"], new Vector2(Mouse.GetState().X, Mouse.GetState().Y), null, Color.White, 0, Vector2.Zero, 1, 0, 0.5f);
+            if(UIManager.lockMouseInput == false)
+            {
+                spriteBatch.Draw(Assets.Sprites["Cursor"], new Vector2(Mouse.GetState().X, Mouse.GetState().Y), null, Color.White, 0, Vector2.Zero, 1, 0, 0.5f);
+            }
             spriteBatch.End();
-            //Sends a spritebatch through to the entity manager every draw update
 
             base.Draw(gameTime);
         }

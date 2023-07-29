@@ -1,6 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Space_Wars.Content.Main.Entities;
+using Space_Wars.Content.Main.UI_Elements;
 using System;
 using System.Collections.Generic;
 using System.Reflection.Metadata;
@@ -14,31 +15,31 @@ namespace Space_Wars.Content.Main
         private float waveTimer;
         private float difficulty;
         private Vector2 spawnLocation;
-        private Player Player;
+        private Player player;
         private Random random;
         private int randomValue;
         private int enemiesSpawned = 0;
-        public EnemySpawner(Player player)
+        public EnemySpawner(Player _player)
         {
             wave = 0;
             waveTimer = 5;
-            Player = player;
+            player = _player;
             random = new Random();
         }
 
-        public void PlayerRespawn(Player player)
+        public void PlayerRespawn(Player _player)
         {
             wave = 0;
             waveTimer = 5;
-            Player = player;
+            player = _player;
         }
 
         public Vector2 NewSpawnLocation()
         {
             //Creates a position vector defined by the angle from the player in radians and the distance from the edge of the screen
             float angle = (float)(random.NextDouble() - 0.5) * MathF.Tau;
-            float distanceMultiplier = 1 + (float)(random.NextDouble() - 0.5) / 5;
-            float distance = (Engine.screenSize.X + Engine.screenSize.Y) / 4 * distanceMultiplier;
+            float distanceMultiplier = 1 + (float)(random.NextDouble() - 0.5) / 4;
+            float distance = (Engine.screenSize.X + Engine.screenSize.Y) / 2 * distanceMultiplier;
             Vector2 spawnLocation = Engine.ToUnitVector(angle) * distance;
             return spawnLocation + EntityManager.player.position;
 
@@ -62,7 +63,6 @@ namespace Space_Wars.Content.Main
                 waveTimer = 5f * enemiesSpawned;
                 enemiesSpawned = 0;
             }
-
             waveTimer -= Engine.deltaSeconds;
         }
 
@@ -71,7 +71,7 @@ namespace Space_Wars.Content.Main
             for (int i = 0; i < amount; i++)
             {
                 spawnLocation = NewSpawnLocation();
-                Enemy.NewFighter(spawnLocation, Player.velocity, 0, 0);
+                Enemy.NewFighter(spawnLocation, player.velocity, 0, 0);
                 enemiesSpawned++;
                 if (wave > 5)
                 {
@@ -79,7 +79,7 @@ namespace Space_Wars.Content.Main
                     if (randomValue >= 2)
                     {
                         spawnLocation = NewSpawnLocation();
-                        Enemy.NewSniper(spawnLocation, Player.velocity, 0, 0);
+                        Enemy.NewSniper(spawnLocation, player.velocity, 0, 0);
                         enemiesSpawned++;
                     }
 
@@ -90,7 +90,7 @@ namespace Space_Wars.Content.Main
                     if (randomValue >= 7)
                     {
                         spawnLocation = NewSpawnLocation();
-                        Enemy.NewCarrier(spawnLocation, Player.velocity, 0, 0);
+                        Enemy.NewCarrier(spawnLocation, player.velocity, 0, 0);
                         enemiesSpawned++;
                     }
                 }

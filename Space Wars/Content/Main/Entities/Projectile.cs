@@ -10,15 +10,15 @@ namespace Space_Wars.Content.Main.Entities
         {
             AI();
 
-            position += velocity;
-            angle += angularVelocity;
+            position += velocity * Engine.deltaSeconds * 60;
+            angle += angularVelocity * Engine.deltaSeconds * 60;
         }
         public abstract void AI();
     }
 
     public class PulseShot : Projectile
     {
-        public PulseShot(Vector2 _position, Vector2 _velocity, float _angle, float _angularVelocity, bool _isFriendly)
+        public PulseShot(Vector2 _position, Vector2 _velocity, float _angle, float _angularVelocity, bool _isFriendly, int _damage)
         {
             position = _position;
             velocity = _velocity;
@@ -27,7 +27,9 @@ namespace Space_Wars.Content.Main.Entities
             isFriendly = _isFriendly;
             entityType = EntityType.Projectile;
             texture = Assets.Sprites["PulseShot"];
-            damage = 5;
+            damage = _damage;
+            if (isFriendly == true) { color = new Color(0, 255, 0); }
+            else if (isFriendly == false) { color = Color.Red; }
         }
         public override void Collide(int damage)
         {
@@ -57,6 +59,7 @@ namespace Space_Wars.Content.Main.Entities
             isFriendly = false;
             entityType = EntityType.Projectile;
             texture = Assets.Sprites["Metal Scrap"];
+            color = Color.Cyan;
             damage = 0;
         }
         public override void Collide(int damage)
@@ -68,10 +71,10 @@ namespace Space_Wars.Content.Main.Entities
         {
             if (!EntityManager.player.leashedMaterials.Contains(this))
             {
-                if (EntityManager.DistanceSqr(EntityManager.player, this) < 1250 && EntityManager.player.leashedMaterials.Count < 3 && EntityManager.player.canGatherResources == true)
+                if (EntityManager.DistanceSqr(EntityManager.player, this) < 1250 && EntityManager.player.leashedMaterials.Count < 1 && EntityManager.player.canGatherResources == true)
                 {
                     EntityManager.player.leashedMaterials.Add(this);
-                    if (EntityManager.player.leashedMaterials.Count < 3)
+                    if (EntityManager.player.leashedMaterials.Count < 2)
                     {
                         Engine.PlaySound(Assets.SoundFX["Interact"], position);
                     }
@@ -119,6 +122,50 @@ namespace Space_Wars.Content.Main.Entities
         public override void AI()
         {
 
+        }
+    }
+    public class SpiralShot : Projectile
+    {
+        bool isOffset;
+        int sign;
+        float time;
+        Vector2 positionNormal;
+        public SpiralShot(Vector2 _position, Vector2 _velocity, float _angle, float _angularVelocity, bool _isFriendly, int _damage, bool _isOffset)
+        {
+            position = _position;
+            velocity = _velocity;
+            angle = _angle;
+            angularVelocity = _angularVelocity;
+            isFriendly = _isFriendly;
+            entityType = EntityType.Projectile;
+            texture = Assets.Sprites["PulseShot"];
+            damage = _damage;
+            isOffset = _isOffset;
+            time = 0;
+            if(isOffset == true) { sign = -1; }
+            else { sign = 1; }
+            if (isFriendly == true) { color = new Color(0, 255, 0); }
+            else if (isFriendly == false) { color = Color.Red; }
+        }
+        public override void Collide(int damage)
+        {
+            isExpired = true;
+        }
+
+        public override void AI()
+        {
+            time += Engine.deltaSeconds;
+            positionNormal = Vector2.Normalize(new Vector2(-velocity.Y, velocity.X)) * MathF.Sin((time * 9) - MathF.PI / 2) * sign;
+            position += positionNormal * Engine.deltaSeconds * 60;
+            angle = MathF.Atan2(positionNormal.X + velocity.X, -positionNormal.Y + -velocity.Y);
+            if (isFriendly == true)
+            {
+                EntityManager.Collide(this, EntityManager.NearestEnemy(this));
+            }
+            if (isFriendly == false)
+            {
+                EntityManager.Collide(this, EntityManager.player);
+            }
         }
     }
 }

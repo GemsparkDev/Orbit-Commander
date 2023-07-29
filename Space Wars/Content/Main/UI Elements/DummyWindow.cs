@@ -15,10 +15,21 @@ namespace Space_Wars.Content.Main.UI_Elements
             texture = null;
             enabled = false;
         }
+        public override bool GetMouseOver() { return false; }
         public override IFunctional GetWidgetOver()
         {
             return new DummyWidget();
         }
         public override void Draw(SpriteBatch _spriteBatch) { }
+        public override void AddWidget(Widget widget, int tab) { }
+        public override void AddWidget(IFunctional widget, int tab) { }
+        public override Widget GetWidget(int index)
+        {
+            return new DummyWidget();
+        }
+        public override IFunctional GetFuncWidget(int index)
+        {
+            return new DummyWidget() as IFunctional;
+        }
     }
 }

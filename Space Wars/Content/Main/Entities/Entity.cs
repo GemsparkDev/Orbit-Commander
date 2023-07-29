@@ -49,21 +49,21 @@ namespace Space_Wars.Content.Main.Entities
                 velocity.Y = -speed;
             }
         }
-        public void Draw(SpriteBatch spriteBatch)
+        public virtual void Draw(SpriteBatch spriteBatch)
         {
             //Draws itself on the given spritebatch, position is offset by the screen position offset
-            spriteBatch.Draw(texture, position + Engine.screenPosition, null, color, angle, Size / 2, 1, 0, 0.2f);
+            spriteBatch.Draw(texture, position + Engine.screenPosition - Engine.mousePositionOffset, null, color, angle, Size / 2, 1, 0, 0.2f);
 
             if (Engine.debugMode == true)
             {
                 //Draws a line in the direction of motion for X
-                spriteBatch.Draw(Engine.line, position + Engine.screenPosition, new Rectangle((int)position.X, (int)position.Y, 10, 1), Color.White,
+                spriteBatch.Draw(Engine.line, position + Engine.screenPosition - Engine.mousePositionOffset, new Rectangle((int)position.X, (int)position.Y, 10, 1), Color.White,
                     MathF.Atan2(0, velocity.X), Vector2.Zero, new Vector2(MathF.Abs(velocity.X), 1), SpriteEffects.None, 0.4f);
                 //Draws a line in the direction of motion for Y
-                spriteBatch.Draw(Engine.line, position + Engine.screenPosition, new Rectangle((int)position.X, (int)position.Y, 10, 1), Color.White,
+                spriteBatch.Draw(Engine.line, position + Engine.screenPosition - Engine.mousePositionOffset, new Rectangle((int)position.X, (int)position.Y, 10, 1), Color.White,
                     MathF.Atan2(velocity.Y, 0), Vector2.Zero, new Vector2(MathF.Abs(velocity.Y), 1), SpriteEffects.None, 0.4f);
                 //Draws a line in the direction the entity is pointing
-                spriteBatch.Draw(Engine.line, position + Engine.screenPosition, new Rectangle((int)position.X, (int)position.Y, 10, 1), Color.Red,
+                spriteBatch.Draw(Engine.line, position + Engine.screenPosition - Engine.mousePositionOffset, new Rectangle((int)position.X, (int)position.Y, 10, 1), Color.Red,
                     angle - MathF.PI / 2, Vector2.Zero, Vector2.One, SpriteEffects.None, 0.4f);
             }
         }

@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace Space_Wars.Content.Main.UI_Elements
 {
-    internal class Button : Widget, IFunctional
+    public class Button : Widget, IFunctional
     {
         private List<DelegateMethod> behaviours = new();
         public Button(Vector2 _offset, Texture2D _texture)
@@ -33,12 +33,16 @@ namespace Space_Wars.Content.Main.UI_Elements
             textColor = _textColor;
         }
 
-        public void Interact()
+        public void Interact(Vector2 parentPosition)
         {
             for (int i = 0; i < behaviours.Count; i++)
             {
                 ApplyBehaviours();
             }
+        }
+        public void ContinuousInteract(Vector2 parentPosition)
+        {
+
         }
         public void AddBehaviour(DelegateMethod func)
         {

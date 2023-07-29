@@ -2,6 +2,9 @@
 using Microsoft.Xna.Framework.Input;
 using System;
 using System.Collections.Generic;
+using Space_Wars.Content.Main.UI_Elements;
+using System.Runtime.InteropServices;
+using Space_Wars.Content.Main;
 
 namespace Space_Wars.Content.Main.Entities
 {
@@ -16,8 +19,14 @@ namespace Space_Wars.Content.Main.Entities
         public bool docked = false;
         public bool canGatherResources;
         public List<Projectile> leashedMaterials = new();
-        private Projectile mothershipArrow;
-        private float[] healthStats = { 20, 20, 20, 20, 20 };
+        //private Projectile mothershipArrow;
+        public Module[] modules = {
+            new Module(20, new float[] { 1 }, Assets.Sprites["Hull Module"], "Hull", 1), 
+            new Module(20, new float[] { 1 }, Assets.Sprites["Gun Module"], "Guns", 2), 
+            new Module(20, new float[] { 1 }, Assets.Sprites["Engine Module"], "Engines", 3), 
+            new Module(20, new float[] { 1 }, Assets.Sprites["Sensor Module"], "Sensors", 4), 
+            new Module(20, new float[] { 1 }, Assets.Sprites["Core Module"], "Core", 5) 
+        };
 
         public Player(Vector2 _position, Vector2 _velocity, float _angle, float _angularVelocity)
         {
@@ -27,40 +36,25 @@ namespace Space_Wars.Content.Main.Entities
             angularVelocity = _angularVelocity;
             texture = Assets.Sprites["Player"];
             isFriendly = true;
-            mothershipArrow = new MothershipArrow(position, velocity, angle, angularVelocity, true);
-            EntityManager.Add(mothershipArrow);
+            color = new Color(0, 255, 0);
+            //mothershipArrow = new MothershipArrow(position, velocity, angle, angularVelocity, true);
+            //EntityManager.Add(mothershipArrow);
+            damage = 5;
         }
         public override void Update()
         {
-            if (healthStats[4] <= 0)
+            if (modules[4].health <= 0)
             {
                 isExpired = true;
                 Assets.SoundFX["Death"].Play();
             }
-            if (healthStats[4] > 0)
+            if (modules[4].health > 0)
             {
                 ControlShip();
             }
 
-            mothershipArrow.angle = MathF.Atan2(mothership.position.X - position.X, -(mothership.position.Y - position.Y));
-            mothershipArrow.position = position + Engine.ToUnitVector(mothershipArrow.angle) * ColliderRadius * 1.5f;
-            for (int i = 0; i < 4; i++)
-            {
-                UIManager.GetContainer(Containers.PlayerMenu).children[i].text = healthStats[i].ToString();
-                if (healthStats[i] > 10)
-                {
-                    UIManager.GetContainer(Containers.PlayerMenu).children[i].textColor = Color.White;
-                }
-                else if (healthStats[i] <= 0)
-                {
-                    UIManager.GetContainer(Containers.PlayerMenu).children[i].textColor = Color.Black;
-                }
-                else
-                {
-                    UIManager.GetContainer(Containers.PlayerMenu).children[i].textColor = Color.Red;
-                }
-            }
-            UIManager.GetContainer(Containers.PlayerMenu).children[4].text = healthStats[4].ToString();
+            //mothershipArrow.angle = MathF.Atan2(mothership.position.X - position.X, -(mothership.position.Y - position.Y));
+            //mothershipArrow.position = position + Engine.ToUnitVector(mothershipArrow.angle) * ColliderRadius * 1.5f;
         }
         public override void Collide(int damage)
         {
@@ -68,24 +62,24 @@ namespace Space_Wars.Content.Main.Entities
             {
                 for (int i = 0; i < damage; i++)
                 {
-                    if (random.NextDouble() <= healthStats[0] / 20)
+                    if (random.NextDouble() <= modules[0].health / 20)
                     {
-                        healthStats[0]--;
+                        modules[0].health--;
                     }
                     else
                     {
                         int randomNumber = random.Next(1, 4);
-                        if (healthStats[randomNumber] > 0)
+                        if (modules[randomNumber].health > 0)
                         {
-                            healthStats[randomNumber]--;
+                            modules[randomNumber].health--;
                         }
-                        else if (healthStats[0] > 0)
+                        else if (modules[0].health > 0)
                         {
-                            healthStats[0]--;
+                            modules[0].health--;
                         }
                         else
                         {
-                            healthStats[4]--;
+                            modules[4].health--;
                         }
                     }
                 }
@@ -96,9 +90,9 @@ namespace Space_Wars.Content.Main.Entities
         {
             targetVector = Vector2.Normalize(new Vector2(Mouse.GetState().X, Mouse.GetState().Y) - Engine.screenPosition - position);
             angle = MathF.Atan2(targetVector.X, -targetVector.Y);
-            if (Mouse.GetState().LeftButton == ButtonState.Pressed && cooldown <= 0)
+            if (Mouse.GetState().LeftButton == ButtonState.Pressed && cooldown <= 0 && UIManager.lockMouseInput == false)
             {
-                Shotgun();
+                Basic();
             }
 
             pressedKey = Keyboard.GetState().GetPressedKeys();
@@ -109,7 +103,7 @@ namespace Space_Wars.Content.Main.Entities
                 if (docked == false)
                 {
                     float playerSpeedScalar = MathF.Sqrt(velocity.X * velocity.X + velocity.Y * velocity.Y);
-                    float speedMultiplier = (1 / (playerSpeedScalar + 0.2f) + 1) * (healthStats[2] / 40 + 0.5f) / (leashedMaterials.Count + 1);
+                    float speedMultiplier = (1 / (playerSpeedScalar + 0.2f) + 1) * (modules[2].health / 40 + 0.5f) / (leashedMaterials.Count + 1);
                     switch (pressedKey[i])
                     {
                         case Keys.W:
@@ -160,8 +154,8 @@ namespace Space_Wars.Content.Main.Entities
             oldState = newState;
 
             //Moves the player, but offsets the screen to keep the player in the middle
-            position += velocity;
-            angle += angularVelocity;
+            position += velocity * Engine.deltaSeconds * 60;
+            angle += angularVelocity * Engine.deltaSeconds * 60 ;
             angularVelocity = 0;
 
             if (cooldown > 0)
@@ -169,7 +163,7 @@ namespace Space_Wars.Content.Main.Entities
                 cooldown -= Engine.deltaSeconds;
             }
 
-            ClampVelocity(5 * (healthStats[2] / 40 + 0.5f));
+            ClampVelocity(5 * (modules[2].health / 40 + 0.5f));
         }
 
         private void Dock()
@@ -185,7 +179,7 @@ namespace Space_Wars.Content.Main.Entities
                     {
                         UIManager.ToggleMenu(UIManager.GetContainer(Containers.MothershipMenu));
                     }
-                    Move(mothership.angle, 5);
+                    Move(mothership.angle, 5 / (Engine.deltaSeconds*60));
                     leashedMaterials.Clear();
                     Engine.PlayGlobalSound(Assets.SoundFX["Undock"]);
                 }
@@ -195,14 +189,21 @@ namespace Space_Wars.Content.Main.Entities
                     {
                         UIManager.ToggleMenu(UIManager.GetContainer(Containers.PlayerMenu));
                     }
-                    mothership.scrap += leashedMaterials.Count;
                     for (int i = 0; i < leashedMaterials.Count; i++)
                     {
-                        EntityManager.Collide(leashedMaterials[i], mothership);
+                        if (mothership.IsFull() == false)
+                        {
+                            mothership.AddItem(ItemFactory.NewScrap());
+                            EntityManager.Collide(leashedMaterials[i], mothership);
+                        }
+                        else
+                        {
+                            
+                        }
                     }
                     leashedMaterials.Clear();
                     Engine.PlayGlobalSound(Assets.SoundFX["Dock"]);
-                    UIManager.GetContainer(Containers.MothershipMenu).children[5].text = mothership.scrap.ToString();
+                    UIManager.GetContainer(Containers.MothershipMenu).GetWidget(0).text = mothership.scrap.ToString();
                 }
                 docked = !docked;
             }
@@ -211,24 +212,18 @@ namespace Space_Wars.Content.Main.Entities
         {
             velocity += Engine.ToUnitVector(_angle) * 10 * Engine.deltaSeconds * _speed;
         }
-        public void RepairShip()
-        {
-            if (mothership.scrap >= 5)
-            {
-                Engine.PlayGlobalSound(Assets.SoundFX["Interact"]);
-                mothership.scrap -= 5;
-                for (int i = 0; i < 3; i++)
-                {
-                    healthStats[random.Next(0, 5)]++;
-                }
-                UIManager.GetContainer(Containers.MothershipMenu).children[5].text = mothership.scrap.ToString();
-            }
-        }
         private void Basic()
         {
-            EntityManager.Add(new PulseShot(position, targetVector * 8, angle, 0, true));
+            EntityManager.Add(new PulseShot(position, targetVector * 4, angle, 0, true, damage));
             Engine.PlaySound(Assets.SoundFX["Fire_1"], position);
-            cooldown = 0.25f / (healthStats[1] / 40 + 0.5f);
+            cooldown = 0.5f / (modules[1].health / 40 + 0.5f);
+        }
+        private void Spiral()
+        {
+            EntityManager.Add(new SpiralShot(position, targetVector * 4, angle, 0, true, damage * 2, false));
+            EntityManager.Add(new SpiralShot(position, targetVector * 4, angle, 0, true, damage * 2, true));
+            Engine.PlaySound(Assets.SoundFX["Fire_1"], position);
+            cooldown = 0.8f / (modules[1].health / 40 + 0.5f);
         }
         private void Shotgun()
         {
@@ -238,10 +233,10 @@ namespace Space_Wars.Content.Main.Entities
                 float angleDegrees = (float)(random.NextDouble() - 0.5) * 10;
                 float offsetAngle = angleDegrees * MathF.PI / 180;
                 Vector2 targetVector = Engine.ToUnitVector(angle + offsetAngle);
-                EntityManager.Add(new PulseShot(position, targetVector * 8, angle + offsetAngle, 0, true));
+                EntityManager.Add(new PulseShot(position, targetVector * 8, angle + offsetAngle, 0, true, damage));
             }
             Engine.PlaySound(Assets.SoundFX["Fire_1"], position);
-            cooldown = 1f / (healthStats[1] / 40 + 0.5f);
+            cooldown = 1f / (modules[1].health / 40 + 0.5f);
         }
     }
 }
