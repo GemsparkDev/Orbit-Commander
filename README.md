@@ -95,4 +95,7 @@ Update 0.0.9
    	 -Added multiple new UI assets  
    	 -Added the EventHandler class, which manages the interactions between the UI and the game  
    	 -Changed sound volume dropoff to be linear  
-    
+8/3/2023  
+	-Added the Item class and the Module class, which inherits from the item class  
+	-Static item return class for constant item creation  
+	-Fixed bug #6  
