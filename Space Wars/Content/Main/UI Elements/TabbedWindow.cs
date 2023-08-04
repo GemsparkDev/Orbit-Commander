@@ -27,7 +27,7 @@ namespace Space_Wars.Content.Main.UI_Elements
             children = new List<KeyValuePair<int, Widget>>();
             tabList = new();
             totalTabs = tabs?? 0;
-            Vector2 tabOffset = new Vector2(Assets.Sprites["Tab"].Width, -Size.Y / 4 + Assets.Sprites["Tab"].Height);
+            Vector2 tabOffset = new Vector2(0, -Size.Y / 4 + Assets.Sprites["Tab"].Height);
             for (int i = 0; i < totalTabs; i++)
             {
                 if(i == currentTab)
@@ -43,17 +43,19 @@ namespace Space_Wars.Content.Main.UI_Elements
         }
         public override void AddWidget(Widget widget, int tab = 0)
         {
-            if(tab > totalTabs)
+            if(tab >= totalTabs)
             {
-                totalTabs = tab;
+                totalTabs = tab + 1;
+                RecalculateTabs();
             }
             children.Add(new KeyValuePair<int, Widget>(tab, widget));
         }
         public override void AddWidget(IFunctional widget, int tab = 0)
         {
-            if (tab > totalTabs)
+            if (tab >= totalTabs)
             {
-                totalTabs = tab;
+                totalTabs = tab + 1;
+                RecalculateTabs();
             }
             functionalChildren.Add(new KeyValuePair<int, IFunctional>(tab, widget));
         }
@@ -109,6 +111,22 @@ namespace Space_Wars.Content.Main.UI_Elements
                 }
             }
             return bestWidget;
+        }
+        private void RecalculateTabs()
+        {
+            Vector2 tabOffset = new Vector2(0, -Size.Y / 4 + Assets.Sprites["Tab"].Height);
+            for (int i = 0; i < totalTabs; i++)
+            {
+                if (i >= tabList.Count())
+                {
+                    tabList.Add(new Decal(tabOffset, Assets.Sprites["Tab"]));
+                }
+                else
+                {
+                    tabList[i].offset = tabOffset;
+                }
+                tabOffset.X += Assets.Sprites["Tab"].Width + 4;
+            }
         }
         public override void Draw(SpriteBatch spriteBatch)
         {

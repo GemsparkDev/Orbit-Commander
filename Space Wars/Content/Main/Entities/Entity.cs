@@ -4,10 +4,10 @@ using System;
 
 namespace Space_Wars.Content.Main.Entities
 {
-    public enum EntityType { Projectile, Enemy, None }
+    public enum EntityType { Projectile, Enemy, Item, None }
     public abstract class Entity
     {
-        protected Texture2D texture;
+        public Texture2D texture;
         protected Color color = Color.White;
         public Vector2 position;
         public Vector2 velocity;

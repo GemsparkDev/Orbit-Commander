@@ -11,7 +11,7 @@ namespace Space_Wars.Content.Main.UI_Elements
         public float maxHealth;
         public float[] cost;
 
-        public Module(float _health, float[] _cost, Texture2D _texture, string _name, int _id) : base (_texture, _name, _id)
+        public Module(float _health, float[] _cost, Texture2D _texture, string _name, int _id, Vector2 _position, float _angularVelocity) : base(_texture, _name, _id, _position, _angularVelocity)
         {
             health = _health;
             maxHealth = health;
@@ -19,6 +19,10 @@ namespace Space_Wars.Content.Main.UI_Elements
             texture = _texture;
             name = _name;
             id = _id;
+            position = _position;
+            angle = 0;
+            angularVelocity = _angularVelocity;
+            velocity = Vector2.Zero;
             parent = null;
         }
 

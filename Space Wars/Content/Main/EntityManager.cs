@@ -29,11 +29,11 @@ namespace Space_Wars.Content.Main
                 //Checks the entity type, and adds it to the corresponding list for each type
                 entities.Add(entity);
 
-                if (entity.entityType is EntityType.Enemy)
+                if (entity is Enemy)
                 {
                     enemies.Add(entity as Enemy);
                 }
-                if (entity.entityType is EntityType.Projectile)
+                if (entity is Projectile)
                 {
                     projectiles.Add(entity as Projectile);
                 }

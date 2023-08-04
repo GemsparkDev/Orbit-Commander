@@ -17,9 +17,9 @@ namespace Space_Wars.Content.Main
         }
         public static void PairPlayerUIManager()
         {
-            for (int i = 0; i < 5; i++)
+            for (int i = 0; i < UIManager.moduleSlots.Length; i++)
             {
-                ItemSlot slot = UIManager.PlayerMenu.GetFuncWidget(i) as ItemSlot;
+                ItemSlot slot = UIManager.moduleSlots[i];
                 slot.daughterItem = player.modules[i];
                 slot.daughterItem.parent = slot;
             }
@@ -37,7 +37,7 @@ namespace Space_Wars.Content.Main
         }
         public static void RepairModule()
         {
-            ItemSlot slot = UIManager.repairSlot as ItemSlot;
+            ItemSlot slot = UIManager.repairSlot;
             Module daughterModule;
             if (slot.daughterItem != null)
             {
@@ -98,6 +98,24 @@ namespace Space_Wars.Content.Main
                 }
             }
         }
+        public static void UpdateModulesUI()
+        {
+            for (int x = 0; x < UIManager.moduleSlots.Length; x++)
+            {
+                UIManager.moduleSlots[x].daughterItem = player.modules[x];
+                if (UIManager.moduleSlots[x].daughterItem != null)
+                {
+                    UIManager.moduleSlots[x].daughterItem.parent = UIManager.moduleSlots[x];
+                }
+            }
+        }
+        public static void UpdateModules()
+        {
+            for (int x = 0; x < player.modules.Length; x++)
+            {
+                player.modules[x] = UIManager.moduleSlots[x].daughterItem as Module;
+            }
+        }
         public static void UpdateFurnaceUI(float _value, float _maxValue)
         {
             UIManager.furnaceSlot.daughterItem = mothership.furnaceItem;
@@ -111,6 +129,10 @@ namespace Space_Wars.Content.Main
         public static void UpdateFurnace()
         {
             mothership.furnaceItem = UIManager.furnaceSlot.daughterItem;
+        }
+        public static void ReturnItemToParent()
+        {
+            UIManager.selectedIcon.parent.Interact(UIManager.focusedContainer.position);
         }
     }
 }

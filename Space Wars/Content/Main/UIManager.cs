@@ -3,6 +3,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Space_Wars.Content.Main.Entities;
 using Space_Wars.Content.Main.UI_Elements;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -18,36 +19,33 @@ namespace Space_Wars.Content.Main
     public delegate void DelegateMethod();
     public class UIManager
     {
-        private static Engine Root { get; set; }
         public static bool lockMouseInput = false;
         private MouseState oldState;
         private static readonly List<Container> containers = new();
-        private Container focusedContainer;
+        public Container focusedContainer;
         public Container PauseMenu { get; } = new Window(Engine.screenSize / 2, Assets.Sprites["Player UI"]) { enabled = false };
         public Container MainMenu { get; } = new Window(Engine.screenSize / 2, Assets.Sprites["Player UI"]) { enabled = true };
         public Container PlayerMenu { get; } = new Window(Engine.screenSize / 2, Assets.Sprites["Player UI"]) { enabled = false };
         public Container MothershipMenu { get; } = new TabbedWindow(Engine.screenSize / 2, Assets.Sprites["Large Panel"], 2) { enabled = false };
         public Button exitButton;
         public Button singleplayerButton;
+        public Button optionsButton;
         public Button repairButton;
         public ItemSlot repairSlot;
         public ItemSlot smeltingSlot;
-        public ItemSlot playerEngineSlot;
-        public ItemSlot playerGunsSlot;
-        public ItemSlot playerSensorsSlot;
-        public ItemSlot playerHullSlot;
-        public ItemSlot playerCoreSlot;
-        public Slider furnaceSlider;
         public ItemSlot furnaceSlot;
+        public ItemSlot craftingSlot;
+        public Slider furnaceSlider;
+        public Slider craftingSlider;
         public Decal mothershipScrap;
         public Decal repairText;
         public Decal smeltingText;
         public Item selectedIcon;
+        public ItemSlot[] moduleSlots = new ItemSlot[5]; 
         public ItemSlot[,] inventorySlots = new ItemSlot[1, 3];
 
-        public UIManager(Engine root)
+        public UIManager()
         {
-            Root = root;
 
             containers.Add(PauseMenu);
             containers.Add(MainMenu);
@@ -56,17 +54,30 @@ namespace Space_Wars.Content.Main
             exitButton = new Button(MainMenu.Size / 2, Assets.Sprites["Button"], "Exit", Color.White);
             singleplayerButton = new Button(MainMenu.Size / 2, Assets.Sprites["Button"], "Singleplayer", Color.White);
             repairButton = new Button(new Vector2(MainMenu.Size.X / 2 - Assets.Sprites["Button"].Width/2, MainMenu.Size.Y / 2), Assets.Sprites["Button"], "Repair", Color.LightBlue);
-            playerHullSlot = new ItemSlot(new Vector2(MainMenu.Size.X * 2 / 3, Assets.Sprites["Empty Slot"].Height * 0.5f), Assets.Sprites["Empty Slot"], this, 1, true);
-            playerGunsSlot = new ItemSlot(new Vector2(MainMenu.Size.X * 2 / 3 + Assets.Sprites["Empty Slot"].Width/2, Assets.Sprites["Empty Slot"].Height * 1), Assets.Sprites["Empty Slot"], this, 2, true);
-            playerEngineSlot = new ItemSlot(new Vector2(MainMenu.Size.X * 2 / 3, Assets.Sprites["Empty Slot"].Height * 1.5f), Assets.Sprites["Empty Slot"], this, 3, true);
-            playerSensorsSlot = new ItemSlot(new Vector2(MainMenu.Size.X * 2 / 3 + Assets.Sprites["Empty Slot"].Width / 2, Assets.Sprites["Empty Slot"].Height * 2), Assets.Sprites["Empty Slot"], this, 4, true);
-            playerCoreSlot = new ItemSlot(new Vector2(MainMenu.Size.X * 2 / 3, Assets.Sprites["Empty Slot"].Height * 2.5f), Assets.Sprites["Empty Slot"], this, 5, true);
             mothershipScrap = new(new Vector2(MainMenu.Size.X / 2 + 48, 12), "0", Color.Gray);
             repairText = new(new Vector2(MainMenu.Size.X / 2 - Assets.Sprites["Button"].Width / 2, 90), "None", Color.White);
             repairSlot = new ItemSlot(new Vector2(MainMenu.Size.X / 2 - Assets.Sprites["Button"].Width / 2, 63), Assets.Sprites["Empty Slot"], this, -1, true);
             smeltingSlot = new ItemSlot(new Vector2(MainMenu.Size.X / 2 - Assets.Sprites["Button"].Width / 2, 63), Assets.Sprites["Empty Slot"], this, -1, true);
             furnaceSlider = new Slider(new Vector2(MainMenu.Size.X / 3 - 30, 30), 60, true, Color.White, Color.Gray);
             furnaceSlot = new ItemSlot(new Vector2(MainMenu.Size.X / 3, 63), Assets.Sprites["Empty Slot"], this, -1, false);
+            craftingSlider = new Slider(new Vector2(MainMenu.Size.X / 2 - 30, 30), 60, true, Color.White, Color.Gray);
+            craftingSlot = new ItemSlot(new Vector2(MainMenu.Size.X / 2, 63), Assets.Sprites["Empty Slot"], this, -1, false);
+
+            for (int x = 0; x < moduleSlots.GetLength(0); x++)
+            {
+                if(x % 2 == 0)
+                {
+                    moduleSlots[x] = new ItemSlot(new Vector2((MainMenu.Size.X * 2 / 3),
+                        (Assets.Sprites["Empty Slot"].Height + 1) * x/2 + Assets.Sprites["Empty Slot"].Height), Assets.Sprites["Empty Slot"], this, x+1, true);
+                }
+                else
+                {
+                    moduleSlots[x] = new ItemSlot(new Vector2((MainMenu.Size.X * 2 / 3 + Assets.Sprites["Empty Slot"].Width / 2),
+                        (Assets.Sprites["Empty Slot"].Height + 1) * x/2 + Assets.Sprites["Empty Slot"].Height), Assets.Sprites["Empty Slot"], this, x+1, true);
+                }
+                MothershipMenu.AddWidget(moduleSlots[x] as IFunctional, 0);
+                moduleSlots[x].AddBehaviour(new DelegateMethod(EventHandler.UpdateModules));
+            }
             for (int x = 0; x < inventorySlots.GetLength(0); x++)
             {
                 for (int y = 0; y < inventorySlots.GetLength(1); y++)
@@ -80,22 +91,13 @@ namespace Space_Wars.Content.Main
 
             PauseMenu.AddWidget(exitButton as IFunctional);
             MainMenu.AddWidget(singleplayerButton as IFunctional);
-            PlayerMenu.AddWidget(playerHullSlot as IFunctional);
-            PlayerMenu.AddWidget(playerGunsSlot as IFunctional);
-            PlayerMenu.AddWidget(playerEngineSlot as IFunctional);
-            PlayerMenu.AddWidget(playerSensorsSlot as IFunctional);
-            PlayerMenu.AddWidget(playerCoreSlot as IFunctional);
-            MothershipMenu.AddWidget(repairButton as IFunctional, 0);
-            MothershipMenu.AddWidget(playerHullSlot as IFunctional, 0);
-            MothershipMenu.AddWidget(playerGunsSlot as IFunctional, 0);
-            MothershipMenu.AddWidget(playerEngineSlot as IFunctional, 0);
-            MothershipMenu.AddWidget(playerSensorsSlot as IFunctional, 0);
-            MothershipMenu.AddWidget(playerCoreSlot as IFunctional, 0);
             MothershipMenu.AddWidget(mothershipScrap as Widget, 0);
             MothershipMenu.AddWidget(repairSlot as IFunctional, 0);
             MothershipMenu.AddWidget(repairText as Widget, 0);
             MothershipMenu.AddWidget(furnaceSlider as IFunctional, 1);
             MothershipMenu.AddWidget(furnaceSlot as IFunctional, 1);
+            MothershipMenu.AddWidget(craftingSlider as IFunctional, 2);
+            MothershipMenu.AddWidget(craftingSlot as IFunctional, 2);
             exitButton.AddBehaviour(new DelegateMethod(EventHandler.Exit));
             singleplayerButton.AddBehaviour(new DelegateMethod(EventHandler.Startgame));
             repairButton.AddBehaviour(new DelegateMethod(EventHandler.RepairModule));
@@ -163,7 +165,7 @@ namespace Space_Wars.Content.Main
                     }
                     else
                     {
-                        selectedIcon.parent.Interact(focusedContainer.position);
+                        EventHandler.ReturnItemToParent();
                     }
                 }
                 lockMouseInput = false;

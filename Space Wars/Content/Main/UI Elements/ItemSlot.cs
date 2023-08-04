@@ -55,6 +55,7 @@ namespace Space_Wars.Content.Main.UI_Elements
             }
             else
             {
+                EventHandler.ReturnItemToParent();
                 return;
             }
         }

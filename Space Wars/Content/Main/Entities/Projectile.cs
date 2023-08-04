@@ -48,59 +48,6 @@ namespace Space_Wars.Content.Main.Entities
             }
         }
     }
-    public class Scrap : Projectile
-    {
-        public Scrap(Vector2 _position, Vector2 _velocity, float _angle, float _angularVelocity)
-        {
-            position = _position;
-            velocity = _velocity;
-            angle = _angle;
-            angularVelocity = _angularVelocity;
-            isFriendly = false;
-            entityType = EntityType.Projectile;
-            texture = Assets.Sprites["Metal Scrap"];
-            color = Color.Cyan;
-            damage = 0;
-        }
-        public override void Collide(int damage)
-        {
-            isExpired = true;
-        }
-
-        public override void AI()
-        {
-            if (!EntityManager.player.leashedMaterials.Contains(this))
-            {
-                if (EntityManager.DistanceSqr(EntityManager.player, this) < 1250 && EntityManager.player.leashedMaterials.Count < 1 && EntityManager.player.canGatherResources == true)
-                {
-                    EntityManager.player.leashedMaterials.Add(this);
-                    if (EntityManager.player.leashedMaterials.Count < 2)
-                    {
-                        Engine.PlaySound(Assets.SoundFX["Interact"], position);
-                    }
-                    else
-                    {
-                        Engine.PlaySound(Assets.SoundFX["Full"], position);
-                    }
-                }
-            }
-            else
-            {
-                Vector2 playerVelocity = EntityManager.player.velocity;
-                Vector2 leashPosition = EntityManager.player.position - Engine.ToUnitVector(EntityManager.player.angle) * 25;
-                float distance = EntityManager.DistanceSqr(position, leashPosition);
-                if (distance > 16)
-                {
-                    velocity += Vector2.Normalize(leashPosition - position) * Engine.deltaSeconds * distance;
-                }
-                else
-                {
-                    velocity += (playerVelocity - velocity) / 2;
-                }
-                ClampVelocity(MathF.Sqrt(playerVelocity.X * playerVelocity.X + playerVelocity.Y * playerVelocity.Y) + 1);
-            }
-        }
-    }
 
     public class MothershipArrow : Projectile
     {
@@ -117,6 +64,7 @@ namespace Space_Wars.Content.Main.Entities
         }
         public override void Collide(int damage)
         {
+
         }
 
         public override void AI()

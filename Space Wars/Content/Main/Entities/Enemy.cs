@@ -1,5 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Space_Wars.Content.Main.UI_Elements;
 using System;
 using System.Collections.Generic;
 
@@ -58,7 +59,7 @@ namespace Space_Wars.Content.Main.Entities
                     Engine.PlaySound(Assets.SoundFX["Death"], position);
                     if (EntityManager.RandomWithKarma(8))
                     {
-                        EntityManager.Add(new Scrap(position, Vector2.Zero, angle, angularVelocity));
+                        EntityManager.Add(ItemFactory.NewScrap(position, angularVelocity));
                     }
                 }
                 if (health > maxHealth)
@@ -107,7 +108,7 @@ namespace Space_Wars.Content.Main.Entities
                     Engine.PlaySound(Assets.SoundFX["Death"], position);
                     if(EntityManager.RandomWithKarma(3))
                     {
-                        EntityManager.Add(new Scrap(position, Vector2.Zero, angle, angularVelocity));
+                        EntityManager.Add(ItemFactory.NewScrap(position, angularVelocity));
                     }
                 }
                 if (health > maxHealth)
@@ -155,7 +156,7 @@ namespace Space_Wars.Content.Main.Entities
                     Engine.PlaySound(Assets.SoundFX["Death"], position);
                     if(EntityManager.RandomWithKarma(3))
                     {
-                        EntityManager.Add(new Scrap(position, Vector2.Zero, angle, angularVelocity));
+                        EntityManager.Add(ItemFactory.NewScrap(position, angularVelocity));
                     }
                 }
                 if (health > maxHealth)

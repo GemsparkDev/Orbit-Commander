@@ -53,7 +53,7 @@ namespace Space_Wars.Content.Main
             line = new Texture2D(graphics.GraphicsDevice, 1, 1, false, SurfaceFormat.Color);
             line.SetData(new[] { Color.White });
 
-            _UIManager = new UIManager(this);
+            _UIManager = new UIManager();
             EventHandler.root = this;
             EventHandler.UIManager = _UIManager;
 

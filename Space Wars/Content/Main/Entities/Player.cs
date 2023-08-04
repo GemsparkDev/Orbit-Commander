@@ -18,14 +18,14 @@ namespace Space_Wars.Content.Main.Entities
         private Vector2 targetVector;
         public bool docked = false;
         public bool canGatherResources;
-        public List<Projectile> leashedMaterials = new();
+        public List<Item> leashedMaterials = new();
         //private Projectile mothershipArrow;
         public Module[] modules = {
-            new Module(20, new float[] { 1 }, Assets.Sprites["Hull Module"], "Hull", 1), 
-            new Module(20, new float[] { 1 }, Assets.Sprites["Gun Module"], "Guns", 2), 
-            new Module(20, new float[] { 1 }, Assets.Sprites["Engine Module"], "Engines", 3), 
-            new Module(20, new float[] { 1 }, Assets.Sprites["Sensor Module"], "Sensors", 4), 
-            new Module(20, new float[] { 1 }, Assets.Sprites["Core Module"], "Core", 5) 
+            new Module(20, new float[] { 1 }, Assets.Sprites["Hull Module"], "Hull", 1, Vector2.Zero, 0), 
+            new Module(20, new float[] { 1 }, Assets.Sprites["Gun Module"], "Guns", 2, Vector2.Zero, 0), 
+            new Module(20, new float[] { 1 }, Assets.Sprites["Engine Module"], "Engines", 3, Vector2.Zero, 0), 
+            new Module(20, new float[] { 1 }, Assets.Sprites["Sensor Module"], "Sensors", 4, Vector2.Zero, 0), 
+            new Module(20, new float[] { 1 }, Assets.Sprites["Core Module"], "Core", 5, Vector2.Zero, 0) 
         };
 
         public Player(Vector2 _position, Vector2 _velocity, float _angle, float _angularVelocity)
@@ -193,7 +193,7 @@ namespace Space_Wars.Content.Main.Entities
                     {
                         if (mothership.IsFull() == false)
                         {
-                            mothership.AddItem(ItemFactory.NewScrap());
+                            mothership.AddItem(leashedMaterials[i]);
                             EntityManager.Collide(leashedMaterials[i], mothership);
                         }
                         else
