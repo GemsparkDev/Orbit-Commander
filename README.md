@@ -79,7 +79,7 @@ Update 0.0.8
          -Repair system   
 	 -various other code improvements
     
-  7/29/2023: More UI and mechanics  
+7/29/2023: More UI and mechanics  
 Update 0.0.9  
    	 -Added karma based drops - after a period of bad luck, drop chance is increased  
    	 -Added enemy health bars  
@@ -99,3 +99,24 @@ Update 0.0.9
 	-Added the Item class and the Module class, which inherits from the item class  
 	-Static item return class for constant item creation  
 	-Fixed bug #6  
+    
+8/14/2023  
+Update 0.1  
+    -Added various assets, such as an improved mothership sprite  
+    -Removed the sentry due to technical debt  
+    -Increased the range of the fighter enemy by 50 units  
+    -Added a sound manager for playing, pausing, and looping sounds  
+    -Updated the ClampVelocity() function to be the same in all directions  
+    -Added two celestial bodies to the game, a large earth like planet and a dense moon orbiting it  
+    -Added the GravitationalSource class, which creates a planet at a specific location with a radius, gravitational strength, and the ability to host moons  
+    -Added a currently WIP crafting system  
+    -Changed how modules work, with the player having a grid of delegate functions that the module of a specific type and weapon id can select with it's ability  
+    -Completely removed the MothershipArrow child class from the game  
+    -Added a basic particle system to the game  
+    -Added support for container transparency  
+    -Items now quickly glide to a stop  
+    -Added the GameState class and it's context class, CurrentGameState, which determines what managers are allowed to update and when  
+    -Split the EntityManager.Update() function into EntityManager.Update() and EntityManager.PlayerUpdate()  
+    -Added the garage, which provides an environment that allows module repair and reslotting. Fixed bug #8  
+    -Added the WIP interface IAnimatable  
+  
