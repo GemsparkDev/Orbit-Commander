@@ -1,6 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
+using Space_Wars.Content.Main;
 
 namespace Space_Wars.Content.Main.Entities
 {
@@ -19,7 +20,7 @@ namespace Space_Wars.Content.Main.Entities
         public int damage;
         public float ColliderRadius
         {
-            get { return (texture.Height + texture.Width) / 2; }
+            get { return (texture.Height + texture.Width) / 4 + 1; }
 
         }
         public Vector2 Size
@@ -32,38 +33,35 @@ namespace Space_Wars.Content.Main.Entities
 
         public void ClampVelocity(float speed)
         {
-            if (velocity.X > speed)
+            Vector2 clampVelocity = Vector2.Normalize(velocity) * speed;
+            if (MathF.Abs(velocity.X) < 0.0001 && MathF.Abs(velocity.Y) < 0.0001)
             {
-                velocity.X = speed;
+                clampVelocity = Vector2.One * speed;
             }
-            if (velocity.X < -speed)
+            if (MathF.Abs(velocity.X) > MathF.Abs(clampVelocity.X))
             {
-                velocity.X = -speed;
+                velocity.X = clampVelocity.X;
             }
-            if (velocity.Y > speed)
+            if (MathF.Abs(velocity.Y) > MathF.Abs(clampVelocity.Y))
             {
-                velocity.Y = speed;
-            }
-            if (velocity.Y < -speed)
-            {
-                velocity.Y = -speed;
+                velocity.Y = clampVelocity.Y;
             }
         }
-        public virtual void Draw(SpriteBatch spriteBatch)
+        public virtual void Draw(SpriteBatch _spriteBatch)
         {
             //Draws itself on the given spritebatch, position is offset by the screen position offset
-            spriteBatch.Draw(texture, position + Engine.screenPosition - Engine.mousePositionOffset, null, color, angle, Size / 2, 1, 0, 0.2f);
+            _spriteBatch.Draw(texture, position + Engine.screenPosition - Engine.mousePositionOffset, null, color, angle, Size / 2, 1, 0, 0.2f);
 
             if (Engine.debugMode == true)
             {
                 //Draws a line in the direction of motion for X
-                spriteBatch.Draw(Engine.line, position + Engine.screenPosition - Engine.mousePositionOffset, new Rectangle((int)position.X, (int)position.Y, 10, 1), Color.White,
+                _spriteBatch.Draw(Engine.line, position + Engine.screenPosition - Engine.mousePositionOffset, new Rectangle((int)position.X, (int)position.Y, 10, 1), Color.White,
                     MathF.Atan2(0, velocity.X), Vector2.Zero, new Vector2(MathF.Abs(velocity.X), 1), SpriteEffects.None, 0.4f);
                 //Draws a line in the direction of motion for Y
-                spriteBatch.Draw(Engine.line, position + Engine.screenPosition - Engine.mousePositionOffset, new Rectangle((int)position.X, (int)position.Y, 10, 1), Color.White,
+                _spriteBatch.Draw(Engine.line, position + Engine.screenPosition - Engine.mousePositionOffset, new Rectangle((int)position.X, (int)position.Y, 10, 1), Color.White,
                     MathF.Atan2(velocity.Y, 0), Vector2.Zero, new Vector2(MathF.Abs(velocity.Y), 1), SpriteEffects.None, 0.4f);
                 //Draws a line in the direction the entity is pointing
-                spriteBatch.Draw(Engine.line, position + Engine.screenPosition - Engine.mousePositionOffset, new Rectangle((int)position.X, (int)position.Y, 10, 1), Color.Red,
+                _spriteBatch.Draw(Engine.line, position + Engine.screenPosition - Engine.mousePositionOffset, new Rectangle((int)position.X, (int)position.Y, 10, 1), Color.Red,
                     angle - MathF.PI / 2, Vector2.Zero, Vector2.One, SpriteEffects.None, 0.4f);
             }
         }

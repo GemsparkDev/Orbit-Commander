@@ -28,12 +28,19 @@ namespace Space_Wars.Content.Main
         public static void Exit()
         {
             root.Exit();
-            Engine.PlayGlobalSound(Assets.SoundFX["Interact"]);
+            SoundManager.PlayGlobalSound(Assets.SoundFX["Interact"]);
         }
         public static void Startgame()
         {
             root.Startgame();
-            Engine.PlayGlobalSound(Assets.SoundFX["Interact"]);
+            SoundManager.PlayGlobalSound(Assets.SoundFX["Interact"]);
+        }
+        public static void QuitToMenu()
+        {
+            CurrentGameState.SwitchState(new MainMenu());
+            UIManager.PauseMenuTrigger();
+            UIManager.ToggleMenu(Containers.MainMenu);
+            SoundManager.PlayGlobalSound(Assets.SoundFX["Interact"]);
         }
         public static void RepairModule()
         {
@@ -51,13 +58,13 @@ namespace Space_Wars.Content.Main
             {
                 daughterModule.health = 20;
                 EntityManager.player.mothership.scrap -= 5;
-                Engine.PlayGlobalSound(Assets.SoundFX["Full"]);
+                SoundManager.PlayGlobalSound(Assets.SoundFX["Full"]);
                 UpdateRepairText();
                 UIManager.mothershipScrap.text = EntityManager.player.mothership.scrap.ToString();
             }
             else
             {
-                Engine.PlayGlobalSound(Assets.SoundFX["Close Menu"]);
+                SoundManager.PlayGlobalSound(Assets.SoundFX["Close Menu"]);
             }
         }
         public static void UpdateRepairText()
@@ -133,6 +140,32 @@ namespace Space_Wars.Content.Main
         public static void ReturnItemToParent()
         {
             UIManager.selectedIcon.parent.Interact(UIManager.focusedContainer.position);
+        }
+        public static void CraftItem()
+        {
+            if(mothership.scrap >= 10)
+            {
+                mothership.scrap -= 10;
+                mothership.currentlyCrafting = true;
+            }
+        }
+        public static void UpdateCraftingUI(float _value, float _maxValue)
+        {
+            UIManager.craftingSlider.SetInterval(_value, _maxValue);
+            UIManager.mothershipScrap.text = EntityManager.player.mothership.scrap.ToString();
+        }
+        public static void GarageTrigger()
+        {
+            UIManager.ToggleMenu(UIManager.GarageMenu);
+            UIManager.ToggleMenu(Containers.MothershipMenu);
+            if (UIManager.GarageMenu.enabled == true)
+            {
+                CurrentGameState.SwitchState(new Garage());
+            }
+            else if (UIManager.GarageMenu.enabled == false)
+            {
+                CurrentGameState.SwitchState(new PlayingGame());
+            }
         }
     }
 }

@@ -14,6 +14,7 @@ namespace Space_Wars.Content.Main.UI_Elements
             position = Vector2.Zero;
             texture = null;
             enabled = false;
+            transparency = 1;
         }
         public override bool GetMouseOver() { return false; }
         public override IFunctional GetWidgetOver()

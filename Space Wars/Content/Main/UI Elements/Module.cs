@@ -1,28 +1,39 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using System.Security.Cryptography;
-using System.Xml.Linq;
+using Space_Wars.Content.Main.Entities;
 
 namespace Space_Wars.Content.Main.UI_Elements
 {
+    public enum ModuleType
+    {
+        Hull = 1,
+        Guns = 2,
+        Engines = 3,
+        Sensors = 4,
+        Core = 5,
+    }
     public class Module : Item
     {
         public float health;
         public float maxHealth;
         public float[] cost;
+        public int ability;
 
-        public Module(float _health, float[] _cost, Texture2D _texture, string _name, int _id, Vector2 _position, float _angularVelocity) : base(_texture, _name, _id, _position, _angularVelocity)
+        public Module(float _health, float[] _cost, Texture2D _texture, string _name, ModuleType _moduleType, int _weaponID, Vector2 _position, Vector2 _velocity, float _angularVelocity, Color _color) : base(_texture, _name, _weaponID, _position, _velocity, _angularVelocity, _color)
         {
             health = _health;
             maxHealth = health;
             cost = _cost;
             texture = _texture;
             name = _name;
-            id = _id;
+            id = (int)_moduleType;
+            ability = _weaponID;
             position = _position;
+            velocity = _velocity;
             angle = 0;
             angularVelocity = _angularVelocity;
             velocity = Vector2.Zero;
+            color = _color;
             parent = null;
         }
 

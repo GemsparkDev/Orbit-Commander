@@ -28,7 +28,7 @@ namespace Space_Wars.Content.Main.Entities
             entityType = EntityType.Projectile;
             texture = Assets.Sprites["PulseShot"];
             damage = _damage;
-            if (isFriendly == true) { color = new Color(0, 255, 0); }
+            if (isFriendly == true) { color = Color.Orange; }
             else if (isFriendly == false) { color = Color.Red; }
         }
         public override void Collide(int damage)
@@ -46,30 +46,6 @@ namespace Space_Wars.Content.Main.Entities
             {
                 EntityManager.Collide(this, EntityManager.player);
             }
-        }
-    }
-
-    public class MothershipArrow : Projectile
-    {
-        public MothershipArrow(Vector2 _position, Vector2 _velocity, float _angle, float _angularVelocity, bool _isfriendly)
-        {
-            position = _position;
-            velocity = _velocity;
-            angle = _angle;
-            angularVelocity = _angularVelocity;
-            isFriendly = _isfriendly;
-            entityType = EntityType.Projectile;
-            texture = Assets.Sprites["Arrow"];
-            damage = 0;
-        }
-        public override void Collide(int damage)
-        {
-
-        }
-
-        public override void AI()
-        {
-
         }
     }
     public class SpiralShot : Projectile
@@ -92,7 +68,7 @@ namespace Space_Wars.Content.Main.Entities
             time = 0;
             if(isOffset == true) { sign = -1; }
             else { sign = 1; }
-            if (isFriendly == true) { color = new Color(0, 255, 0); }
+            if (isFriendly == true) { color = Color.Orange; }
             else if (isFriendly == false) { color = Color.Red; }
         }
         public override void Collide(int damage)

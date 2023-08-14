@@ -1,17 +1,19 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Space_Wars.Content.Main;
 using Space_Wars.Content.Main.Entities;
 using System;
+using System.Collections.Generic;
 
 namespace Space_Wars.Content.Main.UI_Elements
 {
-    public class Item : Entity, IFunctional
+    public class Item : Entity
     {
         internal int id;
         internal string name;
         public ItemSlot parent;
-
-        public Item(Texture2D _texture, string _name, int _id, Vector2 _position, float _angularVelocity)
+        public Enemy daughterEnemy;
+        public Item(Texture2D _texture, string _name, int _id, Vector2 _position, Vector2 _velocity, float _angularVelocity, Color _color)
         {
             texture = _texture;
             name = _name;
@@ -19,7 +21,8 @@ namespace Space_Wars.Content.Main.UI_Elements
             position = _position;
             angle = 0;
             angularVelocity = _angularVelocity;
-            velocity = Vector2.Zero;
+            velocity = _velocity;
+            color = _color;
             parent = null;
         }
 
@@ -32,13 +35,14 @@ namespace Space_Wars.Content.Main.UI_Elements
                     EntityManager.player.leashedMaterials.Add(this);
                     if (EntityManager.player.leashedMaterials.Count < 2)
                     {
-                        Engine.PlaySound(Assets.SoundFX["Interact"], position);
+                        SoundManager.PlaySound(Assets.SoundFX["Interact"], position);
                     }
                     else
                     {
-                        Engine.PlaySound(Assets.SoundFX["Full"], position);
+                        SoundManager.PlaySound(Assets.SoundFX["Full"], position);
                     }
                 }
+                velocity /= 2*Engine.deltaSeconds + 1;
             }
             else
             {
@@ -57,38 +61,59 @@ namespace Space_Wars.Content.Main.UI_Elements
             }
             position += velocity * Engine.deltaSeconds * 60;
             angle += angularVelocity * Engine.deltaSeconds * 60;
-        }
-        public void Interact(Vector2 _position)
-        {
 
-        }
-        public void ContinuousInteract(Vector2 _position)
-        {
-
-        }
-        public void AddBehaviour(DelegateMethod _func)
-        {
-            
-        }
-
-        public void ApplyBehaviours()
-        {
-            
+            if(daughterEnemy != null)
+            {
+                if (daughterEnemy.health <= 0)
+                {
+                    isExpired = true;
+                }
+                else
+                {
+                    daughterEnemy.position = position;
+                }
+            }
         }
         public override void Collide(int _damage)
         {
-            isExpired = true;
+            if (!EntityManager.player.leashedMaterials.Contains(this))
+            {
+                isExpired = true;
+                if (daughterEnemy != null)
+                {
+                    daughterEnemy.isExpired = true;
+                }
+            }
         }
     }
     public static class ItemFactory
     {
-        public static Item NewScrap(Vector2 _position, float _angle)
+        //Items
+        public static Item NewScrap(Vector2 _position, Vector2 _velocity, float _angle)
         {
-            return new Item(Assets.Sprites["Metal Scrap"], "Metal Salvage", 1, _position, _angle);
+            return new Item(Assets.Sprites["Metal Scrap"], "Metal Salvage", 1, _position, _velocity, _angle, Color.Cyan);
         }
-        public static Item NewSentry(Vector2 _position, float _angle)
+        //Modules
+        public static Module NewBasicHullModule(Vector2 _position, Vector2 _velocity, float _angle)
         {
-            return new Item(Assets.Sprites["Metal Scrap"], "Metal Salvage", 1, _position, _angle);
+            return new(20, new float[] { 1 }, Assets.Sprites["Hull Module"], "Basic Hull", ModuleType.Hull, 0, _position, _velocity, _angle, Color.White);
+        }
+        public static Module NewBasicGunModule(Vector2 _position, Vector2 _velocity, float _angle)
+        {
+            return new(20, new float[] { 1 }, Assets.Sprites["Gun Module"], "Basic Guns", ModuleType.Guns, 1, _position, _velocity, _angle, Color.White);
+        }
+        public static Module NewBasicEngineModule(Vector2 _position, Vector2 _velocity, float _angle)
+        {
+            return new(20, new float[] { 1 }, Assets.Sprites["Engine Module"], "Basic Engines", ModuleType.Engines, 0, _position, _velocity, _angle, Color.White);
+        }
+        public static Module NewBasicSensorModule(Vector2 _position, Vector2 _velocity, float _angle)
+        {
+            return new(20, new float[] { 1 }, Assets.Sprites["Sensor Module"], "Basic Sensors", ModuleType.Sensors, 0, _position, _velocity, _angle, Color.White);
+        }
+        public static Module NewBasicCoreModule(Vector2 _position, Vector2 _velocity, float _angle)
+        {
+            Module module = new(20, new float[] { 1 }, Assets.Sprites["Core Module"], "Basic Core", ModuleType.Core, 0, _position, _velocity, _angle, Color.White);
+            return module;
         }
     }
 }

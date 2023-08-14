@@ -2,6 +2,7 @@
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Space_Wars.Content.Main.Entities;
+using Space_Wars.Content.Main.UI_Elements;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,6 +21,7 @@ namespace Space_Wars.Content.Main
         public static Engine root;
         private static EnemySpawner enemySpawner;
         private static Random random = new();
+        private static GravitationalSource planet = new(new(0, 0), new Vector2(0, 0), 2250, 8, true);
         private static float[] currentKarma = { 0, 0, 0 };
 
         public static void Add(Entity entity)
@@ -48,18 +50,36 @@ namespace Space_Wars.Content.Main
 
         public static void Initialize(Engine _root)
         {
+            entities = new List<Entity>();
+            addedEntities = new List<Entity>();
+            enemies = new List<Enemy>();
+            projectiles = new List<Projectile>();
+            planet.moons = new List<GravitationalSource>() { new(new(1000, 0), new Vector2(0, 1.4f), 250, 1.5f, false) };
             root = _root;
-            player = new(Vector2.Zero, Vector2.Zero, 0f, 0f);
-            mothership = new Mothership(Vector2.Zero, Vector2.Zero, 0f, 0f);
+            player = new(new Vector2(0, -1), Vector2.Zero, 0f, 0f);
+            mothership = new Mothership(new Vector2(0, -1), Vector2.Zero, 0f, 0f);
             player.mothership = mothership;
             Add(mothership);
             enemySpawner = new EnemySpawner(player);
             EventHandler.Initialize(player, mothership);
+            EventHandler.UpdateInventoryUI();
+        }
+        public static void PlayerUpdate()
+        {
+            Engine.mousePositionOffset = new Vector2(Mouse.GetState().X - Engine.screenSize.X / 2, Mouse.GetState().Y - Engine.screenSize.Y / 2) / 20;
+            player.Update();
+            planet.AttractObject(player);
+            planet.CalculateTrajectory(player);
+            if (player.isExpired == true)
+            {
+                root.Startgame();
+            }
         }
         public static void Update()
         {
-            Engine.mousePositionOffset = new Vector2(Mouse.GetState().X - Engine.screenSize.X/2, Mouse.GetState().Y - Engine.screenSize.Y/2) / 20;
-            player.Update();
+            Engine.ingameTime.Duration += Engine.deltaSeconds;
+            planet.Update();
+            planet.DrawRadius();
             Engine.screenPosition = new Vector2(Engine.screenSize.X / 2 - player.position.X, Engine.screenSize.Y / 2 - player.position.Y);
             enemySpawner.Update();
 
@@ -69,6 +89,7 @@ namespace Space_Wars.Content.Main
             foreach (var entity in entities)
             {
                 entity.Update();
+                planet.AttractObject(entity);
             }
 
             if (projectiles.Count >= 100)
@@ -77,24 +98,16 @@ namespace Space_Wars.Content.Main
             }
 
             //Clears all expired entities from the entity lists
+            foreach (Enemy enemy in enemies)
+            {
+                if(enemy.isExpired == true)
+                {
+                    enemy.enemyRange.isEmitterExpired = true;
+                }
+            }
             entities = entities.Where(x => !x.isExpired).ToList();
             projectiles = projectiles.Where(x => !x.isExpired).ToList();
             enemies = enemies.Where(x => !x.isExpired).ToList();
-
-            if (player.isExpired == true)
-            {
-                entities = new List<Entity>();
-                addedEntities = new List<Entity>();
-                enemies = new List<Enemy>();
-                projectiles = new List<Projectile>();
-                player = new Player(Vector2.Zero, Vector2.Zero, 0f, 0f);
-                entities.Add(mothership = new Mothership(Vector2.Zero, Vector2.Zero, 0f, 0f));
-                player.mothership = mothership;
-                enemySpawner.PlayerRespawn(player);
-                EventHandler.Initialize(player, mothership);
-                EventHandler.PairPlayerUIManager();
-                EventHandler.UpdateInventoryUI();
-            }
 
             isUpdating = false;
 
@@ -106,15 +119,16 @@ namespace Space_Wars.Content.Main
             addedEntities.Clear();
         }
 
-        public static void Draw(SpriteBatch spriteBatch)
+        public static void Draw(SpriteBatch _spriteBatch)
         {
-            player.Draw(spriteBatch);
+            //planet.Draw(_spriteBatch);
+            player.Draw(_spriteBatch);
             foreach (var entity in entities)
             {
                 //Draws all entities in the main list
-                entity.Draw(spriteBatch);
+                entity.Draw(_spriteBatch);
             }
-            enemySpawner.Draw(spriteBatch);
+            enemySpawner.Draw(_spriteBatch);
         }
         public static void Collide(Entity entity, Entity targetEntity)
         {
@@ -136,6 +150,10 @@ namespace Space_Wars.Content.Main
             Enemy returnEnemy = null;
             foreach (Enemy targetEnemy in enemies)
             {
+                if(targetEnemy == entity)
+                {
+                    continue;
+                }
                 distance = DistanceSqr(entity, targetEnemy);
                 if (distance < nearestDistance && entity.isFriendly)
                 {

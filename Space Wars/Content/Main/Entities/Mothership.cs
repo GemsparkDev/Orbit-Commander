@@ -1,5 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Audio;
 using Space_Wars.Content.Main.UI_Elements;
+using System;
 
 namespace Space_Wars.Content.Main.Entities
 {
@@ -8,10 +10,13 @@ namespace Space_Wars.Content.Main.Entities
         private float health = 100;
         private float maxHealth;
         private float furnaceCooldown = 15;
+        private float craftingCooldown = 60;
         public int scrap = 0;
         public Item[,] inventory = new Item[1, 3];
         public Item furnaceItem;
+        public Item craftingItem;
         public bool wasEmpty = true;
+        public bool currentlyCrafting = false;
         public Mothership(Vector2 _position, Vector2 _velocity, float _angle, float _angularVelocity)
         {
             position = _position;
@@ -30,7 +35,7 @@ namespace Space_Wars.Content.Main.Entities
             if (health <= 0)
             {
                 isExpired = true;
-                Engine.PlaySound(Assets.SoundFX["Death"], position);
+                SoundManager.PlaySound(Assets.SoundFX["Death"], position);
             }
             if (health > maxHealth)
             {
@@ -43,7 +48,7 @@ namespace Space_Wars.Content.Main.Entities
                 {
                     scrap++;
                     furnaceItem = null;
-                    Engine.PlaySound(Assets.SoundFX["Interact"], position);
+                    SoundManager.PlaySound(Assets.SoundFX["Interact"], position);
                 }
             }
             else
@@ -51,10 +56,21 @@ namespace Space_Wars.Content.Main.Entities
                 wasEmpty = true;
                 furnaceCooldown = 15;
             }
-            EventHandler.UpdateFurnaceUI(15-furnaceCooldown, 15);
+            if(currentlyCrafting == true)
+            {
+                craftingCooldown -= Engine.deltaSeconds;
+                if(craftingCooldown <= 0)
+                {
+                    craftingCooldown = 60;
 
-            position += velocity;
-            angle += angularVelocity;
+                    currentlyCrafting = false;
+                }
+            }
+            EventHandler.UpdateFurnaceUI(15-furnaceCooldown, 15);
+            EventHandler.UpdateCraftingUI(60-craftingCooldown, 60);
+
+            position += velocity * Engine.deltaSeconds * 60;
+            angle += angularVelocity * Engine.deltaSeconds * 60;
             angularVelocity = 0;
 
         }
@@ -92,7 +108,7 @@ namespace Space_Wars.Content.Main.Entities
             health -= _damage;
             if (_damage > 0)
             {
-                Engine.PlaySound(Assets.SoundFX["Hit"], position);
+                SoundManager.PlaySound(Assets.SoundFX["Hit"], position);
             }
         }
     }

@@ -10,11 +10,12 @@ namespace Space_Wars.Content.Main.UI_Elements
     {
         private List<Widget> children = new();
         private List<IFunctional> functionalChildren = new();
-        public Window(Vector2 _position, Texture2D _texture)
+        public Window(Vector2 _position, Texture2D _texture, float _transparency = 1)
         {
             size = new Vector2(_texture.Width, _texture.Height);
             texture = _texture;
             position = _position - Size / 2;
+            transparency = _transparency;
             enabled = true;
             children = new List<Widget>();
             functionalChildren = new List<IFunctional>();

@@ -22,16 +22,9 @@ namespace Space_Wars.Content.Main
         public EnemySpawner(Player _player)
         {
             wave = 0;
-            waveTimer = 5;
+            waveTimer = 50;
             player = _player;
             random = new Random();
-        }
-
-        public void PlayerRespawn(Player _player)
-        {
-            wave = 0;
-            waveTimer = 5;
-            player = _player;
         }
 
         public Vector2 NewSpawnLocation()
@@ -49,6 +42,12 @@ namespace Space_Wars.Content.Main
 
             if (waveTimer <= 0)
             {
+                Engine.WriteLine(Engine.ingameTime.Duration);
+                if(wave >= 100)
+                {
+                    CurrentGameState.SwitchState(new Victory());
+                    return;
+                }
                 wave++;
                 if (wave < 50)
                 {
@@ -60,7 +59,7 @@ namespace Space_Wars.Content.Main
                 }
                 randomValue = random.Next((int)(3 * difficulty), (int)(5 * difficulty));
                 SpawnWaveBatch(randomValue);
-                waveTimer = 5f * enemiesSpawned;
+                waveTimer = 4f * enemiesSpawned;
                 enemiesSpawned = 0;
             }
             waveTimer -= Engine.deltaSeconds;
@@ -73,7 +72,7 @@ namespace Space_Wars.Content.Main
                 spawnLocation = NewSpawnLocation();
                 Enemy.NewFighter(spawnLocation, player.velocity, 0, 0);
                 enemiesSpawned++;
-                if (wave > 5)
+                if (wave > 10)
                 {
                     randomValue = random.Next(0, 3);
                     if (randomValue >= 2)
@@ -84,7 +83,7 @@ namespace Space_Wars.Content.Main
                     }
 
                 }
-                if (wave > 12)
+                if (wave > 25)
                 {
                     randomValue = random.Next(0, 8);
                     if (randomValue >= 7)
@@ -101,6 +100,7 @@ namespace Space_Wars.Content.Main
         {
             spriteBatch.Draw(Engine.line, new Vector2(Engine.screenSize.X / 50, Engine.screenSize.Y / 50), new Rectangle(0, 0, (int)Engine.screenSize.X - (int)Engine.screenSize.X / 25, 1),
                 Color.White, 0, Vector2.Zero, new Vector2(waveTimer / 60, 1), SpriteEffects.None, 0);
+            spriteBatch.DrawString(Assets.textFont, $"{wave}", new Vector2(Engine.screenSize.X - 50, 0), Color.White, 0, Vector2.Zero, Engine.UIScale, SpriteEffects.None, 0.45f);
 
         }
     }

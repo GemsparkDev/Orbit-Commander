@@ -17,7 +17,7 @@ namespace Space_Wars.Content.Main.UI_Elements
         private int currentTab = 0;
         private int prevTab = 0;
         private int totalTabs = 0;
-        public TabbedWindow(Vector2 _position, Texture2D _texture, int? tabs)
+        public TabbedWindow(Vector2 _position, Texture2D _texture, int? _tabs, float _transparency = 1)
         {
             size = new Vector2(_texture.Width, _texture.Height);
             texture = _texture;
@@ -26,7 +26,8 @@ namespace Space_Wars.Content.Main.UI_Elements
             functionalChildren = new List<KeyValuePair<int, IFunctional>>();
             children = new List<KeyValuePair<int, Widget>>();
             tabList = new();
-            totalTabs = tabs?? 0;
+            totalTabs = _tabs?? 0;
+            transparency = _transparency;
             Vector2 tabOffset = new Vector2(0, -Size.Y / 4 + Assets.Sprites["Tab"].Height);
             for (int i = 0; i < totalTabs; i++)
             {
@@ -132,7 +133,7 @@ namespace Space_Wars.Content.Main.UI_Elements
         {
             for (int i = 0; i < totalTabs; i++)
             {
-                spriteBatch.Draw(tabList[i].texture, position + tabList[i].offset, null, Color.White, 0, Vector2.One / 2, Engine.UIScale, SpriteEffects.None, 0.4f);
+                spriteBatch.Draw(tabList[i].texture, position + tabList[i].offset, null, Color.White * transparency, 0, Vector2.One / 2, Engine.UIScale, SpriteEffects.None, 0.4f);
                 tabList[i].Draw(spriteBatch, position);
             }
 
