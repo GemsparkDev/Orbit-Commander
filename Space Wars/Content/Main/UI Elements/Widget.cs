@@ -6,13 +6,17 @@ namespace Space_Wars.Content.Main.UI_Elements
     public abstract class Widget
     {
         protected Vector2 size;
-        public Vector2 offset;
+        protected Vector2 offset;
         public string text;
         public Color textColor;
         public Texture2D texture;
+        public Vector2 Offset
+        {
+            get { return offset * Engine.UIScale; }
+        }
         public Vector2 Size
         {
-            get { return size * Engine.UIScale; }
+            get { return size; }
         }
         public Widget()
         {

@@ -14,6 +14,7 @@ namespace Space_Wars.Content.Main.Entities
         private float mass;
         public float radius;
         public List<GravitationalSource> moons = new();
+        private ParticleEmitter surface;
         public bool isImmovable;
         public GravitationalSource(Vector2 _position, Vector2 _velocity, float _mass, float _radius, bool _isImmovable = false)
         {
@@ -22,25 +23,40 @@ namespace Space_Wars.Content.Main.Entities
             mass = _mass;
             radius = _radius * 50;
             isImmovable = _isImmovable;
+            surface = new ParticleEmitter(Assets.Sprites["Dot"], position, radius, 1, Color.Cyan);
+            ParticleManager.Add(surface);
         }
         public Vector2 GetAcceleration(Vector2 _position)
         {
             Vector2 relativePosition = _position - position;
+            if(relativePosition == Vector2.Zero)
+            {
+                relativePosition = Vector2.One;
+            }
             Vector2 acceleration = Vector2.Normalize(-relativePosition) * mass / relativePosition.LengthSquared();
             return acceleration;
+        }
+        public float GetOrbitalVelocity(Vector2 _position)
+        {
+            float distance = (_position - position).Length();
+            return MathF.Sqrt(mass / distance);
         }
 
         public Vector2 AttractObject(Entity _entity)
         {
             Vector2 relativePosition = _entity.position - position;
+            if(relativePosition == Vector2.Zero)
+            {
+                relativePosition = Vector2.One;
+            }
             if (relativePosition.Length() - _entity.ColliderRadius >= radius)
             {
-                Vector2 acceleration = Vector2.Normalize(-relativePosition) * mass / relativePosition.LengthSquared();
+                Vector2 acceleration = Vector2.Normalize(-relativePosition) * mass / relativePosition.LengthSquared() * Engine.deltaSeconds * 60;
                 foreach(GravitationalSource moon in moons)
                 {
-                    acceleration += moon.AttractObject(_entity);
+                    moon.AttractObject(_entity);
                 }
-                _entity.velocity += acceleration * Engine.deltaSeconds * 60;
+                _entity.velocity += acceleration;
                 return acceleration;
             }
             else
@@ -48,7 +64,7 @@ namespace Space_Wars.Content.Main.Entities
                 int collisionForce = 0;
                 if(Math.Floor(_entity.velocity.Length() / 2) > 5)
                 {
-                    collisionForce = (int)Math.Floor(_entity.velocity.Length() / 2);
+                    collisionForce = (int)Math.Floor((_entity.velocity - velocity).Length() / 2);
                 }
                 _entity.Collide(collisionForce);
                 _entity.position = Vector2.Normalize(relativePosition) * radius + Vector2.Normalize(relativePosition) * _entity.ColliderRadius + position;
@@ -59,31 +75,62 @@ namespace Space_Wars.Content.Main.Entities
         }
         public void CalculateTrajectory(Entity _entity)
         {
-            Vector2 initialAcceleration = Vector2.Normalize(-(_entity.position - position)) * mass / (_entity.position - position).LengthSquared();
-            Vector2 futurePosition = _entity.position;
             Vector2 futureVelocity = _entity.velocity;
-            Vector2 futureAcceleration = initialAcceleration;
-            for (int i = 0; i < 2500; i++)
+            Vector2 futurePosition = _entity.position;
+            Vector2 futureMoonVelocity = Vector2.Zero;
+            Vector2 futureMoonPosition = Vector2.Zero;
+            int iterations = 5000;
+            bool drawPixel = true;
+            for (int i = 0; i < iterations;)
             {
-                futurePosition += futureVelocity;
-                futureVelocity += futureAcceleration;
-                futureAcceleration = Vector2.Normalize(-futurePosition + position + velocity * i) * mass / (futurePosition - position).LengthSquared();
-                if((futurePosition - position).Length() <= radius)
-                {
-                    return;
-                }
+                Vector2 futureAcceleration = GetAcceleration(futurePosition);
                 foreach (GravitationalSource moon in moons)
                 {
-                    if ((futurePosition - moon.position).Length() <= moon.radius)
+                    if (futureMoonPosition == Vector2.Zero)
                     {
+                        futureMoonPosition = moon.position;
+                        futureMoonVelocity = moon.velocity;
+                    }
+                    Vector2 futureMoonAcceleration = GetAcceleration(futureMoonPosition);
+                    futureMoonVelocity += futureMoonAcceleration;
+                    futureMoonPosition += futureMoonVelocity;
+                    Vector2 relativePosition = futurePosition - futureMoonPosition;
+                    if ((futurePosition - futureMoonPosition).Length() <= moon.radius + _entity.ColliderRadius)
+                    {
+                        if (Engine.patchedConics == true)
+                        {
+                            ParticleManager.Add(new Particle(Assets.Sprites["Dot"], -(futureMoonPosition - futurePosition) + moon.position, 0, 1, Color.Crimson));
+                        }
+                        else
+                        {
+                            ParticleManager.Add(new Particle(Assets.Sprites["Dot"], futurePosition, 0, 1, Color.Crimson));
+                        }
                         return;
                     }
-                    futureAcceleration += moon.GetAcceleration(futurePosition);
+                    futureAcceleration += Vector2.Normalize(-(relativePosition)) * moon.mass / relativePosition.LengthSquared();
+
+                    if (i % 3 == 0 && (futurePosition - futureMoonPosition).Length() < moon.radius * 300 && Engine.patchedConics == true)
+                    {
+                        ParticleManager.Add(new Particle(Assets.Sprites["Dot"], -(futureMoonPosition - futurePosition) + moon.position, 0, 1, Color.DarkCyan));
+                        //iterations -= 10;
+                        drawPixel = false;
+                    }
+
                 }
-                if (i % 3 == 0)
+                futureVelocity += futureAcceleration;
+                futurePosition += futureVelocity;
+                if((futurePosition - position).Length() <= radius + _entity.ColliderRadius)
                 {
-                    ParticleManager.Add(new Particle(Assets.Sprites["Dot"], 0.01f, futurePosition, Vector2.Zero, 0, 0, 1, false, Color.DarkCyan, Color.DarkCyan));
+                    ParticleManager.Add(new Particle(Assets.Sprites["Dot"], futurePosition, 0, 1, Color.Crimson));
+                    return;
                 }
+                if (i % 3 == 0 && drawPixel == true)
+                {
+                    ParticleManager.Add(new Particle(Assets.Sprites["Dot"], futurePosition, 0, 1, Color.DarkCyan));
+                }
+                drawPixel = true;
+                i++;
+                iterations -= (int)(futureVelocity.Length());
             }
         }
         public Vector2 AttractObject(GravitationalSource _celestialBody)
@@ -100,43 +147,18 @@ namespace Space_Wars.Content.Main.Entities
                 else
                 {
                     _celestialBody.position = Vector2.Normalize(relativePosition) * radius + Vector2.Normalize(relativePosition) * _celestialBody.radius + position;
-                    _celestialBody.velocity = velocity;
+                    Vector2 tempVelocity = _celestialBody.velocity;
+                    _celestialBody.velocity += (velocity-_celestialBody.velocity) / _celestialBody.mass * mass / 1.25f;
+                    velocity += (tempVelocity-velocity) / mass * _celestialBody.mass / 1.25f;
                 }
             }
             return Vector2.Zero;
         }
-        public void CalculateTrajectory(GravitationalSource _celestialBody)
+        public void AddMoon(float _distance, float _mass, float _radius, bool _isImmovable)
         {
-            Vector2 initialAcceleration = GetAcceleration(_celestialBody.position);
-            Vector2 futurePosition = _celestialBody.position;
-            Vector2 futureVelocity = _celestialBody.velocity;
-            Vector2 futureAcceleration = initialAcceleration;
-            for (int i = 0; i < 4000; i++)
-            {
-                futurePosition += futureVelocity;
-                futureVelocity += futureAcceleration;
-                futureAcceleration = GetAcceleration(futurePosition);
-                if(i % 3 == 0)
-                {
-                    ParticleManager.Add(new Particle(Assets.Sprites["Dot"], 0.01f, futurePosition, Vector2.Zero, 0, 0, 1, false, Color.Cyan, Color.Cyan));
-                }
-            }
-        }
-        public void DrawRadius()
-        {
-            Vector2 normalVector;
-            float angle;
-            for (int i = 0; i < radius; i++)
-            {
-                angle = (MathF.Tau / radius) * i;
-                normalVector = new Vector2(MathF.Sin(angle), -MathF.Cos(angle)) * radius;
-                ParticleManager.Add(new Particle(Assets.Sprites["Dot"], 0.01f, position + normalVector, Vector2.Zero, angle, 0, 1, false, Color.Cyan, Color.Cyan));
-
-            }
-            foreach(GravitationalSource moon in moons)
-            {
-                moon.DrawRadius();
-            }
+            Vector2 _position = new Vector2(_distance, 0) + position;
+            Vector2 _velocity = new(0, GetOrbitalVelocity(_position));
+            moons.Add(new(_position, _velocity, _mass, _radius, _isImmovable));
         }
         public void Update()
         {
@@ -146,10 +168,18 @@ namespace Space_Wars.Content.Main.Entities
             }
             foreach(GravitationalSource moon in moons)
             {
-                AttractObject(moon);
                 moon.Update();
+                AttractObject(moon);
                 moon.AttractObject(this);
+                foreach(GravitationalSource secondMoon in moons)
+                {
+                    if(moon != secondMoon)
+                    {
+                        moon.AttractObject(secondMoon);
+                    }
+                }
             }
+            surface.position = position;
         }
         public void Draw(SpriteBatch _spriteBatch)
         {

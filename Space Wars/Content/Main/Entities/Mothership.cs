@@ -11,6 +11,7 @@ namespace Space_Wars.Content.Main.Entities
         private float maxHealth;
         private float furnaceCooldown = 15;
         private float craftingCooldown = 60;
+        public int requiredCraftsLeft = 25;
         public int scrap = 0;
         public Item[,] inventory = new Item[1, 3];
         public Item furnaceItem;
@@ -62,7 +63,7 @@ namespace Space_Wars.Content.Main.Entities
                 if(craftingCooldown <= 0)
                 {
                     craftingCooldown = 60;
-
+                    requiredCraftsLeft -= 5;
                     currentlyCrafting = false;
                 }
             }
@@ -72,6 +73,11 @@ namespace Space_Wars.Content.Main.Entities
             position += velocity * Engine.deltaSeconds * 60;
             angle += angularVelocity * Engine.deltaSeconds * 60;
             angularVelocity = 0;
+
+            if(requiredCraftsLeft <= 0)
+            {
+                CurrentGameState.SwitchState(new Victory());
+            }
 
         }
         public void AddItem(Item _item)

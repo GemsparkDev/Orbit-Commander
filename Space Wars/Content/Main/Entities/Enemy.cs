@@ -17,7 +17,7 @@ namespace Space_Wars.Content.Main.Entities
         public int maxHealth;
         public Vector2 targetVelocity = Vector2.Zero;
         public Vector2 targetVector;
-        public ParticleEmitter enemyRange = new(Assets.Sprites["Dot"], 0.01f, Vector2.Zero, 0, 360, 600, 0, 10000, 1, false, Color.Red, Color.Red, EmitterType.EmissionOverTime);
+        public ParticleEmitter enemyRange = new(Assets.Sprites["Dot"], Vector2.Zero, 0, 1, Color.Red);
         public Enemy(Vector2 _position, Vector2 _velocity, float _angle, float _angularVelocity, int _damage, int _health, Texture2D _texture)
         {
             position = _position;
@@ -54,15 +54,15 @@ namespace Space_Wars.Content.Main.Entities
         }
         IEnumerable<int> Fighter()
         {
-            enemyRange.particleVelocity = 200;
+            enemyRange.radius = 250;
             while (true)
             {
                 enemyRange.position = position;
-                targetVector = player.position - position + (player.velocity - velocity);
+                targetVector = player.position - position + (player.velocity - velocity) * 8;
                 targetAngle = MathF.Atan2(targetVector.X, -targetVector.Y);
-                if (EntityManager.DistanceSqr(this, player) > 200*200)
+                if (EntityManager.DistanceSqr(this, player) > 250*250)
                 {
-                    GoToEntity(player, 2);
+                    GoToEntity(player, 3);
                 }
                 else
                 {
@@ -95,13 +95,13 @@ namespace Space_Wars.Content.Main.Entities
         }
         IEnumerable<int> Carrier()
         {
-            enemyRange.particleVelocity = 225;
+            enemyRange.radius = 500;
             while (true)
             {
                 enemyRange.position = position;
                 targetVector = player.position - position + (player.velocity - velocity);
                 targetAngle = MathF.Atan2(targetVector.X, -targetVector.Y);
-                if (EntityManager.DistanceSqr(this, player) > 225*255)
+                if (EntityManager.DistanceSqr(this, player) > 500*500)
                 {
                     GoToEntity(player, 1);
                 }
@@ -119,7 +119,7 @@ namespace Space_Wars.Content.Main.Entities
                 {
                     if (cooldown <= 0)
                     {
-                        NewFighter(position, Engine.ToUnitVector(angle) * 8, angle, 0);
+                        NewMissile(position, Engine.ToUnitVector(angle) * 2, angle, 0);
                         SoundManager.PlaySound(Assets.SoundFX["Fire_2"], position);
                         cooldown = 5;
                     }
@@ -146,7 +146,7 @@ namespace Space_Wars.Content.Main.Entities
         }
         IEnumerable<int> Sniper()
         {
-            enemyRange.particleVelocity = 400;
+            enemyRange.radius = 400;
             while (true)
             {
                 enemyRange.position = position;
@@ -194,25 +194,60 @@ namespace Space_Wars.Content.Main.Entities
                 yield return 0;
             }
         }
+        IEnumerable<int> Missile()
+        {
+            enemyRange.radius = 20;
+            while (true)
+            {
+                enemyRange.position = position;
+                targetVector = player.position - position;
+                targetAngle = MathF.Atan2(targetVector.X, -targetVector.Y);
+                RotateTowards(targetAngle);
+                velocity += Vector2.Normalize(new Vector2(MathF.Sin(angle), -MathF.Cos(angle)));
+
+                if (EntityManager.DistanceSqr(this, player) < 20 * 20)
+                {
+                    player.Collide(10);
+                    SoundManager.PlaySound(Assets.SoundFX["Explosion"], position);
+                    isExpired = true;
+                }
+                if (health <= 0)
+                {
+                    isExpired = true;
+                    SoundManager.PlaySound(Assets.SoundFX["Death"], position);
+                }
+                if (health > maxHealth)
+                {
+                    health = maxHealth;
+                }
+
+                
+
+                yield return 0;
+            }
+        }
         public static Enemy NewFighter(Vector2 position, Vector2 velocity, float angle, float angularVelocity)
         {
             Enemy enemy = new(position, velocity, angle, angularVelocity, 5, 10, Assets.Sprites["Fighter"]);
             enemy.AddBehaviour(enemy.Fighter());
-            EntityManager.Add(enemy);
             return enemy;
         }
         public static Enemy NewCarrier(Vector2 position, Vector2 velocity, float angle, float angularVelocity)
         {
             Enemy enemy = new(position, velocity, angle, angularVelocity, 10, 20, Assets.Sprites["Cruiser"]);
             enemy.AddBehaviour(enemy.Carrier());
-            EntityManager.Add(enemy);
             return enemy;
         }
         public static Enemy NewSniper(Vector2 position, Vector2 velocity, float angle, float angularVelocity)
         {
             Enemy enemy = new(position, velocity, angle, angularVelocity, 8, 10, Assets.Sprites["Sniper"]);
             enemy.AddBehaviour(enemy.Sniper());
-            EntityManager.Add(enemy);
+            return enemy;
+        }
+        public static Enemy NewMissile(Vector2 position, Vector2 velocity, float angle, float angularVelocity)
+        {
+            Enemy enemy = new(position, velocity, angle, angularVelocity, 8, 10, Assets.Sprites["Missile"]);
+            enemy.AddBehaviour(enemy.Missile());
             return enemy;
         }
 
@@ -278,7 +313,7 @@ namespace Space_Wars.Content.Main.Entities
 
             if(Engine.debugMode == true)
             {
-                //enemyRange.isEmitterActive = true;
+                enemyRange.isEmitterActive = true;
             }
             else
             {

@@ -29,6 +29,7 @@ namespace Space_Wars.Content.Main.Particles
         public float particleAngularVelocity;
         public float speedOfEmission;
         public float particleTransparency;
+        public float radius;
         public bool particleFadesOut;
         public bool isEmitterExpired = false;
         public bool isEmitterActive = true;
@@ -59,6 +60,16 @@ namespace Space_Wars.Content.Main.Particles
                 emitterFunction = EmissionOverDistance;
             }
         }
+        public ParticleEmitter(Texture2D _particleTexture, Vector2 _position, float _radius, float _particleTransparency, Color _particleColor)
+        {
+            particleTexture = _particleTexture;
+            particleTimeAlive = Engine.deltaSeconds;
+            position = _position;
+            radius = _radius;
+            particleTransparency = _particleTransparency;
+            particleColor = _particleColor;
+            emitterFunction = DrawCircle;
+        }
         public void Update()
         {
             if(isEmitterActive == true)
@@ -67,7 +78,7 @@ namespace Space_Wars.Content.Main.Particles
             }
             prevPosition = position;
         }
-        private void EmissionOverTime()
+        public void EmissionOverTime()
         {
             if (cooldown <= 0)
             {
@@ -122,6 +133,17 @@ namespace Space_Wars.Content.Main.Particles
             if (iterations < 1)
             {
                 cachedDistance += (MathF.Sqrt(EntityManager.DistanceSqr(position, prevPosition)) * speedOfEmission);
+            }
+        }
+        private void DrawCircle()
+        {
+            Vector2 normalVector;
+            float angle;
+            for (int i = 0; i < radius; i++)
+            {
+                angle = (MathF.Tau / radius) * i;
+                normalVector = new Vector2(MathF.Sin(angle), -MathF.Cos(angle)) * radius;
+                ParticleManager.Add(new Particle(particleTexture, position + normalVector, angle, 1, particleColor));
             }
         }
     }

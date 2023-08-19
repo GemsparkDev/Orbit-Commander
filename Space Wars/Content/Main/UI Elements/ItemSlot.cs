@@ -80,7 +80,7 @@ namespace Space_Wars.Content.Main.UI_Elements
         {
             if (daughterItem != null)
             {
-                _spriteBatch.Draw(daughterItem.texture, _parentPosition + offset, null, Color.White, 0, Vector2.One / 2, Engine.UIScale, SpriteEffects.None, 0.35f);
+                _spriteBatch.Draw(daughterItem.texture, _parentPosition + Offset, null, Color.White, 0, Vector2.One / 2, Engine.UIScale, SpriteEffects.None, 0.35f);
             }
         }
     }

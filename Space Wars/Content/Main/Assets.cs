@@ -23,6 +23,7 @@ namespace Space_Wars.Content.Main
             Sprites.Add("Mothership", Content.Load<Texture2D>("Images/Entity_6"));
             Sprites.Add("Arrow", Content.Load<Texture2D>("Images/Entity_7"));
             Sprites.Add("Sniper", Content.Load<Texture2D>("Images/Entity_8"));
+            Sprites.Add("Missile", Content.Load<Texture2D>("Images/Entity_9"));
 
             //Items
             Sprites.Add("Metal Scrap", Content.Load<Texture2D>("Images/Item_0"));
@@ -54,6 +55,7 @@ namespace Space_Wars.Content.Main
             Sprites.Add("Item Slot", Content.Load<Texture2D>("Images/UI_15"));
             Sprites.Add("Knob", Content.Load<Texture2D>("Images/UI_16"));
             Sprites.Add("Slider Slot", Content.Load<Texture2D>("Images/UI_17"));
+            Sprites.Add("Wide Button", Content.Load<Texture2D>("Images/UI_18"));
 
             //Misc
             Sprites.Add("Cursor", Content.Load<Texture2D>("Images/Cursor"));
@@ -67,6 +69,7 @@ namespace Space_Wars.Content.Main
             SoundFX.Add("Fire_1", Content.Load<SoundEffect>("Sounds/Fire_1"));
             SoundFX.Add("Fire_2", Content.Load<SoundEffect>("Sounds/Fire_2"));
             SoundFX.Add("Fire_3", Content.Load<SoundEffect>("Sounds/Fire_3"));
+            SoundFX.Add("Explosion", Content.Load<SoundEffect>("Sounds/Fire_4"));
 
             //Hit Sounds
             SoundFX.Add("Hit", Content.Load<SoundEffect>("Sounds/Hit"));

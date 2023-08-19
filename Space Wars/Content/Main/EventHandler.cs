@@ -143,9 +143,9 @@ namespace Space_Wars.Content.Main
         }
         public static void CraftItem()
         {
-            if(mothership.scrap >= 10)
+            if(mothership.scrap >= 5)
             {
-                mothership.scrap -= 10;
+                mothership.scrap -= 5;
                 mothership.currentlyCrafting = true;
             }
         }
@@ -153,6 +153,7 @@ namespace Space_Wars.Content.Main
         {
             UIManager.craftingSlider.SetInterval(_value, _maxValue);
             UIManager.mothershipScrap.text = EntityManager.player.mothership.scrap.ToString();
+            UIManager.requiredCraftsText.text = EntityManager.player.mothership.requiredCraftsLeft.ToString();
         }
         public static void GarageTrigger()
         {

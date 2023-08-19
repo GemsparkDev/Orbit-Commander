@@ -51,6 +51,20 @@ namespace Space_Wars.Content.Main.Particles
                 originalTimeLeft = _timeLeft;
             }
         }
+        public Particle(Texture2D _texture, Vector2 _position, float _angle, float _transparency, Color _color)
+        {
+            texture = _texture;
+            timeLeft = Engine.deltaSeconds;
+            position = _position;
+            velocity = Vector2.Zero;
+            angle = _angle;
+            angularVelocity = 0;
+            fadesOut = false;
+            color = _color;
+            fadeToColor = Color.White;
+            transparency = _transparency;
+            originalTimeLeft = timeLeft;
+        }
         public void Update()
         {
             float timeScalar = timeLeft / originalTimeLeft;

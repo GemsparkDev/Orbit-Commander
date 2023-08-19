@@ -15,7 +15,7 @@ namespace Space_Wars.Content.Main.UI_Elements
         public float transparency = 1;
         public Vector2 Size
         {
-            get { return size * Engine.UIScale; }
+            get { return size; }
         }
         public abstract void AddWidget(Widget widget, int tab = 0);
         public abstract void AddWidget(IFunctional widget, int tab = 0);
@@ -24,7 +24,7 @@ namespace Space_Wars.Content.Main.UI_Elements
         public virtual bool GetMouseOver()
         {
             Vector2 mousePosition = new(Mouse.GetState().X, Mouse.GetState().Y);
-            if (position.X <= mousePosition.X && mousePosition.X <= position.X + Size.X && position.Y <= mousePosition.Y && mousePosition.Y <= position.Y + Size.Y)
+            if (position.X <= mousePosition.X && mousePosition.X <= position.X + Size.X * Engine.UIScale && position.Y <= mousePosition.Y && mousePosition.Y <= position.Y + Size.Y * Engine.UIScale)
             {
                 return true;
             }

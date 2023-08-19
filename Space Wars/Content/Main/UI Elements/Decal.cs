@@ -38,7 +38,7 @@ namespace Space_Wars.Content.Main.UI_Elements
             if (text != null)
             {
                 Vector2 textMiddlePoint = Assets.textFont.MeasureString(text) / 2;
-                Vector2 textPosition = parentPosition + offset;
+                Vector2 textPosition = parentPosition + Offset;
                 spriteBatch.DrawString(Assets.textFont, text, textPosition, textColor, 0, textMiddlePoint, Engine.UIScale, SpriteEffects.None, 0.45f);
             }
         }

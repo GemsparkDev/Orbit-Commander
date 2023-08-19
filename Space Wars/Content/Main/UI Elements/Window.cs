@@ -14,7 +14,7 @@ namespace Space_Wars.Content.Main.UI_Elements
         {
             size = new Vector2(_texture.Width, _texture.Height);
             texture = _texture;
-            position = _position - Size / 2;
+            position = _position - Size / 2 * Engine.UIScale;
             transparency = _transparency;
             enabled = true;
             children = new List<Widget>();
@@ -29,9 +29,9 @@ namespace Space_Wars.Content.Main.UI_Elements
             foreach (IFunctional functionalWidget in functionalChildren)
             {
                 Widget widget = functionalWidget as Widget ?? new DummyWidget();
-                if (widget.offset.X <= mousePosition.X && mousePosition.X <= widget.offset.X + widget.Size.X && widget.offset.Y <= mousePosition.Y && mousePosition.Y <= widget.offset.Y + widget.Size.Y)
+                if (widget.Offset.X <= mousePosition.X && mousePosition.X <= widget.Offset.X + widget.Size.X * Engine.UIScale && widget.Offset.Y <= mousePosition.Y && mousePosition.Y <= widget.Offset.Y + widget.Size.Y * Engine.UIScale)
                 {
-                    currentDistance = EntityManager.DistanceSqr(widget.Size/2 + widget.offset, mousePosition);
+                    currentDistance = EntityManager.DistanceSqr(widget.Size/2 * Engine.UIScale + widget.Offset, mousePosition);
                     if (currentDistance < bestDistance)
                     {
                         bestDistance = currentDistance;
@@ -44,7 +44,7 @@ namespace Space_Wars.Content.Main.UI_Elements
         public override bool GetMouseOver()
         {
             Vector2 mousePosition = new(Mouse.GetState().X, Mouse.GetState().Y);
-            if (position.X <= mousePosition.X && mousePosition.X <= position.X + Size.X && position.Y <= mousePosition.Y && mousePosition.Y <= position.Y + Size.Y)
+            if (position.X <= mousePosition.X && mousePosition.X <= position.X + Size.X * Engine.UIScale && position.Y <= mousePosition.Y && mousePosition.Y <= position.Y + Size.Y * Engine.UIScale)
             {
                 return true;
             }
@@ -59,7 +59,7 @@ namespace Space_Wars.Content.Main.UI_Elements
             {
                 if (widget.texture != null)
                 {
-                    spriteBatch.Draw(widget.texture, position + widget.offset, null, Color.White, 0, Vector2.One / 2, Engine.UIScale, SpriteEffects.None, 0.4f);
+                    spriteBatch.Draw(widget.texture, position + widget.Offset, null, Color.White, 0, Vector2.Zero, Engine.UIScale, SpriteEffects.None, 0.4f);
                     widget.Draw(spriteBatch, position);
                 }
                 else
@@ -74,7 +74,7 @@ namespace Space_Wars.Content.Main.UI_Elements
                 {
                     if (widget.texture != null)
                     {
-                        spriteBatch.Draw(widget.texture, position + widget.offset, null, Color.White, 0, Vector2.One / 2, Engine.UIScale, SpriteEffects.None, 0.4f);
+                        spriteBatch.Draw(widget.texture, position + widget.Offset, null, Color.White * transparency, 0, Vector2.Zero, Engine.UIScale, SpriteEffects.None, 0.4f);
                         widget.Draw(spriteBatch, position);
                     }
                     else

@@ -16,19 +16,22 @@ namespace Space_Wars.Content.Main
         private GraphicsDeviceManager graphics;
         private SpriteBatch spriteBatch;
         public UIManager _UIManager;
+        private Matrix screenMatrix;
+        private Matrix rotationMatrix;
         public static Vector2 screenSize;
         public static Vector2 screenPosition;
         public static Vector2 mousePositionOffset;
         public KeyboardState oldState;
         public KeyboardState newState;
-        public static Timespan ingameTime = new Timespan();
+        public static Timespan ingameTime = new();
         public static float deltaSeconds;
         public static float timeScale = 1f;
         public static Texture2D line;
         public static bool debugMode;
+        public static bool patchedConics = true;
         public static List<string> debugLog = new();
         private static int messageCount = 0;
-        public static float UIScale = 1;
+        public static float UIScale = 2f;
         public static int targetFramerate = 60;
 
         public Engine()
@@ -40,6 +43,10 @@ namespace Space_Wars.Content.Main
         protected override void Initialize()
         {
             base.Initialize();
+            screenMatrix = Matrix.CreateWorld(Vector3.Right, Vector3.Forward, Vector3.Up);
+            //rotationMatrix = Matrix.CreateFromAxisAngle(Vector3.Forward, MathF.PI);
+            //screenMatrix *= Matrix.CreateTranslation(screenSize.X/2, screenSize.Y/2, 0);
+            //screenMatrix *= rotationMatrix;
             graphics.PreferredBackBufferWidth = GraphicsDevice.Adapter.CurrentDisplayMode.Width;
             graphics.PreferredBackBufferHeight = GraphicsDevice.Adapter.CurrentDisplayMode.Height;
             graphics.IsFullScreen = false;
@@ -125,14 +132,24 @@ namespace Space_Wars.Content.Main
         protected override void Draw(GameTime gameTime)
         {
             GraphicsDevice.Clear(Color.Black);
-            spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, null, null);
-            CurrentGameState.Draw(spriteBatch);
 
+            spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, null, null, null, screenMatrix);
+            CurrentGameState.Draw(spriteBatch);
+            spriteBatch.End();
+            
+            spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, null, null, null);
+            spriteBatch.DrawString(Assets.textFont, $"{(int)(1 / gameTime.ElapsedGameTime.TotalSeconds)}", new Vector2((int)(screenSize.X / 1.25f), 0), Color.White, 0, Vector2.Zero, UIScale, SpriteEffects.None, 0.45f);
+            spriteBatch.DrawString(Assets.textFont, ingameTime.drawText, new Vector2((int)(screenSize.X / 4), 0), Color.White, 0, Vector2.Zero, UIScale, SpriteEffects.None, 0.45f);
+            _UIManager.Draw(spriteBatch);
+            if (UIManager.lockMouseInput == false)
+            {
+                spriteBatch.Draw(Assets.Sprites["Cursor"], new Vector2(Mouse.GetState().X, Mouse.GetState().Y), null, Color.White, 0, Vector2.Zero, 1, 0, 0.5f);
+            }
             if (debugMode == true)
             {
                 //Displays the debug log
                 int logCount = debugLog.Count;
-                if(logCount > 10)
+                if (logCount > 10)
                 {
                     logCount = 10;
                 }
@@ -148,13 +165,6 @@ namespace Space_Wars.Content.Main
                         spriteBatch.DrawString(Assets.textFont, $"{i + 1}: {e.Message}", textPosition, Color.Red, 0, Vector2.Zero, UIScale, SpriteEffects.None, 0.45f);
                     }
                 }
-            }
-            spriteBatch.DrawString(Assets.textFont, $"{(int)(1/gameTime.ElapsedGameTime.TotalSeconds)}", new Vector2((int)(screenSize.X/1.25f), 0), Color.White, 0, Vector2.Zero, UIScale, SpriteEffects.None, 0.45f);
-            spriteBatch.DrawString(Assets.textFont, ingameTime.drawText, new Vector2((int)(screenSize.X/4), 0), Color.White, 0, Vector2.Zero, UIScale, SpriteEffects.None, 0.45f);
-            _UIManager.Draw(spriteBatch);
-            if(UIManager.lockMouseInput == false)
-            {
-                spriteBatch.Draw(Assets.Sprites["Cursor"], new Vector2(Mouse.GetState().X, Mouse.GetState().Y), null, Color.White, 0, Vector2.Zero, 1, 0, 0.5f);
             }
             spriteBatch.End();
 

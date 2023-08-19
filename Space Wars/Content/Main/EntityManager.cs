@@ -21,9 +21,8 @@ namespace Space_Wars.Content.Main
         public static Engine root;
         private static EnemySpawner enemySpawner;
         private static Random random = new();
-        private static GravitationalSource planet = new(new(0, 0), new Vector2(0, 0), 2250, 8, true);
+        private static GravitationalSource planet;
         private static float[] currentKarma = { 0, 0, 0 };
-
         public static void Add(Entity entity)
         {
             if (isUpdating == false)
@@ -50,14 +49,15 @@ namespace Space_Wars.Content.Main
 
         public static void Initialize(Engine _root)
         {
-            entities = new List<Entity>();
-            addedEntities = new List<Entity>();
-            enemies = new List<Enemy>();
-            projectiles = new List<Projectile>();
-            planet.moons = new List<GravitationalSource>() { new(new(1000, 0), new Vector2(0, 1.4f), 250, 1.5f, false) };
+            entities = new();
+            addedEntities = new();
+            enemies = new();
+            projectiles = new();
+            planet = new(Vector2.Zero, Vector2.Zero, 5000, 8, true);
+            planet.AddMoon(1000, 250, 1.5f, false);
             root = _root;
-            player = new(new Vector2(0, -1), Vector2.Zero, 0f, 0f);
-            mothership = new Mothership(new Vector2(0, -1), Vector2.Zero, 0f, 0f);
+            player = new(Vector2.Zero, Vector2.Zero, 0, 0f);
+            mothership = new Mothership(new Vector2(0, -400), Vector2.Zero, 0f, 0f);
             player.mothership = mothership;
             Add(mothership);
             enemySpawner = new EnemySpawner(player);
@@ -69,22 +69,24 @@ namespace Space_Wars.Content.Main
             Engine.mousePositionOffset = new Vector2(Mouse.GetState().X - Engine.screenSize.X / 2, Mouse.GetState().Y - Engine.screenSize.Y / 2) / 20;
             player.Update();
             planet.AttractObject(player);
-            planet.CalculateTrajectory(player);
+            if(player.isDocked == false)
+            {
+                planet.CalculateTrajectory(player);
+            }
             if (player.isExpired == true)
             {
                 root.Startgame();
             }
+            Engine.screenPosition = new Vector2(Engine.screenSize.X / 2 - player.position.X, Engine.screenSize.Y / 2 - player.position.Y);
         }
         public static void Update()
         {
+
             Engine.ingameTime.Duration += Engine.deltaSeconds;
             planet.Update();
-            planet.DrawRadius();
-            Engine.screenPosition = new Vector2(Engine.screenSize.X / 2 - player.position.X, Engine.screenSize.Y / 2 - player.position.Y);
             enemySpawner.Update();
 
             isUpdating = true;
-
             //Updates all entities and moves deleted ones to a new list (prevents modifying a list while iterating over it)
             foreach (var entity in entities)
             {

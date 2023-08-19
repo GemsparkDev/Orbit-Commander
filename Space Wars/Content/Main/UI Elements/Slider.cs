@@ -10,7 +10,7 @@ namespace Space_Wars.Content.Main.UI_Elements
     {
         private List<DelegateMethod> behaviours = new();
         public float sliderInterval = 0.5f;
-        private Vector2 sliderSize = new Vector2(100, 2);
+        private Vector2 sliderSize = new(100, 2);
         public bool visualSlider;
         public Color enabledColor;
         public Color disabledColor;
@@ -19,14 +19,14 @@ namespace Space_Wars.Content.Main.UI_Elements
             texture = null;
             if(_visualSlider == false)
             {
-                size = new Vector2(sliderSize.X, Assets.Sprites["Knob"].Height);
+                size = new (sliderSize.X, Assets.Sprites["Knob"].Height);
             }
             else
             {
                 size = sliderSize;
             }
             offset = _offset;
-            sliderSize.X = _sliderWidth;
+            sliderSize.X = _sliderWidth * Engine.UIScale;
             visualSlider = _visualSlider;
             enabledColor = Color.Green;
             disabledColor = Color.Red;
@@ -42,8 +42,8 @@ namespace Space_Wars.Content.Main.UI_Elements
             {
                 size = sliderSize;
             }
-            offset = _offset;
-            sliderSize.X = _sliderWidth;
+            offset = _offset * Engine.UIScale;
+            sliderSize.X = _sliderWidth * Engine.UIScale;
             visualSlider = _visualSlider;
             enabledColor = _enabledColor;
             disabledColor = _disabledColor;
@@ -87,11 +87,11 @@ namespace Space_Wars.Content.Main.UI_Elements
         public override void Initialize() { }
         public override void Draw(SpriteBatch _spriteBatch, Vector2 _parentPosition)
         {
-            Vector2 centeringVector = new Vector2(0, Size.Y/2);
+            Vector2 centeringVector = new(0, Size.Y/2);
             Vector2 knobPosition = offset + _parentPosition + centeringVector + new Vector2((int)(sliderSize.X * sliderInterval), 0) - new Vector2(Assets.Sprites["Knob"].Width / 2, Assets.Sprites["Knob"].Height / 2);
-            _spriteBatch.Draw(Engine.line, offset + _parentPosition + centeringVector, new Rectangle(0, 0, (int)(sliderSize.X), 2),
+            _spriteBatch.Draw(Engine.line, offset + _parentPosition + centeringVector, new Rectangle(0, 0, (int)(sliderSize.X), 2 * (int)Engine.UIScale),
                 disabledColor, 0, Vector2.Zero, 1, SpriteEffects.None, 0);
-            _spriteBatch.Draw(Engine.line, offset + _parentPosition + centeringVector, new Rectangle(0, 0, (int)(sliderSize.X * sliderInterval), 2),
+            _spriteBatch.Draw(Engine.line, offset + _parentPosition + centeringVector, new Rectangle(0, 0, (int)(sliderSize.X * sliderInterval), 2 * (int)Engine.UIScale),
                 enabledColor, 0, Vector2.Zero, 1, SpriteEffects.None, 0);
             if (visualSlider == false)
             {
