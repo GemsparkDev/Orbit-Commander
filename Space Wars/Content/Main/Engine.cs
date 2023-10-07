@@ -16,10 +16,8 @@ namespace Space_Wars.Content.Main
         private GraphicsDeviceManager graphics;
         private SpriteBatch spriteBatch;
         public UIManager _UIManager;
-        private Matrix screenMatrix;
-        private Matrix rotationMatrix;
+        public static Camera camera;
         public static Vector2 screenSize;
-        public static Vector2 screenPosition;
         public static Vector2 mousePositionOffset;
         public KeyboardState oldState;
         public KeyboardState newState;
@@ -43,10 +41,7 @@ namespace Space_Wars.Content.Main
         protected override void Initialize()
         {
             base.Initialize();
-            screenMatrix = Matrix.CreateWorld(Vector3.Right, Vector3.Forward, Vector3.Up);
-            //rotationMatrix = Matrix.CreateFromAxisAngle(Vector3.Forward, MathF.PI);
-            //screenMatrix *= Matrix.CreateTranslation(screenSize.X/2, screenSize.Y/2, 0);
-            //screenMatrix *= rotationMatrix;
+            Window.Title = ("Lagrange Commander");
             graphics.PreferredBackBufferWidth = GraphicsDevice.Adapter.CurrentDisplayMode.Width;
             graphics.PreferredBackBufferHeight = GraphicsDevice.Adapter.CurrentDisplayMode.Height;
             graphics.IsFullScreen = false;
@@ -59,14 +54,18 @@ namespace Space_Wars.Content.Main
             }
             else
             {
-                TargetElapsedTime = TimeSpan.FromSeconds(1d / (double)(targetFramerate));
+                TargetElapsedTime = TimeSpan.FromSeconds(1 / (double)(targetFramerate));
             }
 
-
-            debugMode = false;
             screenSize = new Vector2(graphics.PreferredBackBufferWidth, graphics.PreferredBackBufferHeight);
+            debugMode = false;
             line = new Texture2D(graphics.GraphicsDevice, 1, 1, false, SurfaceFormat.Color);
             line.SetData(new[] { Color.White });
+
+            camera = new Camera(GraphicsDevice.Viewport);
+            camera.Origin = screenSize / 2;
+            camera.Zoom = new Vector2(1, 1);
+            camera.Position = Vector2.Zero;
 
             _UIManager = new UIManager();
             CurrentGameState.Initialize(this);
@@ -88,6 +87,7 @@ namespace Space_Wars.Content.Main
             SoundManager.Initialize();
             EventHandler.PairPlayerUIManager();
             CurrentGameState.SwitchState(new PlayingGame());
+            ingameTime = new();
         }
 
         protected override void LoadContent()
@@ -133,13 +133,12 @@ namespace Space_Wars.Content.Main
         {
             GraphicsDevice.Clear(Color.Black);
 
-            spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, null, null, null, screenMatrix);
+            spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, null, null, null, transformMatrix: camera.ViewMatrix);
             CurrentGameState.Draw(spriteBatch);
             spriteBatch.End();
             
             spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, null, null, null);
-            spriteBatch.DrawString(Assets.textFont, $"{(int)(1 / gameTime.ElapsedGameTime.TotalSeconds)}", new Vector2((int)(screenSize.X / 1.25f), 0), Color.White, 0, Vector2.Zero, UIScale, SpriteEffects.None, 0.45f);
-            spriteBatch.DrawString(Assets.textFont, ingameTime.drawText, new Vector2((int)(screenSize.X / 4), 0), Color.White, 0, Vector2.Zero, UIScale, SpriteEffects.None, 0.45f);
+            spriteBatch.DrawString(Assets.textFont, $"{(int)(1 / gameTime.ElapsedGameTime.TotalSeconds)}", new Vector2((int)(screenSize.X / 1.25f), 0), Color.White, 0, new Vector2(0, -5), UIScale, SpriteEffects.None, 0.45f);
             _UIManager.Draw(spriteBatch);
             if (UIManager.lockMouseInput == false)
             {

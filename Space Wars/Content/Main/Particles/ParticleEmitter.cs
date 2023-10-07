@@ -118,7 +118,6 @@ namespace Space_Wars.Content.Main.Particles
             float particleAngleRadians;
             Vector2 normalVector;
             Vector2 positionDifference = (position - prevPosition);
-            Engine.WriteLine(positionDifference.X);
             int iterations = (int)(MathF.Sqrt(EntityManager.DistanceSqr(position, prevPosition)) * speedOfEmission + cachedDistance);
             for (int i = 0; i < iterations; i++)
             {

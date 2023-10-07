@@ -65,8 +65,13 @@ namespace Space_Wars.Content.Main.UI_Elements
             if (text != null)
             {
                 Vector2 textMiddlePoint = Assets.textFont.MeasureString(text) / 2;
-                Vector2 textPosition = (parentPosition + Offset + Size);
-                spriteBatch.DrawString(Assets.textFont, text, textPosition, textColor, 0, textMiddlePoint, Engine.UIScale, SpriteEffects.None, 0.45f);
+                Vector2 textPosition = (parentPosition + Offset + Size/2 * Engine.UIScale);
+                float textSize = Size.X/(text.Length * 12);
+                if(textSize > 1)
+                {
+                    textSize = 1;
+                }
+                spriteBatch.DrawString(Assets.textFont, text, textPosition, textColor, 0, textMiddlePoint, textSize*Engine.UIScale, SpriteEffects.None, 0.45f);
             }
         }
     }

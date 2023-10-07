@@ -1,5 +1,7 @@
 ﻿
+using Microsoft.Xna.Framework;
 using Space_Wars.Content.Main.Entities;
+using Space_Wars.Content.Main.Particles;
 using Space_Wars.Content.Main.UI_Elements;
 
 namespace Space_Wars.Content.Main
@@ -10,6 +12,7 @@ namespace Space_Wars.Content.Main
         public static Mothership mothership;
         public static UIManager UIManager;
         public static Engine root;
+        public static bool isTraining = false;
         public static void Initialize(Player _player, Mothership _mothership)
         {
             player = _player;
@@ -35,12 +38,27 @@ namespace Space_Wars.Content.Main
             root.Startgame();
             SoundManager.PlayGlobalSound(Assets.SoundFX["Interact"]);
         }
+        public static void StartTraining()
+        {
+            ParticleManager.Initialize();
+            EntityManager.Initialize(root);
+            PairPlayerUIManager();
+            EntityManager.trainingSimulator = new(EntityManager.player, root);
+            CurrentGameState.SwitchState(new TrainingMode());
+            SoundManager.PlayGlobalSound(Assets.SoundFX["Interact"]);
+        }
         public static void QuitToMenu()
         {
-            CurrentGameState.SwitchState(new MainMenu());
-            UIManager.PauseMenuTrigger();
+            UIManager.GetContainer(Containers.PauseMenu).enabled = false;
             UIManager.ToggleMenu(Containers.MainMenu);
+            ParticleManager.Initialize();
+            SoundManager.SetAllSounds(false);
+            SoundManager.Initialize();
+            EntityManager.player.velocity = Vector2.Zero;
+            Engine.ingameTime = new();
             SoundManager.PlayGlobalSound(Assets.SoundFX["Interact"]);
+            Engine.camera.Position = Vector2.Zero;
+            CurrentGameState.SwitchState(new MainMenu());
         }
         public static void RepairModule()
         {
@@ -51,20 +69,21 @@ namespace Space_Wars.Content.Main
                 daughterModule = slot.daughterItem as Module;
             }
             else
-            {
+            { 
+                SoundManager.PlayGlobalSound(Assets.SoundFX["Fail"]);
                 return;
             }
-            if (daughterModule.health < 20 && EntityManager.player.mothership.scrap >= 5)
+            if (daughterModule.health < 20 && EntityManager.player.mothership.scrap >= 3)
             {
                 daughterModule.health = 20;
-                EntityManager.player.mothership.scrap -= 5;
-                SoundManager.PlayGlobalSound(Assets.SoundFX["Full"]);
+                EntityManager.player.mothership.scrap -= 3;
+                SoundManager.PlayGlobalSound(Assets.SoundFX["Interact"]);
                 UpdateRepairText();
                 UIManager.mothershipScrap.text = EntityManager.player.mothership.scrap.ToString();
             }
             else
             {
-                SoundManager.PlayGlobalSound(Assets.SoundFX["Close Menu"]);
+                SoundManager.PlayGlobalSound(Assets.SoundFX["Fail"]);
             }
         }
         public static void UpdateRepairText()
@@ -122,6 +141,15 @@ namespace Space_Wars.Content.Main
             {
                 player.modules[x] = UIManager.moduleSlots[x].daughterItem as Module;
             }
+            foreach (Module module in EntityManager.player.modules)
+            {
+                if (module == null)
+                {
+                    UIManager.validConfigText.text = "Invalid Configuration";
+                    return;
+                }
+            }
+            UIManager.validConfigText.text = "";
         }
         public static void UpdateFurnaceUI(float _value, float _maxValue)
         {
@@ -147,6 +175,11 @@ namespace Space_Wars.Content.Main
             {
                 mothership.scrap -= 5;
                 mothership.currentlyCrafting = true;
+                SoundManager.PlayGlobalSound(Assets.SoundFX["Interact"]);
+            }
+            else
+            {
+                SoundManager.PlayGlobalSound(Assets.SoundFX["Fail"]);
             }
         }
         public static void UpdateCraftingUI(float _value, float _maxValue)
@@ -155,8 +188,21 @@ namespace Space_Wars.Content.Main
             UIManager.mothershipScrap.text = EntityManager.player.mothership.scrap.ToString();
             UIManager.requiredCraftsText.text = EntityManager.player.mothership.requiredCraftsLeft.ToString();
         }
+        public static void UpdateEnemyCountdownUI(float _value, float _maxValue, float _wave)
+        {
+            UIManager.enemySlider.sliderInterval = _value / _maxValue;
+            UIManager.waveText.text = $"{_wave}";
+        }
         public static void GarageTrigger()
         {
+            foreach(Module module in EntityManager.player.modules)
+            {
+                if(module == null)
+                {
+                    return;
+                }
+            }
+            SoundManager.PlayGlobalSound(Assets.SoundFX["Interact"]);
             UIManager.ToggleMenu(UIManager.GarageMenu);
             UIManager.ToggleMenu(Containers.MothershipMenu);
             if (UIManager.GarageMenu.enabled == true)
@@ -165,7 +211,14 @@ namespace Space_Wars.Content.Main
             }
             else if (UIManager.GarageMenu.enabled == false)
             {
-                CurrentGameState.SwitchState(new PlayingGame());
+                if(isTraining == false)
+                {
+                    CurrentGameState.SwitchState(new PlayingGame());
+                }
+                else
+                {
+                    CurrentGameState.SwitchState(new TrainingMode());
+                }
             }
         }
     }

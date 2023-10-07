@@ -13,7 +13,7 @@ namespace Space_Wars.Content.Main.Entities
         private float craftingCooldown = 60;
         public int requiredCraftsLeft = 25;
         public int scrap = 0;
-        public Item[,] inventory = new Item[1, 3];
+        public Item[,] inventory = new Item[1, 4];
         public Item furnaceItem;
         public Item craftingItem;
         public bool wasEmpty = true;

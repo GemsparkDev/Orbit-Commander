@@ -23,13 +23,14 @@ namespace Space_Wars.Content.Main
         private MouseState oldState;
         private static readonly List<Container> containers = new();
         public Container focusedContainer;
-        public Container PauseMenu { get; } = new Window(Engine.screenSize / 2, Assets.Sprites["Large Panel"], 0.5f) { enabled = false };
-        public Container MainMenu { get; } = new TabbedWindow(Engine.screenSize / 2, Assets.Sprites["Large Panel"], 2, 0.5f) { enabled = true };
-        public Container PlayerMenu { get; } = new Window(Engine.screenSize / 2, Assets.Sprites["Large Panel"], 0.5f) { enabled = false };
-        public Container MothershipMenu { get; } = new TabbedWindow(Engine.screenSize / 2, Assets.Sprites["Large Panel"], 3, 0.5f) { enabled = false };
-        public Container GarageMenu { get; } = new Window(Engine.screenSize / 2, Assets.Sprites["Large Panel"], 0.5f) { enabled = false };
+        public Container MainMenu { get; } = new TabbedWindow(Engine.screenSize / 2, Assets.Sprites["Large Panel"], 2, 1) { enabled = true };
+        public Container PauseMenu { get; } = new Window(Engine.screenSize / 2, Assets.Sprites["Large Panel"], 1) { enabled = false };
+        public Container PlayerMenu { get; } = new Window(Engine.screenSize / 2, Assets.Sprites["Large Panel"], 1) { enabled = false };
+        public Container MothershipMenu { get; } = new TabbedWindow(Engine.screenSize / 2, Assets.Sprites["Large Panel"], 3, 1) { enabled = false };
+        public Container GarageMenu { get; } = new Window(Engine.screenSize/2, Assets.Sprites["Gargantuan Panel"], 1) { enabled = false };
         public Button exitButton;
         public Button singleplayerButton;
+        public Button trainingButton;
         public Button quitToMenuButton;
         public Button garageButton;
         public Button craftButton;
@@ -38,52 +39,72 @@ namespace Space_Wars.Content.Main
         public ItemSlot repairSlot;
         public ItemSlot smeltingSlot;
         public ItemSlot furnaceSlot;
-        public ItemSlot craftingSlot;
         public Slider furnaceSlider;
         public Slider craftingSlider;
+        public Slider enemySlider;
         public Decal mothershipScrap;
         public Decal repairText;
         public Decal requiredCraftsText;
         public Decal smeltingText;
+        public Decal garagePlayerImage;
+        public Decal validConfigText;
+        public Decal waveText;
+        public Decal titleName;
         public Item selectedIcon;
         public ItemSlot[] moduleSlots = new ItemSlot[5]; 
-        public ItemSlot[,] inventorySlots = new ItemSlot[1, 3];
+        public ItemSlot[,] inventorySlots = new ItemSlot[1, 4];
 
         public UIManager()
         {
+            List<Texture2D> iconGroup1 = new() { Assets.Sprites["Play Icon"], Assets.Sprites["Settings Icon"] };
+            List<Texture2D> iconGroup2 = new() { Assets.Sprites["Smelt Icon"], Assets.Sprites["Repair Icon"], Assets.Sprites["Victory Icon"] };
+            TabbedWindow menu = MainMenu as TabbedWindow;
+            menu.icons = iconGroup1;
+            menu = MothershipMenu as TabbedWindow;
+            menu.icons = iconGroup2;
 
             containers.Add(PauseMenu);
             containers.Add(MainMenu);
             containers.Add(PlayerMenu);
             containers.Add(MothershipMenu);
             containers.Add(GarageMenu);
-            exitButton = new Button(new Vector2(MainMenu.Size.X / 2, MainMenu.Size.Y * 3 / 4), Assets.Sprites["Wide Button"], "Exit", Color.White);
+
             singleplayerButton = new Button(new Vector2(MainMenu.Size.X / 2, MainMenu.Size.Y / 4), Assets.Sprites["Wide Button"], "Singleplayer", Color.White);
-            quitToMenuButton = new Button(MainMenu.Size/2, Assets.Sprites["Wide Button"], "Quit to Menu", Color.White);
-            garageButton = new Button(new Vector2(MainMenu.Size.X / 2, MainMenu.Size.Y / 4), Assets.Sprites["Wide Button"], "To Garage", Color.White);
-            repairButton = new Button(new Vector2(MainMenu.Size.X / 2 - Assets.Sprites["Button"].Width/2, MainMenu.Size.Y / 4), Assets.Sprites["Button"], "Repair", Color.LightBlue);
-            craftButton = new Button(new Vector2(MainMenu.Size.X / 2, MainMenu.Size.Y * 3 / 4), Assets.Sprites["Button"], "Repair", Color.LightBlue);
-            mothershipScrap = new(new Vector2(MainMenu.Size.X / 2 + 48, 12), "0", Color.Gray);
-            repairText = new(new Vector2(MainMenu.Size.X / 2 - Assets.Sprites["Button"].Width / 2, 90), "None", Color.White);
-            requiredCraftsText = new(MainMenu.Size/2, "25", Color.White);
-            repairSlot = new ItemSlot(new Vector2(MainMenu.Size.X / 2 - Assets.Sprites["Button"].Width / 2, 63), Assets.Sprites["Empty Slot"], this, -1, true);
+            trainingButton = new Button(new Vector2(MainMenu.Size.X / 2, MainMenu.Size.Y * 2 / 4), Assets.Sprites["Wide Button"], "Training", Color.White);
+            exitButton = new Button(new Vector2(MainMenu.Size.X / 2, MainMenu.Size.Y * 3 / 4), Assets.Sprites["Wide Button"], "Exit", Color.White);
+            titleName = new Decal(new Vector2(MainMenu.Size.X / 2, -MainMenu.Size.Y) - new Vector2(Assets.Sprites["Title Logo"].Width, Assets.Sprites["Title Logo"].Height)/2, Assets.Sprites["Title Logo"]);
+
+            quitToMenuButton = new Button(PauseMenu.Size/2, Assets.Sprites["Wide Button"], "Quit to Menu", Color.White);
+
             smeltingSlot = new ItemSlot(new Vector2(MainMenu.Size.X / 2 - Assets.Sprites["Button"].Width / 2, 63), Assets.Sprites["Empty Slot"], this, -1, true);
             furnaceSlider = new Slider(new Vector2(MainMenu.Size.X / 3 - 30, 30), 60, true, Color.White, Color.Gray);
             furnaceSlot = new ItemSlot(new Vector2(MainMenu.Size.X / 3, 63), Assets.Sprites["Empty Slot"], this, -1, false);
-            craftingSlider = new Slider(new Vector2(MainMenu.Size.X / 2 - 30, 30), 60, true, Color.White, Color.Gray);
-            craftingSlot = new ItemSlot(new Vector2(MainMenu.Size.X / 2, 63), Assets.Sprites["Empty Slot"], this, -1, false);
+            garageButton = new Button(new Vector2(MainMenu.Size.X / 2, MainMenu.Size.Y / 4), Assets.Sprites["Wide Button"], "To Garage", Color.White);
+            craftButton = new Button(new Vector2(MainMenu.Size.X / 2, MainMenu.Size.Y * 3 / 4), Assets.Sprites["Button"], "Repair", Color.LightBlue);
+            requiredCraftsText = new(MainMenu.Size/2 + new Vector2(0, -6), "25", Color.White);
+            craftingSlider = new Slider(new Vector2(MainMenu.Size.X / 2 - 30, MainMenu.Size.Y / 4), 60, true, Color.White, Color.Gray);
+
+            repairSlot = new ItemSlot(new Vector2(GarageMenu.Size.X / 4 - 25, GarageMenu.Size.Y / 2), Assets.Sprites["Empty Slot"], this, -1, true);
+            mothershipScrap = new(new Vector2(GarageMenu.Size.X / 2.2f, 20), "0", Color.Gray);
+            repairText = new(new Vector2(GarageMenu.Size.X / 4 - 60 / 2.5f, GarageMenu.Size.Y / 2 + 40), "None", Color.White);
+            garagePlayerImage = new Decal(GarageMenu.Size/2 + new Vector2(GarageMenu.Size.X/4, 0) - new Vector2(Assets.Sprites["Player UI"].Width, Assets.Sprites["Player UI"].Height)/2, Assets.Sprites["Player UI"], null, Color.White);
+            validConfigText = new Decal(GarageMenu.Size / 4 + new Vector2(20, GarageMenu.Size.Y/1.5f), "", Color.Red);
+            repairButton = new Button(new Vector2(GarageMenu.Size.X / 4 - 25, GarageMenu.Size.Y / 2 - 40), Assets.Sprites["Button"], "Repair", Color.LightBlue);
+
+            enemySlider = new Slider(new Vector2(PlayerMenu.Size.X / 3 - 30, 30), PlayerMenu.Size.X / 1.25f, true, Color.White, Color.Gray);
+            waveText = new Decal(new Vector2(PlayerMenu.Size.X / 3 - 30, 42), "0", Color.White);
 
             for (int x = 0; x < moduleSlots.GetLength(0); x++)
             {
                 if(x % 2 == 0)
                 {
-                    moduleSlots[x] = new ItemSlot(new Vector2((MainMenu.Size.X * 2 / 3),
-                        (Assets.Sprites["Empty Slot"].Height + 1) * x/2 + Assets.Sprites["Empty Slot"].Height), Assets.Sprites["Empty Slot"], this, x+1, true);
+                    moduleSlots[x] = new ItemSlot(new Vector2((GarageMenu.Size.X / 2.75f),
+                        (Assets.Sprites["Empty Slot"].Height) * x/2 + GarageMenu.Size.Y / 2 - Assets.Sprites["Empty Slot"].Height), Assets.Sprites["Empty Slot"], this, x+1, true);
                 }
                 else
                 {
-                    moduleSlots[x] = new ItemSlot(new Vector2((MainMenu.Size.X * 2 / 3 + Assets.Sprites["Empty Slot"].Width / 2),
-                        (Assets.Sprites["Empty Slot"].Height + 1) * x/2 + Assets.Sprites["Empty Slot"].Height), Assets.Sprites["Empty Slot"], this, x+1, true);
+                    moduleSlots[x] = new ItemSlot(new Vector2((GarageMenu.Size.X / 2.75f + Assets.Sprites["Empty Slot"].Width / 1.4142f),
+                        (Assets.Sprites["Empty Slot"].Height) * x/2 + GarageMenu.Size.Y/2 - Assets.Sprites["Empty Slot"].Height), Assets.Sprites["Empty Slot"], this, x+1, true);
                 }
                 GarageMenu.AddWidget(moduleSlots[x] as IFunctional);
                 moduleSlots[x].AddBehaviour(new DelegateMethod(EventHandler.UpdateModules));
@@ -92,28 +113,41 @@ namespace Space_Wars.Content.Main
             {
                 for (int y = 0; y < inventorySlots.GetLength(1); y++)
                 {
-                    inventorySlots[x, y] = new ItemSlot(new Vector2((Assets.Sprites["Empty Slot"].Width + 1) * x + Assets.Sprites["Large Panel"].Width / 1.33f,
-                        (Assets.Sprites["Empty Slot"].Height + 1) * y + Assets.Sprites["Empty Slot"].Height), Assets.Sprites["Empty Slot"], this, -1, false);
-                    MothershipMenu.AddWidget(inventorySlots[x, y] as IFunctional, 1);
+                    inventorySlots[x, y] = new ItemSlot(new Vector2((Assets.Sprites["Empty Slot"].Width) * x + Assets.Sprites["Large Panel"].Width / 1.33f,
+                        (Assets.Sprites["Empty Slot"].Height) * y + Assets.Sprites["Empty Slot"].Height), Assets.Sprites["Empty Slot"], this, -1, false);
+                    MothershipMenu.AddWidget(inventorySlots[x, y] as IFunctional, 0);
                     inventorySlots[x, y].AddBehaviour(new DelegateMethod(EventHandler.UpdateInventory));
                 }
             }
 
             MainMenu.AddWidget(exitButton as IFunctional, 0);
             MainMenu.AddWidget(singleplayerButton as IFunctional, 0);
+            MainMenu.AddWidget(trainingButton as IFunctional, 0);
+            MainMenu.AddWidget(titleName as Widget, 0);
+            MainMenu.AddWidget(titleName as Widget, 1);
+
             PauseMenu.AddWidget(quitToMenuButton as IFunctional);
+
             GarageMenu.AddWidget(mothershipScrap as Widget);
             GarageMenu.AddWidget(repairButton as IFunctional);
             GarageMenu.AddWidget(repairSlot as IFunctional);
             GarageMenu.AddWidget(repairText as Widget);
-            MothershipMenu.AddWidget(garageButton as IFunctional, 0);
-            MothershipMenu.AddWidget(furnaceSlider as IFunctional, 1);
-            MothershipMenu.AddWidget(furnaceSlot as IFunctional, 1);
+            GarageMenu.AddWidget(garagePlayerImage as Widget);
+            GarageMenu.AddWidget(validConfigText as Widget);
+
+            MothershipMenu.AddWidget(furnaceSlider as IFunctional, 0);
+            MothershipMenu.AddWidget(furnaceSlot as IFunctional, 0);
+            MothershipMenu.AddWidget(garageButton as IFunctional, 1);
             MothershipMenu.AddWidget(craftingSlider as IFunctional, 2);
             MothershipMenu.AddWidget(requiredCraftsText as Widget, 2);
             MothershipMenu.AddWidget(craftButton as IFunctional, 2);
+
+            PlayerMenu.AddWidget(enemySlider as IFunctional);
+            PlayerMenu.AddWidget(waveText as Widget);
+
             exitButton.AddBehaviour(new DelegateMethod(EventHandler.Exit));
             singleplayerButton.AddBehaviour(new DelegateMethod(EventHandler.Startgame));
+            trainingButton.AddBehaviour(new DelegateMethod(EventHandler.StartTraining));
             quitToMenuButton.AddBehaviour(new DelegateMethod(EventHandler.QuitToMenu));
             garageButton.AddBehaviour(new DelegateMethod(EventHandler.GarageTrigger));
             repairButton.AddBehaviour(new DelegateMethod(EventHandler.RepairModule));
@@ -203,7 +237,6 @@ namespace Space_Wars.Content.Main
         {
             foreach (Container container in containers.Where(c => c.enabled))
             {
-                spriteBatch.Draw(container.texture, container.position, null, Color.White * container.transparency, 0, Vector2.Zero, Engine.UIScale, SpriteEffects.None, 0.35f);
                 container.Draw(spriteBatch);
             }
             if (selectedIcon != null)

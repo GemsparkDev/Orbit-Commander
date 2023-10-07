@@ -100,7 +100,7 @@ namespace Space_Wars.Content.Main.UI_Elements
         }
         public static Module NewBasicGunModule(Vector2 _position, Vector2 _velocity, float _angle)
         {
-            return new(20, new float[] { 1 }, Assets.Sprites["Gun Module"], "Basic Guns", ModuleType.Guns, 1, _position, _velocity, _angle, Color.White);
+            return new(20, new float[] { 1 }, Assets.Sprites["Gun Module"], "Basic Guns", ModuleType.Guns, 2, _position, _velocity, _angle, Color.White);
         }
         public static Module NewBasicEngineModule(Vector2 _position, Vector2 _velocity, float _angle)
         {

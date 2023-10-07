@@ -16,14 +16,14 @@ namespace Space_Wars.Content.Main.Entities
         public List<GravitationalSource> moons = new();
         private ParticleEmitter surface;
         public bool isImmovable;
-        public GravitationalSource(Vector2 _position, Vector2 _velocity, float _mass, float _radius, bool _isImmovable = false)
+        public GravitationalSource(Vector2 _position, Vector2 _velocity, float _mass, float _radius, bool _isImmovable, Color _color)
         {
             position = _position;
             velocity = _velocity;
             mass = _mass;
             radius = _radius * 50;
             isImmovable = _isImmovable;
-            surface = new ParticleEmitter(Assets.Sprites["Dot"], position, radius, 1, Color.Cyan);
+            surface = new ParticleEmitter(Assets.Sprites["Dot"], position, radius, 1, _color);
             ParticleManager.Add(surface);
         }
         public Vector2 GetAcceleration(Vector2 _position)
@@ -109,10 +109,10 @@ namespace Space_Wars.Content.Main.Entities
                     }
                     futureAcceleration += Vector2.Normalize(-(relativePosition)) * moon.mass / relativePosition.LengthSquared();
 
-                    if (i % 3 == 0 && (futurePosition - futureMoonPosition).Length() < moon.radius * 300 && Engine.patchedConics == true)
+                    if (i % 3 == 0 && (futurePosition - futureMoonPosition).Length() < moon.radius * 3 && Engine.patchedConics == true)
                     {
                         ParticleManager.Add(new Particle(Assets.Sprites["Dot"], -(futureMoonPosition - futurePosition) + moon.position, 0, 1, Color.DarkCyan));
-                        //iterations -= 10;
+                        iterations -= 10;
                         drawPixel = false;
                     }
 
@@ -130,7 +130,7 @@ namespace Space_Wars.Content.Main.Entities
                 }
                 drawPixel = true;
                 i++;
-                iterations -= (int)(futureVelocity.Length());
+                iterations -= (int)futureVelocity.Length();
             }
         }
         public Vector2 AttractObject(GravitationalSource _celestialBody)
@@ -158,7 +158,7 @@ namespace Space_Wars.Content.Main.Entities
         {
             Vector2 _position = new Vector2(_distance, 0) + position;
             Vector2 _velocity = new(0, GetOrbitalVelocity(_position));
-            moons.Add(new(_position, _velocity, _mass, _radius, _isImmovable));
+            moons.Add(new(_position, _velocity, _mass, _radius, _isImmovable, Color.Cyan));
         }
         public void Update()
         {
@@ -190,10 +190,10 @@ namespace Space_Wars.Content.Main.Entities
             if(Engine.debugMode == true)
             {
                 //Draws a line in the direction of motion for X
-                _spriteBatch.Draw(Engine.line, position + Engine.screenPosition - Engine.mousePositionOffset, new Rectangle((int)position.X, (int)position.Y, 10, 1), Color.White,
+                _spriteBatch.Draw(Engine.line, position - Engine.mousePositionOffset, new Rectangle((int)position.X, (int)position.Y, 10, 1), Color.White,
                     MathF.Atan2(0, velocity.X), Vector2.Zero, new Vector2(MathF.Abs(velocity.X), 1), SpriteEffects.None, 0.4f);
                 //Draws a line in the direction of motion for Y
-                _spriteBatch.Draw(Engine.line, position + Engine.screenPosition - Engine.mousePositionOffset, new Rectangle((int)position.X, (int)position.Y, 10, 1), Color.White,
+                _spriteBatch.Draw(Engine.line, position - Engine.mousePositionOffset, new Rectangle((int)position.X, (int)position.Y, 10, 1), Color.White,
                     MathF.Atan2(velocity.Y, 0), Vector2.Zero, new Vector2(MathF.Abs(velocity.Y), 1), SpriteEffects.None, 0.4f);
             }
         }

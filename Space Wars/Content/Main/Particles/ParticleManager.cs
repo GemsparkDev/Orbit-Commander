@@ -66,14 +66,17 @@ namespace Space_Wars.Content.Main.Particles
             {
                 particle.Update();
             }
-            foreach (ParticleEmitter particleEmitter in particleEmitters)
+            foreach (var particleEmitter in particleEmitters)
             {
                 particleEmitter.Update();
             }
 
             if (particles.Count >= 50000)
             {
-                particles[0].isExpired = true;
+                for(int i = 0; i < particles.Count - 50000; i++)
+                {
+                    particles[i].isExpired = true;
+                }
             }
 
             //Clears all expired entities from the entity lists

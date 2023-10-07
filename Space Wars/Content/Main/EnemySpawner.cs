@@ -5,8 +5,7 @@ using Space_Wars.Content.Main.UI_Elements;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
-using System.Reflection.Metadata;
+
 
 namespace Space_Wars.Content.Main
 {
@@ -21,11 +20,12 @@ namespace Space_Wars.Content.Main
         private Random random;
         public delegate Enemy DelegateEnemy(Vector2 position, Vector2 velocity, float angle, float angularVelocity);
         private int enemyCredits;
-        private int enemiesSpawned = 12;
+        public static int enemiesSpawned = 0;
         public EnemySpawner(Player _player)
         {
             wave = 0;
-            waveTimer = 50;
+            enemiesSpawned = 6;
+            waveTimer = enemiesSpawned * 4.5f;
             player = _player;
             random = new Random();
 
@@ -53,7 +53,7 @@ namespace Space_Wars.Content.Main
         }
         public void Update()
         {
-
+            EventHandler.UpdateEnemyCountdownUI(waveTimer, enemiesSpawned * 4.5f, wave);
             if (waveTimer <= 0)
             {
                 enemiesSpawned = 0;
@@ -68,7 +68,7 @@ namespace Space_Wars.Content.Main
                 }
                 enemyCredits = random.Next((int)(3 * difficulty), (int)(5 * difficulty));
                 SpawnWaveBatch();
-                waveTimer = 4f * enemiesSpawned;
+                waveTimer = 4.5f * enemiesSpawned;
             }
             waveTimer -= Engine.deltaSeconds;
         }
@@ -96,13 +96,6 @@ namespace Space_Wars.Content.Main
                 }
             }
         }
-
-        public void Draw(SpriteBatch spriteBatch)
-        {
-            spriteBatch.Draw(Engine.line, new Vector2(Engine.screenSize.X / 50, Engine.screenSize.Y / 50), new Rectangle(0, 0, (int)Engine.screenSize.X - (int)Engine.screenSize.X / 25, 1),
-                Color.White, 0, Vector2.Zero, new Vector2(waveTimer / (enemiesSpawned*4), 2), SpriteEffects.None, 0);
-            spriteBatch.DrawString(Assets.textFont, $"{wave}", new Vector2(Engine.screenSize.X - 50, 0), Color.White, 0, Vector2.Zero, Engine.UIScale, SpriteEffects.None, 0.45f);
-
-        }
+        public void Draw(SpriteBatch _spriteBatch) { }
     }
 }

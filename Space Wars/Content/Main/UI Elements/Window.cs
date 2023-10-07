@@ -3,6 +3,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 
 namespace Space_Wars.Content.Main.UI_Elements
 {
@@ -53,18 +54,19 @@ namespace Space_Wars.Content.Main.UI_Elements
                 return false;
             }
         }
-        public override void Draw(SpriteBatch spriteBatch)
+        public override void Draw(SpriteBatch _spriteBatch)
         {
+            base.Draw(_spriteBatch);
             foreach (var widget in children)
             {
                 if (widget.texture != null)
                 {
-                    spriteBatch.Draw(widget.texture, position + widget.Offset, null, Color.White, 0, Vector2.Zero, Engine.UIScale, SpriteEffects.None, 0.4f);
-                    widget.Draw(spriteBatch, position);
+                    _spriteBatch.Draw(widget.texture, position + widget.Offset, null, Color.White, 0, Vector2.Zero, Engine.UIScale, SpriteEffects.None, 0.4f);
+                    widget.Draw(_spriteBatch, position);
                 }
                 else
                 {
-                    widget.Draw(spriteBatch, position);
+                    widget.Draw(_spriteBatch, position);
                 }
             }
             foreach (var functionalWidget in functionalChildren)
@@ -74,12 +76,12 @@ namespace Space_Wars.Content.Main.UI_Elements
                 {
                     if (widget.texture != null)
                     {
-                        spriteBatch.Draw(widget.texture, position + widget.Offset, null, Color.White * transparency, 0, Vector2.Zero, Engine.UIScale, SpriteEffects.None, 0.4f);
-                        widget.Draw(spriteBatch, position);
+                        _spriteBatch.Draw(widget.texture, position + widget.Offset, null, Color.White * transparency, 0, Vector2.Zero, Engine.UIScale, SpriteEffects.None, 0.4f);
+                        widget.Draw(_spriteBatch, position);
                     }
                     else
                     {
-                        widget.Draw(spriteBatch, position);
+                        widget.Draw(_spriteBatch, position);
                     }
                 }
             }

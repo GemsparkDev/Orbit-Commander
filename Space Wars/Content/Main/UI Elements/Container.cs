@@ -34,7 +34,10 @@ namespace Space_Wars.Content.Main.UI_Elements
             }
         }
         public abstract IFunctional GetWidgetOver();
-        public abstract void Draw(SpriteBatch spriteBatch);
+        public virtual void Draw(SpriteBatch spriteBatch)
+        {
+            spriteBatch.Draw(texture, position, null, Color.White * transparency, 0, Vector2.Zero, Engine.UIScale, SpriteEffects.None, 0.35f);
+        }
 
         /*
         public virtual void MoveContainer()

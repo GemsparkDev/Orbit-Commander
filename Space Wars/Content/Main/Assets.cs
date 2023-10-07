@@ -14,7 +14,6 @@ namespace Space_Wars.Content.Main
             //Sprites
 
             //Entities
-            Sprites.Add("Miner", Content.Load<Texture2D>("Images/Entity_0"));
             Sprites.Add("Fighter", Content.Load<Texture2D>("Images/Entity_1"));
             Sprites.Add("Player", Content.Load<Texture2D>("Images/Entity_2"));
             Sprites.Add("Asteroid", Content.Load<Texture2D>("Images/Entity_3"));
@@ -43,25 +42,24 @@ namespace Space_Wars.Content.Main
             Sprites.Add("Circle", Content.Load<Texture2D>("Images/Particle_2"));
 
             //UI Elements
-            Sprites.Add("Ship Tab", Content.Load<Texture2D>("Images/UI_1"));
-            Sprites.Add("Player UI", Content.Load<Texture2D>("Images/UI_2"));
+            Sprites.Add("Player UI", Content.Load<Texture2D>("Images/UI_1"));
+            Sprites.Add("Title Logo", Content.Load<Texture2D>("Images/UI_2"));
             Sprites.Add("Button", Content.Load<Texture2D>("Images/UI_3"));
-            Sprites.Add("Empty Bar", Content.Load<Texture2D>("Images/UI_4"));
-            Sprites.Add("Full Bar", Content.Load<Texture2D>("Images/UI_5"));
+            Sprites.Add("Gargantuan Panel", Content.Load<Texture2D>("Images/UI_4"));
             Sprites.Add("Empty Slot", Content.Load<Texture2D>("Images/UI_6"));
             Sprites.Add("Large Panel", Content.Load<Texture2D>("Images/UI_8"));
             Sprites.Add("Selected Tab", Content.Load<Texture2D>("Images/UI_13"));
             Sprites.Add("Tab", Content.Load<Texture2D>("Images/UI_14"));
-            Sprites.Add("Item Slot", Content.Load<Texture2D>("Images/UI_15"));
             Sprites.Add("Knob", Content.Load<Texture2D>("Images/UI_16"));
-            Sprites.Add("Slider Slot", Content.Load<Texture2D>("Images/UI_17"));
             Sprites.Add("Wide Button", Content.Load<Texture2D>("Images/UI_18"));
+            Sprites.Add("Smelt Icon", Content.Load<Texture2D>("Images/UI_19"));
+            Sprites.Add("Repair Icon", Content.Load<Texture2D>("Images/UI_20"));
+            Sprites.Add("Victory Icon", Content.Load<Texture2D>("Images/UI_21"));
+            Sprites.Add("Play Icon", Content.Load<Texture2D>("Images/UI_22"));
+            Sprites.Add("Settings Icon", Content.Load<Texture2D>("Images/UI_23"));
 
             //Misc
             Sprites.Add("Cursor", Content.Load<Texture2D>("Images/Cursor"));
-            Sprites.Add("Stars", Content.Load<Texture2D>("Images/Background_0"));
-            Sprites.Add("Planet", Content.Load<Texture2D>("Images/Background_1"));
-            Sprites.Add("Moon", Content.Load<Texture2D>("Images/Background_2"));
 
             //Sound FX
 
@@ -84,7 +82,9 @@ namespace Space_Wars.Content.Main
             //Menu Sounds
             SoundFX.Add("Open Menu", Content.Load<SoundEffect>("Sounds/OpenMenu"));
             SoundFX.Add("Close Menu", Content.Load<SoundEffect>("Sounds/CloseMenu"));
-            SoundFX.Add("Interact", Content.Load<SoundEffect>("Sounds/Interact"));
+            SoundFX.Add("Interact", Content.Load<SoundEffect>("Sounds/Interact_0"));
+            SoundFX.Add("Click", Content.Load<SoundEffect>("Sounds/Interact_1"));
+            SoundFX.Add("Fail", Content.Load<SoundEffect>("Sounds/Interact_2"));
 
             //Current Text Font
             textFont = Content.Load<SpriteFont>("Fonts/RobotoMono");

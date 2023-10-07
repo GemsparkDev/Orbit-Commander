@@ -90,7 +90,7 @@ namespace Space_Wars.Content.Main.Particles
         public void Draw(SpriteBatch _spriteBatch)
         {
             //Draws itself on the given spritebatch, position is offset by the screen position offset
-            _spriteBatch.Draw(texture, position + Engine.screenPosition - Engine.mousePositionOffset, null, renderColor * transparency, angle, Size/2, 1f, 0, 0.2f);
+            _spriteBatch.Draw(texture, position - Engine.mousePositionOffset, null, renderColor * transparency, angle, Size/2, 1f, 0, 0.2f);
         }
     }
 }

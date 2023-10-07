@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using Space_Wars.Content.Main.UI_Elements;
 using System.Collections;
 using System.Linq;
+using System.ComponentModel;
 
 namespace Space_Wars.Content.Main.UI_Elements
 {
@@ -17,6 +18,7 @@ namespace Space_Wars.Content.Main.UI_Elements
         private int currentTab = 0;
         private int prevTab = 0;
         private int totalTabs = 0;
+        public List<Texture2D> icons;
         public TabbedWindow(Vector2 _position, Texture2D _texture, int? _tabs, float _transparency = 1)
         {
             size = new Vector2(_texture.Width, _texture.Height);
@@ -90,9 +92,13 @@ namespace Space_Wars.Content.Main.UI_Elements
                 if (tabList[i].Offset.X <= mousePosition.X && mousePosition.X <= tabList[i].Offset.X + tabList[i].Size.X * Engine.UIScale && tabList[i].Offset.Y <= mousePosition.Y && mousePosition.Y <= tabList[i].Offset.Y + tabList[i].Size.Y * Engine.UIScale)
                 {
                     prevTab = currentTab;
-                    currentTab = i;
-                    tabList[prevTab].texture = Assets.Sprites["Tab"];
-                    tabList[currentTab].texture = Assets.Sprites["Selected Tab"];
+                    if (currentTab != i)
+                    {
+                        currentTab = i;
+                        tabList[prevTab].texture = Assets.Sprites["Tab"];
+                        tabList[currentTab].texture = Assets.Sprites["Selected Tab"];
+                        SoundManager.PlayGlobalSound(Assets.SoundFX["Click"]);
+                    }
                     return new DummyWidget();
                 }
             }
@@ -114,10 +120,10 @@ namespace Space_Wars.Content.Main.UI_Elements
         }
         private void RecalculateTabs()
         {
-            Vector2 tabOffset = new Vector2(0, -Size.Y / 4 + Assets.Sprites["Tab"].Height);
+            Vector2 tabOffset = new (0, -Size.Y / 4 + Assets.Sprites["Tab"].Height);
             for (int i = 0; i < totalTabs; i++)
             {
-                if (i >= tabList.Count())
+                if (i >= tabList.Count)
                 {
                     tabList.Add(new Decal(tabOffset, Assets.Sprites["Tab"]));
                 }
@@ -128,32 +134,48 @@ namespace Space_Wars.Content.Main.UI_Elements
                 tabOffset.X += (Assets.Sprites["Tab"].Width + 4);
             }
         }
-        public override void Draw(SpriteBatch spriteBatch)
+        public override void Draw(SpriteBatch _spriteBatch)
         {
             for (int i = 0; i < totalTabs; i++)
             {
-                spriteBatch.Draw(tabList[i].texture, position + tabList[i].Offset, null, Color.White * transparency, 0, Vector2.One / 2, Engine.UIScale, SpriteEffects.None, 0.4f);
-                tabList[i].Draw(spriteBatch, position);
+                _spriteBatch.Draw(tabList[i].texture, position + tabList[i].Offset, null, Color.White * transparency, 0, Vector2.Zero, Engine.UIScale, SpriteEffects.None, 0.4f);
+                tabList[i].Draw(_spriteBatch, position);
+                if(i < icons.Count)
+                {
+                    if (icons[i] != null)
+                    {
+                        Vector2 placementPosition; 
+                        if(i == currentTab)
+                        {
+                            placementPosition = new ((int)(position.X + tabList[i].Offset.X + tabList[i].Size.X / 2 * Engine.UIScale - icons[i].Width / 2 * Engine.UIScale), (int)(position.Y + tabList[i].Offset.Y + tabList[i].Size.Y / 2 * Engine.UIScale - icons[i].Height / 4 * Engine.UIScale));
+                        }
+                        else
+                        {
+                            placementPosition = new((int)(position.X + tabList[i].Offset.X + tabList[i].Size.X / 2 * Engine.UIScale - icons[i].Width / 2 * Engine.UIScale), (int)(position.Y + tabList[i].Offset.Y + tabList[i].Size.Y / 2 * Engine.UIScale + icons[i].Height / 4 * Engine.UIScale));
+                        }
+                        _spriteBatch.Draw(icons[i], placementPosition, null, Color.White * transparency, 0, Vector2.Zero, Engine.UIScale, SpriteEffects.None, 0.4f);
+                    }
+                }
             }
-
-            if(children.Count() > 0)
+            base.Draw(_spriteBatch);
+            if (children.Count > 0)
             {
                 var matches = from val in children where val.Key == currentTab select val.Value;
                 foreach (var widget in matches)
                 {
                     if (widget.texture != null)
                     {
-                        spriteBatch.Draw(widget.texture, position + widget.Offset, null, Color.White, 0, Vector2.One / 2, Engine.UIScale, SpriteEffects.None, 0.4f);
-                        widget.Draw(spriteBatch, position);
+                        _spriteBatch.Draw(widget.texture, position + widget.Offset, null, Color.White, 0, Vector2.Zero, Engine.UIScale, SpriteEffects.None, 0.4f);
+                        widget.Draw(_spriteBatch, position);
                     }
                     else
                     {
-                        widget.Draw(spriteBatch, position);
+                        widget.Draw(_spriteBatch, position);
                     }
                 }
             }
 
-            if(functionalChildren.Count() > 0)
+            if(functionalChildren.Count > 0)
             {
                 var funcMatches = from val in functionalChildren where val.Key == currentTab select val.Value;
                 foreach (var functionalWidget in funcMatches)
@@ -163,12 +185,12 @@ namespace Space_Wars.Content.Main.UI_Elements
                     {
                         if (widget.texture != null)
                         {
-                            spriteBatch.Draw(widget.texture, position + widget.Offset, null, Color.White * transparency, 0, Vector2.One / 2, Engine.UIScale, SpriteEffects.None, 0.4f);
-                            widget.Draw(spriteBatch, position);
+                            _spriteBatch.Draw(widget.texture, position + widget.Offset, null, Color.White * transparency, 0, Vector2.Zero, Engine.UIScale, SpriteEffects.None, 0.4f);
+                            widget.Draw(_spriteBatch, position);
                         }
                         else
                         {
-                            widget.Draw(spriteBatch, position);
+                            widget.Draw(_spriteBatch, position);
                         }
                     }
                 }

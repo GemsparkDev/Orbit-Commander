@@ -32,6 +32,10 @@ namespace Space_Wars.Content.Main.UI_Elements
             id = _id;
             moduleOnlySlot = _moduleOnlySlot;
         }
+        private void UpdateDescription()
+        { 
+
+        }
         public void Interact(Vector2 parentPosition)
         {
             if(UIManager.selectedIcon == null || (UIManager.selectedIcon is Module && moduleOnlySlot == true) || moduleOnlySlot == false)
@@ -80,7 +84,7 @@ namespace Space_Wars.Content.Main.UI_Elements
         {
             if (daughterItem != null)
             {
-                _spriteBatch.Draw(daughterItem.texture, _parentPosition + Offset, null, Color.White, 0, Vector2.One / 2, Engine.UIScale, SpriteEffects.None, 0.35f);
+                _spriteBatch.Draw(daughterItem.texture, _parentPosition + Offset + Size/2 * Engine.UIScale- daughterItem.Size/2 * Engine.UIScale, null, Color.White, 0, Vector2.Zero, Engine.UIScale, SpriteEffects.None, 0);
             }
         }
     }

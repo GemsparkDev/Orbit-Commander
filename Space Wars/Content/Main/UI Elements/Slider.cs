@@ -88,7 +88,7 @@ namespace Space_Wars.Content.Main.UI_Elements
         public override void Draw(SpriteBatch _spriteBatch, Vector2 _parentPosition)
         {
             Vector2 centeringVector = new(0, Size.Y/2);
-            Vector2 knobPosition = offset + _parentPosition + centeringVector + new Vector2((int)(sliderSize.X * sliderInterval), 0) - new Vector2(Assets.Sprites["Knob"].Width / 2, Assets.Sprites["Knob"].Height / 2);
+            Vector2 knobPosition = offset + _parentPosition + centeringVector + new Vector2((int)(sliderSize.X * sliderInterval), Engine.UIScale) - new Vector2(Assets.Sprites["Knob"].Width / 2, Assets.Sprites["Knob"].Height / 2);
             _spriteBatch.Draw(Engine.line, offset + _parentPosition + centeringVector, new Rectangle(0, 0, (int)(sliderSize.X), 2 * (int)Engine.UIScale),
                 disabledColor, 0, Vector2.Zero, 1, SpriteEffects.None, 0);
             _spriteBatch.Draw(Engine.line, offset + _parentPosition + centeringVector, new Rectangle(0, 0, (int)(sliderSize.X * sliderInterval), 2 * (int)Engine.UIScale),

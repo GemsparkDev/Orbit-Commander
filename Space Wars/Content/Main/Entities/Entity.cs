@@ -50,18 +50,18 @@ namespace Space_Wars.Content.Main.Entities
         public virtual void Draw(SpriteBatch _spriteBatch)
         {
             //Draws itself on the given spritebatch, position is offset by the screen position offset
-            _spriteBatch.Draw(texture, position + Engine.screenPosition - Engine.mousePositionOffset, null, color, angle, Size / 2, 1, 0, 0.2f);
+            _spriteBatch.Draw(texture, position - Engine.mousePositionOffset, null, color, angle, Size / 2, 1, 0, 0);
 
             if (Engine.debugMode == true)
             {
                 //Draws a line in the direction of motion for X
-                _spriteBatch.Draw(Engine.line, position + Engine.screenPosition - Engine.mousePositionOffset, new Rectangle((int)position.X, (int)position.Y, 10, 1), Color.White,
+                _spriteBatch.Draw(Engine.line, position - Engine.mousePositionOffset, new Rectangle((int)position.X, (int)position.Y, 10, 1), Color.White,
                     MathF.Atan2(0, velocity.X), Vector2.Zero, new Vector2(MathF.Abs(velocity.X), 1), SpriteEffects.None, 0.4f);
                 //Draws a line in the direction of motion for Y
-                _spriteBatch.Draw(Engine.line, position + Engine.screenPosition - Engine.mousePositionOffset, new Rectangle((int)position.X, (int)position.Y, 10, 1), Color.White,
+                _spriteBatch.Draw(Engine.line, position - Engine.mousePositionOffset, new Rectangle((int)position.X, (int)position.Y, 10, 1), Color.White,
                     MathF.Atan2(velocity.Y, 0), Vector2.Zero, new Vector2(MathF.Abs(velocity.Y), 1), SpriteEffects.None, 0.4f);
                 //Draws a line in the direction the entity is pointing
-                _spriteBatch.Draw(Engine.line, position + Engine.screenPosition - Engine.mousePositionOffset, new Rectangle((int)position.X, (int)position.Y, 10, 1), Color.Red,
+                _spriteBatch.Draw(Engine.line, position - Engine.mousePositionOffset, new Rectangle((int)position.X, (int)position.Y, 10, 1), Color.Red,
                     angle - MathF.PI / 2, Vector2.Zero, Vector2.One, SpriteEffects.None, 0.4f);
             }
         }
