@@ -1,6 +1,6 @@
-# Space Wars  
+# Lagrange Commander  
   
-Space Wars is a game made using C# in monogame. It is a 2D top down wave based shooter where you must repair and upgrade your ship by salvaging from enemies you defeat.  
+Lagrange Commander is a game made using C# in monogame. It is a 2D top down wave based shooter where you must repair and upgrade your ship by salvaging from enemies you defeat. It features realistic N-Body gravitation, which affects all entities and projectiles.
   
 # Changelog  
   
@@ -140,3 +140,22 @@ Update 0.1.1
         -Added an enemy credit system when spawning enemies.  
         -Changed a variety of the buttons to use a wider button sprite.  
         -Changed the main menu to be a tabbed window.  
+	  
+10/7/2023   
+Update 0.2   
+	-Polished the UI and various entity sprite assets, including icons for tabs.  
+	-Added a small selection of sounds.  
+	-Increased the chance of dropping scrap significantly for all enemies.  
+	-Increased the player inventory by one slot.  
+	-Decreased the spread and damage of the shotgun.  
+	-Added a maximum range to the player, and an arrow that points to the mothership.  
+	-Swapped the smelting tab and the garage tab.  
+	-Expanded the size of the garage menu significantly.  
+	-Added a wave counter to the player menu.  
+	-Changed the name of the game from Space Wars to Lagrange Commander.  
+	-Added a proper title screen, and expanded the victory screen to include your time.  
+	-Added the training simulator mode.  
+ 	-Fixed bug #10.  
+	-Fixed bug #11.  
+     
+	
