@@ -44,6 +44,54 @@
 /processorParam:TextureFormat=Color
 /build:Images/Entity_1.png
 
+#begin Images/Entity_10.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:Images/Entity_10.png
+
+#begin Images/Entity_11.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:Images/Entity_11.png
+
+#begin Images/Entity_12 Shield.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:Images/Entity_12 Shield.png
+
+#begin Images/Entity_12.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:Images/Entity_12.png
+
 #begin Images/Entity_2.png
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -79,6 +127,18 @@
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
 /build:Images/Entity_4.png
+
+#begin Images/Entity_5 Shield.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:Images/Entity_5 Shield.png
 
 #begin Images/Entity_5.png
 /importer:TextureImporter
@@ -152,18 +212,6 @@
 /processorParam:TextureFormat=Color
 /build:Images/Item_0.png
 
-#begin Images/Item_1.png
-/importer:TextureImporter
-/processor:TextureProcessor
-/processorParam:ColorKeyColor=255,0,255,255
-/processorParam:ColorKeyEnabled=True
-/processorParam:GenerateMipmaps=False
-/processorParam:PremultiplyAlpha=True
-/processorParam:ResizeToPowerOfTwo=False
-/processorParam:MakeSquare=False
-/processorParam:TextureFormat=Color
-/build:Images/Item_1.png
-
 #begin Images/Particle_0.png
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -199,6 +247,18 @@
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
 /build:Images/Particle_2.png
+
+#begin Images/Projectile_0.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:Images/Projectile_0.png
 
 #begin Images/Projectile_1.png
 /importer:TextureImporter
@@ -452,6 +512,12 @@
 /processorParam:TextureFormat=Color
 /build:Images/UI_9.png
 
+#begin Shaders/BloomShader.fx
+/importer:EffectImporter
+/processor:EffectProcessor
+/processorParam:DebugMode=Auto
+/build:Shaders/BloomShader.fx
+
 #begin Sounds/CloseMenu.wav
 /importer:WavImporter
 /processor:SoundEffectProcessor
@@ -494,17 +560,29 @@
 /processorParam:Quality=Best
 /build:Sounds/Fire_4.wav
 
+#begin Sounds/Fire_5.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Sounds/Fire_5.wav
+
 #begin Sounds/Full.wav
 /importer:WavImporter
 /processor:SoundEffectProcessor
 /processorParam:Quality=Best
 /build:Sounds/Full.wav
 
-#begin Sounds/Hit.wav
+#begin Sounds/Hit_0.wav
 /importer:WavImporter
 /processor:SoundEffectProcessor
 /processorParam:Quality=Best
-/build:Sounds/Hit.wav
+/build:Sounds/Hit_0.wav
+
+#begin Sounds/Hit_1.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Sounds/Hit_1.wav
 
 #begin Sounds/Interact_0.wav
 /importer:WavImporter

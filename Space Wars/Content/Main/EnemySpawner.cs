@@ -12,7 +12,9 @@ namespace Space_Wars.Content.Main
     class EnemySpawner
     {
         private int wave;
-        private Dictionary<int, DelegateEnemy> enemyCreditValues; 
+        private Dictionary<int, DelegateEnemy> enemyCreditValues;
+        private List<DelegateEnemy> bosses;
+        int currentBoss;
         private float waveTimer;
         private float difficulty;
         private Vector2 spawnLocation;
@@ -24,17 +26,25 @@ namespace Space_Wars.Content.Main
         public EnemySpawner(Player _player)
         {
             wave = 0;
-            enemiesSpawned = 6;
-            waveTimer = enemiesSpawned * 4.5f;
+            enemiesSpawned = 10/4;
+            waveTimer = 10;
             player = _player;
             random = new Random();
 
             enemyCreditValues = new()
             {
                 { 1, Enemy.NewFighter },
-                { 3, Enemy.NewCarrier },
-                { 5, Enemy.NewSniper },
+                { 4, Enemy.NewCarrier },
+                { 2, Enemy.NewSniper },
+                { 3, Enemy.NewShotgunner },
             };
+
+            bosses = new()
+            {
+                Enemy.NewSymmetryBoss,
+                Enemy.NewOverloadBoss
+            };
+            currentBoss = random.Next(bosses.Count);
         }
         public void AddEnemyType(int _credits, DelegateEnemy _enemyType)
         {
@@ -53,22 +63,25 @@ namespace Space_Wars.Content.Main
         }
         public void Update()
         {
-            EventHandler.UpdateEnemyCountdownUI(waveTimer, enemiesSpawned * 4.5f, wave);
+            EventHandler.UpdateEnemyCountdownUI(waveTimer, enemiesSpawned * 4f + 5, wave);
             if (waveTimer <= 0)
             {
                 enemiesSpawned = 0;
                 wave++;
-                if (wave < 50)
+                if (wave % 20 == 0)
                 {
-                    difficulty = (MathF.Pow(wave, 2) / 200) + 1;
+                    EntityManager.Add(bosses[currentBoss](NewSpawnLocation(), Vector2.Zero, 0, 0));
+                    waveTimer = 120;
+                    enemiesSpawned = 30;
+                    currentBoss = (currentBoss + 1) % bosses.Count;
                 }
                 else
                 {
-                    difficulty = wave / 2 - 11.5f;
+                    difficulty = (int)((wave + 1) * MathF.Log(wave + 1, MathF.E) - wave) / 15 + 1;
+                    enemyCredits = random.Next((int)(3 * difficulty), (int)(5 * difficulty));
+                    SpawnWaveBatch();
+                    waveTimer = 4f * enemiesSpawned + 5;
                 }
-                enemyCredits = random.Next((int)(3 * difficulty), (int)(5 * difficulty));
-                SpawnWaveBatch();
-                waveTimer = 4.5f * enemiesSpawned;
             }
             waveTimer -= Engine.deltaSeconds;
         }

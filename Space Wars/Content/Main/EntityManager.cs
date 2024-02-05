@@ -2,6 +2,7 @@
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Space_Wars.Content.Main.Entities;
+using Space_Wars.Content.Main.Particles;
 using Space_Wars.Content.Main.UI_Elements;
 using System;
 using System.Collections.Generic;
@@ -18,8 +19,8 @@ namespace Space_Wars.Content.Main
         private static List<Projectile> projectiles = new();
         public static TrainingSimulator trainingSimulator;
         public static Player player;
-        public static Mothership mothership;
-        public static Engine root;
+        private static Mothership mothership;
+        private static Engine root;
         private static EnemySpawner enemySpawner;
         private static Random random = new();
         private static GravitationalSource planet;
@@ -54,11 +55,13 @@ namespace Space_Wars.Content.Main
             addedEntities = new();
             enemies = new();
             projectiles = new();
-            planet = new(Vector2.Zero, Vector2.Zero, 5000, 8, true, Color.Cyan);
+            planet = new(Vector2.Zero, Vector2.Zero, 15000, 8, true, Color.Cyan);
             planet.AddMoon(1000, 250, 1.5f, false);
+            //planet = new(Vector2.Zero, Vector2.Zero, random.Next(2500, 15000), random.Next(6, 12), true, new Color(random.Next(0, 255), random.Next(0, 255), random.Next(0, 255)));
+            //planet.AddMoon(random.Next(1600, 2000), random.Next(100, 500), random.Next(3, 6)/2, false);
             root = _root;
             player = new(Vector2.Zero, Vector2.Zero, 0, 0f);
-            mothership = new Mothership(new Vector2(0, -400), Vector2.Zero, 0f, 0f);
+            mothership = new Mothership(new Vector2(0, -planet.radius - Assets.DimsOf(Sprite.Mothership).Y/2), Vector2.Zero, 0f, 0f);
             player.mothership = mothership;
             Add(mothership);
             enemySpawner = new EnemySpawner(player);
@@ -97,9 +100,12 @@ namespace Space_Wars.Content.Main
                 planet.AttractObject(entity);
             }
 
-            if (projectiles.Count >= 100)
+            if (projectiles.Count >= 150)
             {
-                projectiles[0].isExpired = true;
+                for (int i = 0; i < projectiles.Count - 150; i++)
+                {
+                    projectiles[i].isExpired = true;
+                }
             }
 
             //Clears all expired entities from the entity lists
@@ -191,6 +197,18 @@ namespace Space_Wars.Content.Main
             currentKarma += (1 / _rarity);
             return false;
         }
+        public static Vector2 GetNormalizedAcceleration(Vector2 _position)
+        {
+            Vector2 normalVector = Vector2.Normalize(_position - planet.position);
+            Vector2 acceleration = normalVector * (planet.radius * planet.radius / DistanceSqr(planet.position, _position));
+            foreach (GravitationalSource moon in planet.moons)
+            {
+                normalVector = Vector2.Normalize(_position - moon.position);
+                acceleration += normalVector * (moon.radius * moon.radius / DistanceSqr(moon.position, _position));
+                //Note: only goes one layer deep; Potential fix: eliminate moons, make all planets one list
+            }
+            return acceleration;
+        }
     }
     public class TrainingSimulator
     {
@@ -212,6 +230,7 @@ namespace Space_Wars.Content.Main
             AddBehaviour(MoveAround());
             AddBehaviour(FightEnemy());
             AddBehaviour(TeachSkill());
+            AddBehaviour(TeachEnergy());
             AddBehaviour(CollectScrap());
             AddBehaviour(SmeltScrap());
             AddBehaviour(RepairShip());
@@ -284,9 +303,17 @@ namespace Space_Wars.Content.Main
             enemy = null;
         }
         IEnumerable<int> TeachSkill()
+        {  
+            instructionText = "You are equipped with a dash that teleports you forward. You can activate it by pressing Q when the cyan bar is full.";
+            while (Keyboard.GetState().IsKeyDown(Keys.Q) == false)
+            {
+                yield return 0;
+            }
+        }
+        IEnumerable<int> TeachEnergy()
         {
-            cooldown = 15;            
-            instructionText = "You can toggle your ability by pressing Q when the yellow bar below your player is full. Your ability teleports you forward, and gives you half a second of immunity time";
+            cooldown = 15;
+            instructionText = "Additionally, your craft requires energy to function, represented by the yellow bar. It is used by your modules and regenerates quickly when usage stops.";
             while (cooldown > 0)
             {
                 cooldown -= Engine.deltaSeconds;
@@ -297,7 +324,7 @@ namespace Space_Wars.Content.Main
         {
             item = ItemFactory.NewScrap(new Vector2(0, -600), Vector2.Zero, 0);
             EntityManager.Add(item);
-            instructionText = "Enemies will sometimes drop scrap. You can collect this scrap by pressing E when close to it, then docking with the mothership. Be careful not to let it run into the planet.";
+            instructionText = "Enemies will occasionally drop scrap. You can collect it by holding right click when close to the scrap, then docking with the mothership. Be careful not to let it run into the planet.";
             while (player.mothership.inventory[0,0] == null)
             {
                 if(item.isExpired == true)
@@ -311,7 +338,7 @@ namespace Space_Wars.Content.Main
         }
         IEnumerable<int> SmeltScrap()
         {
-            instructionText = "You can refine the scrap by pressing I while docked, then dragging the scrap to the smelting slot.";
+            instructionText = "You can refine the scrap by pressing I while docked, then dragging the scrap to the smelting slot on the first tab.";
             while (player.mothership.scrap == 0)
             {
                 yield return 0;
@@ -325,7 +352,7 @@ namespace Space_Wars.Content.Main
                 player.modules[i].health = 0;
             }
             player.mothership.scrap = 50;
-            instructionText = "If you are damaged, you can heal by going into the garage on the second tab, selecting a module, and pressing repair. This costs 3 scrap per repair. Note that you shoot and move slower when damaged.";
+            instructionText = "You can heal by going into the garage on the second tab, dragging a module to the repair slot, and pressing repair. Repairing costs 3 scrap per repair.";
             while (player.modules[0].health + player.modules[1].health + player.modules[2].health + player.modules[3].health < 20)
             {
                 yield return 0;
@@ -333,7 +360,7 @@ namespace Space_Wars.Content.Main
         }
         IEnumerable<int> RepairMothership()
         {
-            instructionText = "Your objective is to fully repair the mothership by going to the third tab of the mothership menu and pressing repair with 5 refined scrap. You will need 25 scrap total to complete repairs.";
+            instructionText = "Your objective is to fix the mothership by going to the third tab and pressing repair with 5 refined scrap. You will need 25 scrap total to complete repairs.";
             while (player.mothership.currentlyCrafting == false)
             {
                 yield return 0;

@@ -24,7 +24,7 @@ namespace Space_Wars.Content.Main.Entities
             velocity = _velocity;
             angle = _angle;
             angularVelocity = _angularVelocity;
-            texture = Assets.Sprites["Mothership"];
+            texture = Assets.Get(Sprite.Mothership);
             maxHealth = health;
             isFriendly = true;
             color = new Color(0, 255, 0);
@@ -36,7 +36,7 @@ namespace Space_Wars.Content.Main.Entities
             if (health <= 0)
             {
                 isExpired = true;
-                SoundManager.PlaySound(Assets.SoundFX["Death"], position);
+                SoundManager.PlaySound(Assets.Get(Sound.Death), position);
             }
             if (health > maxHealth)
             {
@@ -49,7 +49,7 @@ namespace Space_Wars.Content.Main.Entities
                 {
                     scrap++;
                     furnaceItem = null;
-                    SoundManager.PlaySound(Assets.SoundFX["Interact"], position);
+                    SoundManager.PlaySound(Assets.Get(Sound.Interact), position);
                 }
             }
             else
@@ -114,7 +114,7 @@ namespace Space_Wars.Content.Main.Entities
             health -= _damage;
             if (_damage > 0)
             {
-                SoundManager.PlaySound(Assets.SoundFX["Hit"], position);
+                SoundManager.PlaySound(Assets.Get(Sound.Hit), position);
             }
         }
     }

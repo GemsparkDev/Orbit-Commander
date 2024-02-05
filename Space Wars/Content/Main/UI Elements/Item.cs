@@ -35,11 +35,11 @@ namespace Space_Wars.Content.Main.UI_Elements
                     EntityManager.player.leashedMaterials.Add(this);
                     if (EntityManager.player.leashedMaterials.Count < 2)
                     {
-                        SoundManager.PlaySound(Assets.SoundFX["Interact"], position);
+                        SoundManager.PlaySound(Assets.Get(Sound.Interact), position);
                     }
                     else
                     {
-                        SoundManager.PlaySound(Assets.SoundFX["Full"], position);
+                        SoundManager.PlaySound(Assets.Get(Sound.Full), position);
                     }
                 }
                 velocity /= 2*Engine.deltaSeconds + 1;
@@ -91,28 +91,28 @@ namespace Space_Wars.Content.Main.UI_Elements
         //Items
         public static Item NewScrap(Vector2 _position, Vector2 _velocity, float _angle)
         {
-            return new Item(Assets.Sprites["Metal Scrap"], "Metal Salvage", 1, _position, _velocity, _angle, Color.Cyan);
+            return new Item(Assets.Get(Sprite.MetalScrap), "Metal Salvage", 1, _position, _velocity, _angle, Color.Cyan);
         }
         //Modules
         public static Module NewBasicHullModule(Vector2 _position, Vector2 _velocity, float _angle)
         {
-            return new(20, new float[] { 1 }, Assets.Sprites["Hull Module"], "Basic Hull", ModuleType.Hull, 0, _position, _velocity, _angle, Color.White);
+            return new(20, new float[] { 1 }, Assets.Get(Sprite.HullModule), "Basic Hull", ModuleType.Hull, 1, _position, _velocity, _angle, Color.White);
         }
         public static Module NewBasicGunModule(Vector2 _position, Vector2 _velocity, float _angle)
         {
-            return new(20, new float[] { 1 }, Assets.Sprites["Gun Module"], "Basic Guns", ModuleType.Guns, 2, _position, _velocity, _angle, Color.White);
+            return new(20, new float[] { 1 }, Assets.Get(Sprite.GunModule), "Basic Guns", ModuleType.Guns, 1, _position, _velocity, _angle, Color.White);
         }
         public static Module NewBasicEngineModule(Vector2 _position, Vector2 _velocity, float _angle)
         {
-            return new(20, new float[] { 1 }, Assets.Sprites["Engine Module"], "Basic Engines", ModuleType.Engines, 0, _position, _velocity, _angle, Color.White);
+            return new(20, new float[] { 1 }, Assets.Get(Sprite.EngineModule), "Basic Engines", ModuleType.Engines, 0, _position, _velocity, _angle, Color.White);
         }
         public static Module NewBasicSensorModule(Vector2 _position, Vector2 _velocity, float _angle)
         {
-            return new(20, new float[] { 1 }, Assets.Sprites["Sensor Module"], "Basic Sensors", ModuleType.Sensors, 0, _position, _velocity, _angle, Color.White);
+            return new(20, new float[] { 1 }, Assets.Get(Sprite.SensorModule), "Basic Sensors", ModuleType.Sensors, 0, _position, _velocity, _angle, Color.White);
         }
         public static Module NewBasicCoreModule(Vector2 _position, Vector2 _velocity, float _angle)
         {
-            Module module = new(20, new float[] { 1 }, Assets.Sprites["Core Module"], "Basic Core", ModuleType.Core, 0, _position, _velocity, _angle, Color.White);
+            Module module = new(20, new float[] { 1 }, Assets.Get(Sprite.CoreModule), "Basic Core", ModuleType.Core, 0, _position, _velocity, _angle, Color.White);
             return module;
         }
     }

@@ -7,6 +7,7 @@ using Space_Wars.Content.Main;
 using Space_Wars.Content.Main.Particles;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Audio;
+using System.Diagnostics;
 
 namespace Space_Wars.Content.Main.Entities
 {
@@ -15,14 +16,20 @@ namespace Space_Wars.Content.Main.Entities
         private Keys[] pressedKey;
         private Random random = new();
         private KeyboardState oldState;
+        private MouseState oldMouseState;
         public Mothership mothership;
-        private ParticleEmitter engineParticles = new(Assets.Sprites["Circle"], 0.15f, Vector2.Zero, 0, 45, 2, 0, 450f, 1, true, Color.Cyan, Color.DarkSlateBlue, EmitterType.EmissionOverTime);
-        private ParticleEmitter smokeParticles = new(Assets.Sprites["Circle"], 1f, Vector2.Zero, 0, 45, 1, 0, 0.25f, 1, true, Color.Gray, Color.DarkGray, EmitterType.EmissionOverTime);
+        private ParticleEmitter engineParticles = new(Assets.Get(Sprite.Circle), 0.15f, Vector2.Zero, 0, 45, 2, 0, 450f, 1, true, Color.Cyan, Color.DarkSlateBlue, EmitterType.EmissionOverTime);
+        //private ParticleEmitter engineParticles = new(Assets.Sprites["Circle"], 0.15f, Vector2.Zero, 0, 45, 2, 0, 450f, 1, true, Color.Orange, Color.Crimson, EmitterType.EmissionOverTime);
+        private ParticleEmitter smokeParticles = new(Assets.Get(Sprite.Circle), 1f, Vector2.Zero, 0, 45, 1, 0, 0.25f, 1, true, Color.Gray, Color.DarkGray, EmitterType.EmissionOverTime);
         private SoundEffectInstance engineSounds;
         private float cooldown = 0;
         private float invincibilityCooldown = 0;
         private float engineCooldown = 0;
+        private float energyCooldown = 0;
         private float cachedDamage = 0;
+        private float gunAngle = 0;
+        private float energy = 100;
+        private float maxEnergy = 100;
         private Vector2 targetVector;
         public bool isDocked = true;
         public bool isEngineActive = false;
@@ -45,19 +52,19 @@ namespace Space_Wars.Content.Main.Entities
             velocity = _velocity;
             angle = _angle;
             angularVelocity = _angularVelocity;
-            texture = Assets.Sprites["Player"];
+            texture = Assets.Get(Sprite.Player);
             isFriendly = true;
             color = new Color(0, 255, 0);
             damage = 5;
             ParticleManager.Add(engineParticles);
             ParticleManager.Add(smokeParticles);
-            engineSounds = Assets.SoundFX["Fire Engines"].CreateInstance();
+            engineSounds = Assets.Get(Sound.FireEngines).CreateInstance();
             engineSounds.IsLooped = true;
             SoundManager.AddSound(engineSounds);
             moduleFunctions = new PlayerDelegateMethod[3, 5]
             {
-               { None, Basic, Dash, None, None },
-               { None, Spiral, None, None, None },
+               { Hull, Basic, Dash, None, None },
+               { Shield, Spiral, None, None, None },
                { None, Shotgun, None, None, None },
             };
         }
@@ -69,7 +76,7 @@ namespace Space_Wars.Content.Main.Entities
                 {
                     if (random.NextDouble() <= modules[0].health / 20)
                     {
-                        modules[0].health--;
+                        moduleFunctions[modules[0].ability, 0]();
                     }
                     else
                     {
@@ -105,7 +112,7 @@ namespace Space_Wars.Content.Main.Entities
             {
                 isExpired = true;
                 SoundManager.PauseSound(engineSounds);
-                Assets.SoundFX["Death"].Play();
+                Assets.Get(Sound.Death).Play();
             }
             else if (modules[4].health > 0)
             {
@@ -122,6 +129,17 @@ namespace Space_Wars.Content.Main.Entities
             {
                 engineCooldown -= Engine.deltaSeconds;
             }
+            if(energyCooldown > 0)
+            {
+                energyCooldown -= Engine.deltaSeconds;
+            }
+            else
+            {
+                if(energy < maxEnergy)
+                {
+                    energy += Engine.deltaSeconds * 60;
+                }
+            }
             if (invincibilityCooldown > 0)
             {
                 invincibilityCooldown -= Engine.deltaSeconds;
@@ -134,73 +152,94 @@ namespace Space_Wars.Content.Main.Entities
         }
         public override void Collide(int _damage)
         {
-            if(_damage > 0)
+            if(_damage > 0 && invincibilityCooldown <= 0)
             {
-                if(invincibilityCooldown <= 0)
-                {
-                    cachedDamage += _damage;
-                    SoundManager.PlaySound(Assets.SoundFX["Hit"], position);
-                    invincibilityCooldown = 1;
-                }
+                cachedDamage += _damage;
+                SoundManager.PlaySound(Assets.Get(Sound.Hit), position);
+                invincibilityCooldown = 1;
             }
         }
         public void ControlShip()
         {
+            if (isEngineActive == true)
+            {
+                engineParticles.isEmitterActive = true;
+                SoundManager.PlaySound(engineSounds);
+            }
+            else
+            {
+                engineParticles.isEmitterActive = false;
+                SoundManager.PauseSound(engineSounds);
+            }
+            if (position.Length() >= 2500)
+            {
+                velocity *= 0.8f;
+                velocity += Vector2.Normalize(-position) * Engine.deltaSeconds * 15;
+            }
+            position += velocity * Engine.deltaSeconds * 60;
+
+            if (isDocked == true)
+            {
+                position = mothership.position;
+                velocity = mothership.velocity;
+            }
+            MouseState newMouseState = Mouse.GetState();
             targetVector = Vector2.Normalize(new Vector2(Mouse.GetState().X, Mouse.GetState().Y) - Engine.screenSize/2);
-            angle = MathF.Atan2(targetVector.X, -targetVector.Y) - Engine.camera.Rotation;
-            if (Mouse.GetState().LeftButton == ButtonState.Pressed && cooldown <= 0 && UIManager.lockMouseInput == false && isDocked == false)
+            gunAngle = MathF.Atan2(targetVector.X, -targetVector.Y) - Engine.camera.Rotation;
+            if (newMouseState.LeftButton == ButtonState.Pressed && cooldown <= 0 && UIManager.lockMouseInput == false && isDocked == false)
             {
                 moduleFunctions[modules[1].ability, 1]();
             }
+            if (newMouseState.RightButton == ButtonState.Pressed && oldMouseState.RightButton == ButtonState.Released && UIManager.lockMouseInput == false && isDocked == false)
+            {
+                canGatherResources = true;
+                SoundManager.PlayGlobalSound(Assets.Get(Sound.OpenMenu));
+            }
+            else if(newMouseState.RightButton == ButtonState.Released && oldMouseState.RightButton == ButtonState.Pressed && UIManager.lockMouseInput == false && isDocked == false)
+            {
+                SoundManager.PlayGlobalSound(Assets.Get(Sound.CloseMenu));
+                canGatherResources = false;
+            }
+            oldMouseState = newMouseState;
 
             pressedKey = Keyboard.GetState().GetPressedKeys();
             KeyboardState newState = Keyboard.GetState();
-
+            Vector2 direction = Vector2.Zero;
             if (isDocked == false)
             {
                 for (int i = 0; i < pressedKey.Length; i++)
                 {
-                    float speedMultiplier = (1 / (velocity.Length() + 0.2f) + 1.5f) * (modules[2].health / 40 + 0.5f) / (leashedMaterials.Count + 1) / 10;
-                    //float speedMultiplier = 0.05f;
+                    float speed = 0.2f;
+                    isEngineActive = true;
                     switch (pressedKey[i])
                     {
                         case Keys.W:
-                            isEngineActive = true;
                             engineParticles.sprayAngle = 180;
                             engineParticles.offsetVelocity = velocity;
-                            Move(-Engine.camera.Rotation, speedMultiplier);
+                            direction += new Vector2(0, -1);
                             break;
                         case Keys.A:
-                            isEngineActive = true;
                             engineParticles.sprayAngle = 90;
                             engineParticles.offsetVelocity = velocity;
-                            Move(3 * MathF.PI / 2 - Engine.camera.Rotation, speedMultiplier);
+                            direction += new Vector2(-1, 0);
                             break;
                         case Keys.S:
-                            isEngineActive = true;
                             engineParticles.sprayAngle = 0;
                             engineParticles.offsetVelocity = velocity;
-                            Move(MathF.PI - Engine.camera.Rotation, speedMultiplier);
+                            direction += new Vector2(0, 1);
                             break;
                         case Keys.D:
-                            isEngineActive = true;
                             engineParticles.sprayAngle = 270;
                             engineParticles.offsetVelocity = velocity;
-                            Move(MathF.PI / 2 - Engine.camera.Rotation, speedMultiplier);
+                            direction += new Vector2(1, 0);
                             break;
                         default:
+                            speed = 0f;
+                            isEngineActive = false;
                             break;
                     }
-                }
-                if (oldState.IsKeyUp(Keys.E) && newState.IsKeyDown(Keys.E))
-                {
-                    canGatherResources = true;
-                    SoundManager.PlayGlobalSound(Assets.SoundFX["Open Menu"]);
-                }
-                else if (oldState.IsKeyDown(Keys.E) && newState.IsKeyUp(Keys.E))
-                {
-                    SoundManager.PlayGlobalSound(Assets.SoundFX["Close Menu"]);
-                    canGatherResources = false;
+                    angle = MathF.Atan2(direction.X, -direction.Y);
+                    Move(angle - Engine.camera.Rotation, speed);
                 }
                 if (oldState.IsKeyUp(Keys.Z) && newState.IsKeyDown(Keys.Z))
                 {
@@ -212,7 +251,7 @@ namespace Space_Wars.Content.Main.Entities
                 }
                 if (newState.IsKeyDown(Keys.F))
                 {
-                    velocity *= (0.9f * Engine.deltaSeconds * 60);
+                    velocity *= Engine.deltaSeconds * 60 * 0.9f;
                 }
             }
 
@@ -234,32 +273,6 @@ namespace Space_Wars.Content.Main.Entities
             }
 
             oldState = newState;
-
-            if(isEngineActive == true)
-            {
-                engineParticles.isEmitterActive = true;
-                SoundManager.PlaySound(engineSounds);
-            }
-            else
-            {
-                engineParticles.isEmitterActive = false;
-                SoundManager.PauseSound(engineSounds);
-            }
-            if(position.Length() >= 2500)
-            {
-                velocity = Vector2.Normalize(-position);
-                position = Vector2.Normalize(position) * 2500;
-            }
-            //Moves the player, but offsets the screen to keep the player in the middle
-            position += velocity * Engine.deltaSeconds * 60;
-            angle += angularVelocity * Engine.deltaSeconds * 60 ;
-            angularVelocity = 0;
-
-            if(isDocked == true)
-            {
-                position = mothership.position;
-                velocity = mothership.velocity;
-            }
         }
 
         private void Dock()
@@ -276,7 +289,7 @@ namespace Space_Wars.Content.Main.Entities
                     }
                     velocity += new Vector2(0, -2);
                     leashedMaterials.Clear();
-                    SoundManager.PlayGlobalSound(Assets.SoundFX["Undock"]);
+                    SoundManager.PlayGlobalSound(Assets.Get(Sound.Undock));
                 }
                 else if (isDocked == false)
                 {
@@ -297,54 +310,104 @@ namespace Space_Wars.Content.Main.Entities
                         }
                     }
                     leashedMaterials.Clear();
-                    SoundManager.PlayGlobalSound(Assets.SoundFX["Dock"]);
+                    SoundManager.PlayGlobalSound(Assets.Get(Sound.Dock));
                     UIManager.GetContainer(Containers.GarageMenu).GetWidget(0).text = mothership.scrap.ToString();
                 }
                 isDocked = !isDocked;
             }
         }
+        private bool UseEnergy(float _energy)
+        {
+            if(energy > _energy)
+            {
+                energy -= _energy;
+                energyCooldown = 0.5f;
+                return true;
+            }
+            return false;
+        }
         public static void None()
         {
-
+            return;
         }
         private void Move(float _angle, float _speed)
         {
             velocity += Engine.ToUnitVector(_angle) * 60 * Engine.deltaSeconds * _speed;
         }
+        private void Hull()
+        {
+            if(random.Next(0, 2) > 0)
+            {
+                modules[0].health--;
+            }
+        }
+        private void Shield()
+        {
+            for(int i = 0; i < 2; i++)
+            {
+                if (UseEnergy(4) == false && modules[0].health > 0)
+                {
+                    modules[0].health--;
+                }
+            }
+        }
         private void Basic()
         {
-            EntityManager.Add(new PulseShot(position, targetVector * 4, angle, 0, true, damage));
-            SoundManager.PlaySound(Assets.SoundFX["Fire_1"], position);
-            cooldown = 0.5f / (modules[1].health / 40 + 0.5f);
+            if(UseEnergy(1) == false)
+            {
+                return;
+            }
+            EntityManager.Add(new PulseShot(position, velocity + targetVector * 9, gunAngle, 0, true, 3, true));
+            SoundManager.PlaySound(Assets.Get(Sound.PulseFire), position);
+            cooldown = 0.3f / (modules[1].health / 80 + 0.75f);
         }
         private void Spiral()
         {
-            EntityManager.Add(new SpiralShot(position, targetVector * 4, angle, 0, true, damage * 2, false));
-            EntityManager.Add(new SpiralShot(position, targetVector * 4, angle, 0, true, damage * 2, true));
-            SoundManager.PlaySound(Assets.SoundFX["Fire_1"], position);
-            cooldown = 0.8f / (modules[1].health / 40 + 0.5f);
+            if (UseEnergy(10) == false)
+            {
+                return;
+            }
+            EntityManager.Add(new SpiralShot(position, velocity + targetVector * 6, gunAngle, 0, true, 8, false));
+            EntityManager.Add(new SpiralShot(position, velocity + targetVector * 6, gunAngle, 0, true, 8, true));
+            SoundManager.PlaySound(Assets.Get(Sound.PulseFire), position);
+            cooldown = 1.3f - (modules[1].health / 40);
+            //0.8s to 1.3s
         }
         private void Shotgun()
         {
-            int randomBulletCount = random.Next(3, 6);
+            if (UseEnergy(8) == false)
+            {
+                return;
+            }
+            int randomBulletCount = random.Next(4, 6);
             for (int i = 0; i < randomBulletCount; i++)
             {
                 float angleDegrees = (float)(random.NextDouble() - 0.5) * 5;
                 float offsetAngle = angleDegrees * MathF.PI / 180;
-                Vector2 targetVector = Engine.ToUnitVector(angle + offsetAngle);
-                EntityManager.Add(new PulseShot(position, targetVector * 6, angle + offsetAngle, 0, true, damage/2));
+                Vector2 targetVector = Engine.ToUnitVector(gunAngle + offsetAngle);
+                EntityManager.Add(new PulseShot(position, velocity +targetVector * 6, gunAngle + offsetAngle, 0, true, 1));
             }
-            SoundManager.PlaySound(Assets.SoundFX["Fire_1"], position);
-            cooldown = 1f / (modules[1].health / 40 + 0.5f);
+            SoundManager.PlaySound(Assets.Get(Sound.PulseFire), position);
+            cooldown = 1f - (modules[1].health / 40);
+            // 1s to 1.5s
         }
         private void Dash()
         {
             if(engineCooldown <= 0)
             {
+                if(UseEnergy(25) == false)
+                {
+                    return;
+                }
                 invincibilityCooldown = 0.5f;
-                Vector2 normalVector = new(MathF.Sin(angle), -MathF.Cos(angle));
-                position += normalVector * 400;
-                engineCooldown = (-modules[2].health/2) + 30;
+                Vector2 normalVector = new(MathF.Sin(gunAngle), -MathF.Cos(gunAngle));
+                for (int i = 0; i < 200; i++)
+                {
+                    float timeLeft = ((float)i / 200);
+                    ParticleManager.Add(new Particle(Assets.Get(Sprite.Dot), timeLeft, position + normalVector*i, velocity * timeLeft, gunAngle, 0, 1, true, Color.Cyan, Color.SlateBlue));
+                }
+                position += normalVector * 200;
+                engineCooldown =  3 - (modules[2].health / 13.33f);
             }
         }
         public override void Draw(SpriteBatch _spriteBatch)
@@ -352,14 +415,20 @@ namespace Space_Wars.Content.Main.Entities
             if(isDocked == false)
             {
                 base.Draw(_spriteBatch);
+                //_spriteBatch.Draw(gunTexture, position - Engine.mousePositionOffset - new Vector2(MathF.Sin(angle), -MathF.Cos(angle)) * 3, null, Color.White, gunAngle, new Vector2(gunTexture.Width, 3 * gunTexture.Height/2) / 2, 1, SpriteEffects.None, 0);
                 _spriteBatch.Draw(Engine.line, position - Engine.mousePositionOffset + new Vector2(-texture.Width * 2, texture.Height * 1.5f) / 2, new Rectangle(0, 0, texture.Width * 2, 2),
                     Color.DarkGray, 0, Vector2.Zero, 1, SpriteEffects.None, 0);
-                _spriteBatch.Draw(Engine.line, position - Engine.mousePositionOffset + new Vector2(-texture.Width * 2, texture.Height * 1.5f) / 2, new Rectangle(0, 0, (int)(texture.Width * 2 * (1-engineCooldown/((-modules[2].health / 2) + 30))), 2),
+                _spriteBatch.Draw(Engine.line, position - Engine.mousePositionOffset + new Vector2(-texture.Width * 2, texture.Height * 1.5f) / 2, new Rectangle(0, 0, (int)(texture.Width * 2 * (1-engineCooldown / (3 - (modules[2].health / 13.33f)))), 2),
+                    Color.Cyan, 0, Vector2.Zero, 1, SpriteEffects.None, 0);
+
+                _spriteBatch.Draw(Engine.line, position - Engine.mousePositionOffset + new Vector2(-texture.Width, texture.Height), new Rectangle(0, 0, texture.Width * 2, 2),
+                    Color.DarkGray, 0, Vector2.Zero, 1, SpriteEffects.None, 0);
+                _spriteBatch.Draw(Engine.line, position - Engine.mousePositionOffset + new Vector2(-texture.Width, texture.Height), new Rectangle(0, 0, (int)(texture.Width * 2 * (energy / maxEnergy)), 2),
                     Color.Yellow, 0, Vector2.Zero, 1, SpriteEffects.None, 0);
             }
             if ((position.X*position.X)/(Engine.screenSize.X * Engine.screenSize.X / 4) + (position.Y * position.Y) / (Engine.screenSize.Y * Engine.screenSize.Y / 4) >= 5)
             {
-                _spriteBatch.Draw(Assets.Sprites["Arrow"], position - Engine.mousePositionOffset - Vector2.Normalize(position) * 25, null, color, MathF.Atan2(-position.X, position.Y), new Vector2(Assets.Sprites["Arrow"].Width, Assets.Sprites["Arrow"].Height)/2, 1, 0, 0.2f);
+                _spriteBatch.Draw(Assets.Get(Sprite.Arrow), position - Engine.mousePositionOffset - Vector2.Normalize(position) * 25, null, color, MathF.Atan2(-position.X, position.Y), Assets.DimsOf(Sprite.Arrow)/2, 1, 0, 0.2f);
                 _spriteBatch.DrawString(Assets.textFont, "Return to mothership.", Engine.camera.Position - new Vector2(105, 225), Color.Crimson);
             }
         }

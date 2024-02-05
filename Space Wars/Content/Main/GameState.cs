@@ -45,7 +45,7 @@ namespace Space_Wars.Content.Main
     {
         public Engine _Engine { get; set; }
         private GravitationalSource menuPlanet = new(new Vector2(0, 750), Vector2.Zero, 5000, 9, true, Color.Cyan);
-        private ParticleEmitter smokeParticles = new(Assets.Sprites["Circle"], 1f, new Vector2(0, 300 - Assets.Sprites["Mothership"].Height + 10), 0, 45, 1, 0, 5, 1, true, Color.Gray, Color.DarkGray, EmitterType.EmissionOverTime);
+        private ParticleEmitter smokeParticles = new(Assets.Get(Sprite.Circle), 1f, new Vector2(0, 300 - Assets.DimsOf(Sprite.Mothership).Y + 10), 0, 45, 1, 0, 5, 1, true, Color.Gray, Color.DarkGray, EmitterType.EmissionOverTime);
         public void Update()
         {
             if(menuPlanet.moons.Count == 0)
@@ -60,7 +60,7 @@ namespace Space_Wars.Content.Main
         }
         public void Draw(SpriteBatch _spriteBatch)
         {
-            _spriteBatch.Draw(Assets.Sprites["Mothership"], new Vector2(-Assets.Sprites["Mothership"].Width/2, 300 - Assets.Sprites["Mothership"].Height), new Color(0, 255, 0)); ;
+            _spriteBatch.Draw(Assets.Get(Sprite.Mothership), new Vector2(-Assets.DimsOf(Sprite.Mothership).X / 2, 300 - Assets.DimsOf(Sprite.Mothership).Y), new Color(0, 255, 0));
             ParticleManager.Draw(_spriteBatch);
         }
     }
@@ -140,11 +140,6 @@ namespace Space_Wars.Content.Main
         public Engine _Engine { get; set; }
         public void Update()
         {
-            EntityManager.Update();
-            if(EventHandler.isTraining == false)
-            {
-                EntityManager.IngameUpdate();
-            }
             if (_Engine.oldState.IsKeyUp(Keys.Escape) && _Engine.newState.IsKeyDown(Keys.Escape))
             {
                 EventHandler.GarageTrigger();
@@ -152,7 +147,8 @@ namespace Space_Wars.Content.Main
         }
         public void Draw(SpriteBatch _spriteBatch)
         {
-
+            EntityManager.Draw(_spriteBatch);
+            ParticleManager.Draw(_spriteBatch);
         }
     }
     public class Victory : IGameState
@@ -160,12 +156,12 @@ namespace Space_Wars.Content.Main
         public Engine _Engine { get; set; }
         public void Update()
         {
-
+            
         }
         public void Draw(SpriteBatch _spriteBatch)
         {
-            _spriteBatch.DrawString(Assets.textFont, "You Win!", Engine.screenSize/2, Color.Yellow, 0, Vector2.Zero, Engine.UIScale * 5, SpriteEffects.None, 0.45f);
-            _spriteBatch.DrawString(Assets.textFont, $"Your Time: {Engine.ingameTime.drawText}", Engine.screenSize / 2 + new Vector2(0, 12), Color.White, 0, new Vector2(0, -5), Engine.UIScale, SpriteEffects.None, 0.45f);
+            _spriteBatch.DrawString(Assets.textFont, "You Win!", new Vector2(-12 * 8, -60) * Engine.UIScale + Engine.camera.Position, Color.Yellow, 0, Vector2.Zero, Engine.UIScale * 2, SpriteEffects.None, 0);
+            _spriteBatch.DrawString(Assets.textFont, $"Your Time: {Engine.ingameTime.drawText}", new Vector2(-12 * 12 / 2, (12 * 4 - 60)) * Engine.UIScale + Engine.camera.Position, Color.White, 0, Vector2.Zero, Engine.UIScale/2, SpriteEffects.None, 0);
         }
     }
     public class TrainingMode : IGameState

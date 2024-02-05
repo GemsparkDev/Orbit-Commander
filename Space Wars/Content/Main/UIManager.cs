@@ -23,11 +23,11 @@ namespace Space_Wars.Content.Main
         private MouseState oldState;
         private static readonly List<Container> containers = new();
         public Container focusedContainer;
-        public Container MainMenu { get; } = new TabbedWindow(Engine.screenSize / 2, Assets.Sprites["Large Panel"], 2, 1) { enabled = true };
-        public Container PauseMenu { get; } = new Window(Engine.screenSize / 2, Assets.Sprites["Large Panel"], 1) { enabled = false };
-        public Container PlayerMenu { get; } = new Window(Engine.screenSize / 2, Assets.Sprites["Large Panel"], 1) { enabled = false };
-        public Container MothershipMenu { get; } = new TabbedWindow(Engine.screenSize / 2, Assets.Sprites["Large Panel"], 3, 1) { enabled = false };
-        public Container GarageMenu { get; } = new Window(Engine.screenSize/2, Assets.Sprites["Gargantuan Panel"], 1) { enabled = false };
+        public Container MainMenu { get; } = new TabbedWindow(Engine.screenSize / 2, Assets.Get(Sprite.LargePanel), 2, 1) { enabled = true };
+        public Container PauseMenu { get; } = new Window(Engine.screenSize / 2, Assets.Get(Sprite.LargePanel), 1) { enabled = false };
+        public Container PlayerMenu { get; } = new Window(Engine.screenSize / 2, Assets.Get(Sprite.LargePanel), 1) { enabled = false };
+        public Container MothershipMenu { get; } = new TabbedWindow(Engine.screenSize / 2, Assets.Get(Sprite.LargePanel), 3, 1) { enabled = false };
+        public Container GarageMenu { get; } = new Window(Engine.screenSize/2, Assets.Get(Sprite.GargantuanPanel), 1) { enabled = false };
         public Button exitButton;
         public Button singleplayerButton;
         public Button trainingButton;
@@ -56,8 +56,8 @@ namespace Space_Wars.Content.Main
 
         public UIManager()
         {
-            List<Texture2D> iconGroup1 = new() { Assets.Sprites["Play Icon"], Assets.Sprites["Settings Icon"] };
-            List<Texture2D> iconGroup2 = new() { Assets.Sprites["Smelt Icon"], Assets.Sprites["Repair Icon"], Assets.Sprites["Victory Icon"] };
+            List<Texture2D> iconGroup1 = new() { Assets.Get(Sprite.PlayIcon), Assets.Get(Sprite.SettingsIcon) };
+            List<Texture2D> iconGroup2 = new() { Assets.Get(Sprite.SmeltIcon), Assets.Get(Sprite.RepairIcon), Assets.Get(Sprite.VictoryIcon) };
             TabbedWindow menu = MainMenu as TabbedWindow;
             menu.icons = iconGroup1;
             menu = MothershipMenu as TabbedWindow;
@@ -69,27 +69,27 @@ namespace Space_Wars.Content.Main
             containers.Add(MothershipMenu);
             containers.Add(GarageMenu);
 
-            singleplayerButton = new Button(new Vector2(MainMenu.Size.X / 2, MainMenu.Size.Y / 4), Assets.Sprites["Wide Button"], "Singleplayer", Color.White);
-            trainingButton = new Button(new Vector2(MainMenu.Size.X / 2, MainMenu.Size.Y * 2 / 4), Assets.Sprites["Wide Button"], "Training", Color.White);
-            exitButton = new Button(new Vector2(MainMenu.Size.X / 2, MainMenu.Size.Y * 3 / 4), Assets.Sprites["Wide Button"], "Exit", Color.White);
-            titleName = new Decal(new Vector2(MainMenu.Size.X / 2, -MainMenu.Size.Y) - new Vector2(Assets.Sprites["Title Logo"].Width, Assets.Sprites["Title Logo"].Height)/2, Assets.Sprites["Title Logo"]);
+            singleplayerButton = new Button(new Vector2(MainMenu.Size.X / 2, MainMenu.Size.Y / 4), Assets.Get(Sprite.WideButton), "Singleplayer", Color.White);
+            trainingButton = new Button(new Vector2(MainMenu.Size.X / 2, MainMenu.Size.Y * 2 / 4), Assets.Get(Sprite.WideButton), "Training", Color.White);
+            exitButton = new Button(new Vector2(MainMenu.Size.X / 2, MainMenu.Size.Y * 3 / 4), Assets.Get(Sprite.WideButton), "Exit", Color.White);
+            titleName = new Decal(new Vector2(MainMenu.Size.X / 2, -MainMenu.Size.Y) - Assets.DimsOf(Sprite.Title)/2, Assets.Get(Sprite.Title));
 
-            quitToMenuButton = new Button(PauseMenu.Size/2, Assets.Sprites["Wide Button"], "Quit to Menu", Color.White);
+            quitToMenuButton = new Button(PauseMenu.Size/2, Assets.Get(Sprite.WideButton), "Quit to Menu", Color.White);
 
-            smeltingSlot = new ItemSlot(new Vector2(MainMenu.Size.X / 2 - Assets.Sprites["Button"].Width / 2, 63), Assets.Sprites["Empty Slot"], this, -1, true);
-            furnaceSlider = new Slider(new Vector2(MainMenu.Size.X / 3 - 30, 30), 60, true, Color.White, Color.Gray);
-            furnaceSlot = new ItemSlot(new Vector2(MainMenu.Size.X / 3, 63), Assets.Sprites["Empty Slot"], this, -1, false);
-            garageButton = new Button(new Vector2(MainMenu.Size.X / 2, MainMenu.Size.Y / 4), Assets.Sprites["Wide Button"], "To Garage", Color.White);
-            craftButton = new Button(new Vector2(MainMenu.Size.X / 2, MainMenu.Size.Y * 3 / 4), Assets.Sprites["Button"], "Repair", Color.LightBlue);
+            smeltingSlot = new ItemSlot(new Vector2(MainMenu.Size.X / 2 - Assets.DimsOf(Sprite.Button).X / 2, 63), Assets.Get(Sprite.EmptySlot), this, -1, true);
+            furnaceSlider = new Slider(new Vector2(MainMenu.Size.X / 3 - 30, 30), 60, true, new Color(255, 239, 85), new Color(50, 51, 67));
+            furnaceSlot = new ItemSlot(new Vector2(MainMenu.Size.X / 3, 63), Assets.Get(Sprite.EmptySlot), this, -1, false);
+            garageButton = new Button(new Vector2(MainMenu.Size.X / 2, MainMenu.Size.Y / 4), Assets.Get(Sprite.WideButton), "To Garage", Color.White);
+            craftButton = new Button(new Vector2(MainMenu.Size.X / 2, MainMenu.Size.Y * 3 / 4), Assets.Get(Sprite.Button), "Repair", Color.LightBlue);
             requiredCraftsText = new(MainMenu.Size/2 + new Vector2(0, -6), "25", Color.White);
-            craftingSlider = new Slider(new Vector2(MainMenu.Size.X / 2 - 30, MainMenu.Size.Y / 4), 60, true, Color.White, Color.Gray);
+            craftingSlider = new Slider(new Vector2(MainMenu.Size.X / 2 - 30, MainMenu.Size.Y / 4), 60, true, Color.Cyan, Color.Gray);
 
-            repairSlot = new ItemSlot(new Vector2(GarageMenu.Size.X / 4 - 25, GarageMenu.Size.Y / 2), Assets.Sprites["Empty Slot"], this, -1, true);
+            repairSlot = new ItemSlot(new Vector2(GarageMenu.Size.X / 4 - 25, GarageMenu.Size.Y / 2), Assets.Get(Sprite.EmptySlot), this, -1, true);
             mothershipScrap = new(new Vector2(GarageMenu.Size.X / 2.2f, 20), "0", Color.Gray);
             repairText = new(new Vector2(GarageMenu.Size.X / 4 - 60 / 2.5f, GarageMenu.Size.Y / 2 + 40), "None", Color.White);
-            garagePlayerImage = new Decal(GarageMenu.Size/2 + new Vector2(GarageMenu.Size.X/4, 0) - new Vector2(Assets.Sprites["Player UI"].Width, Assets.Sprites["Player UI"].Height)/2, Assets.Sprites["Player UI"], null, Color.White);
-            validConfigText = new Decal(GarageMenu.Size / 4 + new Vector2(20, GarageMenu.Size.Y/1.5f), "", Color.Red);
-            repairButton = new Button(new Vector2(GarageMenu.Size.X / 4 - 25, GarageMenu.Size.Y / 2 - 40), Assets.Sprites["Button"], "Repair", Color.LightBlue);
+            garagePlayerImage = new Decal(GarageMenu.Size/2 + new Vector2(GarageMenu.Size.X/4, 0) - Assets.DimsOf(Sprite.PlayerUI) / 2, Assets.Get(Sprite.PlayerUI), null, Color.White);
+            validConfigText = new Decal(GarageMenu.Size / 4 + new Vector2(20, GarageMenu.Size.Y/1.5f), "Ready for Combat", Color.Green);
+            repairButton = new Button(new Vector2(GarageMenu.Size.X / 4 - 25, GarageMenu.Size.Y / 2 - 40), Assets.Get(Sprite.Button), "Repair", Color.LightBlue);
 
             enemySlider = new Slider(new Vector2(PlayerMenu.Size.X / 3 - 30, 30), PlayerMenu.Size.X / 1.25f, true, Color.White, Color.Gray);
             waveText = new Decal(new Vector2(PlayerMenu.Size.X / 3 - 30, 42), "0", Color.White);
@@ -98,13 +98,13 @@ namespace Space_Wars.Content.Main
             {
                 if(x % 2 == 0)
                 {
-                    moduleSlots[x] = new ItemSlot(new Vector2((GarageMenu.Size.X / 2.75f),
-                        (Assets.Sprites["Empty Slot"].Height) * x/2 + GarageMenu.Size.Y / 2 - Assets.Sprites["Empty Slot"].Height), Assets.Sprites["Empty Slot"], this, x+1, true);
+                    moduleSlots[x] = new ItemSlot(new Vector2(GarageMenu.Size.X / 2.75f,
+                        Assets.DimsOf(Sprite.EmptySlot).Y * x/2 + GarageMenu.Size.Y / 2 - Assets.DimsOf(Sprite.EmptySlot).Y), Assets.Get(Sprite.EmptySlot), this, x+1, true);
                 }
                 else
                 {
-                    moduleSlots[x] = new ItemSlot(new Vector2((GarageMenu.Size.X / 2.75f + Assets.Sprites["Empty Slot"].Width / 1.4142f),
-                        (Assets.Sprites["Empty Slot"].Height) * x/2 + GarageMenu.Size.Y/2 - Assets.Sprites["Empty Slot"].Height), Assets.Sprites["Empty Slot"], this, x+1, true);
+                    moduleSlots[x] = new ItemSlot(new Vector2(GarageMenu.Size.X / 2.75f + Assets.DimsOf(Sprite.EmptySlot).X / 1.4142f,
+                        Assets.DimsOf(Sprite.EmptySlot).Y * x/2 + GarageMenu.Size.Y/2 - Assets.DimsOf(Sprite.EmptySlot).Y), Assets.Get(Sprite.EmptySlot), this, x+1, true);
                 }
                 GarageMenu.AddWidget(moduleSlots[x] as IFunctional);
                 moduleSlots[x].AddBehaviour(new DelegateMethod(EventHandler.UpdateModules));
@@ -113,8 +113,8 @@ namespace Space_Wars.Content.Main
             {
                 for (int y = 0; y < inventorySlots.GetLength(1); y++)
                 {
-                    inventorySlots[x, y] = new ItemSlot(new Vector2((Assets.Sprites["Empty Slot"].Width) * x + Assets.Sprites["Large Panel"].Width / 1.33f,
-                        (Assets.Sprites["Empty Slot"].Height) * y + Assets.Sprites["Empty Slot"].Height), Assets.Sprites["Empty Slot"], this, -1, false);
+                    inventorySlots[x, y] = new ItemSlot(new Vector2(Assets.DimsOf(Sprite.EmptySlot).X * x + Assets.DimsOf(Sprite.LargePanel).X / 1.33f,
+                        Assets.DimsOf(Sprite.EmptySlot).Y * y + Assets.DimsOf(Sprite.EmptySlot).Y), Assets.Get(Sprite.EmptySlot), this, -1, false);
                     MothershipMenu.AddWidget(inventorySlots[x, y] as IFunctional, 0);
                     inventorySlots[x, y].AddBehaviour(new DelegateMethod(EventHandler.UpdateInventory));
                 }
@@ -176,11 +176,11 @@ namespace Space_Wars.Content.Main
             }
             if (PauseMenu.enabled == true)
             {
-                SoundManager.PlayGlobalSound(Assets.SoundFX["Close Menu"]);
+                SoundManager.PlayGlobalSound(Assets.Get(Sound.CloseMenu));
             }
             else
             {
-                SoundManager.PlayGlobalSound(Assets.SoundFX["Open Menu"]);
+                SoundManager.PlayGlobalSound(Assets.Get(Sound.OpenMenu));
             }
             ToggleMenu(PauseMenu);
             return true;

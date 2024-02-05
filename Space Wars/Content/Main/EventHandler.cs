@@ -31,12 +31,12 @@ namespace Space_Wars.Content.Main
         public static void Exit()
         {
             root.Exit();
-            SoundManager.PlayGlobalSound(Assets.SoundFX["Interact"]);
+            SoundManager.PlayGlobalSound(Assets.Get(Sound.Interact));
         }
         public static void Startgame()
         {
             root.Startgame();
-            SoundManager.PlayGlobalSound(Assets.SoundFX["Interact"]);
+            SoundManager.PlayGlobalSound(Assets.Get(Sound.Interact));
         }
         public static void StartTraining()
         {
@@ -45,18 +45,19 @@ namespace Space_Wars.Content.Main
             PairPlayerUIManager();
             EntityManager.trainingSimulator = new(EntityManager.player, root);
             CurrentGameState.SwitchState(new TrainingMode());
-            SoundManager.PlayGlobalSound(Assets.SoundFX["Interact"]);
+            SoundManager.PlayGlobalSound(Assets.Get(Sound.Interact));
         }
         public static void QuitToMenu()
         {
+            EntityManager.player.velocity = Vector2.Zero;
+            Engine.ingameTime = new();
+            Engine.mousePositionOffset = Vector2.Zero;
             UIManager.GetContainer(Containers.PauseMenu).enabled = false;
             UIManager.ToggleMenu(Containers.MainMenu);
             ParticleManager.Initialize();
             SoundManager.SetAllSounds(false);
             SoundManager.Initialize();
-            EntityManager.player.velocity = Vector2.Zero;
-            Engine.ingameTime = new();
-            SoundManager.PlayGlobalSound(Assets.SoundFX["Interact"]);
+            SoundManager.PlayGlobalSound(Assets.Get(Sound.Interact));
             Engine.camera.Position = Vector2.Zero;
             CurrentGameState.SwitchState(new MainMenu());
         }
@@ -70,20 +71,20 @@ namespace Space_Wars.Content.Main
             }
             else
             { 
-                SoundManager.PlayGlobalSound(Assets.SoundFX["Fail"]);
+                SoundManager.PlayGlobalSound(Assets.Get(Sound.Fail));
                 return;
             }
             if (daughterModule.health < 20 && EntityManager.player.mothership.scrap >= 3)
             {
                 daughterModule.health = 20;
                 EntityManager.player.mothership.scrap -= 3;
-                SoundManager.PlayGlobalSound(Assets.SoundFX["Interact"]);
+                SoundManager.PlayGlobalSound(Assets.Get(Sound.Interact));
                 UpdateRepairText();
                 UIManager.mothershipScrap.text = EntityManager.player.mothership.scrap.ToString();
             }
             else
             {
-                SoundManager.PlayGlobalSound(Assets.SoundFX["Fail"]);
+                SoundManager.PlayGlobalSound(Assets.Get(Sound.Fail));
             }
         }
         public static void UpdateRepairText()
@@ -145,11 +146,11 @@ namespace Space_Wars.Content.Main
             {
                 if (module == null)
                 {
-                    UIManager.validConfigText.text = "Invalid Configuration";
+                    UIManager.validConfigText.text = "";
                     return;
                 }
             }
-            UIManager.validConfigText.text = "";
+            UIManager.validConfigText.text = "Ready for Combat";
         }
         public static void UpdateFurnaceUI(float _value, float _maxValue)
         {
@@ -175,11 +176,11 @@ namespace Space_Wars.Content.Main
             {
                 mothership.scrap -= 5;
                 mothership.currentlyCrafting = true;
-                SoundManager.PlayGlobalSound(Assets.SoundFX["Interact"]);
+                SoundManager.PlayGlobalSound(Assets.Get(Sound.Interact));
             }
             else
             {
-                SoundManager.PlayGlobalSound(Assets.SoundFX["Fail"]);
+                SoundManager.PlayGlobalSound(Assets.Get(Sound.Fail));
             }
         }
         public static void UpdateCraftingUI(float _value, float _maxValue)
@@ -202,7 +203,7 @@ namespace Space_Wars.Content.Main
                     return;
                 }
             }
-            SoundManager.PlayGlobalSound(Assets.SoundFX["Interact"]);
+            SoundManager.PlayGlobalSound(Assets.Get(Sound.Interact));
             UIManager.ToggleMenu(UIManager.GarageMenu);
             UIManager.ToggleMenu(Containers.MothershipMenu);
             if (UIManager.GarageMenu.enabled == true)

@@ -30,18 +30,18 @@ namespace Space_Wars.Content.Main.UI_Elements
             tabList = new();
             totalTabs = _tabs?? 0;
             transparency = _transparency;
-            Vector2 tabOffset = new(0, -Size.Y / 4 + Assets.Sprites["Tab"].Height);
+            Vector2 tabOffset = new(0, -Size.Y / 4 + Assets.DimsOf(Sprite.Tab).Y + 1.5f);
             for (int i = 0; i < totalTabs; i++)
             {
                 if(i == currentTab)
                 {
-                    tabList.Add(new Decal(tabOffset, Assets.Sprites["Selected Tab"]));
+                    tabList.Add(new Decal(tabOffset, Assets.Get(Sprite.SelectedTab)));
                 }
                 else
                 {
-                    tabList.Add(new Decal(tabOffset, Assets.Sprites["Tab"]));
+                    tabList.Add(new Decal(tabOffset, Assets.Get(Sprite.Tab)));
                 }
-                tabOffset.X += (Assets.Sprites["Tab"].Width + 4);
+                tabOffset.X += (Assets.DimsOf(Sprite.Tab).X + 4);
             }
         }
         public override void AddWidget(Widget widget, int tab = 0)
@@ -72,7 +72,7 @@ namespace Space_Wars.Content.Main.UI_Elements
         public override bool GetMouseOver()
         {
             Vector2 mousePosition = new(Mouse.GetState().X, Mouse.GetState().Y);
-            if (position.X <= mousePosition.X && mousePosition.X <= position.X + Size.X * Engine.UIScale && position.Y - Assets.Sprites["Tab"].Height * Engine.UIScale <= mousePosition.Y && mousePosition.Y <= position.Y + Size.Y * Engine.UIScale)
+            if (position.X <= mousePosition.X && mousePosition.X <= position.X + Size.X * Engine.UIScale && position.Y - Assets.DimsOf(Sprite.Tab).Y * Engine.UIScale <= mousePosition.Y && mousePosition.Y <= position.Y + Size.Y * Engine.UIScale)
             {
                 return true;
             }
@@ -95,9 +95,9 @@ namespace Space_Wars.Content.Main.UI_Elements
                     if (currentTab != i)
                     {
                         currentTab = i;
-                        tabList[prevTab].texture = Assets.Sprites["Tab"];
-                        tabList[currentTab].texture = Assets.Sprites["Selected Tab"];
-                        SoundManager.PlayGlobalSound(Assets.SoundFX["Click"]);
+                        tabList[prevTab].texture = Assets.Get(Sprite.Tab);
+                        tabList[currentTab].texture = Assets.Get(Sprite.SelectedTab);
+                        SoundManager.PlayGlobalSound(Assets.Get(Sound.Click));
                     }
                     return new DummyWidget();
                 }
@@ -120,18 +120,18 @@ namespace Space_Wars.Content.Main.UI_Elements
         }
         private void RecalculateTabs()
         {
-            Vector2 tabOffset = new (0, -Size.Y / 4 + Assets.Sprites["Tab"].Height);
+            Vector2 tabOffset = new (0, -Size.Y / 4 + Assets.DimsOf(Sprite.Tab).Y);
             for (int i = 0; i < totalTabs; i++)
             {
                 if (i >= tabList.Count)
                 {
-                    tabList.Add(new Decal(tabOffset, Assets.Sprites["Tab"]));
+                    tabList.Add(new Decal(tabOffset, Assets.Get(Sprite.Tab)));
                 }
                 else
                 {
-                    tabList[i] = new Decal(tabOffset, Assets.Sprites["Tab"]);
+                    tabList[i] = new Decal(tabOffset, Assets.Get(Sprite.Tab));
                 }
-                tabOffset.X += (Assets.Sprites["Tab"].Width + 4);
+                tabOffset.X += (Assets.DimsOf(Sprite.Tab).X + 4);
             }
         }
         public override void Draw(SpriteBatch _spriteBatch)

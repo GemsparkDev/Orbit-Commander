@@ -11,7 +11,7 @@ namespace Space_Wars.Content.Main.Entities
     {
         public Vector2 position;
         public Vector2 velocity;
-        private float mass;
+        public float mass;
         public float radius;
         public List<GravitationalSource> moons = new();
         private ParticleEmitter surface;
@@ -23,13 +23,13 @@ namespace Space_Wars.Content.Main.Entities
             mass = _mass;
             radius = _radius * 50;
             isImmovable = _isImmovable;
-            surface = new ParticleEmitter(Assets.Sprites["Dot"], position, radius, 1, _color);
+            surface = new ParticleEmitter(Assets.Get(Sprite.Dot), position, radius, 1, _color);
             ParticleManager.Add(surface);
         }
         public Vector2 GetAcceleration(Vector2 _position)
         {
             Vector2 relativePosition = _position - position;
-            if(relativePosition == Vector2.Zero)
+            if (relativePosition == Vector2.Zero)
             {
                 relativePosition = Vector2.One;
             }
@@ -62,13 +62,14 @@ namespace Space_Wars.Content.Main.Entities
             else
             {
                 int collisionForce = 0;
-                if(Math.Floor(_entity.velocity.Length() / 2) > 5)
+                Vector2 normalVector = Vector2.Normalize(relativePosition);
+                if(Math.Floor((_entity.velocity - velocity).Length() / 2) > 5)
                 {
                     collisionForce = (int)Math.Floor((_entity.velocity - velocity).Length() / 2);
                 }
                 _entity.Collide(collisionForce);
-                _entity.position = Vector2.Normalize(relativePosition) * radius + Vector2.Normalize(relativePosition) * _entity.ColliderRadius + position;
-                _entity.velocity += (velocity - _entity.velocity) / 2;
+                _entity.velocity += normalVector * (1-((relativePosition.Length() - _entity.ColliderRadius)/radius)) * 10000 * Engine.deltaSeconds;
+                _entity.velocity += (-_entity.velocity / 2 + velocity / 2) * Engine.deltaSeconds * 60;
                 return Vector2.Zero;
             }
 
@@ -99,11 +100,11 @@ namespace Space_Wars.Content.Main.Entities
                     {
                         if (Engine.patchedConics == true)
                         {
-                            ParticleManager.Add(new Particle(Assets.Sprites["Dot"], -(futureMoonPosition - futurePosition) + moon.position, 0, 1, Color.Crimson));
+                            ParticleManager.Add(new Particle(Assets.Get(Sprite.Dot), -(futureMoonPosition - futurePosition) + moon.position, 0, 1, Color.Crimson));
                         }
                         else
                         {
-                            ParticleManager.Add(new Particle(Assets.Sprites["Dot"], futurePosition, 0, 1, Color.Crimson));
+                            ParticleManager.Add(new Particle(Assets.Get(Sprite.Dot), futurePosition, 0, 1, Color.Crimson));
                         }
                         return;
                     }
@@ -111,7 +112,7 @@ namespace Space_Wars.Content.Main.Entities
 
                     if (i % 3 == 0 && (futurePosition - futureMoonPosition).Length() < moon.radius * 3 && Engine.patchedConics == true)
                     {
-                        ParticleManager.Add(new Particle(Assets.Sprites["Dot"], -(futureMoonPosition - futurePosition) + moon.position, 0, 1, Color.DarkCyan));
+                        ParticleManager.Add(new Particle(Assets.Get(Sprite.Dot), -(futureMoonPosition - futurePosition) + moon.position, 0, 1, Color.DarkCyan));
                         iterations -= 10;
                         drawPixel = false;
                     }
@@ -121,12 +122,12 @@ namespace Space_Wars.Content.Main.Entities
                 futurePosition += futureVelocity;
                 if((futurePosition - position).Length() <= radius + _entity.ColliderRadius)
                 {
-                    ParticleManager.Add(new Particle(Assets.Sprites["Dot"], futurePosition, 0, 1, Color.Crimson));
+                    ParticleManager.Add(new Particle(Assets.Get(Sprite.Dot), futurePosition, 0, 1, Color.Crimson));
                     return;
                 }
                 if (i % 3 == 0 && drawPixel == true)
                 {
-                    ParticleManager.Add(new Particle(Assets.Sprites["Dot"], futurePosition, 0, 1, Color.DarkCyan));
+                    ParticleManager.Add(new Particle(Assets.Get(Sprite.Dot), futurePosition, 0, 1, Color.DarkCyan));
                 }
                 drawPixel = true;
                 i++;

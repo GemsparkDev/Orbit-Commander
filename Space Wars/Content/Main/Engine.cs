@@ -62,10 +62,12 @@ namespace Space_Wars.Content.Main
             line = new Texture2D(graphics.GraphicsDevice, 1, 1, false, SurfaceFormat.Color);
             line.SetData(new[] { Color.White });
 
-            camera = new Camera(GraphicsDevice.Viewport);
-            camera.Origin = screenSize / 2;
-            camera.Zoom = new Vector2(1, 1);
-            camera.Position = Vector2.Zero;
+            camera = new Camera(GraphicsDevice.Viewport)
+            {
+                Origin = screenSize / 2,
+                Zoom = new Vector2(1f, 1f),
+                Position = Vector2.Zero
+            };
 
             _UIManager = new UIManager();
             CurrentGameState.Initialize(this);
@@ -134,6 +136,7 @@ namespace Space_Wars.Content.Main
             GraphicsDevice.Clear(Color.Black);
 
             spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, null, null, null, transformMatrix: camera.ViewMatrix);
+            //Assets.effect.Parameters["Time"].SetValue((float)gameTime.TotalGameTime.TotalSeconds);
             CurrentGameState.Draw(spriteBatch);
             spriteBatch.End();
             
@@ -142,7 +145,7 @@ namespace Space_Wars.Content.Main
             _UIManager.Draw(spriteBatch);
             if (UIManager.lockMouseInput == false)
             {
-                spriteBatch.Draw(Assets.Sprites["Cursor"], new Vector2(Mouse.GetState().X, Mouse.GetState().Y), null, Color.White, 0, Vector2.Zero, 1, 0, 0.5f);
+                spriteBatch.Draw(Assets.Get(Sprite.Cursor), new Vector2(Mouse.GetState().X, Mouse.GetState().Y), null, Color.White, 0, Vector2.Zero, 1, 0, 0.5f);
             }
             if (debugMode == true)
             {

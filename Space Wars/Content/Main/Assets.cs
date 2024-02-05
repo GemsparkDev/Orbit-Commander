@@ -1,96 +1,192 @@
-﻿using Microsoft.Xna.Framework.Audio;
+﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Graphics;
 using System.Collections.Generic;
+using System.Reflection.Metadata.Ecma335;
 
 namespace Space_Wars.Content.Main
 {
     public static class Assets
     {
-        public static Dictionary<string, Texture2D> Sprites { get; } = new();
-        public static Dictionary<string, SoundEffect> SoundFX { get; } = new();
+        private static Dictionary<Sprite, Texture2D> Sprites { get; } = new();
+        private static Dictionary<Sound, SoundEffect> SoundFX { get; } = new();
         public static SpriteFont textFont;
+        public static Effect effect;
         public static void LoadAssets(Microsoft.Xna.Framework.Content.ContentManager Content)
         {
             //Sprites
 
             //Entities
-            Sprites.Add("Fighter", Content.Load<Texture2D>("Images/Entity_1"));
-            Sprites.Add("Player", Content.Load<Texture2D>("Images/Entity_2"));
-            Sprites.Add("Asteroid", Content.Load<Texture2D>("Images/Entity_3"));
-            Sprites.Add("Cruiser", Content.Load<Texture2D>("Images/Entity_4"));
-            Sprites.Add("Basic Turret", Content.Load<Texture2D>("Images/Entity_5"));
-            Sprites.Add("Mothership", Content.Load<Texture2D>("Images/Entity_6"));
-            Sprites.Add("Arrow", Content.Load<Texture2D>("Images/Entity_7"));
-            Sprites.Add("Sniper", Content.Load<Texture2D>("Images/Entity_8"));
-            Sprites.Add("Missile", Content.Load<Texture2D>("Images/Entity_9"));
+            Sprites.Add(Sprite.Fighter, Content.Load<Texture2D>("Images/Entity_1"));
+            Sprites.Add(Sprite.Player, Content.Load<Texture2D>("Images/Entity_2"));
+            Sprites.Add(Sprite.Asteroid, Content.Load<Texture2D>("Images/Entity_3"));
+            Sprites.Add(Sprite.Cruiser, Content.Load<Texture2D>("Images/Entity_4"));
+            Sprites.Add(Sprite.Shotgunner, Content.Load<Texture2D>("Images/Entity_5"));
+            Sprites.Add(Sprite.ShotgunShield, Content.Load<Texture2D>("Images/Entity_5 Shield"));
+            Sprites.Add(Sprite.Mothership, Content.Load<Texture2D>("Images/Entity_6"));
+            Sprites.Add(Sprite.Arrow, Content.Load<Texture2D>("Images/Entity_7"));
+            Sprites.Add(Sprite.Sniper, Content.Load<Texture2D>("Images/Entity_8"));
+            Sprites.Add(Sprite.Missile, Content.Load<Texture2D>("Images/Entity_9"));
+            Sprites.Add(Sprite.PlayerGun, Content.Load<Texture2D>("Images/Entity_10"));
+            Sprites.Add(Sprite.SymmetryBoss, Content.Load<Texture2D>("Images/Entity_11"));
+            Sprites.Add(Sprite.OverloadBoss, Content.Load<Texture2D>("Images/Entity_12"));
+            Sprites.Add(Sprite.OverloadShield, Content.Load<Texture2D>("Images/Entity_12 Shield"));
 
             //Items
-            Sprites.Add("Metal Scrap", Content.Load<Texture2D>("Images/Item_0"));
-            Sprites.Add("Turret Base", Content.Load<Texture2D>("Images/Item_1"));
-            Sprites.Add("Hull Module", Content.Load<Texture2D>("Images/UI_7"));
-            Sprites.Add("Engine Module", Content.Load<Texture2D>("Images/UI_9"));
-            Sprites.Add("Gun Module", Content.Load<Texture2D>("Images/UI_10"));
-            Sprites.Add("Sensor Module", Content.Load<Texture2D>("Images/UI_11"));
-            Sprites.Add("Core Module", Content.Load<Texture2D>("Images/UI_12"));
+            Sprites.Add(Sprite.MetalScrap, Content.Load<Texture2D>("Images/Item_0"));
+            Sprites.Add(Sprite.HullModule, Content.Load<Texture2D>("Images/UI_7"));
+            Sprites.Add(Sprite.EngineModule, Content.Load<Texture2D>("Images/UI_9"));
+            Sprites.Add(Sprite.GunModule, Content.Load<Texture2D>("Images/UI_10"));
+            Sprites.Add(Sprite.SensorModule, Content.Load<Texture2D>("Images/UI_11"));
+            Sprites.Add(Sprite.CoreModule, Content.Load<Texture2D>("Images/UI_12"));
 
             //Projectiles
-            Sprites.Add("PulseShot", Content.Load<Texture2D>("Images/Projectile_1"));
+            Sprites.Add(Sprite.SpiralShot, Content.Load<Texture2D>("Images/Projectile_0"));
+            Sprites.Add(Sprite.PulseShot, Content.Load<Texture2D>("Images/Projectile_1"));
 
             //Particles
-            Sprites.Add("Dot", Content.Load<Texture2D>("Images/Particle_0"));
-            Sprites.Add("Dollar", Content.Load<Texture2D>("Images/Particle_1"));
-            Sprites.Add("Circle", Content.Load<Texture2D>("Images/Particle_2"));
+            Sprites.Add(Sprite.Dot, Content.Load<Texture2D>("Images/Particle_0"));
+            Sprites.Add(Sprite.Dollar, Content.Load<Texture2D>("Images/Particle_1"));
+            Sprites.Add(Sprite.Circle, Content.Load<Texture2D>("Images/Particle_2"));
 
             //UI Elements
-            Sprites.Add("Player UI", Content.Load<Texture2D>("Images/UI_1"));
-            Sprites.Add("Title Logo", Content.Load<Texture2D>("Images/UI_2"));
-            Sprites.Add("Button", Content.Load<Texture2D>("Images/UI_3"));
-            Sprites.Add("Gargantuan Panel", Content.Load<Texture2D>("Images/UI_4"));
-            Sprites.Add("Empty Slot", Content.Load<Texture2D>("Images/UI_6"));
-            Sprites.Add("Large Panel", Content.Load<Texture2D>("Images/UI_8"));
-            Sprites.Add("Selected Tab", Content.Load<Texture2D>("Images/UI_13"));
-            Sprites.Add("Tab", Content.Load<Texture2D>("Images/UI_14"));
-            Sprites.Add("Knob", Content.Load<Texture2D>("Images/UI_16"));
-            Sprites.Add("Wide Button", Content.Load<Texture2D>("Images/UI_18"));
-            Sprites.Add("Smelt Icon", Content.Load<Texture2D>("Images/UI_19"));
-            Sprites.Add("Repair Icon", Content.Load<Texture2D>("Images/UI_20"));
-            Sprites.Add("Victory Icon", Content.Load<Texture2D>("Images/UI_21"));
-            Sprites.Add("Play Icon", Content.Load<Texture2D>("Images/UI_22"));
-            Sprites.Add("Settings Icon", Content.Load<Texture2D>("Images/UI_23"));
+            Sprites.Add(Sprite.PlayerUI, Content.Load<Texture2D>("Images/UI_1"));
+            Sprites.Add(Sprite.Title, Content.Load<Texture2D>("Images/UI_2"));
+            Sprites.Add(Sprite.Button, Content.Load<Texture2D>("Images/UI_3"));
+            Sprites.Add(Sprite.LargePanel, Content.Load<Texture2D>("Images/UI_8"));
+            Sprites.Add(Sprite.GargantuanPanel, Content.Load<Texture2D>("Images/UI_4"));
+            Sprites.Add(Sprite.EmptySlot, Content.Load<Texture2D>("Images/UI_6"));
+            Sprites.Add(Sprite.SelectedTab, Content.Load<Texture2D>("Images/UI_13"));
+            Sprites.Add(Sprite.Tab, Content.Load<Texture2D>("Images/UI_14"));
+            Sprites.Add(Sprite.Knob, Content.Load<Texture2D>("Images/UI_16"));
+            Sprites.Add(Sprite.WideButton, Content.Load<Texture2D>("Images/UI_18"));
+            Sprites.Add(Sprite.SmeltIcon, Content.Load<Texture2D>("Images/UI_19"));
+            Sprites.Add(Sprite.RepairIcon, Content.Load<Texture2D>("Images/UI_20"));
+            Sprites.Add(Sprite.VictoryIcon, Content.Load<Texture2D>("Images/UI_21"));
+            Sprites.Add(Sprite.PlayIcon, Content.Load<Texture2D>("Images/UI_22"));
+            Sprites.Add(Sprite.SettingsIcon, Content.Load<Texture2D>("Images/UI_23"));
 
             //Misc
-            Sprites.Add("Cursor", Content.Load<Texture2D>("Images/Cursor"));
+            Sprites.Add(Sprite.Cursor, Content.Load<Texture2D>("Images/Cursor"));
 
             //Sound FX
 
             //Weapon Sounds
-            SoundFX.Add("Fire_1", Content.Load<SoundEffect>("Sounds/Fire_1"));
-            SoundFX.Add("Fire_2", Content.Load<SoundEffect>("Sounds/Fire_2"));
-            SoundFX.Add("Fire_3", Content.Load<SoundEffect>("Sounds/Fire_3"));
-            SoundFX.Add("Explosion", Content.Load<SoundEffect>("Sounds/Fire_4"));
+            SoundFX.Add(Sound.PulseFire, Content.Load<SoundEffect>("Sounds/Fire_1"));
+            SoundFX.Add(Sound.MissileFire, Content.Load<SoundEffect>("Sounds/Fire_2"));
+            SoundFX.Add(Sound.SniperFire, Content.Load<SoundEffect>("Sounds/Fire_3"));
+            SoundFX.Add(Sound.Explosion, Content.Load<SoundEffect>("Sounds/Fire_4"));
+            SoundFX.Add(Sound.ShotgunFire, Content.Load<SoundEffect>("Sounds/Fire_5"));
 
             //Hit Sounds
-            SoundFX.Add("Hit", Content.Load<SoundEffect>("Sounds/Hit"));
-            SoundFX.Add("Death", Content.Load<SoundEffect>("Sounds/Death"));
+            SoundFX.Add(Sound.Hit, Content.Load<SoundEffect>("Sounds/Hit_0"));
+            SoundFX.Add(Sound.ShieldHit, Content.Load<SoundEffect>("Sounds/Hit_1"));
+            SoundFX.Add(Sound.Death, Content.Load<SoundEffect>("Sounds/Death"));
 
             //Misc Sounds
-            SoundFX.Add("Dock", Content.Load<SoundEffect>("Sounds/Dock"));
-            SoundFX.Add("Undock", Content.Load<SoundEffect>("Sounds/Undock"));
-            SoundFX.Add("Full", Content.Load<SoundEffect>("Sounds/Full"));
-            SoundFX.Add("Fire Engines", Content.Load<SoundEffect>("Sounds/Loop_0"));
+            SoundFX.Add(Sound.Dock, Content.Load<SoundEffect>("Sounds/Dock"));
+            SoundFX.Add(Sound.Undock, Content.Load<SoundEffect>("Sounds/Undock"));
+            SoundFX.Add(Sound.Full, Content.Load<SoundEffect>("Sounds/Full"));
+            SoundFX.Add(Sound.FireEngines, Content.Load<SoundEffect>("Sounds/Loop_0"));
 
             //Menu Sounds
-            SoundFX.Add("Open Menu", Content.Load<SoundEffect>("Sounds/OpenMenu"));
-            SoundFX.Add("Close Menu", Content.Load<SoundEffect>("Sounds/CloseMenu"));
-            SoundFX.Add("Interact", Content.Load<SoundEffect>("Sounds/Interact_0"));
-            SoundFX.Add("Click", Content.Load<SoundEffect>("Sounds/Interact_1"));
-            SoundFX.Add("Fail", Content.Load<SoundEffect>("Sounds/Interact_2"));
+            SoundFX.Add(Sound.OpenMenu, Content.Load<SoundEffect>("Sounds/OpenMenu"));
+            SoundFX.Add(Sound.CloseMenu, Content.Load<SoundEffect>("Sounds/CloseMenu"));
+            SoundFX.Add(Sound.Interact, Content.Load<SoundEffect>("Sounds/Interact_0"));
+            SoundFX.Add(Sound.Click, Content.Load<SoundEffect>("Sounds/Interact_1"));
+            SoundFX.Add(Sound.Fail, Content.Load<SoundEffect>("Sounds/Interact_2"));
 
             //Current Text Font
             textFont = Content.Load<SpriteFont>("Fonts/RobotoMono");
 
+            effect = Content.Load<Effect>("Shaders/BloomShader");
             //TODO: Add more sound effects for menu sounds
             //TODO: Rename basic module elements to Item_2 - Item_6
         }
+        public static Texture2D Get(Sprite sprite)
+        {
+            return Sprites[sprite];
+        }
+        public static Vector2 DimsOf(Sprite sprite)
+        {
+            Texture2D texture = Sprites[sprite];
+            return new Vector2(texture.Width, texture.Height);
+        }
+        public static SoundEffect Get(Sound sound)
+        {
+            return SoundFX[sound];
+        }
+    }
+    public enum Sprite
+    {
+        Fighter,
+        Player,
+        Asteroid,
+        Cruiser,
+        Shotgunner,
+        ShotgunShield,
+        Mothership,
+        Arrow,
+        Sniper,
+        Missile,
+        PlayerGun,
+        SymmetryBoss,
+        OverloadBoss,
+        OverloadShield,
+
+        MetalScrap,
+        HullModule,
+        EngineModule,
+        GunModule,
+        SensorModule,
+        CoreModule,
+
+        SpiralShot,
+        PulseShot,
+
+        Dot,
+        Dollar,
+        Circle,
+
+        PlayerUI,
+        Title,
+        Button,
+        LargePanel,
+        GargantuanPanel,
+        EmptySlot,
+        SelectedTab,
+        Tab,
+        Knob,
+        WideButton,
+        SmeltIcon,
+        RepairIcon,
+        VictoryIcon,
+        PlayIcon,
+        SettingsIcon,
+
+        Cursor,
+    }
+    public enum Sound
+    {
+        PulseFire,
+        MissileFire,
+        SniperFire,
+        Explosion,
+        ShotgunFire,
+
+        Hit,
+        ShieldHit,
+        Death, 
+
+        Dock,
+        Undock, 
+        Full,
+        FireEngines,
+
+        OpenMenu,
+        CloseMenu,
+        Interact,
+        Click,
+        Fail, 
     }
 }

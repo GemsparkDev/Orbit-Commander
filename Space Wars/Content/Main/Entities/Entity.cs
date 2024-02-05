@@ -2,6 +2,7 @@
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using Space_Wars.Content.Main;
+using Microsoft.Xna.Framework.Audio;
 
 namespace Space_Wars.Content.Main.Entities
 {
@@ -9,6 +10,7 @@ namespace Space_Wars.Content.Main.Entities
     public abstract class Entity
     {
         public Texture2D texture;
+        public SoundEffect hitSound;
         protected Color color = Color.White;
         public Vector2 position;
         public Vector2 velocity;
