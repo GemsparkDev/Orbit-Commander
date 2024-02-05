@@ -161,16 +161,6 @@ namespace Space_Wars.Content.Main.Entities
         }
         public void ControlShip()
         {
-            if (isEngineActive == true)
-            {
-                engineParticles.isEmitterActive = true;
-                SoundManager.PlaySound(engineSounds);
-            }
-            else
-            {
-                engineParticles.isEmitterActive = false;
-                SoundManager.PauseSound(engineSounds);
-            }
             if (position.Length() >= 2500)
             {
                 velocity *= 0.8f;
@@ -253,6 +243,17 @@ namespace Space_Wars.Content.Main.Entities
                 {
                     velocity *= Engine.deltaSeconds * 60 * 0.9f;
                 }
+            }
+
+            if (isEngineActive == true)
+            {
+                engineParticles.isEmitterActive = true;
+                SoundManager.PlaySound(engineSounds);
+            }
+            else
+            {
+                engineParticles.isEmitterActive = false;
+                SoundManager.PauseSound(engineSounds);
             }
 
             if (oldState.IsKeyUp(Keys.Space) && newState.IsKeyDown(Keys.Space))
