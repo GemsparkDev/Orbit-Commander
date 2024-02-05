@@ -157,5 +157,13 @@ Update 0.2
 	-Added the training simulator mode.  
  	-Fixed bug #10.  
 	-Fixed bug #11.  
-     
 	
+2/5/2024
+Update 0.3
+	-Updated and added various sprites, including the cursor, projectiles, and several entities.  
+	-Added two new bosses, Symmetry and Overload. Symmetry fires a burst shot that gets faster as it's health decreases, and occasionally shoots 4 missiles in a cross pattern. Overload chases and tries to touch the player with several shields, occasionally shooting a barrage of bullets. When all 4 shields are destroyed, Overload is vulnerable for 7.5 seconds before regenerating all 4 shields. Either boss can spawn on wave 20.  
+	-Changed the texture and sound system to use an enum that refers to a dictionary as opposed to a reference to the texture / sound.  
+	-Increased the max amount of projectiles to 150.  
+	-Increased the mass of the primary planet to 15000.  
+	-Added the energy system, which is consumed by various abilities and functions of the player. It regenerates slowly when usage stops.  
+ 
