@@ -166,4 +166,5 @@ Update 0.3
 	-Increased the max amount of projectiles to 150.  
 	-Increased the mass of the primary planet to 15000.  
 	-Added the energy system, which is consumed by various abilities and functions of the player. It regenerates slowly when usage stops.  
- 
+ Hotfix 0.3.0.1  
+	-Fixed bug #13  
