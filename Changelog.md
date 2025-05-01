@@ -168,3 +168,27 @@ Update 0.3
 	-Added the energy system, which is consumed by various abilities and functions of the player. It regenerates slowly when usage stops.  
  Hotfix 0.3.0.1  
 	-Fixed bug #13  
+
+4/30/2025 
+Update 0.4
+	-Added simple component system to entities.  
+	-Added screen shaking.  
+	-Updated the fighter enemy code to allow for allying with the player.  
+	-Added the mission system, allowing for more advanced levels.  
+	-Symmetry now shoots more missiles when at low health.  
+	-Overload can now perform a charge attack.  
+	-The mothership is now an enemy.  
+	-Added the turret cannon.  
+	-Added the hovercraft.  
+	-Added the advanced fighter.  
+	-Added the excursion and wyvern bosses.  
+	-Added the stealth system, which determines what you and enemies are capable of seeing.  
+	-Added the ringed planet.  
+	-Modified the collision system for planets to be easier to interact with.  
+	-Added the pickup system, allowing for conversion of ingame entities and player modules.  
+	-Added the module restarting system, which causes modules to randomly fail and stop functioning when the player is hit.  
+	-Added the sniper, shotgun, silenced, and LMG weapon types.  
+	-Added the shield ability.  
+	-Added the assassin projectile type.  
+	-Moved the UI classes into their own library.  
+	-Added music.  
