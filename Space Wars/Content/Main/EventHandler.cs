@@ -2,225 +2,289 @@
 using Microsoft.Xna.Framework;
 using Space_Wars.Content.Main.Entities;
 using Space_Wars.Content.Main.Particles;
-using Space_Wars.Content.Main.UI_Elements;
+using UILib.Content.Main;
+using System.Collections.Generic;
+using System.Linq;
+using System.Diagnostics;
+using System;
+using Space_Wars.Content.Main.Components;
 
-namespace Space_Wars.Content.Main
+namespace Space_Wars.Content.Main;
+
+public class EventHandler
 {
-    public static class EventHandler
+    private static Player player;
+    private static Engine root;
+    public static bool isTraining = false;
+    private static readonly List<Message> eventLog = new();
+
+    public static bool AcknowledgeMessage(Message _message)
     {
-        public static Player player;
-        public static Mothership mothership;
-        public static UIManager UIManager;
-        public static Engine root;
-        public static bool isTraining = false;
-        public static void Initialize(Player _player, Mothership _mothership)
+        return eventLog.Remove(_message);
+    }
+    public static bool SendMessage(Message _message)
+    {
+        if(eventLog.Contains(_message))
         {
-            player = _player;
-            mothership = _mothership;
+            return false;
         }
-        public static void PairPlayerUIManager()
+        eventLog.Add(_message);
+        return true;
+    }
+    public static void InitializeGameSpace(Player _player)
+    {
+        player = _player;
+    }
+    public static void Initialize(Engine _root)
+    {
+        root = _root;
+    }
+    public static void StartTraining()
+    {
+        ParticleManager.Initialize();
+        Player player = EntityManager.Initialize();
+        EntityManager.TrainingSimulator = new(player);
+        CurrentGameState.SwitchState(new TrainingMode());
+        SoundManager.PlayGlobalSound(Assets.Get(Sound.Interact));
+    }
+    public static void QuitToMenu()
+    {
+        player.velocity = Vector2.Zero;
+        Engine.ingameTime = new();
+        Engine.mousePositionOffset = Vector2.Zero;
+        Engine.UIManager.ToggleMenu((int)Containers.PauseMenu);
+        Engine.UIManager.ToggleMenu((int)Containers.MainMenu);
+        ParticleManager.Initialize();
+        SoundManager.SetAllSounds(false);
+        SoundManager.Initialize(player);  
+        SoundManager.PlayGlobalSound(Assets.Get(Sound.Interact));
+        Engine.Camera.Position = Vector2.Zero;
+        CurrentGameState.SwitchState(new MainMenu());
+    }
+    public static void RepairModule()
+    {
+        ItemSlot repairSlot = Engine.UIManager.GetFuncWidget((int)Containers.GarageMenu, 1) as ItemSlot;
+        Module daughterModule;
+        if (repairSlot.daughterItem != null)
         {
-            for (int i = 0; i < UIManager.moduleSlots.Length; i++)
+            daughterModule = repairSlot.daughterItem as Module;
+        }
+        else
+        { 
+            SoundManager.PlayGlobalSound(Assets.Get(Sound.Fail));
+            return;
+        }
+        if (daughterModule.Health < 20 && EntityManager.CurrentMission.MissionScrap >= 1)
+        {
+            daughterModule.Health = 20;
+            daughterModule.isFailed = false;
+            EntityManager.CurrentMission.MissionScrap -= 1;
+            SoundManager.PlayGlobalSound(Assets.Get(Sound.Interact));
+            UpdateRepairText();
+            Decal mothershipScrap = Engine.UIManager.GetWidget((int)Containers.GarageMenu, 0) as Decal;
+            mothershipScrap.text = EntityManager.CurrentMission.MissionScrap.ToString();
+        }
+        else
+        {
+            SoundManager.PlayGlobalSound(Assets.Get(Sound.Fail));
+        }
+    }
+    public static void UpdateRepairText()
+    {
+        Decal repairText = Engine.UIManager.GetWidget((int)Containers.GarageMenu, 1) as Decal;
+        ItemSlot slot = Engine.UIManager.GetFuncWidget((int)Containers.GarageMenu, 1) as ItemSlot;
+        Module daughterModule = slot.daughterItem as Module;
+        if (slot.daughterItem != null)
+        {
+            repairText.text = $"{daughterModule.Health}/20";
+        }
+        else
+        {
+            repairText.text = "";
+        }
+    }
+
+    public static void UpdateInventoryUI(DockableComponent dockableComponent)
+    {
+        for (int y = 0; y < dockableComponent.Inventory.GetLength(1); y++)
+        {
+            for (int x = 0; x < dockableComponent.Inventory.GetLength(0); x++)
             {
-                ItemSlot slot = UIManager.moduleSlots[i];
-                slot.daughterItem = player.modules[i];
-                slot.daughterItem.parent = slot;
+                Engine.inventorySlots[x, y].daughterItem = dockableComponent.Inventory[x, y];
+                if (Engine.inventorySlots[x, y].daughterItem != null)
+                {
+                    Engine.inventorySlots[x, y].daughterItem.Parent = Engine.inventorySlots[x, y];
+                }
             }
-            UIManager.selectedIcon = null;
         }
-        public static void Exit()
+    }
+    public static void UpdateInventory()
+    {
+        SendMessage(Message.MothershipUpdateInventory);
+    }
+    public static void UpdateModulesUI()
+    {
+        for (int x = 0; x < Engine.moduleSlots.Length; x++)
         {
-            root.Exit();
-            SoundManager.PlayGlobalSound(Assets.Get(Sound.Interact));
-        }
-        public static void Startgame()
-        {
-            root.Startgame();
-            SoundManager.PlayGlobalSound(Assets.Get(Sound.Interact));
-        }
-        public static void StartTraining()
-        {
-            ParticleManager.Initialize();
-            EntityManager.Initialize(root);
-            PairPlayerUIManager();
-            EntityManager.trainingSimulator = new(EntityManager.player, root);
-            CurrentGameState.SwitchState(new TrainingMode());
-            SoundManager.PlayGlobalSound(Assets.Get(Sound.Interact));
-        }
-        public static void QuitToMenu()
-        {
-            EntityManager.player.velocity = Vector2.Zero;
-            Engine.ingameTime = new();
-            Engine.mousePositionOffset = Vector2.Zero;
-            UIManager.GetContainer(Containers.PauseMenu).enabled = false;
-            UIManager.ToggleMenu(Containers.MainMenu);
-            ParticleManager.Initialize();
-            SoundManager.SetAllSounds(false);
-            SoundManager.Initialize();
-            SoundManager.PlayGlobalSound(Assets.Get(Sound.Interact));
-            Engine.camera.Position = Vector2.Zero;
-            CurrentGameState.SwitchState(new MainMenu());
-        }
-        public static void RepairModule()
-        {
-            ItemSlot slot = UIManager.repairSlot;
-            Module daughterModule;
-            if (slot.daughterItem != null)
+            Engine.moduleSlots[x].daughterItem = player.modules.ElementAt(x).Value;
+            if (Engine.moduleSlots[x].daughterItem != null)
             {
-                daughterModule = slot.daughterItem as Module;
+                Engine.moduleSlots[x].daughterItem.Parent = Engine.moduleSlots[x];
             }
-            else
-            { 
-                SoundManager.PlayGlobalSound(Assets.Get(Sound.Fail));
+        }
+    }
+    public static void UpdateModules()
+    {
+        Decal validConfigText = Engine.UIManager.GetWidget((int)Containers.GarageMenu,3) as Decal;
+        for (int x = 0; x < player.modules.Count; x++)
+        {
+            player.modules[(ModuleType)x] = Engine.moduleSlots[x].daughterItem as Module;
+        }
+        foreach (KeyValuePair<ModuleType, Module> module in player.modules)
+        {
+            if (module.Value == null)
+            {
+                validConfigText.text = "";
                 return;
             }
-            if (daughterModule.health < 20 && EntityManager.player.mothership.scrap >= 3)
-            {
-                daughterModule.health = 20;
-                EntityManager.player.mothership.scrap -= 3;
-                SoundManager.PlayGlobalSound(Assets.Get(Sound.Interact));
-                UpdateRepairText();
-                UIManager.mothershipScrap.text = EntityManager.player.mothership.scrap.ToString();
-            }
-            else
-            {
-                SoundManager.PlayGlobalSound(Assets.Get(Sound.Fail));
-            }
         }
-        public static void UpdateRepairText()
+        validConfigText.text = "Ready for Combat";
+    }
+    public static void UpdateFurnaceUI(float _value, float _maxValue, Pickup furnaceItem)
+    {
+        ItemSlot furnaceSlot = Engine.UIManager.GetFuncWidget((int)Containers.MothershipMenu, 1) as ItemSlot;
+        furnaceSlot.daughterItem = furnaceItem;
+        if (furnaceSlot.daughterItem != null)
         {
-            ItemSlot slot = UIManager.repairSlot as ItemSlot;
-            Module daughterModule = slot.daughterItem as Module;
-            if (slot.daughterItem != null)
-            {
-                UIManager.repairText.text = daughterModule.health.ToString();
-            }
-            else
-            {
-                UIManager.repairText.text = "None";
-            }
+            furnaceSlot.daughterItem.Parent = furnaceSlot;
         }
-
-        public static void UpdateInventoryUI()
+        (Engine.UIManager.GetFuncWidget((int)Containers.MothershipMenu,0) as Slider).SetInterval(_value, _maxValue);
+        (Engine.UIManager.GetWidget((int)Containers.GarageMenu, 0) as Decal).text = EntityManager.CurrentMission.MissionScrap.ToString();
+    }
+    public static void UpdateFurnace()
+    {
+        SendMessage(Message.MothershipUpdateFurnace);
+    }
+    public static void ReturnItemToParent()
+    {
+        Engine.UIManager.selectedIcon.Parent.Interact(Engine.UIManager.focusedContainer.position);
+    }
+    public static void CraftItem()
+    {
+        if(EntityManager.CurrentMission.MissionScrap >= 1)
         {
-            for (int y = 0; y < UIManager.inventorySlots.GetLength(1); y++)
-            {
-                for (int x = 0; x < UIManager.inventorySlots.GetLength(0); x++)
-                {
-                    UIManager.inventorySlots[x, y].daughterItem = mothership.inventory[x, y];
-                    if(UIManager.inventorySlots[x, y].daughterItem != null)
-                    {
-                        UIManager.inventorySlots[x, y].daughterItem.parent = UIManager.inventorySlots[x, y];
-                    }
-                }
-            }
-        }
-        public static void UpdateInventory()
-        {
-            for (int y = 0; y < mothership.inventory.GetLength(1); y++)
-            {
-                for (int x = 0; x < mothership.inventory.GetLength(0); x++)
-                {
-                    mothership.inventory[x, y] = UIManager.inventorySlots[x, y].daughterItem;
-                }
-            }
-        }
-        public static void UpdateModulesUI()
-        {
-            for (int x = 0; x < UIManager.moduleSlots.Length; x++)
-            {
-                UIManager.moduleSlots[x].daughterItem = player.modules[x];
-                if (UIManager.moduleSlots[x].daughterItem != null)
-                {
-                    UIManager.moduleSlots[x].daughterItem.parent = UIManager.moduleSlots[x];
-                }
-            }
-        }
-        public static void UpdateModules()
-        {
-            for (int x = 0; x < player.modules.Length; x++)
-            {
-                player.modules[x] = UIManager.moduleSlots[x].daughterItem as Module;
-            }
-            foreach (Module module in EntityManager.player.modules)
-            {
-                if (module == null)
-                {
-                    UIManager.validConfigText.text = "";
-                    return;
-                }
-            }
-            UIManager.validConfigText.text = "Ready for Combat";
-        }
-        public static void UpdateFurnaceUI(float _value, float _maxValue)
-        {
-            UIManager.furnaceSlot.daughterItem = mothership.furnaceItem;
-            if (UIManager.furnaceSlot.daughterItem != null)
-            {
-                UIManager.furnaceSlot.daughterItem.parent = UIManager.furnaceSlot;
-            }
-            UIManager.furnaceSlider.SetInterval(_value, _maxValue);
-            UIManager.mothershipScrap.text = EntityManager.player.mothership.scrap.ToString();
-        }
-        public static void UpdateFurnace()
-        {
-            mothership.furnaceItem = UIManager.furnaceSlot.daughterItem;
-        }
-        public static void ReturnItemToParent()
-        {
-            UIManager.selectedIcon.parent.Interact(UIManager.focusedContainer.position);
-        }
-        public static void CraftItem()
-        {
-            if(mothership.scrap >= 5)
-            {
-                mothership.scrap -= 5;
-                mothership.currentlyCrafting = true;
-                SoundManager.PlayGlobalSound(Assets.Get(Sound.Interact));
-            }
-            else
-            {
-                SoundManager.PlayGlobalSound(Assets.Get(Sound.Fail));
-            }
-        }
-        public static void UpdateCraftingUI(float _value, float _maxValue)
-        {
-            UIManager.craftingSlider.SetInterval(_value, _maxValue);
-            UIManager.mothershipScrap.text = EntityManager.player.mothership.scrap.ToString();
-            UIManager.requiredCraftsText.text = EntityManager.player.mothership.requiredCraftsLeft.ToString();
-        }
-        public static void UpdateEnemyCountdownUI(float _value, float _maxValue, float _wave)
-        {
-            UIManager.enemySlider.sliderInterval = _value / _maxValue;
-            UIManager.waveText.text = $"{_wave}";
-        }
-        public static void GarageTrigger()
-        {
-            foreach(Module module in EntityManager.player.modules)
-            {
-                if(module == null)
-                {
-                    return;
-                }
-            }
+            EntityManager.CurrentMission.MissionScrap -= 1;
+            SendMessage(Message.MothershipCraftItem);
             SoundManager.PlayGlobalSound(Assets.Get(Sound.Interact));
-            UIManager.ToggleMenu(UIManager.GarageMenu);
-            UIManager.ToggleMenu(Containers.MothershipMenu);
-            if (UIManager.GarageMenu.enabled == true)
+        }
+        else
+        {
+            SoundManager.PlayGlobalSound(Assets.Get(Sound.Fail));
+        }
+    }
+    public static void UpdateCraftingUI(float _value, float _maxValue, int requiredCraftsLeft)
+    {
+        (Engine.UIManager.GetFuncWidget((int)Containers.MothershipMenu,3) as Slider).SetInterval(_value, _maxValue);
+        (Engine.UIManager.GetWidget((int)Containers.GarageMenu, 0) as Decal).text = EntityManager.CurrentMission.MissionScrap.ToString();
+        (Engine.UIManager.GetWidget((int)Containers.MothershipMenu,0) as Decal).text = requiredCraftsLeft.ToString();
+    }
+    public static void UpdateRestartSlider(float _value, float _maxValue)
+    {
+        (Engine.UIManager.GetFuncWidget((int)Containers.PlayerMenu, 2) as Slider).SetInterval(_value, _maxValue);
+    }
+    public static void UpdateEnemyCountdownUI(float _value, float _maxValue, float _wave)
+    {
+        (Engine.UIManager.GetFuncWidget((int)Containers.PlayerMenu,0) as Slider).sliderInterval = _value / _maxValue;
+        (Engine.UIManager.GetWidget((int)Containers.PlayerMenu,0) as Decal).text = $"{_wave}";
+    }
+    public static void GarageTrigger()
+    {
+        foreach(KeyValuePair<ModuleType, Module> module in player.modules)
+        {
+            if(module.Value == null)
             {
-                CurrentGameState.SwitchState(new Garage());
-            }
-            else if (UIManager.GarageMenu.enabled == false)
-            {
-                if(isTraining == false)
-                {
-                    CurrentGameState.SwitchState(new PlayingGame());
-                }
-                else
-                {
-                    CurrentGameState.SwitchState(new TrainingMode());
-                }
+                return;
             }
         }
+        SoundManager.PlayGlobalSound(Assets.Get(Sound.Interact));
+        Engine.UIManager.ToggleMenu((int)Containers.MothershipMenu);
+        Engine.UIManager.ToggleMenu((int)Containers.GarageMenu);
+        if (Engine.UIManager.GetContainer((int)Containers.GarageMenu).enabled == true)
+        {
+            CurrentGameState.SwitchState(new Garage());
+            return;
+        }
+        if (isTraining == false)
+        {
+            CurrentGameState.SwitchState(new PlayingGame());
+            return;
+        }
+        CurrentGameState.SwitchState(new TrainingMode());
+    }
+    public static void MissionSelectTrigger()
+    {
+        SoundManager.PlayGlobalSound(Assets.Get(Sound.Interact));
+        Container missionSelect = Engine.UIManager.GetContainer((int)Containers.MissionMenu);
+        if (!Engine.UIManager.ToggleToMenu(missionSelect))
+        {
+            missionSelect.enabled = !missionSelect.enabled;
+        }
+        if (missionSelect.enabled == true)
+        {
+            CurrentGameState.SwitchState(new MissionSelect());
+            return;
+        }
+        CurrentGameState.SwitchState(new PlayingGame());
+    }
+    public static void UpdateMissionText()
+    {
+        Container missionSelect = Engine.UIManager.GetContainer((int)Containers.MissionMenu);
+        Mission mission = EntityManager.CurrentMission;
+        (missionSelect.GetWidget(0) as Decal).text = mission.Name;
+        (missionSelect.GetWidget(1) as Decal).text = mission.Description;
+        (missionSelect.GetWidget(2) as Decal).text = mission.Completed ? "Completed" : "Not Completed";
+        (missionSelect.GetWidget(2) as Decal).textColor = mission.Completed ? Color.Green : Color.Red;
+    }
+    public static void UpdateScrapText()
+    {
+        (Engine.UIManager.GetWidget((int)Containers.GarageMenu, 0) as Decal).text = EntityManager.CurrentMission.MissionScrap.ToString();
+    }
+    public static void UpdateModulesStatus()
+    {
+        string text = "";
+        foreach (var module in player.modules)
+        {
+            if (module.Value.isFailed)
+            {
+                text = text + module.Key + ", ";
+            }
+        }
+        Decal textSource = Engine.UIManager.GetWidget((int)Containers.PlayerMenu, 1) as Decal;
+        if (text == "")
+        {
+            textSource.text = "All systems go!";
+            textSource.textColor = Color.Green;
+        }
+        else
+        {
+            text = text.Remove(text.Length - 2, 1);
+            text += "has failed!";
+            textSource.text = text;
+            textSource.textColor = Color.Red;
+        }
+    }
+    public static void DisableDockingMenus()
+    {
+        Engine.UIManager.GetContainer((int)Containers.MothershipMenu).enabled = false;
+        Engine.UIManager.GetContainer((int)Containers.PlayerMenu).enabled = false;
+    }
+    public static void ToggleDockingMenus()
+    {
+        SoundManager.PlayGlobalSound(Assets.Get(Sound.Interact));
+        SendMessage(Message.ToggleTerminal);
+    }
+    public static void RestartModules()
+    {
+        SendMessage(Message.RestartModules);
     }
 }

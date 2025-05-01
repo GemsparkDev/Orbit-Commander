@@ -3,182 +3,208 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Space_Wars.Content.Main.Entities;
 using Space_Wars.Content.Main.Particles;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using UILib.Content.Main;
 
-namespace Space_Wars.Content.Main
+namespace Space_Wars.Content.Main;
+
+public static class CurrentGameState
 {
-    public static class CurrentGameState
+    private static GameState currentGameState;
+    private static Engine root;
+    public static void SwitchState(GameState _gameState)
     {
-        private static IGameState currentGameState;
-        public static Engine engine;
-        public static void SwitchState(IGameState _gameState)
-        {
-            currentGameState = _gameState;
-            currentGameState._Engine = engine;
-        }
-        public static void Initialize(Engine _engine)
-        {
-            engine = _engine;
-        }
-        public static void Update()
-        {
-            currentGameState.Update();
-        }
-
-        public static void Draw(SpriteBatch _SpriteBatch)
-        {
-            currentGameState.Draw(_SpriteBatch);
-        }
+        SoundManager.SetAllSounds(false);
+        currentGameState = _gameState;
+        currentGameState.Initialize(root);
     }
-    public interface IGameState
+    public static void Initialize(Engine _root)
     {
-        public Engine _Engine { get; set; }
-        public abstract void Update();
-        public abstract void Draw(SpriteBatch _spriteBatch);
+        root = _root;
+    }
+    public static void Update()
+    {
+        currentGameState.Update();
     }
 
-    public class MainMenu : IGameState
+    public static void Draw(SpriteBatch _SpriteBatch)
     {
-        public Engine _Engine { get; set; }
-        private GravitationalSource menuPlanet = new(new Vector2(0, 750), Vector2.Zero, 5000, 9, true, Color.Cyan);
-        private ParticleEmitter smokeParticles = new(Assets.Get(Sprite.Circle), 1f, new Vector2(0, 300 - Assets.DimsOf(Sprite.Mothership).Y + 10), 0, 45, 1, 0, 5, 1, true, Color.Gray, Color.DarkGray, EmitterType.EmissionOverTime);
-        public void Update()
-        {
-            if(menuPlanet.moons.Count == 0)
-            {
-                menuPlanet.AddMoon(1000, 250, 1.5f, false);
-                ParticleManager.Add(smokeParticles);
-                smokeParticles.isEmitterActive = true;
-            }
-            smokeParticles.Update();
-            menuPlanet.Update();
-            ParticleManager.Update();
-        }
-        public void Draw(SpriteBatch _spriteBatch)
-        {
-            _spriteBatch.Draw(Assets.Get(Sprite.Mothership), new Vector2(-Assets.DimsOf(Sprite.Mothership).X / 2, 300 - Assets.DimsOf(Sprite.Mothership).Y), new Color(0, 255, 0));
-            ParticleManager.Draw(_spriteBatch);
-        }
+        currentGameState.Draw(_SpriteBatch);
     }
-    public class PlayingGame : IGameState
+}
+public abstract class GameState
+{
+    protected Engine root;
+    public virtual void Initialize(Engine _root) { root = _root; }
+    public abstract void Update();
+    public abstract void Draw(SpriteBatch _spriteBatch);
+}
+
+public class MainMenu : GameState
+{
+    private GravitationalSource menuPlanet = new(new Vector2(0, 750), Vector2.Zero, 5000, 9, true, Color.Cyan);
+    private ParticleEmitter smokeParticles = new(Assets.Get(Sprite.Circle), 1f, new Vector2(0, 300 - Assets.DimsOf(Sprite.Mothership).Y + 10),
+        0, 45, 1, 0, 10, 1, true, Color.Gray, Color.DarkGray, EmitterType.EmissionOverTime);
+    public override void Initialize(Engine _root)
     {
-        public Engine _Engine { get; set; }
-        public void Update()
-        {
-            EntityManager.Update();
-            EntityManager.PlayerUpdate();
-            EntityManager.IngameUpdate();
-            ParticleManager.Update();
-            if (_Engine.oldState.IsKeyUp(Keys.Escape) && _Engine.newState.IsKeyDown(Keys.Escape))
-            {
-                if (_Engine._UIManager.PauseMenuTrigger())
-                {
-                    SoundManager.SetAllSounds(false);
-                    CurrentGameState.SwitchState(new PausedGame());
-                }
-            }
-        }
-        public void Draw(SpriteBatch _spriteBatch)
-        {
-            EntityManager.Draw(_spriteBatch);
-            ParticleManager.Draw(_spriteBatch);
-            if (Engine.debugMode == true)
-            {
-                //Generates a grid
-                for (int x = (int)(Engine.camera.Position.X - Engine.screenSize.X / 2) / 50; x < (Engine.camera.Position.X + Engine.screenSize.X/2) / 50; x++)
-                {
-                    _spriteBatch.Draw(Engine.line, new Vector2(x * 50 - Engine.mousePositionOffset.X, Engine.camera.Position.Y - Engine.screenSize.Y/2), new Rectangle((int)(x * 50), 0, 1, (int)Engine.screenSize.Y), Color.White, 0, Vector2.Zero, 1, SpriteEffects.None, 0.4f);
-                    _spriteBatch.DrawString(Assets.textFont, ((int)x).ToString(), new Vector2(x * 50 - Engine.mousePositionOffset.X, Engine.camera.Position.Y - Engine.screenSize.Y / 2), Color.White, 0, Vector2.Zero, 1, SpriteEffects.None, 0.4f);
-                }
-                for (int y = (int)(Engine.camera.Position.Y - Engine.screenSize.X / 2) / 50 - 1; y < (Engine.camera.Position.Y + Engine.screenSize.Y/2) / 50 + 1; y++)
-                {
-                    _spriteBatch.Draw(Engine.line, new Vector2(Engine.camera.Position.X - Engine.screenSize.X / 2, y * 50 - Engine.mousePositionOffset.Y), new Rectangle(0, (int)(y * 50), (int)Engine.screenSize.X, 1), Color.White, 0, Vector2.Zero, 1, SpriteEffects.None, 0.4f);
-                    _spriteBatch.DrawString(Assets.textFont, ((int)y).ToString(), new Vector2(Engine.camera.Position.X - Engine.screenSize.X / 2, y * 50 - Engine.mousePositionOffset.Y), Color.White, 0, Vector2.Zero, 1, SpriteEffects.None, 0.4f);
-                }
-            }
-        }
+        base.Initialize(_root);
+        menuPlanet.AddMoon(1000, 250, 1.5f, false);
+        menuPlanet.RenderSurface();
+        ParticleManager.Add(smokeParticles);
+        smokeParticles.isEmitterActive = true;
+        Engine.UIManager.SetScreenMenuEnabled(false);
+        SoundManager.ChangeTrack(Assets.Get(Sound.menu));
     }
-    public class PausedGame : IGameState
+    public override void Update()
     {
-        public Engine _Engine { get; set; }
-        public void Update()
+        menuPlanet.Update();
+        ParticleManager.Update();
+    }
+    public override void Draw(SpriteBatch _spriteBatch)
+    {
+        _spriteBatch.Draw(Assets.Get(Sprite.Mothership), new Vector2(-Assets.DimsOf(Sprite.Mothership).X / 2, 300 - Assets.DimsOf(Sprite.Mothership).Y), new Color(0, 255, 0));
+        ParticleManager.Draw(_spriteBatch);
+    }
+}
+public class PlayingGame : GameState
+{
+    public override void Initialize(Engine _root)
+    {
+        base.Initialize(_root);
+        Engine.UIManager.SetScreenMenuEnabled(true);
+    }
+    public override void Update()
+    {
+        if (!root.IsActive)
         {
-            if (_Engine.oldState.IsKeyUp(Keys.Escape) && _Engine.newState.IsKeyDown(Keys.Escape))
-            {
-                if (_Engine._UIManager.PauseMenuTrigger())
-                {
-                    CurrentGameState.SwitchState(new PlayingGame());
-                }
-            }
+            Engine.UIManager.DisableAll();
+            Engine.UIManager.GetContainer((int)Containers.PauseMenu).enabled = true;
+            CurrentGameState.SwitchState(new PausedGame());
         }
-        public void Draw(SpriteBatch _spriteBatch)
+        EntityManager.PlayerUpdate();
+        EntityManager.IngameUpdate();
+        EntityManager.Update();
+        ParticleManager.Update();
+        if (Input.OldState.IsKeyUp(Keys.Escape) && Input.NewState.IsKeyDown(Keys.Escape))
         {
-            EntityManager.Draw(_spriteBatch);
-            ParticleManager.Draw(_spriteBatch);
-            if (Engine.debugMode == true)
+            if (Engine.UIManager.ToggleToMenu(Engine.UIManager.GetContainer((int)Containers.PauseMenu)))
             {
-                //Generates a grid
-                for (int x = (int)(Engine.camera.Position.X - Engine.screenSize.X / 2) / 50; x < (Engine.camera.Position.X + Engine.screenSize.X / 2) / 50; x++)
-                {
-                    _spriteBatch.Draw(Engine.line, new Vector2(x * 50 - Engine.mousePositionOffset.X, Engine.camera.Position.Y - Engine.screenSize.Y / 2), new Rectangle((int)(x * 50), 0, 1, (int)Engine.screenSize.Y), Color.White, 0, Vector2.Zero, 1, SpriteEffects.None, 0.4f);
-                    _spriteBatch.DrawString(Assets.textFont, ((int)x).ToString(), new Vector2(x * 50 - Engine.mousePositionOffset.X, Engine.camera.Position.Y - Engine.screenSize.Y / 2), Color.White, 0, Vector2.Zero, 1, SpriteEffects.None, 0.4f);
-                }
-                for (int y = (int)(Engine.camera.Position.Y - Engine.screenSize.X / 2) / 50 - 1; y < (Engine.camera.Position.Y + Engine.screenSize.Y / 2) / 50 + 1; y++)
-                {
-                    _spriteBatch.Draw(Engine.line, new Vector2(Engine.camera.Position.X - Engine.screenSize.X / 2, y * 50 - Engine.mousePositionOffset.Y), new Rectangle(0, (int)(y * 50), (int)Engine.screenSize.X, 1), Color.White, 0, Vector2.Zero, 1, SpriteEffects.None, 0.4f);
-                    _spriteBatch.DrawString(Assets.textFont, ((int)y).ToString(), new Vector2(Engine.camera.Position.X - Engine.screenSize.X / 2, y * 50 - Engine.mousePositionOffset.Y), Color.White, 0, Vector2.Zero, 1, SpriteEffects.None, 0.4f);
-                }
+                SoundManager.SetAllSounds(false);
+                CurrentGameState.SwitchState(new PausedGame());
             }
         }
     }
-    public class Garage : IGameState
+    public override void Draw(SpriteBatch _spriteBatch)
     {
-        public Engine _Engine { get; set; }
-        public void Update()
+        EntityManager.Draw(_spriteBatch);
+        ParticleManager.Draw(_spriteBatch);
+        if (Engine.DebugMode == true)
         {
-            if (_Engine.oldState.IsKeyUp(Keys.Escape) && _Engine.newState.IsKeyDown(Keys.Escape))
+            //Generates a grid
+            for (int x = (int)(Engine.Camera.Position.X - Engine.ScreenSize.X / 2) / 50; x < (Engine.Camera.Position.X + Engine.ScreenSize.X/2) / 50; x++)
             {
-                EventHandler.GarageTrigger();
+                _spriteBatch.Draw(Engine.Line, new Vector2(x * 50 - Engine.mousePositionOffset.X, Engine.Camera.Position.Y - Engine.ScreenSize.Y/2), new Rectangle((int)(x * 50), 0, 1, (int)Engine.ScreenSize.Y), Color.Gray * 0.5f, 0, Vector2.Zero, 1, SpriteEffects.None, 0.4f);
+                _spriteBatch.DrawString(Assets.TextFont, ((int)x).ToString(), new Vector2(x * 50 - Engine.mousePositionOffset.X, Engine.Camera.Position.Y - Engine.ScreenSize.Y / 2), Color.White, 0, Vector2.Zero, 1, SpriteEffects.None, 0.4f);
+            }
+            for (int y = (int)(Engine.Camera.Position.Y - Engine.ScreenSize.X / 2) / 50 - 1; y < (Engine.Camera.Position.Y + Engine.ScreenSize.Y/2) / 50 + 1; y++)
+            {
+                _spriteBatch.Draw(Engine.Line, new Vector2(Engine.Camera.Position.X - Engine.ScreenSize.X / 2, y * 50 - Engine.mousePositionOffset.Y), new Rectangle(0, (int)(y * 50), (int)Engine.ScreenSize.X, 1), Color.Gray * 0.5f, 0, Vector2.Zero, 1, SpriteEffects.None, 0.4f);
+                _spriteBatch.DrawString(Assets.TextFont, ((int)y).ToString(), new Vector2(Engine.Camera.Position.X - Engine.ScreenSize.X / 2, y * 50 - Engine.mousePositionOffset.Y), Color.White, 0, Vector2.Zero, 1, SpriteEffects.None, 0.4f);
             }
         }
-        public void Draw(SpriteBatch _spriteBatch)
+    }
+}
+public class PausedGame : GameState
+{
+    public Engine Root { get; set; }
+    public override void Update()
+    {
+        if (Input.OldState.IsKeyUp(Keys.Escape) && Input.NewState.IsKeyDown(Keys.Escape))
         {
-            EntityManager.Draw(_spriteBatch);
-            ParticleManager.Draw(_spriteBatch);
+            if (Engine.UIManager.ToggleToMenu(Engine.UIManager.GetContainer((int)Containers.PauseMenu)))
+            {
+                CurrentGameState.SwitchState(new PlayingGame());
+            }
         }
     }
-    public class Victory : IGameState
+    public override void Draw(SpriteBatch _spriteBatch)
     {
-        public Engine _Engine { get; set; }
-        public void Update()
+        EntityManager.Draw(_spriteBatch);
+        ParticleManager.Draw(_spriteBatch);
+        if (Engine.DebugMode == true)
         {
-            
-        }
-        public void Draw(SpriteBatch _spriteBatch)
-        {
-            _spriteBatch.DrawString(Assets.textFont, "You Win!", new Vector2(-12 * 8, -60) * Engine.UIScale + Engine.camera.Position, Color.Yellow, 0, Vector2.Zero, Engine.UIScale * 2, SpriteEffects.None, 0);
-            _spriteBatch.DrawString(Assets.textFont, $"Your Time: {Engine.ingameTime.drawText}", new Vector2(-12 * 12 / 2, (12 * 4 - 60)) * Engine.UIScale + Engine.camera.Position, Color.White, 0, Vector2.Zero, Engine.UIScale/2, SpriteEffects.None, 0);
+            //Generates a grid
+            for (int x = (int)(Engine.Camera.Position.X - Engine.ScreenSize.X / 2) / 50; x < (Engine.Camera.Position.X + Engine.ScreenSize.X / 2) / 50; x++)
+            {
+                _spriteBatch.Draw(Engine.Line, new Vector2(x * 50 - Engine.mousePositionOffset.X, Engine.Camera.Position.Y - Engine.ScreenSize.Y / 2), new Rectangle((int)(x * 50), 0, 1, (int)Engine.ScreenSize.Y), Color.White, 0, Vector2.Zero, 1, SpriteEffects.None, 0.4f);
+                _spriteBatch.DrawString(Assets.TextFont, ((int)x).ToString(), new Vector2(x * 50 - Engine.mousePositionOffset.X, Engine.Camera.Position.Y - Engine.ScreenSize.Y / 2), Color.White, 0, Vector2.Zero, 1, SpriteEffects.None, 0.4f);
+            }
+            for (int y = (int)(Engine.Camera.Position.Y - Engine.ScreenSize.X / 2) / 50 - 1; y < (Engine.Camera.Position.Y + Engine.ScreenSize.Y / 2) / 50 + 1; y++)
+            {
+                _spriteBatch.Draw(Engine.Line, new Vector2(Engine.Camera.Position.X - Engine.ScreenSize.X / 2, y * 50 - Engine.mousePositionOffset.Y), new Rectangle(0, (int)(y * 50), (int)Engine.ScreenSize.X, 1), Color.White, 0, Vector2.Zero, 1, SpriteEffects.None, 0.4f);
+                _spriteBatch.DrawString(Assets.TextFont, ((int)y).ToString(), new Vector2(Engine.Camera.Position.X - Engine.ScreenSize.X / 2, y * 50 - Engine.mousePositionOffset.Y), Color.White, 0, Vector2.Zero, 1, SpriteEffects.None, 0.4f);
+            }
         }
     }
-    public class TrainingMode : IGameState
+}
+public class Garage : GameState
+{
+    public override void Initialize(Engine _root)
     {
-        public Engine _Engine { get; set; }
-        public void Update()
+        EventHandler.UpdateModulesUI();
+        Engine.UIManager.SetScreenMenuEnabled(false);
+        base.Initialize(_root);
+    }
+    public override void Update()
+    {
+        if (Input.OldState.IsKeyUp(Keys.Escape) && Input.NewState.IsKeyDown(Keys.Escape))
         {
-            EntityManager.PlayerUpdate();
-            EntityManager.Update();
-            ParticleManager.Update();
-            EntityManager.trainingSimulator.Update();
+            EventHandler.GarageTrigger();
         }
-        public void Draw(SpriteBatch _spriteBatch)
-        {
-            EntityManager.trainingSimulator.Draw(_spriteBatch);
-            EntityManager.Draw(_spriteBatch);
-            ParticleManager.Draw(_spriteBatch);
-        }
+    }
+    public override void Draw(SpriteBatch _spriteBatch)
+    {
+        EntityManager.Draw(_spriteBatch);
+        ParticleManager.Draw(_spriteBatch);
+    }
+}
+public class MissionSelect : GameState
+{
+    public override void Initialize(Engine _root)
+    {
+        base.Initialize(_root);
+        Engine.UIManager.SetScreenMenuEnabled(false);
+        EventHandler.UpdateMissionText();
+    }
+    public override void Update() { }
+    public override void Draw(SpriteBatch _spriteBatch) { }
+}
+public class Victory : GameState
+{
+    public override void Initialize(Engine _root)
+    {
+        base.Initialize(_root);
+        Engine.UIManager.SetScreenMenuEnabled(false);
+    }
+    public override void Update() { }
+    public override void Draw(SpriteBatch _spriteBatch)
+    {
+        _spriteBatch.DrawString(Assets.TextFont, "You Win!", new Vector2(-12 * 8, -60) * Engine.UIScale + Engine.Camera.Position, Color.Yellow, 0, Vector2.Zero, Engine.UIScale * 2, SpriteEffects.None, 0);
+        _spriteBatch.DrawString(Assets.TextFont, $"Your Time: {Engine.ingameTime.DrawText}", new Vector2(-12 * 12 / 2, (12 * 4 - 60)) * Engine.UIScale + Engine.Camera.Position, Color.White, 0, Vector2.Zero, Engine.UIScale/2, SpriteEffects.None, 0);
+    }
+}
+public class TrainingMode : GameState
+{
+    public override void Update()
+    {
+        EntityManager.PlayerUpdate();
+        EntityManager.Update();
+        ParticleManager.Update();
+        EntityManager.TrainingSimulator.Update();
+    }
+    public override void Draw(SpriteBatch _spriteBatch)
+    {
+        EntityManager.TrainingSimulator.Draw(_spriteBatch);
+        EntityManager.Draw(_spriteBatch);
+        ParticleManager.Draw(_spriteBatch);
     }
 }

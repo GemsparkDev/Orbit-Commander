@@ -2,7 +2,6 @@
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework;
 using Space_Wars.Content.Main.Entities;
-using Space_Wars.Content.Main.UI_Elements;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -49,17 +48,6 @@ namespace Space_Wars.Content.Main.Particles
         }
         public static void Update()
         {
-            foreach (var particle in addedParticles)
-            {
-                Add(particle);
-            }
-            foreach (ParticleEmitter particleEmitter in addedEmitters)
-            {
-                Add(particleEmitter);
-            }
-            addedParticles.Clear();
-            addedEmitters.Clear();
-
             isUpdating = true;
 
             foreach (var particle in particles)
@@ -84,6 +72,17 @@ namespace Space_Wars.Content.Main.Particles
             particleEmitters = particleEmitters.Where(x => !x.isEmitterExpired).ToList();
 
             isUpdating = false;
+
+            foreach (var particle in addedParticles)
+            {
+                Add(particle);
+            }
+            foreach (ParticleEmitter particleEmitter in addedEmitters)
+            {
+                Add(particleEmitter);
+            }
+            addedParticles.Clear();
+            addedEmitters.Clear();
         }
 
         public static void Draw(SpriteBatch _spriteBatch)

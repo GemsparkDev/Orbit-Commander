@@ -1,19 +1,13 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Space_Wars.Content.Main.Particles
 {
     public class Particle
     {
         public bool isExpired = false;
-        public bool fadesOut;
+        public bool fadesOut = false;
         Vector2 position;
         Vector2 velocity;
         Color color;
@@ -29,6 +23,7 @@ namespace Space_Wars.Content.Main.Particles
         {
             get { return texture == null ? Vector2.Zero : new Vector2(texture.Width, texture.Height); }
         }
+        public String drawText;
         public Particle(Texture2D _texture, float _timeLeft, Vector2 _position, Vector2 _velocity, float _angle, float _angularVelocity, float _transparency, bool _fadesOut, Color _color, Color _fadeToColor)
         {
             texture = _texture;
@@ -40,26 +35,17 @@ namespace Space_Wars.Content.Main.Particles
             fadesOut = _fadesOut;
             color = _color;
             fadeToColor = _fadeToColor;
-            if (fadesOut == true)
-            {
-                transparency = 1;
-                originalTimeLeft = _timeLeft;
-            }
-            else
-            {
-                transparency = _transparency;
-                originalTimeLeft = _timeLeft;
-            }
+            originalTimeLeft = _timeLeft;
+            transparency = _transparency;
         }
         public Particle(Texture2D _texture, Vector2 _position, float _angle, float _transparency, Color _color)
         {
             texture = _texture;
-            timeLeft = Engine.deltaSeconds;
+            timeLeft = float.Epsilon;
             position = _position;
             velocity = Vector2.Zero;
             angle = _angle;
             angularVelocity = 0;
-            fadesOut = false;
             color = _color;
             fadeToColor = Color.White;
             transparency = _transparency;
@@ -67,11 +53,7 @@ namespace Space_Wars.Content.Main.Particles
         }
         public void Update()
         {
-            float timeScalar = timeLeft / originalTimeLeft;
-            if(timeScalar > 1 || -1 > timeScalar)
-            {
-                timeScalar = 1;
-            }
+            float timeScalar = Math.Clamp(timeLeft / originalTimeLeft, 0, 1);
             renderColor.R = (byte)Engine.Lerp(color.R, fadeToColor.R, 1-timeScalar);
             renderColor.G = (byte)Engine.Lerp(color.G, fadeToColor.G, 1-timeScalar);
             renderColor.B = (byte)Engine.Lerp(color.B, fadeToColor.B, 1-timeScalar);
@@ -79,17 +61,21 @@ namespace Space_Wars.Content.Main.Particles
             {
                 isExpired = true;
             }
-            if (fadesOut == true)
+            if (fadesOut)
             {
                 transparency = timeScalar;
             }
-            timeLeft -= Engine.deltaSeconds;
-            position += velocity * Engine.deltaSeconds * 60;
-            angle += angularVelocity * Engine.deltaSeconds * 60;
+            timeLeft -= Engine.DeltaSeconds;
+            position += velocity * Engine.DeltaSeconds * 60;
+            angle += angularVelocity * Engine.DeltaSeconds * 60;
         }
         public void Draw(SpriteBatch _spriteBatch)
         {
-            //Draws itself on the given spritebatch, position is offset by the screen position offset
+            if(drawText != null)
+            {
+                _spriteBatch.DrawString(Assets.TextFont, drawText, position - Engine.mousePositionOffset, renderColor * transparency, angle, new Vector2(drawText.Length*4, 6), 0.75f, 0, 0.2f);
+                return;
+            }
             _spriteBatch.Draw(texture, position - Engine.mousePositionOffset, null, renderColor * transparency, angle, Size/2, 1f, 0, 0.2f);
         }
     }
