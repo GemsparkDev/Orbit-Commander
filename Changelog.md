@@ -102,24 +102,24 @@ Update 0.0.9
     
 8/14/2023  
 Update 0.1  
-    -Added various assets, such as an improved mothership sprite.  
-    -Removed the sentry due to technical debt.  
-    -Increased the range of the fighter enemy by 50 units.  
-    -Added a sound manager for playing, pausing, and looping sounds.  
-    -Updated the ClampVelocity() function to be the same in all directions.  
-    -Added two celestial bodies to the game, a large earth like planet and a dense moon orbiting it.  
-    -Added the GravitationalSource class, which creates a planet at a specific location with a radius, gravitational strength, and the ability to host moons.  
-    -Added a currently WIP crafting system.  
-    -Changed how modules work, with the player having a grid of delegate functions that the module of a specific type and weapon id can select with it's ability.  
-    -Completely removed the MothershipArrow child class from the game.  
-    -Added a basic particle system to the game.  
-    -Added support for container transparency.  
-    -Items now quickly glide to a stop.  
-    -Added the GameState class and it's context class, CurrentGameState, which determines what managers are allowed to update and when.  
-    -Split the EntityManager.Update() function into EntityManager.Update() and EntityManager.PlayerUpdate().  
-    -Added the garage, which provides an environment that allows module repair and reslotting. 
-    -Fixed bug #8.  
-    -Added the WIP interface IAnimatable.  
+	-Added various assets, such as an improved mothership sprite.  
+	-Removed the sentry due to technical debt.  
+	-Increased the range of the fighter enemy by 50 units.  
+	-Added a sound manager for playing, pausing, and looping sounds.  
+	-Updated the ClampVelocity() function to be the same in all directions.  
+	-Added two celestial bodies to the game, a large earth like planet and a dense moon orbiting it.  
+	-Added the GravitationalSource class, which creates a planet at a specific location with a radius, gravitational strength, and the ability to host moons.  
+	-Added a currently WIP crafting system.  
+	-Changed how modules work, with the player having a grid of delegate functions that the module of a specific type and weapon id can select with it's ability.  
+	-Completely removed the MothershipArrow child class from the game.  
+	-Added a basic particle system to the game.  
+	-Added support for container transparency.  
+	-Items now quickly glide to a stop.  
+	-Added the GameState class and it's context class, CurrentGameState, which determines what managers are allowed to update and when.  
+	-Split the EntityManager.Update() function into EntityManager.Update() and EntityManager.PlayerUpdate().  
+	-Added the garage, which provides an environment that allows module repair and reslotting. 
+	-Fixed bug #8.  
+	-Added the WIP interface IAnimatable.  
     
 8/18/2023  
 Update 0.1.1  
@@ -168,7 +168,7 @@ Update 0.3
 	-Added the energy system, which is consumed by various abilities and functions of the player. It regenerates slowly when usage stops.  
  Hotfix 0.3.0.1  
 	-Fixed bug #13  
-
+ 	
 4/30/2025 
 Update 0.4
 	-Added simple component system to entities.  
@@ -192,3 +192,8 @@ Update 0.4
 	-Added the assassin projectile type.  
 	-Moved the UI classes into their own library.  
 	-Added music.  
+ 	
+5/3/2025   
+Update 0.4.0.1  
+	-Planets no longer have moons, and every planet can attract every other planet.  
+	-Fixed bug #9  
