@@ -168,7 +168,7 @@ Update 0.3
 	-Added the energy system, which is consumed by various abilities and functions of the player. It regenerates slowly when usage stops.  
  Hotfix 0.3.0.1  
 	-Fixed bug #13  
-
+ 	
 4/30/2025 
 Update 0.4
 	-Added simple component system to entities.  
@@ -192,7 +192,8 @@ Update 0.4
 	-Added the assassin projectile type.  
 	-Moved the UI classes into their own library.  
 	-Added music.  
-5/3/2025 
-Update 0.4.0.1
-	-Planets no longer have moons, and every planet can attract every other planet
-	-Fixed bug #9
+ 	
+5/3/2025   
+Update 0.4.0.1  
+	-Planets no longer have moons, and every planet can attract every other planet.  
+	-Fixed bug #9  
