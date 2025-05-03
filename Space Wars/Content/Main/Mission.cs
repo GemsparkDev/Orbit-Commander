@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using System.Linq;
 using System.Diagnostics;
+using Space_Wars.Content.Main.Particles;
 
 namespace Space_Wars.Content.Main;
 public class Mission
@@ -11,7 +12,8 @@ public class Mission
     public bool Completed { get; set; } = false;
     public string Name { get; }
     public string Description { get; }
-    public GravitationalSource Planet { get; }
+    public GravitationalSource Planet { get { return planets[0]; } }
+    private GravitationalSource[] planets; 
     //Save original entity parameters to allow cloning
     public List<(Func<Vector2, Vector2, float, Entity>, Vector2, Vector2, float, Condition[])> CopyObjectives { get; }
     public List<(Entity entity, Condition[] conditions)> MissionObjectives { get; } = new();
@@ -25,6 +27,7 @@ public class Mission
     private List<DelegateEnemy> bosses;
     private Enemy aliveBoss = null;
     private int currentBoss;
+    private int tier;
     private float waveTimer = 5;
     private float maxWaveTimer = 5;
     private float difficulty;
@@ -33,37 +36,25 @@ public class Mission
     public delegate Enemy DelegateEnemy(Vector2 position, Vector2 velocity, float angle, bool _isFriendly = false);
     public int EnemiesSpawned { get; private set; } = 0;
 
-    public Mission(GravitationalSource _planet, List<GravitationalSource> _moons, List<(Func<Vector2, Vector2, float, Entity> newEntity, Vector2 position, Vector2 velocity, float angle, Condition[] conditions)> _missionObjectives, string _name, string _description, float _timerModifier, int _waveGoal = 0, int _enemyTier = 0)
+    public Mission(GravitationalSource[] _planets, List<(Func<Vector2, Vector2, float, Entity> newEntity, Vector2 position, Vector2 velocity, float angle, Condition[] conditions)> _missionObjectives, string _name, string _description, float _timerModifier, int _waveGoal = 0, int _enemyTier = 0)
     {
         Name = _name;
         Description = _description;
-        Planet = _planet;
+        planets = _planets;
         CopyObjectives = _missionObjectives;
         foreach (var (newEntity, position, velocity, angle, conditions) in _missionObjectives)
         {
             MissionObjectives.Add((newEntity(position, velocity, angle), (Condition[])conditions.Clone()));
         }
-        if (_moons.Count > 0)
-        {
-            Planet.moons = _moons;
-        }
-        foreach (GravitationalSource moon in _moons)
-        {
-            if (moon.velocity != Vector2.Zero)
-            {
-                continue;
-            }
-            Vector2 normalVelocity = Vector2.Normalize(new Vector2(moon.position.Y, -moon.position.X));
-            moon.velocity = normalVelocity * Planet.GetOrbitalVelocity(moon.position);
-        }
         WaveGoal = _waveGoal;
         timerModifier = _timerModifier;
 
+        tier = _enemyTier;
         if (_enemyTier == 0)
         {
             enemyCreditValues = new()
             {
-                (1, Enemy.NewAdvancedFighter),
+                (1, Enemy.NewFighter),
                 (3, Enemy.NewCarrier),
                 (3, Enemy.NewSniper),
                 (4, Enemy.NewShotgunner),
@@ -95,7 +86,18 @@ public class Mission
     }
     public void Update()
     {
-        Planet.Update();
+        foreach (var planet in planets)
+        {
+            planet.Update();
+            foreach (var planet2 in planets)
+            {
+                if (planet == planet2)
+                {
+                    continue;
+                }
+                planet.AttractObject(planet2);
+            }
+        }
         bool allCompleted = true;
         foreach (var (entity, conditions) in MissionObjectives)
         {
@@ -183,7 +185,10 @@ public class Mission
     }
     public void Initialize()
     {
-        Planet.RenderSurface();
+        foreach (var planet in planets)
+        {
+            planet.RenderSurface();
+        }
         foreach(var (entity, _) in MissionObjectives)
         {
             EntityManager.Add(entity);
@@ -198,6 +203,10 @@ public class Mission
         Completed = true;
         MissionScrap = 0;
         restartTimer = 2;
+    }
+    public void AttractObject(Entity _entity)
+    {
+        foreach (var planet in planets) { planet.AttractObject(_entity); }
     }
     public void FailMission()
     {
@@ -224,9 +233,86 @@ public class Mission
             }
         }
     }
+    public void CalculateTrajectory(Vector2 _startPosition, Vector2 _startVelocity, float _radius)
+    {
+        Vector2 futurePosition = _startPosition;
+        Vector2 futureVelocity = _startVelocity;
+        Vector2[] futurePlanetPositions = planets.Select(planet => planet.position).ToArray();
+        Vector2[] futurePlanetVelocities = planets.Select(planet => planet.velocity).ToArray();
+
+        for (int n = 0; n < 1000; n++)
+        {
+            for (int i = 0; i < planets.Length; i++)
+            {
+                if (planets[i].radius + _radius > Vector2.Distance(futurePlanetPositions[i], futurePosition))
+                {
+                    ParticleManager.Add(new Particle(Assets.Get(Sprite.Dot), futurePosition, 0, 0.5f, Color.Red));
+                    return;
+                }
+                for (int j = 0; j < planets.Length; j++)
+                {
+                    if (i == j)
+                    {
+                        continue;
+                    }
+                    Vector2 relativePlanetPosition = futurePlanetPositions[i] - futurePlanetPositions[j];
+                    if (relativePlanetPosition == Vector2.Zero)
+                    {
+                        relativePlanetPosition = Vector2.One;
+                    }
+                    if (!planets[i].isImmovable)
+                    {
+                        futurePlanetVelocities[i] += Vector2.Normalize(-relativePlanetPosition) * planets[j].mass / relativePlanetPosition.LengthSquared();
+                    }
+                }
+                Vector2 relativePosition = futurePosition - futurePlanetPositions[i];
+                futureVelocity += Vector2.Normalize(-relativePosition) * planets[i].mass / relativePosition.LengthSquared();
+            }
+            for (int i = 0; i < planets.Length; i++)
+            {
+                futurePlanetPositions[i] += futurePlanetVelocities[i];
+            }
+            futurePosition += futureVelocity;
+            if (n % 3 == 0)
+            {
+                Vector2 particlePos = futurePosition;
+                if (Engine.patchedConics)
+                {
+                    for(int i = 0; i < futurePlanetPositions.Length; i++)
+                    {
+                        if (i == 0)
+                        {
+                            continue;
+                        }
+                        float sphereOfInfluence = (float)Vector2.Distance(futurePlanetPositions[i], futurePlanetPositions[0]) * (float)Math.Pow(planets[i].mass / planets[0].mass, 2 / 5) / 3;
+                        if (Vector2.Distance(futurePosition, futurePlanetPositions[i]) < sphereOfInfluence)
+                        {
+                            particlePos = particlePos - futurePlanetPositions[i] + planets[i].position;
+                        }
+                    }
+                }
+                ParticleManager.Add(new Particle(Assets.Get(Sprite.Dot), particlePos, 0, 0.5f, Color.Cyan));
+            }
+        }
+    }
+    public Vector2 GetNormalizedAcceleration(Vector2 _position)
+    {
+        Vector2 acceleration = Vector2.Zero;
+        foreach (var planet in planets)
+        {
+            Vector2 normalVector = Vector2.Normalize(_position - planet.position);
+            acceleration += normalVector * (planet.radius * planet.radius / EntityManager.DistanceSqr(planet.position, _position));
+        }
+        return acceleration;
+    }
     public Mission Clone()
     {
-        return new Mission(Planet.Copy(), new(), CopyObjectives, Name, Description, timerModifier, WaveGoal) { Completed = this.Completed};
+        var _planets = new GravitationalSource[planets.Length];
+        for(int i = 0; i < planets.Length; i++)
+        {
+            _planets[i] = planets[i].Copy();
+        }
+        return new Mission(_planets, CopyObjectives, Name, Description, timerModifier, WaveGoal, tier) { Completed = this.Completed};
     }
     private void SpawnWaveBatch(int enemyCredits)
     {

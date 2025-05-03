@@ -206,7 +206,6 @@ public class Player : Entity
     }
     public override void Collide(int _damage)
     {
-        modules[ModuleType.Sensors].isFailed = true;
         if(_damage > 0 && invincibilityCooldown <= 0)
         {
             Engine.ShakeScreen(0.08f * _damage);

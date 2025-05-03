@@ -4,9 +4,6 @@ using Space_Wars.Content.Main.Components;
 using Space_Wars.Content.Main.Particles;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Runtime.Serialization.Formatters;
 using UILib.Content.Main;
 
 namespace Space_Wars.Content.Main.Entities;
@@ -75,6 +72,10 @@ public class Enemy : Entity
             cooldown -= Engine.DeltaSeconds;
         }
     }
+    private Vector2 GetNormalizedAcceleration()
+    {
+        return EntityManager.CurrentMission.GetNormalizedAcceleration(position);
+    }
     public void RotateTowards(float _angle, float _maxSpeed = 0.05f)
     {
         if (angle > _angle && angularVelocity > -_maxSpeed)
@@ -88,7 +89,7 @@ public class Enemy : Entity
     }
     public void GoToPosition(Vector2 _position, float speed)
     {
-        Vector2 gravityForce = EntityManager.GetNormalizedAcceleration(position);
+        Vector2 gravityForce = GetNormalizedAcceleration();
         targetVector = Vector2.Normalize(Vector2.Normalize(_position - position) + gravityForce * 1.25f);
         velocity += targetVector * speed * Engine.DeltaSeconds * 10;
     }
@@ -180,7 +181,7 @@ public class Enemy : Entity
         while (true)
         {
             velocity *= 0.8f;
-            Vector2 normalizedAcceleration = EntityManager.GetNormalizedAcceleration(position);
+            Vector2 normalizedAcceleration = GetNormalizedAcceleration();
             if (health <= 0)
             {
                 Explode();
@@ -242,7 +243,7 @@ public class Enemy : Entity
         {
             targetVector = player.position - position + (player.velocity - velocity);
             targetAngle = MathF.Atan2(targetVector.X, -targetVector.Y);
-            Vector2 gravityForce = EntityManager.GetNormalizedAcceleration(position);
+            Vector2 gravityForce = GetNormalizedAcceleration();
             if (EntityManager.DistanceSqr(this, player) > 500 * 500)
             {
                 GoToPosition(player.position, 1.5f);
@@ -277,7 +278,7 @@ public class Enemy : Entity
                 SoundManager.PlaySound(Assets.Get(Sound.Death), position);
                 if (EntityManager.RandomWithKarma(EntityManager.CurrentMission.EnemiesSpawned))
                 {
-                    EntityManager.Add(ItemFactory.NewScrap(position, EntityManager.GetNormalizedAcceleration(position) * 10, angularVelocity));
+                    EntityManager.Add(ItemFactory.NewScrap(position, GetNormalizedAcceleration() * 10, angularVelocity));
                 }
             }
             velocity *= 0.8f;
@@ -292,7 +293,7 @@ public class Enemy : Entity
             float timeToHit;
             float prevTimeToHit = 0;
             Vector2 playerIterativePosition = player.position;
-            Vector2 gravityForce = EntityManager.GetNormalizedAcceleration(position);
+            Vector2 gravityForce = GetNormalizedAcceleration();
             for (int i = 0; i < 1; i++)
             {
                 timeToHit = MathF.Sqrt(EntityManager.DistanceSqr(position, playerIterativePosition)) / 15;
@@ -459,7 +460,7 @@ public class Enemy : Entity
                 SoundManager.PlaySound(Assets.Get(Sound.Death), position);
                 if (EntityManager.RandomWithKarma(EntityManager.CurrentMission.EnemiesSpawned * 2))
                 {
-                    EntityManager.Add(ItemFactory.NewScrap(position, EntityManager.GetNormalizedAcceleration(position) * 10, angularVelocity));
+                    EntityManager.Add(ItemFactory.NewScrap(position, GetNormalizedAcceleration() * 10, angularVelocity));
                 }
             }
             velocity *= 0.8f;
@@ -514,7 +515,7 @@ public class Enemy : Entity
             }
             targetVector = playerIterativePosition - position;
             targetAngle = MathF.Atan2(targetVector.X, -targetVector.Y);
-            Vector2 gravityForce = EntityManager.GetNormalizedAcceleration(position);
+            Vector2 gravityForce = GetNormalizedAcceleration();
             float theta = MathF.Atan2(gravityForce.Y, gravityForce.X);
             
             GoToPosition(player.position + 100 * new Vector2(MathF.Cos(theta), MathF.Sin(theta)), speed);
@@ -526,7 +527,7 @@ public class Enemy : Entity
             }
             if(EntityManager.DistanceSqr(this, player) < 500 * 500)
             {
-                velocity += EntityManager.GetNormalizedAcceleration(position) * Engine.DeltaSeconds * 10;
+                velocity += GetNormalizedAcceleration() * Engine.DeltaSeconds * 10;
                 if (cooldown <= 0 && missileCooldown > 0)
                 {
                     if (bulletCount < 2)
@@ -673,7 +674,7 @@ public class Enemy : Entity
             else if(chargeCooldown < 0)
             {
                 velocity *= 0.9f;
-                Vector2 gravityForce = EntityManager.GetNormalizedAcceleration(position);
+                Vector2 gravityForce = GetNormalizedAcceleration();
                 float theta = MathF.Atan2(gravityForce.X, -gravityForce.Y);
                 if(chargingWindup == 1)
                 {
@@ -714,7 +715,7 @@ public class Enemy : Entity
                 {
                     accelerationVector = normalAccelerationVector * 0.75f;
                 }
-                velocity += accelerationVector + EntityManager.GetNormalizedAcceleration(position) / 5;
+                velocity += accelerationVector + GetNormalizedAcceleration() / 5;
                 angularVelocity = velocity.Length() / 100;
                 if (MathF.Abs(angleRateOfChange) < 0.5f && Vector2.Dot(targetVector, velocity) < 10)
                 {
@@ -962,8 +963,8 @@ public class Enemy : Entity
         {
             Entity nearestEnemy = EntityManager.NearestEnemy(this);
             Vector2 relativePosition = position - nearestEnemy.position;
-            Vector2 normalizedAcceleration = EntityManager.GetNormalizedAcceleration(position);
-            Vector2 Offset = Vector2.Normalize(EntityManager.GetNormalizedAcceleration(nearestEnemy.position))*100;
+            Vector2 normalizedAcceleration = GetNormalizedAcceleration();
+            Vector2 Offset = Vector2.Normalize(EntityManager.CurrentMission.GetNormalizedAcceleration(nearestEnemy.position))*100;
             Vector2 targetLocation = relativePosition - Offset;
             Vector2 targetAcceleration;
             if (Vector2.Distance(nearestEnemy.position + Offset, position) < 50)
@@ -1066,7 +1067,7 @@ public class Enemy : Entity
                 }
                 else
                 {
-                    Vector2 targetLocation = player.position + Vector2.Normalize(player.velocity) * 250 + EntityManager.GetNormalizedAcceleration(player.position) * 50;
+                    Vector2 targetLocation = player.position + Vector2.Normalize(player.velocity) * 250 + EntityManager.CurrentMission.GetNormalizedAcceleration(player.position) * 50;
                     float speed = 8 - 5 / ((targetLocation - position).Length() / 75 + 1);
                     GoToPosition(targetLocation, speed);
                 }
@@ -1262,7 +1263,7 @@ public class Enemy : Entity
         {
             velocity *= 0.8f;
             ChildEnemy = !(parent == null);
-            Vector2 normalizedAcceleration = EntityManager.GetNormalizedAcceleration(position);
+            Vector2 normalizedAcceleration = GetNormalizedAcceleration();
             if (health <= 0)
             {
                 if (!hasExploded) 
@@ -1366,7 +1367,7 @@ public class Enemy : Entity
         while (true)
         {
             velocity *= 0.8f;
-            Vector2 normalizedAcceleration = EntityManager.GetNormalizedAcceleration(position);
+            Vector2 normalizedAcceleration = GetNormalizedAcceleration();
             if (health <= 0)
             {
                 Explode();
@@ -1417,7 +1418,6 @@ public class Enemy : Entity
             float timeToHit;
             float prevTimeToHit = 0;
             Vector2 playerIterativePosition = nearestEnemy.position;
-            Vector2 gravityForce = EntityManager.GetNormalizedAcceleration(position);
             for (int i = 0; i < 1; i++)
             {
                 timeToHit = MathF.Sqrt(EntityManager.DistanceSqr(position, playerIterativePosition)) / 8;
@@ -1475,6 +1475,7 @@ public class Enemy : Entity
     {
         while (true)
         {
+            velocity *= 0.8f;
             yield return 0;
         }
     }
