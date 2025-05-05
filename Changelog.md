@@ -197,3 +197,10 @@ Update 0.4
 Update 0.4.0.1  
 	-Planets no longer have moons, and every planet can attract every other planet.  
 	-Fixed bug #9  
+        
+5/4/2025    
+Update 0.4.1    
+    -Added two new entity components, currently not in use.    
+    -Added simple cutscene system with demo intro cutscene for first mission.    
+    -Fixed bug #7.    
+    -Fixed bug #14.    
