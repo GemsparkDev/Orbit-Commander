@@ -767,12 +767,12 @@ public class Enemy : Entity
             }
             if(EventHandler.AcknowledgeMessage(Message.MothershipUpdateFurnace))
             {
-                furnaceItem = (Pickup)((ItemSlot)Engine.UIManager.GetFuncWidget((int)Containers.MothershipMenu, 1)).daughterItem;
+                furnaceItem = ((ItemSlot<Pickup>)Engine.UIManager.GetFuncWidget((int)Containers.MothershipMenu, 1)).daughterItem;
             }
             if(EventHandler.AcknowledgeMessage(Message.MothershipUpdateInventory))
             {
-                DockableComponent dockableComponent = Components.GetComponent<DockableComponent>(ComponentType.DockableComponent);
-                dockableComponent.SetInventory(Engine.inventorySlots);
+                var dockableComponent = Components.GetComponent(ComponentType.DockableComponent);
+                if (dockableComponent.IsValid) { (dockableComponent as DockableComponent).SetInventory(Engine.inventorySlots); }
             }
             if (health <= 0)
             {
@@ -1201,12 +1201,15 @@ public class Enemy : Entity
             }
             if (EventHandler.AcknowledgeMessage(Message.MothershipUpdateFurnace))
             {
-                furnaceItem = (Pickup)((ItemSlot)Engine.UIManager.GetFuncWidget((int)Containers.MothershipMenu, 1)).daughterItem;
+                furnaceItem = ((ItemSlot<Pickup>)Engine.UIManager.GetFuncWidget((int)Containers.MothershipMenu, 1)).daughterItem;
             }
             if (EventHandler.AcknowledgeMessage(Message.MothershipUpdateInventory))
             {
-                DockableComponent dockableComponent = Components.GetComponent<DockableComponent>(ComponentType.DockableComponent);
-                dockableComponent.SetInventory(Engine.inventorySlots);
+                var dockableComponent = Components.GetComponent(ComponentType.DockableComponent);
+                if (dockableComponent.IsValid)
+                {
+                    (dockableComponent as DockableComponent).SetInventory(Engine.inventorySlots);
+                }
             }
             if (health <= 0)
             {

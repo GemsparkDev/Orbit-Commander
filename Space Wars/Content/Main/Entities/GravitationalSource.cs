@@ -28,7 +28,7 @@ public class GravitationalSource
         isImmovable = _isImmovable;
         color = _color;
         surface = new ParticleEmitter(Assets.Get(Sprite.Dot), position, radius, 1, _color);
-        trajectory = new ParticleEmitter(Assets.Get(Sprite.Dot), 10, position, 0, 0, 0, 0, 1f, 1, true, _color * 0.1f, _color, EmitterType.EmissionOverDistance);
+        trajectory = new ParticleEmitter(Assets.Get(Sprite.Dot), 100, position, 0, 0, 0, 0, 1f, 1, true, _color * 0.1f, _color, EmitterType.EmissionOverDistance);
         hasRing = _hasRing;
     }
     public void RenderSurface()

@@ -17,14 +17,14 @@ public abstract class Entity
     public Vector2 position;
     public Vector2 velocity;
     public float angularVelocity = 0;
+    public float angle;
     public bool isExpired;
     public bool isFriendly;
-    public float angle;
-    public EntityType entityType;
     public int damage;
-    public ComponentList Components { get; } = new();
     public virtual int SensingAbility { get; protected set; } = 1;
     public virtual int StealthAbility { get; protected set; } = 0;
+    public EntityType entityType;
+    public ComponentList Components { get; } = new();
     public virtual float ColliderRadius
     {
         get { return (texture.Height + texture.Width) / 4 + 1; }
@@ -57,6 +57,9 @@ public abstract class Entity
     {
         Color stealthColor = color;
         float maxDistance = EntityManager.StealthRange;
+        //Player has superior sensing to stealth -> full detection
+        //Player has equal sensing to stealth -> partial detection when nearby
+        //Player has inferior sensing to stealth -> no detection
         if (EntityManager.Player.SensingAbility == StealthAbility)
         {
             float distanceSqr = EntityManager.DistanceSqr(EntityManager.Player, this);
@@ -73,7 +76,6 @@ public abstract class Entity
         {
             stealthColor *= 0;
         }
-        //Draws itself on the given spritebatch, position is offset by the screen position offset
         _spriteBatch.Draw(texture, position - Engine.mousePositionOffset, null, stealthColor, angle, Size / 2, 1, 0, 0);
 
         if (Engine.DebugMode == true)
@@ -88,6 +90,12 @@ public abstract class Entity
             _spriteBatch.Draw(Engine.Line, position - Engine.mousePositionOffset, new Rectangle((int)position.X, (int)position.Y, 10, 1), Color.Red,
                 angle - MathF.PI / 2, Vector2.Zero, Vector2.One, SpriteEffects.None, 0.4f);
         }
+    }
+    public void SimpleDraw(SpriteBatch _spriteBatch)
+    {
+        //Simplified render, only draws the entity texture
+        //Used during cutscenes
+        _spriteBatch.Draw(texture, position - Engine.mousePositionOffset, null, color, angle, Size / 2, 1, 0, 0);
     }
     public virtual Entity Clone() { throw new NotImplementedException(); }
 }

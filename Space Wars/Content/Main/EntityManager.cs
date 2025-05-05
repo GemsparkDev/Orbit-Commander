@@ -3,6 +3,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Space_Wars.Content.Main.Entities;
 using Space_Wars.Content.Main.Components;
+using Space_Wars.Content.Main.Particles;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -32,7 +33,8 @@ public static class EntityManager
         new(new GravitationalSource[2] { new(Vector2.Zero, Vector2.Zero, 10000, 8, true, Color.Cyan), new(new Vector2(1000, 0), GravitationalSource.GetOrbitalVelocity(new Vector2(1000, 0), Vector2.Zero, 10000), 250, 1.5f, false, Color.Cyan) },
         new List<(Func<Vector2, Vector2, float, Entity>, Vector2, Vector2, float, Condition[])>(){ (Enemy.NewMothership, new Vector2(0, -8*50 - Assets.DimsOf(Sprite.Mothership).Y / 2), Vector2.Zero, 0f, new Condition[2] { Condition.Protect, Condition.CustomIncomplete })},
         "Crash Landing",
-        "A simple system with a large planet and one closely orbiting moon. Drone activity detected, but minimal.", 1, 0),
+        "A simple system with a large planet and one closely orbiting moon. Drone activity detected, but minimal.", 
+        1, 0, 0, IntroCutscene()),
 
         new( new GravitationalSource[1] { new(Vector2.Zero, Vector2.Zero, 3500, 4, true, Color.Cyan, true) },
         new List<(Func<Vector2, Vector2, float, Entity>, Vector2, Vector2, float, Condition[])>(){ 
@@ -48,7 +50,7 @@ public static class EntityManager
 
         new(new GravitationalSource[3] { new(Vector2.Zero, Vector2.Zero, 5000, 3, true, Color.Cyan),
             new(new Vector2(400, 0), GravitationalSource.GetOrbitalVelocity(new Vector2(400, 0), Vector2.Zero, 5000), 240, 1f, false, Color.Cyan),
-            new(new Vector2(-900, 0), GravitationalSource.GetOrbitalVelocity(new Vector2(-900, 0), Vector2.Zero, 5000) * 1.1f, 120, 0.6f, false, Color.Yellow), },
+            new(new Vector2(-600, 0), -GravitationalSource.GetOrbitalVelocity(new Vector2(-600, 0), Vector2.Zero, 5000) * 1.2f, 120, 0.6f, false, Color.Yellow), },
         new List<(Func<Vector2, Vector2, float, Entity>, Vector2, Vector2, float, Condition[])>(){ (Enemy.NewExcursionBoss, new Vector2(0, -6*50), Vector2.Zero, 0, new Condition[1] { Condition.Kill }) },
         "Showdown",
         "Defeat the advanced drone prototype, Excursion. Be warned: It may call for reinforcements.", 1.1f, 0, 1),
@@ -216,14 +218,14 @@ public static class EntityManager
             {
                 continue;
             }
-            DockableComponent component = entity.Components.GetComponent<DockableComponent>(ComponentType.DockableComponent);
-            if (component != null)
+            var component = entity.Components.GetComponent(ComponentType.DockableComponent);
+            if (component.IsValid)
             {
                 float distanceSqr = DistanceSqr(entity, _entity);
                 if (distanceSqr < nearestDistance)
                 {
                     nearestDistance = distanceSqr;
-                    returnEntity = component;
+                    returnEntity = component as DockableComponent;
                 }
             }
         }
@@ -233,7 +235,7 @@ public static class EntityManager
     {
         float nearestDistance = float.MaxValue;
         Entity returnEnemy = null;
-        foreach(Entity targetEnemy in enemies)
+        foreach (Entity targetEnemy in enemies)
         {
             if(targetEnemy.isFriendly == entity.isFriendly)
             {
@@ -366,6 +368,22 @@ public static class EntityManager
         }
         currentKarma += (1 / _rarity);
         return false;
+    }
+    private static Cutscene IntroCutscene()
+    {
+        List<IEvent> events = new();
+        List<Entity> actors = new();
+        var mothership = Enemy.NewMothership(new Vector2(1500, -2000), new Vector2(-10, 10), MathF.PI/12);
+        var emitter = new ParticleEmitter(Assets.Get(Sprite.Circle), 1, new Vector2(1500, -2000), 0, 45, 10, 
+            random.NextSingle()-0.5f, 100, 1, true, Color.Yellow, Color.Red, EmitterType.EmissionOverTime);
+        actors.Add(mothership);
+        events.Add(new EntityEvent(0, 3, delegate (float time, Entity entity)
+        {
+            entity.position = new Vector2(1000, -2000) * (3 - time)/3 + new Vector2(0, -500) * time/3;
+            Engine.Camera.Position = entity.position + new Vector2(random.NextSingle() * 10 - 5, random.NextSingle() * 10 - 5);
+            emitter.position = entity.position;
+        }, mothership));
+        return new Cutscene(events, actors, new PlayingGame(), emitter);
     }
 }
 

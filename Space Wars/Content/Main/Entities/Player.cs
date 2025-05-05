@@ -63,7 +63,7 @@ public class Player : Entity
         {
            new Action[2] { Hull, Shield },
            new Action[7] { Basic, Spiral, Shotgun, Missile, LMG, Silenced, Sniper },
-           new Action[2] { SummonShield, Dash },
+           new Action[2] { Dash, SummonShield },
         };
 
         modules = new()

@@ -5,7 +5,7 @@ using UILib.Content.Main;
 
 namespace Space_Wars.Content.Main.Entities;
 
-public class Module : Pickup
+public class Module : Pickup, IData
 {
     private ModuleData moduleData;
     public float Health { get; set; }

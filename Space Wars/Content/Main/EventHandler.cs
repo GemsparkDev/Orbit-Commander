@@ -14,7 +14,6 @@ namespace Space_Wars.Content.Main;
 public class EventHandler
 {
     private static Player player;
-    private static Engine root;
     public static bool isTraining = false;
     private static readonly List<Message> eventLog = new();
 
@@ -34,10 +33,6 @@ public class EventHandler
     public static void InitializeGameSpace(Player _player)
     {
         player = _player;
-    }
-    public static void Initialize(Engine _root)
-    {
-        root = _root;
     }
     public static void StartTraining()
     {
@@ -63,11 +58,11 @@ public class EventHandler
     }
     public static void RepairModule()
     {
-        ItemSlot repairSlot = Engine.UIManager.GetFuncWidget((int)Containers.GarageMenu, 1) as ItemSlot;
+        var repairSlot = Engine.UIManager.GetFuncWidget((int)Containers.GarageMenu, 1) as ItemSlot<Module>;
         Module daughterModule;
         if (repairSlot.daughterItem != null)
         {
-            daughterModule = repairSlot.daughterItem as Module;
+            daughterModule = repairSlot.daughterItem;
         }
         else
         { 
@@ -92,9 +87,9 @@ public class EventHandler
     public static void UpdateRepairText()
     {
         Decal repairText = Engine.UIManager.GetWidget((int)Containers.GarageMenu, 1) as Decal;
-        ItemSlot slot = Engine.UIManager.GetFuncWidget((int)Containers.GarageMenu, 1) as ItemSlot;
-        Module daughterModule = slot.daughterItem as Module;
-        if (slot.daughterItem != null)
+        var slot = Engine.UIManager.GetFuncWidget((int)Containers.GarageMenu, 1) as ItemSlot<Module>;
+        Module daughterModule = slot.daughterItem;
+        if (daughterModule != null)
         {
             repairText.text = $"{daughterModule.Health}/20";
         }
@@ -111,10 +106,6 @@ public class EventHandler
             for (int x = 0; x < dockableComponent.Inventory.GetLength(0); x++)
             {
                 Engine.inventorySlots[x, y].daughterItem = dockableComponent.Inventory[x, y];
-                if (Engine.inventorySlots[x, y].daughterItem != null)
-                {
-                    Engine.inventorySlots[x, y].daughterItem.Parent = Engine.inventorySlots[x, y];
-                }
             }
         }
     }
@@ -127,10 +118,6 @@ public class EventHandler
         for (int x = 0; x < Engine.moduleSlots.Length; x++)
         {
             Engine.moduleSlots[x].daughterItem = player.modules.ElementAt(x).Value;
-            if (Engine.moduleSlots[x].daughterItem != null)
-            {
-                Engine.moduleSlots[x].daughterItem.Parent = Engine.moduleSlots[x];
-            }
         }
     }
     public static void UpdateModules()
@@ -152,22 +139,14 @@ public class EventHandler
     }
     public static void UpdateFurnaceUI(float _value, float _maxValue, Pickup furnaceItem)
     {
-        ItemSlot furnaceSlot = Engine.UIManager.GetFuncWidget((int)Containers.MothershipMenu, 1) as ItemSlot;
+        var furnaceSlot = Engine.UIManager.GetFuncWidget((int)Containers.MothershipMenu, 1) as ItemSlot<Pickup>;
         furnaceSlot.daughterItem = furnaceItem;
-        if (furnaceSlot.daughterItem != null)
-        {
-            furnaceSlot.daughterItem.Parent = furnaceSlot;
-        }
         (Engine.UIManager.GetFuncWidget((int)Containers.MothershipMenu,0) as Slider).SetInterval(_value, _maxValue);
         (Engine.UIManager.GetWidget((int)Containers.GarageMenu, 0) as Decal).text = EntityManager.CurrentMission.MissionScrap.ToString();
     }
     public static void UpdateFurnace()
     {
         SendMessage(Message.MothershipUpdateFurnace);
-    }
-    public static void ReturnItemToParent()
-    {
-        Engine.UIManager.selectedIcon.Parent.Interact(Engine.UIManager.focusedContainer.position);
     }
     public static void CraftItem()
     {

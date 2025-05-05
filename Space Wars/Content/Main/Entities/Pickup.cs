@@ -10,7 +10,6 @@ namespace Space_Wars.Content.Main.Entities;
 public class Pickup : Entity, IData
 {
     internal ItemData itemData;
-    public ItemSlot Parent { get; set; }
     public Texture2D Texture { get { return itemData.Sprite; } }
     public Window Tooltip { get; } = new Window(Vector2.Zero, Assets.Get(Sprite.WideButton));
     public String Name { get { return itemData.Name; } }

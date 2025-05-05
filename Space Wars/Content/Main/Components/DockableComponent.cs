@@ -88,14 +88,15 @@ public class DockableComponent : IComponent
         Engine.ShakeScreen(0.35f);
         return true;
     }
-    public void SetInventory(ItemSlot[,] _daughterInventory)
+    public void SetInventory(ItemSlot<Pickup>[,] _daughterInventory)
     {
         for (int y = 0; y < Inventory.GetLength(1); y++)
         {
             for (int x = 0; x < Inventory.GetLength(0); x++)
             {
-                Inventory[x, y] = (Pickup)_daughterInventory[x, y].daughterItem;
+                Inventory[x, y] = _daughterInventory[x, y].daughterItem;
             }
         }
     }
+    public bool IsValid { get { return true; } }
 }

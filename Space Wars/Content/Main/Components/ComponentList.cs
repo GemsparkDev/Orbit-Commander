@@ -5,9 +5,9 @@ namespace Space_Wars.Content.Main.Components;
 public class ComponentList
 {
     private Dictionary<ComponentType, IComponent> components = new();
-    public T GetComponent<T>(ComponentType _componentType)
+    public IComponent GetComponent(ComponentType _componentType)
     {
-        return components.ContainsKey(_componentType) ? (T)components[_componentType] : default;
+        return components.ContainsKey(_componentType) ? components[_componentType] : new DefaultComponent();
     }
     public bool Add(IComponent _component)
     {

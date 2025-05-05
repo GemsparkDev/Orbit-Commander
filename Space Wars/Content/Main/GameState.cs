@@ -3,6 +3,8 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Space_Wars.Content.Main.Entities;
 using Space_Wars.Content.Main.Particles;
+using System.Collections.Generic;
+
 using UILib.Content.Main;
 
 namespace Space_Wars.Content.Main;
@@ -44,7 +46,8 @@ public class MainMenu : GameState
     private GravitationalSource menuPlanet = new(new Vector2(0, 750), Vector2.Zero, 5000, 9, true, Color.Cyan);
     private GravitationalSource moonPlanet = new(new Vector2(0, 1750), GravitationalSource.GetOrbitalVelocity(new Vector2(0, 1750), new Vector2(0, 750), 5000), 250, 1.5f, false, Color.Cyan);
     private ParticleEmitter smokeParticles = new(Assets.Get(Sprite.Circle), 1f, new Vector2(0, 300 - Assets.DimsOf(Sprite.Mothership).Y + 10),
-        0, 45, 1, 0, 10, 1, true, Color.Gray, Color.DarkGray, EmitterType.EmissionOverTime);
+        0, 45, 1, 0, 40, 1, true, Color.Gray, Color.DarkGray, EmitterType.EmissionOverTime)
+    { probability = 0.25f };
     public override void Initialize(Engine _root)
     {
         base.Initialize(_root);
@@ -211,3 +214,53 @@ public class TrainingMode : GameState
         ParticleManager.Draw(_spriteBatch);
     }
 }
+public class Cutscene : GameState 
+{
+    private float time = 0;
+    private bool isActive = true;
+    private List<IEvent> events = new();
+    private List<Entity> actors = new();
+    private GameState nextGameState;
+    private ParticleEmitter emitter;
+    public Cutscene(List<IEvent> _events, List<Entity> _actors, GameState _nextGameState, ParticleEmitter _emitter)
+    {
+        events = _events;
+        actors = _actors;
+        nextGameState = _nextGameState;
+        emitter = _emitter;
+        emitter.isEmitterExpired = false;
+    }
+    public override void Initialize(Engine _root)
+    {
+        base.Initialize(_root);
+        //ParticleManager.Initialize();
+        time = 0;
+        ParticleManager.Add(emitter);
+    }
+    public override void Update()
+    {
+        ParticleManager.Update();
+        time += Engine.DeltaSeconds;
+        isActive = false;
+        foreach (var _event in events)
+        {
+            //Checks every event to see if they are complete
+            //If every event is no longer active, so too is the cutscene
+            isActive = isActive || _event.Update(time);
+        }
+        if (!isActive)
+        {
+            CurrentGameState.SwitchState(nextGameState);
+            emitter.isEmitterExpired = true;
+        }
+    }
+    public override void Draw(SpriteBatch _spriteBatch)
+    {
+        ParticleManager.Draw(_spriteBatch);
+        foreach (var actor in actors)
+        {
+            actor.SimpleDraw(_spriteBatch);
+        }
+    }
+}
+

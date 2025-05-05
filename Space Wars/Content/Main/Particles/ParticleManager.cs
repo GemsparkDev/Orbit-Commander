@@ -43,8 +43,8 @@ namespace Space_Wars.Content.Main.Particles
         }
         public static void Initialize()
         {
-            particles = new();
-            particleEmitters = new();
+            particles.Clear();
+            particleEmitters.Clear();
         }
         public static void Update()
         {

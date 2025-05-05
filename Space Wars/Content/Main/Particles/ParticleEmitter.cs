@@ -30,8 +30,9 @@ namespace Space_Wars.Content.Main.Particles
         public bool particleFadesOut;
         public bool isEmitterExpired = false;
         public bool isEmitterActive = true;
+        public float probability = 1;
         float cooldown = 1;
-        Random random = new();
+        private Random random = new();
         private Action emitterFunction;
         public ParticleEmitter(Texture2D _particleTexture, float _particleTimeAlive, Vector2 _position, float _sprayAngle, int _sprayCone, float _particleVelocity, float _particleAngularVelocity, float _speedOfEmission, float _particleTransparency, bool _particleFadesOut, Color _particleColor, Color _particleFadeToColor, EmitterType _emitterType)
         {
@@ -71,7 +72,7 @@ namespace Space_Wars.Content.Main.Particles
         }
         public void Update()
         {
-            if(isEmitterActive == true)
+            if(isEmitterActive && random.NextSingle() < probability)
             {
                 emitterFunction();
             }

@@ -17,6 +17,7 @@ public class Mission
     //Save original entity parameters to allow cloning
     public List<(Func<Vector2, Vector2, float, Entity>, Vector2, Vector2, float, Condition[])> CopyObjectives { get; }
     public List<(Entity entity, Condition[] conditions)> MissionObjectives { get; } = new();
+    private Cutscene cutscene;
     public int MissionScrap { get; set; } = 0;
     private float timerModifier;
     public int WaveGoal { get; } = 0;
@@ -36,7 +37,7 @@ public class Mission
     public delegate Enemy DelegateEnemy(Vector2 position, Vector2 velocity, float angle, bool _isFriendly = false);
     public int EnemiesSpawned { get; private set; } = 0;
 
-    public Mission(GravitationalSource[] _planets, List<(Func<Vector2, Vector2, float, Entity> newEntity, Vector2 position, Vector2 velocity, float angle, Condition[] conditions)> _missionObjectives, string _name, string _description, float _timerModifier, int _waveGoal = 0, int _enemyTier = 0)
+    public Mission(GravitationalSource[] _planets, List<(Func<Vector2, Vector2, float, Entity> newEntity, Vector2 position, Vector2 velocity, float angle, Condition[] conditions)> _missionObjectives, string _name, string _description, float _timerModifier, int _waveGoal = 0, int _enemyTier = 0, Cutscene _cutscene = null)
     {
         Name = _name;
         Description = _description;
@@ -83,6 +84,7 @@ public class Mission
             Enemy.NewWyvernBoss,
         };
         currentBoss = random.Next(bosses.Count);
+        cutscene = _cutscene;
     }
     public void Update()
     {
@@ -183,6 +185,17 @@ public class Mission
             }
         }
     }
+    public void PlayIntroCutscene()
+    {
+        if (cutscene != null)
+        {
+            CurrentGameState.SwitchState(cutscene);
+        }
+        else
+        {
+            CurrentGameState.SwitchState(new PlayingGame());
+        }
+    }
     public void Initialize()
     {
         foreach (var planet in planets)
@@ -239,6 +252,7 @@ public class Mission
         Vector2 futureVelocity = _startVelocity;
         Vector2[] futurePlanetPositions = planets.Select(planet => planet.position).ToArray();
         Vector2[] futurePlanetVelocities = planets.Select(planet => planet.velocity).ToArray();
+        bool exit = false;
 
         for (int n = 0; n < 1000; n++)
         {
@@ -246,8 +260,8 @@ public class Mission
             {
                 if (planets[i].radius + _radius > Vector2.Distance(futurePlanetPositions[i], futurePosition))
                 {
-                    ParticleManager.Add(new Particle(Assets.Get(Sprite.Dot), futurePosition, 0, 0.5f, Color.Red));
-                    return;
+                    exit = true;
+                    break;
                 }
                 for (int j = 0; j < planets.Length; j++)
                 {
@@ -273,24 +287,29 @@ public class Mission
                 futurePlanetPositions[i] += futurePlanetVelocities[i];
             }
             futurePosition += futureVelocity;
-            if (n % 3 == 0)
+            Vector2 particlePos = futurePosition;
+            if (Engine.patchedConics)
             {
-                Vector2 particlePos = futurePosition;
-                if (Engine.patchedConics)
+                for(int i = 0; i < futurePlanetPositions.Length; i++)
                 {
-                    for(int i = 0; i < futurePlanetPositions.Length; i++)
+                    if (i == 0)
                     {
-                        if (i == 0)
-                        {
-                            continue;
-                        }
-                        float sphereOfInfluence = (float)Vector2.Distance(futurePlanetPositions[i], futurePlanetPositions[0]) * (float)Math.Pow(planets[i].mass / planets[0].mass, 2 / 5) / 3;
-                        if (Vector2.Distance(futurePosition, futurePlanetPositions[i]) < sphereOfInfluence)
-                        {
-                            particlePos = particlePos - futurePlanetPositions[i] + planets[i].position;
-                        }
+                        continue;
+                    }
+                    float sphereOfInfluence = (float)Vector2.Distance(futurePlanetPositions[i], futurePlanetPositions[0]) * (float)Math.Pow(planets[i].mass / planets[0].mass, 2 / 5) / 3;
+                    if (Vector2.Distance(futurePosition, futurePlanetPositions[i]) < sphereOfInfluence)
+                    {
+                        particlePos = particlePos - futurePlanetPositions[i] + planets[i].position;
                     }
                 }
+            }
+            if (exit)
+            {
+                ParticleManager.Add(new Particle(Assets.Get(Sprite.Dot), particlePos, 0, 0.5f, Color.Red));
+                return;
+            }
+            if (n % 3 == 0)
+            {
                 ParticleManager.Add(new Particle(Assets.Get(Sprite.Dot), particlePos, 0, 0.5f, Color.Cyan));
             }
         }
@@ -312,7 +331,7 @@ public class Mission
         {
             _planets[i] = planets[i].Copy();
         }
-        return new Mission(_planets, CopyObjectives, Name, Description, timerModifier, WaveGoal, tier) { Completed = this.Completed};
+        return new Mission(_planets, CopyObjectives, Name, Description, timerModifier, WaveGoal, tier, cutscene) { Completed = this.Completed};
     }
     private void SpawnWaveBatch(int enemyCredits)
     {

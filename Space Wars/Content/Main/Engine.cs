@@ -35,8 +35,8 @@ public class Engine : Game
     public static bool patchedConics = true;
     public static readonly List<string> debugLog = new();
     public static float UIScale { get; private set; } = 2f;
-    public static ItemSlot[] moduleSlots;
-    public static ItemSlot[,] inventorySlots;
+    public static ItemSlot<Module>[] moduleSlots;
+    public static ItemSlot<Pickup>[,] inventorySlots;
     public static float ScreenShakeFactor { get; private set; } = 0;
 
     public Engine()
@@ -73,7 +73,6 @@ public class Engine : Game
         AddUIElements();
         CurrentGameState.Initialize(this);
         CurrentGameState.SwitchState(new MainMenu());
-        EventHandler.Initialize(this);
 
         IsMouseVisible = false;
     }
@@ -110,14 +109,14 @@ public class Engine : Game
         var quitToMissionButton = new Button(new Vector2(0, -20), wideButton, Assets.TextFont, "Return", Color.White);
         var titleName = new Decal(new Vector2(0, -MainMenu.Size.Y) - Assets.DimsOf(Sprite.Title) / 2, Assets.Get(Sprite.Title));
 
-        var furnaceSlot = new ItemSlot(new Vector2(-20, 0), Assets.Get(Sprite.EmptySlot), UIManager, -1);
+        var furnaceSlot = new ItemSlot<Pickup>(new Vector2(-20, 0), Assets.Get(Sprite.EmptySlot), UIManager, -1);
         var garageButton = new Button(new Vector2(0, -MainMenu.Size.Y / 4), wideButton, Assets.TextFont, "To Garage", Color.White);
         var craftButton = new Button(new Vector2(0, MainMenu.Size.Y / 4), Assets.Get(Sprite.Button), Assets.TextFont, "Repair", Color.LightBlue);
         var requiredCraftsText = new Decal(new Vector2(0) + new Vector2(0, -6), Assets.TextFont, "25", Color.White, 10);
         var furnaceSlider = new Slider(Line, new Vector2(-50, -MainMenu.Size.Y / 6), 60, true, new Color(255, 239, 85), new Color(50, 51, 67));
         var craftingSlider = new Slider(Line, new Vector2(0 - 30, -MainMenu.Size.Y / 4), 60, true, Color.Cyan, Color.Gray);
 
-        var repairSlot = new ItemSlot(new Vector2(-GarageMenu.Size.X / 4 - 25, 0), Assets.Get(Sprite.EmptySlot), UIManager, -1);
+        var repairSlot = new ItemSlot<Module>(new Vector2(-GarageMenu.Size.X / 4 - 25, 0), Assets.Get(Sprite.EmptySlot), UIManager, -1);
         var mothershipScrap = new Decal(new Vector2(GarageMenu.Size.X / 2.2f, 20) - GarageMenu.Size / 2, Assets.TextFont, "0", Color.Gray, 10);
         var repairText = new Decal(new Vector2(-GarageMenu.Size.X / 4 - 60 / 2.5f, 40), Assets.TextFont, "", Color.White, 10);
         var garagePlayerImage = new Decal(new Vector2(GarageMenu.Size.X / 4, 0) - Assets.DimsOf(Sprite.PlayerUI) / 2, Assets.Get(Sprite.PlayerUI));
@@ -238,34 +237,29 @@ public class Engine : Game
         UIManager.AddGlobalWidget(fpsLowest);
         UIManager.AddGlobalWidget(timer);
 
-        moduleSlots = new ItemSlot[5];
-        inventorySlots = new ItemSlot[1, 4];
+        moduleSlots = new ItemSlot<Module>[5];
+        inventorySlots = new ItemSlot<Pickup>[1, 4];
         for (int x = 0; x < moduleSlots.GetLength(0); x++)
         {
             if (x % 2 == 0)
             {
-                moduleSlots[x] = new ItemSlot(new Vector2(-30,Assets.DimsOf(Sprite.EmptySlot).Y * x / 2 
+                moduleSlots[x] = new ItemSlot<Module>(new Vector2(-30,Assets.DimsOf(Sprite.EmptySlot).Y * x / 2 
                     - Assets.DimsOf(Sprite.EmptySlot).Y), Assets.Get(Sprite.EmptySlot), UIManager, x);
             }
             else
             {
-                moduleSlots[x] = new ItemSlot(new Vector2(Assets.DimsOf(Sprite.EmptySlot).X / 1.4142f - 30,
+                moduleSlots[x] = new ItemSlot<Module>(new Vector2(Assets.DimsOf(Sprite.EmptySlot).X / 1.4142f - 30,
                     Assets.DimsOf(Sprite.EmptySlot).Y * x / 2 - Assets.DimsOf(Sprite.EmptySlot).Y), Assets.Get(Sprite.EmptySlot), UIManager, x);
             }
             GarageMenu.AddWidget(moduleSlots[x] as IFunctional);
             MissionSelect.AddWidget(moduleSlots[x] as IFunctional, 1);
             moduleSlots[x].AddBehaviour(new Action(EventHandler.UpdateModules));
         }
-        for (int x = 0; x < 5; x++)
-        {
-            Vector2 itemSlotOffset = new(Assets.DimsOf(Sprite.EmptySlot).X * x + Assets.DimsOf(Sprite.LargePanel).X / 1.33f, Assets.DimsOf(Sprite.EmptySlot).Y);
-            var itemSlot = new ItemSlot(itemSlotOffset, Assets.Get(Sprite.EmptySlot), UIManager, -1);
-        }
         for (int x = 0; x < inventorySlots.GetLength(0); x++)
         {
             for (int y = 0; y < inventorySlots.GetLength(1); y++)
             {
-                inventorySlots[x, y] = new ItemSlot(new Vector2(Assets.DimsOf(Sprite.EmptySlot).X * x + Assets.DimsOf(Sprite.LargePanel).X / 4,
+                inventorySlots[x, y] = new ItemSlot<Pickup>(new Vector2(Assets.DimsOf(Sprite.EmptySlot).X * x + Assets.DimsOf(Sprite.LargePanel).X / 4,
                     Assets.DimsOf(Sprite.EmptySlot).Y * (y+1) - Assets.DimsOf(Sprite.LargePanel).X / 2), Assets.Get(Sprite.EmptySlot), UIManager, -1);
                 MothershipMenu.AddWidget(inventorySlots[x, y] as IFunctional, 0);
                 inventorySlots[x, y].AddBehaviour(new Action(EventHandler.UpdateInventory));
@@ -286,10 +280,10 @@ public class Engine : Game
         Player player = EntityManager.Initialize();
         EventHandler.InitializeGameSpace(player);
         SoundManager.Initialize(player);
-        CurrentGameState.SwitchState(new PlayingGame());
         EventHandler.UpdateModulesStatus();
         SoundManager.PlayGlobalSound(Assets.Get(Sound.Interact));
         SoundManager.ChangeTrack(Assets.Get(Sound.main));
+        EntityManager.CurrentMission.PlayIntroCutscene();
     }
 
     protected override void LoadContent()
@@ -369,7 +363,6 @@ public class Engine : Game
         GraphicsDevice.Clear(Color.Black);
 
         spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, null, null, null, transformMatrix: Camera.ViewMatrix);
-        //Assets.effect.Parameters["Time"].SetValue((float)gameTime.TotalGameTime.TotalSeconds);
         CurrentGameState.Draw(spriteBatch);
         spriteBatch.End();
         

@@ -118,7 +118,7 @@ public enum Sound
 public enum ComponentType
 {
     DockableComponent,
-    UIComponent,
+    TeamComponent,
 }
 public enum Message
 {
