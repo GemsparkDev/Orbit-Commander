@@ -204,3 +204,10 @@ Update 0.4.1
     -Added simple cutscene system with demo intro cutscene for first mission.    
     -Fixed bug #7.    
     -Fixed bug #14.    
+      
+5/5/2025    
+Update 0.4.2    
+    -Added a debug collider renderer.    
+    -Modified particle system such that emitters are managed by entities.    
+    -Debug velocity now renders as a single line in the direction of motion.    
+    -Developed intro cutscene and dialed in cutscene backend.    
