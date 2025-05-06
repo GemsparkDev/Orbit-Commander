@@ -1,20 +1,17 @@
 ﻿using System;
-using Space_Wars.Content.Main.Entities;
 
 namespace Space_Wars.Content.Main;
 
-public class EntityEvent : IEvent
+public class Event : IEvent
 {
     private float start;
     private float end;
-    private Action<float, Entity> action;
-    private Entity entity;
-    public EntityEvent(float _start, float _end, Action<float, Entity> _action, Entity _entity)
+    private Action<float> action;
+    public Event(float _start, float _end, Action<float> _action)
     {
         start = _start;
         end = _end;
         action = _action;
-        entity = _entity;
     }
 
     public bool Update(float _time)
@@ -27,7 +24,7 @@ public class EntityEvent : IEvent
         {
             return false;
         }
-        action(_time - start, entity);
+        action(_time - start);
         return true;
     }
 }

@@ -2,6 +2,7 @@
 using Microsoft.Xna.Framework.Content;
 using Space_Wars.Content.Main.Particles;
 using System;
+using Microsoft.Xna.Framework.Graphics;
 using System.Diagnostics;
 
 namespace Space_Wars.Content.Main.Entities;
@@ -13,14 +14,9 @@ public abstract class Projectile : Entity
     public float timeLeft = 8;
     //Projectiles should always be able to hit potential targets
     public override int SensingAbility { get { return 99; } }
-    public Projectile(Vector2 _position, Vector2 _velocity, float _angle, float _angularVelocity, bool _isFriendly, int _damage, int _stealth)
+    public Projectile(Texture2D _texture, Vector2 _position, Vector2 _velocity, float _angle, float _angularVelocity, bool _isFriendly, int _damage, int _stealth)
+        : base(_texture, _position, _velocity, _angle, _angularVelocity, _damage, _isFriendly)
     {
-        position = _position;
-        velocity = _velocity;
-        angle = _angle;
-        angularVelocity = _angularVelocity;
-        isFriendly = _isFriendly;
-        damage = _damage;
         StealthAbility = _stealth;
     }
     public override void Update()
@@ -33,6 +29,7 @@ public abstract class Projectile : Entity
             ParticleManager.Add(new Particle(texture, 1, position, velocity, angle, 0, 1, true, color, Color.Black));
             isExpired = true;
         }
+        base.Update();
     }
     public abstract void AI();
     public override void Collide(int _damage)
@@ -54,10 +51,9 @@ public class PulseShot : Projectile
 {
     bool isHoming;
     public PulseShot(Vector2 _position, Vector2 _velocity, float _angle, float _angularVelocity, bool _isFriendly, int _damage, bool _isHoming = false, int _stealth = 0) 
-        : base(_position, _velocity, _angle, _angularVelocity, _isFriendly, _damage, _stealth)
+        : base(Assets.Get(Sprite.PulseShot), _position, _velocity, _angle, _angularVelocity, _isFriendly, _damage, _stealth)
     {
         entityType = EntityType.Projectile;
-        texture = Assets.Get(Sprite.PulseShot);
         isHoming = _isHoming;
         color = _isFriendly ? Color.Orange : Color.Red;
     }
@@ -83,10 +79,9 @@ public class SpiralShot : Projectile
     float time;
     Vector2 positionNormal;
     public SpiralShot(Vector2 _position, Vector2 _velocity, float _angle, float _angularVelocity, bool _isFriendly, int _damage, bool _isOffset, int _stealth = 0)
-        : base(_position, _velocity, _angle, _angularVelocity, _isFriendly, _damage, _stealth)
+        : base(Assets.Get(Sprite.SpiralShot), _position, _velocity, _angle, _angularVelocity, _isFriendly, _damage, _stealth)
     {
         entityType = EntityType.Projectile;
-        texture = Assets.Get(Sprite.SpiralShot);
         time = 0;
         isOffset = _isOffset;
         color = _isFriendly ? Color.Orange : Color.Red;
@@ -106,15 +101,12 @@ public class AssassinShot : Projectile
 {
     ParticleEmitter beam;
     public AssassinShot(Vector2 _position, Vector2 _velocity, float _angle, float _angularVelocity, bool _isFriendly, int _damage, int _stealth = 0)
-        : base(_position, _velocity, _angle, _angularVelocity, _isFriendly, _damage, _stealth)
+        : base(Assets.Get(Sprite.Missile), _position, _velocity, _angle, _angularVelocity, _isFriendly, _damage, _stealth)
     {
         entityType = EntityType.Projectile;
-        texture = Assets.Get(Sprite.Missile);
         color = _isFriendly ? Color.Orange : Color.Red;
         timeLeft = 3;
         beam = new(Assets.Get(Sprite.Dot), 0.5f, position, angle, 0, 0, 0, 0.5f, 1, true, color, Color.Gold, EmitterType.EmissionOverDistance);
-        ParticleManager.Add(beam);
-
     }
     public override void AI()
     {
@@ -131,10 +123,10 @@ public class AssassinShot : Projectile
             if (isExpired)
             {
                 beam.position = position;
-                beam.isEmitterExpired = true;
                 return;
             }
         }
         beam.position = position;
+        beam.Update();
     }
 }

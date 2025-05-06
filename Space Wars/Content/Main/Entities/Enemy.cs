@@ -27,26 +27,21 @@ public class Enemy : Entity
     private Vector2 targetVector;
     public ParticleEmitter enemyRange = new(Assets.Get(Sprite.Dot), Vector2.Zero, 0, 0.75f, Color.Red);
     public Enemy(Vector2 _position, Vector2 _velocity, float _angle, int _damage, int _health, Texture2D _texture, bool _isFriendly = false)
+        : base(_texture, _position, _velocity, _angle, 0, _damage, _isFriendly)
     {
-        position = _position;
-        velocity = _velocity;
-        angle = _angle;
         entityType = EntityType.Enemy;
-        damage = _damage;
-        isFriendly = _isFriendly;
-        texture = _texture;
         color = _isFriendly ? new Color(0, 255, 0) : Color.Red;
         health = _health;
         maxHealth = health;
         cooldown = 0.5f;
         enemyRange.position = position;
-        ParticleManager.Add(enemyRange);
         hitSound = Assets.Get(Sound.Hit);
     }
     public override void Update()
     {
         enemyRange.isEmitterActive = Engine.DebugMode;
         enemyRange.position = position;
+        enemyRange.Update();
 
         if (angle - targetAngle >= Math.PI)
         {
@@ -64,6 +59,7 @@ public class Enemy : Entity
         {
             health = maxHealth;
         }
+        base.Update();
     }
     public void LowerCooldown()
     {
@@ -112,7 +108,7 @@ public class Enemy : Entity
     }
     public override void Collide(int damage)
     {
-        if (deleteOnCollide == true && damage >= 0)
+        if (deleteOnCollide && damage >= 0)
         {
             health = 0;
             SoundManager.PlaySound(hitSound, position);
@@ -132,7 +128,7 @@ public class Enemy : Entity
             ParticleManager.Add(new Particle(null, 1, position + new Vector2(0, -1), new Vector2(0, -1.5f), 0, 0, 1, true, Color.Orange, Color.Green) { drawText = $"{-damage}" });
         }
     }
-    private void Explode()
+    public void Explode()
     {
         int particles = random.Next(15, 25);
         for (int i = 0; i < particles; i++)
@@ -152,10 +148,10 @@ public class Enemy : Entity
     }
     public override void Draw(SpriteBatch _spriteBatch)
     {
-        if(ChildEnemy == false && EntityManager.Player.SensingAbility > StealthAbility)
+        if(!ChildEnemy && EntityManager.Player.SensingAbility > StealthAbility)
         {
             //Health bar
-            Vector2 barPosition = position - Engine.mousePositionOffset + new Vector2(-texture.Width * 2, texture.Height) / 2;
+            Vector2 barPosition = position + new Vector2(-texture.Width * 2, texture.Height) / 2;
             Rectangle sourceRectangle = new (0, 0, texture.Width * 2, 2);
             Engine.DrawFilledLine(_spriteBatch, barPosition, sourceRectangle, (float)(health) / (float)(maxHealth), Color.DarkRed, Color.LightGreen);
         }
@@ -342,7 +338,6 @@ public class Enemy : Entity
         deleteOnCollide = true;
         ParticleEmitter engineParticles = new(Assets.Get(Sprite.Dot), 0.15f, Vector2.Zero, 0, 45, 2, 0, 
             450f, 1, true, Color.Yellow, Color.DarkRed, EmitterType.EmissionOverTime) { isEmitterActive = false };
-        ParticleManager.Add(engineParticles);
         while (true)
         {
             if (fuel <= 0)
@@ -361,7 +356,6 @@ public class Enemy : Entity
                 Explode();
                 isExpired = true;
                 SoundManager.PlaySound(Assets.Get(Sound.Death), position);
-                engineParticles.isEmitterExpired = true;
             }
             Entity nearestEnemy = EntityManager.NearestEnemy(this);
             nearestEnemy ??= NewDummyEnemy(position + 100 * new Vector2(MathF.Cos(angle- MathF.PI / 2), MathF.Sin(angle - MathF.PI/2)));
@@ -402,12 +396,12 @@ public class Enemy : Entity
             }
             engineParticles.sprayAngle = angle + MathF.PI;
             engineParticles.position = position + new Vector2(-MathF.Sin(angle), MathF.Cos(angle)) * 4;
+            engineParticles.Update();
             if (EntityManager.DistanceSqr(this, nearestEnemy) < 10 * 10)
             {
                 nearestEnemy.Collide(8);
                 SoundManager.PlaySound(Assets.Get(Sound.Explosion), position);
                 isExpired = true;
-                engineParticles.isEmitterExpired = true;
             }
 
             yield return 0;
@@ -477,7 +471,7 @@ public class Enemy : Entity
             angle = parent.angle + theta;
             position = parent.position + new Vector2(MathF.Sin(angle), -MathF.Cos(angle)) * distance;
             velocity = parent.velocity;
-            if(parent.isExpired == true)
+            if(parent.isExpired)
             {
                 isExpired = true;
                 parent = null;
@@ -800,7 +794,7 @@ public class Enemy : Entity
             {
                 furnaceCooldown = 15;
             }
-            if (currentlyCrafting == true)
+            if (currentlyCrafting)
             {
                 craftingCooldown -= Engine.DeltaSeconds;
                 if (craftingCooldown <= 0)
@@ -925,7 +919,6 @@ public class Enemy : Entity
     {
         ParticleEmitter miningDebris = new(Assets.Get(Sprite.Dot), 0.15f, position + new Vector2(0, Assets.Get(Sprite.Miner).Height / 2), 0, 90, 2, 
             (float)random.NextDouble()-0.5f, 1000, 0, true, Color.Cyan, Color.Black, EmitterType.EmissionOverTime);
-        ParticleManager.Add(miningDebris);
         while (true)
         {
             velocity *= 0;
@@ -945,6 +938,7 @@ public class Enemy : Entity
                     SoundManager.PlaySound(Assets.Get(Sound.Dock), position);
                 }
             }
+            miningDebris.Update();
             yield return 0;
         }
     }
@@ -958,7 +952,6 @@ public class Enemy : Entity
         enemyRange.radius = 250;
         ParticleEmitter engineParticles = new(Assets.Get(Sprite.Dot), 0.15f, Vector2.Zero, 0, 45, 2, 0,
             450f, 1, true, Color.Yellow, Color.DarkRed, EmitterType.EmissionOverTime);
-        ParticleManager.Add(engineParticles);
         while (true)
         {
             Entity nearestEnemy = EntityManager.NearestEnemy(this);
@@ -995,7 +988,6 @@ public class Enemy : Entity
                 {
                     EntityManager.Add(ItemFactory.NewScrap(position, normalizedAcceleration * 10, angularVelocity));
                 }
-                engineParticles.isEmitterExpired = true;
             }
             if (Vector2.Distance(position, nearestEnemy.position) < enemyRange.radius)
             {
@@ -1028,6 +1020,7 @@ public class Enemy : Entity
             engineParticles.sprayAngle = angle * 180 / MathF.PI + 180;
             engineParticles.speedOfEmission = thrust * 100;
             engineParticles.particleVelocity = 3 - 3 / (thrust + 1);
+            engineParticles.Update();
             yield return 0;
         }
     }
@@ -1230,7 +1223,7 @@ public class Enemy : Entity
             {
                 furnaceCooldown = 15;
             }
-            if (currentlyCrafting == true)
+            if (currentlyCrafting)
             {
                 craftingCooldown -= Engine.DeltaSeconds;
                 if (craftingCooldown <= 0)

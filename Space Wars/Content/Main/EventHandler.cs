@@ -46,7 +46,7 @@ public class EventHandler
     {
         player.velocity = Vector2.Zero;
         Engine.ingameTime = new();
-        Engine.mousePositionOffset = Vector2.Zero;
+        Engine.MousePositionOffset = Vector2.Zero;
         Engine.UIManager.ToggleMenu((int)Containers.PauseMenu);
         Engine.UIManager.ToggleMenu((int)Containers.MainMenu);
         ParticleManager.Initialize();
@@ -188,12 +188,12 @@ public class EventHandler
         SoundManager.PlayGlobalSound(Assets.Get(Sound.Interact));
         Engine.UIManager.ToggleMenu((int)Containers.MothershipMenu);
         Engine.UIManager.ToggleMenu((int)Containers.GarageMenu);
-        if (Engine.UIManager.GetContainer((int)Containers.GarageMenu).enabled == true)
+        if (Engine.UIManager.GetContainer((int)Containers.GarageMenu).enabled)
         {
             CurrentGameState.SwitchState(new Garage());
             return;
         }
-        if (isTraining == false)
+        if (!isTraining)
         {
             CurrentGameState.SwitchState(new PlayingGame());
             return;
@@ -208,7 +208,7 @@ public class EventHandler
         {
             missionSelect.enabled = !missionSelect.enabled;
         }
-        if (missionSelect.enabled == true)
+        if (missionSelect.enabled)
         {
             CurrentGameState.SwitchState(new MissionSelect());
             return;

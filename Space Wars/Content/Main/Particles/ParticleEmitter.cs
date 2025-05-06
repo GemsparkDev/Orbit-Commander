@@ -28,7 +28,6 @@ namespace Space_Wars.Content.Main.Particles
         public float particleTransparency;
         public float radius;
         public bool particleFadesOut;
-        public bool isEmitterExpired = false;
         public bool isEmitterActive = true;
         public float probability = 1;
         float cooldown = 1;

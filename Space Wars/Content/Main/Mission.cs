@@ -3,7 +3,6 @@ using System;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using System.Linq;
-using System.Diagnostics;
 using Space_Wars.Content.Main.Particles;
 
 namespace Space_Wars.Content.Main;
@@ -32,7 +31,6 @@ public class Mission
     private float waveTimer = 5;
     private float maxWaveTimer = 5;
     private float difficulty;
-    private Player player { get { return EntityManager.Player; } }
     private Random random = new();
     public delegate Enemy DelegateEnemy(Vector2 position, Vector2 velocity, float angle, bool _isFriendly = false);
     public int EnemiesSpawned { get; private set; } = 0;
@@ -88,18 +86,7 @@ public class Mission
     }
     public void Update()
     {
-        foreach (var planet in planets)
-        {
-            planet.Update();
-            foreach (var planet2 in planets)
-            {
-                if (planet == planet2)
-                {
-                    continue;
-                }
-                planet.AttractObject(planet2);
-            }
-        }
+        PlanetUpdate();
         bool allCompleted = true;
         foreach (var (entity, conditions) in MissionObjectives)
         {
@@ -185,6 +172,21 @@ public class Mission
             }
         }
     }
+    public void PlanetUpdate()
+    {
+        foreach (var planet in planets)
+        {
+            planet.Update();
+            foreach (var planet2 in planets)
+            {
+                if (planet == planet2)
+                {
+                    continue;
+                }
+                planet.AttractObject(planet2);
+            }
+        }
+    }
     public void PlayIntroCutscene()
     {
         if (cutscene != null)
@@ -198,10 +200,6 @@ public class Mission
     }
     public void Initialize()
     {
-        foreach (var planet in planets)
-        {
-            planet.RenderSurface();
-        }
         foreach(var (entity, _) in MissionObjectives)
         {
             EntityManager.Add(entity);
@@ -347,7 +345,7 @@ public class Mission
             {
                 if (random.Next(0, enemyCreditValues[i].cost / 2) == 0 && newCosts[i] <= enemyCredits)
                 {
-                    EntityManager.Add(enemyCreditValues[i].enemy(NewSpawnLocation(), player.velocity, 0));
+                    EntityManager.Add(enemyCreditValues[i].enemy(NewSpawnLocation(), EntityManager.Player.velocity, 0));
                     enemyCredits -= newCosts[i];
                     newCosts[i] += 1;
                     EnemiesSpawned++;
@@ -366,6 +364,6 @@ public class Mission
         float distanceMultiplier = 1 + (random.NextSingle() - 0.5f) / 4;
         float distance = (Engine.ScreenSize.X + Engine.ScreenSize.Y) / 2 * distanceMultiplier;
         Vector2 spawnLocation = Engine.ToUnitVector(angle) * distance;
-        return spawnLocation + player.position;
+        return spawnLocation + EntityManager.Player.position;
     }
 }

@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Diagnostics;
+using Microsoft.Xna.Framework.Audio;
 
 namespace Space_Wars.Content.Main;
 
@@ -73,7 +74,7 @@ public static class EntityManager
     private static Mission currentMission;
     public static void Add(Entity entity)
     {
-        if (isUpdating == false)
+        if (!isUpdating)
         {
             //Checks the entity type, and adds it to the corresponding list for each type
             entities.Add(entity);
@@ -99,7 +100,7 @@ public static class EntityManager
         addedEntities = new();
         enemies = new();
         projectiles = new();
-        Player = new(new Vector2(0, -CurrentMission.Planet.radius + 1000), new Vector2(CurrentMission.Planet.GetOrbitalVelocity(new Vector2(0, -CurrentMission.Planet.radius + 1000)),0), 0, 0f);
+        Player = new(new Vector2(0, -CurrentMission.Planet.radius + 1), new Vector2(0, 0),0, 0);
         CurrentMission.Initialize();
         return Player;
     }
@@ -111,11 +112,11 @@ public static class EntityManager
         {
             CurrentMission.CalculateTrajectory(Player.position, Player.velocity, Player.ColliderRadius);
         }
-        if (Player.isExpired == true)
+        if (Player.isExpired)
         {
             Engine.Startgame();
         }
-        Engine.mousePositionOffset = new Vector2(Mouse.GetState().X - Engine.ScreenSize.X / 2, Mouse.GetState().Y - Engine.ScreenSize.Y / 2) / 10 
+        Engine.MousePositionOffset = new Vector2(Mouse.GetState().X - Engine.ScreenSize.X / 2, Mouse.GetState().Y - Engine.ScreenSize.Y / 2) / 10 
             + Engine.ScreenShakeFactor * Engine.ScreenShakeFactor * new Vector2((float)random.NextDouble() - 0.5f, (float)random.NextDouble() - 0.5f) * 50;
         Engine.Camera.Rotation = Engine.ScreenShakeFactor * Engine.ScreenShakeFactor * ((float)random.NextDouble() - 0.5f) * 0.15f;
         //If the player is further from the camera, put more weight on the player
@@ -143,15 +144,6 @@ public static class EntityManager
             for (int i = 0; i < projectiles.Count - 150; i++)
             {
                 projectiles[i].isExpired = true;
-            }
-        }
-
-        //Clears all expired entities from the entity lists
-        foreach (Entity enemy in enemies)
-        {
-            if(enemy.isExpired == true && enemy is Enemy)
-            {
-                (enemy as Enemy).enemyRange.isEmitterExpired = true;
             }
         }
         entities = entities.Where(x => !x.isExpired).ToList();
@@ -252,7 +244,7 @@ public static class EntityManager
                 returnEnemy = targetEnemy;
             }
         }
-        if (entity.isFriendly == false)
+        if (!entity.isFriendly)
         {
             float distance = DistanceSqr(entity, Player);
             if (distance < nearestDistance)
@@ -283,7 +275,7 @@ public static class EntityManager
                 returnEnemy = targetEnemy;
             }
         }
-        if (entity.isFriendly == true)
+        if (entity.isFriendly)
         {
             float distance = DistanceSqr(entity, Player);
             if (distance < nearestDistance)
@@ -374,16 +366,45 @@ public static class EntityManager
         List<IEvent> events = new();
         List<Entity> actors = new();
         var mothership = Enemy.NewMothership(new Vector2(1500, -2000), new Vector2(-10, 10), MathF.PI/12);
-        var emitter = new ParticleEmitter(Assets.Get(Sprite.Circle), 1, new Vector2(1500, -2000), 0, 45, 10, 
-            random.NextSingle()-0.5f, 100, 1, true, Color.Yellow, Color.Red, EmitterType.EmissionOverTime);
+        var sound = Assets.Get(Sound.FireEngines).CreateInstance();
+        sound.IsLooped = true;
+        var emitter = new ParticleEmitter(Assets.Get(Sprite.Circle), 1, new Vector2(1500, -2000), 165 + 45, 360, 2, 
+            random.NextSingle()-0.5f, 200, 1, true, Color.Gray, Color.Coral, EmitterType.EmissionOverTime);
         actors.Add(mothership);
-        events.Add(new EntityEvent(0, 3, delegate (float time, Entity entity)
+        //Ensure planets still orbit and render
+        events.Add(new Event(0, 5, delegate (float time)
         {
-            entity.position = new Vector2(1000, -2000) * (3 - time)/3 + new Vector2(0, -500) * time/3;
-            Engine.Camera.Position = entity.position + new Vector2(random.NextSingle() * 10 - 5, random.NextSingle() * 10 - 5);
-            emitter.position = entity.position;
-        }, mothership));
-        return new Cutscene(events, actors, new PlayingGame(), emitter);
+            CurrentMission.PlanetUpdate();
+        }));
+        //Starts engine sound
+        events.Add(new TriggerEvent(0, delegate (float time)
+        {
+            sound.Play();
+        }));
+        //Linearly moves the mothership toward the planet
+        events.Add(new Event(0, 3, delegate (float time)
+        {
+            emitter.position = mothership.position;
+            emitter.Update();
+            mothership.position = new Vector2(1500, -2000) * (3 - time)/3 + new Vector2(0, -425) * time/3;
+            Engine.Camera.Position = mothership.position + new Vector2(random.NextSingle() * 10 - 5, random.NextSingle() * 10 - 5);
+        }));
+        //Disables emitter, plays explosion sound, and stops engine sound
+        events.Add(new TriggerEvent(3, delegate(float time) 
+        { 
+            emitter.isEmitterActive = false;
+            sound.Pause();
+            SoundManager.PlayGlobalSound(Assets.Get(Sound.Death));
+        }));
+        //Collision, big shake and rotates the angle of the mothership towards straight up
+        events.Add(new Event(3, 4, delegate (float time)
+        {
+            mothership.position = new Vector2(0, -425);
+            float t = (1 - time) * (1 - time);
+            mothership.angle = MathF.PI / 12 * t;
+            Engine.Camera.Position = mothership.position + t * (new Vector2(random.NextSingle() * 50 - 25, random.NextSingle() * 50 - 25));
+        }));
+        return new Cutscene(events, actors, new PlayingGame());
     }
 }
 
@@ -467,7 +488,7 @@ public class TrainingSimulator
         enemy = Enemy.NewFighter(new Vector2(0, -600), Vector2.Zero, 0);
         EntityManager.Add(enemy);
         instructionText = "An enemy has spawned near the mothership. You can attack it with left click. Destroy the enemy to proceed.";
-        while (enemy.isExpired == false)
+        while (!enemy.isExpired)
         {
             yield return 0;
         }
@@ -476,7 +497,7 @@ public class TrainingSimulator
     IEnumerable<int> TeachSkill()
     {  
         instructionText = "You are equipped with a dash that teleports you forward. You can activate it by pressing Q when the cyan bar is full.";
-        while (Keyboard.GetState().IsKeyDown(Keys.Q) == false)
+        while (!Keyboard.GetState().IsKeyDown(Keys.Q))
         {
             yield return 0;
         }
@@ -498,7 +519,7 @@ public class TrainingSimulator
         instructionText = "Enemies will occasionally drop scrap. You can collect it by holding right click when close to the scrap, then docking with the mothership. Be careful not to let it run into the planet.";
         while (player.dockedEntity.Inventory[0,0] == null)
         {
-            if(item.isExpired == true)
+            if(item.isExpired)
             {
                 item = ItemFactory.NewScrap(new Vector2(0, -600), Vector2.Zero, 0);
                 EntityManager.Add(item);
@@ -533,7 +554,7 @@ public class TrainingSimulator
     IEnumerable<int> RepairMothership()
     {
         instructionText = "Your objective is to fix the mothership by going to the third tab and pressing repair with 5 refined scrap. You will need 25 scrap total to complete repairs.";
-        //while (player.dockableEntity.currentlyCrafting == false)
+        //while (!player.dockableEntity.currentlyCrafting)
         //{
         //    yield return 0;
         //}

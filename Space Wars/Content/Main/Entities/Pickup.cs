@@ -14,32 +14,27 @@ public class Pickup : Entity, IData
     public Window Tooltip { get; } = new Window(Vector2.Zero, Assets.Get(Sprite.WideButton));
     public String Name { get { return itemData.Name; } }
     public virtual Color Color { get { return itemData.Color; } }
-    private int hitsLeft = 3;
+    private int hitsLeft = 2;
     protected float invincibilityCooldown = 0;
     public int ID
     {
         get { return itemData.ID; }
     }
     public Pickup(ItemData _itemData, Texture2D _worldTexture, Color _worldColor, Vector2 _position, Vector2 _velocity, float _angularVelocity)
+        : base(_worldTexture, _position, _velocity, 0, _angularVelocity, 0, true)
     {
         texture = _worldTexture;
-        Engine.WriteLine(ColliderRadius);
         itemData = _itemData;
-        position = _position;
-        velocity = _velocity;
-        angle = 0;
-        angularVelocity = _angularVelocity;
         color = _worldColor;
         Tooltip.AddWidget(new Decal(new Vector2(-Tooltip.Size.X / 3, 0) - new Vector2(_itemData.Sprite.Width, _itemData.Sprite.Height)/2, _itemData.Sprite));
         Tooltip.AddWidget(new Decal(new Vector2(0, -5), Assets.TextFont, _itemData.Name, Color.White,  5f));
-        isFriendly = true;
     }
 
     public override void Update()
     {
         if (!EntityManager.Player.leashedMaterials.Contains(this))
         {
-            if (EntityManager.DistanceSqr(EntityManager.Player, this) < 1375 && EntityManager.Player.leashedMaterials.Count < 3 && EntityManager.Player.canGatherResources == true)
+            if (EntityManager.DistanceSqr(EntityManager.Player, this) < 1375 && EntityManager.Player.leashedMaterials.Count < 3 && EntityManager.Player.canGatherResources)
             {
                 EntityManager.Player.leashedMaterials.Add(this);
                 if (EntityManager.Player.leashedMaterials.Count < 3)
@@ -82,6 +77,7 @@ public class Pickup : Entity, IData
         {
             invincibilityCooldown -= Engine.DeltaSeconds;
         }
+        base.Update();
     }
     public override void Collide(int _damage)
     {

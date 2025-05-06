@@ -40,22 +40,14 @@ public class Player : Entity
     public Dictionary<ModuleType, Module> modules;
 
     public Player(Vector2 _position, Vector2 _velocity, float _angle, float _angularVelocity)
+        : base(Assets.Get(Sprite.Player), _position, _velocity, _angle, _angularVelocity, 5, true)
     {
-        position = _position;
-        velocity = _velocity;
         gunAngle = Enemy.NewDummyEnemy(position, true);
         shield = Enemy.NewShield(gunAngle, 10, 1, 0, 1, true);
         shield.isExpired = true;
-        angle = _angle;
-        angularVelocity = _angularVelocity;
-        texture = Assets.Get(Sprite.Player);
-        isFriendly = true;
         color = new Color(0, 255, 0);
-        damage = 5;
         smokeParticles.isEmitterActive = false; 
         engineParticles.isEmitterActive = false;
-        ParticleManager.Add(engineParticles);
-        ParticleManager.Add(smokeParticles);
         engineSounds = Assets.Get(Sound.FireEngines).CreateInstance();
         engineSounds.IsLooped = true;
         SoundManager.AddSound(engineSounds);
@@ -77,6 +69,10 @@ public class Player : Entity
     }
     public override void Update()
     {
+        engineParticles.position = position - new Vector2(MathF.Sin(angle), -MathF.Cos(angle)) * 8;
+        engineParticles.Update();
+        smokeParticles.position = position;
+        smokeParticles.Update();
         leashedMaterials = leashedMaterials.Where(x => !x.isExpired).ToList();
         if (EventHandler.AcknowledgeMessage(Message.RestartModules))
         {
@@ -186,8 +182,6 @@ public class Player : Entity
             position += velocity * Engine.DeltaSeconds * 60;
             ControlShip();
         }
-        engineParticles.position = position - new Vector2(MathF.Sin(angle), -MathF.Cos(angle)) * 8;
-        smokeParticles.position = position;
         foreach(var module in modules.Values)
         {
             module.UpdateCooldown();
@@ -203,6 +197,7 @@ public class Player : Entity
             SoundManager.PauseSound(engineSounds);
         }
         gunAngle.position = position;
+        base.Update();
     }
     public override void Collide(int _damage)
     {
@@ -272,16 +267,16 @@ public class Player : Entity
         MouseState newMouseState = Mouse.GetState();
         targetVector = Vector2.Normalize(new Vector2(Mouse.GetState().X, Mouse.GetState().Y) - Engine.ScreenSize / 2 - position + Engine.Camera.Position);
         gunAngle.angle = MathF.Atan2(targetVector.X, -targetVector.Y) - Engine.Camera.Rotation;
-        if (newMouseState.LeftButton == ButtonState.Pressed && modules[ModuleType.Guns].IsCooldownReady() && UIManager.LockMouseInput == false && !modules[ModuleType.Guns].isFailed)
+        if (newMouseState.LeftButton == ButtonState.Pressed && modules[ModuleType.Guns].IsCooldownReady() && !UIManager.LockMouseInput && !modules[ModuleType.Guns].isFailed)
         {
             moduleFunctions[1][modules[ModuleType.Guns].AbilityID]();
         }
-        if (newMouseState.RightButton == ButtonState.Pressed && oldMouseState.RightButton == ButtonState.Released && UIManager.LockMouseInput == false)
+        if (newMouseState.RightButton == ButtonState.Pressed && oldMouseState.RightButton == ButtonState.Released && !UIManager.LockMouseInput)
         {
             canGatherResources = true;
             SoundManager.PlayGlobalSound(Assets.Get(Sound.OpenMenu));
         }
-        else if (newMouseState.RightButton == ButtonState.Released && oldMouseState.RightButton == ButtonState.Pressed && UIManager.LockMouseInput == false)
+        else if (newMouseState.RightButton == ButtonState.Released && oldMouseState.RightButton == ButtonState.Pressed && !UIManager.LockMouseInput)
         {
             SoundManager.PlayGlobalSound(Assets.Get(Sound.CloseMenu));
             canGatherResources = false;
@@ -474,7 +469,7 @@ public class Player : Entity
     {
         if (position.Length() > EntityManager.CurrentMission.Planet.radius + 25 * 50)
         {
-            _spriteBatch.Draw(Assets.Get(Sprite.Arrow), position - Engine.mousePositionOffset - Vector2.Normalize(position) * 25, null, color, MathF.Atan2(-position.X, position.Y), Assets.DimsOf(Sprite.Arrow) / 2, 1, 0, 0.2f);
+            _spriteBatch.Draw(Assets.Get(Sprite.Arrow), position - Vector2.Normalize(position) * 25, null, color, MathF.Atan2(-position.X, position.Y), Assets.DimsOf(Sprite.Arrow) / 2, 1, 0, 0.2f);
             _spriteBatch.DrawString(Assets.TextFont, "Return to planet.", Engine.Camera.Position - new Vector2(105, 225), Color.Crimson);
         }
         if(dockedEntity != null)
@@ -482,7 +477,7 @@ public class Player : Entity
             return;
         }
         base.Draw(_spriteBatch);
-        Vector2 linePosition = position - Engine.mousePositionOffset + new Vector2(-texture.Width * 2, texture.Height * 1.5f) / 2;
+        Vector2 linePosition = position + new Vector2(-texture.Width * 2, texture.Height * 1.5f) / 2;
         Rectangle sourceRectangle = new (0, 0, texture.Width * 2, 2);
 
         Engine.DrawFilledLine(_spriteBatch, linePosition, sourceRectangle, (1 - modules[ModuleType.Engines].cooldown / 2), Color.DarkGray, Color.Cyan);

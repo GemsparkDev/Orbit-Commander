@@ -31,11 +31,6 @@ public class GravitationalSource
         trajectory = new ParticleEmitter(Assets.Get(Sprite.Dot), 100, position, 0, 0, 0, 0, 1f, 1, true, _color * 0.1f, _color, EmitterType.EmissionOverDistance);
         hasRing = _hasRing;
     }
-    public void RenderSurface()
-    {
-        ParticleManager.Add(surface);
-        ParticleManager.Add(trajectory);
-    }
     public Vector2 GetAcceleration(Vector2 _position)
     {
         Vector2 relativePosition = _position - position;
@@ -113,7 +108,7 @@ public class GravitationalSource
     }
     public void Update()
     {
-        if(isImmovable == false)
+        if(!isImmovable)
         {
             position += velocity * Engine.DeltaSeconds * 60;
         }
@@ -137,7 +132,9 @@ public class GravitationalSource
             }
         }
         surface.position = position;
+        surface.Update();
         trajectory.position = position;
+        trajectory.Update();
     }
     public bool IsColliding(Vector2 _position)
     {
@@ -145,13 +142,13 @@ public class GravitationalSource
     }
     public void Draw(SpriteBatch _spriteBatch)
     {
-        if(Engine.DebugMode == true)
+        if(Engine.DebugMode)
         {
             //Draws a line in the direction of motion for X
-            _spriteBatch.Draw(Engine.Line, position - Engine.mousePositionOffset, new Rectangle((int)position.X, (int)position.Y, 10, 1), Color.White,
+            _spriteBatch.Draw(Engine.Line, position, new Rectangle((int)position.X, (int)position.Y, 10, 1), Color.White,
                 MathF.Atan2(0, velocity.X), Vector2.Zero, new Vector2(MathF.Abs(velocity.X), 1), SpriteEffects.None, 0.4f);
             //Draws a line in the direction of motion for Y
-            _spriteBatch.Draw(Engine.Line, position - Engine.mousePositionOffset, new Rectangle((int)position.X, (int)position.Y, 10, 1), Color.White,
+            _spriteBatch.Draw(Engine.Line, position, new Rectangle((int)position.X, (int)position.Y, 10, 1), Color.White,
                 MathF.Atan2(velocity.Y, 0), Vector2.Zero, new Vector2(MathF.Abs(velocity.Y), 1), SpriteEffects.None, 0.4f);
         }
     }

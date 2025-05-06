@@ -5,6 +5,7 @@ using Microsoft.Xna.Framework.Audio;
 using System.Collections.Generic;
 using Space_Wars.Content.Main.Components;
 using System.Diagnostics;
+using Space_Wars.Content.Main.Particles;
 
 namespace Space_Wars.Content.Main.Entities;
 
@@ -18,7 +19,7 @@ public abstract class Entity
     public Vector2 velocity;
     public float angularVelocity = 0;
     public float angle;
-    public bool isExpired;
+    public bool isExpired = false;
     public bool isFriendly;
     public int damage;
     public virtual int SensingAbility { get; protected set; } = 1;
@@ -29,12 +30,27 @@ public abstract class Entity
     {
         get { return (texture.Height + texture.Width) / 4 + 1; }
     }
+    private ParticleEmitter collider;
     public Vector2 Size
     {
         get { return texture == null ? Vector2.Zero : new Vector2(texture.Width, texture.Height); }
     }
-
-    public abstract void Update();
+    public Entity(Texture2D _texture, Vector2 _position, Vector2 _velocity, float _angle, float _angularVelocity, int _damage, bool _isFriendly)
+    {
+        texture = _texture;
+        position = _position;
+        velocity = _velocity;
+        angle = _angle;
+        angularVelocity = _angularVelocity;
+        damage = _damage;
+        isFriendly = _isFriendly;
+        collider = new ParticleEmitter(Assets.Get(Sprite.Dot), position, ColliderRadius, 1, Color.Yellow) { isEmitterActive = false };
+    }
+    public virtual void Update()
+    {
+        collider.position = position;
+        collider.Update();
+    }
     public abstract void Collide(int _damage);
 
     public void ClampVelocity(float speed)
@@ -76,26 +92,24 @@ public abstract class Entity
         {
             stealthColor *= 0;
         }
-        _spriteBatch.Draw(texture, position - Engine.mousePositionOffset, null, stealthColor, angle, Size / 2, 1, 0, 0);
+        _spriteBatch.Draw(texture, position, null, stealthColor, angle, Size / 2, 1, 0, 0);
 
-        if (Engine.DebugMode == true)
+        if (Engine.DebugMode)
         {
-            //Draws a line in the direction of motion for X
-            _spriteBatch.Draw(Engine.Line, position - Engine.mousePositionOffset, new Rectangle((int)position.X, (int)position.Y, 10, 1), Color.White,
-                MathF.Atan2(0, velocity.X), Vector2.Zero, new Vector2(MathF.Abs(velocity.X), 1), SpriteEffects.None, 0.4f);
-            //Draws a line in the direction of motion for Y
-            _spriteBatch.Draw(Engine.Line, position - Engine.mousePositionOffset, new Rectangle((int)position.X, (int)position.Y, 10, 1), Color.White,
-                MathF.Atan2(velocity.Y, 0), Vector2.Zero, new Vector2(MathF.Abs(velocity.Y), 1), SpriteEffects.None, 0.4f);
-            //Draws a line in the direction the entity is pointing
-            _spriteBatch.Draw(Engine.Line, position - Engine.mousePositionOffset, new Rectangle((int)position.X, (int)position.Y, 10, 1), Color.Red,
+            //Direction of motion
+            _spriteBatch.Draw(Engine.Line, position, new Rectangle((int)position.X, (int)position.Y, 10, 1), Color.LightBlue,
+                MathF.Atan2(velocity.Y, velocity.X), Vector2.Zero, new Vector2(velocity.Length(), 0.5f), SpriteEffects.None, 0.4f);
+            //Direction the entity is pointing
+            _spriteBatch.Draw(Engine.Line, position, new Rectangle((int)position.X, (int)position.Y, 10, 1), Color.Red,
                 angle - MathF.PI / 2, Vector2.Zero, Vector2.One, SpriteEffects.None, 0.4f);
         }
+        collider.isEmitterActive = Engine.DebugMode;
     }
     public void SimpleDraw(SpriteBatch _spriteBatch)
     {
         //Simplified render, only draws the entity texture
         //Used during cutscenes
-        _spriteBatch.Draw(texture, position - Engine.mousePositionOffset, null, color, angle, Size / 2, 1, 0, 0);
+        _spriteBatch.Draw(texture, position, null, color, angle, Size / 2, 1, 0, 0);
     }
     public virtual Entity Clone() { throw new NotImplementedException(); }
 }

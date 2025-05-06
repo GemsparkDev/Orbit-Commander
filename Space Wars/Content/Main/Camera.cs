@@ -10,7 +10,7 @@ public class Camera
     {
         get
         {
-            if (updateMatricies == true)
+            if (updateMatricies)
             {
                 UpdateMatricies();
             }
@@ -22,7 +22,7 @@ public class Camera
     {
         get 
         { 
-            if(updateMatricies == true)
+            if(updateMatricies)
             {
                 UpdateMatricies();
             }
@@ -129,6 +129,6 @@ public class Camera
     public Camera(Vector2 _viewportSize)
     {
         viewport.Width = (int)_viewportSize.X;
-        viewport.Width = (int)_viewportSize.Y;
+        viewport.Height = (int)_viewportSize.Y;
     }
 }

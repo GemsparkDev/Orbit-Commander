@@ -13,12 +13,10 @@ namespace Space_Wars.Content.Main.Particles
         private static bool isUpdating;
         private static List<Particle> particles = new();
         private static List<Particle> addedParticles = new();
-        private static List<ParticleEmitter> particleEmitters = new();
-        private static List<ParticleEmitter> addedEmitters = new();
 
         public static void Add(Particle particle)
         {
-            if (isUpdating == false)
+            if (!isUpdating)
             {
                 //Checks the entity type, and adds it to the corresponding list for each type
                 particles.Add(particle);
@@ -30,21 +28,9 @@ namespace Space_Wars.Content.Main.Particles
 
             //Moves entities to the inactive list to prevent modifying a list while iterating
         }
-        public static void Add(ParticleEmitter particleEmitter)
-        {
-            if (isUpdating == false)
-            {
-                particleEmitters.Add(particleEmitter);
-            }
-            else
-            {
-                addedEmitters.Add(particleEmitter);
-            }
-        }
         public static void Initialize()
         {
             particles.Clear();
-            particleEmitters.Clear();
         }
         public static void Update()
         {
@@ -53,10 +39,6 @@ namespace Space_Wars.Content.Main.Particles
             foreach (var particle in particles)
             {
                 particle.Update();
-            }
-            foreach (var particleEmitter in particleEmitters)
-            {
-                particleEmitter.Update();
             }
 
             if (particles.Count >= 50000)
@@ -69,7 +51,6 @@ namespace Space_Wars.Content.Main.Particles
 
             //Clears all expired entities from the entity lists
             particles = particles.Where(x => !x.isExpired).ToList();
-            particleEmitters = particleEmitters.Where(x => !x.isEmitterExpired).ToList();
 
             isUpdating = false;
 
@@ -77,12 +58,7 @@ namespace Space_Wars.Content.Main.Particles
             {
                 Add(particle);
             }
-            foreach (ParticleEmitter particleEmitter in addedEmitters)
-            {
-                Add(particleEmitter);
-            }
             addedParticles.Clear();
-            addedEmitters.Clear();
         }
 
         public static void Draw(SpriteBatch _spriteBatch)

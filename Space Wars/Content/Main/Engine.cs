@@ -24,7 +24,7 @@ public class Engine : Game
     public static UIManager UIManager { get; private set; }
     public static Camera Camera { get; private set; }
     public static Vector2 ScreenSize { get; private set; }
-    public static Vector2 mousePositionOffset;
+    public static Vector2 MousePositionOffset { get; set; }
     public static Timespan ingameTime = new();
     public static float DeltaSeconds { get; private set; }
     public static readonly float timeScale = 1f;
@@ -158,7 +158,7 @@ public class Engine : Game
         {
             float i = sfxSlider.sliderInterval;
             SoundManager.SFXVolume = i;
-            UIManager.sfxVolume = i;
+            UIManager.SFXVolume = i;
             sfxVolume.text = $"Sound: {Math.Round(i * 100)}%";
         });
         musicSlider.AddBehaviour(delegate ()
@@ -313,21 +313,24 @@ public class Engine : Game
         {
             ScreenShakeFactor = 0;
         }
-        fpsSamples.Add(DeltaSeconds);
-        if (fpsSamples.Count > 60)
+        if (DebugMode)
         {
-            fpsSamples.RemoveAt(0);
+            fpsSamples.Add(DeltaSeconds);
+            if (fpsSamples.Count > 60)
+            {
+                fpsSamples.RemoveAt(0);
+            }
+            fpsCounter.text = $"{(int)(1 / DeltaSeconds)}";
+            float average = 0;
+            foreach (var sample in fpsSamples)
+            {
+                average += sample;
+            }
+            average /= 60;
+            fpsOneSec.text = $"{(int)(1 / average)}";
+            fpsLowest.text = $"{(int)(1 / fpsSamples.Max())}";
+            timer.text = $"{ingameTime.DrawText}";
         }
-        fpsCounter.text = $"{(int)(1 / DeltaSeconds)}";
-        float average = 0;
-        foreach (var sample in fpsSamples)
-        {
-            average += sample;
-        }
-        average /= 60;
-        fpsOneSec.text = $"{(int)(1 / average)}";
-        fpsLowest.text = $"{(int)(1 / fpsSamples.Max())}";
-        timer.text = $"{ingameTime.DrawText}";
         base.Update(gameTime);
     }
     public static Pickup MoveSelectedPickup()
@@ -361,18 +364,18 @@ public class Engine : Game
     protected override void Draw(GameTime gameTime)
     {
         GraphicsDevice.Clear(Color.Black);
-
+        Camera.Origin = ScreenSize / 2 - MousePositionOffset;
         spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, null, null, null, transformMatrix: Camera.ViewMatrix);
         CurrentGameState.Draw(spriteBatch);
         spriteBatch.End();
         
         spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, null, null, null);
         UIManager.Draw(spriteBatch);
-        if (UIManager.LockMouseInput == false)
+        if (!UIManager.LockMouseInput)
         {
             spriteBatch.Draw(Assets.Get(Sprite.Cursor), new Vector2(Mouse.GetState().X, Mouse.GetState().Y), null, Color.White, 0, Vector2.Zero, 1, 0, 0.5f);
         }
-        if (DebugMode == true)
+        if (DebugMode)
         {
             int logCount = debugLog.Count;
             if (logCount > 10)

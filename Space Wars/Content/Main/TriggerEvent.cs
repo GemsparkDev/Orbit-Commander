@@ -1,34 +1,31 @@
-﻿using Space_Wars.Content.Main.Entities;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace Space_Wars.Content.Main;
-public class GlobalEvent : IEvent
+public class TriggerEvent : IEvent
 {
     private float start;
-    private float end;
     private Action<float> action;
-    public GlobalEvent(float _start, float _end, Action<float> _action)
+    private bool complete = false;
+    public TriggerEvent(float _start, Action<float> _action)
     {
         start = _start;
-        end = _end;
         action = _action;
     }
-
     public bool Update(float _time)
     {
-        if (start > _time)
+        if (_time < start)
         {
             return true;
         }
-        if (_time > end)
+        if (!complete)
         {
-            return false;
+            action(_time);
+            complete = true;
         }
-        action(_time - start);
-        return true;
+        return !complete;
     }
 }

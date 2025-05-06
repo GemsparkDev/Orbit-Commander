@@ -53,7 +53,7 @@ public class DockableComponent : IComponent
         {
             return false;
         }
-        if (IsDocked == true)
+        if (IsDocked)
         {
             _player.velocity += new Vector2(0, -2);
             SoundManager.PlayGlobalSound(Assets.Get(Sound.Undock));
@@ -73,7 +73,7 @@ public class DockableComponent : IComponent
             {
                 //Launches the leashed material away if the docking module cannot store it
                 _player.leashedMaterials[i].velocity += EntityManager.CurrentMission.GetNormalizedAcceleration(_player.leashedMaterials[i].position) * 15;
-                if (IsFull() == true)
+                if (IsFull())
                 {
                     continue;
                 }
