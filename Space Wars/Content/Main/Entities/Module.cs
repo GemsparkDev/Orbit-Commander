@@ -1,6 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Space_Wars.Content.Main.Particles;
+using System;
 using UILib.Content.Main;
 
 namespace Space_Wars.Content.Main.Entities;
@@ -16,10 +17,6 @@ public class Module : Pickup, IData
     public float[] Cost
     {
         get { return moduleData.Cost; }
-    }
-    public int AbilityID
-    {
-        get { return moduleData.WeaponID; }
     }
     public override Color Color 
     { 
@@ -49,6 +46,10 @@ public class Module : Pickup, IData
     {
         return cooldown <= 0;
     }
+    public void ModuleFunction()
+    {
+        moduleData.Action.Value();
+    }
     public override void Collide(int _damage)
     {
         if (_damage <= 0)
@@ -74,3 +75,17 @@ public class Module : Pickup, IData
         }
     }
 }
+public class ModuleData : ItemData
+{
+    public float MaxHealth { get; private set; }
+    public float[] Cost { get; private set; }
+    public Lazy<Action> Action { get; private set; }
+    public ModuleData(Sprite _sprite, String _name, int _id, int _health, float[] _cost, Lazy<Action> _action) : base(_sprite, _name, _id, Color.White)
+    {
+        MaxHealth = _health;
+        Cost = _cost;
+        //Lazy evaluation to prevent error during module creation if the player is not valid
+        Action = _action;
+    }
+}
+

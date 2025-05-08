@@ -108,6 +108,7 @@ public class Pickup : Entity, IData
         }
     }
 }
+
 public static class ItemFactory
 {
     //Items
@@ -117,20 +118,20 @@ public static class ItemFactory
     };
     private static Dictionary<ModuleType, (ModuleData data, Sprite sprite)> moduleData = new()
     {
-        { ModuleType.Hull, (new ModuleData(Sprite.HullModule, "Hull", (int)ModuleType.Hull, 20, Array.Empty<float>(), 1), Sprite.HullModule) },
+        { ModuleType.Hull, (new ModuleData(Sprite.HullModule, "Hull", (int)ModuleType.Hull, 20, Array.Empty<float>(), new Lazy<Action>(() => EntityManager.Player.Hull)), Sprite.HullModule) },
 
-        { ModuleType.Basic, (new ModuleData(Sprite.RealGunModule, "Basic", (int)ModuleType.Guns, 20, Array.Empty<float>(), 0), Sprite.GunModule) },
-        { ModuleType.Spiral, (new ModuleData(Sprite.RealGunModule, "Spiral", (int)ModuleType.Guns, 20, Array.Empty<float>(), 1), Sprite.GunModule) },
-        { ModuleType.Shotgun, (new ModuleData(Sprite.RealGunModule, "Shotgun", (int)ModuleType.Guns, 20, Array.Empty<float>(), 2), Sprite.GunModule) },
-        { ModuleType.Missile, (new ModuleData(Sprite.RealMissileModule, "Missile", (int)ModuleType.Guns, 20, Array.Empty<float>(), 3), Sprite.MissileModule) },
-        { ModuleType.LMG, (new ModuleData(Sprite.RealGunModule, "Light Machine Gun", (int)ModuleType.Guns, 20, Array.Empty<float>(), 4), Sprite.GunModule) },
-        { ModuleType.Sniper, (new ModuleData(Sprite.RealSniperModule, "Railgun", (int)ModuleType.Guns, 20, Array.Empty<float>(), 5), Sprite.SniperModule)},
+        { ModuleType.Basic, (new ModuleData(Sprite.RealGunModule, "Basic", (int)ModuleType.Guns, 20, Array.Empty<float>(), new Lazy<Action>(() => EntityManager.Player.Basic)), Sprite.GunModule) },
+        { ModuleType.Spiral, (new ModuleData(Sprite.RealGunModule, "Spiral", (int)ModuleType.Guns, 20, Array.Empty<float>(), new Lazy<Action>(() => EntityManager.Player.Spiral)), Sprite.GunModule) },
+        { ModuleType.Shotgun, (new ModuleData(Sprite.RealGunModule, "Shotgun", (int)ModuleType.Guns, 20, Array.Empty<float>(), new Lazy<Action>(() => EntityManager.Player.Shotgun)), Sprite.GunModule) },
+        { ModuleType.Missile, (new ModuleData(Sprite.RealMissileModule, "Missile", (int)ModuleType.Guns, 20, Array.Empty<float>(), new Lazy<Action>(() => EntityManager.Player.Missile)), Sprite.MissileModule) },
+        { ModuleType.LMG, (new ModuleData(Sprite.RealGunModule, "Light Machine Gun", (int)ModuleType.Guns, 20, Array.Empty<float>(), new Lazy<Action>(() => EntityManager.Player.LMG)), Sprite.GunModule) },
+        { ModuleType.Sniper, (new ModuleData(Sprite.RealSniperModule, "Railgun", (int)ModuleType.Guns, 20, Array.Empty<float>(), new Lazy<Action>(() => EntityManager.Player.Sniper)), Sprite.SniperModule)},
 
-        { ModuleType.Engines, (new ModuleData(Sprite.EngineModule, "Engines", (int)ModuleType.Engines, 20, Array.Empty<float>(), 0), Sprite.EngineModule) },
+        { ModuleType.Engines, (new ModuleData(Sprite.EngineModule, "Engines", (int)ModuleType.Engines, 20, Array.Empty<float>(), new Lazy<Action>(() => EntityManager.Player.Dash)), Sprite.EngineModule) },
 
-        { ModuleType.Sensors, (new ModuleData(Sprite.SensorModule, "Sensors", (int)ModuleType.Sensors, 20, Array.Empty<float>(), 0), Sprite.SensorModule) },
+        { ModuleType.Sensors, (new ModuleData(Sprite.SensorModule, "Sensors", (int)ModuleType.Sensors, 20, Array.Empty<float>(), new Lazy<Action>(() => EntityManager.Player.None)), Sprite.SensorModule) },
 
-        { ModuleType.Core, (new ModuleData(Sprite.CoreModule, "Core", (int)ModuleType.Core, 20, Array.Empty<float>(), 0), Sprite.CoreModule) }
+        { ModuleType.Core, (new ModuleData(Sprite.CoreModule, "Core", (int)ModuleType.Core, 20, Array.Empty<float>(), new Lazy<Action>(() => EntityManager.Player.None)), Sprite.CoreModule) }
     };
     public static Pickup NewScrap(Vector2 _position = new Vector2(), Vector2 _velocity = new Vector2(), float _angularVelocity = 0)
     {
@@ -161,18 +162,6 @@ public class ItemData
         Name = _name;
         ID = _id;
         Color = _color;
-    }
-}
-public class ModuleData : ItemData
-{
-    public float MaxHealth { get; private set; }
-    public float[] Cost { get; private set; }
-    public int WeaponID { get; private set; }
-    public ModuleData(Sprite _sprite, String _name, int _id, int _health, float[] _cost, int _weaponId) : base(_sprite, _name, _id, Color.White)
-    {
-        MaxHealth = _health;
-        Cost = _cost;
-        WeaponID = _weaponId;
     }
 }
 public enum ItemType

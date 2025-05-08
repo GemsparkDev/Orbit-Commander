@@ -36,8 +36,14 @@ public class Player : Entity
     public override int SensingAbility { get { return GetSensingAbility(); } }
     public override int StealthAbility { get { return GetStealthAbility(); } }
     public List<Pickup> leashedMaterials = new();
-    Action[][] moduleFunctions;
-    public Dictionary<ModuleType, Module> modules;
+    public Dictionary<ModuleType, Module> modules = new()
+        {
+            { ModuleType.Hull, ItemFactory.GetItem(ModuleType.Hull) },
+            { ModuleType.Guns, ItemFactory.GetItem(ModuleType.Sniper) },
+            { ModuleType.Engines, ItemFactory.GetItem(ModuleType.Engines) },
+            { ModuleType.Sensors, ItemFactory.GetItem(ModuleType.Sensors) },
+            { ModuleType.Core, ItemFactory.GetItem(ModuleType.Core) }
+        };
 
     public Player(Vector2 _position, Vector2 _velocity, float _angle, float _angularVelocity)
         : base(Assets.Get(Sprite.Player), _position, _velocity, _angle, _angularVelocity, 5, true)
@@ -51,21 +57,6 @@ public class Player : Entity
         engineSounds = Assets.Get(Sound.FireEngines).CreateInstance();
         engineSounds.IsLooped = true;
         SoundManager.AddSound(engineSounds);
-        moduleFunctions = new Action[3][]
-        {
-           new Action[2] { Hull, Shield },
-           new Action[7] { Basic, Spiral, Shotgun, Missile, LMG, Silenced, Sniper },
-           new Action[2] { Dash, SummonShield },
-        };
-
-        modules = new()
-        {
-            { ModuleType.Hull, ItemFactory.GetItem(ModuleType.Hull) },
-            { ModuleType.Guns, ItemFactory.GetItem(ModuleType.Sniper) },
-            { ModuleType.Engines, ItemFactory.GetItem(ModuleType.Engines) },
-            { ModuleType.Sensors, ItemFactory.GetItem(ModuleType.Sensors) },
-            { ModuleType.Core, ItemFactory.GetItem(ModuleType.Core) }
-        };
     }
     public override void Update()
     {
@@ -130,7 +121,7 @@ public class Player : Entity
         {
             if (!modules[ModuleType.Hull].isFailed)
             {
-                moduleFunctions[0][modules[ModuleType.Hull].AbilityID]();
+                modules[ModuleType.Hull].ModuleFunction();
             }
             for (int i = 0; i < cachedDamage; i++)
             {
@@ -269,7 +260,7 @@ public class Player : Entity
         gunAngle.angle = MathF.Atan2(targetVector.X, -targetVector.Y) - Engine.Camera.Rotation;
         if (newMouseState.LeftButton == ButtonState.Pressed && modules[ModuleType.Guns].IsCooldownReady() && !UIManager.LockMouseInput && !modules[ModuleType.Guns].isFailed)
         {
-            moduleFunctions[1][modules[ModuleType.Guns].AbilityID]();
+            modules[ModuleType.Guns].ModuleFunction();
         }
         if (newMouseState.RightButton == ButtonState.Pressed && oldMouseState.RightButton == ButtonState.Released && !UIManager.LockMouseInput)
         {
@@ -325,14 +316,14 @@ public class Player : Entity
         }
         if (Input.OldState.IsKeyUp(Keys.Q) && Input.NewState.IsKeyDown(Keys.Q) && modules[ModuleType.Engines].IsCooldownReady() && !modules[ModuleType.Engines].isFailed)
         {
-            moduleFunctions[2][modules[ModuleType.Engines].AbilityID]();
+            modules[ModuleType.Engines].ModuleFunction();
         }
     }
-    private void Hull()
+    public void Hull()
     {
         cachedDamage /= 2;
     }
-    private void Shield()
+    public void Shield()
     {
         if(modules[0].cooldown <= 0)
         {
@@ -342,7 +333,7 @@ public class Player : Entity
         }
         modules[0].Health = MathF.Max(0, modules[0].Health - cachedDamage / 2);
     }
-    private void Basic()
+    public void Basic()
     {
         EntityManager.Add(new PulseShot(position, targetVector * 9 + velocity, gunAngle.angle, 0, true, 3, true));
         SoundManager.PlaySound(Assets.Get(Sound.PulseFire), position);
@@ -350,7 +341,7 @@ public class Player : Entity
         Engine.ShakeScreen(0.2f);
         velocity -= targetVector / 4;
     }
-    private void Sniper()
+    public void Sniper()
     {
         EntityManager.Add(new AssassinShot(position, targetVector * 100, gunAngle.angle, 0, true, 10));
         SoundManager.PlaySound(Assets.Get(Sound.SniperFire), position);
@@ -358,7 +349,7 @@ public class Player : Entity
         Engine.ShakeScreen(0.3f);
         velocity -= targetVector / 2;
     }
-    private void Spiral()
+    public void Spiral()
     {
         EntityManager.Add(new SpiralShot(position, targetVector * 8 + velocity, gunAngle.angle, 0, true, 5, false));
         EntityManager.Add(new SpiralShot(position, targetVector * 8 + velocity, gunAngle.angle, 0, true, 5, true));
@@ -366,7 +357,7 @@ public class Player : Entity
         modules[ModuleType.Guns].cooldown = 0.7f;
         Engine.ShakeScreen(0.2f);
     }
-    private void Shotgun()
+    public void Shotgun()
     {
         int randomBulletCount = random.Next(4, 6);
         for (int i = 0; i < randomBulletCount; i++)
@@ -382,7 +373,7 @@ public class Player : Entity
         modules[ModuleType.Guns].cooldown = 1f;
         Engine.ShakeScreen(0.4f);
     }
-    private void Missile()
+    public void Missile()
     {
         EntityManager.Add(Enemy.NewMissile(position + Engine.ToUnitVector(gunAngle.angle + MathF.PI / 2) * 6, targetVector * 9 + velocity, gunAngle.angle, true));
         SoundManager.PlaySound(Assets.Get(Sound.MissileFire), position);
@@ -390,7 +381,7 @@ public class Player : Entity
         velocity -= targetVector / 4;
         Engine.ShakeScreen(0.3f);
     }
-    private void LMG()
+    public void LMG()
     {
         Vector2 offset = Engine.ToUnitVector(gunAngle.angle + MathF.PI / 2) * random.Next(-2, 3);
         Texture2D dot = Assets.Get(Sprite.Microshot);
@@ -405,7 +396,7 @@ public class Player : Entity
         velocity -= targetVector / 16;
         modules[ModuleType.Guns].cooldown = 0.09f;
     }
-    private void Silenced()
+    public void Silenced()
     {
         Vector2 offset = Engine.ToUnitVector(gunAngle.angle + MathF.PI / 2) * random.Next(-2, 3);
         Texture2D dot = Assets.Get(Sprite.Microshot);
@@ -420,7 +411,7 @@ public class Player : Entity
         velocity -= targetVector / 16;
         modules[ModuleType.Guns].cooldown = 0.2f;
     }
-    private void Dash()
+    public void Dash()
     {
         invincibilityCooldown = 0.5f;
         Vector2 normalVector = new(MathF.Sin(gunAngle.angle), -MathF.Cos(gunAngle.angle));
@@ -465,6 +456,7 @@ public class Player : Entity
         }
         return stealth;
     }
+    public void None() { }
     public override void Draw(SpriteBatch _spriteBatch)
     {
         if (position.Length() > EntityManager.CurrentMission.Planet.radius + 25 * 50)

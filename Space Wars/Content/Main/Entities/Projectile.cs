@@ -123,6 +123,7 @@ public class AssassinShot : Projectile
             if (isExpired)
             {
                 beam.position = position;
+                beam.Update();
                 return;
             }
         }

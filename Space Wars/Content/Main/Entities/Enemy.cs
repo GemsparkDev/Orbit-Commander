@@ -1475,6 +1475,60 @@ public class Enemy : Entity
             yield return 0;
         }
     }
+    IEnumerable<int> StealthFighter()
+    {
+        enemyRange.radius = 500;
+        SensingAbility = -1;
+        StealthAbility = 1;
+        Entity target = null;
+        float trackTime = 0;
+        while (true)
+        {
+            velocity *= 0.8f;
+            if (cooldown > 0)
+            {
+                cooldown -= Engine.DeltaSeconds;
+            }
+            if (trackTime > 0) 
+            { 
+                trackTime -= Engine.DeltaSeconds;
+                if (trackTime <= 0)
+                {
+                    target = null;
+                }
+            }
+            if (health <= 0)
+            {
+                isExpired = true;
+            }
+            Entity nearestEnemy = EntityManager.NearestEnemy(this);
+            if (nearestEnemy != null || target != null)
+            {
+                if (nearestEnemy != null || target == null)
+                {
+                    target = nearestEnemy;
+                }
+                if (nearestEnemy != null)
+                {
+                    trackTime = 3;
+                }
+                nearestEnemy = target;
+                targetVector = nearestEnemy.position - position;
+                targetAngle = MathF.Atan2(targetVector.Y, targetVector.X) + MathF.PI/2;
+                float diff = MathF.Abs(angle - targetAngle);
+                RotateTowards(targetAngle, diff / 10);
+                if (diff < 0.2f && cooldown <= 0)
+                {
+                    EntityManager.Add(new AssassinShot(position, Vector2.Normalize(targetVector) * 300, angle, 0, isFriendly, damage) { timeLeft = 0.2f });
+                    cooldown = 1;
+                }
+            }
+            else
+            {
+            }
+            yield return 0;
+        }
+    }
     public static Enemy NewDummyEnemy(Vector2 _position, bool _isFriendly = false)
     {
         return new(_position, Vector2.Zero, 0, 0, 0, Assets.Get(Sprite.Fighter), _isFriendly);
@@ -1602,6 +1656,12 @@ public class Enemy : Entity
         Enemy enemy = new(position, velocity, angle, 0, 250, Assets.Get(Sprite.PickupDrone), true);
         enemy.AddBehaviour(enemy.PickupDrone());
         enemy.Components.Add(new DockableComponent(enemy));
+        return enemy;
+    }
+    public static Enemy NewStealthFighter(Vector2 position, Vector2 velocity, float angle, bool _isFriendly = false)
+    {
+        Enemy enemy = new(position, velocity, angle, 10, 8, Assets.Get(Sprite.Fighter), _isFriendly);
+        enemy.AddBehaviour(enemy.StealthFighter());
         return enemy;
     }
 }

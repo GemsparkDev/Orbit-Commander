@@ -24,7 +24,7 @@ public static class EntityManager
     private static Random random = new();
     private static float currentKarma;
     //Maximum distance for any detection when sensing = stealth
-    public static float StealthRange { get; private set; } = 500;
+    public static float StealthRange { get; private set; } = 750;
     //Threshold of detection for enemies
     public static float StealthThreshold { get; private set; } = 0.75f;
     public readonly static Pickup[] globalInventory = new Pickup[5];
@@ -225,6 +225,7 @@ public static class EntityManager
     }
     public static Entity NearestEnemy(Entity entity)
     {
+        float maxDistSqr = StealthRange * StealthRange * StealthThreshold * StealthThreshold;
         float nearestDistance = float.MaxValue;
         Entity returnEnemy = null;
         foreach (Entity targetEnemy in enemies)
@@ -238,7 +239,7 @@ public static class EntityManager
                 continue;
             }
             float distance = DistanceSqr(entity, targetEnemy);
-            if (distance < nearestDistance && (targetEnemy.StealthAbility < entity.SensingAbility || (targetEnemy.StealthAbility == entity.SensingAbility && distance < StealthRange * StealthThreshold)))
+            if (distance < nearestDistance && (targetEnemy.StealthAbility < entity.SensingAbility || (distance < maxDistSqr)))
             {
                 nearestDistance = distance;
                 returnEnemy = targetEnemy;
@@ -247,7 +248,11 @@ public static class EntityManager
         if (!entity.isFriendly)
         {
             float distance = DistanceSqr(entity, Player);
-            if (distance < nearestDistance)
+            if (Player.StealthAbility > entity.SensingAbility)
+            {
+                return returnEnemy;
+            }
+            if (distance < nearestDistance && (Player.StealthAbility < entity.SensingAbility || (distance < maxDistSqr)))
             {
                 returnEnemy = Player;
             }
