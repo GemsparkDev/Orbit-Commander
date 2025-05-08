@@ -211,3 +211,8 @@ Update 0.4.2
     -Modified particle system such that emitters are managed by entities.    
     -Debug velocity now renders as a single line in the direction of motion.    
     -Developed intro cutscene and dialed in cutscene backend.    
+    
+5/7/2025    
+Update 0.4.3    
+    -Added the stealth fighter, demonstrating the stealth system.    
+    -Modules now store their ability rather than an integer referring to said ability.    
