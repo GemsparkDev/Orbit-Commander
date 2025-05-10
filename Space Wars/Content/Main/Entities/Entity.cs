@@ -105,11 +105,5 @@ public abstract class Entity
         }
         collider.isEmitterActive = Engine.DebugMode;
     }
-    public void SimpleDraw(SpriteBatch _spriteBatch)
-    {
-        //Simplified render, only draws the entity texture
-        //Used during cutscenes
-        _spriteBatch.Draw(texture, position, null, color, angle, Size / 2, 1, 0, 0);
-    }
     public virtual Entity Clone() { throw new NotImplementedException(); }
 }

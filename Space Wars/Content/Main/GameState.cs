@@ -12,16 +12,11 @@ namespace Space_Wars.Content.Main;
 public static class CurrentGameState
 {
     private static GameState currentGameState;
-    private static Engine root;
     public static void SwitchState(GameState _gameState)
     {
         SoundManager.SetAllSounds(false);
         currentGameState = _gameState;
-        currentGameState.Initialize(root);
-    }
-    public static void Initialize(Engine _root)
-    {
-        root = _root;
+        currentGameState.Initialize();
     }
     public static void Update()
     {
@@ -35,8 +30,7 @@ public static class CurrentGameState
 }
 public abstract class GameState
 {
-    protected Engine root;
-    public virtual void Initialize(Engine _root) { root = _root; }
+    public virtual void Initialize() { }
     public abstract void Update();
     public abstract void Draw(SpriteBatch _spriteBatch);
 }
@@ -48,9 +42,8 @@ public class MainMenu : GameState
     private ParticleEmitter smokeParticles = new(Assets.Get(Sprite.Circle), 1f, new Vector2(0, 300 - Assets.DimsOf(Sprite.Mothership).Y + 10),
         0, 45, 1, 0, 40, 1, true, Color.Gray, Color.DarkGray, EmitterType.EmissionOverTime)
     { probability = 0.25f };
-    public override void Initialize(Engine _root)
+    public override void Initialize()
     {
-        base.Initialize(_root);
         smokeParticles.isEmitterActive = true;
         Engine.UIManager.SetScreenMenuEnabled(false);
         SoundManager.ChangeTrack(Assets.Get(Sound.menu));
@@ -71,14 +64,13 @@ public class MainMenu : GameState
 }
 public class PlayingGame : GameState
 {
-    public override void Initialize(Engine _root)
+    public override void Initialize()
     {
-        base.Initialize(_root);
         Engine.UIManager.SetScreenMenuEnabled(true);
     }
     public override void Update()
     {
-        if (!root.IsActive)
+        if (!Engine.Self.IsActive)
         {
             Engine.UIManager.DisableAll();
             Engine.UIManager.GetContainer((int)Containers.PauseMenu).enabled = true;
@@ -86,7 +78,7 @@ public class PlayingGame : GameState
         }
         EntityManager.PlayerUpdate();
         EntityManager.IngameUpdate();
-        EntityManager.Update();
+        Engine.EntityManager.Update();
         ParticleManager.Update();
         if (Input.OldState.IsKeyUp(Keys.Escape) && Input.NewState.IsKeyDown(Keys.Escape))
         {
@@ -99,7 +91,12 @@ public class PlayingGame : GameState
     }
     public override void Draw(SpriteBatch _spriteBatch)
     {
-        EntityManager.Draw(_spriteBatch);
+        if (EntityManager.Player.modules[ModuleType.Core].isFailed)
+        {
+            _spriteBatch.DrawString(Assets.TextFont, "Power failure detected. Please restart system.", Engine.Camera.Position, Color.Red);
+            return;
+        }
+        Engine.EntityManager.Draw(_spriteBatch);
         ParticleManager.Draw(_spriteBatch);
         if (Engine.DebugMode)
         {
@@ -119,7 +116,6 @@ public class PlayingGame : GameState
 }
 public class PausedGame : GameState
 {
-    public Engine Root { get; set; }
     public override void Update()
     {
         if (Input.OldState.IsKeyUp(Keys.Escape) && Input.NewState.IsKeyDown(Keys.Escape))
@@ -132,7 +128,12 @@ public class PausedGame : GameState
     }
     public override void Draw(SpriteBatch _spriteBatch)
     {
-        EntityManager.Draw(_spriteBatch);
+        if (EntityManager.Player.modules[ModuleType.Core].isFailed)
+        {
+            _spriteBatch.DrawString(Assets.TextFont, "Power failure detected. Please restart system.", Engine.Camera.Position, Color.Red);
+            return;
+        }
+        Engine.EntityManager.Draw(_spriteBatch);
         ParticleManager.Draw(_spriteBatch);
         if (Engine.DebugMode)
         {
@@ -152,11 +153,10 @@ public class PausedGame : GameState
 }
 public class Garage : GameState
 {
-    public override void Initialize(Engine _root)
+    public override void Initialize()
     {
         EventHandler.UpdateModulesUI();
         Engine.UIManager.SetScreenMenuEnabled(false);
-        base.Initialize(_root);
     }
     public override void Update()
     {
@@ -167,15 +167,14 @@ public class Garage : GameState
     }
     public override void Draw(SpriteBatch _spriteBatch)
     {
-        EntityManager.Draw(_spriteBatch);
+        Engine.EntityManager.Draw(_spriteBatch);
         ParticleManager.Draw(_spriteBatch);
     }
 }
 public class MissionSelect : GameState
 {
-    public override void Initialize(Engine _root)
+    public override void Initialize()
     {
-        base.Initialize(_root);
         Engine.UIManager.SetScreenMenuEnabled(false);
         EventHandler.UpdateMissionText();
     }
@@ -184,32 +183,15 @@ public class MissionSelect : GameState
 }
 public class Victory : GameState
 {
-    public override void Initialize(Engine _root)
+    public override void Initialize()
     {
-        base.Initialize(_root);
         Engine.UIManager.SetScreenMenuEnabled(false);
     }
     public override void Update() { }
     public override void Draw(SpriteBatch _spriteBatch)
     {
         _spriteBatch.DrawString(Assets.TextFont, "You Win!", new Vector2(-12 * 8, -60) * Engine.UIScale + Engine.Camera.Position, Color.Yellow, 0, Vector2.Zero, Engine.UIScale * 2, SpriteEffects.None, 0);
-        _spriteBatch.DrawString(Assets.TextFont, $"Your Time: {Engine.ingameTime.DrawText}", new Vector2(-12 * 12 / 2, (12 * 4 - 60)) * Engine.UIScale + Engine.Camera.Position, Color.White, 0, Vector2.Zero, Engine.UIScale/2, SpriteEffects.None, 0);
-    }
-}
-public class TrainingMode : GameState
-{
-    public override void Update()
-    {
-        EntityManager.PlayerUpdate();
-        EntityManager.Update();
-        ParticleManager.Update();
-        EntityManager.TrainingSimulator.Update();
-    }
-    public override void Draw(SpriteBatch _spriteBatch)
-    {
-        EntityManager.TrainingSimulator.Draw(_spriteBatch);
-        EntityManager.Draw(_spriteBatch);
-        ParticleManager.Draw(_spriteBatch);
+        _spriteBatch.DrawString(Assets.TextFont, $"Your Time: {Engine.IngameTime.DrawText}", new Vector2(-12 * 12 / 2, (12 * 4 - 60)) * Engine.UIScale + Engine.Camera.Position, Color.White, 0, Vector2.Zero, Engine.UIScale/2, SpriteEffects.None, 0);
     }
 }
 public class Cutscene : GameState 
@@ -217,17 +199,16 @@ public class Cutscene : GameState
     private float time = 0;
     private bool isActive = true;
     private List<IEvent> events = new();
-    private List<Entity> actors = new();
+    private List<Actor> actors = new();
     private GameState nextGameState;
-    public Cutscene(List<IEvent> _events, List<Entity> _actors, GameState _nextGameState)
+    public Cutscene(List<IEvent> _events, List<Actor> _actors, GameState _nextGameState)
     {
         events = _events;
         actors = _actors;
         nextGameState = _nextGameState;
     }
-    public override void Initialize(Engine _root)
+    public override void Initialize()
     {
-        base.Initialize(_root);
         time = 0;
     }
     public override void Update()
@@ -251,7 +232,7 @@ public class Cutscene : GameState
         ParticleManager.Draw(_spriteBatch);
         foreach (var actor in actors)
         {
-            actor.SimpleDraw(_spriteBatch);
+            actor.Draw(_spriteBatch);
         }
     }
 }

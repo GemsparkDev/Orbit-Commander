@@ -14,7 +14,6 @@ namespace Space_Wars.Content.Main;
 public class EventHandler
 {
     private static Player player;
-    public static bool isTraining = false;
     private static readonly List<Message> eventLog = new();
 
     public static bool AcknowledgeMessage(Message _message)
@@ -34,18 +33,10 @@ public class EventHandler
     {
         player = _player;
     }
-    public static void StartTraining()
-    {
-        ParticleManager.Initialize();
-        Player player = EntityManager.Initialize();
-        EntityManager.TrainingSimulator = new(player);
-        CurrentGameState.SwitchState(new TrainingMode());
-        SoundManager.PlayGlobalSound(Assets.Get(Sound.Interact));
-    }
     public static void QuitToMenu()
     {
         player.velocity = Vector2.Zero;
-        Engine.ingameTime = new();
+        Engine.IngameTime = new();
         Engine.MousePositionOffset = Vector2.Zero;
         Engine.UIManager.ToggleMenu((int)Containers.PauseMenu);
         Engine.UIManager.ToggleMenu((int)Containers.MainMenu);
@@ -105,7 +96,7 @@ public class EventHandler
         {
             for (int x = 0; x < dockableComponent.Inventory.GetLength(0); x++)
             {
-                Engine.inventorySlots[x, y].daughterItem = dockableComponent.Inventory[x, y];
+                Engine.InventorySlots[x, y].daughterItem = dockableComponent.Inventory[x, y];
             }
         }
     }
@@ -115,9 +106,9 @@ public class EventHandler
     }
     public static void UpdateModulesUI()
     {
-        for (int x = 0; x < Engine.moduleSlots.Length; x++)
+        for (int x = 0; x < Engine.ModuleSlots.Length; x++)
         {
-            Engine.moduleSlots[x].daughterItem = player.modules.ElementAt(x).Value;
+            Engine.ModuleSlots[x].daughterItem = player.modules.ElementAt(x).Value;
         }
     }
     public static void UpdateModules()
@@ -125,7 +116,7 @@ public class EventHandler
         Decal validConfigText = Engine.UIManager.GetWidget((int)Containers.GarageMenu,3) as Decal;
         for (int x = 0; x < player.modules.Count; x++)
         {
-            player.modules[(ModuleType)x] = Engine.moduleSlots[x].daughterItem as Module;
+            player.modules[(ModuleType)x] = Engine.ModuleSlots[x].daughterItem;
         }
         foreach (KeyValuePair<ModuleType, Module> module in player.modules)
         {
@@ -193,12 +184,7 @@ public class EventHandler
             CurrentGameState.SwitchState(new Garage());
             return;
         }
-        if (!isTraining)
-        {
-            CurrentGameState.SwitchState(new PlayingGame());
-            return;
-        }
-        CurrentGameState.SwitchState(new TrainingMode());
+        CurrentGameState.SwitchState(new PlayingGame());
     }
     public static void MissionSelectTrigger()
     {

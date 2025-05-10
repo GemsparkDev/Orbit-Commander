@@ -24,7 +24,7 @@ public static class SoundManager
     public static void Initialize(Player _player)
     {
         SetAllSounds(false);
-        sounds = new();
+        sounds.Clear();
         player = _player;
     }
     public static void PlaySound(SoundEffectInstance _soundEffectInstance)

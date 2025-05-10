@@ -63,7 +63,7 @@ public class DockableComponent : IComponent
                 EventHandler.UpdateInventoryUI(this);
                 pickup.isExpired = false;
                 _player.leashedMaterials.Add(pickup);
-                EntityManager.Add(pickup);
+                Engine.EntityManager.Add(pickup);
             }
         }
         else

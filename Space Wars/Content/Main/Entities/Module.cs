@@ -14,10 +14,6 @@ public class Module : Pickup, IData
     {
         get { return moduleData.MaxHealth; }
     }
-    public float[] Cost
-    {
-        get { return moduleData.Cost; }
-    }
     public override Color Color 
     { 
         get { return (isFailed ? Color.Red : Color.White); } 
@@ -48,7 +44,7 @@ public class Module : Pickup, IData
     }
     public void ModuleFunction()
     {
-        moduleData.Action.Value();
+        moduleData.Action();
     }
     public override void Collide(int _damage)
     {
@@ -78,12 +74,10 @@ public class Module : Pickup, IData
 public class ModuleData : ItemData
 {
     public float MaxHealth { get; private set; }
-    public float[] Cost { get; private set; }
-    public Lazy<Action> Action { get; private set; }
-    public ModuleData(Sprite _sprite, String _name, int _id, int _health, float[] _cost, Lazy<Action> _action) : base(_sprite, _name, _id, Color.White)
+    public Action Action { get; private set; }
+    public ModuleData(Sprite _realSprite, Sprite _virtualSprite, String _name, int _id, int _health, Action _action) : base(_realSprite, _virtualSprite, _name, _id, Color.White)
     {
         MaxHealth = _health;
-        Cost = _cost;
         //Lazy evaluation to prevent error during module creation if the player is not valid
         Action = _action;
     }

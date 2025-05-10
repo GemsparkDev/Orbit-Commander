@@ -8,37 +8,35 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Diagnostics;
-using Microsoft.Xna.Framework.Audio;
 
 namespace Space_Wars.Content.Main;
 
-public static class EntityManager
+public class EntityManager
 {
-    private static bool isUpdating = false;
-    private static List<Entity> entities = new();
-    private static List<Entity> addedEntities = new();
-    private static List<Entity> enemies = new();
-    private static List<Projectile> projectiles = new();
-    public static TrainingSimulator TrainingSimulator { get; set; }
-    public static Player Player { get; private set; }
+    private bool isUpdating = false;
+    private List<Entity> entities = new();
+    private List<Entity> addedEntities = new();
+    private List<Entity> enemies = new();
+    private List<Projectile> projectiles = new();
     private static Random random = new();
-    private static float currentKarma;
+    private static float currentKarma = 0;
+    public static Player Player { get; private set; }
     //Maximum distance for any detection when sensing = stealth
     public static float StealthRange { get; private set; } = 750;
     //Threshold of detection for enemies
     public static float StealthThreshold { get; private set; } = 0.75f;
     public readonly static Pickup[] globalInventory = new Pickup[5];
     public static int Scrap { get; private set; }
-    public readonly static List<Mission> missions = new()
+    private readonly static List<Mission> missions = new()
     {
         new(new GravitationalSource[2] { new(Vector2.Zero, Vector2.Zero, 10000, 8, true, Color.Cyan), new(new Vector2(1000, 0), GravitationalSource.GetOrbitalVelocity(new Vector2(1000, 0), Vector2.Zero, 10000), 250, 1.5f, false, Color.Cyan) },
         new List<(Func<Vector2, Vector2, float, Entity>, Vector2, Vector2, float, Condition[])>(){ (Enemy.NewMothership, new Vector2(0, -8*50 - Assets.DimsOf(Sprite.Mothership).Y / 2), Vector2.Zero, 0f, new Condition[2] { Condition.Protect, Condition.CustomIncomplete })},
         "Crash Landing",
-        "A simple system with a large planet and one closely orbiting moon. Drone activity detected, but minimal.", 
-        1, 0, 0, IntroCutscene()),
+        "A simple system with a large planet and one closely orbiting moon. Drone activity detected, but minimal.",
+        1, 0, 0, IntroCutscene),
 
         new( new GravitationalSource[1] { new(Vector2.Zero, Vector2.Zero, 3500, 4, true, Color.Cyan, true) },
-        new List<(Func<Vector2, Vector2, float, Entity>, Vector2, Vector2, float, Condition[])>(){ 
+        new List<(Func<Vector2, Vector2, float, Entity>, Vector2, Vector2, float, Condition[])>(){
             (Enemy.NewTurret, new Vector2(0, -200 - Assets.DimsOf(Sprite.TurretBase).Y / 2), Vector2.Zero, 0, new Condition[1] { Condition.Protect }),
             (Enemy.NewOrbiter, new Vector2(400, 0), GravitationalSource.GetOrbitalVelocity(new Vector2(400, 0), Vector2.Zero, 3500), 0, new Condition[1] { Condition.Protect })},
         "Sentry Defense",
@@ -72,7 +70,7 @@ public static class EntityManager
     public static Mission CurrentMission { get { return currentMission ?? missions[missionCount]; } }
     private static int missionCount = 0;
     private static Mission currentMission;
-    public static void Add(Entity entity)
+    public void Add(Entity entity)
     {
         if (!isUpdating)
         {
@@ -82,7 +80,7 @@ public static class EntityManager
             {
                 projectiles.Add(entity as Projectile);
             }
-            if(entity is Enemy || entity is Player)
+            if (entity is Enemy || entity is Player)
             {
                 enemies.Add(entity);
             }
@@ -93,14 +91,14 @@ public static class EntityManager
             addedEntities.Add(entity);
         }
     }
-    public static Player Initialize()
+    public Player Initialize()
     {
         currentMission = missions[missionCount].Clone();
         entities = new();
         addedEntities = new();
         enemies = new();
         projectiles = new();
-        Player = new(new Vector2(0, -CurrentMission.Planet.radius + 1), new Vector2(0, 0),0, 0);
+        Player = new(new Vector2(0, -CurrentMission.Planet.radius + 1), new Vector2(0, 0), 0, 0);
         CurrentMission.Initialize();
         return Player;
     }
@@ -108,7 +106,7 @@ public static class EntityManager
     {
         Player.Update();
         CurrentMission.AttractObject(Player);
-        if(Player.dockedEntity == null)
+        if (Player.dockedEntity == null)
         {
             CurrentMission.CalculateTrajectory(Player.position, Player.velocity, Player.ColliderRadius);
         }
@@ -116,20 +114,21 @@ public static class EntityManager
         {
             Engine.Startgame();
         }
-        Engine.MousePositionOffset = new Vector2(Mouse.GetState().X - Engine.ScreenSize.X / 2, Mouse.GetState().Y - Engine.ScreenSize.Y / 2) / 10 
+        Engine.MousePositionOffset = new Vector2(Mouse.GetState().X - Engine.ScreenSize.X / 2, Mouse.GetState().Y - Engine.ScreenSize.Y / 2) / 10
             + Engine.ScreenShakeFactor * Engine.ScreenShakeFactor * new Vector2((float)random.NextDouble() - 0.5f, (float)random.NextDouble() - 0.5f) * 50;
         Engine.Camera.Rotation = Engine.ScreenShakeFactor * Engine.ScreenShakeFactor * ((float)random.NextDouble() - 0.5f) * 0.15f;
         //If the player is further from the camera, put more weight on the player
         //Tanh prevents frac from going above 1
         float frac = MathF.Tanh(Vector2.Distance(Player.position, Engine.Camera.Position) / 750);
-        Engine.Camera.Position = Player.position * frac + Engine.Camera.Position * (1-frac);
+        Engine.Camera.Position = Player.position * frac + Engine.Camera.Position * (1 - frac);
     }
     public static void IngameUpdate()
     {
-        Engine.ingameTime.Duration += Engine.DeltaSeconds;
+        var time = Engine.IngameTime;
+        (time).Duration += Engine.DeltaSeconds;
         CurrentMission.Update();
     }
-    public static void Update()
+    public void Update()
     {
         isUpdating = true;
         //Updates all entities and moves deleted ones to a new list (prevents modifying a list while iterating over it)
@@ -159,7 +158,7 @@ public static class EntityManager
         }
         addedEntities.Clear();
     }
-    public static void Draw(SpriteBatch _spriteBatch)
+    public void Draw(SpriteBatch _spriteBatch)
     {
         //CurrentMission.Planet.Draw(_spriteBatch);
         Player.Draw(_spriteBatch);
@@ -200,13 +199,13 @@ public static class EntityManager
             targetEntity.Collide(entity.damage);
         }
     }
-    public static DockableComponent NearestDockableEntity(Entity _entity)
+    public DockableComponent NearestDockableEntity(Entity _entity)
     {
         float nearestDistance = float.MaxValue;
         DockableComponent returnEntity = null;
         foreach (Entity entity in entities)
         {
-            if(entity.isFriendly != _entity.isFriendly)
+            if (entity.isFriendly != _entity.isFriendly)
             {
                 continue;
             }
@@ -223,14 +222,14 @@ public static class EntityManager
         }
         return returnEntity;
     }
-    public static Entity NearestEnemy(Entity entity)
+    public Entity NearestEnemy(Entity entity)
     {
         float maxDistSqr = StealthRange * StealthRange * StealthThreshold * StealthThreshold;
         float nearestDistance = float.MaxValue;
         Entity returnEnemy = null;
         foreach (Entity targetEnemy in enemies)
         {
-            if(targetEnemy.isFriendly == entity.isFriendly)
+            if (targetEnemy.isFriendly == entity.isFriendly)
             {
                 continue;
             }
@@ -259,7 +258,7 @@ public static class EntityManager
         }
         return returnEnemy;
     }
-    public static Entity NearestAlly(Entity entity)
+    public Entity NearestAlly(Entity entity)
     {
         float nearestDistance = float.MaxValue;
         Entity returnEnemy = null;
@@ -269,7 +268,7 @@ public static class EntityManager
             {
                 continue;
             }
-            if(targetEnemy == entity)
+            if (targetEnemy == entity)
             {
                 continue;
             }
@@ -290,7 +289,7 @@ public static class EntityManager
         }
         return returnEnemy;
     }
-    public static Entity NearestItem(Entity entity)
+    public Entity NearestItem(Entity entity)
     {
         float nearestDistance = float.MaxValue;
         Entity returnItem = null;
@@ -309,14 +308,14 @@ public static class EntityManager
         }
         return returnItem;
     }
-    public static Entity NearestProjectile(Entity _entity)
+    public Entity NearestProjectile(Entity _entity)
     {
         float nearestDistance = float.MaxValue;
         Entity returnProjectile = null;
         foreach (Projectile targetProjectile in projectiles)
         {
             float distance = DistanceSqr(_entity, targetProjectile);
-            if (distance < nearestDistance && _entity.isFriendly != targetProjectile.isFriendly 
+            if (distance < nearestDistance && _entity.isFriendly != targetProjectile.isFriendly
                 && (targetProjectile.StealthAbility < _entity.SensingAbility || (targetProjectile.StealthAbility == _entity.SensingAbility && distance < StealthRange * StealthThreshold)))
             {
                 nearestDistance = distance;
@@ -341,7 +340,7 @@ public static class EntityManager
     }
     public static float DistanceSqr(Entity _entity1, Entity _entity2)
     {
-        if(_entity1 == null || _entity2 == null)
+        if (_entity1 == null || _entity2 == null)
         {
             return float.MaxValue;
         }
@@ -357,8 +356,8 @@ public static class EntityManager
     public static bool RandomWithKarma(float _rarity)
     {
         float randomNum = (float)random.NextDouble();
-        float karmaBonus = (_rarity-1) / (_rarity + _rarity * MathF.Exp(-10 * currentKarma + 12.5f));
-        if (randomNum < (1/_rarity) + karmaBonus)
+        float karmaBonus = (_rarity - 1) / (_rarity + _rarity * MathF.Exp(-10 * currentKarma + 12.5f));
+        if (randomNum < (1 / _rarity) + karmaBonus)
         {
             currentKarma = 0;
             return true;
@@ -369,12 +368,12 @@ public static class EntityManager
     private static Cutscene IntroCutscene()
     {
         List<IEvent> events = new();
-        List<Entity> actors = new();
-        var mothership = Enemy.NewMothership(new Vector2(1500, -2000), new Vector2(-10, 10), MathF.PI/12);
+        List<Actor> actors = new();
+        var mothership = new Actor(Assets.Get(Sprite.Mothership), new Vector2(1500, -2000), new Color(0, 255, 0), MathF.PI / 12);
         var sound = Assets.Get(Sound.FireEngines).CreateInstance();
         sound.IsLooped = true;
-        var emitter = new ParticleEmitter(Assets.Get(Sprite.Circle), 1, new Vector2(1500, -2000), 165 + 45, 360, 2, 
-            random.NextSingle()-0.5f, 200, 1, true, Color.Gray, Color.Coral, EmitterType.EmissionOverTime);
+        var emitter = new ParticleEmitter(Assets.Get(Sprite.Circle), 1, new Vector2(1500, -2000), 165 + 45, 360, 2,
+            random.NextSingle() - 0.5f, 200, 1, true, Color.Gray, Color.Coral, EmitterType.EmissionOverTime);
         actors.Add(mothership);
         //Ensure planets still orbit and render
         events.Add(new Event(0, 5, delegate (float time)
@@ -389,192 +388,25 @@ public static class EntityManager
         //Linearly moves the mothership toward the planet
         events.Add(new Event(0, 3, delegate (float time)
         {
-            emitter.position = mothership.position;
+            emitter.position = mothership.Position;
             emitter.Update();
-            mothership.position = new Vector2(1500, -2000) * (3 - time)/3 + new Vector2(0, -425) * time/3;
-            Engine.Camera.Position = mothership.position + new Vector2(random.NextSingle() * 10 - 5, random.NextSingle() * 10 - 5);
+            mothership.Position = new Vector2(1500, -2000) * (3 - time) / 3 + new Vector2(0, -425) * time / 3;
+            Engine.Camera.Position = mothership.Position + new Vector2(random.NextSingle() * 10 - 5, random.NextSingle() * 10 - 5);
         }));
         //Disables emitter, plays explosion sound, and stops engine sound
-        events.Add(new TriggerEvent(3, delegate(float time) 
-        { 
-            emitter.isEmitterActive = false;
+        events.Add(new TriggerEvent(3, delegate (float time)
+        {
             sound.Pause();
             SoundManager.PlayGlobalSound(Assets.Get(Sound.Death));
         }));
         //Collision, big shake and rotates the angle of the mothership towards straight up
         events.Add(new Event(3, 4, delegate (float time)
         {
-            mothership.position = new Vector2(0, -425);
+            mothership.Position = new Vector2(0, -425);
             float t = (1 - time) * (1 - time);
-            mothership.angle = MathF.PI / 12 * t;
-            Engine.Camera.Position = mothership.position + t * (new Vector2(random.NextSingle() * 50 - 25, random.NextSingle() * 50 - 25));
+            mothership.Angle = MathF.PI / 12 * t;
+            Engine.Camera.Position = mothership.Position + t * (new Vector2(random.NextSingle() * 50 - 25, random.NextSingle() * 50 - 25));
         }));
         return new Cutscene(events, actors, new PlayingGame());
-    }
-}
-
-
-//Currently bugged
-public class TrainingSimulator
-{
-    private List<IEnumerator<int>> trainingStep = new();
-    private string instructionText = "";
-    private Player player;
-    private Pickup item;
-    private Enemy enemy;
-    private int currentStep = 0;
-    private float cooldown;
-    public TrainingSimulator(Player _player)
-    {
-        player = _player;
-        EventHandler.isTraining = true;
-        Engine.UIManager.ToggleMenu((int)Containers.MainMenu);
-        AddBehaviour(UndockFromMothership());
-        AddBehaviour(MoveAround());
-        AddBehaviour(FightEnemy());
-        AddBehaviour(TeachSkill());
-        AddBehaviour(TeachEnergy());
-        AddBehaviour(CollectScrap());
-        AddBehaviour(SmeltScrap());
-        AddBehaviour(RepairShip());
-        AddBehaviour(RepairMothership());
-        AddBehaviour(CompletedTraining());
-    }
-    private void AddBehaviour(IEnumerable<int> behaviour)
-    {
-        trainingStep.Add(behaviour.GetEnumerator());
-    }
-
-    private void ApplyBehaviours()
-    {
-        if (!trainingStep[currentStep].MoveNext())
-        {
-            currentStep += 1;
-        }
-    }
-    public void Update()
-    {
-        ApplyBehaviours();
-        if(player != null)
-        {
-            KeepPlayerAlive();
-        }
-    }
-    private void KeepPlayerAlive()
-    {
-        player.modules[ModuleType.Core].Health = 20;
-    }
-    public void Draw(SpriteBatch _spriteBatch)
-    {
-        _spriteBatch.DrawString(Assets.TextFont, $"{instructionText}", Engine.Camera.Position - new Vector2(instructionText.Length*5, 250), Color.White, 0, Vector2.Zero, 1, SpriteEffects.None, 0.45f);
-        enemy?.Draw(_spriteBatch);
-        item?.Draw(_spriteBatch);
-    }
-    IEnumerable<int> UndockFromMothership()
-    {
-        instructionText = "You are currently docked at the mothership. Press space to undock from it. You can redock with it at any time by pressing space when you are close to the mothership.";
-        while (player.dockedEntity != null)
-        {
-            yield return 0;
-        }
-    }
-    IEnumerable<int> MoveAround()
-    {
-        cooldown = 15;
-        instructionText = "Use WASD to move around. Notice that your velocity is preserved, and can be changed by any nearby planets. Your path of motion is represented by the faint dotted line.";
-        while (cooldown > 0)
-        {
-            cooldown -= Engine.DeltaSeconds;
-            yield return 0;
-        }
-    }
-    IEnumerable<int> FightEnemy()
-    {
-        enemy = Enemy.NewFighter(new Vector2(0, -600), Vector2.Zero, 0);
-        EntityManager.Add(enemy);
-        instructionText = "An enemy has spawned near the mothership. You can attack it with left click. Destroy the enemy to proceed.";
-        while (!enemy.isExpired)
-        {
-            yield return 0;
-        }
-        enemy = null;
-    }
-    IEnumerable<int> TeachSkill()
-    {  
-        instructionText = "You are equipped with a dash that teleports you forward. You can activate it by pressing Q when the cyan bar is full.";
-        while (!Keyboard.GetState().IsKeyDown(Keys.Q))
-        {
-            yield return 0;
-        }
-    }
-    IEnumerable<int> TeachEnergy()
-    {
-        cooldown = 15;
-        instructionText = "Additionally, your craft requires energy to function, represented by the yellow bar. It is used by your modules and regenerates quickly when usage stops.";
-        while (cooldown > 0)
-        {
-            cooldown -= Engine.DeltaSeconds;
-            yield return 0;
-        }
-    }
-    IEnumerable<int> CollectScrap()
-    {
-        item = ItemFactory.NewScrap(new Vector2(0, -600), Vector2.Zero, 0);
-        EntityManager.Add(item);
-        instructionText = "Enemies will occasionally drop scrap. You can collect it by holding right click when close to the scrap, then docking with the mothership. Be careful not to let it run into the planet.";
-        while (player.dockedEntity.Inventory[0,0] == null)
-        {
-            if(item.isExpired)
-            {
-                item = ItemFactory.NewScrap(new Vector2(0, -600), Vector2.Zero, 0);
-                EntityManager.Add(item);
-            }
-            yield return 0;
-        }
-        item = null;
-    }
-    IEnumerable<int> SmeltScrap()
-    {
-        instructionText = "You can refine the scrap by pressing I while docked, then dragging the scrap to the smelting slot on the first tab.";
-        //while (player.dockableEntity.scrap == 0)
-        //{
-        //    yield return 0;
-        //}
-        yield return 0;
-    }
-    IEnumerable<int> RepairShip()
-    {
-        player.Collide(1);
-        for(int i = 0; i < 4; i++)
-        {
-            player.modules.ElementAt(i).Value.Health = 0;
-        }
-        //player.dockableEntity.scrap = 50;
-        instructionText = "You can heal by going into the garage on the second tab, dragging a module to the repair slot, and pressing repair. Repairing costs 3 scrap per repair.";
-        while (player.modules[ModuleType.Hull].Health + player.modules[ModuleType.Guns].Health + player.modules[ModuleType.Engines].Health + player.modules[ModuleType.Sensors].Health < 20)
-        {
-            yield return 0;
-        }
-    }
-    IEnumerable<int> RepairMothership()
-    {
-        instructionText = "Your objective is to fix the mothership by going to the third tab and pressing repair with 5 refined scrap. You will need 25 scrap total to complete repairs.";
-        //while (!player.dockableEntity.currentlyCrafting)
-        //{
-        //    yield return 0;
-        //}
-        yield return 0;
-    }
-    IEnumerable<int> CompletedTraining()
-    {
-        cooldown = 7.5f;
-        instructionText = "Good job completing the training! You will soon be sent back to the menu.";
-        while (cooldown > 0)
-        {
-            cooldown -= Engine.DeltaSeconds;
-            yield return 0;
-        }
-        EventHandler.isTraining = false;
-        EventHandler.QuitToMenu();
     }
 }

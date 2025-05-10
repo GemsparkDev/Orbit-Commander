@@ -15,9 +15,7 @@ namespace Space_Wars.Content.Main.Entities;
 
 public class Player : Entity
 {
-    private Keys[] pressedKey;
     private Random random = new();
-    private MouseState oldMouseState;
     public DockableComponent dockedEntity;
     private Enemy shield;
     private ParticleEmitter engineParticles = new(Assets.Get(Sprite.Circle), 0.15f, Vector2.Zero, 0, 45, 2, 0, 450f, 1, true, Color.Cyan, Color.DarkSlateBlue, EmitterType.EmissionOverTime) { isEmitterActive = false };
@@ -33,8 +31,38 @@ public class Player : Entity
     private Vector2 direction;
     public bool isEngineActive = false;
     public bool canGatherResources = false;
-    public override int SensingAbility { get { return GetSensingAbility(); } }
-    public override int StealthAbility { get { return GetStealthAbility(); } }
+    public override int SensingAbility 
+    { 
+        get 
+        {
+            int sensing = 1;
+            if (modules[ModuleType.Sensors] == null)
+            {
+                return 0;
+            }
+            if (modules[ModuleType.Sensors].isFailed)
+            {
+                sensing = 0;
+            }
+            return sensing;
+        } 
+    }
+    public override int StealthAbility 
+    { 
+        get 
+        {
+            int stealth = 0;
+            if (isEngineActive)
+            {
+                stealth -= 1;
+            }
+            if (modules[ModuleType.Guns].cooldown > 0)
+            {
+                stealth -= 1;
+            }
+            return stealth;
+        } 
+    }
     public List<Pickup> leashedMaterials = new();
     public Dictionary<ModuleType, Module> modules = new()
         {
@@ -97,6 +125,11 @@ public class Player : Entity
                     module.isFailed = false;
                     restartedModules = true;
                     EventHandler.UpdateModulesStatus();
+                    if (modules[ModuleType.Core] == module)
+                    {
+                        SoundManager.SFXVolume = (Engine.UIManager.GetFuncWidget(0, 3) as Slider).sliderInterval;
+                        SoundManager.MusicVolume = (Engine.UIManager.GetFuncWidget(0, 4) as Slider).sliderInterval;
+                    }
                 }
             }
             if (restartedModules)
@@ -116,8 +149,7 @@ public class Player : Entity
             invincibilityCooldown -= Engine.DeltaSeconds;
             color = invincibilityCooldown > 0 ? new Color(0, 255, 0) * (MathF.Cos(invincibilityCooldown * 30) / 2 + 0.5f) : new Color(0, 255, 0);
         }
-        //if cachedDamage > 0
-        if (false)
+        if (cachedDamage > 0)
         {
             if (!modules[ModuleType.Hull].isFailed)
             {
@@ -171,7 +203,27 @@ public class Player : Entity
                 velocity += Vector2.Normalize(-position) * Engine.DeltaSeconds * (position.Length() - (40 * 50 + EntityManager.CurrentMission.Planet.radius));
             }
             position += velocity * Engine.DeltaSeconds * 60;
-            ControlShip();
+            if (!modules[ModuleType.Core].isFailed)
+            {
+                ControlShip();
+            }
+            if (EventHandler.AcknowledgeMessage(Message.ToggleTerminal))
+            {
+                if (dockedEntity != null)
+                {
+                    Engine.UIManager.ToggleMenu((int)Containers.MothershipMenu);
+                }
+                else
+                {
+                    Engine.UIManager.ToggleMenu((int)Containers.PlayerMenu);
+                }
+            }
+            if (dockedEntity != null)
+            {
+                position = dockedEntity.Position;
+                velocity = dockedEntity.Velocity;
+                return;
+            }
         }
         foreach(var module in modules.Values)
         {
@@ -202,25 +254,31 @@ public class Player : Entity
             //Part Failure
             if (random.Next(0, 5) == 0)
             {
-                ModuleType failedPart = (ModuleType)random.Next(0, 4);
-                if (modules[failedPart].Health < modules[failedPart].MaxHealth / 2 && !modules[failedPart].isFailed)
+                //ModuleType failedPart = (ModuleType)random.Next(0, 4);'
+                ModuleType failedPart = ModuleType.Core;
+                //if (modules[failedPart].Health < modules[failedPart].MaxHealth / 2 && !modules[failedPart].isFailed)
+                if(true)
                 {
                     modules[failedPart].isFailed = true;
                     ParticleManager.Add(new Particle(null, 2, position + new Vector2(0, -3), new Vector2(0, -0.75f), 0, 0, 1, true, Color.Red, Color.Red) { drawText = $"{failedPart} has failed!" });
                     SoundManager.PlaySound(Assets.Get(Sound.Beep), position);
                     EventHandler.UpdateModulesStatus();
+                    if (failedPart == ModuleType.Core)
+                    {
+                        SoundManager.SFXVolume = 0;
+                        SoundManager.MusicVolume = 0;
+                    }
                 }
             }
         }
     }
     public void ControlShip()
     {
-        pressedKey = Keyboard.GetState().GetPressedKeys();
         if (Input.OldState.IsKeyUp(Keys.Space) && Input.NewState.IsKeyDown(Keys.Space))
         {
             if (dockedEntity == null)
             {
-                DockableComponent dockableEntity = EntityManager.NearestDockableEntity(this);
+                DockableComponent dockableEntity = Engine.EntityManager.NearestDockableEntity(this);
                 if (dockableEntity != null)
                 {
                     if (dockableEntity.Dock(this))
@@ -238,42 +296,24 @@ public class Player : Entity
         {
             EventHandler.ToggleDockingMenus();
         }
-        if(EventHandler.AcknowledgeMessage(Message.ToggleTerminal))
-        {
-            if (dockedEntity != null)
-            {
-                Engine.UIManager.ToggleMenu((int)Containers.MothershipMenu);
-            }
-            else
-            {
-                Engine.UIManager.ToggleMenu((int)Containers.PlayerMenu);
-            }
-        }
-        if (dockedEntity != null)
-        {
-            position = dockedEntity.Position;
-            velocity = dockedEntity.Velocity;
-            return;
-        }
-        MouseState newMouseState = Mouse.GetState();
         targetVector = Vector2.Normalize(new Vector2(Mouse.GetState().X, Mouse.GetState().Y) - Engine.ScreenSize / 2 - position + Engine.Camera.Position);
         gunAngle.angle = MathF.Atan2(targetVector.X, -targetVector.Y) - Engine.Camera.Rotation;
-        if (newMouseState.LeftButton == ButtonState.Pressed && modules[ModuleType.Guns].IsCooldownReady() && !UIManager.LockMouseInput && !modules[ModuleType.Guns].isFailed)
+        if (Input.NewMouseState.LeftButton == ButtonState.Pressed && modules[ModuleType.Guns].IsCooldownReady() && !UIManager.LockMouseInput && !modules[ModuleType.Guns].isFailed)
         {
             modules[ModuleType.Guns].ModuleFunction();
         }
-        if (newMouseState.RightButton == ButtonState.Pressed && oldMouseState.RightButton == ButtonState.Released && !UIManager.LockMouseInput)
+        if (Input.NewMouseState.RightButton == ButtonState.Pressed && Input.OldMouseState.RightButton == ButtonState.Released && !UIManager.LockMouseInput)
         {
             canGatherResources = true;
             SoundManager.PlayGlobalSound(Assets.Get(Sound.OpenMenu));
         }
-        else if (newMouseState.RightButton == ButtonState.Released && oldMouseState.RightButton == ButtonState.Pressed && !UIManager.LockMouseInput)
+        else if (Input.NewMouseState.RightButton == ButtonState.Released && Input.OldMouseState.RightButton == ButtonState.Pressed && !UIManager.LockMouseInput)
         {
             SoundManager.PlayGlobalSound(Assets.Get(Sound.CloseMenu));
             canGatherResources = false;
         }
-        oldMouseState = newMouseState;
 
+        Keys[] pressedKey = Input.NewState.GetPressedKeys();
         direction = Vector2.Zero;
         if (!modules[ModuleType.Engines].isFailed)
         {
@@ -301,7 +341,7 @@ public class Player : Entity
                         break;
                 }
             }
-            if (direction != Vector2.Zero)
+            if (isEngineActive)
             {
                 float speed = 0.2f;
                 engineParticles.offsetVelocity = velocity;
@@ -335,7 +375,7 @@ public class Player : Entity
     }
     public void Basic()
     {
-        EntityManager.Add(new PulseShot(position, targetVector * 9 + velocity, gunAngle.angle, 0, true, 3, true));
+        Engine.EntityManager.Add(new PulseShot(position, targetVector * 9 + velocity, gunAngle.angle, 0, true, 3, true));
         SoundManager.PlaySound(Assets.Get(Sound.PulseFire), position);
         modules[ModuleType.Guns].cooldown = 0.25f;
         Engine.ShakeScreen(0.2f);
@@ -343,7 +383,7 @@ public class Player : Entity
     }
     public void Sniper()
     {
-        EntityManager.Add(new AssassinShot(position, targetVector * 100, gunAngle.angle, 0, true, 10));
+        Engine.EntityManager.Add(new AssassinShot(position, targetVector * 100, gunAngle.angle, 0, true, 10));
         SoundManager.PlaySound(Assets.Get(Sound.SniperFire), position);
         modules[ModuleType.Guns].cooldown = 2f;
         Engine.ShakeScreen(0.3f);
@@ -351,8 +391,8 @@ public class Player : Entity
     }
     public void Spiral()
     {
-        EntityManager.Add(new SpiralShot(position, targetVector * 8 + velocity, gunAngle.angle, 0, true, 5, false));
-        EntityManager.Add(new SpiralShot(position, targetVector * 8 + velocity, gunAngle.angle, 0, true, 5, true));
+        Engine.EntityManager.Add(new SpiralShot(position, targetVector * 8 + velocity, gunAngle.angle, 0, true, 5, false));
+        Engine.EntityManager.Add(new SpiralShot(position, targetVector * 8 + velocity, gunAngle.angle, 0, true, 5, true));
         SoundManager.PlaySound(Assets.Get(Sound.PulseFire), position);
         modules[ModuleType.Guns].cooldown = 0.7f;
         Engine.ShakeScreen(0.2f);
@@ -366,7 +406,7 @@ public class Player : Entity
             float offsetAngle = angleDegrees * MathF.PI / 180;
             Vector2 targetVector = Engine.ToUnitVector(gunAngle.angle + offsetAngle);
             Vector2 positionOffset = Engine.ToUnitVector(gunAngle.angle + MathF.PI/2) * offsetAngle * 100;
-            EntityManager.Add(new PulseShot(position + positionOffset, targetVector * 8 + velocity , gunAngle.angle + offsetAngle, 0, true, 2));
+            Engine.EntityManager.Add(new PulseShot(position + positionOffset, targetVector * 8 + velocity , gunAngle.angle + offsetAngle, 0, true, 2));
         }
         SoundManager.PlaySound(Assets.Get(Sound.ShotgunFire), position);
         velocity -= targetVector / 2;
@@ -375,7 +415,7 @@ public class Player : Entity
     }
     public void Missile()
     {
-        EntityManager.Add(Enemy.NewMissile(position + Engine.ToUnitVector(gunAngle.angle + MathF.PI / 2) * 6, targetVector * 9 + velocity, gunAngle.angle, true));
+        Engine.EntityManager.Add(Enemy.NewMissile(position + Engine.ToUnitVector(gunAngle.angle + MathF.PI / 2) * 6, targetVector * 9 + velocity, gunAngle.angle, true));
         SoundManager.PlaySound(Assets.Get(Sound.MissileFire), position);
         modules[ModuleType.Guns].cooldown = 0.15f;
         velocity -= targetVector / 4;
@@ -390,7 +430,7 @@ public class Player : Entity
             texture = dot,
             timeLeft = 3
         };
-        EntityManager.Add(shot);
+        Engine.EntityManager.Add(shot);
         SoundManager.PlaySound(Assets.Get(Sound.LMGFire), position);
         Engine.ShakeScreen(0.15f);
         velocity -= targetVector / 16;
@@ -405,7 +445,7 @@ public class Player : Entity
             texture = dot,
             timeLeft = 3
         };
-        EntityManager.Add(shot);
+        Engine.EntityManager.Add(shot);
         SoundManager.PlaySound(Assets.Get(Sound.LMGFire), position);
         Engine.ShakeScreen(0.15f);
         velocity -= targetVector / 16;
@@ -423,7 +463,7 @@ public class Player : Entity
         position += normalVector * 200;
         modules[ModuleType.Engines].cooldown = 2f;
     }
-    private void SummonShield()
+    public void SummonShield()
     {
         if (!shield.isExpired)
         {
@@ -431,32 +471,22 @@ public class Player : Entity
         }
         shield.health = 1;
         shield.isExpired = false;
-        EntityManager.Add(shield);
+        Engine.EntityManager.Add(shield);
         modules[ModuleType.Engines].cooldown = 5f;
     }
     public int GetSensingAbility()
     {
         int sensing = 1;
+        if (modules[ModuleType.Sensors] == null)
+        {
+            return 0;
+        }
         if (modules[ModuleType.Sensors].isFailed)
         {
             sensing = 0;
         }
         return sensing;
     }
-    public int GetStealthAbility()
-    {
-        int stealth = 0;
-        if (direction != Vector2.Zero)
-        {
-            stealth -= 1;
-        }
-        if (modules[ModuleType.Guns].cooldown > 0)
-        {
-            stealth -= 1;
-        }
-        return stealth;
-    }
-    public void None() { }
     public override void Draw(SpriteBatch _spriteBatch)
     {
         if (position.Length() > EntityManager.CurrentMission.Planet.radius + 25 * 50)

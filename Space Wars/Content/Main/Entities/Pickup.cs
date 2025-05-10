@@ -10,7 +10,7 @@ namespace Space_Wars.Content.Main.Entities;
 public class Pickup : Entity, IData
 {
     internal ItemData itemData;
-    public Texture2D Texture { get { return itemData.Sprite; } }
+    public Texture2D Texture { get { return itemData.RealSprite; } }
     public Window Tooltip { get; } = new Window(Vector2.Zero, Assets.Get(Sprite.WideButton));
     public String Name { get { return itemData.Name; } }
     public virtual Color Color { get { return itemData.Color; } }
@@ -21,12 +21,11 @@ public class Pickup : Entity, IData
         get { return itemData.ID; }
     }
     public Pickup(ItemData _itemData, Texture2D _worldTexture, Color _worldColor, Vector2 _position, Vector2 _velocity, float _angularVelocity)
-        : base(_worldTexture, _position, _velocity, 0, _angularVelocity, 0, true)
+        : base(_itemData.VirtualSprite, _position, _velocity, 0, _angularVelocity, 0, true)
     {
-        texture = _worldTexture;
         itemData = _itemData;
         color = _worldColor;
-        Tooltip.AddWidget(new Decal(new Vector2(-Tooltip.Size.X / 3, 0) - new Vector2(_itemData.Sprite.Width, _itemData.Sprite.Height)/2, _itemData.Sprite));
+        Tooltip.AddWidget(new Decal(new Vector2(-Tooltip.Size.X / 3, 0) - new Vector2(_itemData.RealSprite.Width, _itemData.RealSprite.Height)/2, _itemData.RealSprite));
         Tooltip.AddWidget(new Decal(new Vector2(0, -5), Assets.TextFont, _itemData.Name, Color.White,  5f));
     }
 
@@ -65,7 +64,7 @@ public class Pickup : Entity, IData
         }
         position += velocity * Engine.DeltaSeconds * 60;
         angle += angularVelocity * Engine.DeltaSeconds * 60;
-        var nearestProjectile = EntityManager.NearestProjectile(this);
+        var nearestProjectile = Engine.EntityManager.NearestProjectile(this);
         if (nearestProjectile != null)
         {
             if (Vector2.Distance(nearestProjectile.position, this.position) < nearestProjectile.ColliderRadius + ColliderRadius)
@@ -112,53 +111,60 @@ public class Pickup : Entity, IData
 public static class ItemFactory
 {
     //Items
-    private static Dictionary<ItemType, (ItemData data, Sprite sprite)> itemData = new()
+    private static Dictionary<ItemType, ItemData> itemData = new()
     {
-        { ItemType.Scrap, (new ItemData(Sprite.RealMetalScrap, "Metal Salvage", 1, Color.White), Sprite.MetalScrap) },
+        { ItemType.Scrap, (new ItemData(Sprite.RealMetalScrap,Sprite.MetalScrap, "Metal Salvage", 1, Color.White)) },
     };
-    private static Dictionary<ModuleType, (ModuleData data, Sprite sprite)> moduleData = new()
+    private static Dictionary<ModuleType, ModuleData> moduleData = new()
     {
-        { ModuleType.Hull, (new ModuleData(Sprite.HullModule, "Hull", (int)ModuleType.Hull, 20, Array.Empty<float>(), new Lazy<Action>(() => EntityManager.Player.Hull)), Sprite.HullModule) },
+        { ModuleType.Hull, new ModuleData(Sprite.HullModule, Sprite.HullModule, "Hull", (int)ModuleType.Hull, 20, delegate{ EntityManager.Player.Hull(); }) },
 
-        { ModuleType.Basic, (new ModuleData(Sprite.RealGunModule, "Basic", (int)ModuleType.Guns, 20, Array.Empty<float>(), new Lazy<Action>(() => EntityManager.Player.Basic)), Sprite.GunModule) },
-        { ModuleType.Spiral, (new ModuleData(Sprite.RealGunModule, "Spiral", (int)ModuleType.Guns, 20, Array.Empty<float>(), new Lazy<Action>(() => EntityManager.Player.Spiral)), Sprite.GunModule) },
-        { ModuleType.Shotgun, (new ModuleData(Sprite.RealGunModule, "Shotgun", (int)ModuleType.Guns, 20, Array.Empty<float>(), new Lazy<Action>(() => EntityManager.Player.Shotgun)), Sprite.GunModule) },
-        { ModuleType.Missile, (new ModuleData(Sprite.RealMissileModule, "Missile", (int)ModuleType.Guns, 20, Array.Empty<float>(), new Lazy<Action>(() => EntityManager.Player.Missile)), Sprite.MissileModule) },
-        { ModuleType.LMG, (new ModuleData(Sprite.RealGunModule, "Light Machine Gun", (int)ModuleType.Guns, 20, Array.Empty<float>(), new Lazy<Action>(() => EntityManager.Player.LMG)), Sprite.GunModule) },
-        { ModuleType.Sniper, (new ModuleData(Sprite.RealSniperModule, "Railgun", (int)ModuleType.Guns, 20, Array.Empty<float>(), new Lazy<Action>(() => EntityManager.Player.Sniper)), Sprite.SniperModule)},
+        { ModuleType.Basic, new ModuleData(Sprite.RealGunModule, Sprite.GunModule, "Basic", (int)ModuleType.Guns, 20, delegate{ EntityManager.Player.Basic(); }) },
+        { ModuleType.Spiral, new ModuleData(Sprite.RealGunModule,Sprite.GunModule, "Spiral", (int)ModuleType.Guns, 20, delegate{ EntityManager.Player.Spiral(); }) },
+        { ModuleType.Shotgun, new ModuleData(Sprite.RealGunModule,Sprite.GunModule, "Shotgun", (int)ModuleType.Guns, 20, delegate{ EntityManager.Player.Shotgun(); }) },
+        { ModuleType.Missile, new ModuleData(Sprite.RealMissileModule,Sprite.MissileModule, "Missile", (int)ModuleType.Guns, 20, delegate{ EntityManager.Player.Missile(); }) },
+        { ModuleType.LMG, new ModuleData(Sprite.RealGunModule,Sprite.GunModule, "Light Machine Gun", (int)ModuleType.Guns, 20, delegate{ EntityManager.Player.LMG(); }) },
+        { ModuleType.Sniper, new ModuleData(Sprite.RealSniperModule,Sprite.SniperModule, "Railgun", (int)ModuleType.Guns, 20, delegate{ EntityManager.Player.Sniper(); })},
 
-        { ModuleType.Engines, (new ModuleData(Sprite.EngineModule, "Engines", (int)ModuleType.Engines, 20, Array.Empty<float>(), new Lazy<Action>(() => EntityManager.Player.Dash)), Sprite.EngineModule) },
+        { ModuleType.Engines, new ModuleData(Sprite.EngineModule, Sprite.EngineModule, "Engines", (int)ModuleType.Engines, 20, delegate{ EntityManager.Player.Dash(); }) },
+        //{ ModuleType.Engines, new ModuleData(Sprite.EngineModule, Sprite.EngineModule, "Shield", (int)ModuleType.Engines, 20, delegate{ EntityManager.Player.SummonShield(); }) },
 
-        { ModuleType.Sensors, (new ModuleData(Sprite.SensorModule, "Sensors", (int)ModuleType.Sensors, 20, Array.Empty<float>(), new Lazy<Action>(() => EntityManager.Player.None)), Sprite.SensorModule) },
+        { ModuleType.Sensors, new ModuleData(Sprite.SensorModule,Sprite.SensorModule, "Sensors", (int)ModuleType.Sensors, 20, delegate{ }) },
 
-        { ModuleType.Core, (new ModuleData(Sprite.CoreModule, "Core", (int)ModuleType.Core, 20, Array.Empty<float>(), new Lazy<Action>(() => EntityManager.Player.None)), Sprite.CoreModule) }
+        { ModuleType.Core, new ModuleData(Sprite.CoreModule,Sprite.CoreModule, "Core", (int)ModuleType.Core, 20, delegate{ }) }
     };
     public static Pickup NewScrap(Vector2 _position = new Vector2(), Vector2 _velocity = new Vector2(), float _angularVelocity = 0)
     {
-        return new Pickup(itemData[0].data, Assets.Get(itemData[0].sprite), Color.Cyan, _position, _velocity, _angularVelocity);
+        return new Pickup(itemData[0], itemData[0].RealSprite, Color.Cyan, _position, _velocity, _angularVelocity);
     }
     public static Pickup GetItem(ItemType _item, Vector2 _position = new Vector2(), Vector2 _velocity = new Vector2(), float _angularVelocity = 0)
     {
-        return new Pickup(itemData[_item].data, Assets.Get(itemData[_item].sprite), Color.Cyan, _position, _velocity, _angularVelocity);
+        return new Pickup(itemData[_item], itemData[_item].RealSprite, Color.Cyan, _position, _velocity, _angularVelocity);
     }
     public static Module GetItem(ModuleType _item, Vector2 _position = new Vector2(), Vector2 _velocity = new Vector2(), float _angularVelocity = 0)
     {
-        return new Module(moduleData[_item].data, Assets.Get(moduleData[_item].sprite), Color.Cyan, _position, _velocity, _angularVelocity);
+        return new Module(moduleData[_item], moduleData[_item].RealSprite, Color.Cyan, _position, _velocity, _angularVelocity);
     }
 }
 public class ItemData
 {
-    private Sprite sprite;
-    public Texture2D Sprite
+    private Sprite realSprite;
+    public Texture2D RealSprite
     {
-        get { return Assets.Get(sprite); }
+        get { return Assets.Get(realSprite); }
+    }
+    private Sprite virtualSprite;
+    public Texture2D VirtualSprite
+    {
+        get { return Assets.Get(virtualSprite); }
     }
     public string Name { get; private set; }
     public int ID { get; private set; }
     public Color Color { get; private set; }
-    public ItemData(Sprite _sprite, String _name, int _id, Color _color)
+    public ItemData(Sprite _realSprite, Sprite _virtualSprite, String _name, int _id, Color _color)
     {
-        sprite = _sprite;
+        realSprite = _realSprite;
+        virtualSprite = _virtualSprite;
         Name = _name;
         ID = _id;
         Color = _color;

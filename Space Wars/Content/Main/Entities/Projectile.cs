@@ -62,7 +62,7 @@ public class PulseShot : Projectile
     {
         position += velocity * Engine.DeltaSeconds * 60;
         angle += angularVelocity * Engine.DeltaSeconds * 60;
-        Entity nearestEnemy = EntityManager.NearestEnemy(this);
+        Entity nearestEnemy = Engine.EntityManager.NearestEnemy(this);
         if(isHoming && nearestEnemy != null)
         {
             Vector2 relativePosition = Vector2.Normalize(nearestEnemy.position - position);
@@ -94,7 +94,7 @@ public class SpiralShot : Projectile
         time += Engine.DeltaSeconds;
         positionNormal = Vector2.Normalize(new Vector2(MathF.Cos(angle), MathF.Sin(angle))) * MathF.Sin((time * 9) - MathF.PI / 2) * (isOffset ? 1 : -1);
         position += positionNormal * Engine.DeltaSeconds * 60;
-        EntityManager.Collide(this, EntityManager.NearestEnemy(this));
+        EntityManager.Collide(this, Engine.EntityManager.NearestEnemy(this));
     }
 }
 public class AssassinShot : Projectile
@@ -115,7 +115,7 @@ public class AssassinShot : Projectile
         {
             position += velocity / check * Engine.DeltaSeconds * 60;
             angle += angularVelocity * Engine.DeltaSeconds * 60;
-            EntityManager.Collide(this, EntityManager.NearestEnemy(this));
+            EntityManager.Collide(this, Engine.EntityManager.NearestEnemy(this));
             if (EntityManager.CurrentMission.Planet.IsColliding(position))
             {
                 isExpired = true;

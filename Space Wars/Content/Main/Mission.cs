@@ -16,7 +16,7 @@ public class Mission
     //Save original entity parameters to allow cloning
     public List<(Func<Vector2, Vector2, float, Entity>, Vector2, Vector2, float, Condition[])> CopyObjectives { get; }
     public List<(Entity entity, Condition[] conditions)> MissionObjectives { get; } = new();
-    private Cutscene cutscene;
+    private Func<Cutscene> cutscene;
     public int MissionScrap { get; set; } = 0;
     private float timerModifier;
     public int WaveGoal { get; } = 0;
@@ -35,7 +35,7 @@ public class Mission
     public delegate Enemy DelegateEnemy(Vector2 position, Vector2 velocity, float angle, bool _isFriendly = false);
     public int EnemiesSpawned { get; private set; } = 0;
 
-    public Mission(GravitationalSource[] _planets, List<(Func<Vector2, Vector2, float, Entity> newEntity, Vector2 position, Vector2 velocity, float angle, Condition[] conditions)> _missionObjectives, string _name, string _description, float _timerModifier, int _waveGoal = 0, int _enemyTier = 0, Cutscene _cutscene = null)
+    public Mission(GravitationalSource[] _planets, List<(Func<Vector2, Vector2, float, Entity> newEntity, Vector2 position, Vector2 velocity, float angle, Condition[] conditions)> _missionObjectives, string _name, string _description, float _timerModifier, int _waveGoal = 0, int _enemyTier = 0, Func<Cutscene> _cutscene = null)
     {
         Name = _name;
         Description = _description;
@@ -154,7 +154,7 @@ public class Mission
                 {
                     boss = bosses[2](NewSpawnLocation(), Vector2.Zero, 0);
                 }
-                EntityManager.Add(boss);
+                Engine.EntityManager.Add(boss);
                 waveTimer = 4;
                 maxWaveTimer = waveTimer;
                 EnemiesSpawned = 1;
@@ -191,7 +191,7 @@ public class Mission
     {
         if (cutscene != null)
         {
-            CurrentGameState.SwitchState(cutscene);
+            CurrentGameState.SwitchState(cutscene());
         }
         else
         {
@@ -202,7 +202,7 @@ public class Mission
     {
         foreach(var (entity, _) in MissionObjectives)
         {
-            EntityManager.Add(entity);
+            Engine.EntityManager.Add(entity);
         }
     }
     public void MarkComplete()
@@ -286,7 +286,7 @@ public class Mission
             }
             futurePosition += futureVelocity;
             Vector2 particlePos = futurePosition;
-            if (Engine.patchedConics)
+            if (Engine.PatchedConics)
             {
                 for(int i = 0; i < futurePlanetPositions.Length; i++)
                 {
@@ -345,7 +345,7 @@ public class Mission
             {
                 if (random.Next(0, enemyCreditValues[i].cost / 2) == 0 && newCosts[i] <= enemyCredits)
                 {
-                    EntityManager.Add(enemyCreditValues[i].enemy(NewSpawnLocation(), EntityManager.Player.velocity, 0));
+                    Engine.EntityManager.Add(enemyCreditValues[i].enemy(NewSpawnLocation(), EntityManager.Player.velocity, 0));
                     enemyCredits -= newCosts[i];
                     newCosts[i] += 1;
                     EnemiesSpawned++;

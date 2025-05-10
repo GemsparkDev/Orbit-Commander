@@ -185,10 +185,10 @@ public class Enemy : Entity
                 SoundManager.PlaySound(Assets.Get(Sound.Death), position);
                 if (EntityManager.RandomWithKarma(EntityManager.CurrentMission.EnemiesSpawned * 2))
                 {
-                    EntityManager.Add(ItemFactory.NewScrap(position, normalizedAcceleration * 10, angularVelocity));
+                    Engine.EntityManager.Add(ItemFactory.NewScrap(position, normalizedAcceleration * 10, angularVelocity));
                 }
             }
-            Entity nearestAlly = EntityManager.NearestAlly(this);
+            Entity nearestAlly = Engine.EntityManager.NearestAlly(this);
             if (nearestAlly != null)
             {
                 if((position - nearestAlly.position).LengthSquared() < 0.001f)
@@ -199,7 +199,7 @@ public class Enemy : Entity
                 position -= Size.Length() * Vector2.Normalize(relativePosition) / (MathF.Sqrt(relativePosition.Length())) / 10;
 
             }
-            Entity nearestEnemy = EntityManager.NearestEnemy(this);
+            Entity nearestEnemy = Engine.EntityManager.NearestEnemy(this);
             if(nearestEnemy == null)
             {
                 if((player.position - position).LengthSquared() > 1000)
@@ -224,7 +224,7 @@ public class Enemy : Entity
                 velocity += normalizedAcceleration / 2 * Engine.DeltaSeconds * 60;
                 if (cooldown <= 0)
                 {
-                    EntityManager.Add(new PulseShot(position, Engine.ToUnitVector(angle) * 8, angle, 0, isFriendly, damage, true));
+                    Engine.EntityManager.Add(new PulseShot(position, Engine.ToUnitVector(angle) * 8, angle, 0, isFriendly, damage, true));
                     SoundManager.PlaySound(Assets.Get(Sound.PulseFire), position);
                     cooldown = 1;
                 }
@@ -249,7 +249,7 @@ public class Enemy : Entity
                 GoToPosition(player.position, -1);
                 if (cooldown <= 0)
                 {
-                    EntityManager.Add(new PulseShot(position, Engine.ToUnitVector(angle) * 8, angle, 0, false, damage));
+                    Engine.EntityManager.Add(new PulseShot(position, Engine.ToUnitVector(angle) * 8, angle, 0, false, damage));
                     SoundManager.PlaySound(Assets.Get(Sound.PulseFire), position);
                     cooldown = 0.25f;
                 }
@@ -259,7 +259,7 @@ public class Enemy : Entity
                 velocity += gravityForce / 2 * Engine.DeltaSeconds * 60;
                 if (cooldown <= 0)
                 {
-                    EntityManager.Add(NewMissile(position, Engine.ToUnitVector(angle) * 2, angle, isFriendly));
+                    Engine.EntityManager.Add(NewMissile(position, Engine.ToUnitVector(angle) * 2, angle, isFriendly));
                     SoundManager.PlaySound(Assets.Get(Sound.MissileFire), position);
                     cooldown = 5;
                 }
@@ -274,7 +274,7 @@ public class Enemy : Entity
                 SoundManager.PlaySound(Assets.Get(Sound.Death), position);
                 if (EntityManager.RandomWithKarma(EntityManager.CurrentMission.EnemiesSpawned))
                 {
-                    EntityManager.Add(ItemFactory.NewScrap(position, GetNormalizedAcceleration() * 10, angularVelocity));
+                    Engine.EntityManager.Add(ItemFactory.NewScrap(position, GetNormalizedAcceleration() * 10, angularVelocity));
                 }
             }
             velocity *= 0.8f;
@@ -307,7 +307,7 @@ public class Enemy : Entity
                 velocity += gravityForce / 2 * Engine.DeltaSeconds * 60;
                 if (cooldown <= 0 && MathF.Abs(targetAngle - angle) < 0.1f)
                 {
-                    EntityManager.Add(new AssassinShot(position, Engine.ToUnitVector(angle) * 15, angle, 0, false, damage));
+                    Engine.EntityManager.Add(new AssassinShot(position, Engine.ToUnitVector(angle) * 15, angle, 0, false, damage));
                     SoundManager.PlaySound(Assets.Get(Sound.SniperFire), position);
                     cooldown = 2.5f;
                 }
@@ -322,7 +322,7 @@ public class Enemy : Entity
                 SoundManager.PlaySound(Assets.Get(Sound.Death), position);
                 if (EntityManager.RandomWithKarma(EntityManager.CurrentMission.EnemiesSpawned))
                 {
-                    EntityManager.Add(ItemFactory.NewScrap(position, gravityForce * 10, angularVelocity));
+                    Engine.EntityManager.Add(ItemFactory.NewScrap(position, gravityForce * 10, angularVelocity));
                 }
             }
             velocity *= 0.8f;
@@ -357,7 +357,7 @@ public class Enemy : Entity
                 isExpired = true;
                 SoundManager.PlaySound(Assets.Get(Sound.Death), position);
             }
-            Entity nearestEnemy = EntityManager.NearestEnemy(this);
+            Entity nearestEnemy = Engine.EntityManager.NearestEnemy(this);
             nearestEnemy ??= NewDummyEnemy(position + 100 * new Vector2(MathF.Cos(angle- MathF.PI / 2), MathF.Sin(angle - MathF.PI/2)));
 
             targetVector = Vector2.Normalize(nearestEnemy.position - position);
@@ -411,7 +411,7 @@ public class Enemy : Entity
     {
         Random random = new();
         Enemy shield = NewShield(this, 3, 25, 0, 0);
-        EntityManager.Add(shield);
+        Engine.EntityManager.Add(shield);
         enemyRange.radius = 200;
         while (true)
         {
@@ -431,7 +431,7 @@ public class Enemy : Entity
                         float angleDegrees = (float)(random.NextDouble() - 0.5) * 30;
                         float offsetAngle = angleDegrees * MathF.PI / 180;
                         Vector2 targetVector = Engine.ToUnitVector(angle + offsetAngle);
-                        EntityManager.Add(new PulseShot(position, targetVector * 6, angle + offsetAngle, 0, false, damage, true));
+                        Engine.EntityManager.Add(new PulseShot(position, targetVector * 6, angle + offsetAngle, 0, false, damage, true));
                     }
                     SoundManager.PlaySound(Assets.Get(Sound.ShotgunFire), position);
                     cooldown = 1.2f;
@@ -454,7 +454,7 @@ public class Enemy : Entity
                 SoundManager.PlaySound(Assets.Get(Sound.Death), position);
                 if (EntityManager.RandomWithKarma(EntityManager.CurrentMission.EnemiesSpawned * 2))
                 {
-                    EntityManager.Add(ItemFactory.NewScrap(position, GetNormalizedAcceleration() * 10, angularVelocity));
+                    Engine.EntityManager.Add(ItemFactory.NewScrap(position, GetNormalizedAcceleration() * 10, angularVelocity));
                 }
             }
             velocity *= 0.8f;
@@ -516,7 +516,7 @@ public class Enemy : Entity
             if(!hasLaunchedAllies && ((float)health / (float)maxHealth < 0.5f))
             {
                 hasLaunchedAllies = !hasLaunchedAllies;
-                EntityManager.Add(NewShield(this, 12, 25, 0, 0));
+                Engine.EntityManager.Add(NewShield(this, 12, 25, 0, 0));
                 SoundManager.PlaySound(Assets.Get(Sound.MissileFire), position);
             }
             if(EntityManager.DistanceSqr(this, player) < 500 * 500)
@@ -535,7 +535,7 @@ public class Enemy : Entity
                         bulletCount = 0;
                     }
                     Vector2 direction = Engine.ToUnitVector(angle);
-                    EntityManager.Add(new PulseShot(position, velocity + direction * 8, angle, 0, false, damage, true));
+                    Engine.EntityManager.Add(new PulseShot(position, velocity + direction * 8, angle, 0, false, damage, true));
                     SoundManager.PlaySound(Assets.Get(Sound.PulseFire), position);
                 }
                 else if(missileCooldown < 0)
@@ -553,7 +553,7 @@ public class Enemy : Entity
                         missileCooldown = 10;
                     }
                     Vector2 direction = Engine.ToUnitVector(angle + MathF.PI / 2 + MathF.PI * missileCount);
-                    EntityManager.Add(NewMissile(position, direction * 5 + velocity, angle, isFriendly));
+                    Engine.EntityManager.Add(NewMissile(position, direction * 5 + velocity, angle, isFriendly));
                     SoundManager.PlaySound(Assets.Get(Sound.MissileFire), position);
                 }
             }
@@ -579,9 +579,9 @@ public class Enemy : Entity
                 }
                 isExpired = true;
                 SoundManager.PlaySound(Assets.Get(Sound.Death), position);
-                EntityManager.Add(ItemFactory.NewScrap(position, Engine.ToUnitVector(angle) * 5, angularVelocity));
-                EntityManager.Add(ItemFactory.NewScrap(position, Engine.ToUnitVector(angle + MathF.PI/6) * 5, angularVelocity));
-                EntityManager.Add(ItemFactory.NewScrap(position, Engine.ToUnitVector(angle - MathF.PI / 6) * 5, angularVelocity));
+                Engine.EntityManager.Add(ItemFactory.NewScrap(position, Engine.ToUnitVector(angle) * 5, angularVelocity));
+                Engine.EntityManager.Add(ItemFactory.NewScrap(position, Engine.ToUnitVector(angle + MathF.PI/6) * 5, angularVelocity));
+                Engine.EntityManager.Add(ItemFactory.NewScrap(position, Engine.ToUnitVector(angle - MathF.PI / 6) * 5, angularVelocity));
             }
             velocity *= 0.8f;
             yield return 0;
@@ -605,7 +605,7 @@ public class Enemy : Entity
         };
         foreach(Enemy shield in shields)
         {
-            EntityManager.Add(shield);
+            Engine.EntityManager.Add(shield);
         }
         while(true)
         {
@@ -628,7 +628,7 @@ public class Enemy : Entity
                         shields[i].isExpired = false;
                         shields[i].health = shields[i].maxHealth;
                         shields[i].position = position;
-                        EntityManager.Add(shields[i]);
+                        Engine.EntityManager.Add(shields[i]);
                     }
                 }
             }
@@ -649,7 +649,7 @@ public class Enemy : Entity
                     for (int i = 0; i < 8; i++)
                     {
                         Vector2 shotDirection = new(MathF.Sin(targetAngle), -MathF.Cos(targetAngle));
-                        EntityManager.Add(new PulseShot(position, velocity + shotDirection * 8, targetAngle, 0, false, 5));
+                        Engine.EntityManager.Add(new PulseShot(position, velocity + shotDirection * 8, targetAngle, 0, false, 5));
                         //EntityManager.Add(NewMissile(position, velocity + shotDirection * 8, shotAngle, 0, false));
                         //Golden Ratio
                         targetAngle += 1.6180339887f;
@@ -735,9 +735,9 @@ public class Enemy : Entity
             {
                 Explode();
                 isExpired = true;
-                EntityManager.Add(ItemFactory.NewScrap(position, Engine.ToUnitVector(angle) * 5, angularVelocity));
-                EntityManager.Add(ItemFactory.NewScrap(position, Engine.ToUnitVector(angle + MathF.PI / 6) * 5, angularVelocity));
-                EntityManager.Add(ItemFactory.NewScrap(position, Engine.ToUnitVector(angle - MathF.PI / 6) * 5, angularVelocity));
+                Engine.EntityManager.Add(ItemFactory.NewScrap(position, Engine.ToUnitVector(angle) * 5, angularVelocity));
+                Engine.EntityManager.Add(ItemFactory.NewScrap(position, Engine.ToUnitVector(angle + MathF.PI / 6) * 5, angularVelocity));
+                Engine.EntityManager.Add(ItemFactory.NewScrap(position, Engine.ToUnitVector(angle - MathF.PI / 6) * 5, angularVelocity));
                 SoundManager.PlaySound(Assets.Get(Sound.Death), position);
             }
             yield return 0;
@@ -766,7 +766,7 @@ public class Enemy : Entity
             if(EventHandler.AcknowledgeMessage(Message.MothershipUpdateInventory))
             {
                 var dockableComponent = Components.GetComponent(ComponentType.DockableComponent);
-                if (dockableComponent.IsValid) { (dockableComponent as DockableComponent).SetInventory(Engine.inventorySlots); }
+                if (dockableComponent.IsValid) { (dockableComponent as DockableComponent).SetInventory(Engine.InventorySlots); }
             }
             if (health <= 0)
             {
@@ -816,13 +816,13 @@ public class Enemy : Entity
                 }
                 else
                 {
-                    Entity nearestEnemy = EntityManager.NearestEnemy(this);
+                    Entity nearestEnemy = Engine.EntityManager.NearestEnemy(this);
                     if (nearestEnemy != null)
                     {
                         Vector2 relativePosition = position - nearestEnemy.position;
                         if (relativePosition.Length() < enemyRange.radius)
                         {
-                            EntityManager.Add(new AssassinShot(position, -Vector2.Normalize(relativePosition) * 100 + nearestEnemy.velocity, MathF.Atan2(relativePosition.Y, relativePosition.X) - MathF.PI / 2, 0, isFriendly, damage));
+                            Engine.EntityManager.Add(new AssassinShot(position, -Vector2.Normalize(relativePosition) * 100 + nearestEnemy.velocity, MathF.Atan2(relativePosition.Y, relativePosition.X) - MathF.PI / 2, 0, isFriendly, damage));
                             SoundManager.PlaySound(Assets.Get(Sound.MissileFire), position);
                             cooldown = 3;
                         }
@@ -839,12 +839,12 @@ public class Enemy : Entity
     IEnumerable<int> Turret()
     {
         Enemy turretCannon = NewTurretCannon(this);
-        EntityManager.Add(turretCannon);
+        Engine.EntityManager.Add(turretCannon);
         while (true)
         {
             velocity *= 0;
             turretCannon.position = position + new Vector2(0, -8);
-            Entity nearestPickup = EntityManager.NearestItem(this);
+            Entity nearestPickup = Engine.EntityManager.NearestItem(this);
             if (nearestPickup != null)
             {
                 if (EntityManager.DistanceSqr(this, nearestPickup) < 2500 && health <= maxHealth - 15)
@@ -879,7 +879,7 @@ public class Enemy : Entity
         {
             velocity *= 0;
             targetingAngle += Engine.DeltaSeconds;
-            Entity nearestEnemy = EntityManager.NearestEnemy(NewDummyEnemy(position - new Vector2(0, Size.Y / 2 + 150), isFriendly));
+            Entity nearestEnemy = Engine.EntityManager.NearestEnemy(NewDummyEnemy(position - new Vector2(0, Size.Y / 2 + 150), isFriendly));
             enemyRange.position = position + new Vector2(0, Size.Y / 2);
             if (nearestEnemy != null)
             {
@@ -900,7 +900,7 @@ public class Enemy : Entity
                     Vector2 normalVector = Vector2.Normalize(relativePosition);
                     var rotatedOffset = new Vector2(-Size.Y / 2 * MathF.Sin(angle), Size.Y / 2 * MathF.Cos(angle));
                     //EntityManager.Add(new PulseShot(position - new Vector2(0, Size.Y / 2) + new Vector2(normalVector.Y, -normalVector.X) * bulletOffset * 2, normalVector * 8, turretAngle, 0, isFriendly, 5));
-                    EntityManager.Add(NewMissile(position - rotatedOffset + new Vector2(normalVector.Y, -normalVector.X) * bulletOffset, normalVector * 8, turretAngle, isFriendly));
+                    Engine.EntityManager.Add(NewMissile(position - rotatedOffset + new Vector2(normalVector.Y, -normalVector.X) * bulletOffset, normalVector * 8, turretAngle, isFriendly));
                     Assets.Get(Sound.MissileFire).Play();
                     //Assets.Get(Sound.PulseFire).Play();
                     cooldown = 0.9f;
@@ -928,7 +928,7 @@ public class Enemy : Entity
                 isExpired = true;
                 SoundManager.PlaySound(Assets.Get(Sound.Death), position);
             }
-            Entity nearestPickup = EntityManager.NearestItem(this);
+            Entity nearestPickup = Engine.EntityManager.NearestItem(this);
             if (nearestPickup != null)
             {
                 if (EntityManager.DistanceSqr(this, nearestPickup) < 2500 && health <= maxHealth -15)
@@ -954,7 +954,7 @@ public class Enemy : Entity
             450f, 1, true, Color.Yellow, Color.DarkRed, EmitterType.EmissionOverTime);
         while (true)
         {
-            Entity nearestEnemy = EntityManager.NearestEnemy(this);
+            Entity nearestEnemy = Engine.EntityManager.NearestEnemy(this);
             Vector2 relativePosition = position - nearestEnemy.position;
             Vector2 normalizedAcceleration = GetNormalizedAcceleration();
             Vector2 Offset = Vector2.Normalize(EntityManager.CurrentMission.GetNormalizedAcceleration(nearestEnemy.position))*100;
@@ -986,7 +986,7 @@ public class Enemy : Entity
                 SoundManager.PlaySound(Assets.Get(Sound.Death), position);
                 if (EntityManager.RandomWithKarma(EntityManager.CurrentMission.EnemiesSpawned * 2))
                 {
-                    EntityManager.Add(ItemFactory.NewScrap(position, normalizedAcceleration * 10, angularVelocity));
+                    Engine.EntityManager.Add(ItemFactory.NewScrap(position, normalizedAcceleration * 10, angularVelocity));
                 }
             }
             if (Vector2.Distance(position, nearestEnemy.position) < enemyRange.radius)
@@ -997,7 +997,7 @@ public class Enemy : Entity
                 }
                 else
                 {
-                    EntityManager.Add(new PulseShot(position, -Vector2.Normalize(relativePosition) * 8 + nearestEnemy.velocity, MathF.Atan2(relativePosition.Y, relativePosition.X) - MathF.PI/2, 0, isFriendly, damage, false));
+                    Engine.EntityManager.Add(new PulseShot(position, -Vector2.Normalize(relativePosition) * 8 + nearestEnemy.velocity, MathF.Atan2(relativePosition.Y, relativePosition.X) - MathF.PI/2, 0, isFriendly, damage, false));
                     SoundManager.PlaySound(Assets.Get(Sound.PulseFire), position);
                     shots++;
                     if (shots == 3) 
@@ -1044,7 +1044,7 @@ public class Enemy : Entity
         };
         while (true)
         {
-            nearestPickup = EntityManager.NearestItem(this);
+            nearestPickup = Engine.EntityManager.NearestItem(this);
             Vector2 relativePosition = player.position + player.velocity - position - velocity;
             targetAngle = MathF.Atan2(relativePosition.X, -relativePosition.Y);
             if (health >= maxHealth / 2 || laserCooldown > 0)
@@ -1095,7 +1095,7 @@ public class Enemy : Entity
                 {
                     Vector2 direction = Engine.ToUnitVector(angle);
                     Projectile shot = new AssassinShot(position, direction * 100, angle, 0, isFriendly, 15);
-                    EntityManager.Add(shot);
+                    Engine.EntityManager.Add(shot);
                     SoundManager.PlaySound(Assets.Get(Sound.SniperFire), position);
                     velocity -= direction * 15;
                     laserWindup = 3;
@@ -1114,7 +1114,7 @@ public class Enemy : Entity
                         texture = dot,
                         timeLeft = 3
                     };
-                    EntityManager.Add(shot);
+                    Engine.EntityManager.Add(shot);
                     SoundManager.PlaySound(Assets.Get(Sound.LMGFire), position);
                     cooldown = 0.25f;
                     bulletOffset = -bulletOffset;
@@ -1147,7 +1147,7 @@ public class Enemy : Entity
                     {
                         float spawnAngle = MathF.Tau * currentEnemy / wave.Length + angle;
                         Entity enemy = wave[currentEnemy](position + new Vector2(MathF.Cos(spawnAngle), MathF.Sin(spawnAngle)) * 40, velocity, angle, isFriendly);
-                        EntityManager.Add(enemy);
+                        Engine.EntityManager.Add(enemy);
                         waveTimer = 0.1f;
                         currentEnemy++;
                     }
@@ -1156,9 +1156,9 @@ public class Enemy : Entity
             if (health <= 0)
             {
                 Explode();
-                EntityManager.Add(ItemFactory.NewScrap(position, Engine.ToUnitVector(angle) * 5, angularVelocity));
-                EntityManager.Add(ItemFactory.NewScrap(position, Engine.ToUnitVector(angle + MathF.PI / 6) * 5, angularVelocity));
-                EntityManager.Add(ItemFactory.NewScrap(position, Engine.ToUnitVector(angle - MathF.PI / 6) * 5, angularVelocity));
+                Engine.EntityManager.Add(ItemFactory.NewScrap(position, Engine.ToUnitVector(angle) * 5, angularVelocity));
+                Engine.EntityManager.Add(ItemFactory.NewScrap(position, Engine.ToUnitVector(angle + MathF.PI / 6) * 5, angularVelocity));
+                Engine.EntityManager.Add(ItemFactory.NewScrap(position, Engine.ToUnitVector(angle - MathF.PI / 6) * 5, angularVelocity));
                 int particles = random.Next(3, 5);
                 for (int i = 0; i < particles; i++)
                 {
@@ -1201,7 +1201,7 @@ public class Enemy : Entity
                 var dockableComponent = Components.GetComponent(ComponentType.DockableComponent);
                 if (dockableComponent.IsValid)
                 {
-                    (dockableComponent as DockableComponent).SetInventory(Engine.inventorySlots);
+                    (dockableComponent as DockableComponent).SetInventory(Engine.InventorySlots);
                 }
             }
             if (health <= 0)
@@ -1252,8 +1252,8 @@ public class Enemy : Entity
             tail2 = new(position, velocity, angle, 4, 75, Assets.Get(Sprite.WyvernBoss), false);
             tail1.AddBehaviour(tail1.Wyvern(this));
             tail2.AddBehaviour(tail2.Wyvern(tail1));
-            EntityManager.Add(tail1);
-            EntityManager.Add(tail2);
+            Engine.EntityManager.Add(tail1);
+            Engine.EntityManager.Add(tail2);
         }
         while (true)
         {
@@ -1273,7 +1273,7 @@ public class Enemy : Entity
                     else
                     {
                         hasExploded = true;
-                        EntityManager.Add(ItemFactory.GetItem(ModuleType.LMG, position, normalizedAcceleration * 10, angularVelocity));
+                        Engine.EntityManager.Add(ItemFactory.GetItem(ModuleType.LMG, position, normalizedAcceleration * 10, angularVelocity));
                         position = new Vector2(10000, 10000);
                     }
                 }
@@ -1337,14 +1337,14 @@ public class Enemy : Entity
                             if ((tail1 == null && tail2 == null))
                             {
                                 Vector2 direction = Vector2.Normalize(nearestEnemy.position - position);
-                                EntityManager.Add(new PulseShot(position, velocity + new Vector2(direction.X, -direction.Y) * 2, theta, 0, isFriendly, damage, true) { texture = Assets.Get(Sprite.Microshot) });
-                                EntityManager.Add(new PulseShot(position, velocity - new Vector2(direction.X, -direction.Y) * 2, theta + MathF.PI, 0, isFriendly, damage, true) { texture = Assets.Get(Sprite.Microshot) });
+                                Engine.EntityManager.Add(new PulseShot(position, velocity + new Vector2(direction.X, -direction.Y) * 2, theta, 0, isFriendly, damage, true) { texture = Assets.Get(Sprite.Microshot) });
+                                Engine.EntityManager.Add(new PulseShot(position, velocity - new Vector2(direction.X, -direction.Y) * 2, theta + MathF.PI, 0, isFriendly, damage, true) { texture = Assets.Get(Sprite.Microshot) });
                                 SoundManager.PlaySound(Assets.Get(Sound.LMGFire), position);
                                 cooldown = 0.5f;
                             }
                             else
                             {
-                                EntityManager.Add(new PulseShot(position, Vector2.Normalize(nearestEnemy.position - position) * 6 + nearestEnemy.velocity, angle, 0, isFriendly, damage, tail2.isExpired));
+                                Engine.EntityManager.Add(new PulseShot(position, Vector2.Normalize(nearestEnemy.position - position) * 6 + nearestEnemy.velocity, angle, 0, isFriendly, damage, tail2.isExpired));
                                 SoundManager.PlaySound(Assets.Get(Sound.PulseFire), position);
                                 cooldown = 0.75f;
                             }
@@ -1371,10 +1371,10 @@ public class Enemy : Entity
                 SoundManager.PlaySound(Assets.Get(Sound.Death), position);
                 if (EntityManager.RandomWithKarma(EntityManager.CurrentMission.EnemiesSpawned * 1.5f))
                 {
-                    EntityManager.Add(ItemFactory.NewScrap(position, normalizedAcceleration * 10, angularVelocity));
+                    Engine.EntityManager.Add(ItemFactory.NewScrap(position, normalizedAcceleration * 10, angularVelocity));
                 }
             }
-            Entity nearestAlly = EntityManager.NearestAlly(this);
+            Entity nearestAlly = Engine.EntityManager.NearestAlly(this);
             if (nearestAlly != null)
             {
                 if ((position - nearestAlly.position).LengthSquared() < 0.001f)
@@ -1386,7 +1386,7 @@ public class Enemy : Entity
 
             }
             float speed = 8 + Math.Max((player.position - position).Length() - 500, 0) / 500;
-            Entity nearestEnemy = EntityManager.NearestEnemy(this);
+            Entity nearestEnemy = Engine.EntityManager.NearestEnemy(this);
             if (nearestEnemy == null)
             {
                 if ((player.position - position).LengthSquared() > 1000)
@@ -1399,7 +1399,7 @@ public class Enemy : Entity
                 continue;
             }
 
-            Entity nearestProjectile = EntityManager.NearestProjectile(NewDummyEnemy(position + Vector2.Normalize(player.position - position) * 30, isFriendly));
+            Entity nearestProjectile = Engine.EntityManager.NearestProjectile(NewDummyEnemy(position + Vector2.Normalize(player.position - position) * 30, isFriendly));
             if (nearestProjectile != null)
             {
                 Vector2 relativePos = position - nearestProjectile.position;
@@ -1440,12 +1440,12 @@ public class Enemy : Entity
                         if (shotCount == 0)
                         {
                             SoundManager.PlaySound(Assets.Get(Sound.LMGFire), position);
-                            EntityManager.Add(new PulseShot(position, Engine.ToUnitVector(angle) * 8, angle, 0, isFriendly, damage, false) { texture = tex, timeLeft = 3 } );
+                            Engine.EntityManager.Add(new PulseShot(position, Engine.ToUnitVector(angle) * 8, angle, 0, isFriendly, damage, false) { texture = tex, timeLeft = 3 } );
                         }
                         else
                         {
-                            EntityManager.Add(new SpiralShot(position, Engine.ToUnitVector(angle) * 8, angle, 0, isFriendly, damage, false) { texture = tex, timeLeft = 3 });
-                            EntityManager.Add(new SpiralShot(position, Engine.ToUnitVector(angle) * 8, angle, 0, isFriendly, damage, true) { texture = tex, timeLeft = 3 });
+                            Engine.EntityManager.Add(new SpiralShot(position, Engine.ToUnitVector(angle) * 8, angle, 0, isFriendly, damage, false) { texture = tex, timeLeft = 3 });
+                            Engine.EntityManager.Add(new SpiralShot(position, Engine.ToUnitVector(angle) * 8, angle, 0, isFriendly, damage, true) { texture = tex, timeLeft = 3 });
                         }
                         if (shotCount < 1)
                         {
@@ -1501,7 +1501,7 @@ public class Enemy : Entity
             {
                 isExpired = true;
             }
-            Entity nearestEnemy = EntityManager.NearestEnemy(this);
+            Entity nearestEnemy = Engine.EntityManager.NearestEnemy(this);
             if (nearestEnemy != null || target != null)
             {
                 if (nearestEnemy != null || target == null)
@@ -1519,7 +1519,7 @@ public class Enemy : Entity
                 RotateTowards(targetAngle, diff / 10);
                 if (diff < 0.2f && cooldown <= 0)
                 {
-                    EntityManager.Add(new AssassinShot(position, Vector2.Normalize(targetVector) * 300, angle, 0, isFriendly, damage) { timeLeft = 0.2f });
+                    Engine.EntityManager.Add(new AssassinShot(position, Vector2.Normalize(targetVector) * 300, angle, 0, isFriendly, damage) { timeLeft = 0.2f });
                     cooldown = 1;
                 }
             }
