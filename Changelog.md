@@ -215,4 +215,15 @@ Update 0.4.2
 5/7/2025    
 Update 0.4.3    
     -Added the stealth fighter, demonstrating the stealth system.    
-    -Modules now store their ability rather than an integer referring to said ability.    
+    -Modules now store their ability rather than an integer referring to said ability. 
+    
+5/9/2025    
+0.4.3.1    
+    -EntityManager is no longer a static class.    
+    -Cutscenes now use a simplified actor class instead of entities.    
+    -The core module now completely disables player visuals and control when failed.    
+    -Modules no longer have the cost member, as it continues to remain unusued.    
+    -Completely removed the training simulator.    
+    -The input class now records keyboard state as well.    
+    -Fixed bug #15    
+    -Fixed bug #16    
