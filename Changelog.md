@@ -227,3 +227,8 @@ Update 0.4.3
     -The input class now records keyboard state as well.    
     -Fixed bug #15    
     -Fixed bug #16    
+        
+0.4.3.2     
+5/24/2025     
+    -Added random point exploration to stealth fighters.    
+    -Added proper core failure logic.    
