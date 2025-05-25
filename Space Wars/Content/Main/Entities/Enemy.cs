@@ -4,6 +4,7 @@ using Space_Wars.Content.Main.Components;
 using Space_Wars.Content.Main.Particles;
 using System;
 using System.Collections.Generic;
+using System.Dynamic;
 using UILib.Content.Main;
 
 namespace Space_Wars.Content.Main.Entities;
@@ -1479,11 +1480,13 @@ public class Enemy : Entity
     {
         enemyRange.radius = 500;
         SensingAbility = -1;
-        StealthAbility = 1;
+        StealthAbility = 0;
         Entity target = null;
         float trackTime = 0;
+        Vector2 rand = position;
         while (true)
         {
+            velocity += GetNormalizedAcceleration() * Engine.DeltaSeconds / 2 * 60;
             velocity *= 0.8f;
             if (cooldown > 0)
             {
@@ -1517,6 +1520,10 @@ public class Enemy : Entity
                 targetAngle = MathF.Atan2(targetVector.Y, targetVector.X) + MathF.PI/2;
                 float diff = MathF.Abs(angle - targetAngle);
                 RotateTowards(targetAngle, diff / 10);
+                if (targetVector.Length() > 200)
+                {
+                    GoToPosition(nearestEnemy.position, 15);
+                }
                 if (diff < 0.2f && cooldown <= 0)
                 {
                     Engine.EntityManager.Add(new AssassinShot(position, Vector2.Normalize(targetVector) * 300, angle, 0, isFriendly, damage) { timeLeft = 0.2f });
@@ -1525,6 +1532,20 @@ public class Enemy : Entity
             }
             else
             {
+                if (Vector2.Distance(rand, position) < 500)
+                {
+                    float radius = EntityManager.CurrentMission.Planet.radius;
+                    do
+                    {
+                        rand = new Vector2((random.NextSingle() * 2 - 1) * radius * 3, (random.NextSingle()* 2 - 1) * radius * 3);
+                    }
+                    while (rand.Length() < radius);
+                }
+                GoToPosition(rand, 5);
+                targetVector = velocity;
+                targetAngle = MathF.Atan2(targetVector.Y, targetVector.X) + MathF.PI / 2;
+                float diff = MathF.Abs(angle - targetAngle);
+                RotateTowards(targetAngle, diff / 10);
             }
             yield return 0;
         }

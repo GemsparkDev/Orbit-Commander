@@ -254,11 +254,17 @@ public class Player : Entity
             //Part Failure
             if (random.Next(0, 5) == 0)
             {
-                //ModuleType failedPart = (ModuleType)random.Next(0, 4);'
-                ModuleType failedPart = ModuleType.Core;
-                //if (modules[failedPart].Health < modules[failedPart].MaxHealth / 2 && !modules[failedPart].isFailed)
-                if(true)
+                ModuleType failedPart = (ModuleType)random.Next(0, 4);
+                if (modules[failedPart].Health < modules[failedPart].MaxHealth / 2)
                 {
+                    if (modules[failedPart].isFailed)
+                    {
+                        failedPart = ModuleType.Core;
+                    }
+                    if (modules[failedPart].isFailed && modules[ModuleType.Core].isFailed)
+                    {
+                        return;
+                    }
                     modules[failedPart].isFailed = true;
                     ParticleManager.Add(new Particle(null, 2, position + new Vector2(0, -3), new Vector2(0, -0.75f), 0, 0, 1, true, Color.Red, Color.Red) { drawText = $"{failedPart} has failed!" });
                     SoundManager.PlaySound(Assets.Get(Sound.Beep), position);
