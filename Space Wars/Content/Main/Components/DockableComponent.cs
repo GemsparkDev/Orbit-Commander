@@ -12,9 +12,11 @@ public class DockableComponent : IComponent
     public Pickup[,] Inventory { get; private set; } = new Pickup[1, 4];
     public bool IsDocked { get; private set; } = false;
     public ComponentType Type { get; } = ComponentType.DockableComponent;
-    public DockableComponent(Entity _parentEntity)
+    public Containers Menu { get; private set; }
+    public DockableComponent(Entity _parentEntity, Containers _menu)
     {
         parentEntity = _parentEntity;
+        Menu = _menu;
     }
     public void AddItem(Pickup _pickup)
     {

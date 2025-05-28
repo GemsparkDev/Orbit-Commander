@@ -96,6 +96,7 @@ public class Engine : Game
         var MainMenu = new TabbedWindow(ScreenSize / 2, Assets.Get(Sprite.GargantuanPanel), tabTexture, selectedTabTexture, selectSound, 2, 1) { enabled = true, icons = iconGroup1 };
         var MothershipMenu = new TabbedWindow(new Vector2(Assets.Get(Sprite.Terminal).Width, ScreenSize.Y / 2), Assets.Get(Sprite.Terminal), tabTexture, selectedTabTexture, selectSound, 3, 1) { enabled = false, icons = iconGroup2 };
         var MissionSelect = new TabbedWindow(ScreenSize / 2, Assets.Get(Sprite.GargantuanPanel), tabTexture, selectedTabTexture, selectSound, 2) { enabled = false, icons = iconGroup3 };
+        var PickupDroneMenu = new Window(ScreenSize / 2, largePanel, 1) { enabled = false };
 
         var patchedConicsToggle = new Button(new Vector2(0, -MainMenu.Size.Y / 4), wideButton, Assets.TextFont, $"Patched Conics: {PatchedConics}", Color.White);
         var sfxSlider = new Slider(Line, Assets.Get(Sprite.Knob), new Vector2(25, 0), 50, false, Color.White, Color.Gray);
@@ -137,6 +138,8 @@ public class Engine : Game
         var nextMission = new Button(new Vector2(75, 20), Assets.Get(Sprite.Button), Assets.TextFont, "Next", Color.LightBlue);
         var selectMission = new Button(new Vector2(0, 20), Assets.Get(Sprite.Button), Assets.TextFont, "Launch!", Color.Yellow);
         var isComplete = new Decal(new Vector2(0, 45), Assets.TextFont, "Not Complete", Color.Red, 10);
+
+        var launchButton = new Button(new Vector2(-20, 0), Assets.Get(Sprite.Button), Assets.TextFont, "Leave", Color.LightBlue);
 
         var globalSidePanelOpen = new Button(new Vector2(Assets.Get(Sprite.ToggleButton).Width / 2, ScreenSize.Y / 4), Assets.Get(Sprite.ToggleButton));
         fpsCounter = new Decal(new Vector2(ScreenSize.X / 2 - 20, 10), Assets.TextFont, "60", Color.White, 10);
@@ -184,6 +187,7 @@ public class Engine : Game
         prevMission.AddBehaviour(EntityManager.PrevMission);
         nextMission.AddBehaviour(EntityManager.NextMission);
         selectMission.AddBehaviour(Startgame);
+        launchButton.AddBehaviour(delegate() { EventHandler.SendMessage(Message.EscapeDroneLeave); });
 
         MainMenu.AddWidget(exitButton as IFunctional, 0);
         MainMenu.AddWidget(singleplayerButton as IFunctional, 0);
@@ -226,6 +230,8 @@ public class Engine : Game
         MissionSelect.AddWidget(selectMission as IFunctional, 0);
         MissionSelect.AddWidget(isComplete, 0);
 
+        PickupDroneMenu.AddWidget(launchButton as IFunctional);
+
         for (int i = 0; i < 3; i++)
         {
             MothershipMenu.AddWidget(sidePanelClose as IFunctional, i);
@@ -262,6 +268,7 @@ public class Engine : Game
                 InventorySlots[x, y] = new ItemSlot<Pickup>(new Vector2(Assets.DimsOf(Sprite.EmptySlot).X * x + Assets.DimsOf(Sprite.LargePanel).X / 4,
                     Assets.DimsOf(Sprite.EmptySlot).Y * (y+1) - Assets.DimsOf(Sprite.LargePanel).X / 2), Assets.Get(Sprite.EmptySlot), UIManager, -1);
                 MothershipMenu.AddWidget(InventorySlots[x, y] as IFunctional, 0);
+                PickupDroneMenu.AddWidget(InventorySlots[x,y] as IFunctional);
                 InventorySlots[x, y].AddBehaviour(new Action(EventHandler.UpdateInventory));
             }
         }
@@ -272,6 +279,7 @@ public class Engine : Game
         UIManager.AddContainer(MothershipMenu);
         UIManager.AddContainer(GarageMenu);
         UIManager.AddContainer(MissionSelect);
+        UIManager.AddContainer(PickupDroneMenu);
     }
     public static void Startgame()
     {

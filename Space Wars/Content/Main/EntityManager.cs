@@ -30,34 +30,34 @@ public class EntityManager
     private readonly static List<Mission> missions = new()
     {
         new(new GravitationalSource[2] { new(Vector2.Zero, Vector2.Zero, 10000, 8, true, Color.Cyan), new(new Vector2(1000, 0), GravitationalSource.GetOrbitalVelocity(new Vector2(1000, 0), Vector2.Zero, 10000), 250, 1.5f, false, Color.Cyan) },
-        new List<(Func<Vector2, Vector2, float, Entity>, Vector2, Vector2, float, Condition[])>(){ (Enemy.NewMothership, new Vector2(0, -8*50 - Assets.DimsOf(Sprite.Mothership).Y / 2), Vector2.Zero, 0f, new Condition[2] { Condition.Protect, Condition.CustomIncomplete })},
+        new(){ (Enemy.NewMothership, new Vector2(0, -8*50 - Assets.DimsOf(Sprite.Mothership).Y / 2), Vector2.Zero, 0f, new Condition[2] { Condition.Protect, Condition.CustomIncomplete })},
         "Crash Landing",
         "A simple system with a large planet and one closely orbiting moon. Drone activity detected, but minimal.",
         1, 0, 0, IntroCutscene),
 
         new( new GravitationalSource[1] { new(Vector2.Zero, Vector2.Zero, 3500, 4, true, Color.Cyan, true) },
-        new List<(Func<Vector2, Vector2, float, Entity>, Vector2, Vector2, float, Condition[])>(){
+        new(){
             (Enemy.NewTurret, new Vector2(0, -200 - Assets.DimsOf(Sprite.TurretBase).Y / 2), Vector2.Zero, 0, new Condition[1] { Condition.Protect }),
             (Enemy.NewOrbiter, new Vector2(400, 0), GravitationalSource.GetOrbitalVelocity(new Vector2(400, 0), Vector2.Zero, 3500), 0, new Condition[1] { Condition.Protect })},
         "Sentry Defense",
         "A small outpost is located orbiting this rogue planet. Defend it.", 0.75f, 40),
 
         new( new GravitationalSource[2] { new(Vector2.Zero, Vector2.Zero, 25000, 7f, true, Color.Cyan), new(new Vector2(800, 0), GravitationalSource.GetOrbitalVelocity(new Vector2(800, 0), Vector2.Zero, 25000), 150, 0.5f, false, Color.Cyan), },
-        new List<(Func<Vector2, Vector2, float, Entity>, Vector2, Vector2, float, Condition[])>(){ (Enemy.NewMiner, new Vector2(0, -7*50 - Assets.DimsOf(Sprite.Miner).Y / 2), Vector2.Zero, 0, new Condition[1] { Condition.Protect }) },
+        new(){ (Enemy.NewMiner, new Vector2(0, -7*50 - Assets.DimsOf(Sprite.Miner).Y / 2), Vector2.Zero, 0, new Condition[1] { Condition.Protect }) },
         "Extraction",
         "This deceptively dense planet is rich with materials that our deployed miner will extract.", 1, 20),
 
         new(new GravitationalSource[3] { new(Vector2.Zero, Vector2.Zero, 5000, 3, true, Color.Cyan),
             new(new Vector2(400, 0), GravitationalSource.GetOrbitalVelocity(new Vector2(400, 0), Vector2.Zero, 5000), 240, 1f, false, Color.Cyan),
             new(new Vector2(-600, 0), -GravitationalSource.GetOrbitalVelocity(new Vector2(-600, 0), Vector2.Zero, 5000) * 1.2f, 120, 0.6f, false, Color.Yellow), },
-        new List<(Func<Vector2, Vector2, float, Entity>, Vector2, Vector2, float, Condition[])>(){ (Enemy.NewExcursionBoss, new Vector2(0, -6*50), Vector2.Zero, 0, new Condition[1] { Condition.Kill }) },
+        new(){ (Enemy.NewExcursionBoss, new Vector2(0, -6*50), Vector2.Zero, 0, new Condition[1] { Condition.Kill }) },
         "Showdown",
         "Defeat the advanced drone prototype, Excursion. Be warned: It may call for reinforcements.", 1.1f, 0, 1),
 
         new(new GravitationalSource[1] {new(Vector2.Zero, Vector2.Zero, 30000, 10f, true, Color.HotPink, true) },
-        new List<(Func<Vector2, Vector2, float, Entity>, Vector2, Vector2, float, Condition[])>(){ (Enemy.NewPickupDrone, new Vector2(0, -8*50 - Assets.DimsOf(Sprite.PickupDrone).Y / 2), Vector2.Zero, 0f, new Condition[2] { Condition.Protect, Condition.CustomIncomplete })},
+        new(){ },
         "cool planet",
-        "Super earth", 2, 5, 1),
+        "Super earth", 2, 0, 1, null, true),
     };
 
     /*

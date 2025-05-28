@@ -211,7 +211,7 @@ public class Player : Entity
             {
                 if (dockedEntity != null)
                 {
-                    Engine.UIManager.ToggleMenu((int)Containers.MothershipMenu);
+                    Engine.UIManager.ToggleMenu((int)dockedEntity.Menu);
                 }
                 else
                 {

@@ -9,6 +9,7 @@ namespace Space_Wars.Content.Main;
 public class Mission
 {
     public bool Completed { get; set; } = false;
+    private Entity escapeVehicle = null;
     public string Name { get; }
     public string Description { get; }
     public GravitationalSource Planet { get { return planets[0]; } }
@@ -35,7 +36,7 @@ public class Mission
     public delegate Enemy DelegateEnemy(Vector2 position, Vector2 velocity, float angle, bool _isFriendly = false);
     public int EnemiesSpawned { get; private set; } = 0;
 
-    public Mission(GravitationalSource[] _planets, List<(Func<Vector2, Vector2, float, Entity> newEntity, Vector2 position, Vector2 velocity, float angle, Condition[] conditions)> _missionObjectives, string _name, string _description, float _timerModifier, int _waveGoal = 0, int _enemyTier = 0, Func<Cutscene> _cutscene = null)
+    public Mission(GravitationalSource[] _planets, List<(Func<Vector2, Vector2, float, Entity> newEntity, Vector2 position, Vector2 velocity, float angle, Condition[] conditions)> _missionObjectives, string _name, string _description, float _timerModifier, int _waveGoal = 0, int _enemyTier = 0, Func<Cutscene> _cutscene = null, bool _escapeVehicle = false)
     {
         Name = _name;
         Description = _description;
@@ -83,6 +84,10 @@ public class Mission
         };
         currentBoss = random.Next(bosses.Count);
         cutscene = _cutscene;
+        if (_escapeVehicle)
+        {
+            escapeVehicle = Enemy.NewPickupDrone(new Vector2(-2000, -2000), Vector2.Zero, 0);
+        }
     }
     public void Update()
     {
@@ -112,7 +117,17 @@ public class Mission
         }
         if (allCompleted && restartTimer == -1)
         {
-            EntityManager.MarkMissionComplete();
+            if (escapeVehicle != null)
+            {
+                MissionObjectives.Add((escapeVehicle, new Condition[2] { Condition.Protect, Condition.CustomIncomplete }));
+                Engine.EntityManager.Add(escapeVehicle);
+                escapeVehicle = null;
+                allCompleted = false;
+            }
+            else
+            {
+                EntityManager.MarkMissionComplete();
+            }
         }
         if (restartTimer != -1)
         {
@@ -329,7 +344,7 @@ public class Mission
         {
             _planets[i] = planets[i].Copy();
         }
-        return new Mission(_planets, CopyObjectives, Name, Description, timerModifier, WaveGoal, tier, cutscene) { Completed = this.Completed};
+        return new Mission(_planets, CopyObjectives, Name, Description, timerModifier, WaveGoal, tier, cutscene, escapeVehicle != null) { Completed = this.Completed};
     }
     private void SpawnWaveBatch(int enemyCredits)
     {

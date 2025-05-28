@@ -127,8 +127,9 @@ public enum Message
     MothershipUpdateInventory,
     ToggleTerminal,
     RestartModules,
+    EscapeDroneLeave,
 }
-enum Containers
+public enum Containers
 {
     MainMenu,
     PauseMenu,
@@ -136,6 +137,7 @@ enum Containers
     MothershipMenu,
     GarageMenu,
     MissionMenu,
+    PickupDroneMenu,
 }
 public enum Condition
 {
@@ -144,4 +146,5 @@ public enum Condition
     Kill,
     CustomIncomplete,
     CustomComplete,
+    DelayedSpawn,
 }

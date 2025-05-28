@@ -241,6 +241,7 @@ public class EventHandler
     public static void DisableDockingMenus()
     {
         Engine.UIManager.GetContainer((int)Containers.MothershipMenu).enabled = false;
+        Engine.UIManager.GetContainer((int)Containers.PickupDroneMenu).enabled = false;
         Engine.UIManager.GetContainer((int)Containers.PlayerMenu).enabled = false;
     }
     public static void ToggleDockingMenus()

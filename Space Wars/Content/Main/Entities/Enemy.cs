@@ -1470,9 +1470,28 @@ public class Enemy : Entity
     }
     IEnumerable<int> PickupDrone()
     {
+        bool currentlyLeaving = false;
         while (true)
         {
-            velocity *= 0.8f;
+            if (EventHandler.AcknowledgeMessage(Message.EscapeDroneLeave))
+            {
+                currentlyLeaving = true;
+                EntityManager.CurrentMission.CompleteCustomRule(this);
+            }
+            if (health <= 0)
+            {
+                isExpired = true;
+                SoundManager.PlaySound(Assets.Get(Sound.Death), position);
+            }
+            if (currentlyLeaving)
+            {
+                velocity += new Vector2(Engine.DeltaSeconds, 0);
+            }
+            else
+            {
+                velocity = Vector2.Zero;
+                position = position * (1f - Engine.DeltaSeconds) - new Vector2(0, EntityManager.CurrentMission.Planet.radius * 1.5f) * Engine.DeltaSeconds;
+            }
             yield return 0;
         }
     }
@@ -1503,6 +1522,11 @@ public class Enemy : Entity
             if (health <= 0)
             {
                 isExpired = true;
+                Explode();
+                if (EntityManager.RandomWithKarma(EntityManager.CurrentMission.EnemiesSpawned))
+                {
+                    Engine.EntityManager.Add(ItemFactory.NewScrap(position, velocity, angularVelocity));
+                }
             }
             Entity nearestEnemy = Engine.EntityManager.NearestEnemy(this);
             if (nearestEnemy != null || target != null)
@@ -1615,7 +1639,7 @@ public class Enemy : Entity
     {
         Enemy enemy = new(position, velocity, angle, 8, 1000, Assets.Get(Sprite.Mothership), true);
         enemy.AddBehaviour(enemy.Mothership());
-        enemy.Components.Add(new DockableComponent(enemy));
+        enemy.Components.Add(new DockableComponent(enemy, Containers.MothershipMenu));
         return enemy;
     }
     public static Enemy NewTurret(Vector2 position, Vector2 velocity, float angle)
@@ -1668,7 +1692,7 @@ public class Enemy : Entity
     {
         Enemy enemy = new(position, velocity, angle, 10, 300, Assets.Get(Sprite.Orbiter), true);
         enemy.AddBehaviour(enemy.Orbiter());
-        enemy.Components.Add(new DockableComponent(enemy));
+        enemy.Components.Add(new DockableComponent(enemy, Containers.MothershipMenu));
         enemy.angularVelocity = -0.01f;
         return enemy;
     }
@@ -1676,7 +1700,7 @@ public class Enemy : Entity
     {
         Enemy enemy = new(position, velocity, angle, 0, 250, Assets.Get(Sprite.PickupDrone), true);
         enemy.AddBehaviour(enemy.PickupDrone());
-        enemy.Components.Add(new DockableComponent(enemy));
+        enemy.Components.Add(new DockableComponent(enemy, Containers.PickupDroneMenu));
         return enemy;
     }
     public static Enemy NewStealthFighter(Vector2 position, Vector2 velocity, float angle, bool _isFriendly = false)
