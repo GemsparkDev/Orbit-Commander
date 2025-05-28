@@ -231,4 +231,9 @@ Update 0.4.3
 0.4.3.2     
 5/24/2025     
     -Added random point exploration to stealth fighters.    
-    -Added proper core failure logic.    
+    -Added proper core failure logic.  
+    
+0.4.3.3     
+5/27/2025    
+    -Added an escape drone that allows the player to bring items back to the mothership on some missions.    
+    -The stealth fighter now drops scrap and explodes.    
