@@ -237,3 +237,7 @@ Update 0.4.3
 5/27/2025    
     -Added an escape drone that allows the player to bring items back to the mothership on some missions.    
     -The stealth fighter now drops scrap and explodes.    
+        
+0.4.3.4    
+5/28/2025    
+    -Added the fuse system, which causes random fuses to fail when a part fails. Failed fuses causes the part to work less efficiently when restarted.    
