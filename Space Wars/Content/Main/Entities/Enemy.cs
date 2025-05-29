@@ -1485,7 +1485,7 @@ public class Enemy : Entity
             }
             if (currentlyLeaving)
             {
-                velocity += new Vector2(Engine.DeltaSeconds, 0);
+                velocity += new Vector2(Engine.DeltaSeconds * 10, -Engine.DeltaSeconds * 5);
             }
             else
             {

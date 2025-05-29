@@ -9,6 +9,7 @@ using Space_Wars.Content.Main.Particles;
 using Space_Wars.Content.Main.Entities;
 using System.Linq;
 using System.Diagnostics;
+using System.Transactions;
 
 namespace Space_Wars.Content.Main;
 
@@ -97,6 +98,7 @@ public class Engine : Game
         var MothershipMenu = new TabbedWindow(new Vector2(Assets.Get(Sprite.Terminal).Width, ScreenSize.Y / 2), Assets.Get(Sprite.Terminal), tabTexture, selectedTabTexture, selectSound, 3, 1) { enabled = false, icons = iconGroup2 };
         var MissionSelect = new TabbedWindow(ScreenSize / 2, Assets.Get(Sprite.GargantuanPanel), tabTexture, selectedTabTexture, selectSound, 2) { enabled = false, icons = iconGroup3 };
         var PickupDroneMenu = new Window(ScreenSize / 2, largePanel, 1) { enabled = false };
+        var FuseMenu = new Window(ScreenSize / 2, largePanel, 1) { enabled = false };
 
         var patchedConicsToggle = new Button(new Vector2(0, -MainMenu.Size.Y / 4), wideButton, Assets.TextFont, $"Patched Conics: {PatchedConics}", Color.White);
         var sfxSlider = new Slider(Line, Assets.Get(Sprite.Knob), new Vector2(25, 0), 50, false, Color.White, Color.Gray);
@@ -140,6 +142,8 @@ public class Engine : Game
         var isComplete = new Decal(new Vector2(0, 45), Assets.TextFont, "Not Complete", Color.Red, 10);
 
         var launchButton = new Button(new Vector2(-20, 0), Assets.Get(Sprite.Button), Assets.TextFont, "Leave", Color.LightBlue);
+
+        var fuseCounter = new Decal(new Vector2(-20, -10), Assets.TextFont, "1", Color.Yellow, 10);
 
         var globalSidePanelOpen = new Button(new Vector2(Assets.Get(Sprite.ToggleButton).Width / 2, ScreenSize.Y / 4), Assets.Get(Sprite.ToggleButton));
         fpsCounter = new Decal(new Vector2(ScreenSize.X / 2 - 20, 10), Assets.TextFont, "60", Color.White, 10);
@@ -232,6 +236,8 @@ public class Engine : Game
 
         PickupDroneMenu.AddWidget(launchButton as IFunctional);
 
+        FuseMenu.AddWidget(fuseCounter);
+
         for (int i = 0; i < 3; i++)
         {
             MothershipMenu.AddWidget(sidePanelClose as IFunctional, i);
@@ -272,6 +278,18 @@ public class Engine : Game
                 InventorySlots[x, y].AddBehaviour(new Action(EventHandler.UpdateInventory));
             }
         }
+        for (int i = -1; i < 2; i++)
+        {
+            for (int j = -2; j < 3; j++)
+            {
+                var fuse = new Button(new Vector2(i * 10, j * 20), Assets.Get(Sprite.Fuse));
+                //Performs a shallow copy of the instance variable
+                int x = j + 2;
+                int y = i + 1;
+                fuse.AddBehaviour(delegate () { EntityManager.Player.ToggleFuse(x, y); });
+                FuseMenu.AddWidget(fuse as IFunctional);
+            }
+        }
 
         UIManager.AddContainer(MainMenu);
         UIManager.AddContainer(PauseMenu);
@@ -280,6 +298,7 @@ public class Engine : Game
         UIManager.AddContainer(GarageMenu);
         UIManager.AddContainer(MissionSelect);
         UIManager.AddContainer(PickupDroneMenu);
+        UIManager.AddContainer(FuseMenu);
     }
     public static void Startgame()
     {

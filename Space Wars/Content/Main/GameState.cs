@@ -88,6 +88,12 @@ public class PlayingGame : GameState
                 CurrentGameState.SwitchState(new PausedGame());
             }
         }
+        if (Input.OldState.IsKeyUp(Keys.F) && Input.NewState.IsKeyDown(Keys.F))
+        {
+            SoundManager.SetAllSounds(false);
+            CurrentGameState.SwitchState(new InShip());
+            Engine.UIManager.GetContainer((int)Containers.FuseMenu).enabled = true;
+        }
     }
     public override void Draw(SpriteBatch _spriteBatch)
     {
@@ -235,5 +241,21 @@ public class Cutscene : GameState
             actor.Draw(_spriteBatch);
         }
     }
+}
+public class InShip : GameState
+{
+    public override void Initialize()
+    {
+        Engine.UIManager.SetScreenMenuEnabled(false);
+    }
+    public override void Update() 
+    {
+        if (Input.OldState.IsKeyUp(Keys.Escape) && Input.NewState.IsKeyDown(Keys.Escape))
+        {
+            CurrentGameState.SwitchState(new PlayingGame());
+            Engine.UIManager.GetContainer((int)Containers.FuseMenu).enabled = false;
+        }
+    }
+    public override void Draw(SpriteBatch _spriteBatch) { }
 }
 

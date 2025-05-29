@@ -83,6 +83,7 @@ public enum Sprite
     PlayIcon,
     SettingsIcon,
     PlanetIcon,
+    Fuse,
 
     Cursor,
 }
@@ -138,6 +139,7 @@ public enum Containers
     GarageMenu,
     MissionMenu,
     PickupDroneMenu,
+    FuseMenu,
 }
 public enum Condition
 {

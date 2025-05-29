@@ -182,9 +182,11 @@ public class EventHandler
         if (Engine.UIManager.GetContainer((int)Containers.GarageMenu).enabled)
         {
             CurrentGameState.SwitchState(new Garage());
-            return;
         }
-        CurrentGameState.SwitchState(new PlayingGame());
+        else
+        {
+            CurrentGameState.SwitchState(new PlayingGame());
+        }
     }
     public static void MissionSelectTrigger()
     {
@@ -252,5 +254,17 @@ public class EventHandler
     public static void RestartModules()
     {
         SendMessage(Message.RestartModules);
+    }
+    public static void UpdateFuseUI(bool[,] _fuses, int _fusesRemaining)
+    {
+        var menu = Engine.UIManager.GetContainer((int)Containers.FuseMenu);
+        for (int i = 0; i < 5; i++)
+        {
+            for (int j = 0; j < 3; j++)
+            {
+                (menu.GetFuncWidget(i + j * 5) as Widget).color = _fuses[i, j] ? Color.White : Color.Gray;
+            }
+        }
+        menu.GetWidget(0).text = $"{_fusesRemaining}";
     }
 }

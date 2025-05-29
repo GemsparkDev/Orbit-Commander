@@ -87,6 +87,7 @@ public static class Assets
         Sprites.Add(Sprite.PlayIcon, Content.Load<Texture2D>("Images/UI_22"));
         Sprites.Add(Sprite.SettingsIcon, Content.Load<Texture2D>("Images/UI_23"));
         Sprites.Add(Sprite.PlanetIcon, Content.Load<Texture2D>("Images/UI_24"));
+        Sprites.Add(Sprite.Fuse, Content.Load<Texture2D>("Images/UI_29"));
 
         //Misc
         Sprites.Add(Sprite.Cursor, Content.Load<Texture2D>("Images/Cursor"));

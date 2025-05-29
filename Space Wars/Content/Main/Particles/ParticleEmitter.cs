@@ -79,6 +79,10 @@ namespace Space_Wars.Content.Main.Particles
         }
         public void EmissionOverTime()
         {
+            if (speedOfEmission <= 0)
+            {
+                return;
+            }
             if (cooldown <= 0)
             {
                 float randomAngle;

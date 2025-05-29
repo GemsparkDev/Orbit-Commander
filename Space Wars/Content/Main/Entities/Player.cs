@@ -31,9 +31,10 @@ public class Player : Entity
     private Vector2 direction;
     public bool isEngineActive = false;
     public bool canGatherResources = false;
-    public override int SensingAbility 
-    { 
-        get 
+    private int fuses = 1;
+    public override int SensingAbility
+    {
+        get
         {
             int sensing = 1;
             if (modules[ModuleType.Sensors] == null)
@@ -45,11 +46,11 @@ public class Player : Entity
                 sensing = 0;
             }
             return sensing;
-        } 
+        }
     }
-    public override int StealthAbility 
-    { 
-        get 
+    public override int StealthAbility
+    {
+        get
         {
             int stealth = 0;
             if (isEngineActive)
@@ -61,17 +62,25 @@ public class Player : Entity
                 stealth -= 1;
             }
             return stealth;
-        } 
+        }
     }
     public List<Pickup> leashedMaterials = new();
     public Dictionary<ModuleType, Module> modules = new()
-        {
-            { ModuleType.Hull, ItemFactory.GetItem(ModuleType.Hull) },
-            { ModuleType.Guns, ItemFactory.GetItem(ModuleType.Sniper) },
-            { ModuleType.Engines, ItemFactory.GetItem(ModuleType.Engines) },
-            { ModuleType.Sensors, ItemFactory.GetItem(ModuleType.Sensors) },
-            { ModuleType.Core, ItemFactory.GetItem(ModuleType.Core) }
-        };
+    {
+        { ModuleType.Hull, ItemFactory.GetItem(ModuleType.Hull) },
+        { ModuleType.Guns, ItemFactory.GetItem(ModuleType.Sniper) },
+        { ModuleType.Engines, ItemFactory.GetItem(ModuleType.Engines) },
+        { ModuleType.Sensors, ItemFactory.GetItem(ModuleType.Sensors) },
+        { ModuleType.Core, ItemFactory.GetItem(ModuleType.Core) }
+    };
+    private bool[,] moduleFuses = new bool[5, 3]
+    {
+        { true, true, true },
+        { true, true, true },
+        { true, true, true },
+        { true, true, true },
+        { true, true, true }
+    };
 
     public Player(Vector2 _position, Vector2 _velocity, float _angle, float _angularVelocity)
         : base(Assets.Get(Sprite.Player), _position, _velocity, _angle, _angularVelocity, 5, true)
@@ -80,7 +89,7 @@ public class Player : Entity
         shield = Enemy.NewShield(gunAngle, 10, 1, 0, 1, true);
         shield.isExpired = true;
         color = new Color(0, 255, 0);
-        smokeParticles.isEmitterActive = false; 
+        smokeParticles.isEmitterActive = false;
         engineParticles.isEmitterActive = false;
         engineSounds = Assets.Get(Sound.FireEngines).CreateInstance();
         engineSounds.IsLooped = true;
@@ -197,7 +206,7 @@ public class Player : Entity
         }
         else if (modules[ModuleType.Core].Health > 0)
         {
-            if (position.Length() >= 40*50 + EntityManager.CurrentMission.Planet.radius)
+            if (position.Length() >= 40 * 50 + EntityManager.CurrentMission.Planet.radius)
             {
                 velocity *= 0.8f;
                 velocity += Vector2.Normalize(-position) * Engine.DeltaSeconds * (position.Length() - (40 * 50 + EntityManager.CurrentMission.Planet.radius));
@@ -225,9 +234,20 @@ public class Player : Entity
                 return;
             }
         }
-        foreach(var module in modules.Values)
+        for (int i = 0; i < modules.Count; i++)
         {
-            module.UpdateCooldown();
+            var module = modules[(ModuleType)i];
+            int workingFuses = 0;
+            for (int j = 0; j < 3; j++)
+            {
+                workingFuses += moduleFuses[i, j] ? 1 : 0;
+            }
+            //Rate of cooldown lowering is proportional to the quantity of working fuses
+            //Note: Do not have any active abilities that are based on the cooldown, as the player could remove all 3 fuses and get infinite of the ability
+            if (random.Next(0, 3) < workingFuses)
+            {
+                module.UpdateCooldown();
+            }
         }
         if (isEngineActive)
         {
@@ -244,7 +264,7 @@ public class Player : Entity
     }
     public override void Collide(int _damage)
     {
-        if(_damage > 0 && invincibilityCooldown <= 0)
+        if (_damage > 0 && invincibilityCooldown <= 0)
         {
             Engine.ShakeScreen(0.08f * _damage);
             cachedDamage += _damage;
@@ -252,7 +272,7 @@ public class Player : Entity
             invincibilityCooldown = 1;
             ParticleManager.Add(new Particle(null, 1, position + new Vector2(0, -1), new Vector2(0, -1.5f), 0, 0, 1, true, Color.Red, Color.Red) { drawText = $"{_damage}" });
             //Part Failure
-            if (random.Next(0, 5) == 0)
+            if (random.Next(0, 1) == 0)
             {
                 ModuleType failedPart = (ModuleType)random.Next(0, 4);
                 if (modules[failedPart].Health < modules[failedPart].MaxHealth / 2)
@@ -266,7 +286,16 @@ public class Player : Entity
                         return;
                     }
                     modules[failedPart].isFailed = true;
-                    ParticleManager.Add(new Particle(null, 2, position + new Vector2(0, -3), new Vector2(0, -0.75f), 0, 0, 1, true, Color.Red, Color.Red) { drawText = $"{failedPart} has failed!" });
+                    string text = $"{failedPart} has failed!";
+                    int burntOutFuse = random.Next(0, 3);
+                    if (moduleFuses[(int)failedPart, burntOutFuse])
+                    {
+                        moduleFuses[(int)failedPart, burntOutFuse] = false;
+                        SoundManager.PlayGlobalSound(Assets.Get(Sound.FireEngines));
+                        text += " Check fuses!";
+                        EventHandler.UpdateFuseUI(moduleFuses, fuses);
+                    }
+                    ParticleManager.Add(new Particle(null, 2, position + new Vector2(0, -3), new Vector2(0, -0.75f), 0, 0, 1, true, Color.Red, Color.Red) { drawText = text });
                     SoundManager.PlaySound(Assets.Get(Sound.Beep), position);
                     EventHandler.UpdateModulesStatus();
                     if (failedPart == ModuleType.Core)
@@ -293,7 +322,7 @@ public class Player : Entity
                     }
                 }
             }
-            else if(dockedEntity.Dock(this))
+            else if (dockedEntity.Dock(this))
             {
                 dockedEntity = null;
             }
@@ -353,7 +382,14 @@ public class Player : Entity
                 engineParticles.offsetVelocity = velocity;
                 angle = (angle * 0.5f + MathF.Atan2(direction.X, -direction.Y) * 0.5f);
                 engineParticles.sprayAngle = angle * 180 / MathF.PI + 180;
-                velocity += Engine.ToUnitVector(angle) * 60 * Engine.DeltaSeconds * speed * 2 / (leashedMaterials.Count + 2);
+                float fuseRatio = 0;
+                for (int i = 0; i < 3; i++)
+                {
+                    fuseRatio += moduleFuses[(int)ModuleType.Engines, i] ? 1f : 0;
+                }
+                fuseRatio /= 3;
+                engineParticles.speedOfEmission = 450f * fuseRatio;
+                velocity += Engine.ToUnitVector(angle) * 60 * Engine.DeltaSeconds * speed * 2 * fuseRatio / (leashedMaterials.Count + 2);
             }
         }
         if (Input.OldState.IsKeyUp(Keys.Z) && Input.NewState.IsKeyDown(Keys.Z))
@@ -364,6 +400,21 @@ public class Player : Entity
         {
             modules[ModuleType.Engines].ModuleFunction();
         }
+    }
+    public void ToggleFuse(int x, int y)
+    {
+        bool fuse = moduleFuses[x, y];
+        if (!fuse && fuses <= 0)
+        {
+            return;
+        }
+        fuses += fuse ? 1 : -1;
+        moduleFuses[x, y] = !moduleFuses[x, y];
+        EventHandler.UpdateFuseUI(moduleFuses, fuses);
+    }
+    public void AddFuse()
+    {
+        fuses++;
     }
     public void Hull()
     {
