@@ -255,16 +255,26 @@ public class EventHandler
     {
         SendMessage(Message.RestartModules);
     }
-    public static void UpdateFuseUI(bool[,] _fuses, int _fusesRemaining)
+    public static void UpdateFuseUI(bool[,] _fuses, int _spareFuses)
     {
         var menu = Engine.UIManager.GetContainer((int)Containers.FuseMenu);
         for (int i = 0; i < 5; i++)
         {
-            for (int j = 0; j < 3; j++)
+            for (int j = 0; j < 4; j++)
             {
-                (menu.GetFuncWidget(i + j * 5) as Widget).color = _fuses[i, j] ? Color.White : Color.Gray;
+                //Active fuse is white, no fuse is gray, disabled fuse is red
+                Color color = Color.White;
+                if (!_fuses[i, j])
+                {
+                    color = Color.Gray;
+                }
+                else if (!_fuses[(int)ModuleType.Core, j])
+                {
+                    color = Color.Red;
+                }
+                (menu.GetFuncWidget(i + j * 5) as Widget).color = color;
             }
         }
-        menu.GetWidget(0).text = $"{_fusesRemaining}";
+        menu.GetWidget(0).text = $"{_spareFuses}";
     }
 }

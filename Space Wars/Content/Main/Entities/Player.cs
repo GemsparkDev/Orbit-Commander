@@ -31,7 +31,7 @@ public class Player : Entity
     private Vector2 direction;
     public bool isEngineActive = false;
     public bool canGatherResources = false;
-    private int fuses = 1;
+    private int spareFuses = 0;
     public override int SensingAbility
     {
         get
@@ -39,12 +39,15 @@ public class Player : Entity
             int sensing = 1;
             if (modules[ModuleType.Sensors] == null)
             {
-                return 0;
+                return -1;
             }
             if (modules[ModuleType.Sensors].isFailed)
             {
                 sensing = 0;
             }
+            float x = (float)(CountFuses(ModuleType.Sensors)) - 2;
+            //Fuse modifiers: 0 = -2, 1 = -1, 2 or 3 = 0, 4 = +1
+            sensing += (int)Math.Floor(x * x * x / 5);
             return sensing;
         }
     }
@@ -73,13 +76,13 @@ public class Player : Entity
         { ModuleType.Sensors, ItemFactory.GetItem(ModuleType.Sensors) },
         { ModuleType.Core, ItemFactory.GetItem(ModuleType.Core) }
     };
-    private bool[,] moduleFuses = new bool[5, 3]
+    private bool[,] moduleFuses = new bool[5, 4]
     {
-        { true, true, true },
-        { true, true, true },
-        { true, true, true },
-        { true, true, true },
-        { true, true, true }
+        { true, true, true, false },
+        { true, true, true, false },
+        { true, true, true, false },
+        { true, true, true, false },
+        { true, true, true, false }
     };
 
     public Player(Vector2 _position, Vector2 _velocity, float _angle, float _angularVelocity)
@@ -94,6 +97,7 @@ public class Player : Entity
         engineSounds = Assets.Get(Sound.FireEngines).CreateInstance();
         engineSounds.IsLooped = true;
         SoundManager.AddSound(engineSounds);
+        EventHandler.UpdateFuseUI(moduleFuses, spareFuses);
     }
     public override void Update()
     {
@@ -237,13 +241,17 @@ public class Player : Entity
         for (int i = 0; i < modules.Count; i++)
         {
             var module = modules[(ModuleType)i];
-            int workingFuses = 0;
-            for (int j = 0; j < 3; j++)
-            {
-                workingFuses += moduleFuses[i, j] ? 1 : 0;
-            }
             //Rate of cooldown lowering is proportional to the quantity of working fuses
             //Note: Do not have any active abilities that are based on the cooldown, as the player could remove all 3 fuses and get infinite of the ability
+            int workingFuses = CountFuses((ModuleType)i);
+            if(workingFuses > 3)
+            {
+                //Bonus for 4 fuses
+                module.UpdateCooldown();
+                //Easy workaround for random check
+                //Prevents 3 % 3 = 0 issues
+                workingFuses -= 3;
+            }
             if (random.Next(0, 3) < workingFuses)
             {
                 module.UpdateCooldown();
@@ -287,13 +295,14 @@ public class Player : Entity
                     }
                     modules[failedPart].isFailed = true;
                     string text = $"{failedPart} has failed!";
+                    //Picks a random fuse to burn out if a module fails
                     int burntOutFuse = random.Next(0, 3);
                     if (moduleFuses[(int)failedPart, burntOutFuse])
                     {
                         moduleFuses[(int)failedPart, burntOutFuse] = false;
                         SoundManager.PlayGlobalSound(Assets.Get(Sound.FireEngines));
-                        text += " Check fuses!";
-                        EventHandler.UpdateFuseUI(moduleFuses, fuses);
+                        text += " Fuse damaged!";
+                        EventHandler.UpdateFuseUI(moduleFuses, spareFuses);
                     }
                     ParticleManager.Add(new Particle(null, 2, position + new Vector2(0, -3), new Vector2(0, -0.75f), 0, 0, 1, true, Color.Red, Color.Red) { drawText = text });
                     SoundManager.PlaySound(Assets.Get(Sound.Beep), position);
@@ -382,13 +391,9 @@ public class Player : Entity
                 engineParticles.offsetVelocity = velocity;
                 angle = (angle * 0.5f + MathF.Atan2(direction.X, -direction.Y) * 0.5f);
                 engineParticles.sprayAngle = angle * 180 / MathF.PI + 180;
-                float fuseRatio = 0;
-                for (int i = 0; i < 3; i++)
-                {
-                    fuseRatio += moduleFuses[(int)ModuleType.Engines, i] ? 1f : 0;
-                }
-                fuseRatio /= 3;
+                float fuseRatio = (float)(CountFuses(ModuleType.Engines)) / 3;
                 engineParticles.speedOfEmission = 450f * fuseRatio;
+                engineSounds.Volume = Math.Clamp(fuseRatio, 0, 1);
                 velocity += Engine.ToUnitVector(angle) * 60 * Engine.DeltaSeconds * speed * 2 * fuseRatio / (leashedMaterials.Count + 2);
             }
         }
@@ -404,17 +409,36 @@ public class Player : Entity
     public void ToggleFuse(int x, int y)
     {
         bool fuse = moduleFuses[x, y];
-        if (!fuse && fuses <= 0)
+        if (!fuse && spareFuses <= 0)
         {
             return;
         }
-        fuses += fuse ? 1 : -1;
+        spareFuses += fuse ? 1 : -1;
         moduleFuses[x, y] = !moduleFuses[x, y];
-        EventHandler.UpdateFuseUI(moduleFuses, fuses);
+        EventHandler.UpdateFuseUI(moduleFuses, spareFuses);
     }
     public void AddFuse()
     {
-        fuses++;
+        spareFuses++;
+    }
+    private int CountFuses(ModuleType _module)
+    {
+        int count = 0;
+        //Fuses only count if the corresponding core fuse is also active
+        for (int i = 0; i < 4; i++)
+        {
+            switch (_module)
+            {
+                case ModuleType.Core:
+                    count += moduleFuses[(int)ModuleType.Core, i] ? 1 : 0;
+                    break;
+                default:
+                    bool fuse = moduleFuses[(int)_module, i];
+                    count += (fuse && moduleFuses[(int)ModuleType.Core, i]) ? 1 : 0;
+                    break;
+            }
+        }
+        return count;
     }
     public void Hull()
     {
@@ -530,19 +554,6 @@ public class Player : Entity
         shield.isExpired = false;
         Engine.EntityManager.Add(shield);
         modules[ModuleType.Engines].cooldown = 5f;
-    }
-    public int GetSensingAbility()
-    {
-        int sensing = 1;
-        if (modules[ModuleType.Sensors] == null)
-        {
-            return 0;
-        }
-        if (modules[ModuleType.Sensors].isFailed)
-        {
-            sensing = 0;
-        }
-        return sensing;
     }
     public override void Draw(SpriteBatch _spriteBatch)
     {

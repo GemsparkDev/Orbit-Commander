@@ -17,7 +17,7 @@ public static class SoundManager
     private static SoundEffectInstance prevTrack;
     private static float soundTimer = -1;
     private const float swapTime = 3;
-    private static float musicVolume = 1;
+    private static float musicVolume = 0;
     public static float MusicVolume { get { return musicVolume; } set { musicVolume = value; UpdateVolume(); } }
     private static float sfxVolume = 1;
     public static float SFXVolume { get { return sfxVolume; } set { sfxVolume = value; UpdateVolume(); } }

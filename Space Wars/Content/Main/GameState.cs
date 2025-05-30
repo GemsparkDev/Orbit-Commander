@@ -99,7 +99,8 @@ public class PlayingGame : GameState
     {
         if (EntityManager.Player.modules[ModuleType.Core].isFailed)
         {
-            _spriteBatch.DrawString(Assets.TextFont, "Power failure detected. Please restart system.", Engine.Camera.Position, Color.Red);
+            string text = "Power failure detected. Please restart system.";
+            _spriteBatch.DrawString(Assets.TextFont, text, Engine.Camera.Position - new Vector2(text.Length * 3, 6), Color.Red);
             return;
         }
         Engine.EntityManager.Draw(_spriteBatch);

@@ -278,14 +278,14 @@ public class Engine : Game
                 InventorySlots[x, y].AddBehaviour(new Action(EventHandler.UpdateInventory));
             }
         }
-        for (int i = -1; i < 2; i++)
+        for (int i = 0; i < 4; i++)
         {
             for (int j = -2; j < 3; j++)
             {
                 var fuse = new Button(new Vector2(i * 10, j * 20), Assets.Get(Sprite.Fuse));
                 //Performs a shallow copy of the instance variable
                 int x = j + 2;
-                int y = i + 1;
+                int y = i;
                 fuse.AddBehaviour(delegate () { EntityManager.Player.ToggleFuse(x, y); });
                 FuseMenu.AddWidget(fuse as IFunctional);
             }
