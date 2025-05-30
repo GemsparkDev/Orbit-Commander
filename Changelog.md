@@ -240,4 +240,17 @@ Update 0.4.3
         
 0.4.3.4    
 5/28/2025    
-    -Added the fuse system, which causes random fuses to fail when a part fails. Failed fuses causes the part to work less efficiently when restarted.    
+    -The fuse menu has been added, which can be accessed by pressing F.    
+    -The player can place and remove fuses, spending their spare fuses.
+    -The player starts with 1 spare fuse.        
+    -When a module has less than 3 fuses, it begins to work less effectively.    
+    -A module failing causes one of it's corresponding fuses to break.    
+    
+0.4.4   
+5/29/2025    
+    -The player is now able to add an additional fuse to a module, increasing it's power.    
+    -All fuses on a column require a corresponding core fuse to work.    
+    -The sensor module now has a modification to it's sensing value based on the quantity of fuses on it.    
+    -The player's sensing value is further decreased when the sensor is failed.    
+    -The player no longer starts with a spare fuse.    
+    -Damaging a fuse now has the added text "Fuse damaged!" instead of "Check fuses!"    
