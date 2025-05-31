@@ -253,4 +253,10 @@ Update 0.4.3
     -The sensor module now has a modification to it's sensing value based on the quantity of fuses on it.    
     -The player's sensing value is further decreased when the sensor is failed.    
     -The player no longer starts with a spare fuse.    
-    -Damaging a fuse now has the added text "Fuse damaged!" instead of "Check fuses!"    
+    -Damaging a fuse now has the added text "Fuse damaged!" instead of "Check fuses!"   
+        
+0.4.5    
+5/30/2025     
+    -Updated Monogame to 3.6.3.    
+    -The fuse menu now has decals w/ modules for each row.    
+    -The game now renders with a bloom shader.    
