@@ -8,13 +8,14 @@ using System.Linq;
 using System.Diagnostics;
 using System;
 using Space_Wars.Content.Main.Components;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace Space_Wars.Content.Main;
 
 public class EventHandler
 {
     private static Player player;
-    private static readonly List<Message> eventLog = new();
+    private static readonly List<Message> eventLog = [];
 
     public static bool AcknowledgeMessage(Message _message)
     {
@@ -63,6 +64,7 @@ public class EventHandler
         if (daughterModule.Health < 20 && EntityManager.CurrentMission.MissionScrap >= 1)
         {
             daughterModule.Health = 20;
+            daughterModule.UpdateHealth();
             daughterModule.isFailed = false;
             EntityManager.CurrentMission.MissionScrap -= 1;
             SoundManager.PlayGlobalSound(Assets.Get(Sound.Interact));
@@ -276,5 +278,33 @@ public class EventHandler
             }
         }
         menu.GetWidget(0).text = $"{_spareFuses}";
+        Color[] possibleColors = [ Color.Red, Color.Orange, Color.Yellow, Color.White, Color.Cyan ];
+        for (int i = 0; i < 5; i++)
+        {
+            var decal = Engine.UIManager.GetContainer((int)Containers.FuseMenu).GetWidget(i + 1);
+            int count = 0;
+            for (int j = 0; j < 4; j++)
+            {
+                switch (i)
+                {
+                    case (int)ModuleType.Core:
+                        count += _fuses[(int)ModuleType.Core, j] ? 1 : 0;
+                        break;
+                    default:
+                        bool fuse = _fuses[i, j];
+                        count += (fuse && _fuses[(int)ModuleType.Core, j]) ? 1 : 0;
+                        break;
+                }
+            }
+            decal.color = possibleColors[count];
+        }
+    }
+    public static void SetFuseModuleDecals(Texture2D[] moduleTextures)
+    {
+        for (int i = 0; i < 5; i++)
+        {
+            var decal = Engine.UIManager.GetContainer((int)Containers.FuseMenu).GetWidget(i + 1);
+            decal.texture = moduleTextures[i];
+        }
     }
 }

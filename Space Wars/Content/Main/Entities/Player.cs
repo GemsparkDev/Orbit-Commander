@@ -71,7 +71,7 @@ public class Player : Entity
     public Dictionary<ModuleType, Module> modules = new()
     {
         { ModuleType.Hull, ItemFactory.GetItem(ModuleType.Hull) },
-        { ModuleType.Guns, ItemFactory.GetItem(ModuleType.Sniper) },
+        { ModuleType.Guns, ItemFactory.GetItem(ModuleType.Basic) },
         { ModuleType.Engines, ItemFactory.GetItem(ModuleType.Engines) },
         { ModuleType.Sensors, ItemFactory.GetItem(ModuleType.Sensors) },
         { ModuleType.Core, ItemFactory.GetItem(ModuleType.Core) }
@@ -97,6 +97,12 @@ public class Player : Entity
         engineSounds = Assets.Get(Sound.FireEngines).CreateInstance();
         engineSounds.IsLooped = true;
         SoundManager.AddSound(engineSounds);
+        Texture2D[] textures = new Texture2D[modules.Count];
+        for(int i = 0; i < modules.Count; i++)
+        {
+            textures[i] = modules[(ModuleType)i].itemData.RealSprite;
+        }
+        EventHandler.SetFuseModuleDecals(textures);
         EventHandler.UpdateFuseUI(moduleFuses, spareFuses);
     }
     public override void Update()
@@ -241,18 +247,17 @@ public class Player : Entity
         for (int i = 0; i < modules.Count; i++)
         {
             var module = modules[(ModuleType)i];
-            //Rate of cooldown lowering is proportional to the quantity of working fuses
-            //Note: Do not have any active abilities that are based on the cooldown, as the player could remove all 3 fuses and get infinite of the ability
-            int workingFuses = CountFuses((ModuleType)i);
-            if(workingFuses > 3)
+            //Square root of the ratio reduces balancing impact with an additional fuse (especially with the gun dps)
+            //Note: Do not have any active abilities that are based on the cooldown, as the player could remove all fuses and get infinite of the ability
+            float fuseRatio = MathF.Sqrt((float)CountFuses((ModuleType)i)/3);
+            if(fuseRatio > 1.01)
             {
                 //Bonus for 4 fuses
                 module.UpdateCooldown();
-                //Easy workaround for random check
-                //Prevents 3 % 3 = 0 issues
-                workingFuses -= 3;
+                //Allows for easy random check in all cases
+                fuseRatio -= 1f;
             }
-            if (random.Next(0, 3) < workingFuses)
+            if (random.NextSingle() < fuseRatio)
             {
                 module.UpdateCooldown();
             }

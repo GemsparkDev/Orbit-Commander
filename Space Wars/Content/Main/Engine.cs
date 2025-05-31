@@ -22,6 +22,7 @@ public class Engine : Game
     private Decal fpsLowest;
     private List<float> fpsSamples = new();
     private Decal timer;
+    private RenderTarget2D renderTarget;
     public static UIManager UIManager { get; private set; }
     public static EntityManager EntityManager { get; private set; }
     public static Camera Camera { get; private set; }
@@ -77,6 +78,7 @@ public class Engine : Game
         EntityManager = new EntityManager();
         AddUIElements();
         CurrentGameState.SwitchState(new MainMenu());
+        renderTarget = new RenderTarget2D(GraphicsDevice, (int)ScreenSize.X, (int)ScreenSize.Y);
 
         IsMouseVisible = false;
     }
@@ -290,7 +292,11 @@ public class Engine : Game
                 FuseMenu.AddWidget(fuse as IFunctional);
             }
         }
-
+        for (int i = 0; i < 5; i++)
+        {
+            var decal = new Decal(new Vector2(40, (i - 2) * 20 - 8), null);
+            FuseMenu.AddWidget(decal);
+        }
         UIManager.AddContainer(MainMenu);
         UIManager.AddContainer(PauseMenu);
         UIManager.AddContainer(PlayerMenu);
@@ -390,12 +396,22 @@ public class Engine : Game
 
     protected override void Draw(GameTime gameTime)
     {
-        GraphicsDevice.Clear(Color.Black);
         Camera.Origin = ScreenSize / 2 - MousePositionOffset;
+
+        //Render to renderTarget
+        GraphicsDevice.SetRenderTarget(renderTarget);
+        GraphicsDevice.Clear(Color.Black);
         spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, null, null, null, transformMatrix: Camera.ViewMatrix);
         CurrentGameState.Draw(spriteBatch);
         spriteBatch.End();
-        
+
+        //Render renderTarget with custom bloom shader
+        GraphicsDevice.SetRenderTarget(null);
+        GraphicsDevice.Clear(Color.Black);
+        spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, null, null, Assets.effect);
+        spriteBatch.Draw(renderTarget,Vector2.Zero,Color.White);
+        spriteBatch.End();
+
         spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, null, null, null);
         UIManager.Draw(spriteBatch);
         if (!UIManager.LockMouseInput)

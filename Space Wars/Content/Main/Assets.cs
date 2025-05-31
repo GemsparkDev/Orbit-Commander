@@ -11,6 +11,7 @@ public static class Assets
     private static Dictionary<Sprite, Texture2D> Sprites { get; } = new();
     private static Dictionary<Sound, SoundEffect> SoundFX { get; } = new();
     public static SpriteFont TextFont { get; private set; }
+    public static Effect effect;
     public static void LoadAssets(Microsoft.Xna.Framework.Content.ContentManager Content)
     {
         //
@@ -131,7 +132,7 @@ public static class Assets
         //Current Text Font
         TextFont = Content.Load<SpriteFont>("Fonts/RobotoMono");
 
-        //effect = Content.Load<Effect>("Shaders/BloomShader");
+        effect = Content.Load<Effect>("Shaders/BloomShader");
         //TODO: Add more sound effects for menu sounds
         //TODO: Rename basic module elements to Item_2 - Item_6
     }

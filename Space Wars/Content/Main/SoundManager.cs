@@ -10,7 +10,7 @@ using System.Diagnostics;
 namespace Space_Wars.Content.Main;
 public static class SoundManager
 {
-    private static List<SoundEffectInstance> sounds = new();
+    private static List<SoundEffectInstance> sounds =[];
     private static Random random = new();
     private static Player player;
     private static SoundEffectInstance currentTrack;

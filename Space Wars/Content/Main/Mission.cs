@@ -64,7 +64,7 @@ public class Mission
         {
             enemyCreditValues = new()
             {
-                (1, Enemy.NewStealthFighter),
+                (1, Enemy.NewAdvancedFighter),
                 (2, Enemy.NewHovercraft),
             };
         }
@@ -72,6 +72,7 @@ public class Mission
         {
             enemyCreditValues = new()
             {
+                (1, Enemy.NewStealthFighter)
             };
         }
 
