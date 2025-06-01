@@ -426,7 +426,7 @@ public class Player : Entity
     {
         spareFuses++;
     }
-    private int CountFuses(ModuleType _module)
+    public int CountFuses(ModuleType _module)
     {
         int count = 0;
         //Fuses only count if the corresponding core fuse is also active

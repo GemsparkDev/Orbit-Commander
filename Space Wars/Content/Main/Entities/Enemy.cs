@@ -154,7 +154,7 @@ public class Enemy : Entity
             //Health bar
             Vector2 barPosition = position + new Vector2(-texture.Width * 2, texture.Height) / 2;
             Rectangle sourceRectangle = new (0, 0, texture.Width * 2, 2);
-            Engine.DrawFilledLine(_spriteBatch, barPosition, sourceRectangle, (float)(health) / (float)(maxHealth), Color.DarkRed, Color.LightGreen);
+            Engine.DrawFilledLine(_spriteBatch, barPosition, sourceRectangle, (float)(health) / (float)(maxHealth), new Color(0, 50, 25), Color.Green);
         }
         base.Draw(_spriteBatch);
     }

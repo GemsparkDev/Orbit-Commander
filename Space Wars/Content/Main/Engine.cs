@@ -42,6 +42,7 @@ public class Engine : Game
     public static ItemSlot<Pickup>[,] InventorySlots { get; private set; }
     public static float ScreenShakeFactor { get; private set; } = 0;
     public static Engine Self { get; private set; }
+    public static bool UseShader { get; private set; } = true;
 
     public Engine()
     {
@@ -109,6 +110,7 @@ public class Engine : Game
         musicSlider.SetInterval(1, 0);
         var sfxVolume = new Decal(new Vector2(-30, 0), Assets.TextFont, "Sound: 100%", Color.White, 5);
         var musicVolume = new Decal(new Vector2(-30, -15), Assets.TextFont, "Music: 100%", Color.White, 5);
+        var shaderToggle = new Button(new Vector2(-100, -MainMenu.Size.Y / 4), wideButton, Assets.TextFont, $"Shader: {UseShader}", Color.White);
 
         var singleplayerButton = new Button(new Vector2(0, -MainMenu.Size.Y / 4), wideButton, Assets.TextFont, "Singleplayer", Color.White);
         var exitButton = new Button(new Vector2(0, MainMenu.Size.Y / 4), wideButton, Assets.TextFont, "Exit", Color.White);
@@ -194,6 +196,7 @@ public class Engine : Game
         nextMission.AddBehaviour(EntityManager.NextMission);
         selectMission.AddBehaviour(Startgame);
         launchButton.AddBehaviour(delegate() { EventHandler.SendMessage(Message.EscapeDroneLeave); });
+        shaderToggle.AddBehaviour(delegate () { UseShader = !UseShader; shaderToggle.text = $"Shader: {UseShader}"; });
 
         MainMenu.AddWidget(exitButton as IFunctional, 0);
         MainMenu.AddWidget(singleplayerButton as IFunctional, 0);
@@ -204,6 +207,7 @@ public class Engine : Game
         MainMenu.AddWidget(musicSlider as IFunctional, 1);
         MainMenu.AddWidget(sfxVolume, 1);
         MainMenu.AddWidget(musicVolume, 1);
+        MainMenu.AddWidget(shaderToggle as IFunctional, 1);
 
         PauseMenu.AddWidget(quitToMenuButton as IFunctional);
         PauseMenu.AddWidget(quitToMissionButton as IFunctional);
@@ -408,7 +412,7 @@ public class Engine : Game
         //Render renderTarget with custom bloom shader
         GraphicsDevice.SetRenderTarget(null);
         GraphicsDevice.Clear(Color.Black);
-        spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, null, null, Assets.effect);
+        spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, null, null, Assets.GlobalShader);
         spriteBatch.Draw(renderTarget,Vector2.Zero,Color.White);
         spriteBatch.End();
 

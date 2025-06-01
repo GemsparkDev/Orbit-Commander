@@ -11,7 +11,16 @@ public static class Assets
     private static Dictionary<Sprite, Texture2D> Sprites { get; } = new();
     private static Dictionary<Sound, SoundEffect> SoundFX { get; } = new();
     public static SpriteFont TextFont { get; private set; }
-    public static Effect effect;
+    private static Effect effect;
+    public static Effect GlobalShader
+    {
+        get
+        {
+            if (Engine.UseShader)
+            { return effect; }
+            else { return null; }
+        }
+    }
     public static void LoadAssets(Microsoft.Xna.Framework.Content.ContentManager Content)
     {
         //

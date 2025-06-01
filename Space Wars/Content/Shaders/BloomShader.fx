@@ -31,41 +31,33 @@ struct VertexShaderOutput
 	float2 TextureCoordinates : TEXCOORD0;
 };
 
-float4 MainPS(VertexShaderOutput input) : COLOR
+float4 HorizontalBlur(VertexShaderOutput input) : COLOR
 {
-	
-    float gaussian[7][7]  =
+    float dist = 1 - ((input.TextureCoordinates.x - 0.5) * (input.TextureCoordinates.x - 0.5) + (input.TextureCoordinates.y - 0.5) * (input.TextureCoordinates.y - 0.5)) * 2;
+    float gaussian[5][5]  =
 	{
-        { 0.011, 0.039, 0.082, 0.105, 0.082, 0.039, 0.011 },
-        { 0.039, 0.135, 0.286, 0.368, 0.286, 0.135, 0.039 },
-        { 0.082, 0.286, 0.607, 0.779, 0.607, 0.286, 0.082 },
-        { 0.105, 0.368, 0.779,     1, 0.779, 0.368, 0.105 },
-        { 0.082, 0.286, 0.607, 0.779, 0.607, 0.286, 0.082 },
-        { 0.039, 0.135, 0.286, 0.368, 0.286, 0.135, 0.039 },
-        { 0.011, 0.039, 0.082, 0.105, 0.082, 0.039, 0.011 }
+        { 0.003, 0.013, 0.022, 0.013, 0.003 },
+        { 0.013, 0.062, 0.102, 0.062, 0.013 },
+        { 0.022, 0.102, dist, 0.102, 0.022 },
+        { 0.013, 0.062, 0.102, 0.062, 0.013 },
+        { 0.003, 0.013, 0.022, 0.013, 0.003 },
     };
-	
     float2 screenSize = float2(1920, 1080);
-    float2 div = float2(1, 1) / (screenSize * 2);
-    float3 comp = tex2D(s0, input.TextureCoordinates);
+    float2 div = float2(1, 1) / (screenSize);
+    float2 tanh2x6 = 5.78416548045;
     float3 col = float3(0, 0, 0);
-    for (int x = 0; x < 7; x++)
+    for (int x = 0; x < 5; x++)
     {
-        for (int y = 0; y < 7; y++)
+        for (int y = 0; y < 5; y++)
         {
-            if (x == 3 && y == 3)
-            {
-                y++;
-            }
-            float2 texCoord = input.TextureCoordinates + float2((x - 3) * div.x, (y - 3) * div.y);
+            float2 texCoord = input.TextureCoordinates + float2((x - 2) * div.x, (y - 2) * div.y);
             float3 s = tex2D(s0, texCoord).rgb;
-            float3 ds = s - comp;
-            float colorDiff = sqrt(ds.r * ds.r + ds.g * ds.g + ds.b * ds.b);
-            col += s * gaussian[x][y] * colorDiff;
+            col += s * gaussian[x][y];
         }
     }
-    col += comp;
-    col = float3(min(1, col.r), min(1, col.g), min(1, col.b)) * (sin(screenSize.y * 1.5 * input.TextureCoordinates.y) / 2 + 0.5);
+    float scanline = tanh(2 * sin(screenSize.y * 1.5 * input.TextureCoordinates.y)) / tanh2x6 + 0.8333;
+    col = float3(min(1, col.r), min(1, col.g), min(1, col.b)) * scanline;
+    //col = float3(min(1, col.r), min(1, col.g), min(1, col.b));
     return float4(col.rgb, 1);
 }
 
@@ -73,6 +65,6 @@ technique SpriteDrawing
 {
 	pass P0
 	{
-		PixelShader = compile PS_SHADERMODEL MainPS();
+		PixelShader = compile PS_SHADERMODEL HorizontalBlur();
 	}
 };

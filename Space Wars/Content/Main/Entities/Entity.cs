@@ -72,7 +72,7 @@ public abstract class Entity
     public virtual void Draw(SpriteBatch _spriteBatch)
     {
         Color stealthColor = color;
-        float maxDistance = EntityManager.StealthRange;
+        float maxDistance = EntityManager.StealthRange * (float)EntityManager.Player.CountFuses(ModuleType.Sensors) / 4;
         //Player has superior sensing to stealth -> full detection
         //Player has equal sensing to stealth -> partial detection when nearby
         //Player has inferior sensing to stealth -> no detection
