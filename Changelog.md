@@ -260,3 +260,10 @@ Update 0.4.3
     -Updated Monogame to 3.6.3.    
     -The fuse menu now has decals w/ modules for each row.    
     -The game now renders with a bloom shader.    
+    
+0.4.5.1    
+5/31/2025    
+    -Changed the color of the enemy health bar to green and a dark grey.    
+    -The stealth dropoff range is reduced based on how many fuses are on the sensors.    
+    -Added a toggle for the global shader.    
+    -Significantly reduced the strength of the shader.    
