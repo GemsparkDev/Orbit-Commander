@@ -64,7 +64,6 @@ public class EventHandler
         if (daughterModule.Health < 20 && EntityManager.CurrentMission.MissionScrap >= 1)
         {
             daughterModule.Health = 20;
-            daughterModule.UpdateHealth();
             daughterModule.isFailed = false;
             EntityManager.CurrentMission.MissionScrap -= 1;
             SoundManager.PlayGlobalSound(Assets.Get(Sound.Interact));
@@ -113,16 +112,27 @@ public class EventHandler
             Engine.ModuleSlots[x].daughterItem = player.modules.ElementAt(x).Value;
         }
     }
-    public static void UpdateModules()
+    public static bool SyncModules()
     {
-        Decal validConfigText = Engine.UIManager.GetWidget((int)Containers.GarageMenu,3) as Decal;
+        foreach (var module in Engine.ModuleSlots)
+        {
+            if (module.daughterItem == null)
+            {
+                return false;
+            }
+        }
         for (int x = 0; x < player.modules.Count; x++)
         {
             player.modules[(ModuleType)x] = Engine.ModuleSlots[x].daughterItem;
         }
-        foreach (KeyValuePair<ModuleType, Module> module in player.modules)
+        return true;
+    }
+    public static void UpdateModules()
+    {
+        Decal validConfigText = Engine.UIManager.GetWidget((int)Containers.GarageMenu,3) as Decal;
+        foreach (var module in Engine.ModuleSlots)
         {
-            if (module.Value == null)
+            if (module.daughterItem == null)
             {
                 validConfigText.text = "";
                 return;

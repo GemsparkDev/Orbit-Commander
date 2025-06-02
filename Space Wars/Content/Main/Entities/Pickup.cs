@@ -10,17 +10,14 @@ namespace Space_Wars.Content.Main.Entities;
 public class Pickup : Entity, IData
 {
     internal ItemData itemData;
-    public Texture2D Texture { get { return itemData.RealSprite; } }
+    public Texture2D Texture => itemData.RealSprite;
     public Window Tooltip { get; } = new Window(Vector2.Zero, Assets.Get(Sprite.WideButton));
-    public String Name { get { return itemData.Name; } }
-    public virtual Color Color { get { return itemData.Color; } }
-    private int hitsLeft = 2;
-    protected float invincibilityCooldown = 0;
-    public int ID
-    {
-        get { return itemData.ID; }
-    }
-    public Pickup(ItemData _itemData, Texture2D _worldTexture, Color _worldColor, Vector2 _position, Vector2 _velocity, float _angularVelocity)
+    public String Name => itemData.Name;
+    public virtual Color Color => itemData.Color;
+    private int hitsLeft = 3;
+    protected float invincibilityCooldown = 5;
+    public int ID => itemData.ID;
+    public Pickup(ItemData _itemData, Color _worldColor, Vector2 _position, Vector2 _velocity, float _angularVelocity)
         : base(_itemData.VirtualSprite, _position, _velocity, 0, _angularVelocity, 0, true)
     {
         itemData = _itemData;
@@ -89,22 +86,21 @@ public class Pickup : Entity, IData
             invincibilityCooldown = 0;
             return;
         }
-        ParticleManager.Add(new Particle(null, 1, position + new Vector2(0, -1), new Vector2(0, -1.5f), 0, 0, 1, true, Color.Orange, Color.Red) { drawText = $"Integrity: {hitsLeft}" });
-        SoundManager.PlaySound(Assets.Get(Sound.Death), position);
-        Engine.ShakeScreen(10 / ((position - Engine.Camera.Position).Length() + 150));
-        if (hitsLeft > 0)
+        hitsLeft--;
+        if (_damage >= 10)
         {
             hitsLeft--;
-            if (_damage >= 10)
-            {
-                hitsLeft--;
-            }
-            invincibilityCooldown = 1;
         }
-        else
+        //Prevents negative integrity values
+        hitsLeft = Math.Max(hitsLeft, 0);
+        invincibilityCooldown = 1;
+        if (hitsLeft <= 0)
         {
             isExpired = true;
         }
+        SoundManager.PlaySound(Assets.Get(Sound.Death), position);
+        Engine.ShakeScreen(10 / ((position - Engine.Camera.Position).Length() + 150));
+        ParticleManager.Add(new Particle(null, 1, position + new Vector2(0, -1), new Vector2(0, -1.5f), 0, 0, 1, true, Color.Orange, Color.Red) { drawText = $"Integrity: {hitsLeft}" });
     }
 }
 
@@ -135,40 +131,24 @@ public static class ItemFactory
     };
     public static Pickup NewScrap(Vector2 _position = new Vector2(), Vector2 _velocity = new Vector2(), float _angularVelocity = 0)
     {
-        return new Pickup(itemData[0], itemData[0].RealSprite, Color.Cyan, _position, _velocity, _angularVelocity);
+        return new Pickup(itemData[0], Color.Cyan, _position, _velocity, _angularVelocity);
     }
     public static Pickup GetItem(ItemType _item, Vector2 _position = new Vector2(), Vector2 _velocity = new Vector2(), float _angularVelocity = 0)
     {
-        return new Pickup(itemData[_item], itemData[_item].RealSprite, Color.Cyan, _position, _velocity, _angularVelocity);
+        return new Pickup(itemData[_item], Color.Cyan, _position, _velocity, _angularVelocity);
     }
     public static Module GetItem(ModuleType _item, Vector2 _position = new Vector2(), Vector2 _velocity = new Vector2(), float _angularVelocity = 0)
     {
-        return new Module(moduleData[_item], moduleData[_item].RealSprite, Color.Cyan, _position, _velocity, _angularVelocity);
+        return new Module(moduleData[_item], Color.Cyan, _position, _velocity, _angularVelocity);
     }
 }
-public class ItemData
+public class ItemData(Sprite _realSprite, Sprite _virtualSprite, String _name, int _id, Color _color)
 {
-    private Sprite realSprite;
-    public Texture2D RealSprite
-    {
-        get { return Assets.Get(realSprite); }
-    }
-    private Sprite virtualSprite;
-    public Texture2D VirtualSprite
-    {
-        get { return Assets.Get(virtualSprite); }
-    }
-    public string Name { get; private set; }
-    public int ID { get; private set; }
-    public Color Color { get; private set; }
-    public ItemData(Sprite _realSprite, Sprite _virtualSprite, String _name, int _id, Color _color)
-    {
-        realSprite = _realSprite;
-        virtualSprite = _virtualSprite;
-        Name = _name;
-        ID = _id;
-        Color = _color;
-    }
+    public Texture2D RealSprite { get; } = Assets.Get(_realSprite);
+    public Texture2D VirtualSprite { get; } = Assets.Get(_virtualSprite);
+    public string Name { get; } = _name;
+    public int ID { get; } = _id;
+    public Color Color { get; } = _color;
 }
 public enum ItemType
 {

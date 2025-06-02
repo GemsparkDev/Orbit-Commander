@@ -2,26 +2,18 @@
 using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Graphics;
 using System.Collections.Generic;
-using System.Reflection.Metadata.Ecma335;
+using Microsoft.Xna.Framework.Content;
 
 namespace Space_Wars.Content.Main;
 
 public static class Assets
 {
-    private static Dictionary<Sprite, Texture2D> Sprites { get; } = new();
-    private static Dictionary<Sound, SoundEffect> SoundFX { get; } = new();
+    private static Dictionary<Sprite, Texture2D> Sprites { get; } = [];
+    private static Dictionary<Sound, SoundEffect> SoundFX { get; } = [];
     public static SpriteFont TextFont { get; private set; }
     private static Effect effect;
-    public static Effect GlobalShader
-    {
-        get
-        {
-            if (Engine.UseShader)
-            { return effect; }
-            else { return null; }
-        }
-    }
-    public static void LoadAssets(Microsoft.Xna.Framework.Content.ContentManager Content)
+    public static Effect GlobalShader => Engine.UseShader ? effect : null;
+    public static void LoadAssets(ContentManager Content)
     {
         //
         //Sprites

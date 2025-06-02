@@ -4,10 +4,10 @@ using System.ComponentModel;
 namespace Space_Wars.Content.Main.Components;
 public class ComponentList
 {
-    private Dictionary<ComponentType, IComponent> components = new();
+    private Dictionary<ComponentType, IComponent> components = [];
     public IComponent GetComponent(ComponentType _componentType)
     {
-        return components.ContainsKey(_componentType) ? components[_componentType] : new DefaultComponent();
+        return components.TryGetValue(_componentType, out IComponent value) ? value : new DefaultComponent();
     }
     public bool Add(IComponent _component)
     {

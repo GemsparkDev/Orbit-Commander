@@ -8,8 +8,6 @@ using Microsoft.Xna.Framework.Audio;
 using System.Linq;
 using UILib.Content.Main;
 using Space_Wars.Content.Main.Components;
-using System.Diagnostics;
-using System.ComponentModel;
 
 namespace Space_Wars.Content.Main.Entities;
 
@@ -67,7 +65,7 @@ public class Player : Entity
             return stealth;
         }
     }
-    public List<Pickup> leashedMaterials = new();
+    public List<Pickup> leashedMaterials = [];
     public Dictionary<ModuleType, Module> modules = new()
     {
         { ModuleType.Hull, ItemFactory.GetItem(ModuleType.Hull) },
@@ -142,6 +140,8 @@ public class Player : Entity
                 else if (module.isFailed)
                 {
                     module.isFailed = false;
+                    //Small bonus to module health to keep players alive in firefights
+                    module.Health = Math.Min(module.MaxHealth, module.Health + random.Next(1, 4));
                     restartedModules = true;
                     EventHandler.UpdateModulesStatus();
                     if (modules[ModuleType.Core] == module)
@@ -190,10 +190,6 @@ public class Player : Entity
                     modules[ModuleType.Core].Health--;
                 }
             }
-            foreach (var module in modules)
-            {
-                module.Value.UpdateHealth();
-            }
             cachedDamage = 0;
         }
         isEngineActive = false;
@@ -205,9 +201,8 @@ public class Player : Entity
         else
         {
             smokeParticles.isEmitterActive = true;
-            smokeParticles.speedOfEmission = (-currentHealth + 100) / 4;
+            smokeParticles.speedOfEmission = 25f - currentHealth/4;
         }
-        isEngineActive = false;
         if (modules[ModuleType.Core].Health <= 0)
         {
             isExpired = true;
@@ -224,7 +219,93 @@ public class Player : Entity
             position += velocity * Engine.DeltaSeconds * 60;
             if (!modules[ModuleType.Core].isFailed)
             {
-                ControlShip();
+                if (Input.OldState.IsKeyUp(Keys.Space) && Input.NewState.IsKeyDown(Keys.Space))
+                {
+                    if (dockedEntity == null)
+                    {
+                        DockableComponent dockableEntity = Engine.EntityManager.NearestDockableEntity(this);
+                        if (dockableEntity != null)
+                        {
+                            if (dockableEntity.Dock(this))
+                            {
+                                dockedEntity = dockableEntity;
+                            }
+                        }
+                    }
+                    else if (dockedEntity.Dock(this))
+                    {
+                        dockedEntity = null;
+                    }
+                }
+                if (Input.OldState.IsKeyUp(Keys.I) && Input.NewState.IsKeyDown(Keys.I))
+                {
+                    EventHandler.ToggleDockingMenus();
+                }
+                targetVector = Vector2.Normalize(new Vector2(Mouse.GetState().X, Mouse.GetState().Y) - Engine.ScreenSize / 2 - position + Engine.Camera.Position);
+                gunAngle.angle = MathF.Atan2(targetVector.X, -targetVector.Y) - Engine.Camera.Rotation;
+                if (Input.NewMouseState.LeftButton == ButtonState.Pressed && modules[ModuleType.Guns].IsCooldownReady() && !UIManager.LockMouseInput && !modules[ModuleType.Guns].isFailed)
+                {
+                    modules[ModuleType.Guns].ModuleFunction();
+                }
+                if (Input.NewMouseState.RightButton == ButtonState.Pressed && Input.OldMouseState.RightButton == ButtonState.Released && !UIManager.LockMouseInput)
+                {
+                    canGatherResources = true;
+                    SoundManager.PlayGlobalSound(Assets.Get(Sound.OpenMenu));
+                }
+                else if (Input.NewMouseState.RightButton == ButtonState.Released && Input.OldMouseState.RightButton == ButtonState.Pressed && !UIManager.LockMouseInput)
+                {
+                    SoundManager.PlayGlobalSound(Assets.Get(Sound.CloseMenu));
+                    canGatherResources = false;
+                }
+
+                Keys[] pressedKey = Input.NewState.GetPressedKeys();
+                direction = Vector2.Zero;
+                if (!modules[ModuleType.Engines].isFailed && dockedEntity == null)
+                {
+                    for (int i = 0; i < pressedKey.Length; i++)
+                    {
+                        switch (pressedKey[i])
+                        {
+                            case Keys.W:
+                                direction += new Vector2(0, -1);
+                                isEngineActive = true;
+                                break;
+                            case Keys.A:
+                                direction += new Vector2(-1, 0);
+                                isEngineActive = true;
+                                break;
+                            case Keys.S:
+                                direction += new Vector2(0, 1);
+                                isEngineActive = true;
+                                break;
+                            case Keys.D:
+                                direction += new Vector2(1, 0);
+                                isEngineActive = true;
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+                    if (isEngineActive)
+                    {
+                        engineParticles.offsetVelocity = velocity;
+                        angle = angle * 0.5f + MathF.Atan2(direction.X, -direction.Y) * 0.5f;
+                        engineParticles.sprayAngle = angle * 180 / MathF.PI + 180;
+                        float fuseRatio = (float)(CountFuses(ModuleType.Engines)) / 3;
+                        engineParticles.speedOfEmission = 450f * fuseRatio;
+                        engineSounds.Volume = Math.Clamp(fuseRatio, 0, 1);
+                        float speed = 0.2f;
+                        velocity += Engine.ToUnitVector(angle) * 60 * Engine.DeltaSeconds * speed * 2 * fuseRatio / (leashedMaterials.Count + 2);
+                    }
+                }
+                if (Input.OldState.IsKeyUp(Keys.Z) && Input.NewState.IsKeyDown(Keys.Z))
+                {
+                    leashedMaterials = [];
+                }
+                if (Input.OldState.IsKeyUp(Keys.Q) && Input.NewState.IsKeyDown(Keys.Q) && modules[ModuleType.Engines].IsCooldownReady() && !modules[ModuleType.Engines].isFailed)
+                {
+                    modules[ModuleType.Engines].ModuleFunction();
+                }
             }
             if (EventHandler.AcknowledgeMessage(Message.ToggleTerminal))
             {
@@ -239,9 +320,15 @@ public class Player : Entity
             }
             if (dockedEntity != null)
             {
-                position = dockedEntity.Position;
-                velocity = dockedEntity.Velocity;
-                return;
+                if (dockedEntity.IsValid)
+                {
+                    position = dockedEntity.Position;
+                    velocity = dockedEntity.Velocity;
+                }
+                else
+                {
+                    dockedEntity = null;
+                }
             }
         }
         for (int i = 0; i < modules.Count; i++)
@@ -319,96 +406,6 @@ public class Player : Entity
                     }
                 }
             }
-        }
-    }
-    public void ControlShip()
-    {
-        if (Input.OldState.IsKeyUp(Keys.Space) && Input.NewState.IsKeyDown(Keys.Space))
-        {
-            if (dockedEntity == null)
-            {
-                DockableComponent dockableEntity = Engine.EntityManager.NearestDockableEntity(this);
-                if (dockableEntity != null)
-                {
-                    if (dockableEntity.Dock(this))
-                    {
-                        dockedEntity = dockableEntity;
-                    }
-                }
-            }
-            else if (dockedEntity.Dock(this))
-            {
-                dockedEntity = null;
-            }
-        }
-        if (Input.OldState.IsKeyUp(Keys.I) && Input.NewState.IsKeyDown(Keys.I))
-        {
-            EventHandler.ToggleDockingMenus();
-        }
-        targetVector = Vector2.Normalize(new Vector2(Mouse.GetState().X, Mouse.GetState().Y) - Engine.ScreenSize / 2 - position + Engine.Camera.Position);
-        gunAngle.angle = MathF.Atan2(targetVector.X, -targetVector.Y) - Engine.Camera.Rotation;
-        if (Input.NewMouseState.LeftButton == ButtonState.Pressed && modules[ModuleType.Guns].IsCooldownReady() && !UIManager.LockMouseInput && !modules[ModuleType.Guns].isFailed)
-        {
-            modules[ModuleType.Guns].ModuleFunction();
-        }
-        if (Input.NewMouseState.RightButton == ButtonState.Pressed && Input.OldMouseState.RightButton == ButtonState.Released && !UIManager.LockMouseInput)
-        {
-            canGatherResources = true;
-            SoundManager.PlayGlobalSound(Assets.Get(Sound.OpenMenu));
-        }
-        else if (Input.NewMouseState.RightButton == ButtonState.Released && Input.OldMouseState.RightButton == ButtonState.Pressed && !UIManager.LockMouseInput)
-        {
-            SoundManager.PlayGlobalSound(Assets.Get(Sound.CloseMenu));
-            canGatherResources = false;
-        }
-
-        Keys[] pressedKey = Input.NewState.GetPressedKeys();
-        direction = Vector2.Zero;
-        if (!modules[ModuleType.Engines].isFailed)
-        {
-            for (int i = 0; i < pressedKey.Length; i++)
-            {
-                switch (pressedKey[i])
-                {
-                    case Keys.W:
-                        direction += new Vector2(0, -1);
-                        isEngineActive = true;
-                        break;
-                    case Keys.A:
-                        direction += new Vector2(-1, 0);
-                        isEngineActive = true;
-                        break;
-                    case Keys.S:
-                        direction += new Vector2(0, 1);
-                        isEngineActive = true;
-                        break;
-                    case Keys.D:
-                        direction += new Vector2(1, 0);
-                        isEngineActive = true;
-                        break;
-                    default:
-                        break;
-                }
-            }
-            if (isEngineActive)
-            {
-                float speed = 0.2f;
-                engineParticles.offsetVelocity = velocity;
-                angle = (angle * 0.5f + MathF.Atan2(direction.X, -direction.Y) * 0.5f);
-                engineParticles.sprayAngle = angle * 180 / MathF.PI + 180;
-                float fuseRatio = (float)(CountFuses(ModuleType.Engines)) / 3;
-                engineParticles.speedOfEmission = 450f * fuseRatio;
-                engineSounds.Volume = Math.Clamp(fuseRatio, 0, 1);
-                velocity += Engine.ToUnitVector(angle) * 60 * Engine.DeltaSeconds * speed * 2 * fuseRatio / (leashedMaterials.Count + 2);
-            }
-        }
-        if (Input.OldState.IsKeyUp(Keys.Z) && Input.NewState.IsKeyDown(Keys.Z))
-        {
-            leashedMaterials = new();
-        }
-        if (Input.OldState.IsKeyUp(Keys.Q) && Input.NewState.IsKeyDown(Keys.Q) && modules[ModuleType.Engines].IsCooldownReady() && !modules[ModuleType.Engines].isFailed)
-        {
-            modules[ModuleType.Engines].ModuleFunction();
         }
     }
     public void ToggleFuse(int x, int y)

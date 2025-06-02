@@ -14,10 +14,10 @@ namespace Space_Wars.Content.Main;
 public class EntityManager
 {
     private bool isUpdating = false;
-    private List<Entity> entities = new();
-    private List<Entity> addedEntities = new();
-    private List<Entity> enemies = new();
-    private List<Projectile> projectiles = new();
+    private List<Entity> entities = [];
+    private List<Entity> addedEntities = [];
+    private List<Entity> enemies = [];
+    private List<Projectile> projectiles = [];
     private static Random random = new();
     private static float currentKarma = 0;
     public static Player Player { get; private set; }
@@ -27,38 +27,38 @@ public class EntityManager
     public static float StealthThreshold { get; private set; } = 0.75f;
     public readonly static Pickup[] globalInventory = new Pickup[5];
     public static int Scrap { get; private set; }
-    private readonly static List<Mission> missions = new()
-    {
-        new(new GravitationalSource[2] { new(Vector2.Zero, Vector2.Zero, 10000, 8, true, Color.Cyan), new(new Vector2(1000, 0), GravitationalSource.GetOrbitalVelocity(new Vector2(1000, 0), Vector2.Zero, 10000), 250, 1.5f, false, Color.Cyan) },
-        new(){ (Enemy.NewMothership, new Vector2(0, -8*50 - Assets.DimsOf(Sprite.Mothership).Y / 2), Vector2.Zero, 0f, new Condition[2] { Condition.Protect, Condition.CustomIncomplete })},
+    private readonly static List<Mission> missions = 
+    [
+        new([ new(Vector2.Zero, Vector2.Zero, 10000, 8, true, Color.Cyan), new(new Vector2(1000, 0), GravitationalSource.GetOrbitalVelocity(new Vector2(1000, 0), Vector2.Zero, 10000), 250, 1.5f, false, Color.Cyan) ],
+        [ (new EntityConstructor(Enemy.NewMothership, new Vector2(0, -8*50 - Assets.DimsOf(Sprite.Mothership).Y / 2), Vector2.Zero, 0f), [ Condition.Protect, Condition.CustomIncomplete ])],
         "Crash Landing",
         "A simple system with a large planet and one closely orbiting moon. Drone activity detected, but minimal.",
         1, 0, 0, IntroCutscene),
 
-        new( new GravitationalSource[1] { new(Vector2.Zero, Vector2.Zero, 3500, 4, true, Color.Cyan, true) },
-        new(){
-            (Enemy.NewTurret, new Vector2(0, -200 - Assets.DimsOf(Sprite.TurretBase).Y / 2), Vector2.Zero, 0, new Condition[1] { Condition.Protect }),
-            (Enemy.NewOrbiter, new Vector2(400, 0), GravitationalSource.GetOrbitalVelocity(new Vector2(400, 0), Vector2.Zero, 3500), 0, new Condition[1] { Condition.Protect })},
+        new( [ new(Vector2.Zero, Vector2.Zero, 3500, 4, true, Color.Cyan, true) ],
+        [
+            (new EntityConstructor(Enemy.NewTurret, new Vector2(0, -200 - Assets.DimsOf(Sprite.TurretBase).Y / 2), Vector2.Zero, 0), [ Condition.Protect ]),
+            (new EntityConstructor(Enemy.NewOrbiter, new Vector2(400, 0), GravitationalSource.GetOrbitalVelocity(new Vector2(400, 0), Vector2.Zero, 3500), 0), [ Condition.Protect ])],
         "Sentry Defense",
         "A small outpost is located orbiting this rogue planet. Defend it.", 0.75f, 40),
 
-        new( new GravitationalSource[2] { new(Vector2.Zero, Vector2.Zero, 25000, 7f, true, Color.Cyan), new(new Vector2(800, 0), GravitationalSource.GetOrbitalVelocity(new Vector2(800, 0), Vector2.Zero, 25000), 150, 0.5f, false, Color.Cyan), },
-        new(){ (Enemy.NewMiner, new Vector2(0, -7*50 - Assets.DimsOf(Sprite.Miner).Y / 2), Vector2.Zero, 0, new Condition[1] { Condition.Protect }) },
+        new( [ new(Vector2.Zero, Vector2.Zero, 25000, 7f, true, Color.Cyan), new(new Vector2(800, 0), GravitationalSource.GetOrbitalVelocity(new Vector2(800, 0), Vector2.Zero, 25000), 150, 0.5f, false, Color.Cyan), ],
+        [(new EntityConstructor(Enemy.NewMiner, new Vector2(0, -7*50 - Assets.DimsOf(Sprite.Miner).Y / 2), Vector2.Zero, 0), [ Condition.Protect ])],
         "Extraction",
         "This deceptively dense planet is rich with materials that our deployed miner will extract.", 1, 20),
 
-        new(new GravitationalSource[3] { new(Vector2.Zero, Vector2.Zero, 5000, 3, true, Color.Cyan),
+        new([ new(Vector2.Zero, Vector2.Zero, 5000, 3, true, Color.Cyan),
             new(new Vector2(400, 0), GravitationalSource.GetOrbitalVelocity(new Vector2(400, 0), Vector2.Zero, 5000), 240, 1f, false, Color.Cyan),
-            new(new Vector2(-600, 0), -GravitationalSource.GetOrbitalVelocity(new Vector2(-600, 0), Vector2.Zero, 5000) * 1.2f, 120, 0.6f, false, Color.Yellow), },
-        new(){ (Enemy.NewExcursionBoss, new Vector2(0, -6*50), Vector2.Zero, 0, new Condition[1] { Condition.Kill }) },
+            new(new Vector2(-600, 0), -GravitationalSource.GetOrbitalVelocity(new Vector2(-600, 0), Vector2.Zero, 5000) * 1.2f, 120, 0.6f, false, Color.Yellow), ],
+        [(new EntityConstructor(Enemy.NewExcursionBoss, new Vector2(0, -6*50), Vector2.Zero, 0), [ Condition.Kill ])],
         "Showdown",
         "Defeat the advanced drone prototype, Excursion. Be warned: It may call for reinforcements.", 1.1f, 0, 1),
 
-        new(new GravitationalSource[1] {new(Vector2.Zero, Vector2.Zero, 30000, 10f, true, Color.HotPink, true) },
-        new(){ },
+        new([new(Vector2.Zero, Vector2.Zero, 30000, 10f, true, Color.HotPink, true) ],
+        [],
         "cool planet",
         "Super earth", 2, 0, 1, null, true),
-    };
+    ];
 
     /*
      * (Enemy.NewOrbiter, 
@@ -94,10 +94,10 @@ public class EntityManager
     public Player Initialize()
     {
         currentMission = missions[missionCount].Clone();
-        entities = new();
-        addedEntities = new();
-        enemies = new();
-        projectiles = new();
+        entities.Clear();
+        addedEntities.Clear();
+        enemies.Clear();
+        projectiles.Clear();
         Player = new(new Vector2(0, -CurrentMission.Planet.radius + 1), new Vector2(0, 0), 0, 0);
         CurrentMission.Initialize();
         return Player;
@@ -125,13 +125,14 @@ public class EntityManager
     public static void IngameUpdate()
     {
         var time = Engine.IngameTime;
-        (time).Duration += Engine.DeltaSeconds;
+        time.Duration += Engine.DeltaSeconds;
         CurrentMission.Update();
+        Engine.EntityManager.Update();
     }
     public void Update()
     {
         isUpdating = true;
-        //Updates all entities and moves deleted ones to a new list (prevents modifying a list while iterating over it)
+        //Prevents modifying a list while iterating over it
         foreach (var entity in entities)
         {
             entity.Update();
@@ -185,6 +186,16 @@ public class EntityManager
         missionCount = Math.Clamp(missionCount - 1, 0, missions.Count - 1);
         currentMission = missions[missionCount].Clone();
         EventHandler.UpdateMissionText();
+    }
+    public void DecayPickups()
+    {
+        foreach (var pickup in entities)
+        {
+            if (pickup is Pickup && random.NextSingle() < 0.6f)
+            {
+                pickup.Collide(1);
+            }
+        }
     }
     public static void Collide(Entity entity, Entity targetEntity)
     {
@@ -367,8 +378,8 @@ public class EntityManager
     }
     private static Cutscene IntroCutscene()
     {
-        List<IEvent> events = new();
-        List<Actor> actors = new();
+        List<IEvent> events = [];
+        List<Actor> actors = [];
         var mothership = new Actor(Assets.Get(Sprite.Mothership), new Vector2(1500, -2000), new Color(0, 255, 0), MathF.PI / 12);
         var sound = Assets.Get(Sound.FireEngines).CreateInstance();
         sound.IsLooped = true;

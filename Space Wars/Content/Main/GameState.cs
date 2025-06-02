@@ -78,7 +78,6 @@ public class PlayingGame : GameState
         }
         EntityManager.PlayerUpdate();
         EntityManager.IngameUpdate();
-        Engine.EntityManager.Update();
         ParticleManager.Update();
         if (Input.OldState.IsKeyUp(Keys.Escape) && Input.NewState.IsKeyDown(Keys.Escape))
         {
@@ -167,9 +166,16 @@ public class Garage : GameState
     }
     public override void Update()
     {
+        EntityManager.PlayerUpdate();
+        EntityManager.IngameUpdate();
+        ParticleManager.Update();
         if (Input.OldState.IsKeyUp(Keys.Escape) && Input.NewState.IsKeyDown(Keys.Escape))
         {
-            EventHandler.GarageTrigger();
+            //Only toggle game state if in valid module configuration
+            if (EventHandler.SyncModules())
+            {
+                EventHandler.GarageTrigger();
+            }
         }
     }
     public override void Draw(SpriteBatch _spriteBatch)
@@ -201,19 +207,11 @@ public class Victory : GameState
         _spriteBatch.DrawString(Assets.TextFont, $"Your Time: {Engine.IngameTime.DrawText}", new Vector2(-12 * 12 / 2, (12 * 4 - 60)) * Engine.UIScale + Engine.Camera.Position, Color.White, 0, Vector2.Zero, Engine.UIScale/2, SpriteEffects.None, 0);
     }
 }
-public class Cutscene : GameState 
+public class Cutscene(List<IEvent> _events, List<Actor> _actors, GameState _nextGameState) : GameState 
 {
     private float time = 0;
     private bool isActive = true;
-    private List<IEvent> events = new();
-    private List<Actor> actors = new();
-    private GameState nextGameState;
-    public Cutscene(List<IEvent> _events, List<Actor> _actors, GameState _nextGameState)
-    {
-        events = _events;
-        actors = _actors;
-        nextGameState = _nextGameState;
-    }
+
     public override void Initialize()
     {
         time = 0;
@@ -223,7 +221,7 @@ public class Cutscene : GameState
         ParticleManager.Update();
         time += Engine.DeltaSeconds;
         isActive = false;
-        foreach (var _event in events)
+        foreach (var _event in _events)
         {
             //Checks every event to see if they are complete
             //If every event is no longer active, so too is the cutscene
@@ -231,13 +229,13 @@ public class Cutscene : GameState
         }
         if (!isActive)
         {
-            CurrentGameState.SwitchState(nextGameState);
+            CurrentGameState.SwitchState(_nextGameState);
         }
     }
     public override void Draw(SpriteBatch _spriteBatch)
     {
         ParticleManager.Draw(_spriteBatch);
-        foreach (var actor in actors)
+        foreach (var actor in _actors)
         {
             actor.Draw(_spriteBatch);
         }
@@ -251,7 +249,10 @@ public class InShip : GameState
     }
     public override void Update() 
     {
-        if (Input.OldState.IsKeyUp(Keys.Escape) && Input.NewState.IsKeyDown(Keys.Escape))
+        EntityManager.PlayerUpdate();
+        EntityManager.IngameUpdate();
+        ParticleManager.Update();
+        if (Input.OldState.IsKeyUp(Keys.F) && Input.NewState.IsKeyDown(Keys.F))
         {
             CurrentGameState.SwitchState(new PlayingGame());
             Engine.UIManager.GetContainer((int)Containers.FuseMenu).enabled = false;

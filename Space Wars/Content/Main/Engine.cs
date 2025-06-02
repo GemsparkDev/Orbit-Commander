@@ -10,6 +10,7 @@ using Space_Wars.Content.Main.Entities;
 using System.Linq;
 using System.Diagnostics;
 using System.Transactions;
+using Space_Wars.Content.Main.Components;
 
 namespace Space_Wars.Content.Main;
 
@@ -20,7 +21,7 @@ public class Engine : Game
     private Decal fpsCounter;
     private Decal fpsOneSec;
     private Decal fpsLowest;
-    private List<float> fpsSamples = new();
+    private List<float> fpsSamples = [];
     private Decal timer;
     private RenderTarget2D renderTarget;
     public static UIManager UIManager { get; private set; }
@@ -36,7 +37,7 @@ public class Engine : Game
     public static Texture2D Line { get; private set; }
     public static bool DebugMode { get; private set; }
     public static bool PatchedConics { get; private set; } = true;
-    public static readonly List<string> debugLog = new();
+    public static readonly List<string> debugLog = [];
     public static float UIScale { get; private set; } = 2f;
     public static ItemSlot<Module>[] ModuleSlots { get; private set; }
     public static ItemSlot<Pickup>[,] InventorySlots { get; private set; }
@@ -87,9 +88,9 @@ public class Engine : Game
     {
         Texture2D largePanel = Assets.Get(Sprite.LargePanel);
         Texture2D wideButton = Assets.Get(Sprite.WideButton);
-        List<Texture2D> iconGroup1 = new() { Assets.Get(Sprite.PlayIcon), Assets.Get(Sprite.SettingsIcon) };
-        List<Texture2D> iconGroup2 = new() { Assets.Get(Sprite.SmeltIcon), Assets.Get(Sprite.RepairIcon), Assets.Get(Sprite.VictoryIcon) };
-        List<Texture2D> iconGroup3 = new() { Assets.Get(Sprite.PlanetIcon), Assets.Get(Sprite.RepairIcon) };
+        List<Texture2D> iconGroup1 = [ Assets.Get(Sprite.PlayIcon), Assets.Get(Sprite.SettingsIcon) ];
+        List<Texture2D> iconGroup2 = [ Assets.Get(Sprite.SmeltIcon), Assets.Get(Sprite.RepairIcon), Assets.Get(Sprite.VictoryIcon) ];
+        List<Texture2D> iconGroup3 = [ Assets.Get(Sprite.PlanetIcon), Assets.Get(Sprite.RepairIcon) ];
 
         var tabTexture = Assets.Get(Sprite.Tab);
         var selectedTabTexture = Assets.Get(Sprite.SelectedTab);
@@ -271,7 +272,7 @@ public class Engine : Game
             }
             GarageMenu.AddWidget(ModuleSlots[x] as IFunctional);
             MissionSelect.AddWidget(ModuleSlots[x] as IFunctional, 1);
-            ModuleSlots[x].AddBehaviour(new Action(EventHandler.UpdateModules));
+            ModuleSlots[x].AddBehaviour(EventHandler.UpdateModules);
         }
         for (int x = 0; x < InventorySlots.GetLength(0); x++)
         {
@@ -309,6 +310,8 @@ public class Engine : Game
         UIManager.AddContainer(MissionSelect);
         UIManager.AddContainer(PickupDroneMenu);
         UIManager.AddContainer(FuseMenu);
+
+        var teamComponent = new TeamComponent(true, 1, 1);
     }
     public static void Startgame()
     {

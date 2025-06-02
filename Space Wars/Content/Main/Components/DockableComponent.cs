@@ -1,23 +1,20 @@
 ﻿using UILib.Content.Main;
 using Microsoft.Xna.Framework;
 using Space_Wars.Content.Main.Entities;
+using Assimp;
 
 namespace Space_Wars.Content.Main.Components;
 
-public class DockableComponent : IComponent
+public class DockableComponent(Entity _parentEntity, Containers _menu) : IComponent
 {
-    private Entity parentEntity;
-    public Vector2 Position { get { return parentEntity.position; } }
-    public Vector2 Velocity { get { return parentEntity.velocity; } }
+    public Vector2 Position => _parentEntity.position;
+    public Vector2 Velocity => _parentEntity.velocity;
     public Pickup[,] Inventory { get; private set; } = new Pickup[1, 4];
     public bool IsDocked { get; private set; } = false;
-    public ComponentType Type { get; } = ComponentType.DockableComponent;
-    public Containers Menu { get; private set; }
-    public DockableComponent(Entity _parentEntity, Containers _menu)
-    {
-        parentEntity = _parentEntity;
-        Menu = _menu;
-    }
+    public ComponentType Type => ComponentType.DockableComponent;
+    public bool IsValid => !_parentEntity.isExpired;
+    public Containers Menu { get; private set; } = _menu;
+
     public void AddItem(Pickup _pickup)
     {
         for (int y = 0; y < Inventory.GetLength(1); y++)
@@ -51,7 +48,7 @@ public class DockableComponent : IComponent
     public bool Dock(Player _player)
     {
         EventHandler.DisableDockingMenus();
-        if (EntityManager.DistanceSqr(_player, parentEntity) > 1250)
+        if (EntityManager.DistanceSqr(_player, _parentEntity) > 1250)
         {
             return false;
         }
@@ -64,6 +61,7 @@ public class DockableComponent : IComponent
             {
                 EventHandler.UpdateInventoryUI(this);
                 pickup.isExpired = false;
+                pickup.position = Position;
                 _player.leashedMaterials.Add(pickup);
                 Engine.EntityManager.Add(pickup);
             }
@@ -100,5 +98,4 @@ public class DockableComponent : IComponent
             }
         }
     }
-    public bool IsValid { get { return true; } }
 }

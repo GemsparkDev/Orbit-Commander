@@ -9,21 +9,16 @@ namespace Space_Wars.Content.Main.Entities;
 public class Module : Pickup, IData
 {
     private ModuleData moduleData;
-    public float Health { get; set; }
-    public float MaxHealth 
-    {
-        get { return moduleData.MaxHealth; }
-    }
-    public override Color Color 
-    { 
-        get { return (isFailed ? Color.Red : Color.White); } 
-    }
+    private float health;
+    public float Health { get { return health; } set { health = value; UpdateHealth(); } }
+    public float MaxHealth => moduleData.MaxHealth;
+    public override Color Color => isFailed ? Color.Red : Color.White;
     public bool isFailed = false;
     public float cooldown = 0;
 
-    public Module(ModuleData _itemData, Texture2D _worldTexture, Color _worldColor, Vector2 _position, Vector2 _velocity, float _angularVelocity) : base(_itemData, _worldTexture, _worldColor, _position, _velocity, _angularVelocity)
+    public Module(ModuleData _itemData, Color _worldColor, Vector2 _position, Vector2 _velocity, float _angularVelocity) : base(_itemData, _worldColor, _position, _velocity, _angularVelocity)
     {
-        Health = _itemData.MaxHealth;
+        health = _itemData.MaxHealth;
         moduleData = _itemData;
         Tooltip.AddWidget(new Decal(new Vector2(0, 5), Assets.TextFont, $"{Health} / {moduleData.MaxHealth}", Color.Pink, 5f));
     }
@@ -34,7 +29,7 @@ public class Module : Pickup, IData
             cooldown -= Engine.DeltaSeconds;
         }
     }
-    public void UpdateHealth()
+    private void UpdateHealth()
     {
         Tooltip.GetWidget(2).text = $"{Health} / {moduleData.MaxHealth}";
     }
@@ -71,15 +66,9 @@ public class Module : Pickup, IData
         }
     }
 }
-public class ModuleData : ItemData
+public class ModuleData(Sprite _realSprite, Sprite _virtualSprite, String _name, int _id, int _health, Action _action) : ItemData(_realSprite, _virtualSprite, _name, _id, Color.White)
 {
-    public float MaxHealth { get; private set; }
-    public Action Action { get; private set; }
-    public ModuleData(Sprite _realSprite, Sprite _virtualSprite, String _name, int _id, int _health, Action _action) : base(_realSprite, _virtualSprite, _name, _id, Color.White)
-    {
-        MaxHealth = _health;
-        //Lazy evaluation to prevent error during module creation if the player is not valid
-        Action = _action;
-    }
+    public float MaxHealth { get; } = _health;
+    public Action Action { get; } = _action;
 }
 

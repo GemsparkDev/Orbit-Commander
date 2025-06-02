@@ -12,17 +12,17 @@ public class Mission
     private Entity escapeVehicle = null;
     public string Name { get; }
     public string Description { get; }
-    public GravitationalSource Planet { get { return planets[0]; } }
+    //Change me when multiple main planets are added
+    public GravitationalSource Planet => planets[0];
     private GravitationalSource[] planets; 
     //Save original entity parameters to allow cloning
-    public List<(Func<Vector2, Vector2, float, Entity>, Vector2, Vector2, float, Condition[])> CopyObjectives { get; }
-    public List<(Entity entity, Condition[] conditions)> MissionObjectives { get; } = new();
+    public List<(EntityConstructor, Condition[])> CopyObjectives { get; }
+    public List<(Entity entity, Condition[] conditions)> MissionObjectives { get; } = [];
     private Func<Cutscene> cutscene;
     public int MissionScrap { get; set; } = 0;
     private float timerModifier;
     public int WaveGoal { get; } = 0;
     public float restartTimer = -1;
-
     public int Wave { get; private set; } = 0;
     private List<(int cost, DelegateEnemy enemy)> enemyCreditValues;
     private List<DelegateEnemy> bosses;
@@ -36,15 +36,15 @@ public class Mission
     public delegate Enemy DelegateEnemy(Vector2 position, Vector2 velocity, float angle, bool _isFriendly = false);
     public int EnemiesSpawned { get; private set; } = 0;
 
-    public Mission(GravitationalSource[] _planets, List<(Func<Vector2, Vector2, float, Entity> newEntity, Vector2 position, Vector2 velocity, float angle, Condition[] conditions)> _missionObjectives, string _name, string _description, float _timerModifier, int _waveGoal = 0, int _enemyTier = 0, Func<Cutscene> _cutscene = null, bool _escapeVehicle = false)
+    public Mission(GravitationalSource[] _planets, List<(EntityConstructor, Condition[] conditions)> _missionObjectives, string _name, string _description, float _timerModifier, int _waveGoal = 0, int _enemyTier = 0, Func<Cutscene> _cutscene = null, bool _escapeVehicle = false)
     {
         Name = _name;
         Description = _description;
         planets = _planets;
         CopyObjectives = _missionObjectives;
-        foreach (var (newEntity, position, velocity, angle, conditions) in _missionObjectives)
+        foreach (var (entityConstructor, conditions) in _missionObjectives)
         {
-            MissionObjectives.Add((newEntity(position, velocity, angle), (Condition[])conditions.Clone()));
+            MissionObjectives.Add((entityConstructor.Construct(), (Condition[])conditions.Clone()));
         }
         WaveGoal = _waveGoal;
         timerModifier = _timerModifier;
@@ -52,37 +52,37 @@ public class Mission
         tier = _enemyTier;
         if (_enemyTier == 0)
         {
-            enemyCreditValues = new()
-            {
+            enemyCreditValues = 
+            [
                 (1, Enemy.NewFighter),
                 (3, Enemy.NewCarrier),
                 (3, Enemy.NewSniper),
                 (4, Enemy.NewShotgunner),
-            };
+            ];
         }
         else if (_enemyTier == 1)
         {
-            enemyCreditValues = new()
-            {
+            enemyCreditValues = 
+            [
                 (1, Enemy.NewAdvancedFighter),
                 (2, Enemy.NewHovercraft),
-            };
+            ];
         }
         else
         {
-            enemyCreditValues = new()
-            {
+            enemyCreditValues = 
+            [
                 (1, Enemy.NewStealthFighter)
-            };
+            ];
         }
 
-        bosses = new()
-        {
+        bosses = 
+        [
             Enemy.NewSymmetryBoss,
             Enemy.NewOverloadBoss,
             Enemy.NewExcursionBoss,
             Enemy.NewWyvernBoss,
-        };
+        ];
         currentBoss = random.Next(bosses.Count);
         cutscene = _cutscene;
         if (_escapeVehicle)
@@ -90,6 +90,7 @@ public class Mission
             escapeVehicle = Enemy.NewPickupDrone(new Vector2(-2000, -2000), Vector2.Zero, 0);
         }
     }
+    //Whether to decay the pickups or not
     public void Update()
     {
         PlanetUpdate();
@@ -162,6 +163,7 @@ public class Mission
         {
             EnemiesSpawned = 0;
             Wave++;
+            Engine.EntityManager.DecayPickups();
             if (Wave % 20 == 0)
             {
                 SoundManager.ChangeTrack(Assets.Get(Sound.boss));
@@ -171,7 +173,7 @@ public class Mission
                     boss = bosses[2](NewSpawnLocation(), Vector2.Zero, 0);
                 }
                 Engine.EntityManager.Add(boss);
-                waveTimer = 4;
+                waveTimer = 10;
                 maxWaveTimer = waveTimer;
                 EnemiesSpawned = 1;
                 currentBoss = (currentBoss + 1) % bosses.Count;
@@ -183,7 +185,7 @@ public class Mission
             {
                 difficulty = (int)((Wave + 1) * MathF.Log(Wave + 1, MathF.E) - Wave) / 15 + 1;
                 SpawnWaveBatch(random.Next((int)(3 * difficulty), (int)(5 * difficulty)));
-                waveTimer = (4f * EnemiesSpawned + 5) * timerModifier;
+                waveTimer = (5f * EnemiesSpawned + 6) * timerModifier;
                 maxWaveTimer = waveTimer;
             }
         }
@@ -349,7 +351,7 @@ public class Mission
     }
     private void SpawnWaveBatch(int enemyCredits)
     {
-        List<int> newCosts = new();
+        List<int> newCosts = [];
         int availableEnemies = Math.Min(enemyCreditValues.Count, Wave / 10 + 1);
         for (int i = 0; i < availableEnemies; i++)
         {
@@ -381,5 +383,12 @@ public class Mission
         float distance = (Engine.ScreenSize.X + Engine.ScreenSize.Y) / 2 * distanceMultiplier;
         Vector2 spawnLocation = Engine.ToUnitVector(angle) * distance;
         return spawnLocation + EntityManager.Player.position;
+    }
+}
+public class EntityConstructor(Func<Vector2, Vector2, float, Entity> _constructor, Vector2 _position, Vector2 _velocity, float _angle)
+{
+    public Entity Construct()
+    {
+        return _constructor(_position, _velocity, _angle);
     }
 }

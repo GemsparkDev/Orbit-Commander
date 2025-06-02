@@ -11,8 +11,8 @@ namespace Space_Wars.Content.Main.Entities;
 
 public class Enemy : Entity
 {
-    private List<IEnumerator<int>> behaviours = new();
-    private List<IEnumerable<int>> copyBehaviors = new();
+    private List<IEnumerator<int>> behaviours = [];
+    private List<IEnumerable<int>> copyBehaviors = [];
     public Player player = EntityManager.Player;
     private Random random = new();
     private float targetAngle = 0;
@@ -598,12 +598,13 @@ public class Enemy : Entity
         float chargingWindup = 1;
         float shieldCooldown = maxShieldCooldown;
         Vector2 chargeLocation = Vector2.Zero;
-        Enemy[] shields = new Enemy[4] {
+        Enemy[] shields =
+        [
             NewShield(this, 14, 8, 0, 1),
             NewShield(this, 14, 8, MathF.PI, 1),
             NewShield(this, 14, 8, MathF.PI/2, 1),
             NewShield(this, 14, 8, MathF.PI*3/2, 1)
-        };
+        ];
         foreach(Enemy shield in shields)
         {
             Engine.EntityManager.Add(shield);
@@ -1036,13 +1037,13 @@ public class Enemy : Entity
         int bulletOffset = 8;
         float laserCooldown = 0;
         float laserWindup = 3;
-        Func<Vector2, Vector2, float, bool, Enemy>[][] waves = new Func<Vector2, Vector2, float, bool, Enemy>[4][] 
-        {
-            new Func<Vector2, Vector2, float, bool, Enemy>[] { NewHovercraft, NewHovercraft, },
-            new Func<Vector2, Vector2, float, bool, Enemy>[] { NewCarrier, NewHovercraft, NewHovercraft, NewHovercraft, NewHovercraft },
-            new Func<Vector2, Vector2, float, bool, Enemy>[] { NewCarrier, NewSniper, NewSniper, NewSniper, NewHovercraft, NewHovercraft, NewHovercraft, },
-            new Func<Vector2, Vector2, float, bool, Enemy>[] { NewCarrier, NewSniper, NewSniper, NewHovercraft, NewHovercraft, NewHovercraft, NewShotgunner, NewCarrier, },
-        };
+        Func<Vector2, Vector2, float, bool, Enemy>[][] waves = 
+        [
+            [ NewHovercraft, NewHovercraft, ],
+            [ NewCarrier, NewHovercraft, NewHovercraft, NewHovercraft, NewHovercraft ],
+            [ NewCarrier, NewSniper, NewSniper, NewSniper, NewHovercraft, NewHovercraft, NewHovercraft, ],
+            [ NewCarrier, NewSniper, NewSniper, NewHovercraft, NewHovercraft, NewHovercraft, NewShotgunner, NewCarrier, ],
+        ];
         while (true)
         {
             nearestPickup = Engine.EntityManager.NearestItem(this);
