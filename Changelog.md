@@ -267,3 +267,14 @@ Update 0.4.3
     -The stealth dropoff range is reduced based on how many fuses are on the sensors.    
     -Added a toggle for the global shader.    
     -Significantly reduced the strength of the shader.    
+   
+0.4.5.2        
+6/1/2025        
+    -Fixed a potential issue with docking to an expired entity.    
+    -The waves are now slightly longer.    
+    -When a wave ends, scrap still on the field will periodically take decay damage.    
+    -Restarting a module restores a couple health points to the corresponding module.    
+    -Inlined the ControlShip function.    
+    -Missions now use the EntityConstructor class.    
+    -The fuse menu and the garage menu now update the game state.    
+    -Fixed bug #18
