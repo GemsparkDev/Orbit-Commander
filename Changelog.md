@@ -278,3 +278,9 @@ Update 0.4.3
     -Missions now use the EntityConstructor class.    
     -The fuse menu and the garage menu now update the game state.    
     -Fixed bug #18
+    
+0.4.5.3    
+6/2/2025    
+    -Rearranged mission select menu.    
+    -Modified what actions fall under player update and ingame update.    
+    -Fixed bug #19.    
