@@ -181,13 +181,6 @@ public class EventHandler
     }
     public static void GarageTrigger()
     {
-        foreach(KeyValuePair<ModuleType, Module> module in player.modules)
-        {
-            if(module.Value == null)
-            {
-                return;
-            }
-        }
         SoundManager.PlayGlobalSound(Assets.Get(Sound.Interact));
         Engine.UIManager.ToggleMenu((int)Containers.MothershipMenu);
         Engine.UIManager.ToggleMenu((int)Containers.GarageMenu);

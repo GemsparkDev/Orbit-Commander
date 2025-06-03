@@ -100,7 +100,7 @@ public class Engine : Game
         var GarageMenu = new Window(ScreenSize / 2, Assets.Get(Sprite.GargantuanPanel), 1) { enabled = false };
         var MainMenu = new TabbedWindow(ScreenSize / 2, Assets.Get(Sprite.GargantuanPanel), tabTexture, selectedTabTexture, selectSound, 2, 1) { enabled = true, icons = iconGroup1 };
         var MothershipMenu = new TabbedWindow(new Vector2(Assets.Get(Sprite.Terminal).Width, ScreenSize.Y / 2), Assets.Get(Sprite.Terminal), tabTexture, selectedTabTexture, selectSound, 3, 1) { enabled = false, icons = iconGroup2 };
-        var MissionSelect = new TabbedWindow(ScreenSize / 2, Assets.Get(Sprite.GargantuanPanel), tabTexture, selectedTabTexture, selectSound, 2) { enabled = false, icons = iconGroup3 };
+        var MissionSelect = new TabbedWindow(new Vector2(Assets.DimsOf(Sprite.GargantuanPanel).X, ScreenSize.Y / 2), Assets.Get(Sprite.GargantuanPanel), tabTexture, selectedTabTexture, selectSound, 2) { enabled = false, icons = iconGroup3 };
         var PickupDroneMenu = new Window(ScreenSize / 2, largePanel, 1) { enabled = false };
         var FuseMenu = new Window(ScreenSize / 2, largePanel, 1) { enabled = false };
 
@@ -155,8 +155,14 @@ public class Engine : Game
         fpsOneSec = new Decal(new Vector2(ScreenSize.X / 2 - 20, 23), Assets.TextFont, "60", Color.White, 10);
         fpsLowest = new Decal(new Vector2(ScreenSize.X / 2 - 20, 36), Assets.TextFont, "60", Color.White, 10);
         timer = new Decal(new Vector2(ScreenSize.X / 2 - 100, 10), Assets.TextFont, $"{IngameTime.DrawText}", Color.White, 10);
-        var sidePanelClose = new Button(new Vector2(-Assets.Get(Sprite.ToggleButton).Width / 2 + Assets.Get(Sprite.Terminal).Width / 2, 0), Assets.Get(Sprite.ToggleButton));
 
+        Vector2 center = new Vector2(ScreenSize.X*2 / 3, ScreenSize.Y/2) / 2;
+        //System 1
+        var systemCenter = new Decal(center, Assets.Get(Sprite.Knob));
+        var mission0 = new Button(center + new Vector2(0, 80), Assets.Get(Sprite.PlanetIcon));
+        var nextSystem = new Button(center + new Vector2(100, 0), Assets.Get(Sprite.Button));
+
+        var sidePanelClose = new Button(new Vector2(-Assets.Get(Sprite.ToggleButton).Width / 2 + Assets.Get(Sprite.Terminal).Width / 2, 0), Assets.Get(Sprite.ToggleButton));
         patchedConicsToggle.AddBehaviour(delegate
         {
             PatchedConics = !PatchedConics;
@@ -198,6 +204,8 @@ public class Engine : Game
         selectMission.AddBehaviour(Startgame);
         launchButton.AddBehaviour(delegate() { EventHandler.SendMessage(Message.EscapeDroneLeave); });
         shaderToggle.AddBehaviour(delegate () { UseShader = !UseShader; shaderToggle.text = $"Shader: {UseShader}"; });
+        mission0.AddBehaviour(delegate() { EntityManager.SetMission(1); });
+        nextSystem.AddBehaviour(delegate() { UIManager.ScreenWindow.CurrentTab = 2; });
 
         MainMenu.AddWidget(exitButton as IFunctional, 0);
         MainMenu.AddWidget(singleplayerButton as IFunctional, 0);
@@ -250,13 +258,17 @@ public class Engine : Game
             MothershipMenu.AddWidget(sidePanelClose as IFunctional, i);
         }
 
-        UIManager.AddGlobalWidget(globalSidePanelOpen as IFunctional);
-        UIManager.AddGlobalWidget(fpsCounter);
-        UIManager.AddGlobalWidget(fpsOneSec);
-        UIManager.AddGlobalWidget(fpsLowest);
-        UIManager.AddGlobalWidget(timer);
+        UIManager.ScreenWindow.AddWidget(globalSidePanelOpen as IFunctional, 0);
+        UIManager.ScreenWindow.AddWidget(fpsCounter, 0);
+        UIManager.ScreenWindow.AddWidget(fpsOneSec, 0);
+        UIManager.ScreenWindow.AddWidget(fpsLowest, 0);
+        UIManager.ScreenWindow.AddWidget(timer, 0);
+        UIManager.ScreenWindow.AddWidget(systemCenter, 1);
+        UIManager.ScreenWindow.AddWidget(systemCenter, 2);
+        UIManager.ScreenWindow.AddWidget(mission0 as IFunctional, 1);
+        UIManager.ScreenWindow.AddWidget(nextSystem as IFunctional, 1);
 
-        ModuleSlots = new ItemSlot<Module>[5];
+        ModuleSlots = new ItemSlot<Module>[5]; 
         InventorySlots = new ItemSlot<Pickup>[1, 4];
         for (int x = 0; x < ModuleSlots.GetLength(0); x++)
         {

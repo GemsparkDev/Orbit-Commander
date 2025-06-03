@@ -11,8 +11,8 @@ namespace Space_Wars.Content.Main.Particles
     public static class ParticleManager
     {
         private static bool isUpdating;
-        private static List<Particle> particles = new();
-        private static List<Particle> addedParticles = new();
+        private static List<Particle> particles = [];
+        private static List<Particle> addedParticles = [];
 
         public static void Add(Particle particle)
         {

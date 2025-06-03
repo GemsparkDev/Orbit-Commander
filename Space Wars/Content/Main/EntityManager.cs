@@ -104,6 +104,10 @@ public class EntityManager
     }
     public static void PlayerUpdate()
     {
+        Player.RestrictedActions();
+    }
+    public static void IngameUpdate()
+    {
         Player.Update();
         CurrentMission.AttractObject(Player);
         if (Player.dockedEntity == null)
@@ -121,9 +125,6 @@ public class EntityManager
         //Tanh prevents frac from going above 1
         float frac = MathF.Tanh(Vector2.Distance(Player.position, Engine.Camera.Position) / 750);
         Engine.Camera.Position = Player.position * frac + Engine.Camera.Position * (1 - frac);
-    }
-    public static void IngameUpdate()
-    {
         var time = Engine.IngameTime;
         time.Duration += Engine.DeltaSeconds;
         CurrentMission.Update();
@@ -174,6 +175,12 @@ public class EntityManager
         Scrap += CurrentMission.MissionScrap;
         missions[missionCount].Completed = true;
         CurrentMission.MarkComplete();
+    }
+    public static void SetMission(int _count)
+    {
+        missionCount = Math.Clamp(_count, 0, missions.Count - 1);
+        currentMission = missions[missionCount].Clone();
+        EventHandler.UpdateMissionText();
     }
     public static void NextMission()
     {

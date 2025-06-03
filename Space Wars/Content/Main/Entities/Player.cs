@@ -105,6 +105,13 @@ public class Player : Entity
     }
     public override void Update()
     {
+        if (modules[ModuleType.Core].Health <= 0)
+        {
+            isExpired = true;
+            SoundManager.PauseSound(engineSounds);
+            Assets.Get(Sound.Death).Play();
+            return;
+        }
         engineParticles.position = position - new Vector2(MathF.Sin(angle), -MathF.Cos(angle)) * 8;
         engineParticles.Update();
         smokeParticles.position = position;
@@ -192,7 +199,6 @@ public class Player : Entity
             }
             cachedDamage = 0;
         }
-        isEngineActive = false;
         float currentHealth = modules[ModuleType.Hull].Health + modules[ModuleType.Guns].Health + modules[ModuleType.Engines].Health + modules[ModuleType.Sensors].Health + modules[ModuleType.Core].Health;
         if (currentHealth > 50)
         {
@@ -203,44 +209,56 @@ public class Player : Entity
             smokeParticles.isEmitterActive = true;
             smokeParticles.speedOfEmission = 25f - currentHealth/4;
         }
-        if (modules[ModuleType.Core].Health <= 0)
+        if (position.Length() >= 40 * 50 + EntityManager.CurrentMission.Planet.radius)
         {
-            isExpired = true;
-            SoundManager.PauseSound(engineSounds);
-            Assets.Get(Sound.Death).Play();
+            velocity *= 0.8f;
+            velocity += Vector2.Normalize(-position) * Engine.DeltaSeconds * (position.Length() - (40 * 50 + EntityManager.CurrentMission.Planet.radius));
         }
-        else if (modules[ModuleType.Core].Health > 0)
+        position += velocity * Engine.DeltaSeconds * 60;
+        if (dockedEntity != null)
         {
-            if (position.Length() >= 40 * 50 + EntityManager.CurrentMission.Planet.radius)
+            if (dockedEntity.IsValid)
             {
-                velocity *= 0.8f;
-                velocity += Vector2.Normalize(-position) * Engine.DeltaSeconds * (position.Length() - (40 * 50 + EntityManager.CurrentMission.Planet.radius));
+                position = dockedEntity.Position;
+                velocity = dockedEntity.Velocity;
             }
-            position += velocity * Engine.DeltaSeconds * 60;
-            if (!modules[ModuleType.Core].isFailed)
+            else
             {
-                if (Input.OldState.IsKeyUp(Keys.Space) && Input.NewState.IsKeyDown(Keys.Space))
-                {
-                    if (dockedEntity == null)
-                    {
-                        DockableComponent dockableEntity = Engine.EntityManager.NearestDockableEntity(this);
-                        if (dockableEntity != null)
-                        {
-                            if (dockableEntity.Dock(this))
-                            {
-                                dockedEntity = dockableEntity;
-                            }
-                        }
-                    }
-                    else if (dockedEntity.Dock(this))
-                    {
-                        dockedEntity = null;
-                    }
-                }
-                if (Input.OldState.IsKeyUp(Keys.I) && Input.NewState.IsKeyDown(Keys.I))
-                {
-                    EventHandler.ToggleDockingMenus();
-                }
+                dockedEntity = null;
+            }
+        }
+        for (int i = 0; i < modules.Count; i++)
+        {
+            var module = modules[(ModuleType)i];
+            //Square root of the ratio reduces balancing impact with an additional fuse (especially with the gun dps)
+            //Note: Do not have any active abilities that are based on the cooldown, as the player could remove all fuses and get infinite of the ability
+            float fuseRatio = MathF.Sqrt((float)CountFuses((ModuleType)i)/3);
+            if(fuseRatio > 1.01)
+            {
+                //Bonus for 4 fuses
+                module.UpdateCooldown();
+                //Allows for easy random check in all cases
+                fuseRatio -= 1f;
+            }
+            if (random.NextSingle() < fuseRatio)
+            {
+                module.UpdateCooldown();
+            }
+        }
+        gunAngle.position = position;
+        base.Update();
+    }
+    public void RestrictedActions()
+    {
+        //Prevents undocking when in the garage menu
+        if (!modules[ModuleType.Core].isFailed)
+        {
+            if (Input.OldState.IsKeyUp(Keys.I) && Input.NewState.IsKeyDown(Keys.I))
+            {
+                EventHandler.ToggleDockingMenus();
+            }
+            if (dockedEntity == null)
+            {
                 targetVector = Vector2.Normalize(new Vector2(Mouse.GetState().X, Mouse.GetState().Y) - Engine.ScreenSize / 2 - position + Engine.Camera.Position);
                 gunAngle.angle = MathF.Atan2(targetVector.X, -targetVector.Y) - Engine.Camera.Rotation;
                 if (Input.NewMouseState.LeftButton == ButtonState.Pressed && modules[ModuleType.Guns].IsCooldownReady() && !UIManager.LockMouseInput && !modules[ModuleType.Guns].isFailed)
@@ -257,11 +275,19 @@ public class Player : Entity
                     SoundManager.PlayGlobalSound(Assets.Get(Sound.CloseMenu));
                     canGatherResources = false;
                 }
-
+                if (Input.OldState.IsKeyUp(Keys.Z) && Input.NewState.IsKeyDown(Keys.Z))
+                {
+                    leashedMaterials = [];
+                }
+                if (Input.OldState.IsKeyUp(Keys.Q) && Input.NewState.IsKeyDown(Keys.Q) && modules[ModuleType.Engines].IsCooldownReady() && !modules[ModuleType.Engines].isFailed)
+                {
+                    modules[ModuleType.Engines].ModuleFunction();
+                }
                 Keys[] pressedKey = Input.NewState.GetPressedKeys();
                 direction = Vector2.Zero;
-                if (!modules[ModuleType.Engines].isFailed && dockedEntity == null)
+                if (!modules[ModuleType.Engines].isFailed)
                 {
+                    isEngineActive = false;
                     for (int i = 0; i < pressedKey.Length; i++)
                     {
                         switch (pressedKey[i])
@@ -298,55 +324,38 @@ public class Player : Entity
                         velocity += Engine.ToUnitVector(angle) * 60 * Engine.DeltaSeconds * speed * 2 * fuseRatio / (leashedMaterials.Count + 2);
                     }
                 }
-                if (Input.OldState.IsKeyUp(Keys.Z) && Input.NewState.IsKeyDown(Keys.Z))
-                {
-                    leashedMaterials = [];
-                }
-                if (Input.OldState.IsKeyUp(Keys.Q) && Input.NewState.IsKeyDown(Keys.Q) && modules[ModuleType.Engines].IsCooldownReady() && !modules[ModuleType.Engines].isFailed)
-                {
-                    modules[ModuleType.Engines].ModuleFunction();
-                }
             }
-            if (EventHandler.AcknowledgeMessage(Message.ToggleTerminal))
+            if (Input.OldState.IsKeyUp(Keys.Space) && Input.NewState.IsKeyDown(Keys.Space))
             {
-                if (dockedEntity != null)
+                if (dockedEntity == null)
                 {
-                    Engine.UIManager.ToggleMenu((int)dockedEntity.Menu);
+                    DockableComponent dockableEntity = Engine.EntityManager.NearestDockableEntity(this);
+                    if (dockableEntity != null)
+                    {
+                        if (dockableEntity.Dock(this))
+                        {
+                            dockedEntity = dockableEntity;
+                            isEngineActive = false;
+                        }
+                    }
                 }
-                else
-                {
-                    Engine.UIManager.ToggleMenu((int)Containers.PlayerMenu);
-                }
-            }
-            if (dockedEntity != null)
-            {
-                if (dockedEntity.IsValid)
-                {
-                    position = dockedEntity.Position;
-                    velocity = dockedEntity.Velocity;
-                }
-                else
+                else if (dockedEntity.Dock(this))
                 {
                     dockedEntity = null;
+                    isEngineActive = false;
                 }
             }
         }
-        for (int i = 0; i < modules.Count; i++)
+        //Prevents unusual interations between various game states
+        if (EventHandler.AcknowledgeMessage(Message.ToggleTerminal))
         {
-            var module = modules[(ModuleType)i];
-            //Square root of the ratio reduces balancing impact with an additional fuse (especially with the gun dps)
-            //Note: Do not have any active abilities that are based on the cooldown, as the player could remove all fuses and get infinite of the ability
-            float fuseRatio = MathF.Sqrt((float)CountFuses((ModuleType)i)/3);
-            if(fuseRatio > 1.01)
+            if (dockedEntity != null)
             {
-                //Bonus for 4 fuses
-                module.UpdateCooldown();
-                //Allows for easy random check in all cases
-                fuseRatio -= 1f;
+                Engine.UIManager.ToggleMenu((int)dockedEntity.Menu);
             }
-            if (random.NextSingle() < fuseRatio)
+            else
             {
-                module.UpdateCooldown();
+                Engine.UIManager.ToggleMenu((int)Containers.PlayerMenu);
             }
         }
         if (isEngineActive)
@@ -359,8 +368,6 @@ public class Player : Entity
             engineParticles.isEmitterActive = false;
             SoundManager.PauseSound(engineSounds);
         }
-        gunAngle.position = position;
-        base.Update();
     }
     public override void Collide(int _damage)
     {
