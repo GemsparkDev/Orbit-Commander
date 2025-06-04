@@ -117,7 +117,7 @@ public class Engine : Game
         var exitButton = new Button(new Vector2(0, MainMenu.Size.Y / 4), wideButton, Assets.TextFont, "Exit", Color.White);
         var quitToMenuButton = new Button(new Vector2(0, 20), wideButton, Assets.TextFont, "Quit to Menu", Color.White);
         var quitToMissionButton = new Button(new Vector2(0, -20), wideButton, Assets.TextFont, "Return", Color.White);
-        var titleName = new Decal(new Vector2(0, -MainMenu.Size.Y) - Assets.DimsOf(Sprite.Title) / 2, Assets.Get(Sprite.Title));
+        var titleName = new Decal(new Vector2(0, -MainMenu.Size.Y), Assets.Get(Sprite.Title));
 
         var furnaceSlot = new ItemSlot<Pickup>(new Vector2(-20, 0), Assets.Get(Sprite.EmptySlot), UIManager, -1);
         var garageButton = new Button(new Vector2(0, -MainMenu.Size.Y / 4), wideButton, Assets.TextFont, "To Garage", Color.White);
@@ -129,7 +129,7 @@ public class Engine : Game
         var repairSlot = new ItemSlot<Module>(new Vector2(-GarageMenu.Size.X / 4 - 25, 0), Assets.Get(Sprite.EmptySlot), UIManager, -1);
         var mothershipScrap = new Decal(new Vector2(GarageMenu.Size.X / 2.2f, 20) - GarageMenu.Size / 2, Assets.TextFont, "0", Color.Gray, 10);
         var repairText = new Decal(new Vector2(-GarageMenu.Size.X / 4 - 60 / 2.5f, 40), Assets.TextFont, "", Color.White, 10);
-        var garagePlayerImage = new Decal(new Vector2(GarageMenu.Size.X / 4, 0) - Assets.DimsOf(Sprite.PlayerUI) / 2, Assets.Get(Sprite.PlayerUI));
+        var garagePlayerImage = new Decal(new Vector2(GarageMenu.Size.X / 4, 0), Assets.Get(Sprite.PlayerUI));
         var validConfigText = new Decal(-GarageMenu.Size / 4 + new Vector2(20, GarageMenu.Size.Y / 1.5f), Assets.TextFont, "Ready for Combat", Color.Green, 10);
         var repairButton = new Button(new Vector2(-GarageMenu.Size.X / 4 - 25, -40), Assets.Get(Sprite.Button), Assets.TextFont, "Repair", Color.LightBlue);
 
@@ -157,9 +157,6 @@ public class Engine : Game
         timer = new Decal(new Vector2(ScreenSize.X / 2 - 100, 10), Assets.TextFont, $"{IngameTime.DrawText}", Color.White, 10);
 
         Vector2 center = new Vector2(ScreenSize.X*2 / 3, ScreenSize.Y/2) / 2;
-        //System 1
-        var systemCenter = new Decal(center, Assets.Get(Sprite.Knob));
-        var mission0 = new Button(center + new Vector2(0, 80), Assets.Get(Sprite.PlanetIcon));
         var nextSystem = new Button(center + new Vector2(100, 0), Assets.Get(Sprite.Button));
 
         var sidePanelClose = new Button(new Vector2(-Assets.Get(Sprite.ToggleButton).Width / 2 + Assets.Get(Sprite.Terminal).Width / 2, 0), Assets.Get(Sprite.ToggleButton));
@@ -204,8 +201,7 @@ public class Engine : Game
         selectMission.AddBehaviour(Startgame);
         launchButton.AddBehaviour(delegate() { EventHandler.SendMessage(Message.EscapeDroneLeave); });
         shaderToggle.AddBehaviour(delegate () { UseShader = !UseShader; shaderToggle.text = $"Shader: {UseShader}"; });
-        mission0.AddBehaviour(delegate() { EntityManager.SetMission(1); });
-        nextSystem.AddBehaviour(delegate() { UIManager.ScreenWindow.CurrentTab = 2; });
+        nextSystem.AddBehaviour(delegate() { Main.MissionSelect.system = (Main.MissionSelect.system + 1) % 3; });
 
         MainMenu.AddWidget(exitButton as IFunctional, 0);
         MainMenu.AddWidget(singleplayerButton as IFunctional, 0);
@@ -263,9 +259,6 @@ public class Engine : Game
         UIManager.ScreenWindow.AddWidget(fpsOneSec, 0);
         UIManager.ScreenWindow.AddWidget(fpsLowest, 0);
         UIManager.ScreenWindow.AddWidget(timer, 0);
-        UIManager.ScreenWindow.AddWidget(systemCenter, 1);
-        UIManager.ScreenWindow.AddWidget(systemCenter, 2);
-        UIManager.ScreenWindow.AddWidget(mission0 as IFunctional, 1);
         UIManager.ScreenWindow.AddWidget(nextSystem as IFunctional, 1);
 
         ModuleSlots = new ItemSlot<Module>[5]; 
@@ -322,8 +315,6 @@ public class Engine : Game
         UIManager.AddContainer(MissionSelect);
         UIManager.AddContainer(PickupDroneMenu);
         UIManager.AddContainer(FuseMenu);
-
-        var teamComponent = new TeamComponent(true, 1, 1);
     }
     public static void Startgame()
     {

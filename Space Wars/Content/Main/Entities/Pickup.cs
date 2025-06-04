@@ -22,7 +22,7 @@ public class Pickup : Entity, IData
     {
         itemData = _itemData;
         color = _worldColor;
-        Tooltip.AddWidget(new Decal(new Vector2(-Tooltip.Size.X / 3, 0) - new Vector2(_itemData.RealSprite.Width, _itemData.RealSprite.Height)/2, _itemData.RealSprite));
+        Tooltip.AddWidget(new Decal(new Vector2(-Tooltip.Size.X / 3, 0), _itemData.RealSprite));
         Tooltip.AddWidget(new Decal(new Vector2(0, -5), Assets.TextFont, _itemData.Name, Color.White,  5f));
     }
 

@@ -194,6 +194,10 @@ public class EntityManager
         currentMission = missions[missionCount].Clone();
         EventHandler.UpdateMissionText();
     }
+    public static bool IsComplete(int _mission)
+    {
+        return missions[_mission].Completed;
+    }
     public void DecayPickups()
     {
         foreach (var pickup in entities)

@@ -5,25 +5,19 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace Space_Wars.Content.Main;
-public class TriggerEvent : IEvent
+public class TriggerEvent(float _start, Action<float> _action) : IEvent
 {
-    private float start;
-    private Action<float> action;
     private bool complete = false;
-    public TriggerEvent(float _start, Action<float> _action)
-    {
-        start = _start;
-        action = _action;
-    }
+
     public bool Update(float _time)
     {
-        if (_time < start)
+        if (_time < _start)
         {
             return true;
         }
         if (!complete)
         {
-            action(_time);
+            _action(_time);
             complete = true;
         }
         return !complete;

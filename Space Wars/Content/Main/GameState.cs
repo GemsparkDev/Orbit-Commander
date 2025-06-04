@@ -6,6 +6,7 @@ using Space_Wars.Content.Main.Particles;
 using System.Collections.Generic;
 using System.Diagnostics;
 using UILib.Content.Main;
+using System;
 
 namespace Space_Wars.Content.Main;
 
@@ -39,7 +40,8 @@ public abstract class GameState
         if (EntityManager.Player.modules[ModuleType.Core].isFailed)
         {
             string text = "Power failure detected. Please restart system.";
-            _spriteBatch.DrawString(Assets.TextFont, text, Engine.Camera.Position - new Vector2(text.Length * 3, 6), Color.Red);
+            Vector2 middlePoint = Assets.TextFont.MeasureString(text) / 2;
+            _spriteBatch.DrawString(Assets.TextFont, text, Engine.Camera.Position - middlePoint, Color.Red);
             return;
         }
         Engine.EntityManager.Draw(_spriteBatch);
@@ -170,22 +172,21 @@ public class Garage : GameState
 public class MissionSelect : GameState
 {
     private float time = 0;
-    private List<int> missions = [1, 0, 0];
-    private List<List<ParticleEmitter>> missionOrbits = [];
+    private List<(float distance, List<int> prerequisites, int system)> missions =
+    [
+        (200, [], 0), (160, [0], 0), (140, [0], 0), (100, [1, 2], 0),
+        (210, [3], 1)
+    ];
+    private List<(int system, ParticleEmitter orbit)> missionOrbits = [];
+    public static int system = 0;
+    private ParticleEmitter sun = new (Assets.Get(Sprite.Dot), new Vector2(Engine.ScreenSize.X / 6, 0), 20, 1, new Color(255, 255, 0));
     public MissionSelect()
     {
         var center = new Vector2(Engine.ScreenSize.X/6, 0);
-        foreach (var missionCount in missions)
+        foreach (var mission in missions)
         {
-            var system = new List<ParticleEmitter>();
-            for (int i = 0; i < missionCount; i++)
-            {
-                var element = Engine.UIManager.ScreenWindow.GetFuncWidget(i, missionCount) as Button;
-                float distance = Vector2.Distance(element.Offset + element.Size / 2 * UIManager.UIScale, new Vector2(Engine.ScreenSize.X * 2 / 6, Engine.ScreenSize.Y/4) * UIManager.UIScale);
-                
-                system.Add(new ParticleEmitter(Assets.Get(Sprite.Dot), center, distance, 1, new Color(0, 255, 255)));
-            }
-            missionOrbits.Add(system);
+            var orbit = (mission.system, new ParticleEmitter(Assets.Get(Sprite.Dot), center, mission.distance, 1, new Color(0, 255, 255)));
+            missionOrbits.Add(orbit);
         }
     }
     public override void Initialize()
@@ -193,15 +194,50 @@ public class MissionSelect : GameState
         Engine.UIManager.ScreenWindow.CurrentTab = 1;
         Engine.UIManager.ScreenWindow.enabled = true;
         EventHandler.UpdateMissionText();
+        Engine.Camera.Position = Vector2.Zero;
+        ParticleManager.Initialize();
     }
     public override void Update() 
     {
         time += Engine.DeltaSeconds;
         ParticleManager.Update();
-        foreach (var orbit in missionOrbits[Engine.UIManager.ScreenWindow.CurrentTab - 1])
-        { 
-            orbit.Update();
+        var pos = new Vector2(Input.NewMouseState.Position.X, Input.NewMouseState.Position.Y);
+        float distance = Vector2.Distance(pos, new Vector2(Engine.ScreenSize.X * 2 / 3, Engine.ScreenSize.Y/2));
+        for(int i = 0; i < missions.Count; i++)
+        {
+            var mission = missions[i];
+            if (mission.system != system)
+            {
+                continue;
+            }
+            var color = new Color(0, 255, 255);
+            bool canSelect = true;
+            foreach (var prerequisite in mission.prerequisites)
+            {
+                if (!EntityManager.IsComplete(prerequisite))
+                {
+                    color = new Color(0, 100, 100);
+                    canSelect = false;
+                }
+            }
+            if (canSelect && Math.Abs(mission.distance - distance) < 10)
+            {
+                color = Color.White;
+                if (Input.NewMouseState.LeftButton == ButtonState.Released && Input.OldMouseState.LeftButton == ButtonState.Pressed)
+                {
+                    EntityManager.SetMission(i);
+                }
+            }
+            missionOrbits[i].orbit.particleColor = color;
+            var orbit = missionOrbits[i];
+            if (orbit.system == system)
+            {
+                float freq = MathF.Sqrt(mission.distance * mission.distance * mission.distance) / 100;
+                ParticleManager.Add(new Particle(Assets.Get(Sprite.Circle), new Vector2(Engine.ScreenSize.X / 6, 0) + new Vector2(MathF.Cos(time / freq), MathF.Sin(time / freq)) * mission.distance, 0, 1, color));
+                orbit.orbit.Update();
+            }
         }
+        sun.Update();
     }
     public override void Draw(SpriteBatch _spriteBatch) 
     {
