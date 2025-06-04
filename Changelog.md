@@ -284,3 +284,12 @@ Update 0.4.3
     -Rearranged mission select menu.    
     -Modified what actions fall under player update and ingame update.    
     -Fixed bug #19.    
+    
+0.4.5.4    
+6/3/2025    
+    -Mission select game state now handles all mission selection UI.    
+    -Added every current mission to the mission select menu.    
+    -The system change button cycles through all 3 systems.    
+    -Mission planets now properly orbit their sun.    
+    -Selecting a mission now only requires hitting the path rather than the planet itself.    
+    -Missions have colors that change depending on whether they are active, inactive, and selected.    
