@@ -293,3 +293,14 @@ Update 0.4.3
     -Mission planets now properly orbit their sun.    
     -Selecting a mission now only requires hitting the path rather than the planet itself.    
     -Missions have colors that change depending on whether they are active, inactive, and selected.    
+    
+0.4.6    
+6/4/2025        
+ - Added a small ship icon to the mission select menu.    
+ - Rearranged various global modules in code.    
+ - Added the SaveGame class, allowing for modular saves and data storage between missions.    
+ - Added a UI Scale slider.    
+ - Added inventory slots and a module config checker to the mission select menu.    
+ - The mission select menu modules now properly syncs to the player.    
+ - The crash landing intro cutscene now fails the player's core module.    
+ - Fixed bug #17.    
