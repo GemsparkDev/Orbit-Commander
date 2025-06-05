@@ -76,6 +76,7 @@ public enum Sprite
     WideButton,
     ToggleButton,
     Terminal,
+    Miniplayer,
 
     SmeltIcon,
     RepairIcon,

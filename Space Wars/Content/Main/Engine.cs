@@ -8,14 +8,12 @@ using UILib.Content.Main;
 using Space_Wars.Content.Main.Particles;
 using Space_Wars.Content.Main.Entities;
 using System.Linq;
-using System.Diagnostics;
-using System.Transactions;
-using Space_Wars.Content.Main.Components;
 
 namespace Space_Wars.Content.Main;
 
 public class Engine : Game
 {
+    private static readonly List<string> debugLog = [];
     private GraphicsDeviceManager graphics;
     private SpriteBatch spriteBatch;
     private Decal fpsCounter;
@@ -26,24 +24,25 @@ public class Engine : Game
     private RenderTarget2D renderTarget;
     public static UIManager UIManager { get; private set; }
     public static EntityManager EntityManager { get; private set; }
+    public static SaveGame SaveGame { get; private set; }
     public static Camera Camera { get; private set; }
+    public static Engine Self { get; private set; }
+    public static Random Random { get; } = new();
     public static Vector2 ScreenSize { get; private set; }
     public static Vector2 MousePositionOffset { get; set; }
     public static Timespan IngameTime { get; set; } = new();
     public static float DeltaSeconds { get; private set; }
-    public static readonly float timeScale = 1f;
-    public static readonly int targetFramerate = 60;
-    public static readonly float enemyHitboxModifier = 1.2f;
+    private readonly float timeScale = 1f;
+    private readonly int targetFramerate = 60;
+    public static float EnemyHitboxModifier { get; private set; } = 1.2f;
     public static Texture2D Line { get; private set; }
     public static bool DebugMode { get; private set; }
     public static bool PatchedConics { get; private set; } = true;
-    public static readonly List<string> debugLog = [];
-    public static float UIScale { get; private set; } = 2f;
-    public static ItemSlot<Module>[] ModuleSlots { get; private set; }
-    public static ItemSlot<Pickup>[,] InventorySlots { get; private set; }
-    public static float ScreenShakeFactor { get; private set; } = 0;
-    public static Engine Self { get; private set; }
     public static bool UseShader { get; private set; } = true;
+    public static float ScreenShakeFactor { get; private set; } = 0;
+    //Convenient access point for player modules and dockable inventories
+    public static ItemSlot<Module>[] ModuleSlots { get; private set; } = new ItemSlot<Module>[5];
+    public static ItemSlot<Pickup>[,] InventorySlots { get; private set; } = new ItemSlot<Pickup>[1, 4];
 
     public Engine()
     {
@@ -86,11 +85,14 @@ public class Engine : Game
     }
     private void AddUIElements()
     {
+
+        UIManager.UIScale = 2;
+
         Texture2D largePanel = Assets.Get(Sprite.LargePanel);
         Texture2D wideButton = Assets.Get(Sprite.WideButton);
-        List<Texture2D> iconGroup1 = [ Assets.Get(Sprite.PlayIcon), Assets.Get(Sprite.SettingsIcon) ];
-        List<Texture2D> iconGroup2 = [ Assets.Get(Sprite.SmeltIcon), Assets.Get(Sprite.RepairIcon), Assets.Get(Sprite.VictoryIcon) ];
-        List<Texture2D> iconGroup3 = [ Assets.Get(Sprite.PlanetIcon), Assets.Get(Sprite.RepairIcon) ];
+        List<Texture2D> iconGroup1 = [Assets.Get(Sprite.PlayIcon), Assets.Get(Sprite.SettingsIcon)];
+        List<Texture2D> iconGroup2 = [Assets.Get(Sprite.SmeltIcon), Assets.Get(Sprite.RepairIcon), Assets.Get(Sprite.VictoryIcon)];
+        List<Texture2D> iconGroup3 = [Assets.Get(Sprite.PlanetIcon), Assets.Get(Sprite.RepairIcon)];
 
         var tabTexture = Assets.Get(Sprite.Tab);
         var selectedTabTexture = Assets.Get(Sprite.SelectedTab);
@@ -107,11 +109,14 @@ public class Engine : Game
         var patchedConicsToggle = new Button(new Vector2(0, -MainMenu.Size.Y / 4), wideButton, Assets.TextFont, $"Patched Conics: {PatchedConics}", Color.White);
         var sfxSlider = new Slider(Line, Assets.Get(Sprite.Knob), new Vector2(25, 0), 50, false, Color.White, Color.Gray);
         var musicSlider = new Slider(Line, Assets.Get(Sprite.Knob), new Vector2(25, -15), 50, false, Color.White, Color.Gray);
+        var uiScaleSlider = new Slider(Line, Assets.Get(Sprite.Knob), new Vector2(25, 15), 50, false, Color.White, Color.Gray);
         sfxSlider.SetInterval(1, 1);
-        musicSlider.SetInterval(1, 0);
-        var sfxVolume = new Decal(new Vector2(-30, 0), Assets.TextFont, "Sound: 100%", Color.White, 5);
-        var musicVolume = new Decal(new Vector2(-30, -15), Assets.TextFont, "Music: 100%", Color.White, 5);
-        var shaderToggle = new Button(new Vector2(-100, -MainMenu.Size.Y / 4), wideButton, Assets.TextFont, $"Shader: {UseShader}", Color.White);
+        musicSlider.SetInterval(0, 1);
+        uiScaleSlider.SetInterval(1, 1);
+        var sfxVolume = new Decal(new Vector2(-35, 0), Assets.TextFont, "Sound: 100%", Color.White, 5);
+        var musicVolume = new Decal(new Vector2(-35, -15), Assets.TextFont, "Music: 100%", Color.White, 5);
+        var uiScale = new Decal(new Vector2(-35, 15), Assets.TextFont, $"UI Scale: {Math.Truncate((uiScaleSlider.sliderInterval + 1) * 10) / 10}", Color.White, 5);
+        var shaderToggle = new Button(new Vector2(0, MainMenu.Size.Y / 4), wideButton, Assets.TextFont, $"Shader: {UseShader}", Color.White);
 
         var singleplayerButton = new Button(new Vector2(0, -MainMenu.Size.Y / 4), wideButton, Assets.TextFont, "Singleplayer", Color.White);
         var exitButton = new Button(new Vector2(0, MainMenu.Size.Y / 4), wideButton, Assets.TextFont, "Exit", Color.White);
@@ -133,11 +138,11 @@ public class Engine : Game
         var validConfigText = new Decal(-GarageMenu.Size / 4 + new Vector2(20, GarageMenu.Size.Y / 1.5f), Assets.TextFont, "Ready for Combat", Color.Green, 10);
         var repairButton = new Button(new Vector2(-GarageMenu.Size.X / 4 - 25, -40), Assets.Get(Sprite.Button), Assets.TextFont, "Repair", Color.LightBlue);
 
-        var enemySlider = new Slider(Line, new Vector2(-30, -PlayerMenu.Size.Y / 3), 50, true, Color.White, Color.Gray);
+        var enemySlider = new Slider(Line, new Vector2(0, -PlayerMenu.Size.Y / 3), 50, true, Color.White, Color.Gray);
         var waveText = new Decal(new Vector2(-5, 0), Assets.TextFont, "0", Color.White, 10);
         var partStatus = new Decal(new Vector2(0, 20), Assets.TextFont, "All systems go", Color.Green, 10);
         var restartButton = new Button(new Vector2(0, 50), Assets.Get(Sprite.Button), Assets.TextFont, "Restart", Color.LightBlue);
-        var restartSlider = new Slider(Line, new Vector2(-25, 63), 50, true, Color.Cyan, Color.Black);
+        var restartSlider = new Slider(Line, new Vector2(0, 63), 50, true, Color.Cyan, Color.Black);
 
         var missionName = new Decal(new Vector2(0, -30), Assets.TextFont, "Name", Color.White, 10);
         var missionDescription = new Decal(new Vector2(0, -15), Assets.TextFont, "Description", Color.Gray, 3f);
@@ -148,7 +153,7 @@ public class Engine : Game
 
         var launchButton = new Button(new Vector2(-20, 0), Assets.Get(Sprite.Button), Assets.TextFont, "Leave", Color.LightBlue);
 
-        var fuseCounter = new Decal(new Vector2(-20, -10), Assets.TextFont, "1", Color.Yellow, 10);
+        var fuseCounter = new Decal(new Vector2(-20, -10), Assets.TextFont, "0", Color.Yellow, 10);
 
         var globalSidePanelOpen = new Button(new Vector2(Assets.Get(Sprite.ToggleButton).Width / 2, ScreenSize.Y / 4), Assets.Get(Sprite.ToggleButton));
         fpsCounter = new Decal(new Vector2(ScreenSize.X / 2 - 20, 10), Assets.TextFont, "60", Color.White, 10);
@@ -156,7 +161,7 @@ public class Engine : Game
         fpsLowest = new Decal(new Vector2(ScreenSize.X / 2 - 20, 36), Assets.TextFont, "60", Color.White, 10);
         timer = new Decal(new Vector2(ScreenSize.X / 2 - 100, 10), Assets.TextFont, $"{IngameTime.DrawText}", Color.White, 10);
 
-        Vector2 center = new Vector2(ScreenSize.X*2 / 3, ScreenSize.Y/2) / 2;
+        Vector2 center = new Vector2(ScreenSize.X * 2 / 3, ScreenSize.Y / 2) / 2;
         var nextSystem = new Button(center + new Vector2(100, 0), Assets.Get(Sprite.Button));
 
         var sidePanelClose = new Button(new Vector2(-Assets.Get(Sprite.ToggleButton).Width / 2 + Assets.Get(Sprite.Terminal).Width / 2, 0), Assets.Get(Sprite.ToggleButton));
@@ -184,8 +189,14 @@ public class Engine : Game
             SoundManager.MusicVolume = i;
             musicVolume.text = $"Music: {Math.Round(i * 100)}%";
         });
+        uiScaleSlider.AddBehaviour(delegate ()
+        {
+            float i = uiScaleSlider.sliderInterval;
+            UIManager.UIScale = i + 1f;
+            uiScale.text = $"UI Scale: {Math.Truncate((i + 1) * 10) / 10}";
+        });
 
-        singleplayerButton.AddBehaviour(EventHandler.MissionSelectTrigger);
+        singleplayerButton.AddBehaviour(delegate () { SaveGame = new(); EventHandler.MissionSelectTrigger(); });
         quitToMenuButton.AddBehaviour(EventHandler.QuitToMenu);
         quitToMissionButton.AddBehaviour(EventHandler.MissionSelectTrigger);
         garageButton.AddBehaviour(EventHandler.GarageTrigger);
@@ -198,7 +209,7 @@ public class Engine : Game
         sidePanelClose.AddBehaviour(EventHandler.ToggleDockingMenus);
         prevMission.AddBehaviour(EntityManager.PrevMission);
         nextMission.AddBehaviour(EntityManager.NextMission);
-        selectMission.AddBehaviour(Startgame);
+        selectMission.AddBehaviour(delegate() { if (EventHandler.SyncModules()) { Startgame(); } });
         launchButton.AddBehaviour(delegate() { EventHandler.SendMessage(Message.EscapeDroneLeave); });
         shaderToggle.AddBehaviour(delegate () { UseShader = !UseShader; shaderToggle.text = $"Shader: {UseShader}"; });
         nextSystem.AddBehaviour(delegate() { Main.MissionSelect.system = (Main.MissionSelect.system + 1) % 3; });
@@ -210,8 +221,10 @@ public class Engine : Game
         MainMenu.AddWidget(patchedConicsToggle as IFunctional, 1);
         MainMenu.AddWidget(sfxSlider as IFunctional, 1);
         MainMenu.AddWidget(musicSlider as IFunctional, 1);
+        MainMenu.AddWidget(uiScaleSlider as IFunctional, 1);
         MainMenu.AddWidget(sfxVolume, 1);
         MainMenu.AddWidget(musicVolume, 1);
+        MainMenu.AddWidget(uiScale, 1);
         MainMenu.AddWidget(shaderToggle as IFunctional, 1);
 
         PauseMenu.AddWidget(quitToMenuButton as IFunctional);
@@ -244,6 +257,7 @@ public class Engine : Game
         MissionSelect.AddWidget(nextMission as IFunctional, 0);
         MissionSelect.AddWidget(selectMission as IFunctional, 0);
         MissionSelect.AddWidget(isComplete, 0);
+        MissionSelect.AddWidget(validConfigText, 1);
 
         PickupDroneMenu.AddWidget(launchButton as IFunctional);
 
@@ -261,7 +275,7 @@ public class Engine : Game
         UIManager.ScreenWindow.AddWidget(timer, 0);
         UIManager.ScreenWindow.AddWidget(nextSystem as IFunctional, 1);
 
-        ModuleSlots = new ItemSlot<Module>[5]; 
+        ModuleSlots = new ItemSlot<Module>[5];
         InventorySlots = new ItemSlot<Pickup>[1, 4];
         for (int x = 0; x < ModuleSlots.GetLength(0); x++)
         {
@@ -287,6 +301,7 @@ public class Engine : Game
                     Assets.DimsOf(Sprite.EmptySlot).Y * (y+1) - Assets.DimsOf(Sprite.LargePanel).X / 2), Assets.Get(Sprite.EmptySlot), UIManager, -1);
                 MothershipMenu.AddWidget(InventorySlots[x, y] as IFunctional, 0);
                 PickupDroneMenu.AddWidget(InventorySlots[x,y] as IFunctional);
+                MissionSelect.AddWidget(InventorySlots[x, y] as IFunctional, 1);
                 InventorySlots[x, y].AddBehaviour(new Action(EventHandler.UpdateInventory));
             }
         }
@@ -298,7 +313,7 @@ public class Engine : Game
                 //Performs a shallow copy of the instance variable
                 int x = j + 2;
                 int y = i;
-                fuse.AddBehaviour(delegate () { EntityManager.Player.ToggleFuse(x, y); });
+                fuse.AddBehaviour(delegate () { SaveGame.Player.ToggleFuse(x, y); });
                 FuseMenu.AddWidget(fuse as IFunctional);
             }
         }
@@ -320,9 +335,8 @@ public class Engine : Game
     {
         UIManager.DisableAll();
         ParticleManager.Initialize();
-        Player player = EntityManager.Initialize();
-        EventHandler.InitializeGameSpace(player);
-        SoundManager.Initialize(player);
+        EntityManager.Initialize();
+        SoundManager.Initialize();
         EventHandler.UpdateModulesStatus();
         SoundManager.PlayGlobalSound(Assets.Get(Sound.Interact));
         SoundManager.ChangeTrack(Assets.Get(Sound.main));
@@ -356,7 +370,7 @@ public class Engine : Game
         {
             ScreenShakeFactor = 0;
         }
-        if (DebugMode)
+        if (true)
         {
             fpsSamples.Add(DeltaSeconds);
             if (fpsSamples.Count > 60)
@@ -437,14 +451,14 @@ public class Engine : Game
             }
             for (int i = 0; i < logCount; i++)
             {
-                Vector2 textPosition = new(35, 20 + 15 * i * UIScale);
+                Vector2 textPosition = new(35, 20 + 15 * i * UIManager.UIScale);
                 try
                 {
-                    spriteBatch.DrawString(Assets.TextFont, $"{i + 1}: {debugLog[i]}", textPosition, Color.White, 0, Vector2.Zero, UIScale, SpriteEffects.None, 0.45f);
+                    spriteBatch.DrawString(Assets.TextFont, $"{i + 1}: {debugLog[i]}", textPosition, Color.White, 0, Vector2.Zero, UIManager.UIScale, SpriteEffects.None, 0.45f);
                 }
                 catch (Exception e)
                 {
-                    spriteBatch.DrawString(Assets.TextFont, $"{i + 1}: {e.Message}", textPosition, Color.Red, 0, Vector2.Zero, UIScale, SpriteEffects.None, 0.45f);
+                    spriteBatch.DrawString(Assets.TextFont, $"{i + 1}: {e.Message}", textPosition, Color.Red, 0, Vector2.Zero, UIManager.UIScale, SpriteEffects.None, 0.45f);
                 }
             }
         }

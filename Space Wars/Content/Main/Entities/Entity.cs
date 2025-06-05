@@ -35,6 +35,7 @@ public abstract class Entity
     {
         get { return texture == null ? Vector2.Zero : new Vector2(texture.Width, texture.Height); }
     }
+    internal Player Player => Engine.SaveGame.Player;
     public Entity(Texture2D _texture, Vector2 _position, Vector2 _velocity, float _angle, float _angularVelocity, int _damage, bool _isFriendly)
     {
         texture = _texture;
@@ -72,13 +73,13 @@ public abstract class Entity
     public virtual void Draw(SpriteBatch _spriteBatch)
     {
         Color stealthColor = color;
-        float maxDistance = EntityManager.StealthRange * (float)EntityManager.Player.CountFuses(ModuleType.Sensors) / 4;
+        float maxDistance = EntityManager.StealthRange * (float)Engine.SaveGame.Player.CountFuses(ModuleType.Sensors) / 4;
         //Player has superior sensing to stealth -> full detection
         //Player has equal sensing to stealth -> partial detection when nearby
         //Player has inferior sensing to stealth -> no detection
-        if (EntityManager.Player.SensingAbility == StealthAbility)
+        if (Engine.SaveGame.Player.SensingAbility == StealthAbility)
         {
-            float distanceSqr = EntityManager.DistanceSqr(EntityManager.Player, this);
+            float distanceSqr = EntityManager.DistanceSqr(Engine.SaveGame.Player, this);
             if ((distanceSqr > maxDistance * maxDistance))
             {
                 stealthColor *= 0;
@@ -88,7 +89,7 @@ public abstract class Entity
                 stealthColor *= MathF.Sqrt(maxDistance - MathF.Sqrt(distanceSqr)) / MathF.Sqrt(maxDistance);
             }
         }
-        else if(EntityManager.Player.SensingAbility < StealthAbility)
+        else if(Engine.SaveGame.Player.SensingAbility < StealthAbility)
         {
             stealthColor *= 0;
         }

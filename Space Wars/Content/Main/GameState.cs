@@ -4,7 +4,6 @@ using Microsoft.Xna.Framework.Input;
 using Space_Wars.Content.Main.Entities;
 using Space_Wars.Content.Main.Particles;
 using System.Collections.Generic;
-using System.Diagnostics;
 using UILib.Content.Main;
 using System;
 
@@ -34,10 +33,11 @@ public abstract class GameState
     public virtual void Initialize() { }
     public abstract void Update();
     public abstract void Draw(SpriteBatch _spriteBatch);
+    private Player Player => Engine.SaveGame.Player;
     //Useful if several game states want to render the same game space
-    internal static void RenderGamespace(SpriteBatch _spriteBatch)
+    internal void RenderGamespace(SpriteBatch _spriteBatch)
     {
-        if (EntityManager.Player.modules[ModuleType.Core].isFailed)
+        if (Player.modules[ModuleType.Core].isFailed)
         {
             string text = "Power failure detected. Please restart system.";
             Vector2 middlePoint = Assets.TextFont.MeasureString(text) / 2;
@@ -104,8 +104,8 @@ public class PlayingGame : GameState
             Engine.UIManager.GetContainer((int)Containers.PauseMenu).enabled = true;
             CurrentGameState.SwitchState(new PausedGame());
         }
-        EntityManager.PlayerUpdate();
-        EntityManager.IngameUpdate();
+        Engine.EntityManager.PlayerUpdate();
+        Engine.EntityManager.IngameUpdate();
         ParticleManager.Update();
         if (Input.OldState.IsKeyUp(Keys.Escape) && Input.NewState.IsKeyDown(Keys.Escape))
         {
@@ -153,7 +153,7 @@ public class Garage : GameState
     }
     public override void Update()
     {
-        EntityManager.IngameUpdate();
+        Engine.EntityManager.IngameUpdate();
         ParticleManager.Update();
         if (Input.OldState.IsKeyUp(Keys.Escape) && Input.NewState.IsKeyDown(Keys.Escape))
         {
@@ -177,6 +177,7 @@ public class MissionSelect : GameState
         (200, [], 0), (160, [0], 0), (140, [0], 0), (100, [1, 2], 0),
         (210, [3], 1)
     ];
+    private Vector2 playerPosition;
     private List<(int system, ParticleEmitter orbit)> missionOrbits = [];
     public static int system = 0;
     private ParticleEmitter sun = new (Assets.Get(Sprite.Dot), new Vector2(Engine.ScreenSize.X / 6, 0), 20, 1, new Color(255, 255, 0));
@@ -188,14 +189,17 @@ public class MissionSelect : GameState
             var orbit = (mission.system, new ParticleEmitter(Assets.Get(Sprite.Dot), center, mission.distance, 1, new Color(0, 255, 255)));
             missionOrbits.Add(orbit);
         }
+        var playerMission = missions[Engine.EntityManager.MissionCount];
+        float freq = MathF.Sqrt(playerMission.distance * playerMission.distance * playerMission.distance) / 100;
+        playerPosition = new Vector2(Engine.ScreenSize.X / 6, 0) + new Vector2(MathF.Cos(time / freq), MathF.Sin(time / freq)) * playerMission.distance;
     }
     public override void Initialize()
     {
-        Engine.UIManager.ScreenWindow.CurrentTab = 1;
-        Engine.UIManager.ScreenWindow.enabled = true;
+        Engine.UIManager.ScreenWindow.enabled = false;
         EventHandler.UpdateMissionText();
         Engine.Camera.Position = Vector2.Zero;
         ParticleManager.Initialize();
+        EventHandler.UpdateModulesUI();
     }
     public override void Update() 
     {
@@ -206,6 +210,12 @@ public class MissionSelect : GameState
         for(int i = 0; i < missions.Count; i++)
         {
             var mission = missions[i];
+            float freq = MathF.Sqrt(mission.distance * mission.distance * mission.distance) / 100;
+            pos = new Vector2(Engine.ScreenSize.X / 6, 0) + new Vector2(MathF.Cos(time / freq), MathF.Sin(time / freq)) * mission.distance;
+            if (i == Engine.EntityManager.MissionCount)
+            {
+                playerPosition = playerPosition * 0.95f + pos * 0.05f;
+            }
             if (mission.system != system)
             {
                 continue;
@@ -214,7 +224,7 @@ public class MissionSelect : GameState
             bool canSelect = true;
             foreach (var prerequisite in mission.prerequisites)
             {
-                if (!EntityManager.IsComplete(prerequisite))
+                if (!Engine.EntityManager.IsComplete(prerequisite))
                 {
                     color = new Color(0, 100, 100);
                     canSelect = false;
@@ -225,15 +235,14 @@ public class MissionSelect : GameState
                 color = Color.White;
                 if (Input.NewMouseState.LeftButton == ButtonState.Released && Input.OldMouseState.LeftButton == ButtonState.Pressed)
                 {
-                    EntityManager.SetMission(i);
+                    Engine.EntityManager.SetMission(i);
                 }
             }
             missionOrbits[i].orbit.particleColor = color;
             var orbit = missionOrbits[i];
             if (orbit.system == system)
             {
-                float freq = MathF.Sqrt(mission.distance * mission.distance * mission.distance) / 100;
-                ParticleManager.Add(new Particle(Assets.Get(Sprite.Circle), new Vector2(Engine.ScreenSize.X / 6, 0) + new Vector2(MathF.Cos(time / freq), MathF.Sin(time / freq)) * mission.distance, 0, 1, color));
+                ParticleManager.Add(new Particle(Assets.Get(Sprite.Circle), pos, 0, 1, color));
                 orbit.orbit.Update();
             }
         }
@@ -242,6 +251,10 @@ public class MissionSelect : GameState
     public override void Draw(SpriteBatch _spriteBatch) 
     {
         ParticleManager.Draw(_spriteBatch);
+        if (system == missions[Engine.EntityManager.MissionCount].system)
+        {
+            _spriteBatch.Draw(Assets.Get(Sprite.Miniplayer), playerPosition, null, new Color(0, 255, 0), 0, Vector2.Zero, 1, 0, 0);
+        }
     }
 }
 public class Victory : GameState
@@ -253,8 +266,8 @@ public class Victory : GameState
     public override void Update() { }
     public override void Draw(SpriteBatch _spriteBatch)
     {
-        _spriteBatch.DrawString(Assets.TextFont, "You Win!", new Vector2(-12 * 8, -60) * Engine.UIScale + Engine.Camera.Position, Color.Yellow, 0, Vector2.Zero, Engine.UIScale * 2, SpriteEffects.None, 0);
-        _spriteBatch.DrawString(Assets.TextFont, $"Your Time: {Engine.IngameTime.DrawText}", new Vector2(-12 * 12 / 2, (12 * 4 - 60)) * Engine.UIScale + Engine.Camera.Position, Color.White, 0, Vector2.Zero, Engine.UIScale/2, SpriteEffects.None, 0);
+        _spriteBatch.DrawString(Assets.TextFont, "You Win!", new Vector2(-12 * 8, -60) * UIManager.UIScale + Engine.Camera.Position, Color.Yellow, 0, Vector2.Zero, UIManager.UIScale * 2, SpriteEffects.None, 0);
+        _spriteBatch.DrawString(Assets.TextFont, $"Your Time: {Engine.IngameTime.DrawText}", new Vector2(-12 * 12 / 2, (12 * 4 - 60)) * UIManager.UIScale + Engine.Camera.Position, Color.White, 0, Vector2.Zero, UIManager.UIScale /2, SpriteEffects.None, 0);
     }
 }
 public class Cutscene(List<IEvent> _events, List<Actor> _actors, GameState _nextGameState) : GameState 
@@ -299,7 +312,7 @@ public class InShip : GameState
     }
     public override void Update() 
     {
-        EntityManager.IngameUpdate();
+        Engine.EntityManager.IngameUpdate();
         ParticleManager.Update();
         if (Input.OldState.IsKeyUp(Keys.F) && Input.NewState.IsKeyDown(Keys.F))
         {

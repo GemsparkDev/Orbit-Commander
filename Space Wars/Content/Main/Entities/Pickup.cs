@@ -28,12 +28,12 @@ public class Pickup : Entity, IData
 
     public override void Update()
     {
-        if (!EntityManager.Player.leashedMaterials.Contains(this))
+        if (!Player.leashedMaterials.Contains(this))
         {
-            if (EntityManager.DistanceSqr(EntityManager.Player, this) < 1375 && EntityManager.Player.leashedMaterials.Count < 3 && EntityManager.Player.canGatherResources)
+            if (EntityManager.DistanceSqr(Player, this) < 1375 && Player.leashedMaterials.Count < 3 && Player.canGatherResources)
             {
-                EntityManager.Player.leashedMaterials.Add(this);
-                if (EntityManager.Player.leashedMaterials.Count < 3)
+                Player.leashedMaterials.Add(this);
+                if (Player.leashedMaterials.Count < 3)
                 {
                     SoundManager.PlaySound(Assets.Get(Sound.Interact), position);
                 }
@@ -46,8 +46,8 @@ public class Pickup : Entity, IData
         }
         else
         {
-            Vector2 playerVelocity = EntityManager.Player.velocity;
-            Vector2 leashPosition = EntityManager.Player.position - Engine.ToUnitVector(EntityManager.Player.angle) * 25;
+            Vector2 playerVelocity = Player.velocity;
+            Vector2 leashPosition = Player.position - Engine.ToUnitVector(Player.angle) * 25;
             float distance = EntityManager.DistanceSqr(position, leashPosition);
             if (distance > 16)
             {
@@ -106,6 +106,7 @@ public class Pickup : Entity, IData
 
 public static class ItemFactory
 {
+    private static Player Player => Engine.SaveGame.Player;
     //Items
     private static Dictionary<ItemType, ItemData> itemData = new()
     {
@@ -113,16 +114,16 @@ public static class ItemFactory
     };
     private static Dictionary<ModuleType, ModuleData> moduleData = new()
     {
-        { ModuleType.Hull, new ModuleData(Sprite.HullModule, Sprite.HullModule, "Hull", (int)ModuleType.Hull, 20, delegate{ EntityManager.Player.Hull(); }) },
+        { ModuleType.Hull, new ModuleData(Sprite.HullModule, Sprite.HullModule, "Hull", (int)ModuleType.Hull, 20, delegate{ Player.Hull(); }) },
 
-        { ModuleType.Basic, new ModuleData(Sprite.RealGunModule, Sprite.GunModule, "Basic", (int)ModuleType.Guns, 20, delegate{ EntityManager.Player.Basic(); }) },
-        { ModuleType.Spiral, new ModuleData(Sprite.RealGunModule,Sprite.GunModule, "Spiral", (int)ModuleType.Guns, 20, delegate{ EntityManager.Player.Spiral(); }) },
-        { ModuleType.Shotgun, new ModuleData(Sprite.RealGunModule,Sprite.GunModule, "Shotgun", (int)ModuleType.Guns, 20, delegate{ EntityManager.Player.Shotgun(); }) },
-        { ModuleType.Missile, new ModuleData(Sprite.RealMissileModule,Sprite.MissileModule, "Missile", (int)ModuleType.Guns, 20, delegate{ EntityManager.Player.Missile(); }) },
-        { ModuleType.LMG, new ModuleData(Sprite.RealGunModule,Sprite.GunModule, "Light Machine Gun", (int)ModuleType.Guns, 20, delegate{ EntityManager.Player.LMG(); }) },
-        { ModuleType.Sniper, new ModuleData(Sprite.RealSniperModule,Sprite.SniperModule, "Railgun", (int)ModuleType.Guns, 20, delegate{ EntityManager.Player.Sniper(); })},
+        { ModuleType.Basic, new ModuleData(Sprite.RealGunModule, Sprite.GunModule, "Basic", (int)ModuleType.Guns, 20, delegate{ Player.Basic(); }) },
+        { ModuleType.Spiral, new ModuleData(Sprite.RealGunModule,Sprite.GunModule, "Spiral", (int)ModuleType.Guns, 20, delegate{ Player.Spiral(); }) },
+        { ModuleType.Shotgun, new ModuleData(Sprite.RealGunModule,Sprite.GunModule, "Shotgun", (int)ModuleType.Guns, 20, delegate{ Player.Shotgun(); }) },
+        { ModuleType.Missile, new ModuleData(Sprite.RealMissileModule,Sprite.MissileModule, "Missile", (int)ModuleType.Guns, 20, delegate{ Player.Missile(); }) },
+        { ModuleType.LMG, new ModuleData(Sprite.RealGunModule,Sprite.GunModule, "Light Machine Gun", (int)ModuleType.Guns, 20, delegate{ Player.LMG(); }) },
+        { ModuleType.Sniper, new ModuleData(Sprite.RealSniperModule,Sprite.SniperModule, "Railgun", (int)ModuleType.Guns, 20, delegate{ Player.Sniper(); })},
 
-        { ModuleType.Engines, new ModuleData(Sprite.EngineModule, Sprite.EngineModule, "Engines", (int)ModuleType.Engines, 20, delegate{ EntityManager.Player.Dash(); }) },
+        { ModuleType.Engines, new ModuleData(Sprite.EngineModule, Sprite.EngineModule, "Engines", (int)ModuleType.Engines, 20, delegate{ Player.Dash(); }) },
         //{ ModuleType.Engines, new ModuleData(Sprite.EngineModule, Sprite.EngineModule, "Shield", (int)ModuleType.Engines, 20, delegate{ EntityManager.Player.SummonShield(); }) },
 
         { ModuleType.Sensors, new ModuleData(Sprite.SensorModule,Sprite.SensorModule, "Sensors", (int)ModuleType.Sensors, 20, delegate{ }) },

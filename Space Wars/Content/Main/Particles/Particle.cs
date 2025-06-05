@@ -19,10 +19,7 @@ namespace Space_Wars.Content.Main.Particles
         float angularVelocity;
         float transparency;
         public Texture2D texture;
-        public Vector2 Size
-        {
-            get { return texture == null ? Vector2.Zero : new Vector2(texture.Width, texture.Height); }
-        }
+        public Vector2 Size => texture == null ? Vector2.Zero : new Vector2(texture.Width, texture.Height);
         public String drawText;
         public Particle(Texture2D _texture, float _timeLeft, Vector2 _position, Vector2 _velocity, float _angle, float _angularVelocity, float _transparency, bool _fadesOut, Color _color, Color _fadeToColor)
         {

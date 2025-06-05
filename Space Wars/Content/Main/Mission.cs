@@ -19,7 +19,6 @@ public class Mission
     public List<(EntityConstructor, Condition[])> CopyObjectives { get; }
     public List<(Entity entity, Condition[] conditions)> MissionObjectives { get; } = [];
     private Func<Cutscene> cutscene;
-    public int MissionScrap { get; set; } = 0;
     private float timerModifier;
     public int WaveGoal { get; } = 0;
     public float restartTimer = -1;
@@ -33,6 +32,7 @@ public class Mission
     private float maxWaveTimer = 5;
     private float difficulty;
     private Random random = new();
+    private Player Player => Engine.SaveGame.Player;
     public delegate Enemy DelegateEnemy(Vector2 position, Vector2 velocity, float angle, bool _isFriendly = false);
     public int EnemiesSpawned { get; private set; } = 0;
 
@@ -113,7 +113,7 @@ public class Mission
                 }
             }
         }
-        if (WaveGoal > 0 && (WaveGoal >= EntityManager.CurrentMission.Wave))
+        if (WaveGoal > 0 && (WaveGoal >= Wave))
         {
             allCompleted = false;
         }
@@ -128,7 +128,7 @@ public class Mission
             }
             else
             {
-                EntityManager.MarkMissionComplete();
+                Engine.EntityManager.MarkMissionComplete();
             }
         }
         if (restartTimer != -1)
@@ -230,7 +230,6 @@ public class Mission
             return;
         }
         Completed = true;
-        MissionScrap = 0;
         restartTimer = 2;
     }
     public void AttractObject(Entity _entity)
@@ -363,7 +362,7 @@ public class Mission
             {
                 if (random.Next(0, enemyCreditValues[i].cost / 2) == 0 && newCosts[i] <= enemyCredits)
                 {
-                    Engine.EntityManager.Add(enemyCreditValues[i].enemy(NewSpawnLocation(), EntityManager.Player.velocity, 0));
+                    Engine.EntityManager.Add(enemyCreditValues[i].enemy(NewSpawnLocation(), Player.velocity, 0));
                     enemyCredits -= newCosts[i];
                     newCosts[i] += 1;
                     EnemiesSpawned++;
@@ -382,7 +381,7 @@ public class Mission
         float distanceMultiplier = 1 + (random.NextSingle() - 0.5f) / 4;
         float distance = (Engine.ScreenSize.X + Engine.ScreenSize.Y) / 2 * distanceMultiplier;
         Vector2 spawnLocation = Engine.ToUnitVector(angle) * distance;
-        return spawnLocation + EntityManager.Player.position;
+        return spawnLocation + Player.position;
     }
 }
 public class EntityConstructor(Func<Vector2, Vector2, float, Entity> _constructor, Vector2 _position, Vector2 _velocity, float _angle)

@@ -13,7 +13,6 @@ namespace Space_Wars.Content.Main.Entities;
 
 public class Player : Entity
 {
-    private Random random = new();
     public DockableComponent dockedEntity;
     private Enemy shield;
     private ParticleEmitter engineParticles = new(Assets.Get(Sprite.Circle), 0.15f, Vector2.Zero, 0, 45, 2, 0, 450f, 1, true, Color.Cyan, Color.DarkSlateBlue, EmitterType.EmissionOverTime) { isEmitterActive = false };
@@ -110,6 +109,8 @@ public class Player : Entity
             isExpired = true;
             SoundManager.PauseSound(engineSounds);
             Assets.Get(Sound.Death).Play();
+            SoundManager.SFXVolume = (Engine.UIManager.GetFuncWidget(0, 3) as Slider).sliderInterval;
+            SoundManager.MusicVolume = (Engine.UIManager.GetFuncWidget(0, 4) as Slider).sliderInterval;
             return;
         }
         engineParticles.position = position - new Vector2(MathF.Sin(angle), -MathF.Cos(angle)) * 8;
@@ -148,7 +149,7 @@ public class Player : Entity
                 {
                     module.isFailed = false;
                     //Small bonus to module health to keep players alive in firefights
-                    module.Health = Math.Min(module.MaxHealth, module.Health + random.Next(1, 4));
+                    module.Health = Math.Min(module.MaxHealth, module.Health + Engine.Random.Next(1, 4));
                     restartedModules = true;
                     EventHandler.UpdateModulesStatus();
                     if (modules[ModuleType.Core] == module)
@@ -183,7 +184,7 @@ public class Player : Entity
             }
             for (int i = 0; i < cachedDamage; i++)
             {
-                int randomNumber = random.Next(1, 4);
+                int randomNumber = Engine.Random.Next(1, 4);
                 if (modules[ModuleType.Hull].Health > 0)
                 {
                     modules[ModuleType.Hull].Health--;
@@ -209,10 +210,11 @@ public class Player : Entity
             smokeParticles.isEmitterActive = true;
             smokeParticles.speedOfEmission = 25f - currentHealth/4;
         }
-        if (position.Length() >= 40 * 50 + EntityManager.CurrentMission.Planet.radius)
+        var planet = Engine.EntityManager.CurrentMission.Planet;
+        if (position.Length() >= 40 * 50 + planet.radius)
         {
             velocity *= 0.8f;
-            velocity += Vector2.Normalize(-position) * Engine.DeltaSeconds * (position.Length() - (40 * 50 + EntityManager.CurrentMission.Planet.radius));
+            velocity += Vector2.Normalize(-position) * Engine.DeltaSeconds * (position.Length() - (40 * 50 + planet.radius));
         }
         position += velocity * Engine.DeltaSeconds * 60;
         if (dockedEntity != null)
@@ -240,7 +242,7 @@ public class Player : Entity
                 //Allows for easy random check in all cases
                 fuseRatio -= 1f;
             }
-            if (random.NextSingle() < fuseRatio)
+            if (Engine.Random.NextSingle() < fuseRatio)
             {
                 module.UpdateCooldown();
             }
@@ -379,9 +381,9 @@ public class Player : Entity
             invincibilityCooldown = 1;
             ParticleManager.Add(new Particle(null, 1, position + new Vector2(0, -1), new Vector2(0, -1.5f), 0, 0, 1, true, Color.Red, Color.Red) { drawText = $"{_damage}" });
             //Part Failure
-            if (random.Next(0, 1) == 0)
+            if (Engine.Random.Next(0, 1) == 0)
             {
-                ModuleType failedPart = (ModuleType)random.Next(0, 4);
+                ModuleType failedPart = (ModuleType)Engine.Random.Next(0, 4);
                 if (modules[failedPart].Health < modules[failedPart].MaxHealth / 2)
                 {
                     if (modules[failedPart].isFailed)
@@ -395,7 +397,7 @@ public class Player : Entity
                     modules[failedPart].isFailed = true;
                     string text = $"{failedPart} has failed!";
                     //Picks a random fuse to burn out if a module fails
-                    int burntOutFuse = random.Next(0, 3);
+                    int burntOutFuse = Engine.Random.Next(0, 3);
                     if (moduleFuses[(int)failedPart, burntOutFuse])
                     {
                         moduleFuses[(int)failedPart, burntOutFuse] = false;
@@ -489,10 +491,10 @@ public class Player : Entity
     }
     public void Shotgun()
     {
-        int randomBulletCount = random.Next(4, 6);
+        int randomBulletCount = Engine.Random.Next(4, 6);
         for (int i = 0; i < randomBulletCount; i++)
         {
-            float angleDegrees = (float)(random.NextDouble() - 0.5) * 5;
+            float angleDegrees = (Engine.Random.NextSingle() - 0.5f) * 5;
             float offsetAngle = angleDegrees * MathF.PI / 180;
             Vector2 targetVector = Engine.ToUnitVector(gunAngle.angle + offsetAngle);
             Vector2 positionOffset = Engine.ToUnitVector(gunAngle.angle + MathF.PI/2) * offsetAngle * 100;
@@ -513,7 +515,7 @@ public class Player : Entity
     }
     public void LMG()
     {
-        Vector2 offset = Engine.ToUnitVector(gunAngle.angle + MathF.PI / 2) * random.Next(-2, 3);
+        Vector2 offset = Engine.ToUnitVector(gunAngle.angle + MathF.PI / 2) * Engine.Random.Next(-2, 3);
         Texture2D dot = Assets.Get(Sprite.Microshot);
         Projectile shot = new PulseShot(position + offset, targetVector * 8 + velocity + offset / 4, gunAngle.angle, 0, true, 1)
         {
@@ -528,7 +530,7 @@ public class Player : Entity
     }
     public void Silenced()
     {
-        Vector2 offset = Engine.ToUnitVector(gunAngle.angle + MathF.PI / 2) * random.Next(-2, 3);
+        Vector2 offset = Engine.ToUnitVector(gunAngle.angle + MathF.PI / 2) * Engine.Random.Next(-2, 3);
         Texture2D dot = Assets.Get(Sprite.Microshot);
         Projectile shot = new PulseShot(position + offset, targetVector * 12 + velocity + offset / 4, gunAngle.angle, 0, true, 5, false, 1)
         {
@@ -566,7 +568,7 @@ public class Player : Entity
     }
     public override void Draw(SpriteBatch _spriteBatch)
     {
-        if (position.Length() > EntityManager.CurrentMission.Planet.radius + 25 * 50)
+        if (position.Length() > Engine.EntityManager.CurrentMission.Planet.radius + 25 * 50)
         {
             _spriteBatch.Draw(Assets.Get(Sprite.Arrow), position - Vector2.Normalize(position) * 25, null, color, MathF.Atan2(-position.X, position.Y), Assets.DimsOf(Sprite.Arrow) / 2, 1, 0, 0.2f);
             _spriteBatch.DrawString(Assets.TextFont, "Return to planet.", Engine.Camera.Position - new Vector2(105, 225), Color.Crimson);

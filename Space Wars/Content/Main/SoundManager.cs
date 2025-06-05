@@ -13,7 +13,7 @@ public static class SoundManager
 {
     private static List<SoundEffectInstance> sounds =[];
     private static Random random = new();
-    private static Player player;
+    private static Player player => Engine.SaveGame.Player;
     private static SoundEffectInstance currentTrack;
     private static SoundEffectInstance prevTrack;
     private static float soundTimer = -1;
@@ -22,11 +22,10 @@ public static class SoundManager
     public static float MusicVolume { get { return musicVolume; } set { musicVolume = value; UpdateVolume(); } }
     private static float sfxVolume = 1;
     public static float SFXVolume { get { return sfxVolume; } set { sfxVolume = value; UpdateVolume(); } }
-    public static void Initialize(Player _player)
+    public static void Initialize()
     {
         SetAllSounds(false);
         sounds.Clear();
-        player = _player;
     }
     public static void PlaySound(SoundEffectInstance _soundEffectInstance)
     {

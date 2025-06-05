@@ -116,7 +116,7 @@ public class AssassinShot : Projectile
             position += velocity / check * Engine.DeltaSeconds * 60;
             angle += angularVelocity * Engine.DeltaSeconds * 60;
             EntityManager.Collide(this, Engine.EntityManager.NearestEnemy(this));
-            if (EntityManager.CurrentMission.Planet.IsColliding(position))
+            if (Engine.EntityManager.CurrentMission.Planet.IsColliding(position))
             {
                 isExpired = true;
             }

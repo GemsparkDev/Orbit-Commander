@@ -14,7 +14,7 @@ namespace Space_Wars.Content.Main;
 
 public class EventHandler
 {
-    private static Player player;
+    private static Player player => Engine.SaveGame.Player;
     private static readonly List<Message> eventLog = [];
 
     public static bool AcknowledgeMessage(Message _message)
@@ -30,10 +30,6 @@ public class EventHandler
         eventLog.Add(_message);
         return true;
     }
-    public static void InitializeGameSpace(Player _player)
-    {
-        player = _player;
-    }
     public static void QuitToMenu()
     {
         player.velocity = Vector2.Zero;
@@ -43,7 +39,7 @@ public class EventHandler
         Engine.UIManager.ToggleMenu((int)Containers.MainMenu);
         ParticleManager.Initialize();
         SoundManager.SetAllSounds(false);
-        SoundManager.Initialize(player);  
+        SoundManager.Initialize();  
         SoundManager.PlayGlobalSound(Assets.Get(Sound.Interact));
         Engine.Camera.Position = Vector2.Zero;
         CurrentGameState.SwitchState(new MainMenu());
@@ -61,15 +57,15 @@ public class EventHandler
             SoundManager.PlayGlobalSound(Assets.Get(Sound.Fail));
             return;
         }
-        if (daughterModule.Health < 20 && EntityManager.CurrentMission.MissionScrap >= 1)
+        if (daughterModule.Health < 20 && Engine.SaveGame.Scrap >= 1)
         {
             daughterModule.Health = 20;
             daughterModule.isFailed = false;
-            EntityManager.CurrentMission.MissionScrap -= 1;
+            Engine.SaveGame.Scrap -= 1;
             SoundManager.PlayGlobalSound(Assets.Get(Sound.Interact));
             UpdateRepairText();
             Decal mothershipScrap = Engine.UIManager.GetWidget((int)Containers.GarageMenu, 0) as Decal;
-            mothershipScrap.text = EntityManager.CurrentMission.MissionScrap.ToString();
+            mothershipScrap.text = Engine.SaveGame.Scrap.ToString();
         }
         else
         {
@@ -145,7 +141,7 @@ public class EventHandler
         var furnaceSlot = Engine.UIManager.GetFuncWidget((int)Containers.MothershipMenu, 1) as ItemSlot<Pickup>;
         furnaceSlot.daughterItem = furnaceItem;
         (Engine.UIManager.GetFuncWidget((int)Containers.MothershipMenu,0) as Slider).SetInterval(_value, _maxValue);
-        (Engine.UIManager.GetWidget((int)Containers.GarageMenu, 0) as Decal).text = EntityManager.CurrentMission.MissionScrap.ToString();
+        (Engine.UIManager.GetWidget((int)Containers.GarageMenu, 0) as Decal).text = Engine.SaveGame.Scrap.ToString();
     }
     public static void UpdateFurnace()
     {
@@ -153,9 +149,9 @@ public class EventHandler
     }
     public static void CraftItem()
     {
-        if(EntityManager.CurrentMission.MissionScrap >= 1)
+        if(Engine.SaveGame.Scrap >= 1)
         {
-            EntityManager.CurrentMission.MissionScrap -= 1;
+            Engine.SaveGame.Scrap -= 1;
             SendMessage(Message.MothershipCraftItem);
             SoundManager.PlayGlobalSound(Assets.Get(Sound.Interact));
         }
@@ -167,7 +163,7 @@ public class EventHandler
     public static void UpdateCraftingUI(float _value, float _maxValue, int requiredCraftsLeft)
     {
         (Engine.UIManager.GetFuncWidget((int)Containers.MothershipMenu,3) as Slider).SetInterval(_value, _maxValue);
-        (Engine.UIManager.GetWidget((int)Containers.GarageMenu, 0) as Decal).text = EntityManager.CurrentMission.MissionScrap.ToString();
+        (Engine.UIManager.GetWidget((int)Containers.GarageMenu, 0) as Decal).text = Engine.SaveGame.Scrap.ToString();
         (Engine.UIManager.GetWidget((int)Containers.MothershipMenu,0) as Decal).text = requiredCraftsLeft.ToString();
     }
     public static void UpdateRestartSlider(float _value, float _maxValue)
@@ -211,7 +207,7 @@ public class EventHandler
     public static void UpdateMissionText()
     {
         Container missionSelect = Engine.UIManager.GetContainer((int)Containers.MissionMenu);
-        Mission mission = EntityManager.CurrentMission;
+        Mission mission = Engine.EntityManager.CurrentMission;
         (missionSelect.GetWidget(0) as Decal).text = mission.Name;
         (missionSelect.GetWidget(1) as Decal).text = mission.Description;
         (missionSelect.GetWidget(2) as Decal).text = mission.Completed ? "Completed" : "Not Completed";
@@ -219,7 +215,7 @@ public class EventHandler
     }
     public static void UpdateScrapText()
     {
-        (Engine.UIManager.GetWidget((int)Containers.GarageMenu, 0) as Decal).text = EntityManager.CurrentMission.MissionScrap.ToString();
+        (Engine.UIManager.GetWidget((int)Containers.GarageMenu, 0) as Decal).text = Engine.SaveGame.Scrap.ToString();
     }
     public static void UpdateModulesStatus()
     {

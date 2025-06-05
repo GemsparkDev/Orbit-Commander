@@ -7,7 +7,6 @@ using Space_Wars.Content.Main.Particles;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Diagnostics;
 
 namespace Space_Wars.Content.Main;
 
@@ -18,16 +17,14 @@ public class EntityManager
     private List<Entity> addedEntities = [];
     private List<Entity> enemies = [];
     private List<Projectile> projectiles = [];
-    private static Random random = new();
     private static float currentKarma = 0;
-    public static Player Player { get; private set; }
+    private Player Player => Engine.SaveGame.Player;
     //Maximum distance for any detection when sensing = stealth
     public static float StealthRange { get; private set; } = 750;
     //Threshold of detection for enemies
     public static float StealthThreshold { get; private set; } = 0.75f;
     public readonly static Pickup[] globalInventory = new Pickup[5];
-    public static int Scrap { get; private set; }
-    private readonly static List<Mission> missions = 
+    private readonly List<Mission> missions = 
     [
         new([ new(Vector2.Zero, Vector2.Zero, 10000, 8, true, Color.Cyan), new(new Vector2(1000, 0), GravitationalSource.GetOrbitalVelocity(new Vector2(1000, 0), Vector2.Zero, 10000), 250, 1.5f, false, Color.Cyan) ],
         [ (new EntityConstructor(Enemy.NewMothership, new Vector2(0, -8*50 - Assets.DimsOf(Sprite.Mothership).Y / 2), Vector2.Zero, 0f), [ Condition.Protect, Condition.CustomIncomplete ])],
@@ -67,9 +64,10 @@ public class EntityManager
             0, 
             new Condition[0])
     */
-    public static Mission CurrentMission { get { return currentMission ?? missions[missionCount]; } }
-    private static int missionCount = 0;
-    private static Mission currentMission;
+    private Mission currentMission;
+    public Mission CurrentMission { get { return currentMission ?? missions[missionCount]; } }
+    private int missionCount = 0;
+    public int MissionCount { get { return missionCount; } }
     public void Add(Entity entity)
     {
         if (!isUpdating)
@@ -91,22 +89,21 @@ public class EntityManager
             addedEntities.Add(entity);
         }
     }
-    public Player Initialize()
+    public void Initialize()
     {
         currentMission = missions[missionCount].Clone();
         entities.Clear();
         addedEntities.Clear();
         enemies.Clear();
         projectiles.Clear();
-        Player = new(new Vector2(0, -CurrentMission.Planet.radius + 1), new Vector2(0, 0), 0, 0);
+        Player.position = new Vector2(0, -CurrentMission.Planet.radius + 1);
         CurrentMission.Initialize();
-        return Player;
     }
-    public static void PlayerUpdate()
+    public void PlayerUpdate()
     {
         Player.RestrictedActions();
     }
-    public static void IngameUpdate()
+    public void IngameUpdate()
     {
         Player.Update();
         CurrentMission.AttractObject(Player);
@@ -116,17 +113,23 @@ public class EntityManager
         }
         if (Player.isExpired)
         {
+            foreach (var module in Player.modules)
+            {
+                module.Value.Health = module.Value.MaxHealth;
+                module.Value.isFailed = false;
+            }
             Engine.Startgame();
         }
         Engine.MousePositionOffset = new Vector2(Mouse.GetState().X - Engine.ScreenSize.X / 2, Mouse.GetState().Y - Engine.ScreenSize.Y / 2) / 10
-            + Engine.ScreenShakeFactor * Engine.ScreenShakeFactor * new Vector2((float)random.NextDouble() - 0.5f, (float)random.NextDouble() - 0.5f) * 50;
-        Engine.Camera.Rotation = Engine.ScreenShakeFactor * Engine.ScreenShakeFactor * ((float)random.NextDouble() - 0.5f) * 0.15f;
+            + Engine.ScreenShakeFactor * Engine.ScreenShakeFactor * new Vector2(Engine.Random.NextSingle() - 0.5f, Engine.Random.NextSingle() - 0.5f) * 50;
+        Engine.Camera.Rotation = Engine.ScreenShakeFactor * Engine.ScreenShakeFactor * (Engine.Random.NextSingle() - 0.5f) * 0.15f;
         //If the player is further from the camera, put more weight on the player
         //Tanh prevents frac from going above 1
         float frac = MathF.Tanh(Vector2.Distance(Player.position, Engine.Camera.Position) / 750);
         Engine.Camera.Position = Player.position * frac + Engine.Camera.Position * (1 - frac);
         var time = Engine.IngameTime;
         time.Duration += Engine.DeltaSeconds;
+        Engine.IngameTime = time;
         CurrentMission.Update();
         Engine.EntityManager.Update();
     }
@@ -170,31 +173,30 @@ public class EntityManager
             entity.Draw(_spriteBatch);
         }
     }
-    public static void MarkMissionComplete()
+    public void MarkMissionComplete()
     {
-        Scrap += CurrentMission.MissionScrap;
         missions[missionCount].Completed = true;
         CurrentMission.MarkComplete();
     }
-    public static void SetMission(int _count)
+    public void SetMission(int _count)
     {
         missionCount = Math.Clamp(_count, 0, missions.Count - 1);
         currentMission = missions[missionCount].Clone();
         EventHandler.UpdateMissionText();
     }
-    public static void NextMission()
+    public void NextMission()
     {
         missionCount = Math.Clamp(missionCount + 1, 0, missions.Count - 1);
         currentMission = missions[missionCount].Clone();
         EventHandler.UpdateMissionText();
     }
-    public static void PrevMission()
+    public void PrevMission()
     {
         missionCount = Math.Clamp(missionCount - 1, 0, missions.Count - 1);
         currentMission = missions[missionCount].Clone();
         EventHandler.UpdateMissionText();
     }
-    public static bool IsComplete(int _mission)
+    public bool IsComplete(int _mission)
     {
         return missions[_mission].Completed;
     }
@@ -202,7 +204,7 @@ public class EntityManager
     {
         foreach (var pickup in entities)
         {
-            if (pickup is Pickup && random.NextSingle() < 0.6f)
+            if (pickup is Pickup && Engine.Random.NextSingle() < 0.6f)
             {
                 pickup.Collide(1);
             }
@@ -377,9 +379,8 @@ public class EntityManager
 
     public static bool RandomWithKarma(float _rarity)
     {
-        float randomNum = (float)random.NextDouble();
         float karmaBonus = (_rarity - 1) / (_rarity + _rarity * MathF.Exp(-10 * currentKarma + 12.5f));
-        if (randomNum < (1 / _rarity) + karmaBonus)
+        if (Engine.Random.NextSingle() < (1 / _rarity) + karmaBonus)
         {
             currentKarma = 0;
             return true;
@@ -395,12 +396,12 @@ public class EntityManager
         var sound = Assets.Get(Sound.FireEngines).CreateInstance();
         sound.IsLooped = true;
         var emitter = new ParticleEmitter(Assets.Get(Sprite.Circle), 1, new Vector2(1500, -2000), 165 + 45, 360, 2,
-            random.NextSingle() - 0.5f, 200, 1, true, Color.Gray, Color.Coral, EmitterType.EmissionOverTime);
+            Engine.Random.NextSingle() - 0.5f, 200, 1, true, Color.Gray, Color.Coral, EmitterType.EmissionOverTime);
         actors.Add(mothership);
         //Ensure planets still orbit and render
-        events.Add(new Event(0, 5, delegate (float time)
+        events.Add(new Event(0, 3, delegate (float time)
         {
-            CurrentMission.PlanetUpdate();
+            Engine.EntityManager.CurrentMission.PlanetUpdate();
         }));
         //Starts engine sound
         events.Add(new TriggerEvent(0, delegate (float time)
@@ -413,21 +414,15 @@ public class EntityManager
             emitter.position = mothership.Position;
             emitter.Update();
             mothership.Position = new Vector2(1500, -2000) * (3 - time) / 3 + new Vector2(0, -425) * time / 3;
-            Engine.Camera.Position = mothership.Position + new Vector2(random.NextSingle() * 10 - 5, random.NextSingle() * 10 - 5);
+            Engine.Camera.Position = mothership.Position + new Vector2(Engine.Random.NextSingle() * 10 - 5, Engine.Random.NextSingle() * 10 - 5);
         }));
-        //Disables emitter, plays explosion sound, and stops engine sound
+        //Fails player module, plays explosion sound, and stops engine sound
         events.Add(new TriggerEvent(3, delegate (float time)
         {
             sound.Pause();
             SoundManager.PlayGlobalSound(Assets.Get(Sound.Death));
-        }));
-        //Collision, big shake and rotates the angle of the mothership towards straight up
-        events.Add(new Event(3, 4, delegate (float time)
-        {
-            mothership.Position = new Vector2(0, -425);
-            float t = (1 - time) * (1 - time);
-            mothership.Angle = MathF.PI / 12 * t;
-            Engine.Camera.Position = mothership.Position + t * (new Vector2(random.NextSingle() * 50 - 25, random.NextSingle() * 50 - 25));
+            Engine.SaveGame.Player.modules[ModuleType.Core].isFailed = true;
+            Engine.ShakeScreen(1);
         }));
         return new Cutscene(events, actors, new PlayingGame());
     }

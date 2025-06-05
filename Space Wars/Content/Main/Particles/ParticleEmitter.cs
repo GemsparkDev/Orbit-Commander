@@ -31,7 +31,6 @@ namespace Space_Wars.Content.Main.Particles
         public bool isEmitterActive = true;
         public float probability = 1;
         float cooldown = 1;
-        private Random random = new();
         private Action emitterFunction;
         public ParticleEmitter(Texture2D _particleTexture, float _particleTimeAlive, Vector2 _position, float _sprayAngle, int _sprayCone, float _particleVelocity, float _particleAngularVelocity, float _speedOfEmission, float _particleTransparency, bool _particleFadesOut, Color _particleColor, Color _particleFadeToColor, EmitterType _emitterType)
         {
@@ -71,7 +70,7 @@ namespace Space_Wars.Content.Main.Particles
         }
         public void Update()
         {
-            if(isEmitterActive && random.NextSingle() < probability)
+            if(isEmitterActive && Engine.Random.NextSingle() < probability)
             {
                 emitterFunction();
             }
@@ -96,7 +95,7 @@ namespace Space_Wars.Content.Main.Particles
                 }
                 for (int i = 0; i < iterations; i++)
                 {
-                    randomAngle = random.Next(0, sprayCone);
+                    randomAngle = Engine.Random.Next(0, sprayCone);
                     particleAngle = randomAngle - sprayCone / 2 + sprayAngle;
                     particleAngleRadians = particleAngle * MathF.PI / 180;
                     normalVector = new(MathF.Sin(particleAngleRadians), -MathF.Cos(particleAngleRadians));
@@ -124,7 +123,7 @@ namespace Space_Wars.Content.Main.Particles
             float iterations = (Vector2.Distance(position, prevPosition) * speedOfEmission + cachedDistance);
             for (float i = 1; i < iterations; i++)
             {
-                randomAngle = random.Next(0, sprayCone);
+                randomAngle = Engine.Random.Next(0, sprayCone);
                 particleAngle = randomAngle - sprayCone / 2 + sprayAngle;
                 particleAngleRadians = particleAngle * MathF.PI / 180 - MathF.Atan2(positionDifference.X, positionDifference.Y);
                 normalVector = new(MathF.Sin(particleAngleRadians), -MathF.Cos(particleAngleRadians));

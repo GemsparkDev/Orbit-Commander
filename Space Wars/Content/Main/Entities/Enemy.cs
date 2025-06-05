@@ -13,18 +13,13 @@ public class Enemy : Entity
 {
     private List<IEnumerator<int>> behaviours = [];
     private List<IEnumerable<int>> copyBehaviors = [];
-    public Player player = EntityManager.Player;
-    private Random random = new();
     private float targetAngle = 0;
     private float cooldown;
     public int health;
     private int maxHealth;
     private bool deleteOnCollide = false;
     public bool ChildEnemy { get; private set; }
-    public override float ColliderRadius
-    {
-        get { return Engine.enemyHitboxModifier * ((texture.Height + texture.Width) / 4 + 1); }
-    }
+    public override float ColliderRadius => Engine.EnemyHitboxModifier * ((texture.Height + texture.Width) / 4 + 1);
     private Vector2 targetVector;
     public ParticleEmitter enemyRange = new(Assets.Get(Sprite.Dot), Vector2.Zero, 0, 0.75f, Color.Red);
     public Enemy(Vector2 _position, Vector2 _velocity, float _angle, int _damage, int _health, Texture2D _texture, bool _isFriendly = false)
@@ -71,7 +66,7 @@ public class Enemy : Entity
     }
     private Vector2 GetNormalizedAcceleration()
     {
-        return EntityManager.CurrentMission.GetNormalizedAcceleration(position);
+        return Engine.EntityManager.CurrentMission.GetNormalizedAcceleration(position);
     }
     public void RotateTowards(float _angle, float _maxSpeed = 0.05f)
     {
@@ -131,25 +126,25 @@ public class Enemy : Entity
     }
     public void Explode()
     {
-        int particles = random.Next(15, 25);
+        int particles = Engine.Random.Next(15, 25);
         for (int i = 0; i < particles; i++)
         {
-            float angle = (float)random.NextDouble() * MathF.PI * 2;
-            Vector2 particleVelocity = new Vector2(MathF.Cos(angle), MathF.Sin(angle)) * (float)(random.NextDouble() * 2 + 2);
+            float angle = Engine.Random.NextSingle() * MathF.PI * 2;
+            Vector2 particleVelocity = new Vector2(MathF.Cos(angle), MathF.Sin(angle)) * (Engine.Random.NextSingle() * 2 + 2);
             ParticleManager.Add(new Particle(Assets.Get(Sprite.Dot), 0.25f, position, particleVelocity + velocity, angle, 0, 1, true, Color.Yellow, Color.Red));
         }
-        particles = random.Next(8, 16);
+        particles = Engine.Random.Next(8, 16);
         for (int i = 0; i < particles; i++)
         {
-            float angle = (float)random.NextDouble() * MathF.PI * 2;
-            Vector2 particleVelocity = new Vector2(MathF.Cos(angle), MathF.Sin(angle)) * (float)(random.NextDouble() * 2 + 2);
+            float angle = Engine.Random.NextSingle() * MathF.PI * 2;
+            Vector2 particleVelocity = new Vector2(MathF.Cos(angle), MathF.Sin(angle)) * (Engine.Random.NextSingle() * 2 + 2);
             ParticleManager.Add(new Particle(Assets.Get(Sprite.Circle), 0.25f, position, particleVelocity + velocity, angle, 0, 1, true, Color.DarkSlateGray, Color.Black));
         }
         Engine.ShakeScreen(150 / ((position - Engine.Camera.Position).Length()+300));
     }
     public override void Draw(SpriteBatch _spriteBatch)
     {
-        if(!ChildEnemy && EntityManager.Player.SensingAbility > StealthAbility)
+        if(!ChildEnemy && Player.SensingAbility > StealthAbility)
         {
             //Health bar
             Vector2 barPosition = position + new Vector2(-texture.Width * 2, texture.Height) / 2;
@@ -184,7 +179,7 @@ public class Enemy : Entity
                 Explode();
                 isExpired = true;
                 SoundManager.PlaySound(Assets.Get(Sound.Death), position);
-                if (EntityManager.RandomWithKarma(EntityManager.CurrentMission.EnemiesSpawned * 2))
+                if (EntityManager.RandomWithKarma(Engine.EntityManager.CurrentMission.EnemiesSpawned * 2))
                 {
                     Engine.EntityManager.Add(ItemFactory.NewScrap(position, normalizedAcceleration * 10, angularVelocity));
                 }
@@ -203,11 +198,11 @@ public class Enemy : Entity
             Entity nearestEnemy = Engine.EntityManager.NearestEnemy(this);
             if(nearestEnemy == null)
             {
-                if((player.position - position).LengthSquared() > 1000)
+                if((Player.position - position).LengthSquared() > 1000)
                 {
-                    GoToPosition(player.position,(speed + (player.position - position).Length() / 100));
+                    GoToPosition(Player.position,(speed + (Player.position - position).Length() / 100));
                 }
-                targetVector = player.position - position + (player.velocity - velocity) * 8;
+                targetVector = Player.position - position + (Player.velocity - velocity) * 8;
                 targetAngle = MathF.Atan2(targetVector.X, -targetVector.Y);
                 yield return 0;
                 continue;
@@ -238,16 +233,16 @@ public class Enemy : Entity
         enemyRange.radius = 500;
         while (true)
         {
-            targetVector = player.position - position + (player.velocity - velocity);
+            targetVector = Player.position - position + (Player.velocity - velocity);
             targetAngle = MathF.Atan2(targetVector.X, -targetVector.Y);
             Vector2 gravityForce = GetNormalizedAcceleration();
-            if (EntityManager.DistanceSqr(this, player) > 500 * 500)
+            if (EntityManager.DistanceSqr(this, Player) > 500 * 500)
             {
-                GoToPosition(player.position, 1.5f);
+                GoToPosition(Player.position, 1.5f);
             }
-            else if (EntityManager.DistanceSqr(this, player) < 75*75)
+            else if (EntityManager.DistanceSqr(this, Player) < 75*75)
             {
-                GoToPosition(player.position, -1);
+                GoToPosition(Player.position, -1);
                 if (cooldown <= 0)
                 {
                     Engine.EntityManager.Add(new PulseShot(position, Engine.ToUnitVector(angle) * 8, angle, 0, false, damage));
@@ -273,7 +268,7 @@ public class Enemy : Entity
                 Explode();
                 isExpired = true;
                 SoundManager.PlaySound(Assets.Get(Sound.Death), position);
-                if (EntityManager.RandomWithKarma(EntityManager.CurrentMission.EnemiesSpawned))
+                if (EntityManager.RandomWithKarma(Engine.EntityManager.CurrentMission.EnemiesSpawned))
                 {
                     Engine.EntityManager.Add(ItemFactory.NewScrap(position, GetNormalizedAcceleration() * 10, angularVelocity));
                 }
@@ -289,19 +284,19 @@ public class Enemy : Entity
         {
             float timeToHit;
             float prevTimeToHit = 0;
-            Vector2 playerIterativePosition = player.position;
+            Vector2 playerIterativePosition = Player.position;
             Vector2 gravityForce = GetNormalizedAcceleration();
             for (int i = 0; i < 1; i++)
             {
                 timeToHit = MathF.Sqrt(EntityManager.DistanceSqr(position, playerIterativePosition)) / 15;
-                playerIterativePosition += player.velocity * (timeToHit - prevTimeToHit);
+                playerIterativePosition += Player.velocity * (timeToHit - prevTimeToHit);
                 prevTimeToHit = timeToHit;
             }
             targetVector = (playerIterativePosition - position);
             targetAngle = MathF.Atan2(targetVector.X, -targetVector.Y);
-            if (EntityManager.DistanceSqr(this, player) > 400 * 400)
+            if (EntityManager.DistanceSqr(this, Player) > 400 * 400)
             {
-                GoToPosition(player.position, 2);
+                GoToPosition(Player.position, 2);
             }
             else
             {
@@ -321,7 +316,7 @@ public class Enemy : Entity
                 Explode();
                 isExpired = true;
                 SoundManager.PlaySound(Assets.Get(Sound.Death), position);
-                if (EntityManager.RandomWithKarma(EntityManager.CurrentMission.EnemiesSpawned))
+                if (EntityManager.RandomWithKarma(Engine.EntityManager.CurrentMission.EnemiesSpawned))
                 {
                     Engine.EntityManager.Add(ItemFactory.NewScrap(position, gravityForce * 10, angularVelocity));
                 }
@@ -416,11 +411,11 @@ public class Enemy : Entity
         enemyRange.radius = 200;
         while (true)
         {
-            targetVector = player.position - position + (player.velocity - velocity) * 8;
+            targetVector = Player.position - position + (Player.velocity - velocity) * 8;
             targetAngle = MathF.Atan2(targetVector.X, -targetVector.Y);
-            if (EntityManager.DistanceSqr(this, player) > 200 * 200)
+            if (EntityManager.DistanceSqr(this, Player) > 200 * 200)
             {
-                GoToPosition(player.position, 3.5f);
+                GoToPosition(Player.position, 3.5f);
             }
             else
             {
@@ -453,7 +448,7 @@ public class Enemy : Entity
                 Explode();
                 isExpired = true;
                 SoundManager.PlaySound(Assets.Get(Sound.Death), position);
-                if (EntityManager.RandomWithKarma(EntityManager.CurrentMission.EnemiesSpawned * 2))
+                if (EntityManager.RandomWithKarma(Engine.EntityManager.CurrentMission.EnemiesSpawned * 2))
                 {
                     Engine.EntityManager.Add(ItemFactory.NewScrap(position, GetNormalizedAcceleration() * 10, angularVelocity));
                 }
@@ -498,14 +493,14 @@ public class Enemy : Entity
             {
                 missileCooldown -= Engine.DeltaSeconds;
             }
-            float speed = (player.position - position).Length() / 75;
+            float speed = (Player.position - position).Length() / 75;
             float timeToHit;
             float prevTimeToHit = 0;
-            Vector2 playerIterativePosition = player.position;
+            Vector2 playerIterativePosition = Player.position;
             for (int i = 0; i < 5; i++)
             {
                 timeToHit = MathF.Sqrt(EntityManager.DistanceSqr(position, playerIterativePosition)) / (8);
-                playerIterativePosition += (player.velocity-velocity) * (timeToHit - prevTimeToHit);
+                playerIterativePosition += (Player.velocity-velocity) * (timeToHit - prevTimeToHit);
                 prevTimeToHit = timeToHit;
             }
             targetVector = playerIterativePosition - position;
@@ -513,14 +508,14 @@ public class Enemy : Entity
             Vector2 gravityForce = GetNormalizedAcceleration();
             float theta = MathF.Atan2(gravityForce.Y, gravityForce.X);
             
-            GoToPosition(player.position + 100 * new Vector2(MathF.Cos(theta), MathF.Sin(theta)), speed);
+            GoToPosition(Player.position + 100 * new Vector2(MathF.Cos(theta), MathF.Sin(theta)), speed);
             if(!hasLaunchedAllies && ((float)health / (float)maxHealth < 0.5f))
             {
                 hasLaunchedAllies = !hasLaunchedAllies;
                 Engine.EntityManager.Add(NewShield(this, 12, 25, 0, 0));
                 SoundManager.PlaySound(Assets.Get(Sound.MissileFire), position);
             }
-            if(EntityManager.DistanceSqr(this, player) < 500 * 500)
+            if(EntityManager.DistanceSqr(this, Player) < 500 * 500)
             {
                 velocity += GetNormalizedAcceleration() * Engine.DeltaSeconds * 10;
                 if (cooldown <= 0 && missileCooldown > 0)
@@ -564,18 +559,18 @@ public class Enemy : Entity
             if (health <= 0)
             {
                 Explode();
-                int particles = random.Next(3, 5);
+                int particles = Engine.Random.Next(3, 5);
                 for (int i = 0; i < particles; i++)
                 {
-                    float angle = (float)random.NextDouble() * MathF.PI * 2;
-                    Vector2 particleVelocity = new Vector2(MathF.Cos(angle), MathF.Sin(angle)) * (float)(random.NextDouble() * 2 + 2) / 2;
+                    float angle = Engine.Random.NextSingle() * MathF.PI * 2;
+                    Vector2 particleVelocity = new Vector2(MathF.Cos(angle), MathF.Sin(angle)) * (Engine.Random.NextSingle() * 2 + 2) / 2;
                     ParticleManager.Add(new Particle(Assets.Get(Sprite.Circle), 0.5f, position, particleVelocity + velocity, angle, 0, 1, true, Color.Yellow, Color.Red));
                 }
-                particles = random.Next(3, 5);
+                particles = Engine.Random.Next(3, 5);
                 for (int i = 0; i < particles; i++)
                 {
-                    float angle = (float)random.NextDouble() * MathF.PI * 2;
-                    Vector2 particleVelocity = new Vector2(MathF.Cos(angle), MathF.Sin(angle)) * (float)(random.NextDouble() * 2 + 2) / 2;
+                    float angle = Engine.Random.NextSingle() * MathF.PI * 2;
+                    Vector2 particleVelocity = new Vector2(MathF.Cos(angle), MathF.Sin(angle)) * (Engine.Random.NextSingle() * 2 + 2) / 2;
                     ParticleManager.Add(new Particle(Assets.Get(Sprite.Circle), 0.5f, position, particleVelocity + velocity, angle, 0, 1, true, Color.DarkSlateGray, Color.Black));
                 }
                 isExpired = true;
@@ -674,14 +669,14 @@ public class Enemy : Entity
                 float theta = MathF.Atan2(gravityForce.X, -gravityForce.Y);
                 if(chargingWindup == 1)
                 {
-                    chargeLocation = player.position + 50 * new Vector2(MathF.Cos(theta), MathF.Sin(theta));
+                    chargeLocation = Player.position + 50 * new Vector2(MathF.Cos(theta), MathF.Sin(theta));
                 }
                 GoToPosition(chargeLocation, 1 + 2 * MathF.Sqrt((chargeLocation - position).Length()));
                 if((chargeLocation - position).LengthSquared() < 200)
                 {
                     if(chargingWindup <= 0)
                     {
-                        Vector2 relativePosition = position - player.position;
+                        Vector2 relativePosition = position - Player.position;
                         velocity -= Vector2.Normalize(relativePosition) * 15;
                         chargeCooldown = 15;
                         chargingWindup = 1;
@@ -699,11 +694,11 @@ public class Enemy : Entity
                 octoshotCooldown -= Engine.DeltaSeconds;
                 chargeCooldown -= Engine.DeltaSeconds;
 
-                targetVector = Vector2.Normalize(player.position - position);
+                targetVector = Vector2.Normalize(Player.position - position);
                 targetAngle = MathF.Atan2(targetVector.X, -targetVector.Y);
                 Vector2 normalAcceleration = Vector2.Normalize(new Vector2(velocity.Y - 0.001f, -velocity.X));
                 float closingVelocity = Vector2.Dot(targetVector, velocity);
-                Vector2 futureTargetVector = (player.position + player.velocity) - (position + velocity);
+                Vector2 futureTargetVector = (Player.position + Player.velocity) - (position + velocity);
                 float angleRateOfChange = (targetAngle - MathF.Atan2(futureTargetVector.X, -futureTargetVector.Y)) / Engine.DeltaSeconds;
                 Vector2 accelerationVector = normalAcceleration * closingVelocity * angleRateOfChange * Engine.DeltaSeconds * 2;
                 Vector2 normalAccelerationVector = Vector2.Normalize(accelerationVector);
@@ -718,10 +713,10 @@ public class Enemy : Entity
                     Vector2 thrustForce = targetVector * 8;
                     velocity += thrustForce * Engine.DeltaSeconds;
                 }
-                if (EntityManager.DistanceSqr(this, player) < 10 * 10)
+                if (EntityManager.DistanceSqr(this, Player) < 10 * 10)
                 {
-                    player.Collide(damage);
-                    velocity = player.velocity - velocity/2;
+                    Player.Collide(damage);
+                    velocity = Player.velocity - velocity/2;
                 }
             }
             if(shieldCooldown >= maxShieldCooldown)
@@ -782,11 +777,11 @@ public class Enemy : Entity
                 {
                     if (furnaceItem is Module)
                     {
-                        EntityManager.CurrentMission.MissionScrap += 3;
+                        Engine.SaveGame.Scrap += 3;
                     }
                     else
                     {
-                        EntityManager.CurrentMission.MissionScrap++;
+                        Engine.SaveGame.Scrap++;
                     }
                     furnaceItem = null;
                     SoundManager.PlaySound(Assets.Get(Sound.Interact), position);
@@ -833,7 +828,7 @@ public class Enemy : Entity
             }
             if (requiredCraftsLeft <= 0)
             {
-                EntityManager.CurrentMission.CompleteCustomRule(this);
+                Engine.EntityManager.CurrentMission.CompleteCustomRule(this);
             }
             yield return 0;
         }
@@ -919,8 +914,8 @@ public class Enemy : Entity
     }
     IEnumerable<int> Miner()
     {
-        ParticleEmitter miningDebris = new(Assets.Get(Sprite.Dot), 0.15f, position + new Vector2(0, Assets.Get(Sprite.Miner).Height / 2), 0, 90, 2, 
-            (float)random.NextDouble()-0.5f, 1000, 0, true, Color.Cyan, Color.Black, EmitterType.EmissionOverTime);
+        ParticleEmitter miningDebris = new(Assets.Get(Sprite.Dot), 0.15f, position + new Vector2(0, Assets.Get(Sprite.Miner).Height / 2), 0, 90, 2,
+            Engine.Random.NextSingle() - 0.5f, 1000, 0, true, Color.Cyan, Color.Black, EmitterType.EmissionOverTime);
         while (true)
         {
             velocity *= 0;
@@ -959,7 +954,7 @@ public class Enemy : Entity
             Entity nearestEnemy = Engine.EntityManager.NearestEnemy(this);
             Vector2 relativePosition = position - nearestEnemy.position;
             Vector2 normalizedAcceleration = GetNormalizedAcceleration();
-            Vector2 Offset = Vector2.Normalize(EntityManager.CurrentMission.GetNormalizedAcceleration(nearestEnemy.position))*100;
+            Vector2 Offset = Vector2.Normalize(Engine.EntityManager.CurrentMission.GetNormalizedAcceleration(nearestEnemy.position))*100;
             Vector2 targetLocation = relativePosition - Offset;
             Vector2 targetAcceleration;
             if (Vector2.Distance(nearestEnemy.position + Offset, position) < 50)
@@ -971,7 +966,7 @@ public class Enemy : Entity
                 else
                 {
                     cooldown = 1;
-                    randomPos = new Vector2(random.NextSingle() * 50 - 25, random.NextSingle() * 50 - 25);
+                    randomPos = new Vector2(Engine.Random.NextSingle() * 50 - 25, Engine.Random.NextSingle() * 50 - 25);
                 }
                 targetAcceleration = velocity - nearestEnemy.velocity - normalizedAcceleration * 10 + (randomPos + targetLocation) * Engine.DeltaSeconds;
             }
@@ -986,7 +981,7 @@ public class Enemy : Entity
                 Explode();
                 isExpired = true;
                 SoundManager.PlaySound(Assets.Get(Sound.Death), position);
-                if (EntityManager.RandomWithKarma(EntityManager.CurrentMission.EnemiesSpawned * 2))
+                if (EntityManager.RandomWithKarma(Engine.EntityManager.CurrentMission.EnemiesSpawned * 2))
                 {
                     Engine.EntityManager.Add(ItemFactory.NewScrap(position, normalizedAcceleration * 10, angularVelocity));
                 }
@@ -1029,7 +1024,6 @@ public class Enemy : Entity
     IEnumerable<int> Excursion()
     {
         enemyRange.radius = 500;
-        player = EntityManager.Player;
         int currentWave = 0;
         int currentEnemy = 0;
         float waveTimer = 0;
@@ -1047,7 +1041,7 @@ public class Enemy : Entity
         while (true)
         {
             nearestPickup = Engine.EntityManager.NearestItem(this);
-            Vector2 relativePosition = player.position + player.velocity - position - velocity;
+            Vector2 relativePosition = Player.position + Player.velocity - position - velocity;
             targetAngle = MathF.Atan2(relativePosition.X, -relativePosition.Y);
             if (health >= maxHealth / 2 || laserCooldown > 0)
             {
@@ -1062,7 +1056,7 @@ public class Enemy : Entity
                 }
                 else
                 {
-                    Vector2 targetLocation = player.position + Vector2.Normalize(player.velocity) * 250 + EntityManager.CurrentMission.GetNormalizedAcceleration(player.position) * 50;
+                    Vector2 targetLocation = Player.position + Vector2.Normalize(Player.velocity) * 250 + Engine.EntityManager.CurrentMission.GetNormalizedAcceleration(Player.position) * 50;
                     float speed = 8 - 5 / ((targetLocation - position).Length() / 75 + 1);
                     GoToPosition(targetLocation, speed);
                 }
@@ -1075,12 +1069,12 @@ public class Enemy : Entity
             {
                 velocity *= 0.9f;
                 float timeToHit;
-                Vector2 playerIterativePosition = player.position;
+                Vector2 playerIterativePosition = Player.position;
                 float prevTimeToHit = 0;
                 for (int i = 0; i < 1; i++)
                 {
                     timeToHit = MathF.Sqrt(EntityManager.DistanceSqr(position, playerIterativePosition)) / 100;
-                    playerIterativePosition += player.velocity * (timeToHit - prevTimeToHit);
+                    playerIterativePosition += Player.velocity * (timeToHit - prevTimeToHit);
                     prevTimeToHit = timeToHit;
                 }
                 targetVector = (playerIterativePosition - position);
@@ -1104,12 +1098,12 @@ public class Enemy : Entity
                     laserCooldown = 10;
                 }
             }
-            else if (EntityManager.DistanceSqr(player, this) < 300*300)
+            else if (EntityManager.DistanceSqr(Player, this) < 300*300)
             {
                 if(cooldown <= 0)
                 {
                     Vector2 normalOffset = Engine.ToUnitVector(angle + MathF.PI / 2);
-                    Vector2 offset = normalOffset * random.Next(-2, 3);
+                    Vector2 offset = normalOffset * Engine.Random.Next(-2, 3);
                     Texture2D dot = Assets.Get(Sprite.Microshot);
                     Projectile shot = new AssassinShot(position + normalOffset * bulletOffset, Engine.ToUnitVector(angle) * 10 + offset / 4, angle, 0, isFriendly, 3)
                     {
@@ -1161,18 +1155,18 @@ public class Enemy : Entity
                 Engine.EntityManager.Add(ItemFactory.NewScrap(position, Engine.ToUnitVector(angle) * 5, angularVelocity));
                 Engine.EntityManager.Add(ItemFactory.NewScrap(position, Engine.ToUnitVector(angle + MathF.PI / 6) * 5, angularVelocity));
                 Engine.EntityManager.Add(ItemFactory.NewScrap(position, Engine.ToUnitVector(angle - MathF.PI / 6) * 5, angularVelocity));
-                int particles = random.Next(3, 5);
+                int particles = Engine.Random.Next(3, 5);
                 for (int i = 0; i < particles; i++)
                 {
-                    float angle = (float)random.NextDouble() * MathF.PI * 2;
-                    Vector2 particleVelocity = new Vector2(MathF.Cos(angle), MathF.Sin(angle)) * (float)(random.NextDouble() * 2 + 2) / 2;
+                    float angle = Engine.Random.NextSingle() * MathF.PI * 2;
+                    Vector2 particleVelocity = new Vector2(MathF.Cos(angle), MathF.Sin(angle)) * (Engine.Random.NextSingle() * 2 + 2) / 2;
                     ParticleManager.Add(new Particle(Assets.Get(Sprite.Circle), 0.5f, position, particleVelocity + velocity, angle, 0, 1, true, Color.Yellow, Color.Red));
                 }
-                particles = random.Next(3, 5);
+                particles = Engine.Random.Next(3, 5);
                 for (int i = 0; i < particles; i++)
                 {
-                    float angle = (float)random.NextDouble() * MathF.PI * 2;
-                    Vector2 particleVelocity = new Vector2(MathF.Cos(angle), MathF.Sin(angle)) * (float)(random.NextDouble() * 2 + 2) / 2;
+                    float angle = Engine.Random.NextSingle() * MathF.PI * 2;
+                    Vector2 particleVelocity = new Vector2(MathF.Cos(angle), MathF.Sin(angle)) * (Engine.Random.NextSingle() * 2 + 2) / 2;
                     ParticleManager.Add(new Particle(Assets.Get(Sprite.Circle), 0.5f, position, particleVelocity + velocity, angle, 0, 1, true, Color.DarkSlateGray, Color.Black));
                 }
                 isExpired = true;
@@ -1216,7 +1210,7 @@ public class Enemy : Entity
                 furnaceCooldown -= Engine.DeltaSeconds;
                 if (furnaceCooldown <= 0)
                 {
-                    EntityManager.CurrentMission.MissionScrap++;
+                    Engine.SaveGame.Scrap++;
                     furnaceItem = null;
                     SoundManager.PlaySound(Assets.Get(Sound.Interact), position);
                 }
@@ -1308,7 +1302,7 @@ public class Enemy : Entity
             {
                 if (!hasExploded)
                 {
-                    Entity nearestEnemy = EntityManager.Player;
+                    Entity nearestEnemy = Player;
                     float theta = MathF.Atan2((nearestEnemy.position - position).X, -(nearestEnemy.position - position).Y) - MathF.PI / 2;
                     targetVector = nearestEnemy.position - new Vector2(MathF.Cos(theta + MathF.PI / 8), MathF.Sin(theta + MathF.PI / 8)) * 200;
                     targetAngle = MathF.Atan2(velocity.X, -velocity.Y);
@@ -1371,7 +1365,7 @@ public class Enemy : Entity
                 Explode();
                 isExpired = true;
                 SoundManager.PlaySound(Assets.Get(Sound.Death), position);
-                if (EntityManager.RandomWithKarma(EntityManager.CurrentMission.EnemiesSpawned * 1.5f))
+                if (EntityManager.RandomWithKarma(Engine.EntityManager.CurrentMission.EnemiesSpawned * 1.5f))
                 {
                     Engine.EntityManager.Add(ItemFactory.NewScrap(position, normalizedAcceleration * 10, angularVelocity));
                 }
@@ -1387,21 +1381,21 @@ public class Enemy : Entity
                 position -= Size.Length() * Vector2.Normalize(relativePosition) / (MathF.Sqrt(relativePosition.Length())) / 10;
 
             }
-            float speed = 8 + Math.Max((player.position - position).Length() - 500, 0) / 500;
+            float speed = 8 + Math.Max((Player.position - position).Length() - 500, 0) / 500;
             Entity nearestEnemy = Engine.EntityManager.NearestEnemy(this);
             if (nearestEnemy == null)
             {
-                if ((player.position - position).LengthSquared() > 1000)
+                if ((Player.position - position).LengthSquared() > 1000)
                 {
-                    GoToPosition(player.position, (speed + (player.position - position).Length() / 100));
+                    GoToPosition(Player.position, (speed + (Player.position - position).Length() / 100));
                 }
-                targetVector = player.position - position + (player.velocity - velocity) * 8;
+                targetVector = Player.position - position + (Player.velocity - velocity) * 8;
                 targetAngle = MathF.Atan2(targetVector.X, -targetVector.Y);
                 yield return 0;
                 continue;
             }
 
-            Entity nearestProjectile = Engine.EntityManager.NearestProjectile(NewDummyEnemy(position + Vector2.Normalize(player.position - position) * 30, isFriendly));
+            Entity nearestProjectile = Engine.EntityManager.NearestProjectile(NewDummyEnemy(position + Vector2.Normalize(Player.position - position) * 30, isFriendly));
             if (nearestProjectile != null)
             {
                 Vector2 relativePos = position - nearestProjectile.position;
@@ -1419,7 +1413,7 @@ public class Enemy : Entity
             for (int i = 0; i < 1; i++)
             {
                 timeToHit = MathF.Sqrt(EntityManager.DistanceSqr(position, playerIterativePosition)) / 8;
-                playerIterativePosition += player.velocity * (timeToHit - prevTimeToHit);
+                playerIterativePosition += Player.velocity * (timeToHit - prevTimeToHit);
                 prevTimeToHit = timeToHit;
             }
             targetVector = (playerIterativePosition - position);
@@ -1477,7 +1471,7 @@ public class Enemy : Entity
             if (EventHandler.AcknowledgeMessage(Message.EscapeDroneLeave))
             {
                 currentlyLeaving = true;
-                EntityManager.CurrentMission.CompleteCustomRule(this);
+                Engine.EntityManager.CurrentMission.CompleteCustomRule(this);
             }
             if (health <= 0)
             {
@@ -1491,7 +1485,7 @@ public class Enemy : Entity
             else
             {
                 velocity = Vector2.Zero;
-                position = position * (1f - Engine.DeltaSeconds) - new Vector2(0, EntityManager.CurrentMission.Planet.radius * 1.5f) * Engine.DeltaSeconds;
+                position = position * (1f - Engine.DeltaSeconds) - new Vector2(0, Engine.EntityManager.CurrentMission.Planet.radius * 1.5f) * Engine.DeltaSeconds;
             }
             yield return 0;
         }
@@ -1524,7 +1518,7 @@ public class Enemy : Entity
             {
                 isExpired = true;
                 Explode();
-                if (EntityManager.RandomWithKarma(EntityManager.CurrentMission.EnemiesSpawned))
+                if (EntityManager.RandomWithKarma(Engine.EntityManager.CurrentMission.EnemiesSpawned))
                 {
                     Engine.EntityManager.Add(ItemFactory.NewScrap(position, velocity, angularVelocity));
                 }
@@ -1559,10 +1553,10 @@ public class Enemy : Entity
             {
                 if (Vector2.Distance(rand, position) < 500)
                 {
-                    float radius = EntityManager.CurrentMission.Planet.radius;
+                    float radius = Engine.EntityManager.CurrentMission.Planet.radius;
                     do
                     {
-                        rand = new Vector2((random.NextSingle() * 2 - 1) * radius * 3, (random.NextSingle()* 2 - 1) * radius * 3);
+                        rand = new Vector2((Engine.Random.NextSingle() * 2 - 1) * radius * 3, (Engine.Random.NextSingle()* 2 - 1) * radius * 3);
                     }
                     while (rand.Length() < radius);
                 }
