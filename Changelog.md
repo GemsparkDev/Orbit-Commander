@@ -303,4 +303,11 @@ Update 0.4.3
  - Added inventory slots and a module config checker to the mission select menu.    
  - The mission select menu modules now properly syncs to the player.    
  - The crash landing intro cutscene now fails the player's core module.    
- - Fixed bug #17.    
+ - Fixed bug #17.
+    
+0.4.6.1    
+6/5/2025    
+ - Added the framework for the crafting queue system.    
+ - Moved the information on completed missions to the SaveGame class.    
+ - Inlined the MarkComplete Function.    
+ - Fixed bug #20.    
