@@ -8,7 +8,6 @@ using Space_Wars.Content.Main.Particles;
 namespace Space_Wars.Content.Main;
 public class Mission
 {
-    public bool Completed { get; set; } = false;
     private Entity escapeVehicle = null;
     public string Name { get; }
     public string Description { get; }
@@ -128,7 +127,9 @@ public class Mission
             }
             else
             {
-                Engine.EntityManager.MarkMissionComplete();
+                Engine.SaveGame.CompletedMissions[Engine.EntityManager.MissionCount] = true;
+                restartTimer = 2;
+                Engine.EntityManager.CompleteMission(Wave);
             }
         }
         if (restartTimer != -1)
@@ -137,6 +138,10 @@ public class Mission
             {
                 restartTimer -= Engine.DeltaSeconds;
                 return;
+            }
+            foreach (var entity in MissionObjectives)
+            {
+                entity.entity.isExpired = true;
             }
             EventHandler.MissionSelectTrigger();
         }
@@ -222,15 +227,6 @@ public class Mission
         {
             Engine.EntityManager.Add(entity);
         }
-    }
-    public void MarkComplete()
-    {
-        if (restartTimer != -1)
-        {
-            return;
-        }
-        Completed = true;
-        restartTimer = 2;
     }
     public void AttractObject(Entity _entity)
     {
@@ -346,7 +342,7 @@ public class Mission
         {
             _planets[i] = planets[i].Copy();
         }
-        return new Mission(_planets, CopyObjectives, Name, Description, timerModifier, WaveGoal, tier, cutscene, escapeVehicle != null) { Completed = this.Completed};
+        return new Mission(_planets, CopyObjectives, Name, Description, timerModifier, WaveGoal, tier, cutscene, escapeVehicle != null);
     }
     private void SpawnWaveBatch(int enemyCredits)
     {

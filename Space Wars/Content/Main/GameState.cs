@@ -224,7 +224,7 @@ public class MissionSelect : GameState
             bool canSelect = true;
             foreach (var prerequisite in mission.prerequisites)
             {
-                if (!Engine.EntityManager.IsComplete(prerequisite))
+                if (!Engine.SaveGame.CompletedMissions[prerequisite])
                 {
                     color = new Color(0, 100, 100);
                     canSelect = false;

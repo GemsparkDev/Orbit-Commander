@@ -431,6 +431,7 @@ public class Player : Entity
     public void AddFuse()
     {
         spareFuses++;
+        EventHandler.UpdateFuseUI(moduleFuses, spareFuses);
     }
     public int CountFuses(ModuleType _module)
     {

@@ -24,6 +24,7 @@ public class EntityManager
     //Threshold of detection for enemies
     public static float StealthThreshold { get; private set; } = 0.75f;
     public readonly static Pickup[] globalInventory = new Pickup[5];
+    public int MissionLength => missions.Count;
     private readonly List<Mission> missions = 
     [
         new([ new(Vector2.Zero, Vector2.Zero, 10000, 8, true, Color.Cyan), new(new Vector2(1000, 0), GravitationalSource.GetOrbitalVelocity(new Vector2(1000, 0), Vector2.Zero, 10000), 250, 1.5f, false, Color.Cyan) ],
@@ -56,18 +57,11 @@ public class EntityManager
         "cool planet",
         "Super earth", 2, 0, 1, null, true),
     ];
-
-    /*
-     * (Enemy.NewOrbiter, 
-            new Vector2(400, 0), 
-            GravitationalSource.GetOrbitalVelocity(new Vector2(400, 0), Vector2.Zero, 3500), 
-            0, 
-            new Condition[0])
-    */
     private Mission currentMission;
     public Mission CurrentMission { get { return currentMission ?? missions[missionCount]; } }
     private int missionCount = 0;
     public int MissionCount { get { return missionCount; } }
+    private List<Queueable> queuedItems = [new FuseQueue(), new FuseQueue()];
     public void Add(Entity entity)
     {
         if (!isUpdating)
@@ -97,6 +91,7 @@ public class EntityManager
         enemies.Clear();
         projectiles.Clear();
         Player.position = new Vector2(0, -CurrentMission.Planet.radius + 1);
+        Player.velocity = Vector2.Zero;
         CurrentMission.Initialize();
     }
     public void PlayerUpdate()
@@ -173,10 +168,19 @@ public class EntityManager
             entity.Draw(_spriteBatch);
         }
     }
-    public void MarkMissionComplete()
+    public void CompleteMission(int _duration)
     {
-        missions[missionCount].Completed = true;
-        CurrentMission.MarkComplete();
+        //int points = _duration / 10;
+        int points = 1;
+        foreach (var item in queuedItems)
+        {
+            points = item.AttemptConstruct(points);
+            if (points <= 0)
+            {
+                break;
+            }
+        }
+        queuedItems = (from item in queuedItems where !item.IsExpired select item).ToList();
     }
     public void SetMission(int _count)
     {
@@ -195,10 +199,6 @@ public class EntityManager
         missionCount = Math.Clamp(missionCount - 1, 0, missions.Count - 1);
         currentMission = missions[missionCount].Clone();
         EventHandler.UpdateMissionText();
-    }
-    public bool IsComplete(int _mission)
-    {
-        return missions[_mission].Completed;
     }
     public void DecayPickups()
     {
@@ -416,7 +416,7 @@ public class EntityManager
             mothership.Position = new Vector2(1500, -2000) * (3 - time) / 3 + new Vector2(0, -425) * time / 3;
             Engine.Camera.Position = mothership.Position + new Vector2(Engine.Random.NextSingle() * 10 - 5, Engine.Random.NextSingle() * 10 - 5);
         }));
-        //Fails player module, plays explosion sound, and stops engine sound
+        //Fails player core, plays explosion sound, and stops engine sound
         events.Add(new TriggerEvent(3, delegate (float time)
         {
             sound.Pause();

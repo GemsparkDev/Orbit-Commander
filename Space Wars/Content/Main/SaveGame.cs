@@ -12,4 +12,6 @@ public class SaveGame
 {
     public Player Player { get; } = new Player(Vector2.Zero, Vector2.Zero, 0, 0);
     public int Scrap { get; set; }
+    public bool[] CompletedMissions { get; } = new bool[Engine.EntityManager.MissionLength];
+    public bool CurrentMissionCompleted => CompletedMissions[Engine.EntityManager.MissionCount];
 }

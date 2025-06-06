@@ -208,10 +208,11 @@ public class EventHandler
     {
         Container missionSelect = Engine.UIManager.GetContainer((int)Containers.MissionMenu);
         Mission mission = Engine.EntityManager.CurrentMission;
+        bool completed = Engine.SaveGame.CurrentMissionCompleted;
         (missionSelect.GetWidget(0) as Decal).text = mission.Name;
         (missionSelect.GetWidget(1) as Decal).text = mission.Description;
-        (missionSelect.GetWidget(2) as Decal).text = mission.Completed ? "Completed" : "Not Completed";
-        (missionSelect.GetWidget(2) as Decal).textColor = mission.Completed ? Color.Green : Color.Red;
+        (missionSelect.GetWidget(2) as Decal).text = completed ? "Completed" : "Not Completed";
+        (missionSelect.GetWidget(2) as Decal).textColor = completed ? Color.Green : Color.Red;
     }
     public static void UpdateScrapText()
     {
