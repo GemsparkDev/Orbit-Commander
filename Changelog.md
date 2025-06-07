@@ -311,3 +311,9 @@ Update 0.4.3
  - Moved the information on completed missions to the SaveGame class.    
  - Inlined the MarkComplete Function.    
  - Fixed bug #20.    
+    
+0.4.6.2    
+6/6/2025    
+ - Added buttons to queue items for crafting.    
+ - Added a mission select inventory to store items between missions.    
+ - Added a small image showing every queued item.    
