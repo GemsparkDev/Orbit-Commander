@@ -8,6 +8,7 @@ using UILib.Content.Main;
 using Space_Wars.Content.Main.Particles;
 using Space_Wars.Content.Main.Entities;
 using System.Linq;
+using Assimp.Configs;
 
 namespace Space_Wars.Content.Main;
 
@@ -43,6 +44,7 @@ public class Engine : Game
     //Convenient access point for player modules and dockable inventories
     public static ItemSlot<Module>[] ModuleSlots { get; private set; } = new ItemSlot<Module>[5];
     public static ItemSlot<Pickup>[,] InventorySlots { get; private set; } = new ItemSlot<Pickup>[1, 4];
+    public static ItemSlot<Pickup>[] MissionSelectItems { get; private set; } = new ItemSlot<Pickup>[4];
 
     public Engine()
     {
@@ -150,6 +152,9 @@ public class Engine : Game
         var nextMission = new Button(new Vector2(75, 20), Assets.Get(Sprite.Button), Assets.TextFont, "Next", Color.LightBlue);
         var selectMission = new Button(new Vector2(0, 20), Assets.Get(Sprite.Button), Assets.TextFont, "Launch!", Color.Yellow);
         var isComplete = new Decal(new Vector2(0, 45), Assets.TextFont, "Not Complete", Color.Red, 10);
+        var createFuse = new Button(new Vector2(-85,-30), Assets.Get(Sprite.Button), Assets.TextFont, "Queue Fuse", Color.Yellow);
+        var smeltScrap = new Button(new Vector2(-85, 0), Assets.Get(Sprite.Button), Assets.TextFont, "Queue Smelt", Color.Yellow);
+        var repairModule = new Button(new Vector2(-85, 30), Assets.Get(Sprite.Button), Assets.TextFont, "Queue Module", Color.Yellow);
 
         var launchButton = new Button(new Vector2(-20, 0), Assets.Get(Sprite.Button), Assets.TextFont, "Leave", Color.LightBlue);
 
@@ -213,6 +218,29 @@ public class Engine : Game
         launchButton.AddBehaviour(delegate() { EventHandler.SendMessage(Message.EscapeDroneLeave); });
         shaderToggle.AddBehaviour(delegate () { UseShader = !UseShader; shaderToggle.text = $"Shader: {UseShader}"; });
         nextSystem.AddBehaviour(delegate() { Main.MissionSelect.system = (Main.MissionSelect.system + 1) % 3; });
+        createFuse.AddBehaviour(delegate () { EntityManager.QueuedItems.Add(new FuseQueue()); });
+        smeltScrap.AddBehaviour(delegate () 
+        {
+            foreach (var item in MissionSelectItems)
+            {
+                if (item.daughterItem != null) 
+                {
+                    EntityManager.QueuedItems.Add(new SmeltQueue(ref item.daughterItem));
+                    return;
+                }
+            }
+        });
+        repairModule.AddBehaviour(delegate () 
+        {
+            foreach (var item in MissionSelectItems)
+            {
+                if (item.daughterItem != null && item.daughterItem is Module)
+                {
+                    EntityManager.QueuedItems.Add(new RepairQueue(item.daughterItem as Module));
+                    return;
+                }
+            }
+        });
 
         MainMenu.AddWidget(exitButton as IFunctional, 0);
         MainMenu.AddWidget(singleplayerButton as IFunctional, 0);
@@ -258,6 +286,9 @@ public class Engine : Game
         MissionSelect.AddWidget(selectMission as IFunctional, 0);
         MissionSelect.AddWidget(isComplete, 0);
         MissionSelect.AddWidget(validConfigText, 1);
+        MissionSelect.AddWidget(createFuse as IFunctional, 1);
+        MissionSelect.AddWidget(smeltScrap as IFunctional, 1);
+        MissionSelect.AddWidget(repairModule as IFunctional, 1);
 
         PickupDroneMenu.AddWidget(launchButton as IFunctional);
 
@@ -299,9 +330,12 @@ public class Engine : Game
             {
                 InventorySlots[x, y] = new ItemSlot<Pickup>(new Vector2(Assets.DimsOf(Sprite.EmptySlot).X * x + Assets.DimsOf(Sprite.LargePanel).X / 4,
                     Assets.DimsOf(Sprite.EmptySlot).Y * (y+1) - Assets.DimsOf(Sprite.LargePanel).X / 2), Assets.Get(Sprite.EmptySlot), UIManager, -1);
+                MissionSelectItems[y] = new ItemSlot<Pickup>(new Vector2(Assets.DimsOf(Sprite.EmptySlot).X * x + Assets.DimsOf(Sprite.LargePanel).X / 2,
+                    Assets.DimsOf(Sprite.EmptySlot).Y * (y + 1) - Assets.DimsOf(Sprite.LargePanel).X / 2), Assets.Get(Sprite.EmptySlot), UIManager, -1);
                 MothershipMenu.AddWidget(InventorySlots[x, y] as IFunctional, 0);
                 PickupDroneMenu.AddWidget(InventorySlots[x,y] as IFunctional);
                 MissionSelect.AddWidget(InventorySlots[x, y] as IFunctional, 1);
+                MissionSelect.AddWidget(MissionSelectItems[y] as IFunctional, 1);
                 InventorySlots[x, y].AddBehaviour(new Action(EventHandler.UpdateInventory));
             }
         }

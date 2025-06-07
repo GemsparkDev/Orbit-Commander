@@ -23,7 +23,6 @@ public class EntityManager
     public static float StealthRange { get; private set; } = 750;
     //Threshold of detection for enemies
     public static float StealthThreshold { get; private set; } = 0.75f;
-    public readonly static Pickup[] globalInventory = new Pickup[5];
     public int MissionLength => missions.Count;
     private readonly List<Mission> missions = 
     [
@@ -61,7 +60,8 @@ public class EntityManager
     public Mission CurrentMission { get { return currentMission ?? missions[missionCount]; } }
     private int missionCount = 0;
     public int MissionCount { get { return missionCount; } }
-    private List<Queueable> queuedItems = [new FuseQueue(), new FuseQueue()];
+    public List<Queueable> QueuedItems { get; private set; } = [];
+
     public void Add(Entity entity)
     {
         if (!isUpdating)
@@ -170,9 +170,8 @@ public class EntityManager
     }
     public void CompleteMission(int _duration)
     {
-        //int points = _duration / 10;
-        int points = 1;
-        foreach (var item in queuedItems)
+        int points = _duration / 10;
+        foreach (var item in QueuedItems)
         {
             points = item.AttemptConstruct(points);
             if (points <= 0)
@@ -180,7 +179,7 @@ public class EntityManager
                 break;
             }
         }
-        queuedItems = (from item in queuedItems where !item.IsExpired select item).ToList();
+        QueuedItems = (from item in QueuedItems where !item.IsExpired select item).ToList();
     }
     public void SetMission(int _count)
     {

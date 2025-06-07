@@ -255,6 +255,11 @@ public class MissionSelect : GameState
         {
             _spriteBatch.Draw(Assets.Get(Sprite.Miniplayer), playerPosition, null, new Color(0, 255, 0), 0, Vector2.Zero, 1, 0, 0);
         }
+        for(int i = 0; i < Engine.EntityManager.QueuedItems.Count; i++)
+        {
+            var texture = Engine.EntityManager.QueuedItems[i].Texture;
+            _spriteBatch.Draw(texture, new Vector2(10, 10) + new Vector2(20, 0) * i - Engine.ScreenSize/2, null, Color.White, 0, Vector2.Zero, 1, 0, 0);
+        }
     }
 }
 public class Victory : GameState
