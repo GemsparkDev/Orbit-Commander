@@ -317,3 +317,11 @@ Update 0.4.3
  - Added buttons to queue items for crafting.    
  - Added a mission select inventory to store items between missions.    
  - Added a small image showing every queued item.    
+    
+0.4.6.3    
+6/7/2025    
+ - Fixed an issue with rendering scaling with different resolutions.    
+ - Added a remove queue item button.    
+ - Smelting and repairing now requires the player to click the button with the pickup.    
+ - Setting sliders now update the value stored.    
+ - Fixed bug #21.    
