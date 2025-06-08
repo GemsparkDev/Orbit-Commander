@@ -198,11 +198,19 @@ public class MissionSelect : GameState
         Engine.UIManager.ScreenWindow.enabled = false;
         EventHandler.UpdateMissionText();
         Engine.Camera.Position = Vector2.Zero;
+        Engine.MousePositionOffset = Vector2.Zero;
         ParticleManager.Initialize();
         EventHandler.UpdateModulesUI();
     }
     public override void Update() 
     {
+        for (int i = 0; i < Engine.EntityManager.QueuedItems.Count; i++)
+        {
+            if (Engine.EntityManager.QueuedItems[i].IsExpired)
+            {
+                Engine.EntityManager.QueuedItems.RemoveAt(i);
+            }
+        }
         time += Engine.DeltaSeconds;
         ParticleManager.Update();
         var pos = new Vector2(Input.NewMouseState.Position.X, Input.NewMouseState.Position.Y);
@@ -222,6 +230,10 @@ public class MissionSelect : GameState
             }
             var color = new Color(0, 255, 255);
             bool canSelect = true;
+            if (Engine.SaveGame.CompletedMissions[i])
+            {
+                color = new Color(255, 255, 0);
+            }
             foreach (var prerequisite in mission.prerequisites)
             {
                 if (!Engine.SaveGame.CompletedMissions[prerequisite])
@@ -238,6 +250,7 @@ public class MissionSelect : GameState
                     Engine.EntityManager.SetMission(i);
                 }
             }
+            
             missionOrbits[i].orbit.particleColor = color;
             var orbit = missionOrbits[i];
             if (orbit.system == system)
@@ -258,7 +271,7 @@ public class MissionSelect : GameState
         for(int i = 0; i < Engine.EntityManager.QueuedItems.Count; i++)
         {
             var texture = Engine.EntityManager.QueuedItems[i].Texture;
-            _spriteBatch.Draw(texture, new Vector2(10, 10) + new Vector2(20, 0) * i - Engine.ScreenSize/2, null, Color.White, 0, Vector2.Zero, 1, 0, 0);
+            _spriteBatch.Draw(texture, new Vector2(10, 10) + new Vector2(20, 0) * i - Engine.ScreenSize/2, null, Color.White, 0, Vector2.Zero, UIManager.UIScale, 0, 0);
         }
     }
 }

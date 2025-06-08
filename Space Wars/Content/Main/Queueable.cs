@@ -5,23 +5,31 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Xna.Framework.Graphics;
 using Space_Wars.Content.Main.Entities;
+using UILib.Content.Main;
 
 namespace Space_Wars.Content.Main;
 public abstract class Queueable(int _cost, Texture2D _texture)
 {
-    public bool IsExpired { get; private set; } = false;
-    public Texture2D Texture { get; } = _texture;
+    public bool IsExpired => !CanConstruct() || _cost == 0;
+    public int Cost => _cost;
+    public Texture2D Texture => _texture;
     public int AttemptConstruct(int _time)
     {
-        if (_time >= _cost)
+        if (CanConstruct())
         {
-            Construct();
-            IsExpired = true;
-            return _time - _cost;
+            if (_time >= _cost)
+            {
+                Construct();
+                _cost = 0;
+                return _time - _cost;
+            }
+            _cost -= _time;
+            return 0;
         }
         return _time;
     }
     protected abstract void Construct();
+    protected abstract bool CanConstruct();
 }
 public class FuseQueue() : Queueable(1, Assets.Get(Sprite.Fuse))
 {
@@ -29,29 +37,28 @@ public class FuseQueue() : Queueable(1, Assets.Get(Sprite.Fuse))
     {
         Engine.SaveGame.Player.AddFuse();
     }
-}
-public class RepairQueue : Queueable
-{
-    private Module module;
-    public RepairQueue(Module _module) : base(2, Assets.Get(Sprite.HullModule))
+    protected override bool CanConstruct()
     {
-        module = _module;
+        return true;
     }
+}
+public class RepairQueue(ItemSlot<Pickup> _module) : Queueable(2, Assets.Get(Sprite.HullModule))
+{
     protected override void Construct()
     {
+        var module = _module.daughterItem as Module;
         module.Health = module.MaxHealth;
     }
-}
-public class SmeltQueue : Queueable
-{
-    private Pickup pickup;
-    public SmeltQueue(ref Pickup _pickup) : base(2, Assets.Get(Sprite.RealMetalScrap))
+    protected override bool CanConstruct()
     {
-        pickup = _pickup;
+        return (_module.daughterItem as Module) != null;
     }
+}
+public class SmeltQueue(ItemSlot<Pickup> _pickup) : Queueable(2, Assets.Get(Sprite.RealMetalScrap))
+{
     protected override void Construct()
     {
-        if (pickup is Module)
+        if (_pickup.daughterItem is Module)
         {
             Engine.SaveGame.Scrap += 3;
         }
@@ -59,6 +66,10 @@ public class SmeltQueue : Queueable
         {
             Engine.SaveGame.Scrap += 2;
         }
-        pickup = null;
+        _pickup.daughterItem = null;
+    }
+    protected override bool CanConstruct()
+    {
+        return _pickup.daughterItem != null;
     }
 }

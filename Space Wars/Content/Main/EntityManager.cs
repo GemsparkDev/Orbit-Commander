@@ -170,7 +170,8 @@ public class EntityManager
     }
     public void CompleteMission(int _duration)
     {
-        int points = _duration / 10;
+        //int points = _duration / 10;
+        int points = 1;
         foreach (var item in QueuedItems)
         {
             points = item.AttemptConstruct(points);

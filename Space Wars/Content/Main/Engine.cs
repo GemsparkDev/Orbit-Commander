@@ -81,15 +81,12 @@ public class Engine : Game
         EntityManager = new EntityManager();
         AddUIElements();
         CurrentGameState.SwitchState(new MainMenu());
-        renderTarget = new RenderTarget2D(GraphicsDevice, (int)ScreenSize.X, (int)ScreenSize.Y);
+        renderTarget = new RenderTarget2D(GraphicsDevice, (int)1920, (int)1080);
 
         IsMouseVisible = false;
     }
     private void AddUIElements()
     {
-
-        UIManager.UIScale = 2;
-
         Texture2D largePanel = Assets.Get(Sprite.LargePanel);
         Texture2D wideButton = Assets.Get(Sprite.WideButton);
         List<Texture2D> iconGroup1 = [Assets.Get(Sprite.PlayIcon), Assets.Get(Sprite.SettingsIcon)];
@@ -104,7 +101,7 @@ public class Engine : Game
         var GarageMenu = new Window(ScreenSize / 2, Assets.Get(Sprite.GargantuanPanel), 1) { enabled = false };
         var MainMenu = new TabbedWindow(ScreenSize / 2, Assets.Get(Sprite.GargantuanPanel), tabTexture, selectedTabTexture, selectSound, 2, 1) { enabled = true, icons = iconGroup1 };
         var MothershipMenu = new TabbedWindow(new Vector2(Assets.Get(Sprite.Terminal).Width, ScreenSize.Y / 2), Assets.Get(Sprite.Terminal), tabTexture, selectedTabTexture, selectSound, 3, 1) { enabled = false, icons = iconGroup2 };
-        var MissionSelect = new TabbedWindow(new Vector2(Assets.DimsOf(Sprite.GargantuanPanel).X, ScreenSize.Y / 2), Assets.Get(Sprite.GargantuanPanel), tabTexture, selectedTabTexture, selectSound, 2) { enabled = false, icons = iconGroup3 };
+        var MissionSelect = new TabbedWindow(new Vector2(Assets.DimsOf(Sprite.GargantuanPanel).X, ScreenSize.Y / 2), Assets.Get(Sprite.GargantuanPanel), tabTexture, selectedTabTexture, selectSound, 2) { enabled = false, icons = iconGroup3, alignment = Alignment.Left };
         var PickupDroneMenu = new Window(ScreenSize / 2, largePanel, 1) { enabled = false };
         var FuseMenu = new Window(ScreenSize / 2, largePanel, 1) { enabled = false };
 
@@ -152,9 +149,10 @@ public class Engine : Game
         var nextMission = new Button(new Vector2(75, 20), Assets.Get(Sprite.Button), Assets.TextFont, "Next", Color.LightBlue);
         var selectMission = new Button(new Vector2(0, 20), Assets.Get(Sprite.Button), Assets.TextFont, "Launch!", Color.Yellow);
         var isComplete = new Decal(new Vector2(0, 45), Assets.TextFont, "Not Complete", Color.Red, 10);
-        var createFuse = new Button(new Vector2(-85,-30), Assets.Get(Sprite.Button), Assets.TextFont, "Queue Fuse", Color.Yellow);
-        var smeltScrap = new Button(new Vector2(-85, 0), Assets.Get(Sprite.Button), Assets.TextFont, "Queue Smelt", Color.Yellow);
-        var repairModule = new Button(new Vector2(-85, 30), Assets.Get(Sprite.Button), Assets.TextFont, "Queue Module", Color.Yellow);
+        var createFuse = new Button(new Vector2(-85,-45), Assets.Get(Sprite.Button), Assets.TextFont, "Queue Fuse", Color.Yellow);
+        var smeltScrap = new Button(new Vector2(-85, -15), Assets.Get(Sprite.Button), Assets.TextFont, "Queue Smelt", Color.Yellow);
+        var repairModule = new Button(new Vector2(-85, 15), Assets.Get(Sprite.Button), Assets.TextFont, "Queue Module", Color.Yellow);
+        var cancelQueue = new Button(new Vector2(-85, 45), Assets.Get(Sprite.Button), Assets.TextFont, "Cancel Latest", Color.Red);
 
         var launchButton = new Button(new Vector2(-20, 0), Assets.Get(Sprite.Button), Assets.TextFont, "Leave", Color.LightBlue);
 
@@ -197,9 +195,12 @@ public class Engine : Game
         uiScaleSlider.AddBehaviour(delegate ()
         {
             float i = uiScaleSlider.sliderInterval;
-            UIManager.UIScale = i + 1f;
+            UIManager.UIScale = (i + 1f) * ScreenSize.X / 1920f;
             uiScale.text = $"UI Scale: {Math.Truncate((i + 1) * 10) / 10}";
         });
+        sfxSlider.ApplyBehaviours();
+        musicSlider.ApplyBehaviours();
+        uiScaleSlider.ApplyBehaviours();
 
         singleplayerButton.AddBehaviour(delegate () { SaveGame = new(); EventHandler.MissionSelectTrigger(); });
         quitToMenuButton.AddBehaviour(EventHandler.QuitToMenu);
@@ -221,24 +222,41 @@ public class Engine : Game
         createFuse.AddBehaviour(delegate () { EntityManager.QueuedItems.Add(new FuseQueue()); });
         smeltScrap.AddBehaviour(delegate () 
         {
-            foreach (var item in MissionSelectItems)
+            if (UIManager.selectedIcon != null)
             {
-                if (item.daughterItem != null) 
+                foreach (var item in MissionSelectItems)
                 {
-                    EntityManager.QueuedItems.Add(new SmeltQueue(ref item.daughterItem));
-                    return;
+                    if (item.daughterItem == null)
+                    {
+                        item.daughterItem = UIManager.selectedIcon as Pickup;
+                        UIManager.selectedIcon = null;
+                        EntityManager.QueuedItems.Add(new SmeltQueue(item));
+                        return;
+                    }
                 }
             }
         });
         repairModule.AddBehaviour(delegate () 
         {
-            foreach (var item in MissionSelectItems)
+            if (UIManager.selectedIcon as Module != null)
             {
-                if (item.daughterItem != null && item.daughterItem is Module)
+                foreach (var item in MissionSelectItems)
                 {
-                    EntityManager.QueuedItems.Add(new RepairQueue(item.daughterItem as Module));
-                    return;
+                    if (item.daughterItem == null)
+                    {
+                        item.daughterItem = UIManager.selectedIcon as Module;
+                        UIManager.selectedIcon = null;
+                        EntityManager.QueuedItems.Add(new RepairQueue(item));
+                        return;
+                    }
                 }
+            }
+        });
+        cancelQueue.AddBehaviour(delegate () 
+        {
+            if(EntityManager.QueuedItems.Count != 0)
+            {
+                EntityManager.QueuedItems.RemoveAt(EntityManager.QueuedItems.Count - 1);
             }
         });
 
@@ -289,6 +307,7 @@ public class Engine : Game
         MissionSelect.AddWidget(createFuse as IFunctional, 1);
         MissionSelect.AddWidget(smeltScrap as IFunctional, 1);
         MissionSelect.AddWidget(repairModule as IFunctional, 1);
+        MissionSelect.AddWidget(cancelQueue as IFunctional, 1);
 
         PickupDroneMenu.AddWidget(launchButton as IFunctional);
 
@@ -339,6 +358,7 @@ public class Engine : Game
                 InventorySlots[x, y].AddBehaviour(new Action(EventHandler.UpdateInventory));
             }
         }
+        MissionSelectItems[0].daughterItem = ItemFactory.NewScrap();
         for (int i = 0; i < 4; i++)
         {
             for (int j = -2; j < 3; j++)
@@ -454,7 +474,7 @@ public class Engine : Game
 
     protected override void Draw(GameTime gameTime)
     {
-        Camera.Origin = ScreenSize / 2 - MousePositionOffset;
+        Camera.Origin = new Vector2(1920, 1080) / 2 - MousePositionOffset;
 
         //Render to renderTarget
         GraphicsDevice.SetRenderTarget(renderTarget);
@@ -467,7 +487,7 @@ public class Engine : Game
         GraphicsDevice.SetRenderTarget(null);
         GraphicsDevice.Clear(Color.Black);
         spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, null, null, Assets.GlobalShader);
-        spriteBatch.Draw(renderTarget,Vector2.Zero,Color.White);
+        spriteBatch.Draw(renderTarget, new Rectangle(0, 0, (int)ScreenSize.X, (int)ScreenSize.Y), Color.White);
         spriteBatch.End();
 
         spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, null, null, null);
