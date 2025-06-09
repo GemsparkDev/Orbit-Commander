@@ -57,9 +57,9 @@ public class EntityManager
         "Super earth", 2, 0, 1, null, true),
     ];
     private Mission currentMission;
-    public Mission CurrentMission { get { return currentMission ?? missions[missionCount]; } }
+    public Mission CurrentMission => currentMission ?? missions[missionCount];
     private int missionCount = 0;
-    public int MissionCount { get { return missionCount; } }
+    public int MissionCount => missionCount;
     public List<Queueable> QueuedItems { get; private set; } = [];
 
     public void Add(Entity entity)
@@ -115,7 +115,7 @@ public class EntityManager
             }
             Engine.Startgame();
         }
-        Engine.MousePositionOffset = new Vector2(Mouse.GetState().X - Engine.ScreenSize.X / 2, Mouse.GetState().Y - Engine.ScreenSize.Y / 2) / 10
+        Engine.MousePositionOffset = new Vector2(Mouse.GetState().X, Mouse.GetState().Y) / 10 - Engine.BackBuffer / 20
             + Engine.ScreenShakeFactor * Engine.ScreenShakeFactor * new Vector2(Engine.Random.NextSingle() - 0.5f, Engine.Random.NextSingle() - 0.5f) * 50;
         Engine.Camera.Rotation = Engine.ScreenShakeFactor * Engine.ScreenShakeFactor * (Engine.Random.NextSingle() - 0.5f) * 0.15f;
         //If the player is further from the camera, put more weight on the player
@@ -170,8 +170,7 @@ public class EntityManager
     }
     public void CompleteMission(int _duration)
     {
-        //int points = _duration / 10;
-        int points = 1;
+        int points = _duration / 10;
         foreach (var item in QueuedItems)
         {
             points = item.AttemptConstruct(points);

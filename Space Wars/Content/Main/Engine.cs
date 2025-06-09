@@ -29,7 +29,10 @@ public class Engine : Game
     public static Camera Camera { get; private set; }
     public static Engine Self { get; private set; }
     public static Random Random { get; } = new();
-    public static Vector2 ScreenSize { get; private set; }
+    //Render target size
+    public static Vector2 ScreenSize => new(1920, 1080);
+    //Monitor size
+    public static Vector2 BackBuffer { get; private set; }
     public static Vector2 MousePositionOffset { get; set; }
     public static Timespan IngameTime { get; set; } = new();
     public static float DeltaSeconds { get; private set; }
@@ -64,8 +67,8 @@ public class Engine : Game
 
         IsFixedTimeStep = true;
         TargetElapsedTime = TimeSpan.FromSeconds(1d / (double)(targetFramerate * timeScale));
-
-        ScreenSize = new Vector2(graphics.PreferredBackBufferWidth, graphics.PreferredBackBufferHeight);
+        
+        BackBuffer = new Vector2(graphics.PreferredBackBufferWidth, graphics.PreferredBackBufferHeight);
         DebugMode = false;
         Line = new Texture2D(graphics.GraphicsDevice, 1, 1, false, SurfaceFormat.Color);
         Line.SetData(new[] { Color.White });
@@ -81,7 +84,7 @@ public class Engine : Game
         EntityManager = new EntityManager();
         AddUIElements();
         CurrentGameState.SwitchState(new MainMenu());
-        renderTarget = new RenderTarget2D(GraphicsDevice, (int)1920, (int)1080);
+        renderTarget = new RenderTarget2D(GraphicsDevice, (int)ScreenSize.X, (int)ScreenSize.Y);
 
         IsMouseVisible = false;
     }
@@ -96,22 +99,19 @@ public class Engine : Game
         var tabTexture = Assets.Get(Sprite.Tab);
         var selectedTabTexture = Assets.Get(Sprite.SelectedTab);
         var selectSound = Assets.Get(Sound.Interact);
-        var PauseMenu = new Window(ScreenSize / 2, largePanel, 1) { enabled = false };
-        var PlayerMenu = new Window(new Vector2(Assets.Get(Sprite.Terminal).Width, ScreenSize.Y / 2), Assets.Get(Sprite.Terminal), 1) { enabled = false };
-        var GarageMenu = new Window(ScreenSize / 2, Assets.Get(Sprite.GargantuanPanel), 1) { enabled = false };
-        var MainMenu = new TabbedWindow(ScreenSize / 2, Assets.Get(Sprite.GargantuanPanel), tabTexture, selectedTabTexture, selectSound, 2, 1) { enabled = true, icons = iconGroup1 };
-        var MothershipMenu = new TabbedWindow(new Vector2(Assets.Get(Sprite.Terminal).Width, ScreenSize.Y / 2), Assets.Get(Sprite.Terminal), tabTexture, selectedTabTexture, selectSound, 3, 1) { enabled = false, icons = iconGroup2 };
-        var MissionSelect = new TabbedWindow(new Vector2(Assets.DimsOf(Sprite.GargantuanPanel).X, ScreenSize.Y / 2), Assets.Get(Sprite.GargantuanPanel), tabTexture, selectedTabTexture, selectSound, 2) { enabled = false, icons = iconGroup3, alignment = Alignment.Left };
-        var PickupDroneMenu = new Window(ScreenSize / 2, largePanel, 1) { enabled = false };
-        var FuseMenu = new Window(ScreenSize / 2, largePanel, 1) { enabled = false };
+        var PauseMenu = new Window(BackBuffer / 2, largePanel, 1) { enabled = false };
+        var PlayerMenu = new Window(new Vector2(0, BackBuffer.Y / 2), Assets.Get(Sprite.Terminal), 1) { enabled = false, alignment = Alignment.Left };
+        var GarageMenu = new Window(BackBuffer / 2, Assets.Get(Sprite.GargantuanPanel), 1) { enabled = false };
+        var MainMenu = new TabbedWindow(BackBuffer / 2, Assets.Get(Sprite.GargantuanPanel), tabTexture, selectedTabTexture, selectSound, 2, 1) { enabled = true, icons = iconGroup1 };
+        var MothershipMenu = new TabbedWindow(new Vector2(0, BackBuffer.Y / 2), Assets.Get(Sprite.Terminal), tabTexture, selectedTabTexture, selectSound, 3, 1) { enabled = false, icons = iconGroup2, alignment = Alignment.Left };
+        var MissionSelect = new TabbedWindow(new Vector2(0, BackBuffer.Y / 2), Assets.Get(Sprite.GargantuanPanel), tabTexture, selectedTabTexture, selectSound, 2) { enabled = false, icons = iconGroup3, alignment = Alignment.Left };
+        var PickupDroneMenu = new Window(BackBuffer / 2, largePanel, 1) { enabled = false };
+        var FuseMenu = new Window(BackBuffer / 2, largePanel, 1) { enabled = false };
 
         var patchedConicsToggle = new Button(new Vector2(0, -MainMenu.Size.Y / 4), wideButton, Assets.TextFont, $"Patched Conics: {PatchedConics}", Color.White);
         var sfxSlider = new Slider(Line, Assets.Get(Sprite.Knob), new Vector2(25, 0), 50, false, Color.White, Color.Gray);
         var musicSlider = new Slider(Line, Assets.Get(Sprite.Knob), new Vector2(25, -15), 50, false, Color.White, Color.Gray);
         var uiScaleSlider = new Slider(Line, Assets.Get(Sprite.Knob), new Vector2(25, 15), 50, false, Color.White, Color.Gray);
-        sfxSlider.SetInterval(1, 1);
-        musicSlider.SetInterval(0, 1);
-        uiScaleSlider.SetInterval(1, 1);
         var sfxVolume = new Decal(new Vector2(-35, 0), Assets.TextFont, "Sound: 100%", Color.White, 5);
         var musicVolume = new Decal(new Vector2(-35, -15), Assets.TextFont, "Music: 100%", Color.White, 5);
         var uiScale = new Decal(new Vector2(-35, 15), Assets.TextFont, $"UI Scale: {Math.Truncate((uiScaleSlider.sliderInterval + 1) * 10) / 10}", Color.White, 5);
@@ -158,14 +158,11 @@ public class Engine : Game
 
         var fuseCounter = new Decal(new Vector2(-20, -10), Assets.TextFont, "0", Color.Yellow, 10);
 
-        var globalSidePanelOpen = new Button(new Vector2(Assets.Get(Sprite.ToggleButton).Width / 2, ScreenSize.Y / 4), Assets.Get(Sprite.ToggleButton));
-        fpsCounter = new Decal(new Vector2(ScreenSize.X / 2 - 20, 10), Assets.TextFont, "60", Color.White, 10);
-        fpsOneSec = new Decal(new Vector2(ScreenSize.X / 2 - 20, 23), Assets.TextFont, "60", Color.White, 10);
-        fpsLowest = new Decal(new Vector2(ScreenSize.X / 2 - 20, 36), Assets.TextFont, "60", Color.White, 10);
-        timer = new Decal(new Vector2(ScreenSize.X / 2 - 100, 10), Assets.TextFont, $"{IngameTime.DrawText}", Color.White, 10);
-
-        Vector2 center = new Vector2(ScreenSize.X * 2 / 3, ScreenSize.Y / 2) / 2;
-        var nextSystem = new Button(center + new Vector2(100, 0), Assets.Get(Sprite.Button));
+        var globalSidePanelOpen = new Button(new Vector2(0, BackBuffer.Y / 2), Assets.Get(Sprite.ToggleButton));
+        fpsCounter = new Decal(new Vector2(BackBuffer.X - 40, 50), Assets.TextFont, "60", Color.White, 10);
+        fpsOneSec = new Decal(new Vector2(BackBuffer.X - 40, 100), Assets.TextFont, "60", Color.White, 10);
+        fpsLowest = new Decal(new Vector2(BackBuffer.X - 40, 150), Assets.TextFont, "60", Color.White, 10);
+        timer = new Decal(new Vector2(BackBuffer.X - 150, 0), Assets.TextFont, $"{IngameTime.DrawText}", Color.White, 10);
 
         var sidePanelClose = new Button(new Vector2(-Assets.Get(Sprite.ToggleButton).Width / 2 + Assets.Get(Sprite.Terminal).Width / 2, 0), Assets.Get(Sprite.ToggleButton));
         patchedConicsToggle.AddBehaviour(delegate
@@ -195,9 +192,13 @@ public class Engine : Game
         uiScaleSlider.AddBehaviour(delegate ()
         {
             float i = uiScaleSlider.sliderInterval;
-            UIManager.UIScale = (i + 1f) * ScreenSize.X / 1920f;
+            UIManager.UIScale = (i + 1f) * BackBuffer.X / ScreenSize.X;
             uiScale.text = $"UI Scale: {Math.Truncate((i + 1) * 10) / 10}";
         });
+        sfxSlider.SetInterval(1, 1);
+        musicSlider.SetInterval(0, 1);
+        uiScaleSlider.SetInterval(1, 1);
+
         sfxSlider.ApplyBehaviours();
         musicSlider.ApplyBehaviours();
         uiScaleSlider.ApplyBehaviours();
@@ -218,7 +219,6 @@ public class Engine : Game
         selectMission.AddBehaviour(delegate() { if (EventHandler.SyncModules()) { Startgame(); } });
         launchButton.AddBehaviour(delegate() { EventHandler.SendMessage(Message.EscapeDroneLeave); });
         shaderToggle.AddBehaviour(delegate () { UseShader = !UseShader; shaderToggle.text = $"Shader: {UseShader}"; });
-        nextSystem.AddBehaviour(delegate() { Main.MissionSelect.system = (Main.MissionSelect.system + 1) % 3; });
         createFuse.AddBehaviour(delegate () { EntityManager.QueuedItems.Add(new FuseQueue()); });
         smeltScrap.AddBehaviour(delegate () 
         {
@@ -318,12 +318,11 @@ public class Engine : Game
             MothershipMenu.AddWidget(sidePanelClose as IFunctional, i);
         }
 
-        UIManager.ScreenWindow.AddWidget(globalSidePanelOpen as IFunctional, 0);
-        UIManager.ScreenWindow.AddWidget(fpsCounter, 0);
-        UIManager.ScreenWindow.AddWidget(fpsOneSec, 0);
-        UIManager.ScreenWindow.AddWidget(fpsLowest, 0);
-        UIManager.ScreenWindow.AddWidget(timer, 0);
-        UIManager.ScreenWindow.AddWidget(nextSystem as IFunctional, 1);
+        UIManager.ScreenWindow.AddWidget(globalSidePanelOpen as IFunctional, (int)Alignment.Left);
+        UIManager.ScreenWindow.AddWidget(fpsCounter, (int)Alignment.TopRight);
+        UIManager.ScreenWindow.AddWidget(fpsOneSec, (int)Alignment.TopRight);
+        UIManager.ScreenWindow.AddWidget(fpsLowest, (int)Alignment.TopRight);
+        UIManager.ScreenWindow.AddWidget(timer, (int)Alignment.TopRight);
 
         ModuleSlots = new ItemSlot<Module>[5];
         InventorySlots = new ItemSlot<Pickup>[1, 4];
@@ -474,7 +473,7 @@ public class Engine : Game
 
     protected override void Draw(GameTime gameTime)
     {
-        Camera.Origin = new Vector2(1920, 1080) / 2 - MousePositionOffset;
+        Camera.Origin = ScreenSize / 2 - MousePositionOffset;
 
         //Render to renderTarget
         GraphicsDevice.SetRenderTarget(renderTarget);
@@ -487,14 +486,14 @@ public class Engine : Game
         GraphicsDevice.SetRenderTarget(null);
         GraphicsDevice.Clear(Color.Black);
         spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, null, null, Assets.GlobalShader);
-        spriteBatch.Draw(renderTarget, new Rectangle(0, 0, (int)ScreenSize.X, (int)ScreenSize.Y), Color.White);
+        spriteBatch.Draw(renderTarget, new Rectangle(0, 0, (int)BackBuffer.X, (int)BackBuffer.Y), Color.White);
         spriteBatch.End();
 
         spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, null, null, null);
         UIManager.Draw(spriteBatch);
         if (!UIManager.LockMouseInput)
         {
-            spriteBatch.Draw(Assets.Get(Sprite.Cursor), new Vector2(Mouse.GetState().X, Mouse.GetState().Y), null, Color.White, 0, Vector2.Zero, 1, 0, 0.5f);
+            spriteBatch.Draw(Assets.Get(Sprite.Cursor), new Vector2(Mouse.GetState().X, Mouse.GetState().Y), null, Color.White, 0, Vector2.Zero, UIManager.UIScale / 2, 0, 0.5f);
         }
         if (DebugMode)
         {
@@ -517,27 +516,14 @@ public class Engine : Game
             }
         }
         spriteBatch.End();
-
         base.Draw(gameTime);
     }
 }
 public struct Timespan
 {
     public float Duration { get; set; }
-    public readonly float Seconds
-    {
-        get { return Duration % 60; }
-    }
-    public readonly float Minutes
-    {
-        get { return (int)(Duration / 60) % 60; }
-    }
-    public readonly float Hours
-    {
-        get { return (int)(Duration / 3600); }
-    }
-    public readonly string DrawText
-    {
-        get { return $"{Hours:00}:{Minutes:00}:{Seconds:00.00}"; }
-    }
+    public readonly float Seconds => Duration % 60;
+    public readonly float Minutes => (int)(Duration / 60) % 60;
+    public readonly float Hours => (int)(Duration / 3600);
+    public readonly string DrawText => $"{Hours:00}:{Minutes:00}:{Seconds:00.00}";
 }

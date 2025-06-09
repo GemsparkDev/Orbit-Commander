@@ -21,14 +21,13 @@ public abstract class Projectile : Entity
     }
     public override void Update()
     {
-        AI();
-
         timeLeft -= Engine.DeltaSeconds;
         if(timeLeft <= 0)
         {
             ParticleManager.Add(new Particle(texture, 1, position, velocity, angle, 0, 1, true, color, Color.Black));
             isExpired = true;
         }
+        AI();
         base.Update();
     }
     public abstract void AI();
@@ -131,3 +130,119 @@ public class AssassinShot : Projectile
         beam.Update();
     }
 }
+public class GrapplingHook : Projectile
+{
+    private Entity parent;
+    private ILatchable target;
+    private float maxDistance;
+    public GrapplingHook(Vector2 _position, Vector2 _velocity, float _angle, Entity _parent) : base(Assets.Get(Sprite.Microshot), _position, _velocity, _angle, 0, true, 0, 0)
+    {
+        parent = _parent;
+        color = new Color(0, 255, 255);
+        timeLeft = 60;
+    }
+    public override void AI()
+    {
+        velocity *= (1 - Engine.DeltaSeconds) * 0.97f;
+        position += velocity * Engine.DeltaSeconds * 60;
+        if (target != null)
+        {
+            position = target.Position;
+            float distance = Vector2.Distance(position, parent.position);
+            if (distance > maxDistance)
+            {
+                Vector2 direction = Vector2.Normalize(position - parent.position);
+                Vector2 force = direction * (distance - maxDistance) * Engine.DeltaSeconds;
+                parent.velocity += force;
+                target.ApplyForce(force);
+            }
+            if (target.IsExpired)
+            {
+                isExpired = true;
+            }
+        }
+        else
+        {
+            float distance = Vector2.Distance(position, parent.position);
+            if (distance > 800)
+            {
+                isExpired = true;
+            }
+            var planet = Engine.EntityManager.CurrentMission.IsColliding(position + velocity * Engine.DeltaSeconds * 60);
+            if (planet != null)
+            {
+                target = new LatchedPlanet(planet, position);
+                SoundManager.PlaySound(Assets.Get(Sound.ShieldHit), position);
+                maxDistance = distance;
+            }
+            else
+            {
+                Entity entity = Engine.EntityManager.NearestEnemy(this);
+                if (entity != null && Vector2.Distance(position, entity.position) < entity.ColliderRadius + ColliderRadius)
+                {
+                    target = new LatchedEntity(entity);
+                    SoundManager.PlaySound(Assets.Get(Sound.ShieldHit), position);
+                    maxDistance = distance;
+                }
+            }
+        }
+        if (isExpired)
+        {
+            velocity = Vector2.Zero;
+            Texture2D texture = Assets.Get(Sprite.Dot);
+            Vector2 direction = Vector2.Normalize(parent.position - position);
+            float angle = MathF.Atan2(direction.Y, direction.X);
+            float distance = Vector2.Distance(parent.position, position);
+            for (float i = 0; i < distance / texture.Height; i++)
+            {
+                ParticleManager.Add(new Particle(texture, 1, position + direction * i * texture.Height, velocity, angle, 0, 1, true, color, Color.Black));
+            }
+            if (timeLeft > 0)
+            {
+                ParticleManager.Add(new Particle(this.texture, 1, position, velocity, this.angle, 0, 1, true, color, Color.Black));
+            }
+        }
+    }
+    public override void Draw(SpriteBatch _spriteBatch)
+    {
+        Texture2D texture = Assets.Get(Sprite.Dot);
+        Vector2 direction = Vector2.Normalize(parent.position - position);
+        float angle = MathF.Atan2(direction.Y, direction.X);
+        float distance = Vector2.Distance(parent.position, position);
+        for (float i = 0; i < distance / texture.Height; i++)
+        {
+            _spriteBatch.Draw(texture, position + direction * i * texture.Height, null, color, angle, new Vector2(texture.Width, texture.Height)/2, 1, 0, 0);
+        }
+        base.Draw(_spriteBatch);
+    }
+    public override void Collide(int _damage)
+    {
+
+    }
+}
+public interface ILatchable 
+{ 
+    public Vector2 Position { get; } 
+    public bool IsExpired { get; }
+    public void ApplyForce(Vector2 _force);
+}
+public class LatchedEntity(Entity _entity) : ILatchable 
+{
+    public Vector2 Position => _entity.position;
+    public bool IsExpired => _entity.isExpired;
+
+    public void ApplyForce(Vector2 _force)
+    {
+        _entity.velocity -= _force;
+    }
+}
+public class LatchedPlanet(GravitationalSource _planet, Vector2 _position) : ILatchable 
+{
+    private Vector2 offset = Vector2.Normalize(_position - _planet.position) * _planet.radius;
+    public Vector2 Position => _planet.position + offset;
+    public bool IsExpired => false;
+
+    //Prevents deorbiting planets
+    public void ApplyForce(Vector2 _force) { }
+}
+

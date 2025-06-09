@@ -94,7 +94,6 @@ public class PlayingGame : GameState
     public override void Initialize()
     {
         Engine.UIManager.ScreenWindow.enabled = true;
-        Engine.UIManager.ScreenWindow.CurrentTab = 0;
     }
     public override void Update()
     {
@@ -271,7 +270,7 @@ public class MissionSelect : GameState
         for(int i = 0; i < Engine.EntityManager.QueuedItems.Count; i++)
         {
             var texture = Engine.EntityManager.QueuedItems[i].Texture;
-            _spriteBatch.Draw(texture, new Vector2(10, 10) + new Vector2(20, 0) * i - Engine.ScreenSize/2, null, Color.White, 0, Vector2.Zero, UIManager.UIScale, 0, 0);
+            _spriteBatch.Draw(texture, (new Vector2(10, 10) + new Vector2(20, 0) * i) * UIManager.UIScale - Engine.ScreenSize/2, null, Color.White, 0, Vector2.Zero, UIManager.UIScale, 0, 0);
         }
     }
 }

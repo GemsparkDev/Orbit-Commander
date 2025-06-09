@@ -15,6 +15,8 @@ public enum ModuleType
     Missile,
     LMG,
     Sniper,
+    //Engines
+    GrapplingHook,
 }
 public enum Sprite
 {

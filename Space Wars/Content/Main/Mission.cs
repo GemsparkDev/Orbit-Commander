@@ -210,6 +210,17 @@ public class Mission
             }
         }
     }
+    public GravitationalSource IsColliding(Vector2 _position)
+    {
+        foreach(var planet in planets)
+        {
+            if (planet.IsColliding(_position))
+            {
+                return planet;
+            }
+        }
+        return null;
+    }
     public void PlayIntroCutscene()
     {
         if (cutscene != null)

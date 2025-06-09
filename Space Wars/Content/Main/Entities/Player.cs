@@ -14,7 +14,7 @@ namespace Space_Wars.Content.Main.Entities;
 public class Player : Entity
 {
     public DockableComponent dockedEntity;
-    private Enemy shield;
+    private Entity abilityEntity;
     private ParticleEmitter engineParticles = new(Assets.Get(Sprite.Circle), 0.15f, Vector2.Zero, 0, 45, 2, 0, 450f, 1, true, Color.Cyan, Color.DarkSlateBlue, EmitterType.EmissionOverTime) { isEmitterActive = false };
     //private ParticleEmitter engineParticles = new(Assets.Sprites["Circle"], 0.15f, Vector2.Zero, 0, 45, 2, 0, 450f, 1, true, Color.Orange, Color.Crimson, EmitterType.EmissionOverTime);
     private ParticleEmitter smokeParticles = new(Assets.Get(Sprite.Circle), 1f, Vector2.Zero, 0, 45, 1, 0, 0.25f, 1, true, Color.Gray, Color.DarkGray, EmitterType.EmissionOverTime) { isEmitterActive = false };
@@ -68,8 +68,8 @@ public class Player : Entity
     public Dictionary<ModuleType, Module> modules = new()
     {
         { ModuleType.Hull, ItemFactory.GetItem(ModuleType.Hull) },
-        { ModuleType.Guns, ItemFactory.GetItem(ModuleType.Basic) },
-        { ModuleType.Engines, ItemFactory.GetItem(ModuleType.Engines) },
+        { ModuleType.Guns, ItemFactory.GetItem(ModuleType.Sniper) },
+        { ModuleType.Engines, ItemFactory.GetItem(ModuleType.GrapplingHook) },
         { ModuleType.Sensors, ItemFactory.GetItem(ModuleType.Sensors) },
         { ModuleType.Core, ItemFactory.GetItem(ModuleType.Core) }
     };
@@ -86,8 +86,8 @@ public class Player : Entity
         : base(Assets.Get(Sprite.Player), _position, _velocity, _angle, _angularVelocity, 5, true)
     {
         gunAngle = Enemy.NewDummyEnemy(position, true);
-        shield = Enemy.NewShield(gunAngle, 10, 1, 0, 1, true);
-        shield.isExpired = true;
+        abilityEntity = Enemy.NewShield(gunAngle, 10, 1, 0, 1, true);
+        abilityEntity.isExpired = true;
         color = new Color(0, 255, 0);
         smokeParticles.isEmitterActive = false;
         engineParticles.isEmitterActive = false;
@@ -261,7 +261,7 @@ public class Player : Entity
             }
             if (dockedEntity == null)
             {
-                targetVector = Vector2.Normalize(new Vector2(Mouse.GetState().X, Mouse.GetState().Y) - Engine.ScreenSize / 2 - position + Engine.Camera.Position);
+                targetVector = Vector2.Normalize(new Vector2(Mouse.GetState().X, Mouse.GetState().Y) - Engine.BackBuffer / 2 - position + Engine.Camera.Position);
                 gunAngle.angle = MathF.Atan2(targetVector.X, -targetVector.Y) - Engine.Camera.Rotation;
                 if (Input.NewMouseState.LeftButton == ButtonState.Pressed && modules[ModuleType.Guns].IsCooldownReady() && !UIManager.LockMouseInput && !modules[ModuleType.Guns].isFailed)
                 {
@@ -281,7 +281,7 @@ public class Player : Entity
                 {
                     leashedMaterials = [];
                 }
-                if (Input.OldState.IsKeyUp(Keys.Q) && Input.NewState.IsKeyDown(Keys.Q) && modules[ModuleType.Engines].IsCooldownReady() && !modules[ModuleType.Engines].isFailed)
+                if (Input.OldState.IsKeyUp(Keys.Q) && Input.NewState.IsKeyDown(Keys.Q) && !modules[ModuleType.Engines].isFailed)
                 {
                     modules[ModuleType.Engines].ModuleFunction();
                 }
@@ -546,6 +546,10 @@ public class Player : Entity
     }
     public void Dash()
     {
+        if (!modules[ModuleType.Engines].IsCooldownReady())
+        {
+            return;
+        }
         invincibilityCooldown = 0.5f;
         Vector2 normalVector = new(MathF.Sin(gunAngle.angle), -MathF.Cos(gunAngle.angle));
         for (int i = 0; i < 200; i++)
@@ -558,14 +562,35 @@ public class Player : Entity
     }
     public void SummonShield()
     {
-        if (!shield.isExpired)
+        if (!modules[ModuleType.Engines].IsCooldownReady())
         {
             return;
         }
-        shield.health = 1;
-        shield.isExpired = false;
-        Engine.EntityManager.Add(shield);
+        if (!abilityEntity.isExpired)
+        {
+            return;
+        }
+        (abilityEntity as Enemy).health = 1;
+        abilityEntity.isExpired = false;
+        Engine.EntityManager.Add(abilityEntity);
         modules[ModuleType.Engines].cooldown = 5f;
+    }
+    public void SummonGrapplingHook()
+    {
+        if ((abilityEntity == null || abilityEntity.isExpired) && modules[ModuleType.Engines].IsCooldownReady())
+        {
+            abilityEntity = new GrapplingHook(position, targetVector * 50, gunAngle.angle, this);
+            SoundManager.PlaySound(Assets.Get(Sound.Click), position);
+            Engine.ShakeScreen(0.3f);
+            velocity -= targetVector / 2;
+            Engine.EntityManager.Add(abilityEntity);
+            modules[ModuleType.Engines].cooldown = 5f;
+        }
+        else if(abilityEntity != null && !abilityEntity.isExpired)
+        {
+            abilityEntity.isExpired = true;
+            modules[ModuleType.Engines].cooldown /= 2;
+        }
     }
     public override void Draw(SpriteBatch _spriteBatch)
     {
