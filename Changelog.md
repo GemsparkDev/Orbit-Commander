@@ -325,3 +325,12 @@ Update 0.4.3
  - Smelting and repairing now requires the player to click the button with the pickup.    
  - Setting sliders now update the value stored.    
  - Fixed bug #21.    
+
+0.4.6.4    
+6/8/2025    
+ - Added the grappling hook module with a cooldown of 5 seconds.    
+ - The grappling hook can attach to entities or planets, and will drag the player toward it if they get too far.    
+ - Moved the ItemFactory class into it's own file.    
+ - The ScreenSize parameter now defaults to 1920 by 1080. Use the new BackBuffer parameter to get monitor size.    
+ - Windows now have alignment fields which affect how they scale with UIScale.    
+ - Mission now has a general IsColliding function for every planet.    
