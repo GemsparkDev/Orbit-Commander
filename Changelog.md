@@ -334,3 +334,12 @@ Update 0.4.3
  - The ScreenSize parameter now defaults to 1920 by 1080. Use the new BackBuffer parameter to get monitor size.    
  - Windows now have alignment fields which affect how they scale with UIScale.    
  - Mission now has a general IsColliding function for every planet.    
+    
+0.4.6.5    
+6/9/2025    
+ - Removed the particle transparency and particle fades out fields.    
+ - Particles now use the alpha channel to control transparency.    
+ - Docking with the ship now disables ability summons (like the grappling hook).    
+ - The grappling hook line is now dashed.    
+ - The coloration of the grappling hook line becomes more extreme when the player is near the max range.    
+ - Fixed bug #22.    
