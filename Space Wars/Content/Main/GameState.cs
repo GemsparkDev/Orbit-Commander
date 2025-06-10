@@ -67,7 +67,7 @@ public class MainMenu : GameState
     private GravitationalSource menuPlanet = new(new Vector2(0, 750), Vector2.Zero, 5000, 9, true, Color.Cyan);
     private GravitationalSource moonPlanet = new(new Vector2(0, 1750), GravitationalSource.GetOrbitalVelocity(new Vector2(0, 1750), new Vector2(0, 750), 5000), 250, 1.5f, false, Color.Cyan);
     private ParticleEmitter smokeParticles = new(Assets.Get(Sprite.Circle), 1f, new Vector2(0, 300 - Assets.DimsOf(Sprite.Mothership).Y + 10),
-        0, 45, 1, 0, 40, 1, true, Color.Gray, Color.DarkGray, EmitterType.EmissionOverTime)
+        0, 45, 1, 0, 40, Color.Gray, new Color(169, 169, 169, 0), EmitterType.EmissionOverTime)
     { probability = 0.25f };
     public override void Initialize()
     {
@@ -179,13 +179,13 @@ public class MissionSelect : GameState
     private Vector2 playerPosition;
     private List<(int system, ParticleEmitter orbit)> missionOrbits = [];
     public static int system = 0;
-    private ParticleEmitter sun = new (Assets.Get(Sprite.Dot), new Vector2(Engine.ScreenSize.X / 6, 0), 20, 1, new Color(255, 255, 0));
+    private ParticleEmitter sun = new (Assets.Get(Sprite.Dot), new Vector2(Engine.ScreenSize.X / 6, 0), 20, new Color(255, 255, 0));
     public MissionSelect()
     {
         var center = new Vector2(Engine.ScreenSize.X/6, 0);
         foreach (var mission in missions)
         {
-            var orbit = (mission.system, new ParticleEmitter(Assets.Get(Sprite.Dot), center, mission.distance, 1, new Color(0, 255, 255)));
+            var orbit = (mission.system, new ParticleEmitter(Assets.Get(Sprite.Dot), center, mission.distance, new Color(0, 255, 255)));
             missionOrbits.Add(orbit);
         }
         var playerMission = missions[Engine.EntityManager.MissionCount];
@@ -254,7 +254,7 @@ public class MissionSelect : GameState
             var orbit = missionOrbits[i];
             if (orbit.system == system)
             {
-                ParticleManager.Add(new Particle(Assets.Get(Sprite.Circle), pos, 0, 1, color));
+                ParticleManager.Add(new Particle(Assets.Get(Sprite.Circle), pos, 0, color));
                 orbit.orbit.Update();
             }
         }

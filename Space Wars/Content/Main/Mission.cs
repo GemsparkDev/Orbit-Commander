@@ -327,12 +327,12 @@ public class Mission
             }
             if (exit)
             {
-                ParticleManager.Add(new Particle(Assets.Get(Sprite.Dot), particlePos, 0, 0.5f, Color.Red));
+                ParticleManager.Add(new Particle(Assets.Get(Sprite.Dot), particlePos, 0, Color.Red * 0.5f));
                 return;
             }
             if (n % 3 == 0)
             {
-                ParticleManager.Add(new Particle(Assets.Get(Sprite.Dot), particlePos, 0, 0.5f, Color.Cyan));
+                ParticleManager.Add(new Particle(Assets.Get(Sprite.Dot), particlePos, 0, Color.Cyan * 0.5f));
             }
         }
     }

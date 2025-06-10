@@ -15,9 +15,9 @@ public class Player : Entity
 {
     public DockableComponent dockedEntity;
     private Entity abilityEntity;
-    private ParticleEmitter engineParticles = new(Assets.Get(Sprite.Circle), 0.15f, Vector2.Zero, 0, 45, 2, 0, 450f, 1, true, Color.Cyan, Color.DarkSlateBlue, EmitterType.EmissionOverTime) { isEmitterActive = false };
+    private ParticleEmitter engineParticles = new(Assets.Get(Sprite.Circle), 0.15f, Vector2.Zero, 0, 45, 2, 0, 450f, Color.Cyan, new Color(72, 61, 139, 0), EmitterType.EmissionOverTime) { isEmitterActive = false };
     //private ParticleEmitter engineParticles = new(Assets.Sprites["Circle"], 0.15f, Vector2.Zero, 0, 45, 2, 0, 450f, 1, true, Color.Orange, Color.Crimson, EmitterType.EmissionOverTime);
-    private ParticleEmitter smokeParticles = new(Assets.Get(Sprite.Circle), 1f, Vector2.Zero, 0, 45, 1, 0, 0.25f, 1, true, Color.Gray, Color.DarkGray, EmitterType.EmissionOverTime) { isEmitterActive = false };
+    private ParticleEmitter smokeParticles = new(Assets.Get(Sprite.Circle), 1f, Vector2.Zero, 0, 45, 1, 0, 0.25f, Color.Gray, new Color(169, 169, 169, 0), EmitterType.EmissionOverTime) { isEmitterActive = false };
     private SoundEffectInstance engineSounds;
     private float invincibilityCooldown = 0;
     private float cachedDamage = 0;
@@ -338,6 +338,10 @@ public class Player : Entity
                         {
                             dockedEntity = dockableEntity;
                             isEngineActive = false;
+                            if (abilityEntity != null)
+                            {
+                                abilityEntity.isExpired = true;
+                            }
                         }
                     }
                 }
@@ -379,9 +383,9 @@ public class Player : Entity
             cachedDamage += _damage;
             SoundManager.PlaySound(Assets.Get(Sound.Hit), position);
             invincibilityCooldown = 1;
-            ParticleManager.Add(new Particle(null, 1, position + new Vector2(0, -1), new Vector2(0, -1.5f), 0, 0, 1, true, Color.Red, Color.Red) { drawText = $"{_damage}" });
+            ParticleManager.Add(new Particle(null, 1, position + new Vector2(0, -1), new Vector2(0, -1.5f), 0, 0, Color.Red, Color.Transparent) { drawText = $"{_damage}" });
             //Part Failure
-            if (Engine.Random.Next(0, 1) == 0)
+            if (Engine.Random.Next(0, 5) == 0)
             {
                 ModuleType failedPart = (ModuleType)Engine.Random.Next(0, 4);
                 if (modules[failedPart].Health < modules[failedPart].MaxHealth / 2)
@@ -405,7 +409,7 @@ public class Player : Entity
                         text += " Fuse damaged!";
                         EventHandler.UpdateFuseUI(moduleFuses, spareFuses);
                     }
-                    ParticleManager.Add(new Particle(null, 2, position + new Vector2(0, -3), new Vector2(0, -0.75f), 0, 0, 1, true, Color.Red, Color.Red) { drawText = text });
+                    ParticleManager.Add(new Particle(null, 2, position + new Vector2(0, -3), new Vector2(0, -0.75f), 0, 0, Color.Red, Color.Transparent) { drawText = text });
                     SoundManager.PlaySound(Assets.Get(Sound.Beep), position);
                     EventHandler.UpdateModulesStatus();
                     if (failedPart == ModuleType.Core)
@@ -555,7 +559,9 @@ public class Player : Entity
         for (int i = 0; i < 200; i++)
         {
             float timeLeft = ((float)i / 200);
-            ParticleManager.Add(new Particle(Assets.Get(Sprite.Dot), timeLeft, position + normalVector*i, velocity * timeLeft, gunAngle.angle, 0, 1, true, Color.Cyan, Color.SlateBlue));
+            var col = Color.SlateBlue;
+            col.A = 0;
+            ParticleManager.Add(new Particle(Assets.Get(Sprite.Dot), timeLeft, position + normalVector*i, velocity * timeLeft, gunAngle.angle, 0, Color.Cyan, col));
         }
         position += normalVector * 200;
         modules[ModuleType.Engines].cooldown = 2f;

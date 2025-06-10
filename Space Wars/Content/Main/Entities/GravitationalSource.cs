@@ -27,8 +27,8 @@ public class GravitationalSource
         radius = _radius * 50;
         isImmovable = _isImmovable;
         color = _color;
-        surface = new ParticleEmitter(Assets.Get(Sprite.Dot), position, radius, 1, _color);
-        trajectory = new ParticleEmitter(Assets.Get(Sprite.Dot), 10, position, 0, 0, 0, 0, 1f, 1, true, _color * 0.1f, _color, EmitterType.EmissionOverDistance);
+        surface = new ParticleEmitter(Assets.Get(Sprite.Dot), position, radius, _color);
+        trajectory = new ParticleEmitter(Assets.Get(Sprite.Dot), 10, position, 0, 0, 0, 0, 1f, _color * 0.1f, new Color(_color.R, _color.G, _color.B, (byte)0), EmitterType.EmissionOverDistance);
         hasRing = _hasRing;
     }
     public Vector2 GetAcceleration(Vector2 _position)
@@ -127,7 +127,7 @@ public class GravitationalSource
                 Vector2 particlePosition = new Vector2(MathF.Cos(particleAngle), MathF.Sin(particleAngle) * 0.25f) * distance;
                 if (particlePosition.LengthSquared() > radius * radius || particlePosition.Y > 0)
                 {
-                    ParticleManager.Add(new Particle(Assets.Get(Sprite.Dot), position + particlePosition, particleAngle, 0.75f, color));
+                    ParticleManager.Add(new Particle(Assets.Get(Sprite.Dot), position + particlePosition, particleAngle, color * 0.75f));
                 }
             }
         }

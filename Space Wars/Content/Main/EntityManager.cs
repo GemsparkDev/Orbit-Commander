@@ -110,7 +110,8 @@ public class EntityManager
         {
             foreach (var module in Player.modules)
             {
-                module.Value.Health = module.Value.MaxHealth;
+                //module.Value.Health = module.Value.MaxHealth;
+                module.Value.Health = 20;
                 module.Value.isFailed = false;
             }
             Engine.Startgame();
@@ -394,8 +395,10 @@ public class EntityManager
         var mothership = new Actor(Assets.Get(Sprite.Mothership), new Vector2(1500, -2000), new Color(0, 255, 0), MathF.PI / 12);
         var sound = Assets.Get(Sound.FireEngines).CreateInstance();
         sound.IsLooped = true;
+        var col = Color.Coral;
+        col.A = 0;
         var emitter = new ParticleEmitter(Assets.Get(Sprite.Circle), 1, new Vector2(1500, -2000), 165 + 45, 360, 2,
-            Engine.Random.NextSingle() - 0.5f, 200, 1, true, Color.Gray, Color.Coral, EmitterType.EmissionOverTime);
+            Engine.Random.NextSingle() - 0.5f, 200, Color.Gray, col, EmitterType.EmissionOverTime);
         actors.Add(mothership);
         //Ensure planets still orbit and render
         events.Add(new Event(0, 3, delegate (float time)
@@ -420,6 +423,7 @@ public class EntityManager
         {
             sound.Pause();
             SoundManager.PlayGlobalSound(Assets.Get(Sound.Death));
+            //Note: Make sure the player can't farm free core hp with this
             Engine.SaveGame.Player.modules[ModuleType.Core].isFailed = true;
             Engine.ShakeScreen(1);
         }));

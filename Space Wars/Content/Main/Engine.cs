@@ -127,8 +127,8 @@ public class Engine : Game
         var garageButton = new Button(new Vector2(0, -MainMenu.Size.Y / 4), wideButton, Assets.TextFont, "To Garage", Color.White);
         var craftButton = new Button(new Vector2(0, MainMenu.Size.Y / 4), Assets.Get(Sprite.Button), Assets.TextFont, "Repair", Color.LightBlue);
         var requiredCraftsText = new Decal(new Vector2(0) + new Vector2(0, -6), Assets.TextFont, "25", Color.White, 10);
-        var furnaceSlider = new Slider(Line, new Vector2(-50, -MainMenu.Size.Y / 6), 60, true, new Color(255, 239, 85), new Color(50, 51, 67));
-        var craftingSlider = new Slider(Line, new Vector2(0 - 30, -MainMenu.Size.Y / 4), 60, true, Color.Cyan, Color.Gray);
+        var furnaceSlider = new Slider(Line, new Vector2(0, -MainMenu.Size.Y / 6), 60, true, new Color(255, 239, 85), new Color(50, 51, 67));
+        var craftingSlider = new Slider(Line, new Vector2(0, -MainMenu.Size.Y / 4), 60, true, Color.Cyan, Color.Gray);
 
         var repairSlot = new ItemSlot<Module>(new Vector2(-GarageMenu.Size.X / 4 - 25, 0), Assets.Get(Sprite.EmptySlot), UIManager, -1);
         var mothershipScrap = new Decal(new Vector2(GarageMenu.Size.X / 2.2f, 20) - GarageMenu.Size / 2, Assets.TextFont, "0", Color.Gray, 10);
@@ -357,7 +357,6 @@ public class Engine : Game
                 InventorySlots[x, y].AddBehaviour(new Action(EventHandler.UpdateInventory));
             }
         }
-        MissionSelectItems[0].daughterItem = ItemFactory.NewScrap();
         for (int i = 0; i < 4; i++)
         {
             for (int j = -2; j < 3; j++)

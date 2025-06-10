@@ -24,7 +24,7 @@ public abstract class Projectile : Entity
         timeLeft -= Engine.DeltaSeconds;
         if(timeLeft <= 0)
         {
-            ParticleManager.Add(new Particle(texture, 1, position, velocity, angle, 0, 1, true, color, Color.Black));
+            ParticleManager.Add(new Particle(texture, 1, position, velocity, angle, 0, color, Color.Transparent));
             isExpired = true;
         }
         AI();
@@ -38,7 +38,7 @@ public abstract class Projectile : Entity
         {
             float angle = -(float)random.NextDouble() * MathF.PI / 2 - MathF.PI/4 + MathF.Atan2(velocity.X, -velocity.Y);
             Vector2 particleVelocity = new Vector2(MathF.Cos(angle), MathF.Sin(angle)) * (float)(random.NextDouble() * 2 + 2);
-            ParticleManager.Add(new Particle(Assets.Get(Sprite.Dot), 0.25f, position, particleVelocity, angle, 0, 1, false, color, Color.Black));
+            ParticleManager.Add(new Particle(Assets.Get(Sprite.Dot), 0.25f, position, particleVelocity, angle, 0, color, Color.Black));
         }
         //Shaking is too intense with high fire rate weapons
         //Engine.ShakeScreen(100f * (float)damage / ((position - Engine.camera.Position).Length() + 1000f));
@@ -105,7 +105,9 @@ public class AssassinShot : Projectile
         entityType = EntityType.Projectile;
         color = _isFriendly ? Color.Orange : Color.Red;
         timeLeft = 3;
-        beam = new(Assets.Get(Sprite.Dot), 0.5f, position, angle, 0, 0, 0, 0.5f, 1, true, color, Color.Gold, EmitterType.EmissionOverDistance);
+        var col = Color.Gold;
+        col.A = 0;
+        beam = new(Assets.Get(Sprite.Dot), 0.5f, position, angle, 0, 0, 0, 0.5f, color, col, EmitterType.EmissionOverDistance);
     }
     public override void AI()
     {
@@ -134,7 +136,7 @@ public class GrapplingHook : Projectile
 {
     private Entity parent;
     private ILatchable target;
-    private float maxDistance;
+    private float maxDistance = 800;
     public GrapplingHook(Vector2 _position, Vector2 _velocity, float _angle, Entity _parent) : base(Assets.Get(Sprite.Microshot), _position, _velocity, _angle, 0, true, 0, 0)
     {
         parent = _parent;
@@ -164,7 +166,7 @@ public class GrapplingHook : Projectile
         else
         {
             float distance = Vector2.Distance(position, parent.position);
-            if (distance > 800)
+            if (distance > maxDistance)
             {
                 isExpired = true;
             }
@@ -178,7 +180,7 @@ public class GrapplingHook : Projectile
             else
             {
                 Entity entity = Engine.EntityManager.NearestEnemy(this);
-                if (entity != null && Vector2.Distance(position, entity.position) < entity.ColliderRadius + ColliderRadius)
+                if (entity != null && Vector2.Distance(position, entity.position) < (entity.ColliderRadius + ColliderRadius) * 2)
                 {
                     target = new LatchedEntity(entity);
                     SoundManager.PlaySound(Assets.Get(Sound.ShieldHit), position);
@@ -193,13 +195,14 @@ public class GrapplingHook : Projectile
             Vector2 direction = Vector2.Normalize(parent.position - position);
             float angle = MathF.Atan2(direction.Y, direction.X);
             float distance = Vector2.Distance(parent.position, position);
-            for (float i = 0; i < distance / texture.Height; i++)
+            float trans = distance * distance / maxDistance / maxDistance;
+            for (float i = 0; i < distance / texture.Height / 2; i++)
             {
-                ParticleManager.Add(new Particle(texture, 1, position + direction * i * texture.Height, velocity, angle, 0, 1, true, color, Color.Black));
+                ParticleManager.Add(new Particle(texture, 1, position + direction * i * texture.Height * 2, velocity, angle, 0, color * trans, Color.Transparent));
             }
             if (timeLeft > 0)
             {
-                ParticleManager.Add(new Particle(this.texture, 1, position, velocity, this.angle, 0, 1, true, color, Color.Black));
+                ParticleManager.Add(new Particle(this.texture, 1, position, velocity, this.angle, 0, color, Color.Transparent));
             }
         }
     }
@@ -209,9 +212,10 @@ public class GrapplingHook : Projectile
         Vector2 direction = Vector2.Normalize(parent.position - position);
         float angle = MathF.Atan2(direction.Y, direction.X);
         float distance = Vector2.Distance(parent.position, position);
-        for (float i = 0; i < distance / texture.Height; i++)
+        float trans = distance * distance / maxDistance / maxDistance;
+        for (float i = 0; i < distance / texture.Height / 2; i++)
         {
-            _spriteBatch.Draw(texture, position + direction * i * texture.Height, null, color, angle, new Vector2(texture.Width, texture.Height)/2, 1, 0, 0);
+            _spriteBatch.Draw(texture, position + direction * i * texture.Height * 2, null, color * trans, angle, new Vector2(texture.Width, texture.Height)/2, 1, 0, 0);
         }
         base.Draw(_spriteBatch);
     }

@@ -45,7 +45,7 @@ public abstract class Entity
         angularVelocity = _angularVelocity;
         damage = _damage;
         isFriendly = _isFriendly;
-        collider = new ParticleEmitter(Assets.Get(Sprite.Dot), position, ColliderRadius, 1, Color.Yellow) { isEmitterActive = false };
+        collider = new ParticleEmitter(Assets.Get(Sprite.Dot), position, ColliderRadius, Color.Yellow) { isEmitterActive = false };
     }
     public virtual void Update()
     {

@@ -21,7 +21,7 @@ public class Enemy : Entity
     public bool ChildEnemy { get; private set; }
     public override float ColliderRadius => Engine.EnemyHitboxModifier * ((texture.Height + texture.Width) / 4 + 1);
     private Vector2 targetVector;
-    public ParticleEmitter enemyRange = new(Assets.Get(Sprite.Dot), Vector2.Zero, 0, 0.75f, Color.Red);
+    public ParticleEmitter enemyRange = new(Assets.Get(Sprite.Dot), Vector2.Zero, 0, Color.Red * 0.75f);
     public Enemy(Vector2 _position, Vector2 _velocity, float _angle, int _damage, int _health, Texture2D _texture, bool _isFriendly = false)
         : base(_texture, _position, _velocity, _angle, 0, _damage, _isFriendly)
     {
@@ -115,13 +115,13 @@ public class Enemy : Entity
             SoundManager.PlaySound(hitSound, position);
             health -= damage;
             Engine.ShakeScreen(10 / ((position - Engine.Camera.Position).Length() + 200) * damage);
-            ParticleManager.Add(new Particle(null, 1, position + new Vector2(0,-1), new Vector2(0,-1.5f), 0, 0, 1, true, Color.Orange, Color.Red) { drawText = $"{damage}" });
+            ParticleManager.Add(new Particle(null, 1, position + new Vector2(0,-1), new Vector2(0,-1.5f), 0, 0, Color.Orange, new Color(255, 0, 0, 0)) { drawText = $"{damage}" });
         }
         else if (damage < 0)
         {
             SoundManager.PlaySound(Assets.Get(Sound.Full), position);
             health -= damage;
-            ParticleManager.Add(new Particle(null, 1, position + new Vector2(0, -1), new Vector2(0, -1.5f), 0, 0, 1, true, Color.Orange, Color.Green) { drawText = $"{-damage}" });
+            ParticleManager.Add(new Particle(null, 1, position + new Vector2(0, -1), new Vector2(0, -1.5f), 0, 0, Color.Orange, new Color(0, 255, 0, 0)) { drawText = $"{-damage}" });
         }
     }
     public void Explode()
@@ -131,14 +131,14 @@ public class Enemy : Entity
         {
             float angle = Engine.Random.NextSingle() * MathF.PI * 2;
             Vector2 particleVelocity = new Vector2(MathF.Cos(angle), MathF.Sin(angle)) * (Engine.Random.NextSingle() * 2 + 2);
-            ParticleManager.Add(new Particle(Assets.Get(Sprite.Dot), 0.25f, position, particleVelocity + velocity, angle, 0, 1, true, Color.Yellow, Color.Red));
+            ParticleManager.Add(new Particle(Assets.Get(Sprite.Dot), 0.25f, position, particleVelocity + velocity, angle, 0, Color.Yellow, new Color(255, 0, 0, 0)));
         }
         particles = Engine.Random.Next(8, 16);
         for (int i = 0; i < particles; i++)
         {
             float angle = Engine.Random.NextSingle() * MathF.PI * 2;
             Vector2 particleVelocity = new Vector2(MathF.Cos(angle), MathF.Sin(angle)) * (Engine.Random.NextSingle() * 2 + 2);
-            ParticleManager.Add(new Particle(Assets.Get(Sprite.Circle), 0.25f, position, particleVelocity + velocity, angle, 0, 1, true, Color.DarkSlateGray, Color.Black));
+            ParticleManager.Add(new Particle(Assets.Get(Sprite.Circle), 0.25f, position, particleVelocity + velocity, angle, 0, Color.DarkSlateGray, Color.Transparent));
         }
         Engine.ShakeScreen(150 / ((position - Engine.Camera.Position).Length()+300));
     }
@@ -332,8 +332,10 @@ public class Enemy : Entity
         float fuel = 45;
         float deathCooldown = 2;
         deleteOnCollide = true;
+        var col = Color.DarkRed;
+        col.A = 0;
         ParticleEmitter engineParticles = new(Assets.Get(Sprite.Dot), 0.15f, Vector2.Zero, 0, 45, 2, 0, 
-            450f, 1, true, Color.Yellow, Color.DarkRed, EmitterType.EmissionOverTime) { isEmitterActive = false };
+            450f, Color.Yellow, col, EmitterType.EmissionOverTime) { isEmitterActive = false };
         while (true)
         {
             if (fuel <= 0)
@@ -564,14 +566,14 @@ public class Enemy : Entity
                 {
                     float angle = Engine.Random.NextSingle() * MathF.PI * 2;
                     Vector2 particleVelocity = new Vector2(MathF.Cos(angle), MathF.Sin(angle)) * (Engine.Random.NextSingle() * 2 + 2) / 2;
-                    ParticleManager.Add(new Particle(Assets.Get(Sprite.Circle), 0.5f, position, particleVelocity + velocity, angle, 0, 1, true, Color.Yellow, Color.Red));
+                    ParticleManager.Add(new Particle(Assets.Get(Sprite.Circle), 0.5f, position, particleVelocity + velocity, angle, 0, Color.Yellow, new Color(255, 0, 0, 0)));
                 }
                 particles = Engine.Random.Next(3, 5);
                 for (int i = 0; i < particles; i++)
                 {
                     float angle = Engine.Random.NextSingle() * MathF.PI * 2;
                     Vector2 particleVelocity = new Vector2(MathF.Cos(angle), MathF.Sin(angle)) * (Engine.Random.NextSingle() * 2 + 2) / 2;
-                    ParticleManager.Add(new Particle(Assets.Get(Sprite.Circle), 0.5f, position, particleVelocity + velocity, angle, 0, 1, true, Color.DarkSlateGray, Color.Black));
+                    ParticleManager.Add(new Particle(Assets.Get(Sprite.Circle), 0.5f, position, particleVelocity + velocity, angle, 0, Color.DarkSlateGray, Color.Transparent));
                 }
                 isExpired = true;
                 SoundManager.PlaySound(Assets.Get(Sound.Death), position);
@@ -724,7 +726,7 @@ public class Enemy : Entity
                 for (int i = 0; i < 6; i++)
                 {
                     float angle = (i * 2 * MathF.PI) / 6;
-                    Particle particle = new(Assets.Get(Sprite.Dot), 0.08f, position - velocity, velocity + new Vector2(MathF.Cos(angle), MathF.Sin(angle)), angle, 0, 1, true, new Color(255, 0, 0), new Color(255, 0, 0));
+                    Particle particle = new(Assets.Get(Sprite.Dot), 0.08f, position - velocity, velocity + new Vector2(MathF.Cos(angle), MathF.Sin(angle)), angle, 0, new Color(255, 0, 0), Color.Transparent);
                     ParticleManager.Add(particle);
                 }
             }
@@ -915,7 +917,7 @@ public class Enemy : Entity
     IEnumerable<int> Miner()
     {
         ParticleEmitter miningDebris = new(Assets.Get(Sprite.Dot), 0.15f, position + new Vector2(0, Assets.Get(Sprite.Miner).Height / 2), 0, 90, 2,
-            Engine.Random.NextSingle() - 0.5f, 1000, 0, true, Color.Cyan, Color.Black, EmitterType.EmissionOverTime);
+            Engine.Random.NextSingle() - 0.5f, 1000, Color.Cyan, Color.Transparent, EmitterType.EmissionOverTime);
         while (true)
         {
             velocity *= 0;
@@ -947,8 +949,10 @@ public class Enemy : Entity
         float weaponCooldown = 2;
         Vector2 randomPos = Vector2.Zero;
         enemyRange.radius = 250;
+        var col = Color.DarkRed;
+        col.A = 0;
         ParticleEmitter engineParticles = new(Assets.Get(Sprite.Dot), 0.15f, Vector2.Zero, 0, 45, 2, 0,
-            450f, 1, true, Color.Yellow, Color.DarkRed, EmitterType.EmissionOverTime);
+            450f, Color.Yellow, col, EmitterType.EmissionOverTime);
         while (true)
         {
             Entity nearestEnemy = Engine.EntityManager.NearestEnemy(this);
@@ -1160,14 +1164,14 @@ public class Enemy : Entity
                 {
                     float angle = Engine.Random.NextSingle() * MathF.PI * 2;
                     Vector2 particleVelocity = new Vector2(MathF.Cos(angle), MathF.Sin(angle)) * (Engine.Random.NextSingle() * 2 + 2) / 2;
-                    ParticleManager.Add(new Particle(Assets.Get(Sprite.Circle), 0.5f, position, particleVelocity + velocity, angle, 0, 1, true, Color.Yellow, Color.Red));
+                    ParticleManager.Add(new Particle(Assets.Get(Sprite.Circle), 0.5f, position, particleVelocity + velocity, angle, 0, Color.Yellow, new Color(255, 0, 0, 0)));
                 }
                 particles = Engine.Random.Next(3, 5);
                 for (int i = 0; i < particles; i++)
                 {
                     float angle = Engine.Random.NextSingle() * MathF.PI * 2;
                     Vector2 particleVelocity = new Vector2(MathF.Cos(angle), MathF.Sin(angle)) * (Engine.Random.NextSingle() * 2 + 2) / 2;
-                    ParticleManager.Add(new Particle(Assets.Get(Sprite.Circle), 0.5f, position, particleVelocity + velocity, angle, 0, 1, true, Color.DarkSlateGray, Color.Black));
+                    ParticleManager.Add(new Particle(Assets.Get(Sprite.Circle), 0.5f, position, particleVelocity + velocity, angle, 0, Color.DarkSlateGray, Color.Transparent));
                 }
                 isExpired = true;
                 SoundManager.PlaySound(Assets.Get(Sound.Death), position);

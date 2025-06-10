@@ -100,6 +100,6 @@ public class Pickup : Entity, IData
         }
         SoundManager.PlaySound(Assets.Get(Sound.Death), position);
         Engine.ShakeScreen(10 / ((position - Engine.Camera.Position).Length() + 150));
-        ParticleManager.Add(new Particle(null, 1, position + new Vector2(0, -1), new Vector2(0, -1.5f), 0, 0, 1, true, Color.Orange, Color.Red) { drawText = $"Integrity: {hitsLeft}" });
+        ParticleManager.Add(new Particle(null, 1, position + new Vector2(0, -1), new Vector2(0, -1.5f), 0, 0, Color.Orange, new Color(255, 0, 0, 0)) { drawText = $"Integrity: {hitsLeft}" });
     }
 }
