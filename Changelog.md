@@ -343,3 +343,10 @@ Update 0.4.3
  - The grappling hook line is now dashed.    
  - The coloration of the grappling hook line becomes more extreme when the player is near the max range.    
  - Fixed bug #22.    
+    
+0.4.6.6    
+6/10/2025    
+ - Added the hunter enemy.    
+ - The hunter enemy will try to grapple the player, revealing it to other enemies in the process.    
+ - Added the reveal field for entities allowing enemies to have their stealth removed temporarily.    
+ - The grapple hook now turns red if it's being used by enemies.    
