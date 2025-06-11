@@ -71,7 +71,7 @@ public class Mission
         {
             enemyCreditValues = 
             [
-                (1, Enemy.NewStealthFighter)
+                (1, Enemy.NewHunter)
             ];
         }
 

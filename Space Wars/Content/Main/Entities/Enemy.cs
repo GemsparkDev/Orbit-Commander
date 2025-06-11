@@ -19,6 +19,11 @@ public class Enemy : Entity
     private int maxHealth;
     private bool deleteOnCollide = false;
     public bool ChildEnemy { get; private set; }
+    public override int StealthAbility 
+    { 
+        get => base.StealthAbility + ((revealDuration > 0) ? -5 : 0); 
+        protected set => base.StealthAbility = value; 
+    }
     public override float ColliderRadius => Engine.EnemyHitboxModifier * ((texture.Height + texture.Width) / 4 + 1);
     private Vector2 targetVector;
     public ParticleEmitter enemyRange = new(Assets.Get(Sprite.Dot), Vector2.Zero, 0, Color.Red * 0.75f);
@@ -1513,10 +1518,10 @@ public class Enemy : Entity
             if (trackTime > 0) 
             { 
                 trackTime -= Engine.DeltaSeconds;
-                if (trackTime <= 0)
-                {
-                    target = null;
-                }
+            }
+            else
+            {
+                target = null;
             }
             if (health <= 0)
             {
@@ -1561,6 +1566,123 @@ public class Enemy : Entity
                     do
                     {
                         rand = new Vector2((Engine.Random.NextSingle() * 2 - 1) * radius * 3, (Engine.Random.NextSingle()* 2 - 1) * radius * 3);
+                    }
+                    while (rand.Length() < radius);
+                }
+                GoToPosition(rand, 5);
+                targetVector = velocity;
+                targetAngle = MathF.Atan2(targetVector.Y, targetVector.X) + MathF.PI / 2;
+                float diff = MathF.Abs(angle - targetAngle);
+                RotateTowards(targetAngle, diff / 10);
+            }
+            yield return 0;
+        }
+    }
+    IEnumerable<int> Hunter()
+    {
+        enemyRange.radius = 300;
+        SensingAbility = 0;
+        StealthAbility = 1;
+        Entity target = null;
+        GrapplingHook grapplingHook = null;
+        float trackTime = 0;
+        float hookCooldown = 0;
+        Vector2 rand = position;
+        while (true)
+        {
+            velocity += GetNormalizedAcceleration() * Engine.DeltaSeconds / 2 * 60;
+            velocity *= 0.8f;
+            if (cooldown > 0)
+            {
+                cooldown -= Engine.DeltaSeconds;
+            }
+            if (hookCooldown > 0)
+            {
+                hookCooldown -= Engine.DeltaSeconds;
+            }
+            if (grapplingHook != null)
+            {
+                if (grapplingHook.isExpired)
+                {
+                    grapplingHook = null;
+                }
+                else if(grapplingHook.IsHooked && target != null)
+                {
+                    if (Vector2.Distance(grapplingHook.position, target.position) < 50)
+                    {
+                        target.Reveal(3f);
+                    }
+                    else
+                    {
+                        grapplingHook.isExpired = true;
+                    }
+                }
+            }
+            if (trackTime > 0)
+            {
+                trackTime -= Engine.DeltaSeconds;
+            }
+            else
+            {
+                target = null;
+            }
+            if (health <= 0)
+            {
+                isExpired = true;
+                if (grapplingHook != null)
+                {
+                    grapplingHook.isExpired = true;
+                }
+                Explode();
+                if (EntityManager.RandomWithKarma(Engine.EntityManager.CurrentMission.EnemiesSpawned * 2))
+                {
+                    Engine.EntityManager.Add(ItemFactory.NewScrap(position, velocity, angularVelocity));
+                }
+            }
+            Entity nearestEnemy = Engine.EntityManager.NearestEnemy(this);
+            if (nearestEnemy != null || target != null)
+            {
+                if (nearestEnemy != null || target == null)
+                {
+                    target = nearestEnemy;
+                }
+                if (nearestEnemy != null)
+                {
+                    trackTime = 5;
+                }
+                nearestEnemy = target;
+                targetVector = nearestEnemy.position - position;
+                targetAngle = MathF.Atan2(targetVector.Y, targetVector.X) + MathF.PI / 2;
+                float diff = MathF.Abs(angle - targetAngle);
+                RotateTowards(targetAngle, diff / 10);
+                if (targetVector.Length() > 150)
+                {
+                    GoToPosition(nearestEnemy.position, 15);
+                    if (diff < 0.1f && hookCooldown <= 0 && grapplingHook == null)
+                    {
+                        grapplingHook = new GrapplingHook(position, Vector2.Normalize(targetVector) * 30, angle, this, isFriendly);
+                        Engine.EntityManager.Add(grapplingHook);
+                        SoundManager.PlaySound(Assets.Get(Sound.Click), position);
+                        Engine.ShakeScreen(0.2f);
+                        hookCooldown = 10;
+                    }
+                }
+                if (diff < 0.2f && targetVector.Length() < 300 && cooldown <= 0)
+                {
+                    Engine.EntityManager.Add(new PulseShot(position, Vector2.Normalize(targetVector) * 10, angle, 0, isFriendly, 5, false, 1) { texture = Assets.Get(Sprite.Microshot), timeLeft = 2f });
+                    SoundManager.PlaySound(Assets.Get(Sound.LMGFire), position);
+                    Engine.ShakeScreen(0.1f);
+                    cooldown = 0.5f;
+                }
+            }
+            else
+            {
+                if (Vector2.Distance(rand, position) < 500)
+                {
+                    float radius = Engine.EntityManager.CurrentMission.Planet.radius;
+                    do
+                    {
+                        rand = new Vector2((Engine.Random.NextSingle() * 2 - 1) * radius * 3, (Engine.Random.NextSingle() * 2 - 1) * radius * 3);
                     }
                     while (rand.Length() < radius);
                 }
@@ -1706,6 +1828,12 @@ public class Enemy : Entity
     {
         Enemy enemy = new(position, velocity, angle, 10, 8, Assets.Get(Sprite.Fighter), _isFriendly);
         enemy.AddBehaviour(enemy.StealthFighter());
+        return enemy;
+    }
+    public static Enemy NewHunter(Vector2 position, Vector2 velocity, float angle, bool _isFriendly = false) 
+    {
+        Enemy enemy = new(position, velocity, angle, 8, 15, Assets.Get(Sprite.Fighter), _isFriendly);
+        enemy.AddBehaviour(enemy.Hunter());
         return enemy;
     }
 }

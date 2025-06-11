@@ -24,6 +24,7 @@ public abstract class Entity
     public int damage;
     public virtual int SensingAbility { get; protected set; } = 1;
     public virtual int StealthAbility { get; protected set; } = 0;
+    protected float revealDuration = 0;
     public EntityType entityType;
     public ComponentList Components { get; } = new();
     public virtual float ColliderRadius
@@ -49,6 +50,10 @@ public abstract class Entity
     }
     public virtual void Update()
     {
+        if (revealDuration > 0)
+        {
+            revealDuration -= Engine.DeltaSeconds;
+        }
         collider.position = position;
         collider.Update();
     }
@@ -69,6 +74,10 @@ public abstract class Entity
         {
             velocity.Y = clampVelocity.Y;
         }
+    }
+    public void Reveal(float _duration)
+    {
+        revealDuration = _duration;
     }
     public virtual void Draw(SpriteBatch _spriteBatch)
     {

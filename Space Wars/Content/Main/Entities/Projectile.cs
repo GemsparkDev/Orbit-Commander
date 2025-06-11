@@ -137,10 +137,11 @@ public class GrapplingHook : Projectile
     private Entity parent;
     private ILatchable target;
     private float maxDistance = 800;
-    public GrapplingHook(Vector2 _position, Vector2 _velocity, float _angle, Entity _parent) : base(Assets.Get(Sprite.Microshot), _position, _velocity, _angle, 0, true, 0, 0)
+    public bool IsHooked => target != null;
+    public GrapplingHook(Vector2 _position, Vector2 _velocity, float _angle, Entity _parent, bool _isFriendly = true) : base(Assets.Get(Sprite.Microshot), _position, _velocity, _angle, 0, _isFriendly, 0, 0)
     {
         parent = _parent;
-        color = new Color(0, 255, 255);
+        color = _isFriendly ? new Color(0, 255, 255) : new Color(255, 0, 0);
         timeLeft = 60;
     }
     public override void AI()

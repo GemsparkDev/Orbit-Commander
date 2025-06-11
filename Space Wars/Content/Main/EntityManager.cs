@@ -49,12 +49,12 @@ public class EntityManager
             new(new Vector2(-600, 0), -GravitationalSource.GetOrbitalVelocity(new Vector2(-600, 0), Vector2.Zero, 5000) * 1.2f, 120, 0.6f, false, Color.Yellow), ],
         [(new EntityConstructor(Enemy.NewExcursionBoss, new Vector2(0, -6*50), Vector2.Zero, 0), [ Condition.Kill ])],
         "Showdown",
-        "Defeat the advanced drone prototype, Excursion. Be warned: It may call for reinforcements.", 1.1f, 0, 1),
+        "Defeat the advanced drone prototype, Excursion. Be warned: It may call for reinforcements.", 1.1f, 0, 0),
 
         new([new(Vector2.Zero, Vector2.Zero, 30000, 10f, true, Color.HotPink, true) ],
         [],
         "cool planet",
-        "Super earth", 2, 0, 1, null, true),
+        "Super earth", 2, 0, 2, null, true),
     ];
     private Mission currentMission;
     public Mission CurrentMission => currentMission ?? missions[missionCount];

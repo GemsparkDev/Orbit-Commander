@@ -52,6 +52,10 @@ public class Player : Entity
     {
         get
         {
+            if (revealDuration > 0)
+            {
+                return -10;
+            }
             int stealth = 0;
             if (isEngineActive)
             {
