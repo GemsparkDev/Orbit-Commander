@@ -350,3 +350,11 @@ Update 0.4.3
  - The hunter enemy will try to grapple the player, revealing it to other enemies in the process.    
  - Added the reveal field for entities allowing enemies to have their stealth removed temporarily.    
  - The grapple hook now turns red if it's being used by enemies.    
+       
+0.4.6.7    
+6/11/2025    
+ - Added the construct type, allowing for future deployable traps.    
+ - Enemies now spawn with trails.    
+ - The timer now no longer counts down while there are enemies alive.    
+ - Enemies now project their future positions.    
+ - Inlined the SpawnWaveBatch function.    
