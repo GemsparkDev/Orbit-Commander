@@ -103,3 +103,11 @@ public class Pickup : Entity, IData
         ParticleManager.Add(new Particle(null, 1, position + new Vector2(0, -1), new Vector2(0, -1.5f), 0, 0, Color.Orange, new Color(255, 0, 0, 0)) { drawText = $"Integrity: {hitsLeft}" });
     }
 }
+public class ItemData(Sprite _realSprite, Sprite _virtualSprite, String _name, int _id, Color _color)
+{
+    public Texture2D RealSprite { get; } = Assets.Get(_realSprite);
+    public Texture2D VirtualSprite { get; } = Assets.Get(_virtualSprite);
+    public string Name { get; } = _name;
+    public int ID { get; } = _id;
+    public Color Color { get; } = _color;
+}

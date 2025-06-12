@@ -1639,33 +1639,39 @@ public class Enemy : Entity
                     Engine.EntityManager.Add(ItemFactory.NewScrap(position, velocity, angularVelocity));
                 }
             }
-            Entity nearestEnemy = Engine.EntityManager.NearestEnemy(this);
-            if (nearestEnemy != null || target != null)
+            var nearestEnemy = Engine.EntityManager.NearestEnemy(this);
+            if (target != null)
             {
-                if (nearestEnemy != null || target == null)
+                if (target.isExpired)
                 {
                     target = nearestEnemy;
                 }
-                if (nearestEnemy != null)
+            }
+            else
+            {
+                target = nearestEnemy;
+            }
+            if (target != null)
+            {
+                if (target == nearestEnemy)
                 {
-                    trackTime = 5;
+                    trackTime = 3;
                 }
-                nearestEnemy = target;
-                targetVector = nearestEnemy.position - position;
+                targetVector = target.position - position;
                 targetAngle = MathF.Atan2(targetVector.Y, targetVector.X) + MathF.PI / 2;
                 float diff = MathF.Abs(angle - targetAngle);
                 RotateTowards(targetAngle, diff / 10);
                 if (targetVector.Length() > 150)
                 {
-                    GoToPosition(nearestEnemy.position, 15);
-                    if (diff < 0.1f && hookCooldown <= 0 && grapplingHook == null)
-                    {
-                        grapplingHook = new GrapplingHook(position, Vector2.Normalize(targetVector) * 30, angle, this, isFriendly);
-                        Engine.EntityManager.Add(grapplingHook);
-                        SoundManager.PlaySound(Assets.Get(Sound.Click), position);
-                        Engine.ShakeScreen(0.2f);
-                        hookCooldown = 10;
-                    }
+                    GoToPosition(target.position, 15);
+                }
+                else if (diff < 0.1f && hookCooldown <= 0 && grapplingHook == null)
+                {
+                    grapplingHook = new GrapplingHook(position, Vector2.Normalize(targetVector) * 30, angle, this, isFriendly);
+                    Engine.EntityManager.Add(grapplingHook);
+                    SoundManager.PlaySound(Assets.Get(Sound.Click), position);
+                    Engine.ShakeScreen(0.2f);
+                    hookCooldown = 10;
                 }
                 if (diff < 0.2f && targetVector.Length() < 300 && cooldown <= 0)
                 {

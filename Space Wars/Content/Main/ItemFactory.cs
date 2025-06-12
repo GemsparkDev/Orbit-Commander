@@ -45,14 +45,6 @@ public static class ItemFactory
         return new Module(moduleData[_item], Color.Cyan, _position, _velocity, _angularVelocity);
     }
 }
-public class ItemData(Sprite _realSprite, Sprite _virtualSprite, String _name, int _id, Color _color)
-{
-    public Texture2D RealSprite { get; } = Assets.Get(_realSprite);
-    public Texture2D VirtualSprite { get; } = Assets.Get(_virtualSprite);
-    public string Name { get; } = _name;
-    public int ID { get; } = _id;
-    public Color Color { get; } = _color;
-}
 public enum ItemType
 {
     Scrap

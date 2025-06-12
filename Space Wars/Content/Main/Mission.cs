@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using System.Linq;
 using Space_Wars.Content.Main.Particles;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace Space_Wars.Content.Main;
 public class Mission
@@ -17,6 +18,8 @@ public class Mission
     //Save original entity parameters to allow cloning
     public List<(EntityConstructor, Condition[])> CopyObjectives { get; }
     public List<(Entity entity, Condition[] conditions)> MissionObjectives { get; } = [];
+    private List<Entity> enemiesSpawned = [];
+    private bool currentWaveActive = false;
     private Func<Cutscene> cutscene;
     private float timerModifier;
     public int WaveGoal { get; } = 0;
@@ -24,7 +27,6 @@ public class Mission
     public int Wave { get; private set; } = 0;
     private List<(int cost, DelegateEnemy enemy)> enemyCreditValues;
     private List<DelegateEnemy> bosses;
-    private Enemy aliveBoss = null;
     private int currentBoss;
     private int tier;
     private float waveTimer = 5;
@@ -71,7 +73,8 @@ public class Mission
         {
             enemyCreditValues = 
             [
-                (1, Enemy.NewHunter)
+                (1, Enemy.NewStealthFighter),
+                (2, Enemy.NewHunter),
             ];
         }
 
@@ -145,53 +148,104 @@ public class Mission
             }
             EventHandler.MissionSelectTrigger();
         }
+        //Natural enemy spawning toggle
         if (timerModifier == -1)
         {
             return;
         }
 
-        if (aliveBoss != null)
+        var isReady = true;
+        foreach (var enemy in enemiesSpawned)
         {
-            if (aliveBoss.isExpired)
+            if (!enemy.isExpired)
             {
-                aliveBoss = null;
-                SoundManager.ChangeTrack(Assets.Get(Sound.main));
+                isReady = false;
+            }
+        }
+        if (!currentWaveActive)
+        {
+            if (waveTimer <= 0)
+            {
+                foreach (var enemy in enemiesSpawned)
+                {
+                    Engine.EntityManager.Add(enemy);
+                    float angle = MathF.Atan2(-enemy.position.X, enemy.position.Y);
+                    float height = Assets.DimsOf(Sprite.Dot).X;
+                    for (float i = 0; i < 500; i++)
+                    {
+                        var dir = Vector2.Normalize(enemy.position);
+                        float pow = (500 - i) / 500;
+                        ParticleManager.Add(new Particle(Assets.Get(Sprite.Dot), 0.5f, enemy.position + dir * i * height, Vector2.Zero, angle, 0, new Color(255, 0, 0), Color.Transparent));
+                    }
+                }
+                currentWaveActive = true;
             }
             else
             {
-                return;
+                waveTimer -= Engine.DeltaSeconds;
+                EventHandler.UpdateEnemyCountdownUI(waveTimer, maxWaveTimer, Wave);
+                foreach (var enemy in enemiesSpawned)
+                {
+                    ParticleManager.Add(new Particle(enemy.texture, enemy.position, enemy.angle, new Color(255, 0, 0) * 0.5f));
+                }
             }
         }
-        waveTimer -= Engine.DeltaSeconds;
-        EventHandler.UpdateEnemyCountdownUI(waveTimer, maxWaveTimer, Wave);
-        if (waveTimer <= 0)
+        if (isReady)
         {
+            if (Wave % 20 == 0)
+            {
+                SoundManager.ChangeTrack(Assets.Get(Sound.main));
+            }
+            currentWaveActive = false;
+            enemiesSpawned.Clear();
             EnemiesSpawned = 0;
+            waveTimer = 10;
+            maxWaveTimer = waveTimer;
             Wave++;
             Engine.EntityManager.DecayPickups();
             if (Wave % 20 == 0)
             {
                 SoundManager.ChangeTrack(Assets.Get(Sound.boss));
-                Enemy boss = bosses[currentBoss](NewSpawnLocation(), Vector2.Zero, 0);
+                var pos = NewSpawnLocation();
+                Enemy boss = bosses[currentBoss](pos, Vector2.Zero, MathF.Atan2(-pos.X, pos.Y));
                 if (Wave == 40)
                 {
                     boss = bosses[2](NewSpawnLocation(), Vector2.Zero, 0);
                 }
-                Engine.EntityManager.Add(boss);
-                waveTimer = 10;
-                maxWaveTimer = waveTimer;
+                enemiesSpawned.Add(boss);
                 EnemiesSpawned = 1;
                 currentBoss = (currentBoss + 1) % bosses.Count;
-                aliveBoss = boss;
                 EventHandler.UpdateEnemyCountdownUI(waveTimer, maxWaveTimer, Wave);
                 return;
             }
             else
             {
                 difficulty = (int)((Wave + 1) * MathF.Log(Wave + 1, MathF.E) - Wave) / 15 + 1;
-                SpawnWaveBatch(random.Next((int)(3 * difficulty), (int)(5 * difficulty)));
-                waveTimer = (5f * EnemiesSpawned + 6) * timerModifier;
-                maxWaveTimer = waveTimer;
+                List<int> newCosts = [];
+                int availableEnemies = Math.Min(enemyCreditValues.Count, Wave / 10 + 1);
+                for (int i = 0; i < availableEnemies; i++)
+                {
+                    newCosts.Add(enemyCreditValues[i].cost);
+                }
+                var enemyCredits = random.Next((int)(3 * difficulty), (int)(5 * difficulty));
+                while (enemyCredits > 0)
+                {
+                    for (int i = 0; i < availableEnemies; i++)
+                    {
+                        if (random.Next(0, enemyCreditValues[i].cost / 2) == 0 && newCosts[i] <= enemyCredits)
+                        {
+                            var pos = NewSpawnLocation();
+                            enemiesSpawned.Add(enemyCreditValues[i].enemy(pos, Player.velocity, MathF.Atan2(-pos.X, pos.Y)));
+                            enemyCredits -= newCosts[i];
+                            newCosts[i] += 1;
+                            EnemiesSpawned++;
+                        }
+                        if (enemyCredits < newCosts.Min(c => c))
+                        {
+                            return;
+                        }
+                    }
+                }
             }
         }
     }
@@ -355,38 +409,12 @@ public class Mission
         }
         return new Mission(_planets, CopyObjectives, Name, Description, timerModifier, WaveGoal, tier, cutscene, escapeVehicle != null);
     }
-    private void SpawnWaveBatch(int enemyCredits)
-    {
-        List<int> newCosts = [];
-        int availableEnemies = Math.Min(enemyCreditValues.Count, Wave / 10 + 1);
-        for (int i = 0; i < availableEnemies; i++)
-        {
-            newCosts.Add(enemyCreditValues[i].cost);
-        }
-        while (enemyCredits > 0)
-        {
-            for (int i = 0; i < availableEnemies; i++)
-            {
-                if (random.Next(0, enemyCreditValues[i].cost / 2) == 0 && newCosts[i] <= enemyCredits)
-                {
-                    Engine.EntityManager.Add(enemyCreditValues[i].enemy(NewSpawnLocation(), Player.velocity, 0));
-                    enemyCredits -= newCosts[i];
-                    newCosts[i] += 1;
-                    EnemiesSpawned++;
-                }
-                if (enemyCredits < newCosts.Min(c => c))
-                {
-                    return;
-                }
-            }
-        }
-    }
     private Vector2 NewSpawnLocation()
     {
         //Creates a position vector defined by the angle from the player in radians and the distance from the edge of the screen
         float angle = (random.NextSingle() - 0.5f) * MathF.Tau;
         float distanceMultiplier = 1 + (random.NextSingle() - 0.5f) / 4;
-        float distance = (Engine.ScreenSize.X + Engine.ScreenSize.Y) / 2 * distanceMultiplier;
+        float distance = (Engine.ScreenSize.X + Engine.ScreenSize.Y) * distanceMultiplier / 3;
         Vector2 spawnLocation = Engine.ToUnitVector(angle) * distance;
         return spawnLocation + Player.position;
     }
