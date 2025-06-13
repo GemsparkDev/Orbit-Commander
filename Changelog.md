@@ -358,3 +358,11 @@ Update 0.4.3
  - The timer now no longer counts down while there are enemies alive.    
  - Enemies now project their future positions.    
  - Inlined the SpawnWaveBatch function.    
+    
+0.4.6.8    
+6/12/2025    
+ - Added the barricade and trap construct.    
+ - The barricade can take 10 hits before breaking.    
+ - The trap will periodically shoot 9 bullets toward enemies nearby it.    
+ - Added two buttons to construct both new constructs.    
+ - Future waves now appear slightly brighter and in yellow.    
