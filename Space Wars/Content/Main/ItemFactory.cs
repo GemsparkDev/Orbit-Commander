@@ -32,6 +32,11 @@ public static class ItemFactory
 
         { ModuleType.Core, new ModuleData(Sprite.CoreModule,Sprite.CoreModule, "Core", (int)ModuleType.Core, 20, delegate{ }) }
     };
+    private static Dictionary<ConstructType, ItemData> constructData = new() 
+    {
+        { ConstructType.Barricade, new ItemData(Sprite.HullModule, Sprite.HullModule, "Barricade", 1, Color.White) },
+        { ConstructType.Trap, new ItemData(Sprite.GunModule, Sprite.GunModule, "Trap", 1, Color.White) }
+    };
     public static Pickup NewScrap(Vector2 _position = new Vector2(), Vector2 _velocity = new Vector2(), float _angularVelocity = 0)
     {
         return new Pickup(itemData[0], Color.Cyan, _position, _velocity, _angularVelocity);
@@ -43,6 +48,10 @@ public static class ItemFactory
     public static Module GetItem(ModuleType _item, Vector2 _position = new Vector2(), Vector2 _velocity = new Vector2(), float _angularVelocity = 0)
     {
         return new Module(moduleData[_item], Color.Cyan, _position, _velocity, _angularVelocity);
+    }
+    public static Construct GetItem(ConstructType _item, Vector2 _position = new Vector2(), Vector2 _velocity = new Vector2(), float _angularVelocity = 0)
+    {
+        return new Construct(constructData[_item], Color.Cyan, _position, _velocity, 0, _angularVelocity, _item);
     }
 }
 public enum ItemType

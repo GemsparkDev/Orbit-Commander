@@ -14,16 +14,17 @@ public class Pickup : Entity, IData
     public Window Tooltip { get; } = new Window(Vector2.Zero, Assets.Get(Sprite.WideButton));
     public String Name => itemData.Name;
     public virtual Color Color => itemData.Color;
-    private int hitsLeft = 3;
+    private int hitsLeft;
     protected float invincibilityCooldown = 5;
     public int ID => itemData.ID;
-    public Pickup(ItemData _itemData, Color _worldColor, Vector2 _position, Vector2 _velocity, float _angularVelocity)
+    public Pickup(ItemData _itemData, Color _worldColor, Vector2 _position, Vector2 _velocity, float _angularVelocity, int _integrity = 3)
         : base(_itemData.VirtualSprite, _position, _velocity, 0, _angularVelocity, 0, true)
     {
         itemData = _itemData;
         color = _worldColor;
         Tooltip.AddWidget(new Decal(new Vector2(-Tooltip.Size.X / 3, 0), _itemData.RealSprite));
         Tooltip.AddWidget(new Decal(new Vector2(0, -5), Assets.TextFont, _itemData.Name, Color.White,  5f));
+        hitsLeft = _integrity;
     }
 
     public override void Update()

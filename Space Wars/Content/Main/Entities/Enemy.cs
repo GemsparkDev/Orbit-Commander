@@ -24,7 +24,7 @@ public class Enemy : Entity
         get => base.StealthAbility + ((revealDuration > 0) ? -5 : 0); 
         protected set => base.StealthAbility = value; 
     }
-    public override float ColliderRadius => Engine.EnemyHitboxModifier * ((texture.Height + texture.Width) / 4 + 1);
+    public override float ColliderRadius => ((texture != null) ? Engine.EnemyHitboxModifier * ((texture.Height + texture.Width) / 4 + 1) : 0);
     private Vector2 targetVector;
     public ParticleEmitter enemyRange = new(Assets.Get(Sprite.Dot), Vector2.Zero, 0, Color.Red * 0.75f);
     public Enemy(Vector2 _position, Vector2 _velocity, float _angle, int _damage, int _health, Texture2D _texture, bool _isFriendly = false)

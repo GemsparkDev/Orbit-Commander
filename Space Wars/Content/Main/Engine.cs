@@ -96,6 +96,7 @@ public class Engine : Game
         List<Texture2D> iconGroup2 = [Assets.Get(Sprite.SmeltIcon), Assets.Get(Sprite.RepairIcon), Assets.Get(Sprite.VictoryIcon)];
         List<Texture2D> iconGroup3 = [Assets.Get(Sprite.PlanetIcon), Assets.Get(Sprite.RepairIcon)];
 
+        //Menus
         var tabTexture = Assets.Get(Sprite.Tab);
         var selectedTabTexture = Assets.Get(Sprite.SelectedTab);
         var selectSound = Assets.Get(Sound.Interact);
@@ -108,6 +109,7 @@ public class Engine : Game
         var PickupDroneMenu = new Window(BackBuffer / 2, largePanel, 1) { enabled = false };
         var FuseMenu = new Window(BackBuffer / 2, largePanel, 1) { enabled = false };
 
+        //Main Menu Widgets
         var patchedConicsToggle = new Button(new Vector2(0, -MainMenu.Size.Y / 4), wideButton, Assets.TextFont, $"Patched Conics: {PatchedConics}", Color.White);
         var sfxSlider = new Slider(Line, Assets.Get(Sprite.Knob), new Vector2(25, 0), 50, false, Color.White, Color.Gray);
         var musicSlider = new Slider(Line, Assets.Get(Sprite.Knob), new Vector2(25, -15), 50, false, Color.White, Color.Gray);
@@ -116,20 +118,23 @@ public class Engine : Game
         var musicVolume = new Decal(new Vector2(-35, -15), Assets.TextFont, "Music: 100%", Color.White, 5);
         var uiScale = new Decal(new Vector2(-35, 15), Assets.TextFont, $"UI Scale: {Math.Truncate((uiScaleSlider.sliderInterval + 1) * 10) / 10}", Color.White, 5);
         var shaderToggle = new Button(new Vector2(0, MainMenu.Size.Y / 4), wideButton, Assets.TextFont, $"Shader: {UseShader}", Color.White);
-
         var singleplayerButton = new Button(new Vector2(0, -MainMenu.Size.Y / 4), wideButton, Assets.TextFont, "Singleplayer", Color.White);
         var exitButton = new Button(new Vector2(0, MainMenu.Size.Y / 4), wideButton, Assets.TextFont, "Exit", Color.White);
         var quitToMenuButton = new Button(new Vector2(0, 20), wideButton, Assets.TextFont, "Quit to Menu", Color.White);
         var quitToMissionButton = new Button(new Vector2(0, -20), wideButton, Assets.TextFont, "Return", Color.White);
         var titleName = new Decal(new Vector2(0, -MainMenu.Size.Y), Assets.Get(Sprite.Title));
 
+        //Mothership Menu
         var furnaceSlot = new ItemSlot<Pickup>(new Vector2(-20, 0), Assets.Get(Sprite.EmptySlot), UIManager, -1);
         var garageButton = new Button(new Vector2(0, -MainMenu.Size.Y / 4), wideButton, Assets.TextFont, "To Garage", Color.White);
         var craftButton = new Button(new Vector2(0, MainMenu.Size.Y / 4), Assets.Get(Sprite.Button), Assets.TextFont, "Repair", Color.LightBlue);
         var requiredCraftsText = new Decal(new Vector2(0) + new Vector2(0, -6), Assets.TextFont, "25", Color.White, 10);
         var furnaceSlider = new Slider(Line, new Vector2(0, -MainMenu.Size.Y / 6), 60, true, new Color(255, 239, 85), new Color(50, 51, 67));
         var craftingSlider = new Slider(Line, new Vector2(0, -MainMenu.Size.Y / 4), 60, true, Color.Cyan, Color.Gray);
+        var constructBarricade = new Button(new Vector2(-MainMenu.Size.X / 5, -MainMenu.Size.Y / 4), Assets.Get(Sprite.Button), Assets.TextFont, "Barricade", Color.White);
+        var constructTrap = new Button(new Vector2(-MainMenu.Size.X / 5, MainMenu.Size.Y / 4), Assets.Get(Sprite.Button), Assets.TextFont, "Trap", Color.White);
 
+        //Garage Menu
         var repairSlot = new ItemSlot<Module>(new Vector2(-GarageMenu.Size.X / 4 - 25, 0), Assets.Get(Sprite.EmptySlot), UIManager, -1);
         var mothershipScrap = new Decal(new Vector2(GarageMenu.Size.X / 2.2f, 20) - GarageMenu.Size / 2, Assets.TextFont, "0", Color.Gray, 10);
         var repairText = new Decal(new Vector2(-GarageMenu.Size.X / 4 - 60 / 2.5f, 40), Assets.TextFont, "", Color.White, 10);
@@ -137,12 +142,14 @@ public class Engine : Game
         var validConfigText = new Decal(-GarageMenu.Size / 4 + new Vector2(20, GarageMenu.Size.Y / 1.5f), Assets.TextFont, "Ready for Combat", Color.Green, 10);
         var repairButton = new Button(new Vector2(-GarageMenu.Size.X / 4 - 25, -40), Assets.Get(Sprite.Button), Assets.TextFont, "Repair", Color.LightBlue);
 
+        //Player Menu
         var enemySlider = new Slider(Line, new Vector2(0, -PlayerMenu.Size.Y / 3), 50, true, Color.White, Color.Gray);
         var waveText = new Decal(new Vector2(-5, 0), Assets.TextFont, "0", Color.White, 10);
         var partStatus = new Decal(new Vector2(0, 20), Assets.TextFont, "All systems go", Color.Green, 10);
         var restartButton = new Button(new Vector2(0, 50), Assets.Get(Sprite.Button), Assets.TextFont, "Restart", Color.LightBlue);
         var restartSlider = new Slider(Line, new Vector2(0, 63), 50, true, Color.Cyan, Color.Black);
 
+        //Mission Select Menu
         var missionName = new Decal(new Vector2(0, -30), Assets.TextFont, "Name", Color.White, 10);
         var missionDescription = new Decal(new Vector2(0, -15), Assets.TextFont, "Description", Color.Gray, 3f);
         var prevMission = new Button(new Vector2(-75, 20), Assets.Get(Sprite.Button), Assets.TextFont, "Prev", Color.LightBlue);
@@ -153,11 +160,12 @@ public class Engine : Game
         var smeltScrap = new Button(new Vector2(-85, -15), Assets.Get(Sprite.Button), Assets.TextFont, "Queue Smelt", Color.Yellow);
         var repairModule = new Button(new Vector2(-85, 15), Assets.Get(Sprite.Button), Assets.TextFont, "Queue Module", Color.Yellow);
         var cancelQueue = new Button(new Vector2(-85, 45), Assets.Get(Sprite.Button), Assets.TextFont, "Cancel Latest", Color.Red);
-
         var launchButton = new Button(new Vector2(-20, 0), Assets.Get(Sprite.Button), Assets.TextFont, "Leave", Color.LightBlue);
 
+        //Fuse Menu
         var fuseCounter = new Decal(new Vector2(-20, -10), Assets.TextFont, "0", Color.Yellow, 10);
 
+        //Global Menu
         var globalSidePanelOpen = new Button(new Vector2(0, BackBuffer.Y / 2), Assets.Get(Sprite.ToggleButton));
         fpsCounter = new Decal(new Vector2(BackBuffer.X - 40, 50), Assets.TextFont, "60", Color.White, 10);
         fpsOneSec = new Decal(new Vector2(BackBuffer.X - 40, 100), Assets.TextFont, "60", Color.White, 10);
@@ -259,6 +267,22 @@ public class Engine : Game
                 EntityManager.QueuedItems.RemoveAt(EntityManager.QueuedItems.Count - 1);
             }
         });
+        constructBarricade.AddBehaviour(delegate ()
+        {
+            if (SaveGame.Scrap > 0)
+            {
+                SaveGame.Scrap -= 1;
+                EntityManager.Add(ItemFactory.GetItem(ConstructType.Barricade, SaveGame.Player.position, Vector2.Zero, 0));
+            }
+        });
+        constructTrap.AddBehaviour(delegate ()
+        {
+            if (SaveGame.Scrap > 0)
+            {
+                SaveGame.Scrap -= 1;
+                EntityManager.Add(ItemFactory.GetItem(ConstructType.Trap, SaveGame.Player.position, Vector2.Zero, 0));
+            }
+        });
 
         MainMenu.AddWidget(exitButton as IFunctional, 0);
         MainMenu.AddWidget(singleplayerButton as IFunctional, 0);
@@ -289,6 +313,8 @@ public class Engine : Game
         MothershipMenu.AddWidget(craftingSlider as IFunctional, 2);
         MothershipMenu.AddWidget(requiredCraftsText, 2);
         MothershipMenu.AddWidget(craftButton as IFunctional, 2);
+        MothershipMenu.AddWidget(constructBarricade as IFunctional, 2);
+        MothershipMenu.AddWidget(constructTrap as IFunctional, 2);
 
         PlayerMenu.AddWidget(enemySlider as IFunctional);
         PlayerMenu.AddWidget(waveText);
