@@ -7,7 +7,7 @@ public class Construct : Pickup
     private ConstructType type;
     private float cooldown = 0;
     public Construct(ItemData _itemData, Color _worldColor, Vector2 _position, Vector2 _velocity, float _angle, float _angularVelocity, ConstructType _type) 
-        : base(_itemData, _worldColor, _position, _velocity, _angularVelocity, ((_type == ConstructType.Barricade) ? 10 : 5))
+        : base(_itemData, _worldColor, _position, _velocity, _angularVelocity, ((_type == ConstructType.Barricade) ? 20 : 8))
     {
         angle = _angle;
         type = _type;
@@ -22,6 +22,7 @@ public class Construct : Pickup
         switch (type)
         {
             case ConstructType.Barricade:
+                angle = MathF.Atan2(position.X, -position.Y);
                 break;
             case ConstructType.Trap:
                 var nearestEnemy = Engine.EntityManager.NearestEnemy(new Enemy(position, Vector2.Zero, 0, 0, 0, null, true));

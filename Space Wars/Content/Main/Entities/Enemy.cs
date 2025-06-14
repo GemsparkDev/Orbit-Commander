@@ -848,7 +848,7 @@ public class Enemy : Entity
         {
             velocity *= 0;
             turretCannon.position = position + new Vector2(0, -8);
-            Entity nearestPickup = Engine.EntityManager.NearestItem(this);
+            Entity nearestPickup = Engine.EntityManager.NearestItem(this, false);
             if (nearestPickup != null)
             {
                 if (EntityManager.DistanceSqr(this, nearestPickup) < 2500 && health <= maxHealth - 15)
@@ -932,7 +932,7 @@ public class Enemy : Entity
                 isExpired = true;
                 SoundManager.PlaySound(Assets.Get(Sound.Death), position);
             }
-            Entity nearestPickup = Engine.EntityManager.NearestItem(this);
+            Entity nearestPickup = Engine.EntityManager.NearestItem(this, false);
             if (nearestPickup != null)
             {
                 if (EntityManager.DistanceSqr(this, nearestPickup) < 2500 && health <= maxHealth -15)
@@ -1049,7 +1049,7 @@ public class Enemy : Entity
         ];
         while (true)
         {
-            nearestPickup = Engine.EntityManager.NearestItem(this);
+            nearestPickup = Engine.EntityManager.NearestItem(this, true);
             Vector2 relativePosition = Player.position + Player.velocity - position - velocity;
             targetAngle = MathF.Atan2(relativePosition.X, -relativePosition.Y);
             if (health >= maxHealth / 2 || laserCooldown > 0)

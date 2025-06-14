@@ -280,7 +280,7 @@ public class Engine : Game
             if (SaveGame.Scrap > 0)
             {
                 SaveGame.Scrap -= 1;
-                EntityManager.Add(ItemFactory.GetItem(ConstructType.Trap, SaveGame.Player.position, Vector2.Zero, 0));
+                EntityManager.Add(ItemFactory.GetItem(ConstructType.Trap, SaveGame.Player.position, Vector2.Zero, 0.02f));
             }
         });
 

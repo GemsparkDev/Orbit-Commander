@@ -34,8 +34,8 @@ public static class ItemFactory
     };
     private static Dictionary<ConstructType, ItemData> constructData = new() 
     {
-        { ConstructType.Barricade, new ItemData(Sprite.HullModule, Sprite.HullModule, "Barricade", 1, Color.White) },
-        { ConstructType.Trap, new ItemData(Sprite.GunModule, Sprite.GunModule, "Trap", 1, Color.White) }
+        { ConstructType.Barricade, new ItemData(Sprite.RealBarricade, Sprite.Barricade, "Barricade", 1, Color.White) },
+        { ConstructType.Trap, new ItemData(Sprite.RealTrap, Sprite.Trap, "Trap", 1, Color.White) }
     };
     public static Pickup NewScrap(Vector2 _position = new Vector2(), Vector2 _velocity = new Vector2(), float _angularVelocity = 0)
     {

@@ -44,6 +44,8 @@ public enum Sprite
     WyvernBoss,
     AdvancedFighter,
     PickupDrone,
+    Barricade,
+    Trap,
 
     MetalScrap,
     RealMetalScrap,
@@ -57,6 +59,8 @@ public enum Sprite
     RealSniperModule,
     SensorModule,
     CoreModule,
+    RealTrap,
+    RealBarricade,
 
     SpiralShot,
     PulseShot,

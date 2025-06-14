@@ -313,13 +313,17 @@ public class EntityManager
         }
         return returnEnemy;
     }
-    public Entity NearestItem(Entity entity)
+    public Entity NearestItem(Entity entity, bool _findAll)
     {
         float nearestDistance = float.MaxValue;
         Entity returnItem = null;
         foreach (Entity targetEntity in entities)
         {
             if (targetEntity is not Pickup)
+            {
+                continue;
+            }
+            if (!_findAll && (targetEntity is Module || targetEntity is Construct))
             {
                 continue;
             }

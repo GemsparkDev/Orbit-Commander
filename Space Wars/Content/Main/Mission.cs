@@ -186,7 +186,7 @@ public class Mission
                 EventHandler.UpdateEnemyCountdownUI(waveTimer, maxWaveTimer, Wave);
                 foreach (var enemy in enemiesSpawned)
                 {
-                    ParticleManager.Add(new Particle(enemy.texture, enemy.position, enemy.angle, new Color(255, 255, 0) * 0.75f));
+                    ParticleManager.Add(new Particle(enemy.texture, enemy.position, enemy.angle, new Color(255,127, 0) * (Engine.Random.NextSingle() / 2 + 0.25f)));
                 }
             }
         }

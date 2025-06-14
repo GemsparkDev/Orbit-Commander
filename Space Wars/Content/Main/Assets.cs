@@ -44,6 +44,8 @@ public static class Assets
         Sprites.Add(Sprite.WyvernBoss, Content.Load<Texture2D>("Images/Entity_18"));
         Sprites.Add(Sprite.AdvancedFighter, Content.Load<Texture2D>("Images/Entity_19"));
         Sprites.Add(Sprite.PickupDrone, Content.Load<Texture2D>("Images/Entity_20"));
+        Sprites.Add(Sprite.Trap, Content.Load<Texture2D>("Images/Entity_21"));
+        Sprites.Add(Sprite.Barricade, Content.Load<Texture2D>("Images/Entity_22"));
 
         //Items
         Sprites.Add(Sprite.MetalScrap, Content.Load<Texture2D>("Images/Item_0"));
@@ -58,6 +60,8 @@ public static class Assets
         Sprites.Add(Sprite.MissileModule, Content.Load<Texture2D>("Images/Item_2"));
         Sprites.Add(Sprite.SniperModule, Content.Load<Texture2D>("Images/Item_3"));
         Sprites.Add(Sprite.RealSniperModule, Content.Load<Texture2D>("Images/UI_28"));
+        Sprites.Add(Sprite.RealBarricade, Content.Load<Texture2D>("Images/UI_30"));
+        Sprites.Add(Sprite.RealTrap, Content.Load<Texture2D>("Images/UI_31"));
 
         //Projectiles
         Sprites.Add(Sprite.SpiralShot, Content.Load<Texture2D>("Images/Projectile_0"));
