@@ -366,3 +366,11 @@ Update 0.4.3
  - The trap will periodically shoot 9 bullets toward enemies nearby it.    
  - Added two buttons to construct both new constructs.    
  - Future waves now appear slightly brighter and in yellow.    
+    
+0.4.6.9    
+6/13/2025    
+ - Added proper sprites for the trap and the barricade.    
+ - The trap now rotates, and the barricade always points alway from the origin.    
+ - The miner and the sentry can no longer heal using constructs or modules.    
+ - Increased the health of the barricade to 20, and the health of the trap to 8.    
+ - The future enemy spawn predictor is now orange and flickers.    
