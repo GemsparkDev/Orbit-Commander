@@ -32,7 +32,6 @@ public class Mission
     private float waveTimer = 5;
     private float maxWaveTimer = 5;
     private float difficulty;
-    private Random random = new();
     private Player Player => Engine.SaveGame.Player;
     public delegate Enemy DelegateEnemy(Vector2 position, Vector2 velocity, float angle, bool _isFriendly = false);
     public int EnemiesSpawned { get; private set; } = 0;
@@ -85,7 +84,7 @@ public class Mission
             Enemy.NewExcursionBoss,
             Enemy.NewWyvernBoss,
         ];
-        currentBoss = random.Next(bosses.Count);
+        currentBoss = Engine.Random.Next(bosses.Count);
         cutscene = _cutscene;
         if (_escapeVehicle)
         {
@@ -223,19 +222,45 @@ public class Mission
                 difficulty = (int)((Wave + 1) * MathF.Log(Wave + 1, MathF.E) - Wave) / 15 + 1;
                 List<int> newCosts = [];
                 int availableEnemies = Math.Min(enemyCreditValues.Count, Wave / 10 + 1);
+                Enemy squadLeader = null;
+                int count = 0;
                 for (int i = 0; i < availableEnemies; i++)
                 {
                     newCosts.Add(enemyCreditValues[i].cost);
                 }
-                var enemyCredits = random.Next((int)(3 * difficulty), (int)(5 * difficulty));
+                var enemyCredits = Engine.Random.Next((int)(3 * difficulty), (int)(5 * difficulty));
                 while (enemyCredits > 0)
                 {
                     for (int i = 0; i < availableEnemies; i++)
                     {
-                        if (random.Next(0, enemyCreditValues[i].cost / 2) == 0 && newCosts[i] <= enemyCredits)
+                        if (Engine.Random.Next(0, enemyCreditValues[i].cost / 2) == 0 && newCosts[i] <= enemyCredits)
                         {
-                            var pos = NewSpawnLocation();
-                            enemiesSpawned.Add(enemyCreditValues[i].enemy(pos, Player.velocity, MathF.Atan2(-pos.X, pos.Y)));
+                            Vector2 pos;
+                            
+                            if (squadLeader != null && (count < 2 || Engine.Random.Next(0, 4) != 0))
+                            {
+                                Vector2 offset = Vector2.Normalize(new Vector2(squadLeader.position.X, squadLeader.position.Y));
+                                int isOdd = (count % 2 == 0) ? 1 : -1;
+                                
+                                pos = squadLeader.position 
+                                    //Horizontal offset
+                                    + new Vector2(offset.Y, -offset.X) * 10 * isOdd * (count / 2 + 1) 
+                                    //Vertical offset
+                                    + offset * (count / 2 + 1) * 10;
+                                count++;
+                            }
+                            else
+                            {
+                                pos = NewSpawnLocation();
+                                squadLeader = null;
+                                count = 0;
+                            }
+                            var enemy = enemyCreditValues[i].enemy(pos, Player.velocity, MathF.Atan2(-pos.X, pos.Y));
+                            enemiesSpawned.Add(enemy);
+                            if (squadLeader == null)
+                            {
+                                squadLeader = enemy;
+                            }
                             enemyCredits -= newCosts[i];
                             newCosts[i] += 1;
                             EnemiesSpawned++;
@@ -412,11 +437,18 @@ public class Mission
     private Vector2 NewSpawnLocation()
     {
         //Creates a position vector defined by the angle from the player in radians and the distance from the edge of the screen
-        float angle = (random.NextSingle() - 0.5f) * MathF.Tau;
-        float distanceMultiplier = 1 + (random.NextSingle() - 0.5f) / 4;
+        float angle = (Engine.Random.NextSingle() - 0.5f) * MathF.Tau;
+        float distanceMultiplier = 1 + (Engine.Random.NextSingle() - 0.5f) / 4;
         float distance = (Engine.ScreenSize.X + Engine.ScreenSize.Y) * distanceMultiplier / 3;
-        Vector2 spawnLocation = Engine.ToUnitVector(angle) * distance;
-        return spawnLocation + Player.position;
+        Vector2 spawnLocation = Engine.ToUnitVector(angle) * distance + Player.position;
+        foreach (var planet in planets)
+        {
+            if (Vector2.Distance(spawnLocation, planet.position) < planet.radius)
+            {
+                return NewSpawnLocation();
+            }
+        }
+        return spawnLocation;
     }
 }
 public class EntityConstructor(Func<Vector2, Vector2, float, Entity> _constructor, Vector2 _position, Vector2 _velocity, float _angle)
