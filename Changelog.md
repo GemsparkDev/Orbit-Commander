@@ -373,4 +373,9 @@ Update 0.4.3
  - The trap now rotates, and the barricade always points alway from the origin.    
  - The miner and the sentry can no longer heal using constructs or modules.    
  - Increased the health of the barricade to 20, and the health of the trap to 8.    
- - The future enemy spawn predictor is now orange and flickers.    
+ - The future enemy spawn predictor is now orange and flickers.
+    
+0.4.7    
+6/14/2025    
+ - Enemies now spawn in small formations.    
+ - Formations will almost always be 3 or more enemies.    
