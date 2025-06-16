@@ -387,3 +387,4 @@ Update 0.4.3
  - Reorganized the enemy AI in code to aid organization.    
  - The player ability cooldown now properly displays for all modules.    
  - Seperated some elements of the ModuleType enum into the new Modules enum.    
+ - Some bosses now drop weapons instead of scrap: Overload - Shotgun, Symmetry - Missile, Excursion - Sniper
