@@ -379,3 +379,11 @@ Update 0.4.3
 6/14/2025    
  - Enemies now spawn in small formations.    
  - Formations will almost always be 3 or more enemies.    
+     
+0.4.7.1    
+6/15/2025    
+ - Player abilities are now tied to the core rather than the engine module.    
+ - Added the EnemyDeath behavior, allowing for code reuse.    
+ - Reorganized the enemy AI in code to aid organization.    
+ - The player ability cooldown now properly displays for all modules.    
+ - Seperated some elements of the ModuleType enum into the new Modules enum.    
