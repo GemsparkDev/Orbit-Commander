@@ -2,12 +2,17 @@
 
 public enum ModuleType
 {
-    //Categorical
     Hull,
     Guns,
     Engines,
     Sensors,
     Core,
+}
+public enum Modules
+{
+    Engines,
+    Sensors,
+    Hull,
     //Weapons
     Basic,
     Spiral,
@@ -15,8 +20,10 @@ public enum ModuleType
     Missile,
     LMG,
     Sniper,
-    //Engines
+    //Cores
+    Dash,
     GrapplingHook,
+    SummonShield,
 }
 public enum Sprite
 {

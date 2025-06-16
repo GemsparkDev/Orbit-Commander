@@ -16,12 +16,12 @@ public class Player : Entity
     public DockableComponent dockedEntity;
     private Entity abilityEntity;
     private ParticleEmitter engineParticles = new(Assets.Get(Sprite.Circle), 0.15f, Vector2.Zero, 0, 45, 2, 0, 450f, Color.Cyan, new Color(72, 61, 139, 0), EmitterType.EmissionOverTime) { isEmitterActive = false };
-    //private ParticleEmitter engineParticles = new(Assets.Sprites["Circle"], 0.15f, Vector2.Zero, 0, 45, 2, 0, 450f, 1, true, Color.Orange, Color.Crimson, EmitterType.EmissionOverTime);
     private ParticleEmitter smokeParticles = new(Assets.Get(Sprite.Circle), 1f, Vector2.Zero, 0, 45, 1, 0, 0.25f, Color.Gray, new Color(169, 169, 169, 0), EmitterType.EmissionOverTime) { isEmitterActive = false };
     private SoundEffectInstance engineSounds;
     private float invincibilityCooldown = 0;
     private float cachedDamage = 0;
     private float restartCooldown = 0;
+    private float abilityMaxCooldown = 1f;
     private bool isRestarting = false;
     private Entity gunAngle;
     private Vector2 targetVector;
@@ -71,11 +71,11 @@ public class Player : Entity
     public List<Pickup> leashedMaterials = [];
     public Dictionary<ModuleType, Module> modules = new()
     {
-        { ModuleType.Hull, ItemFactory.GetItem(ModuleType.Hull) },
-        { ModuleType.Guns, ItemFactory.GetItem(ModuleType.Sniper) },
-        { ModuleType.Engines, ItemFactory.GetItem(ModuleType.GrapplingHook) },
-        { ModuleType.Sensors, ItemFactory.GetItem(ModuleType.Sensors) },
-        { ModuleType.Core, ItemFactory.GetItem(ModuleType.Core) }
+        { ModuleType.Hull, ItemFactory.GetItem(Modules.Hull) },
+        { ModuleType.Guns, ItemFactory.GetItem(Modules.Sniper) },
+        { ModuleType.Engines, ItemFactory.GetItem(Modules.Engines) },
+        { ModuleType.Sensors, ItemFactory.GetItem(Modules.Sensors) },
+        { ModuleType.Core, ItemFactory.GetItem(Modules.Dash) }
     };
     private bool[,] moduleFuses = new bool[5, 4]
     {
@@ -285,9 +285,9 @@ public class Player : Entity
                 {
                     leashedMaterials = [];
                 }
-                if (Input.OldState.IsKeyUp(Keys.Q) && Input.NewState.IsKeyDown(Keys.Q) && !modules[ModuleType.Engines].isFailed)
+                if (Input.OldState.IsKeyUp(Keys.Q) && Input.NewState.IsKeyDown(Keys.Q))
                 {
-                    modules[ModuleType.Engines].ModuleFunction();
+                    modules[ModuleType.Core].ModuleFunction();
                 }
                 Keys[] pressedKey = Input.NewState.GetPressedKeys();
                 direction = Vector2.Zero;
@@ -568,7 +568,9 @@ public class Player : Entity
             ParticleManager.Add(new Particle(Assets.Get(Sprite.Dot), timeLeft, position + normalVector*i, velocity * timeLeft, gunAngle.angle, 0, Color.Cyan, col));
         }
         position += normalVector * 200;
-        modules[ModuleType.Engines].cooldown = 2f;
+        float c = 2f;
+        modules[ModuleType.Engines].cooldown = c;
+        abilityMaxCooldown = c;
     }
     public void SummonShield()
     {
@@ -583,7 +585,9 @@ public class Player : Entity
         (abilityEntity as Enemy).health = 1;
         abilityEntity.isExpired = false;
         Engine.EntityManager.Add(abilityEntity);
-        modules[ModuleType.Engines].cooldown = 5f;
+        float c = 5f;
+        modules[ModuleType.Engines].cooldown = c;
+        abilityMaxCooldown = c;
     }
     public void SummonGrapplingHook()
     {
@@ -594,7 +598,9 @@ public class Player : Entity
             Engine.ShakeScreen(0.3f);
             velocity -= targetVector / 2;
             Engine.EntityManager.Add(abilityEntity);
-            modules[ModuleType.Engines].cooldown = 5f;
+            float c = 5f;
+            modules[ModuleType.Engines].cooldown = c;
+            abilityMaxCooldown = c;
         }
         else if(abilityEntity != null && !abilityEntity.isExpired)
         {
@@ -617,7 +623,7 @@ public class Player : Entity
         Vector2 linePosition = position + new Vector2(-texture.Width * 2, texture.Height * 1.5f) / 2;
         Rectangle sourceRectangle = new (0, 0, texture.Width * 2, 2);
 
-        Engine.DrawFilledLine(_spriteBatch, linePosition, sourceRectangle, (1 - modules[ModuleType.Engines].cooldown / 2), Color.DarkGray, Color.Cyan);
+        Engine.DrawFilledLine(_spriteBatch, linePosition, sourceRectangle, (1 - (modules[ModuleType.Engines].cooldown / abilityMaxCooldown)), Color.DarkGray, Color.Cyan);
         if (modules[ModuleType.Hull].ID == 1)
         {
             Engine.DrawFilledLine(_spriteBatch, linePosition + new Vector2(0, texture.Height / 4), sourceRectangle, (1 - modules[0].cooldown / 8), Color.DarkGray, Color.Yellow);

@@ -257,10 +257,7 @@ public class Mission
                             }
                             var enemy = enemyCreditValues[i].enemy(pos, Player.velocity, MathF.Atan2(-pos.X, pos.Y));
                             enemiesSpawned.Add(enemy);
-                            if (squadLeader == null)
-                            {
-                                squadLeader = enemy;
-                            }
+                            squadLeader ??= enemy;
                             enemyCredits -= newCosts[i];
                             newCosts[i] += 1;
                             EnemiesSpawned++;
