@@ -111,9 +111,9 @@ public class Engine : Game
 
         //Main Menu Widgets
         var patchedConicsToggle = new Button(new Vector2(0, -MainMenu.Size.Y / 4), wideButton, Assets.TextFont, $"Patched Conics: {PatchedConics}", Color.White);
-        var sfxSlider = new Slider(Line, Assets.Get(Sprite.Knob), new Vector2(25, 0), 50, false, Color.White, Color.Gray);
-        var musicSlider = new Slider(Line, Assets.Get(Sprite.Knob), new Vector2(25, -15), 50, false, Color.White, Color.Gray);
-        var uiScaleSlider = new Slider(Line, Assets.Get(Sprite.Knob), new Vector2(25, 15), 50, false, Color.White, Color.Gray);
+        var sfxSlider = new Slider(Line, Assets.Get(Sprite.Knob), new Vector2(25, 0), new Vector2(50, 2), false, Color.White, Color.Gray);
+        var musicSlider = new Slider(Line, Assets.Get(Sprite.Knob), new Vector2(25, -15), new Vector2(50, 2), false, Color.White, Color.Gray);
+        var uiScaleSlider = new Slider(Line, Assets.Get(Sprite.Knob), new Vector2(25, 15), new Vector2(50, 2), false, Color.White, Color.Gray);
         var sfxVolume = new Decal(new Vector2(-35, 0), Assets.TextFont, "Sound: 100%", Color.White, 5);
         var musicVolume = new Decal(new Vector2(-35, -15), Assets.TextFont, "Music: 100%", Color.White, 5);
         var uiScale = new Decal(new Vector2(-35, 15), Assets.TextFont, $"UI Scale: {Math.Truncate((uiScaleSlider.sliderInterval + 1) * 10) / 10}", Color.White, 5);
@@ -129,8 +129,8 @@ public class Engine : Game
         var garageButton = new Button(new Vector2(0, -MainMenu.Size.Y / 4), wideButton, Assets.TextFont, "To Garage", Color.White);
         var craftButton = new Button(new Vector2(0, MainMenu.Size.Y / 4), Assets.Get(Sprite.Button), Assets.TextFont, "Repair", Color.LightBlue);
         var requiredCraftsText = new Decal(new Vector2(0) + new Vector2(0, -6), Assets.TextFont, "25", Color.White, 10);
-        var furnaceSlider = new Slider(Line, new Vector2(0, -MainMenu.Size.Y / 6), 60, true, new Color(255, 239, 85), new Color(50, 51, 67));
-        var craftingSlider = new Slider(Line, new Vector2(0, -MainMenu.Size.Y / 4), 60, true, Color.Cyan, Color.Gray);
+        var furnaceSlider = new Slider(Line, new Vector2(-20, -MainMenu.Size.Y / 6), new Vector2(60, 2), true, new Color(255, 239, 85), new Color(50, 51, 67));
+        var craftingSlider = new Slider(Line, new Vector2(0, -MainMenu.Size.Y / 4), new Vector2(60, 2), true, Color.Cyan, Color.Gray);
         var constructBarricade = new Button(new Vector2(-MainMenu.Size.X / 5, -MainMenu.Size.Y / 4), Assets.Get(Sprite.Button), Assets.TextFont, "Barricade", Color.White);
         var constructTrap = new Button(new Vector2(-MainMenu.Size.X / 5, MainMenu.Size.Y / 4), Assets.Get(Sprite.Button), Assets.TextFont, "Trap", Color.White);
 
@@ -143,11 +143,11 @@ public class Engine : Game
         var repairButton = new Button(new Vector2(-GarageMenu.Size.X / 4 - 25, -40), Assets.Get(Sprite.Button), Assets.TextFont, "Repair", Color.LightBlue);
 
         //Player Menu
-        var enemySlider = new Slider(Line, new Vector2(0, -PlayerMenu.Size.Y / 3), 50, true, Color.White, Color.Gray);
+        var enemySlider = new Slider(Line, new Vector2(0, -PlayerMenu.Size.Y / 3), new Vector2(50, 2), true, Color.White, Color.Gray);
         var waveText = new Decal(new Vector2(-5, 0), Assets.TextFont, "0", Color.White, 10);
         var partStatus = new Decal(new Vector2(0, 20), Assets.TextFont, "All systems go", Color.Green, 10);
         var restartButton = new Button(new Vector2(0, 50), Assets.Get(Sprite.Button), Assets.TextFont, "Restart", Color.LightBlue);
-        var restartSlider = new Slider(Line, new Vector2(0, 63), 50, true, Color.Cyan, Color.Black);
+        var restartSlider = new Slider(Line, new Vector2(0, 63), new Vector2(50, 2), true, Color.Cyan, Color.Black);
 
         //Mission Select Menu
         var missionName = new Decal(new Vector2(0, -30), Assets.TextFont, "Name", Color.White, 10);
@@ -171,6 +171,8 @@ public class Engine : Game
         fpsOneSec = new Decal(new Vector2(BackBuffer.X - 40, 100), Assets.TextFont, "60", Color.White, 10);
         fpsLowest = new Decal(new Vector2(BackBuffer.X - 40, 150), Assets.TextFont, "60", Color.White, 10);
         timer = new Decal(new Vector2(BackBuffer.X - 150, 0), Assets.TextFont, $"{IngameTime.DrawText}", Color.White, 10);
+        var playerHealth = new Slider(Line, new Vector2(10, 10), new Vector2(150, 15), true, Color.Red, Color.DarkGray);
+        var playerAbility = new Slider(Line, new Vector2(10, 35), new Vector2(100, 10), true, Color.Cyan, Color.DarkGray);
 
         var sidePanelClose = new Button(new Vector2(-Assets.Get(Sprite.ToggleButton).Width / 2 + Assets.Get(Sprite.Terminal).Width / 2, 0), Assets.Get(Sprite.ToggleButton));
         patchedConicsToggle.AddBehaviour(delegate
@@ -349,6 +351,8 @@ public class Engine : Game
         UIManager.ScreenWindow.AddWidget(fpsOneSec, (int)Alignment.TopRight);
         UIManager.ScreenWindow.AddWidget(fpsLowest, (int)Alignment.TopRight);
         UIManager.ScreenWindow.AddWidget(timer, (int)Alignment.TopRight);
+        UIManager.ScreenWindow.AddWidget(playerHealth as IFunctional, (int)Alignment.TopLeft);
+        UIManager.ScreenWindow.AddWidget(playerAbility as IFunctional, (int)Alignment.TopLeft);
 
         ModuleSlots = new ItemSlot<Module>[5];
         InventorySlots = new ItemSlot<Pickup>[1, 4];

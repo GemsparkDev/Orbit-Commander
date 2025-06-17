@@ -129,7 +129,7 @@ public class Mission
             }
             else
             {
-                Engine.SaveGame.CompletedMissions[Engine.EntityManager.MissionCount] = true;
+                Engine.SaveGame.CompletedMissions[Engine.SaveGame.CurrentMissionIndex] = true;
                 restartTimer = 2;
                 Engine.EntityManager.CompleteMission(Wave);
             }

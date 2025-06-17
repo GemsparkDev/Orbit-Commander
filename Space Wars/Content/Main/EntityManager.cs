@@ -49,7 +49,7 @@ public class EntityManager
             new(new Vector2(-600, 0), -GravitationalSource.GetOrbitalVelocity(new Vector2(-600, 0), Vector2.Zero, 5000) * 1.2f, 120, 0.6f, false, Color.Yellow), ],
         [(new EntityConstructor(Enemy.NewExcursionBoss, new Vector2(0, -6*50), Vector2.Zero, 0), [ Condition.Kill ])],
         "Showdown",
-        "Defeat the advanced drone prototype, Excursion. Be warned: It may call for reinforcements.", 1.1f, 0, 0),
+        "Defeat the advanced drone prototype, Excursion. Be warned: It may call for reinforcements.", 1.1f, 0, 0, null, true),
 
         new([new(Vector2.Zero, Vector2.Zero, 30000, 10f, true, Color.HotPink, true) ],
         [],
@@ -57,9 +57,7 @@ public class EntityManager
         "Super earth", 2, 0, 2, null, true),
     ];
     private Mission currentMission;
-    public Mission CurrentMission => currentMission ?? missions[missionCount];
-    private int missionCount = 0;
-    public int MissionCount => missionCount;
+    public Mission CurrentMission => currentMission ?? missions[Engine.SaveGame.CurrentMissionIndex];
     public List<Queueable> QueuedItems { get; private set; } = [];
 
     public void Add(Entity entity)
@@ -85,7 +83,7 @@ public class EntityManager
     }
     public void Initialize()
     {
-        currentMission = missions[missionCount].Clone();
+        currentMission = missions[Engine.SaveGame.CurrentMissionIndex].Clone();
         entities.Clear();
         addedEntities.Clear();
         enemies.Clear();
@@ -184,20 +182,20 @@ public class EntityManager
     }
     public void SetMission(int _count)
     {
-        missionCount = Math.Clamp(_count, 0, missions.Count - 1);
-        currentMission = missions[missionCount].Clone();
+        Engine.SaveGame.CurrentMissionIndex = Math.Clamp(_count, 0, missions.Count - 1);
+        currentMission = missions[Engine.SaveGame.CurrentMissionIndex].Clone();
         EventHandler.UpdateMissionText();
     }
     public void NextMission()
     {
-        missionCount = Math.Clamp(missionCount + 1, 0, missions.Count - 1);
-        currentMission = missions[missionCount].Clone();
+        Engine.SaveGame.CurrentMissionIndex = Math.Clamp(Engine.SaveGame.CurrentMissionIndex + 1, 0, missions.Count - 1);
+        currentMission = missions[Engine.SaveGame.CurrentMissionIndex].Clone();
         EventHandler.UpdateMissionText();
     }
     public void PrevMission()
     {
-        missionCount = Math.Clamp(missionCount - 1, 0, missions.Count - 1);
-        currentMission = missions[missionCount].Clone();
+        Engine.SaveGame.CurrentMissionIndex = Math.Clamp(Engine.SaveGame.CurrentMissionIndex - 1, 0, missions.Count - 1);
+        currentMission = missions[Engine.SaveGame.CurrentMissionIndex].Clone();
         EventHandler.UpdateMissionText();
     }
     public void DecayPickups()

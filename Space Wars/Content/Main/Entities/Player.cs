@@ -29,6 +29,7 @@ public class Player : Entity
     public bool isEngineActive = false;
     public bool canGatherResources = false;
     private int spareFuses = 0;
+    private float time = 0;
     public override int SensingAbility
     {
         get
@@ -72,10 +73,10 @@ public class Player : Entity
     public Dictionary<ModuleType, Module> modules = new()
     {
         { ModuleType.Hull, ItemFactory.GetItem(Modules.Hull) },
-        { ModuleType.Guns, ItemFactory.GetItem(Modules.Sniper) },
+        { ModuleType.Guns, ItemFactory.GetItem(Modules.Missile) },
         { ModuleType.Engines, ItemFactory.GetItem(Modules.Engines) },
         { ModuleType.Sensors, ItemFactory.GetItem(Modules.Sensors) },
-        { ModuleType.Core, ItemFactory.GetItem(Modules.Dash) }
+        { ModuleType.Core, ItemFactory.GetItem(Modules.SummonShield) }
     };
     private bool[,] moduleFuses = new bool[5, 4]
     {
@@ -108,6 +109,7 @@ public class Player : Entity
     }
     public override void Update()
     {
+        time += Engine.DeltaSeconds;
         if (modules[ModuleType.Core].Health <= 0)
         {
             isExpired = true;
@@ -205,6 +207,18 @@ public class Player : Entity
             cachedDamage = 0;
         }
         float currentHealth = modules[ModuleType.Hull].Health + modules[ModuleType.Guns].Health + modules[ModuleType.Engines].Health + modules[ModuleType.Sensors].Health + modules[ModuleType.Core].Health;
+
+        var slider = (Engine.UIManager.ScreenWindow.GetFuncWidget(1) as Slider);
+        slider.SetInterval(currentHealth, 100);
+        float val = (MathF.Sin(time) + 1f) / 2;
+        var colorVec = new Vector3(1, 0, 0) * val + new Vector3(1, 0.2f, 0.2f) * (1f - val);
+        slider.enabledColor = new Color(colorVec.X, colorVec.Y, colorVec.Z);
+
+        slider = (Engine.UIManager.ScreenWindow.GetFuncWidget(2) as Slider);
+        slider.SetInterval(1 - (modules[ModuleType.Engines].cooldown / abilityMaxCooldown), 1);
+        colorVec = new Vector3(0, 1, 1) * val + new Vector3(0.2f, 1, 0.8f) * (1f - val);
+        slider.enabledColor = new Color(colorVec.X, colorVec.Y, colorVec.Z);
+
         if (currentHealth > 50)
         {
             smokeParticles.isEmitterActive = false;
@@ -623,10 +637,9 @@ public class Player : Entity
         Vector2 linePosition = position + new Vector2(-texture.Width * 2, texture.Height * 1.5f) / 2;
         Rectangle sourceRectangle = new (0, 0, texture.Width * 2, 2);
 
-        Engine.DrawFilledLine(_spriteBatch, linePosition, sourceRectangle, (1 - (modules[ModuleType.Engines].cooldown / abilityMaxCooldown)), Color.DarkGray, Color.Cyan);
         if (modules[ModuleType.Hull].ID == 1)
         {
-            Engine.DrawFilledLine(_spriteBatch, linePosition + new Vector2(0, texture.Height / 4), sourceRectangle, (1 - modules[0].cooldown / 8), Color.DarkGray, Color.Yellow);
+            Engine.DrawFilledLine(_spriteBatch, linePosition, sourceRectangle, (1 - modules[0].cooldown / 8), Color.DarkGray, Color.Yellow);
         }
     }
 }
