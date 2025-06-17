@@ -388,3 +388,9 @@ Update 0.4.3
  - The player ability cooldown now properly displays for all modules.    
  - Seperated some elements of the ModuleType enum into the new Modules enum.    
  - Some bosses now drop weapons instead of scrap: Overload - Shotgun, Symmetry - Missile, Excursion - Sniper
+
+0.4.7.2    
+6/16/2025    
+ - Added a health and ability bar to the screen menu.    
+ - Moved the mission index and system index to the SaveGame class.    
+ - The planets in the mission select menu now start at random locations.    
