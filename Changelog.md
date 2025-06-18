@@ -394,3 +394,11 @@ Update 0.4.3
  - Added a health and ability bar to the screen menu.    
  - Moved the mission index and system index to the SaveGame class.    
  - The planets in the mission select menu now start at random locations.    
+    
+0.4.7.2    
+6/17/2025    
+ - Added the bomb construct, which explodes when integrity reaches zero.    
+ - Additionally, the bomb construct costs 5 scrap to create.    
+ - Added the Explode function, which damages all entities in it's radius.    
+ - The missile, along with all exploding entities, now use said explode function.    
+ - Added the ExtraUpdates property to projectiles, which causes projectiles to get updated several times a frame.    
