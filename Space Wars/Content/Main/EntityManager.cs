@@ -136,7 +136,16 @@ public class EntityManager
             entity.Update();
             CurrentMission.AttractObject(entity);
         }
-
+        foreach (var projectile in projectiles)
+        {
+            if (projectile.ExtraUpdates > 1)
+            {
+                for (int i = 0; i < projectile.ExtraUpdates - 1; i++)
+                {
+                    projectile.Update();
+                }
+            }
+        }
         if (projectiles.Count >= 150)
         {
             for (int i = 0; i < projectiles.Count - 150; i++)
@@ -165,6 +174,17 @@ public class EntityManager
         {
             //Draws all entities in the main list
             entity.Draw(_spriteBatch);
+        }
+    }
+    public void Explode(int _damage, float _radius, Vector2 _position)
+    {
+        foreach (var entity in entities)
+        {
+            float dist = Vector2.Distance(_position, entity.position);
+            if (dist < _radius && dist > 0.001f)
+            {
+                entity.Collide(_damage);
+            }
         }
     }
     public void CompleteMission(int _duration)
@@ -334,14 +354,14 @@ public class EntityManager
         }
         return returnItem;
     }
-    public Entity NearestProjectile(Entity _entity)
+    public Entity NearestProjectile(Entity _entity, bool _isFriendly)
     {
         float nearestDistance = float.MaxValue;
         Entity returnProjectile = null;
         foreach (Projectile targetProjectile in projectiles)
         {
             float distance = DistanceSqr(_entity, targetProjectile);
-            if (distance < nearestDistance && _entity.isFriendly != targetProjectile.isFriendly
+            if (distance < nearestDistance && _isFriendly != targetProjectile.isFriendly
                 && (targetProjectile.StealthAbility < _entity.SensingAbility || (targetProjectile.StealthAbility == _entity.SensingAbility && distance < StealthRange * StealthThreshold)))
             {
                 nearestDistance = distance;
@@ -355,7 +375,7 @@ public class EntityManager
                 continue;
             }
             float distance = DistanceSqr(_entity, missile);
-            if (distance < nearestDistance && _entity.isFriendly != missile.isFriendly
+            if (distance < nearestDistance && _isFriendly != missile.isFriendly
                 && (missile.StealthAbility < _entity.SensingAbility || (missile.StealthAbility == _entity.SensingAbility && distance < StealthRange * StealthThreshold)))
             {
                 nearestDistance = distance;

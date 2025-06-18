@@ -66,7 +66,8 @@ public class Module : Pickup, IData
         }
     }
 }
-public class ModuleData(Sprite _realSprite, Sprite _virtualSprite, String _name, int _id, int _health, Action _action) : ItemData(_realSprite, _virtualSprite, _name, _id, Color.White)
+public class ModuleData(Sprite _realSprite, Sprite _virtualSprite, String _name, int _id, int _health, Action _action) 
+    : ItemData(_realSprite, _virtualSprite, _name, _id, Color.White)
 {
     public float MaxHealth { get; } = _health;
     public Action Action { get; } = _action;

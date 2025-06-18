@@ -129,7 +129,7 @@ public class Enemy : Entity
             ParticleManager.Add(new Particle(null, 1, position + new Vector2(0, -1), new Vector2(0, -1.5f), 0, 0, Color.Orange, new Color(0, 255, 0, 0)) { drawText = $"{-damage}" });
         }
     }
-    public void Explode()
+    public void Explode(int _damage, float _radius)
     {
         int particles = Engine.Random.Next(15, 25);
         for (int i = 0; i < particles; i++)
@@ -145,6 +145,7 @@ public class Enemy : Entity
             Vector2 particleVelocity = new Vector2(MathF.Cos(angle), MathF.Sin(angle)) * (Engine.Random.NextSingle() * 2 + 2);
             ParticleManager.Add(new Particle(Assets.Get(Sprite.Circle), 0.25f, position, particleVelocity + velocity, angle, 0, Color.DarkSlateGray, Color.Transparent));
         }
+        Engine.EntityManager.Explode(_damage, _radius, position);
         Engine.ShakeScreen(150 / ((position - Engine.Camera.Position).Length()+300));
     }
     public override void Draw(SpriteBatch _spriteBatch)
@@ -174,7 +175,7 @@ public class Enemy : Entity
         {
             if (health <= 0)
             {
-                Explode();
+                Explode(4, ColliderRadius);
                 isExpired = true;
                 SoundManager.PlaySound(Assets.Get(Sound.Death), position);
                 if (EntityManager.RandomWithKarma(Engine.EntityManager.CurrentMission.EnemiesSpawned * _rarity))
@@ -264,7 +265,7 @@ public class Enemy : Entity
 
             if (health <= 0)
             {
-                Explode();
+                Explode(6, ColliderRadius);
                 int particles = Engine.Random.Next(3, 5);
                 for (int i = 0; i < particles; i++)
                 {
@@ -434,7 +435,7 @@ public class Enemy : Entity
             }
             if (health <= 0)
             {
-                Explode();
+                Explode(6, ColliderRadius);
                 isExpired = true;
                 Engine.EntityManager.Add(ItemFactory.GetItem(Modules.Shotgun, position, GetNormalizedAcceleration() * 10, angularVelocity));
                 SoundManager.PlaySound(Assets.Get(Sound.Death), position);
@@ -467,7 +468,7 @@ public class Enemy : Entity
             {
                 if (!hasExploded)
                 {
-                    Explode();
+                    Explode(6, ColliderRadius);
                     SoundManager.PlaySound(Assets.Get(Sound.Death), position);
                     if (tail1 == null && tail2 == null)
                     {
@@ -688,7 +689,7 @@ public class Enemy : Entity
             }
             if (health <= 0)
             {
-                Explode();
+                Explode(6, ColliderRadius);
                 Engine.EntityManager.Add(ItemFactory.GetItem(Modules.Sniper, position, GetNormalizedAcceleration() * 10, angularVelocity));
                 int particles = Engine.Random.Next(3, 5);
                 for (int i = 0; i < particles; i++)
@@ -869,7 +870,7 @@ public class Enemy : Entity
             }
             if (health <= 0)
             {
-                Explode();
+                Explode(8, 12);
                 isExpired = true;
                 SoundManager.PlaySound(Assets.Get(Sound.Death), position);
             }
@@ -915,7 +916,7 @@ public class Enemy : Entity
             engineParticles.Update();
             if (EntityManager.DistanceSqr(this, nearestEnemy) < 10 * 10)
             {
-                nearestEnemy.Collide(8);
+                Explode(8, 12);
                 SoundManager.PlaySound(Assets.Get(Sound.Explosion), position);
                 isExpired = true;
             }
@@ -1097,7 +1098,7 @@ public class Enemy : Entity
                 continue;
             }
 
-            Entity nearestProjectile = Engine.EntityManager.NearestProjectile(NewDummyEnemy(position + Vector2.Normalize(Player.position - position) * 30, isFriendly));
+            Entity nearestProjectile = Engine.EntityManager.NearestProjectile(NewDummyEnemy(position + Vector2.Normalize(Player.position - position) * 30, isFriendly), isFriendly);
             if (nearestProjectile != null)
             {
                 Vector2 relativePos = position - nearestProjectile.position;
@@ -1617,7 +1618,7 @@ public class Enemy : Entity
             velocity *= 0;
             if (health <= 0)
             {
-                Explode();
+                Explode(4, ColliderRadius);
                 isExpired = true;
                 SoundManager.PlaySound(Assets.Get(Sound.Death), position);
             }

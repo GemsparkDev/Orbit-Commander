@@ -1,20 +1,24 @@
 ﻿using Microsoft.Xna.Framework;
 using System;
+using Space_Wars.Content.Main.Particles;
 
 namespace Space_Wars.Content.Main.Entities;
 public class Construct : Pickup
 {
     private ConstructType type;
     private float cooldown = 0;
-    public Construct(ItemData _itemData, Color _worldColor, Vector2 _position, Vector2 _velocity, float _angle, float _angularVelocity, ConstructType _type) 
-        : base(_itemData, _worldColor, _position, _velocity, _angularVelocity, ((_type == ConstructType.Barricade) ? 20 : 8))
+    public Construct(ConstructData _constructData, Color _worldColor, Vector2 _position, Vector2 _velocity, float _angle, float _angularVelocity, ConstructType _type)
+        : base(_constructData, _worldColor, _position, _velocity, _angularVelocity, _constructData.Integrity)
     {
         angle = _angle;
         type = _type;
+        if (_type == ConstructType.Bomb)
+        {
+            isFriendly = false;
+        }
     }
     public override void Update()
     {
-        velocity = Vector2.Zero;
         if (cooldown > 0)
         {
             cooldown -= Engine.DeltaSeconds;
@@ -22,9 +26,11 @@ public class Construct : Pickup
         switch (type)
         {
             case ConstructType.Barricade:
+                velocity = Vector2.Zero;
                 angle = MathF.Atan2(position.X, -position.Y);
                 break;
             case ConstructType.Trap:
+                velocity = Vector2.Zero;
                 var nearestEnemy = Engine.EntityManager.NearestEnemy(new Enemy(position, Vector2.Zero, 0, 0, 0, null, true));
                 if (cooldown <= 0 && nearestEnemy != null && Vector2.Distance(nearestEnemy.position, position) < 300)
                 {
@@ -40,12 +46,48 @@ public class Construct : Pickup
                     cooldown = 1.5f;
                 }
                 break;
+            case ConstructType.Bomb:
+                var nearestProjectile = Engine.EntityManager.NearestProjectile(this, !isFriendly);
+                if (nearestProjectile != null && Vector2.Distance(nearestProjectile.position, position) < ColliderRadius + nearestProjectile.ColliderRadius)
+                {
+                    Collide(nearestProjectile.damage);
+                    nearestProjectile.Collide(1);
+                }
+                break;
         }
         base.Update();
     }
+    public override void Collide(int _damage)
+    {
+        bool isActive = !isExpired;
+        base.Collide(_damage);
+        //TODO: Replace this w/ proper explosion sprite
+        if (type == ConstructType.Bomb && isExpired && isActive)
+        {
+            var tex = Assets.Get(Sprite.Dot);
+            for (int i = -50; i < 51; i++)
+            {
+                for (int j = -50; j < 51; j++)
+                {
+                    if (Vector2.Distance(Vector2.Zero, new Vector2(i, j)) > 50)
+                    {
+                        continue;
+                    }
+                    ParticleManager.Add(new Particle(tex, 3, position + new Vector2(i, j) * 2, Vector2.Zero, MathF.Atan2(j, i), 0, Color.White, Color.Transparent));
+                }
+            }
+            Engine.EntityManager.Explode(400, 100, position);
+        }
+    }
+}
+public class ConstructData(Sprite _realSprite, Sprite _virtualSprite, String _name, int _id, int _integrity)
+    : ItemData(_realSprite, _virtualSprite, _name, _id, Color.White)
+{
+    public int Integrity { get; } = _integrity;
 }
 public enum ConstructType
 {
     Barricade,
     Trap,
+    Bomb,
 }

@@ -12,6 +12,7 @@ public abstract class Projectile : Entity
     private Random random = new ();
     public Entity targetEntity;
     public float timeLeft = 8;
+    public int ExtraUpdates { get; protected set; } = 1;
     //Projectiles should always be able to hit potential targets
     public override int SensingAbility { get { return 99; } }
     public Projectile(Texture2D _texture, Vector2 _position, Vector2 _velocity, float _angle, float _angularVelocity, bool _isFriendly, int _damage, int _stealth)
@@ -106,30 +107,18 @@ public class AssassinShot : Projectile
         color = _isFriendly ? Color.Orange : Color.Red;
         timeLeft = 3;
         var col = Color.Gold;
+        ExtraUpdates = (int)(_velocity.Length() / 6);
         col.A = 0;
         beam = new(Assets.Get(Sprite.Dot), 0.5f, position, angle, 0, 0, 0, 0.5f, color, col, EmitterType.EmissionOverDistance);
     }
     public override void AI()
     {
-        int check = (int)velocity.Length() / 6;
-        for (int i = 0; i < check; i++)
-        {
-            position += velocity / check * Engine.DeltaSeconds * 60;
-            angle += angularVelocity * Engine.DeltaSeconds * 60;
-            EntityManager.Collide(this, Engine.EntityManager.NearestEnemy(this));
-            if (Engine.EntityManager.CurrentMission.Planet.IsColliding(position))
-            {
-                isExpired = true;
-            }
-            if (isExpired)
-            {
-                beam.position = position;
-                beam.Update();
-                return;
-            }
-        }
+        position += velocity * Engine.DeltaSeconds * 60 / (float)(ExtraUpdates);
+        angle += angularVelocity * Engine.DeltaSeconds * 60 / (float)(ExtraUpdates);
         beam.position = position;
         beam.Update();
+        var nearestEnemy = Engine.EntityManager.NearestEnemy(this);
+        EntityManager.Collide(this, nearestEnemy);
     }
 }
 public class GrapplingHook : Projectile

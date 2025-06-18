@@ -33,10 +33,11 @@ public static class ItemFactory
         { Modules.SummonShield, new ModuleData(Sprite.EngineModule, Sprite.EngineModule, "Shield Core", (int)ModuleType.Core, 20, delegate{ Player.SummonShield(); }) },
 
     };
-    private static Dictionary<ConstructType, ItemData> constructData = new() 
+    private static Dictionary<ConstructType, ConstructData> constructData = new() 
     {
-        { ConstructType.Barricade, new ItemData(Sprite.RealBarricade, Sprite.Barricade, "Barricade", 1, Color.White) },
-        { ConstructType.Trap, new ItemData(Sprite.RealTrap, Sprite.Trap, "Trap", 1, Color.White) }
+        { ConstructType.Barricade, new ConstructData(Sprite.RealBarricade, Sprite.Barricade, "Barricade", 1, 20) },
+        { ConstructType.Trap, new ConstructData(Sprite.RealTrap, Sprite.Trap, "Trap", 1, 8) },
+        { ConstructType.Bomb, new ConstructData(Sprite.RealTrap, Sprite.Trap, "Bomb", 1, 3) }
     };
     public static Pickup NewScrap(Vector2 _position = new Vector2(), Vector2 _velocity = new Vector2(), float _angularVelocity = 0)
     {

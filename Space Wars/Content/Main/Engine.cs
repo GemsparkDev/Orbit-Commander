@@ -133,6 +133,7 @@ public class Engine : Game
         var craftingSlider = new Slider(Line, new Vector2(0, -MainMenu.Size.Y / 4), new Vector2(60, 2), true, Color.Cyan, Color.Gray);
         var constructBarricade = new Button(new Vector2(-MainMenu.Size.X / 5, -MainMenu.Size.Y / 4), Assets.Get(Sprite.Button), Assets.TextFont, "Barricade", Color.White);
         var constructTrap = new Button(new Vector2(-MainMenu.Size.X / 5, MainMenu.Size.Y / 4), Assets.Get(Sprite.Button), Assets.TextFont, "Trap", Color.White);
+        var constructBomb = new Button(new Vector2(-MainMenu.Size.X / 5, 0), Assets.Get(Sprite.Button), Assets.TextFont, "Bomb", Color.White);
 
         //Garage Menu
         var repairSlot = new ItemSlot<Module>(new Vector2(-GarageMenu.Size.X / 4 - 25, 0), Assets.Get(Sprite.EmptySlot), UIManager, -1);
@@ -285,6 +286,14 @@ public class Engine : Game
                 EntityManager.Add(ItemFactory.GetItem(ConstructType.Trap, SaveGame.Player.position, Vector2.Zero, 0.02f));
             }
         });
+        constructBomb.AddBehaviour(delegate ()
+        {
+            if (true)
+            {
+                SaveGame.Scrap -= 5;
+                EntityManager.Add(ItemFactory.GetItem(ConstructType.Bomb, SaveGame.Player.position, Vector2.Zero, 0));
+            }
+        });
 
         MainMenu.AddWidget(exitButton as IFunctional, 0);
         MainMenu.AddWidget(singleplayerButton as IFunctional, 0);
@@ -317,6 +326,7 @@ public class Engine : Game
         MothershipMenu.AddWidget(craftButton as IFunctional, 2);
         MothershipMenu.AddWidget(constructBarricade as IFunctional, 2);
         MothershipMenu.AddWidget(constructTrap as IFunctional, 2);
+        MothershipMenu.AddWidget(constructBomb as IFunctional, 2);
 
         PlayerMenu.AddWidget(enemySlider as IFunctional);
         PlayerMenu.AddWidget(waveText);
@@ -423,6 +433,7 @@ public class Engine : Game
         SoundManager.PlayGlobalSound(Assets.Get(Sound.Interact));
         SoundManager.ChangeTrack(Assets.Get(Sound.main));
         EntityManager.CurrentMission.PlayIntroCutscene();
+        ScreenShakeFactor = 0;
     }
 
     protected override void LoadContent()

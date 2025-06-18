@@ -62,7 +62,7 @@ public class Pickup : Entity, IData
         }
         position += velocity * Engine.DeltaSeconds * 60;
         angle += angularVelocity * Engine.DeltaSeconds * 60;
-        var nearestProjectile = Engine.EntityManager.NearestProjectile(this);
+        var nearestProjectile = Engine.EntityManager.NearestProjectile(this, isFriendly);
         if (nearestProjectile != null)
         {
             if (Vector2.Distance(nearestProjectile.position, this.position) < nearestProjectile.ColliderRadius + ColliderRadius)
