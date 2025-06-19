@@ -494,7 +494,7 @@ public class Engine : Game
     }
     public static void ShakeScreen(float _val)
     {
-        ScreenShakeFactor += _val * _val / (ScreenShakeFactor + _val);
+        ScreenShakeFactor = Math.Min(ScreenShakeFactor + _val * _val / (ScreenShakeFactor + _val), 1);
     }
     public static Vector2 ToUnitVector(float _angle)
     {

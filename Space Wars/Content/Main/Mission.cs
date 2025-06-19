@@ -16,7 +16,7 @@ public class Mission
     public GravitationalSource Planet => planets[0];
     private GravitationalSource[] planets; 
     //Save original entity parameters to allow cloning
-    public List<(EntityConstructor, Condition[])> CopyObjectives { get; }
+    public List<(IConstructor, Condition[])> CopyObjectives { get; }
     public List<(Entity entity, Condition[] conditions)> MissionObjectives { get; } = [];
     private List<Entity> enemiesSpawned = [];
     private bool currentWaveActive = false;
@@ -36,7 +36,7 @@ public class Mission
     public delegate Enemy DelegateEnemy(Vector2 position, Vector2 velocity, float angle, bool _isFriendly = false);
     public int EnemiesSpawned { get; private set; } = 0;
 
-    public Mission(GravitationalSource[] _planets, List<(EntityConstructor, Condition[] conditions)> _missionObjectives, string _name, string _description, float _timerModifier, int _waveGoal = 0, int _enemyTier = 0, Func<Cutscene> _cutscene = null, bool _escapeVehicle = false)
+    public Mission(GravitationalSource[] _planets, List<(IConstructor, Condition[] conditions)> _missionObjectives, string _name, string _description, float _timerModifier, int _waveGoal = 0, int _enemyTier = 0, Func<Cutscene> _cutscene = null, bool _escapeVehicle = false)
     {
         Name = _name;
         Description = _description;
@@ -448,10 +448,23 @@ public class Mission
         return spawnLocation;
     }
 }
-public class EntityConstructor(Func<Vector2, Vector2, float, Entity> _constructor, Vector2 _position, Vector2 _velocity, float _angle)
+public class EntityConstructor(Func<Vector2, Vector2, float, Entity> _constructor, Vector2 _position, Vector2 _velocity, float _angle) : IConstructor
 {
     public Entity Construct()
     {
-        return _constructor(_position, _velocity, _angle);
+        var entity = _constructor(_position, _velocity, _angle);
+        return entity;
     }
+}
+public class AdvancedConstructor(Func<Vector2, Vector2, float, bool, Entity> _constructor, Vector2 _position, Vector2 _velocity, float _angle, bool _isFriendly) : IConstructor
+{
+    public Entity Construct()
+    {
+        var entity = _constructor(_position, _velocity, _angle, _isFriendly);
+        return entity;
+    }
+}
+public interface IConstructor
+{
+    public Entity Construct();
 }

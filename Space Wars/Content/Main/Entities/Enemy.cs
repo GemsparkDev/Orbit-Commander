@@ -4,6 +4,7 @@ using Space_Wars.Content.Main.Components;
 using Space_Wars.Content.Main.Particles;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Dynamic;
 using UILib.Content.Main;
 
@@ -156,6 +157,13 @@ public class Enemy : Entity
             Vector2 barPosition = position + new Vector2(-texture.Width * 2, texture.Height) / 2;
             Rectangle sourceRectangle = new (0, 0, texture.Width * 2, 2);
             Engine.DrawFilledLine(_spriteBatch, barPosition, sourceRectangle, (float)(health) / (float)(maxHealth), new Color(0, 50, 25), Color.Green);
+        }
+        if (!ChildEnemy && !deleteOnCollide && isFriendly &&
+           (position.X - Engine.Camera.Position.X < -Engine.BackBuffer.X / 2 || position.Y - Engine.Camera.Position.Y < -Engine.BackBuffer.Y / 2
+         || position.X - Engine.Camera.Position.X >  Engine.BackBuffer.X / 2 || position.Y - Engine.Camera.Position.Y >  Engine.BackBuffer.Y / 2))
+        {
+            var pos = position - Engine.SaveGame.Player.position;
+            ParticleManager.Add(new Particle(Assets.Get(Sprite.Dot), pos / 50 + Engine.SaveGame.Player.position, 0, color * 0.75f));
         }
         base.Draw(_spriteBatch);
     }
@@ -1451,7 +1459,7 @@ public class Enemy : Entity
         while (true)
         {
             velocity *= 0;
-            turretCannon.position = position + new Vector2(0, -8);
+            turretCannon.position = position + new Vector2(8 * MathF.Sin(angle), -8 * MathF.Cos(angle));
             Entity nearestPickup = Engine.EntityManager.NearestItem(this, false);
             if (nearestPickup != null)
             {
@@ -1476,10 +1484,9 @@ public class Enemy : Entity
             yield return 0;
         }
     }
-    IEnumerable<int> TurretCannon()
+    IEnumerable<int> TurretCannon(float _angle)
     {
         float targetingAngle = 0;
-        float turretAngle = 0;
         float bulletOffset = 3;
         enemyRange.radius = 400;
         ChildEnemy = true;
@@ -1487,28 +1494,30 @@ public class Enemy : Entity
         {
             velocity *= 0;
             targetingAngle += Engine.DeltaSeconds;
-            Entity nearestEnemy = Engine.EntityManager.NearestEnemy(NewDummyEnemy(position - new Vector2(0, Size.Y / 2 + 150), isFriendly));
-            enemyRange.position = position + new Vector2(0, Size.Y / 2);
+            var dir = new Vector2(MathF.Sin(_angle), MathF.Cos(_angle));
+            Vector2 offset = dir * (Size.Y / 2 + 150);
+            Entity nearestEnemy = Engine.EntityManager.NearestEnemy(NewDummyEnemy(position + offset, isFriendly));
+            enemyRange.position = position + offset;
             if (nearestEnemy != null)
             {
 
-                float distance = (nearestEnemy.position - position - new Vector2(0, Size.Y / 2)).Length();
-                Vector2 relativePosition = nearestEnemy.position - position - new Vector2(0, Size.Y / 2) + nearestEnemy.velocity * distance / 8;
+                float distance = (nearestEnemy.position - position - dir * (Size / 2)).Length();
+                Vector2 relativePosition = nearestEnemy.position - position - dir * (Size / 2) + nearestEnemy.velocity * distance / 8;
                 float targetAngle = MathF.Atan2(relativePosition.Y, relativePosition.X) + MathF.PI / 2;
-                if (turretAngle - targetAngle > 0.1f && targetAngle > -1.7f)
+                if (angle - targetAngle > 0.1f && targetAngle > _angle - 1.7f)
                 {
-                    turretAngle -= 10 * Engine.DeltaSeconds;
+                    angle -= 10 * Engine.DeltaSeconds;
                 }
-                else if (turretAngle - targetAngle < -0.1f && targetAngle < 1.7f)
+                else if (angle - targetAngle < -0.1f && targetAngle < _angle + 1.7f)
                 {
-                    turretAngle += 10 * Engine.DeltaSeconds;
+                    angle += 10 * Engine.DeltaSeconds;
                 }
-                if (distance < 400 && cooldown <= 0 && MathF.Abs(turretAngle - targetAngle) < 0.1f)
+                if (distance < 400 && cooldown <= 0 && MathF.Abs(angle - targetAngle) < 0.1f)
                 {
                     Vector2 normalVector = Vector2.Normalize(relativePosition);
                     var rotatedOffset = new Vector2(-Size.Y / 2 * MathF.Sin(angle), Size.Y / 2 * MathF.Cos(angle));
                     //EntityManager.Add(new PulseShot(position - new Vector2(0, Size.Y / 2) + new Vector2(normalVector.Y, -normalVector.X) * bulletOffset * 2, normalVector * 8, turretAngle, 0, isFriendly, 5));
-                    Engine.EntityManager.Add(NewMissile(position - rotatedOffset + new Vector2(normalVector.Y, -normalVector.X) * bulletOffset, normalVector * 8, turretAngle, isFriendly));
+                    Engine.EntityManager.Add(NewMissile(position - rotatedOffset + new Vector2(normalVector.Y, -normalVector.X) * bulletOffset, normalVector * 8, angle, isFriendly));
                     Assets.Get(Sound.MissileFire).Play();
                     //Assets.Get(Sound.PulseFire).Play();
                     cooldown = 0.9f;
@@ -1519,7 +1528,6 @@ public class Enemy : Entity
             {
                 cooldown -= Engine.DeltaSeconds;
             }
-            angle = turretAngle;
             yield return 0;
         }
     }
@@ -1611,7 +1619,7 @@ public class Enemy : Entity
     }
     IEnumerable<int> Miner()
     {
-        ParticleEmitter miningDebris = new(Assets.Get(Sprite.Dot), 0.15f, position + new Vector2(0, Assets.Get(Sprite.Miner).Height / 2), 0, 90, 2,
+        ParticleEmitter miningDebris = new(Assets.Get(Sprite.Dot), 0.15f, position, angle * 180 / 3.1415926f, 90, 2,
             Engine.Random.NextSingle() - 0.5f, 1000, Color.Cyan, Color.Transparent, EmitterType.EmissionOverTime);
         while (true)
         {
@@ -1708,23 +1716,31 @@ public class Enemy : Entity
         enemy.Components.Add(new DockableComponent(enemy, Containers.MothershipMenu));
         return enemy;
     }
-    public static Enemy NewTurret(Vector2 position, Vector2 velocity, float angle)
+    public static Enemy NewTurret(Vector2 position, Vector2 velocity, float angle, bool _isFriendly)
     {
-        Enemy enemy = new(position, velocity, angle, 0, 400, Assets.Get(Sprite.TurretBase), true);
+        Enemy enemy = new(position, velocity, angle, 0, 400, Assets.Get(Sprite.TurretBase), _isFriendly);
         enemy.AddBehaviour(enemy.Turret());
         return enemy;
+    }
+    public static Enemy NewTurret(Vector2 position, Vector2 velocity, float angle)
+    {
+        return NewTurret(position, velocity, angle, true);
     }
     public static Enemy NewTurretCannon(Enemy parent)
     {
         Enemy enemy = new(parent.position, parent.velocity, parent.angle, 6, 400, Assets.Get(Sprite.TurretHead), parent.isFriendly);
-        enemy.AddBehaviour(enemy.TurretCannon());
+        enemy.AddBehaviour(enemy.TurretCannon(parent.angle));
+        return enemy;
+    }
+    public static Enemy NewMiner(Vector2 position, Vector2 velocity, float angle, bool _isFriendly)
+    {
+        Enemy enemy = new(position, velocity, angle, 0, 1000, Assets.Get(Sprite.Miner), _isFriendly);
+        enemy.AddBehaviour(enemy.Miner());
         return enemy;
     }
     public static Enemy NewMiner(Vector2 position, Vector2 velocity, float angle)
     {
-        Enemy enemy = new(position, velocity, angle, 0, 1000, Assets.Get(Sprite.Miner), true);
-        enemy.AddBehaviour(enemy.Miner());
-        return enemy;
+        return NewMiner(position, velocity, angle, true);
     }
     public static Enemy NewHovercraft(Vector2 position, Vector2 velocity, float angle, bool isFriendly = false)
     {

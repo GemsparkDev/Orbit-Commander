@@ -37,7 +37,7 @@ public static class ItemFactory
     {
         { ConstructType.Barricade, new ConstructData(Sprite.RealBarricade, Sprite.Barricade, "Barricade", 1, 20) },
         { ConstructType.Trap, new ConstructData(Sprite.RealTrap, Sprite.Trap, "Trap", 1, 8) },
-        { ConstructType.Bomb, new ConstructData(Sprite.RealTrap, Sprite.Trap, "Bomb", 1, 3) }
+        { ConstructType.Bomb, new ConstructData(Sprite.RealBomb, Sprite.Bomb, "Bomb", 1, 3) }
     };
     public static Pickup NewScrap(Vector2 _position = new Vector2(), Vector2 _velocity = new Vector2(), float _angularVelocity = 0)
     {

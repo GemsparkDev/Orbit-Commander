@@ -54,7 +54,19 @@ public class EntityManager
         new([new(Vector2.Zero, Vector2.Zero, 30000, 10f, true, Color.HotPink, true) ],
         [],
         "cool planet",
-        "Super earth", 2, 0, 2, null, true),
+        "Super earth", 2, 0, 1, null, true),
+
+        new([new(Vector2.Zero, Vector2.Zero, 20000, 9f, true, Color.Cyan, false), 
+                    new(new Vector2(0, 2100), GravitationalSource.GetOrbitalVelocity(new Vector2(0, 2100), Vector2.Zero, 20000), 1500, 2f, false, Color.Cyan) ],
+        [
+            (new AdvancedConstructor(Enemy.NewTurret, new Vector2(MathF.Sin(1.88495f), -MathF.Cos(1.88495f)) * 9 * 50, Vector2.Zero, 1.88495f, false), [ Condition.Kill ]),
+            (new AdvancedConstructor(Enemy.NewTurret, new Vector2(MathF.Sin(4.39822f), -MathF.Cos(4.39822f)) * 9 * 50, Vector2.Zero, 4.39822f, false), [ Condition.Kill ]),
+            (new AdvancedConstructor(Enemy.NewTurret, new Vector2(MathF.Sin(0), -MathF.Cos(0)) * 9 * 50, Vector2.Zero, 0, false), [ Condition.Kill ]),
+            (new AdvancedConstructor(Enemy.NewMiner, new Vector2(MathF.Sin(MathF.PI), -MathF.Cos(MathF.PI)) * 9 * 50, Vector2.Zero, MathF.PI, false), [ Condition.Kill ]),
+            (new AdvancedConstructor(Enemy.NewMiner, new Vector2(MathF.Sin(MathF.PI * 5/3), -MathF.Cos(MathF.PI * 5/3)) * 9 * 50, Vector2.Zero, MathF.PI * 5 / 3, false), [ Condition.Kill ]),
+            (new EntityConstructor(Enemy.NewOrbiter, new Vector2(0, 1950), GravitationalSource.GetOrbitalVelocity(new Vector2(0, 1950), new Vector2(0, 2100), 1500) + GravitationalSource.GetOrbitalVelocity(new Vector2(0, 2200), Vector2.Zero, 20000), 0), [ Condition.Protect ])],
+        "Assault",
+        "You have been placed in high orbit. Destroy the enemy base on the surface planet, and all reinforcements that arrive.", 1.5f, 2, 1, null, false),
     ];
     private Mission currentMission;
     public Mission CurrentMission => currentMission ?? missions[Engine.SaveGame.CurrentMissionIndex];
@@ -178,13 +190,19 @@ public class EntityManager
     }
     public void Explode(int _damage, float _radius, Vector2 _position)
     {
+        float dist;
         foreach (var entity in entities)
         {
-            float dist = Vector2.Distance(_position, entity.position);
+            dist = Vector2.Distance(_position, entity.position);
             if (dist < _radius && dist > 0.001f)
             {
                 entity.Collide(_damage);
             }
+        }
+        dist = Vector2.Distance(_position, Player.position);
+        if (dist < _radius && dist > 0.001f)
+        {
+            Player.Collide(_damage);
         }
     }
     public void CompleteMission(int _duration)

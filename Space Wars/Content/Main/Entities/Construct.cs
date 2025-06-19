@@ -1,5 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 using System;
+using Microsoft.Xna.Framework.Graphics;
 using Space_Wars.Content.Main.Particles;
 
 namespace Space_Wars.Content.Main.Entities;
@@ -7,15 +8,23 @@ public class Construct : Pickup
 {
     private ConstructType type;
     private float cooldown = 0;
+    private ParticleEmitter attackRadius;
     public Construct(ConstructData _constructData, Color _worldColor, Vector2 _position, Vector2 _velocity, float _angle, float _angularVelocity, ConstructType _type)
         : base(_constructData, _worldColor, _position, _velocity, _angularVelocity, _constructData.Integrity)
     {
         angle = _angle;
         type = _type;
+        int radius = 0;
         if (_type == ConstructType.Bomb)
         {
             isFriendly = false;
+            radius = 100;
         }
+        else if (_type == ConstructType.Trap)
+        {
+            radius = 300;
+        }
+        attackRadius = new ParticleEmitter(Assets.Get(Sprite.Dot), position, radius, new Color(255, 0, 0));
     }
     public override void Update()
     {
@@ -23,6 +32,7 @@ public class Construct : Pickup
         {
             cooldown -= Engine.DeltaSeconds;
         }
+        attackRadius.position = position;
         switch (type)
         {
             case ConstructType.Barricade:
@@ -45,6 +55,10 @@ public class Construct : Pickup
                     SoundManager.PlaySound(Assets.Get(Sound.PulseFire), position);
                     cooldown = 1.5f;
                 }
+                if (Engine.DebugMode)
+                {
+                    attackRadius.Update();
+                }
                 break;
             case ConstructType.Bomb:
                 var nearestProjectile = Engine.EntityManager.NearestProjectile(this, !isFriendly);
@@ -53,6 +67,7 @@ public class Construct : Pickup
                     Collide(nearestProjectile.damage);
                     nearestProjectile.Collide(1);
                 }
+                attackRadius.Update();
                 break;
         }
         base.Update();
@@ -61,21 +76,10 @@ public class Construct : Pickup
     {
         bool isActive = !isExpired;
         base.Collide(_damage);
-        //TODO: Replace this w/ proper explosion sprite
         if (type == ConstructType.Bomb && isExpired && isActive)
         {
-            var tex = Assets.Get(Sprite.Dot);
-            for (int i = -50; i < 51; i++)
-            {
-                for (int j = -50; j < 51; j++)
-                {
-                    if (Vector2.Distance(Vector2.Zero, new Vector2(i, j)) > 50)
-                    {
-                        continue;
-                    }
-                    ParticleManager.Add(new Particle(tex, 3, position + new Vector2(i, j) * 2, Vector2.Zero, MathF.Atan2(j, i), 0, Color.White, Color.Transparent));
-                }
-            }
+            var tex = Assets.Get(Sprite.Explosion);
+            ParticleManager.Add(new Particle(tex, 3, position, Vector2.Zero, 0, 0, Color.White, Color.Transparent));
             Engine.EntityManager.Explode(400, 100, position);
         }
     }

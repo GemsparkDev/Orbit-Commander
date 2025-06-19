@@ -53,6 +53,8 @@ public enum Sprite
     PickupDrone,
     Barricade,
     Trap,
+    Explosion,
+    Bomb,
 
     MetalScrap,
     RealMetalScrap,
@@ -68,6 +70,7 @@ public enum Sprite
     CoreModule,
     RealTrap,
     RealBarricade,
+    RealBomb,
 
     SpiralShot,
     PulseShot,
