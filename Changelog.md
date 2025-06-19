@@ -402,3 +402,15 @@ Update 0.4.3
  - Added the Explode function, which damages all entities in it's radius.    
  - The missile, along with all exploding entities, now use said explode function.    
  - Added the ExtraUpdates property to projectiles, which causes projectiles to get updated several times a frame.    
+    
+0.4.7.3    
+6/18/2025    
+ - Added sprites for the bomb and it's explosion.    
+ - The bomb now show's it's explosion radius.    
+ - The trap has an enemy detection radius shown during debug mode.    
+ - The miner and the turret can rotate properly.    
+ - Friendly entities create a small projectile indicating it's direction when offscreen.    
+ - Added a cap on the screen shake factor.    
+ - Added a mission where you are required to assalut a small mining operation.    
+ - The explode function now properly targets the player.    
+ - Downgraded the MonoGame Content Builder Task to 3.8.2.1105 due to stalling issues during compilation.    
