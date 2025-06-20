@@ -398,7 +398,9 @@ public class Player : Entity
         if (_damage > 0 && invincibilityCooldown <= 0)
         {
             Engine.ShakeScreen(0.08f * _damage);
-            cachedDamage += _damage;
+            //Helps to cushion huge hits
+            //Player will never be one shot (unless they deserve it)
+            cachedDamage += Math.Min(50, _damage);
             SoundManager.PlaySound(Assets.Get(Sound.Hit), position);
             invincibilityCooldown = 1;
             ParticleManager.Add(new Particle(null, 1, position + new Vector2(0, -1), new Vector2(0, -1.5f), 0, 0, Color.Red, Color.Transparent) { drawText = $"{_damage}" });

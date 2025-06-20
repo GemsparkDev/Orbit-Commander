@@ -198,7 +198,7 @@ public class Mission
             currentWaveActive = false;
             enemiesSpawned.Clear();
             EnemiesSpawned = 0;
-            waveTimer = 10;
+            waveTimer = 10f * timerModifier;
             maxWaveTimer = waveTimer;
             Wave++;
             Engine.EntityManager.DecayPickups();

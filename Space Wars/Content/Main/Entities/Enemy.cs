@@ -1621,6 +1621,7 @@ public class Enemy : Entity
     {
         ParticleEmitter miningDebris = new(Assets.Get(Sprite.Dot), 0.15f, position, angle * 180 / 3.1415926f, 90, 2,
             Engine.Random.NextSingle() - 0.5f, 1000, Color.Cyan, Color.Transparent, EmitterType.EmissionOverTime);
+        float healTimer = 30;
         while (true)
         {
             velocity *= 0;
@@ -1629,6 +1630,22 @@ public class Enemy : Entity
                 Explode(4, ColliderRadius);
                 isExpired = true;
                 SoundManager.PlaySound(Assets.Get(Sound.Death), position);
+            }
+            if (health < maxHealth)
+            {
+                if (healTimer > 0)
+                {
+                    healTimer -= Engine.DeltaSeconds;
+                }
+                else
+                {
+                    healTimer = 30;
+                    Collide(-15);
+                }
+            }
+            else
+            {
+                healTimer = 30;
             }
             Entity nearestPickup = Engine.EntityManager.NearestItem(this, false);
             if (nearestPickup != null)
@@ -1640,6 +1657,7 @@ public class Enemy : Entity
                     SoundManager.PlaySound(Assets.Get(Sound.Dock), position);
                 }
             }
+            miningDebris.position = position + new Vector2(-MathF.Sin(angle), MathF.Cos(angle)) * texture.Height / 2;
             miningDebris.Update();
             yield return 0;
         }
@@ -1728,13 +1746,13 @@ public class Enemy : Entity
     }
     public static Enemy NewTurretCannon(Enemy parent)
     {
-        Enemy enemy = new(parent.position, parent.velocity, parent.angle, 6, 400, Assets.Get(Sprite.TurretHead), parent.isFriendly);
+        Enemy enemy = new(parent.position, parent.velocity, parent.angle, 6, 800, Assets.Get(Sprite.TurretHead), parent.isFriendly);
         enemy.AddBehaviour(enemy.TurretCannon(parent.angle));
         return enemy;
     }
     public static Enemy NewMiner(Vector2 position, Vector2 velocity, float angle, bool _isFriendly)
     {
-        Enemy enemy = new(position, velocity, angle, 0, 1000, Assets.Get(Sprite.Miner), _isFriendly);
+        Enemy enemy = new(position, velocity, angle, 0, 600, Assets.Get(Sprite.Miner), _isFriendly);
         enemy.AddBehaviour(enemy.Miner());
         return enemy;
     }

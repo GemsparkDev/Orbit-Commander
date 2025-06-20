@@ -80,7 +80,7 @@ public class Construct : Pickup
         {
             var tex = Assets.Get(Sprite.Explosion);
             ParticleManager.Add(new Particle(tex, 3, position, Vector2.Zero, 0, 0, Color.White, Color.Transparent));
-            Engine.EntityManager.Explode(400, 100, position);
+            Engine.EntityManager.Explode(100, 100, position);
         }
     }
 }

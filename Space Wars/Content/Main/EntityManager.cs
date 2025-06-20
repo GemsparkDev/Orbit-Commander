@@ -40,7 +40,7 @@ public class EntityManager
         "A small outpost is located orbiting this rogue planet. Defend it.", 0.75f, 40),
 
         new( [ new(Vector2.Zero, Vector2.Zero, 25000, 7f, true, Color.Cyan), new(new Vector2(800, 0), GravitationalSource.GetOrbitalVelocity(new Vector2(800, 0), Vector2.Zero, 25000), 150, 0.5f, false, Color.Cyan), ],
-        [(new EntityConstructor(Enemy.NewMiner, new Vector2(0, -7*50 - Assets.DimsOf(Sprite.Miner).Y / 2), Vector2.Zero, 0), [ Condition.Protect ])],
+        [(new EntityConstructor(Enemy.NewMiner, new Vector2(0, -7*50), Vector2.Zero, 0), [ Condition.Protect ])],
         "Extraction",
         "This deceptively dense planet is rich with materials that our deployed miner will extract.", 1, 20),
 
@@ -54,7 +54,7 @@ public class EntityManager
         new([new(Vector2.Zero, Vector2.Zero, 30000, 10f, true, Color.HotPink, true) ],
         [],
         "cool planet",
-        "Super earth", 2, 0, 1, null, true),
+        "Super earth", 0, 0, 1, null, true),
 
         new([new(Vector2.Zero, Vector2.Zero, 20000, 9f, true, Color.Cyan, false), 
                     new(new Vector2(0, 2100), GravitationalSource.GetOrbitalVelocity(new Vector2(0, 2100), Vector2.Zero, 20000), 1500, 2f, false, Color.Cyan) ],
@@ -66,7 +66,7 @@ public class EntityManager
             (new AdvancedConstructor(Enemy.NewMiner, new Vector2(MathF.Sin(MathF.PI * 5/3), -MathF.Cos(MathF.PI * 5/3)) * 9 * 50, Vector2.Zero, MathF.PI * 5 / 3, false), [ Condition.Kill ]),
             (new EntityConstructor(Enemy.NewOrbiter, new Vector2(0, 1950), GravitationalSource.GetOrbitalVelocity(new Vector2(0, 1950), new Vector2(0, 2100), 1500) + GravitationalSource.GetOrbitalVelocity(new Vector2(0, 2200), Vector2.Zero, 20000), 0), [ Condition.Protect ])],
         "Assault",
-        "You have been placed in high orbit. Destroy the enemy base on the surface planet, and all reinforcements that arrive.", 1.5f, 2, 1, null, false),
+        "You have been placed in high orbit. Destroy the enemy base on the surface planet, and all reinforcements that arrive.", 0.75f, 2, 1, null, false),
     ];
     private Mission currentMission;
     public Mission CurrentMission => currentMission ?? missions[Engine.SaveGame.CurrentMissionIndex];

@@ -219,7 +219,13 @@ public class Engine : Game
         quitToMissionButton.AddBehaviour(EventHandler.MissionSelectTrigger);
         garageButton.AddBehaviour(EventHandler.GarageTrigger);
         repairButton.AddBehaviour(EventHandler.RepairModule);
+        var tooltip = new Window(Vector2.Zero, wideButton);
+        tooltip.AddWidget(new Decal(new Vector2(0, 0), Assets.TextFont, "1 metal to repair", Color.White, 3f));
+        repairButton.AddTooltip(tooltip);
         craftButton.AddBehaviour(EventHandler.CraftItem);
+        tooltip = new Window(Vector2.Zero, wideButton);
+        tooltip.AddWidget(new Decal(new Vector2(0, 0), Assets.TextFont, "1 metal to repair", Color.White, 3f));
+        craftButton.AddTooltip(tooltip);
         repairSlot.AddBehaviour(EventHandler.UpdateRepairText);
         furnaceSlot.AddBehaviour(EventHandler.UpdateFurnace);
         restartButton.AddBehaviour(EventHandler.RestartModules);
@@ -231,6 +237,10 @@ public class Engine : Game
         launchButton.AddBehaviour(delegate() { EventHandler.SendMessage(Message.EscapeDroneLeave); });
         shaderToggle.AddBehaviour(delegate () { UseShader = !UseShader; shaderToggle.text = $"Shader: {UseShader}"; });
         createFuse.AddBehaviour(delegate () { EntityManager.QueuedItems.Add(new FuseQueue()); });
+        tooltip = new Window(Vector2.Zero, wideButton);
+        tooltip.AddWidget(new Decal(new Vector2(0, -3), Assets.TextFont, "Queue fuse construction. Cheap but delicate.", Color.White, 3f));
+        tooltip.AddWidget(new Decal(new Vector2(0, 3), Assets.TextFont, "Required time: 10 waves.", Color.White, 3f));
+        createFuse.AddTooltip(tooltip);
         smeltScrap.AddBehaviour(delegate () 
         {
             if (UIManager.selectedIcon != null)
@@ -247,6 +257,10 @@ public class Engine : Game
                 }
             }
         });
+        tooltip = new Window(Vector2.Zero, wideButton);
+        tooltip.AddWidget(new Decal(new Vector2(0, -3), Assets.TextFont, "Drag pickup over button to queue scrap melting.", Color.White, 3f));
+        tooltip.AddWidget(new Decal(new Vector2(0, 3), Assets.TextFont, "Required time: 10 waves. Gains additional metal per scrap.", Color.White, 3f));
+        smeltScrap.AddTooltip(tooltip);
         repairModule.AddBehaviour(delegate () 
         {
             if (UIManager.selectedIcon as Module != null)
@@ -263,6 +277,10 @@ public class Engine : Game
                 }
             }
         });
+        tooltip = new Window(Vector2.Zero, wideButton);
+        tooltip.AddWidget(new Decal(new Vector2(0, -3), Assets.TextFont, "Drag module over button to queue repair.", Color.White, 3f));
+        tooltip.AddWidget(new Decal(new Vector2(0, 3), Assets.TextFont, "Required time: 20 waves. Requires no metal to repair.", Color.White, 3f));
+        repairModule.AddTooltip(tooltip);
         cancelQueue.AddBehaviour(delegate () 
         {
             if(EntityManager.QueuedItems.Count != 0)
@@ -278,6 +296,10 @@ public class Engine : Game
                 EntityManager.Add(ItemFactory.GetItem(ConstructType.Barricade, SaveGame.Player.position, Vector2.Zero, 0));
             }
         });
+        tooltip = new Window(Vector2.Zero, wideButton);
+        tooltip.AddWidget(new Decal(new Vector2(0, -3), Assets.TextFont, "1 metal cost, resists enemy fire.", Color.White, 3f));
+        tooltip.AddWidget(new Decal(new Vector2(0, 3), Assets.TextFont, "20 integrity.", Color.White, 3f));
+        constructBarricade.AddTooltip(tooltip);
         constructTrap.AddBehaviour(delegate ()
         {
             if (SaveGame.Scrap > 0)
@@ -286,14 +308,22 @@ public class Engine : Game
                 EntityManager.Add(ItemFactory.GetItem(ConstructType.Trap, SaveGame.Player.position, Vector2.Zero, 0.02f));
             }
         });
+        tooltip = new Window(Vector2.Zero, wideButton);
+        tooltip.AddWidget(new Decal(new Vector2(0, -3), Assets.TextFont, "1 metal cost, fires on nearby enemies.", Color.White, 3f));
+        tooltip.AddWidget(new Decal(new Vector2(0, 3), Assets.TextFont, "8 integrity.", Color.White, 3f));
+        constructTrap.AddTooltip(tooltip);
         constructBomb.AddBehaviour(delegate ()
         {
             if (true)
             {
-                SaveGame.Scrap -= 5;
+                SaveGame.Scrap -= 1;
                 EntityManager.Add(ItemFactory.GetItem(ConstructType.Bomb, SaveGame.Player.position, Vector2.Zero, 0));
             }
         });
+        tooltip = new Window(Vector2.Zero, wideButton);
+        tooltip.AddWidget(new Decal(new Vector2(0, -3), Assets.TextFont, "1 metal cost, activates when destroyed.", Color.White, 3f));
+        tooltip.AddWidget(new Decal(new Vector2(0, 3), Assets.TextFont, "3 integrity, 100 dmg to all in radius", Color.White, 3f));
+        constructBomb.AddTooltip(tooltip);
 
         MainMenu.AddWidget(exitButton as IFunctional, 0);
         MainMenu.AddWidget(singleplayerButton as IFunctional, 0);
