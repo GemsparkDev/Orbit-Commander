@@ -414,3 +414,14 @@ Update 0.4.3
  - Added a mission where you are required to assalut a small mining operation.    
  - The explode function now properly targets the player.    
  - Downgraded the MonoGame Content Builder Task to 3.8.2.1105 due to stalling issues during compilation.    
+    
+0.4.7.4
+6/19/2025
+ - The turret now has 800 hp, from 400.    
+ - The miner now has 600 hp, from 1000.    
+ - The miner now heals 15 hp every 30 seconds.    
+ - The miner particle effect now properly follows the miner when moving.    
+ - The bomb now costs 1 metal, from 5, and does 100 damage, from 400.    
+ - The player can no longer take more than 50 damage from a single hit.    
+ - Added tooltips to a variety of ui buttons.    
+ - Fixed an issue with the timer modifyer not modifying the time between waves.    
