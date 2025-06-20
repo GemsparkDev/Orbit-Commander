@@ -424,4 +424,4 @@ Update 0.4.3
  - The bomb now costs 1 metal, from 5, and does 100 damage, from 400.    
  - The player can no longer take more than 50 damage from a single hit.    
  - Added tooltips to a variety of ui buttons.    
- - Fixed an issue with the timer modifyer not modifying the time between waves.    
+ - Fixed an issue with the timer modifier not modifying the time between waves.    
