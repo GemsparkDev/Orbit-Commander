@@ -425,3 +425,11 @@ Update 0.4.3
  - The player can no longer take more than 50 damage from a single hit.    
  - Added tooltips to a variety of ui buttons.    
  - Fixed an issue with the timer modifier not modifying the time between waves.    
+    
+0.4.7.4    
+6/20/2025    
+ - Added a simple player progression system, preventing some abilites from being used on early missions.    
+ - Mission 1 starts the player w/ 0 progression, and mission 2 and 3 start w/ 1 progression. All else have 2 progression.    
+ - The construct buttons are now in the fuse menu.    
+ - Each construct will replace a scrap when created, instead of using metal.    
+ - When the player dies, the game now restarts at the mission select menu.
