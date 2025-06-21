@@ -228,7 +228,7 @@ public class Engine : Game
         craftButton.AddTooltip(tooltip);
         repairSlot.AddBehaviour(EventHandler.UpdateRepairText);
         furnaceSlot.AddBehaviour(EventHandler.UpdateFurnace);
-        restartButton.AddBehaviour(EventHandler.RestartModules);
+        restartButton.AddBehaviour(delegate() { EventHandler.SendMessage(Message.RestartModules); });
         globalSidePanelOpen.AddBehaviour(EventHandler.ToggleDockingMenus);
         sidePanelClose.AddBehaviour(EventHandler.ToggleDockingMenus);
         prevMission.AddBehaviour(EntityManager.PrevMission);
@@ -290,10 +290,16 @@ public class Engine : Game
         });
         constructBarricade.AddBehaviour(delegate ()
         {
-            if (SaveGame.Scrap > 0)
+            foreach (var scrap in SaveGame.Player.leashedMaterials)
             {
-                SaveGame.Scrap -= 1;
-                EntityManager.Add(ItemFactory.GetItem(ConstructType.Barricade, SaveGame.Player.position, Vector2.Zero, 0));
+                if (scrap is not Module && scrap is not Construct)
+                {
+                    scrap.isExpired = true;
+                    var barricade = ItemFactory.GetItem(ConstructType.Barricade, scrap.position, scrap.velocity, 0);
+                    SaveGame.Player.leashedMaterials.Add(barricade);
+                    EntityManager.Add(barricade);
+                    return;
+                }
             }
         });
         tooltip = new Window(Vector2.Zero, wideButton);
@@ -302,10 +308,16 @@ public class Engine : Game
         constructBarricade.AddTooltip(tooltip);
         constructTrap.AddBehaviour(delegate ()
         {
-            if (SaveGame.Scrap > 0)
+            foreach (var scrap in SaveGame.Player.leashedMaterials)
             {
-                SaveGame.Scrap -= 1;
-                EntityManager.Add(ItemFactory.GetItem(ConstructType.Trap, SaveGame.Player.position, Vector2.Zero, 0.02f));
+                if (scrap is not Module && scrap is not Construct)
+                {
+                    scrap.isExpired = true;
+                    var trap = ItemFactory.GetItem(ConstructType.Trap, scrap.position, scrap.velocity, 0.02f);
+                    SaveGame.Player.leashedMaterials.Add(trap);
+                    EntityManager.Add(trap);
+                    return;
+                }
             }
         });
         tooltip = new Window(Vector2.Zero, wideButton);
@@ -314,10 +326,16 @@ public class Engine : Game
         constructTrap.AddTooltip(tooltip);
         constructBomb.AddBehaviour(delegate ()
         {
-            if (true)
+            foreach (var scrap in SaveGame.Player.leashedMaterials)
             {
-                SaveGame.Scrap -= 1;
-                EntityManager.Add(ItemFactory.GetItem(ConstructType.Bomb, SaveGame.Player.position, Vector2.Zero, 0));
+                if (scrap is not Module && scrap is not Construct)
+                {
+                    scrap.isExpired = true;
+                    var bomb =  ItemFactory.GetItem(ConstructType.Bomb, scrap.position, scrap.velocity, 0);
+                    SaveGame.Player.leashedMaterials.Add(bomb);
+                    EntityManager.Add(bomb);
+                    return;
+                }
             }
         });
         tooltip = new Window(Vector2.Zero, wideButton);
@@ -354,9 +372,10 @@ public class Engine : Game
         MothershipMenu.AddWidget(craftingSlider as IFunctional, 2);
         MothershipMenu.AddWidget(requiredCraftsText, 2);
         MothershipMenu.AddWidget(craftButton as IFunctional, 2);
-        MothershipMenu.AddWidget(constructBarricade as IFunctional, 2);
-        MothershipMenu.AddWidget(constructTrap as IFunctional, 2);
-        MothershipMenu.AddWidget(constructBomb as IFunctional, 2);
+        for (int i = 0; i < 3; i++)
+        {
+            MothershipMenu.AddWidget(sidePanelClose as IFunctional, i);
+        }
 
         PlayerMenu.AddWidget(enemySlider as IFunctional);
         PlayerMenu.AddWidget(waveText);
@@ -380,11 +399,26 @@ public class Engine : Game
         PickupDroneMenu.AddWidget(launchButton as IFunctional);
 
         FuseMenu.AddWidget(fuseCounter);
-
-        for (int i = 0; i < 3; i++)
+        for (int i = 0; i < 4; i++)
         {
-            MothershipMenu.AddWidget(sidePanelClose as IFunctional, i);
+            for (int j = -2; j < 3; j++)
+            {
+                var fuse = new Button(new Vector2(i * 10, j * 20), Assets.Get(Sprite.Fuse));
+                //Performs a shallow copy of the instance variable
+                int x = j + 2;
+                int y = i;
+                fuse.AddBehaviour(delegate () { SaveGame.Player.ToggleFuse(x, y); });
+                FuseMenu.AddWidget(fuse as IFunctional);
+            }
         }
+        for (int i = 0; i < 5; i++)
+        {
+            var decal = new Decal(new Vector2(40, (i - 2) * 20 - 8), null);
+            FuseMenu.AddWidget(decal);
+        }
+        FuseMenu.AddWidget(constructBarricade as IFunctional);
+        FuseMenu.AddWidget(constructTrap as IFunctional);
+        FuseMenu.AddWidget(constructBomb as IFunctional);
 
         UIManager.ScreenWindow.AddWidget(globalSidePanelOpen as IFunctional, (int)Alignment.Left);
         UIManager.ScreenWindow.AddWidget(fpsCounter, (int)Alignment.TopRight);
@@ -426,23 +460,6 @@ public class Engine : Game
                 MissionSelect.AddWidget(MissionSelectItems[y] as IFunctional, 1);
                 InventorySlots[x, y].AddBehaviour(new Action(EventHandler.UpdateInventory));
             }
-        }
-        for (int i = 0; i < 4; i++)
-        {
-            for (int j = -2; j < 3; j++)
-            {
-                var fuse = new Button(new Vector2(i * 10, j * 20), Assets.Get(Sprite.Fuse));
-                //Performs a shallow copy of the instance variable
-                int x = j + 2;
-                int y = i;
-                fuse.AddBehaviour(delegate () { SaveGame.Player.ToggleFuse(x, y); });
-                FuseMenu.AddWidget(fuse as IFunctional);
-            }
-        }
-        for (int i = 0; i < 5; i++)
-        {
-            var decal = new Decal(new Vector2(40, (i - 2) * 20 - 8), null);
-            FuseMenu.AddWidget(decal);
         }
         UIManager.AddContainer(MainMenu);
         UIManager.AddContainer(PauseMenu);

@@ -106,20 +106,6 @@ public class PlayingGame : GameState
         Engine.EntityManager.PlayerUpdate();
         Engine.EntityManager.IngameUpdate();
         ParticleManager.Update();
-        if (Input.OldState.IsKeyUp(Keys.Escape) && Input.NewState.IsKeyDown(Keys.Escape))
-        {
-            if (Engine.UIManager.ToggleToMenu(Engine.UIManager.GetContainer((int)Containers.PauseMenu)))
-            {
-                SoundManager.SetAllSounds(false);
-                CurrentGameState.SwitchState(new PausedGame());
-            }
-        }
-        if (Input.OldState.IsKeyUp(Keys.F) && Input.NewState.IsKeyDown(Keys.F))
-        {
-            SoundManager.SetAllSounds(false);
-            CurrentGameState.SwitchState(new InShip());
-            Engine.UIManager.GetContainer((int)Containers.FuseMenu).enabled = true;
-        }
     }
     public override void Draw(SpriteBatch _spriteBatch)
     {

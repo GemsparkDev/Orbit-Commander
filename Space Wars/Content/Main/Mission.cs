@@ -22,6 +22,7 @@ public class Mission
     private bool currentWaveActive = false;
     private Func<Cutscene> cutscene;
     private float timerModifier;
+    public int playerProgression = 2;
     public int WaveGoal { get; } = 0;
     public float restartTimer = -1;
     public int Wave { get; private set; } = 0;
@@ -314,6 +315,7 @@ public class Mission
         {
             Engine.EntityManager.Add(entity);
         }
+        Engine.SaveGame.Player.Progression = playerProgression;
     }
     public void AttractObject(Entity _entity)
     {
@@ -429,7 +431,7 @@ public class Mission
         {
             _planets[i] = planets[i].Copy();
         }
-        return new Mission(_planets, CopyObjectives, Name, Description, timerModifier, WaveGoal, tier, cutscene, escapeVehicle != null);
+        return new Mission(_planets, CopyObjectives, Name, Description, timerModifier, WaveGoal, tier, cutscene, escapeVehicle != null) { playerProgression = this.playerProgression };
     }
     private Vector2 NewSpawnLocation()
     {

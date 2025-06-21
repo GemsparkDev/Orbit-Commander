@@ -30,6 +30,8 @@ public class Player : Entity
     public bool canGatherResources = false;
     private int spareFuses = 0;
     private float time = 0;
+    //0 is basic stuff only, 1 adds restarting, constructs, and fuses, 2 adds abilities
+    public int Progression { get; set; } = 2;
     public override int SensingAbility
     {
         get
@@ -110,6 +112,20 @@ public class Player : Entity
     public override void Update()
     {
         time += Engine.DeltaSeconds;
+        if (Input.OldState.IsKeyUp(Keys.Escape) && Input.NewState.IsKeyDown(Keys.Escape))
+        {
+            if (Engine.UIManager.ToggleToMenu(Engine.UIManager.GetContainer((int)Containers.PauseMenu)))
+            {
+                SoundManager.SetAllSounds(false);
+                CurrentGameState.SwitchState(new PausedGame());
+            }
+        }
+        if (Progression > 0 && Input.OldState.IsKeyUp(Keys.F) && Input.NewState.IsKeyDown(Keys.F))
+        {
+            SoundManager.SetAllSounds(false);
+            CurrentGameState.SwitchState(new InShip());
+            Engine.UIManager.GetContainer((int)Containers.FuseMenu).enabled = true;
+        }
         if (modules[ModuleType.Core].Health <= 0)
         {
             isExpired = true;
@@ -215,9 +231,19 @@ public class Player : Entity
         slider.enabledColor = new Color(colorVec.X, colorVec.Y, colorVec.Z);
 
         slider = (Engine.UIManager.ScreenWindow.GetFuncWidget(2) as Slider);
-        slider.SetInterval(1 - (modules[ModuleType.Engines].cooldown / abilityMaxCooldown), 1);
-        colorVec = new Vector3(0, 1, 1) * val + new Vector3(0.2f, 1, 0.8f) * (1f - val);
-        slider.enabledColor = new Color(colorVec.X, colorVec.Y, colorVec.Z);
+        //Only displays if the player has abilities unlocked
+        if (Progression > 1) 
+        {
+            slider.SetInterval(1 - (modules[ModuleType.Engines].cooldown / abilityMaxCooldown), 1);
+            colorVec = new Vector3(0, 1, 1) * val + new Vector3(0.2f, 1, 0.8f) * (1f - val);
+            slider.enabledColor = new Color(colorVec.X, colorVec.Y, colorVec.Z);
+            slider.disabledColor = Color.DarkGray;
+        }
+        else
+        {
+            slider.enabledColor = Color.Transparent;
+            slider.disabledColor = Color.Transparent;
+        }
 
         if (currentHealth > 50)
         {
@@ -253,7 +279,7 @@ public class Player : Entity
             //Square root of the ratio reduces balancing impact with an additional fuse (especially with the gun dps)
             //Note: Do not have any active abilities that are based on the cooldown, as the player could remove all fuses and get infinite of the ability
             float fuseRatio = MathF.Sqrt((float)CountFuses((ModuleType)i)/3);
-            if(fuseRatio > 1.01)
+            if(fuseRatio > 1.01f)
             {
                 //Bonus for 4 fuses
                 module.UpdateCooldown();
@@ -299,7 +325,7 @@ public class Player : Entity
                 {
                     leashedMaterials = [];
                 }
-                if (Input.OldState.IsKeyUp(Keys.Q) && Input.NewState.IsKeyDown(Keys.Q))
+                if (Progression > 1 && Input.OldState.IsKeyUp(Keys.Q) && Input.NewState.IsKeyDown(Keys.Q))
                 {
                     modules[ModuleType.Core].ModuleFunction();
                 }
@@ -404,8 +430,8 @@ public class Player : Entity
             SoundManager.PlaySound(Assets.Get(Sound.Hit), position);
             invincibilityCooldown = 1;
             ParticleManager.Add(new Particle(null, 1, position + new Vector2(0, -1), new Vector2(0, -1.5f), 0, 0, Color.Red, Color.Transparent) { drawText = $"{_damage}" });
-            //Part Failure
-            if (Engine.Random.Next(0, 5) == 0)
+            //Part and Fuse Failure
+            if (Progression > 0 && Engine.Random.Next(0, 5) == 0)
             {
                 ModuleType failedPart = (ModuleType)Engine.Random.Next(0, 4);
                 if (modules[failedPart].Health < modules[failedPart].MaxHealth / 2)

@@ -253,10 +253,6 @@ public class EventHandler
         SoundManager.PlayGlobalSound(Assets.Get(Sound.Interact));
         SendMessage(Message.ToggleTerminal);
     }
-    public static void RestartModules()
-    {
-        SendMessage(Message.RestartModules);
-    }
     public static void UpdateFuseUI(bool[,] _fuses, int _spareFuses)
     {
         var menu = Engine.UIManager.GetContainer((int)Containers.FuseMenu);

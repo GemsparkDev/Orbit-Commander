@@ -24,25 +24,25 @@ public class EntityManager
     //Threshold of detection for enemies
     public static float StealthThreshold { get; private set; } = 0.75f;
     public int MissionLength => missions.Count;
-    private readonly List<Mission> missions = 
+    private readonly List<Mission> missions =
     [
         new([ new(Vector2.Zero, Vector2.Zero, 10000, 8, true, Color.Cyan), new(new Vector2(1000, 0), GravitationalSource.GetOrbitalVelocity(new Vector2(1000, 0), Vector2.Zero, 10000), 250, 1.5f, false, Color.Cyan) ],
         [ (new EntityConstructor(Enemy.NewMothership, new Vector2(0, -8*50 - Assets.DimsOf(Sprite.Mothership).Y / 2), Vector2.Zero, 0f), [ Condition.Protect, Condition.CustomIncomplete ])],
         "Crash Landing",
         "A simple system with a large planet and one closely orbiting moon. Drone activity detected, but minimal.",
-        1, 0, 0, IntroCutscene),
+        1, 0, 0, IntroCutscene) { playerProgression = 0 },
 
         new( [ new(Vector2.Zero, Vector2.Zero, 3500, 4, true, Color.Cyan, true) ],
         [
             (new EntityConstructor(Enemy.NewTurret, new Vector2(0, -200 - Assets.DimsOf(Sprite.TurretBase).Y / 2), Vector2.Zero, 0), [ Condition.Protect ]),
             (new EntityConstructor(Enemy.NewOrbiter, new Vector2(400, 0), GravitationalSource.GetOrbitalVelocity(new Vector2(400, 0), Vector2.Zero, 3500), 0), [ Condition.Protect ])],
         "Sentry Defense",
-        "A small outpost is located orbiting this rogue planet. Defend it.", 0.75f, 40),
+        "A small outpost is located orbiting this rogue planet. Defend it.", 0.75f, 40) { playerProgression = 1 },
 
         new( [ new(Vector2.Zero, Vector2.Zero, 25000, 7f, true, Color.Cyan), new(new Vector2(800, 0), GravitationalSource.GetOrbitalVelocity(new Vector2(800, 0), Vector2.Zero, 25000), 150, 0.5f, false, Color.Cyan), ],
         [(new EntityConstructor(Enemy.NewMiner, new Vector2(0, -7*50), Vector2.Zero, 0), [ Condition.Protect ])],
         "Extraction",
-        "This deceptively dense planet is rich with materials that our deployed miner will extract.", 1, 20),
+        "This deceptively dense planet is rich with materials that our deployed miner will extract.", 1, 20) { playerProgression = 1 },
 
         new([ new(Vector2.Zero, Vector2.Zero, 5000, 3, true, Color.Cyan),
             new(new Vector2(400, 0), GravitationalSource.GetOrbitalVelocity(new Vector2(400, 0), Vector2.Zero, 5000), 240, 1f, false, Color.Cyan),
@@ -56,7 +56,7 @@ public class EntityManager
         "cool planet",
         "Super earth", 0, 0, 1, null, true),
 
-        new([new(Vector2.Zero, Vector2.Zero, 20000, 9f, true, Color.Cyan, false), 
+        new([new(Vector2.Zero, Vector2.Zero, 20000, 9f, true, Color.Cyan, false),
                     new(new Vector2(0, 2100), GravitationalSource.GetOrbitalVelocity(new Vector2(0, 2100), Vector2.Zero, 20000), 1500, 2f, false, Color.Cyan) ],
         [
             (new AdvancedConstructor(Enemy.NewTurret, new Vector2(MathF.Sin(1.88495f), -MathF.Cos(1.88495f)) * 9 * 50, Vector2.Zero, 1.88495f, false), [ Condition.Kill ]),
@@ -116,18 +116,8 @@ public class EntityManager
         {
             CurrentMission.CalculateTrajectory(Player.position, Player.velocity, Player.ColliderRadius);
         }
-        if (Player.isExpired)
-        {
-            foreach (var module in Player.modules)
-            {
-                //module.Value.Health = module.Value.MaxHealth;
-                module.Value.Health = 20;
-                module.Value.isFailed = false;
-            }
-            Engine.Startgame();
-        }
         Engine.MousePositionOffset = new Vector2(Mouse.GetState().X, Mouse.GetState().Y) / 10 - Engine.BackBuffer / 20
-            + Engine.ScreenShakeFactor * Engine.ScreenShakeFactor * new Vector2(Engine.Random.NextSingle() - 0.5f, Engine.Random.NextSingle() - 0.5f) * 50;
+        + Engine.ScreenShakeFactor * Engine.ScreenShakeFactor * new Vector2(Engine.Random.NextSingle() - 0.5f, Engine.Random.NextSingle() - 0.5f) * 50;
         Engine.Camera.Rotation = Engine.ScreenShakeFactor * Engine.ScreenShakeFactor * (Engine.Random.NextSingle() - 0.5f) * 0.15f;
         //If the player is further from the camera, put more weight on the player
         //Tanh prevents frac from going above 1
@@ -137,7 +127,18 @@ public class EntityManager
         time.Duration += Engine.DeltaSeconds;
         Engine.IngameTime = time;
         CurrentMission.Update();
-        Engine.EntityManager.Update();
+        Update();
+        if (Player.isExpired)
+        {
+            foreach (var module in Player.modules)
+            {
+                //module.Value.Health = module.Value.MaxHealth;
+                module.Value.Health = 20;
+                module.Value.isFailed = false;
+            }
+            Player.isExpired = false;
+            EventHandler.MissionSelectTrigger();
+        }
     }
     public void Update()
     {
