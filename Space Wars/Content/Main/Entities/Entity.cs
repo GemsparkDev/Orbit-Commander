@@ -81,6 +81,12 @@ public abstract class Entity
     }
     public virtual void Draw(SpriteBatch _spriteBatch)
     {
+        Vector2 halfSize = Engine.BackBuffer / 2;
+        if (position.X - Engine.Camera.Position.X + Size.X / 2 < -halfSize.X || position.Y - Engine.Camera.Position.Y + Size.Y / 2 < -halfSize.Y
+         || position.X - Engine.Camera.Position.X - Size.X / 2 >  halfSize.X || position.Y - Engine.Camera.Position.Y - Size.Y / 2 >  halfSize.Y)
+        {
+            return;
+        }
         Color stealthColor = color;
         float maxDistance = EntityManager.StealthRange * (float)Engine.SaveGame.Player.CountFuses(ModuleType.Sensors) / 4;
         //Player has superior sensing to stealth -> full detection

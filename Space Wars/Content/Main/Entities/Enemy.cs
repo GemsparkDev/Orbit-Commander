@@ -156,9 +156,10 @@ public class Enemy : Entity
             Rectangle sourceRectangle = new (0, 0, texture.Width * 2, 2);
             Engine.DrawFilledLine(_spriteBatch, barPosition, sourceRectangle, (float)(health) / (float)(maxHealth), new Color(0, 50, 25), Color.Green);
         }
+        Vector2 halfSize = Engine.BackBuffer / 2;
         if (!ChildEnemy && !deleteOnCollide && isFriendly &&
-           (position.X - Engine.Camera.Position.X < -Engine.BackBuffer.X / 2 || position.Y - Engine.Camera.Position.Y < -Engine.BackBuffer.Y / 2
-         || position.X - Engine.Camera.Position.X >  Engine.BackBuffer.X / 2 || position.Y - Engine.Camera.Position.Y >  Engine.BackBuffer.Y / 2))
+           (position.X - Engine.Camera.Position.X + Size.X / 2 < -halfSize.X || position.Y - Engine.Camera.Position.Y + Size.Y / 2 < -halfSize.Y
+         || position.X - Engine.Camera.Position.X - Size.X / 2 >  halfSize.X || position.Y - Engine.Camera.Position.Y - Size.Y / 2 >  halfSize.Y))
         {
             var pos = position - Engine.SaveGame.Player.position;
             ParticleManager.Add(new Particle(Assets.Get(Sprite.Dot), pos / 50 + Engine.SaveGame.Player.position, 0, color * 0.75f));
