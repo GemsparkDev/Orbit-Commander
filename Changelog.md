@@ -4,7 +4,10 @@ Lagrange Commander is a game made using C# in monogame. It is a 2D top down wave
   
 # Changelog  
 
-0.4.7.6 - 6/20/2025    
+0.4.7.7 - 6/21/2025    
+ - Added culling to entities not visible on the screen.    
+ - Friendly enemy particle effect now only shows when the entire texture is offscreen.    
+0.4.7.6 - 6/20/2025      
  - Added a simple player progression system, preventing some abilites from being used on early missions.    
  - Mission 1 starts the player w/ 0 progression, and mission 2 and 3 start w/ 1 progression. All else have 2 progression.    
  - The construct buttons are now in the fuse menu.    
