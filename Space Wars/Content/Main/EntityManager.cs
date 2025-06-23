@@ -30,43 +30,52 @@ public class EntityManager
         [ (new EntityConstructor(Enemy.NewMothership, new Vector2(0, -8*50 - Assets.DimsOf(Sprite.Mothership).Y / 2), Vector2.Zero, 0f), [ Condition.Protect, Condition.CustomIncomplete ])],
         "Crash Landing",
         "A simple system with a large planet and one closely orbiting moon. Drone activity detected, but minimal.",
-        1, 0, 0, IntroCutscene) { playerProgression = 0 },
+        1, new Vector2(0, -8*50 - Assets.DimsOf(Sprite.Mothership).Y / 2), 0, 0, IntroCutscene) { playerProgression = 0, playerDocked = true },
 
         new( [ new(Vector2.Zero, Vector2.Zero, 3500, 4, true, Color.Cyan, true) ],
         [
             (new EntityConstructor(Enemy.NewTurret, new Vector2(0, -200 - Assets.DimsOf(Sprite.TurretBase).Y / 2), Vector2.Zero, 0), [ Condition.Protect ]),
             (new EntityConstructor(Enemy.NewOrbiter, new Vector2(400, 0), GravitationalSource.GetOrbitalVelocity(new Vector2(400, 0), Vector2.Zero, 3500), 0), [ Condition.Protect ])],
         "Sentry Defense",
-        "A small outpost is located orbiting this rogue planet. Defend it.", 0.75f, 40) { playerProgression = 1 },
+        "A small outpost is located orbiting this rogue planet. Defend it.", 0.75f, new Vector2(0, 1), 40) { playerProgression = 1 },
 
         new( [ new(Vector2.Zero, Vector2.Zero, 25000, 7f, true, Color.Cyan), new(new Vector2(800, 0), GravitationalSource.GetOrbitalVelocity(new Vector2(800, 0), Vector2.Zero, 25000), 150, 0.5f, false, Color.Cyan), ],
         [(new EntityConstructor(Enemy.NewMiner, new Vector2(0, -7*50), Vector2.Zero, 0), [ Condition.Protect ])],
         "Extraction",
-        "This deceptively dense planet is rich with materials that our deployed miner will extract.", 1, 20) { playerProgression = 1 },
+        "This deceptively dense planet is rich with materials that our deployed miner will extract.", 1, new Vector2(0, 1), 20) { playerProgression = 1 },
 
         new([ new(Vector2.Zero, Vector2.Zero, 5000, 3, true, Color.Cyan),
             new(new Vector2(400, 0), GravitationalSource.GetOrbitalVelocity(new Vector2(400, 0), Vector2.Zero, 5000), 240, 1f, false, Color.Cyan),
             new(new Vector2(-600, 0), -GravitationalSource.GetOrbitalVelocity(new Vector2(-600, 0), Vector2.Zero, 5000) * 1.2f, 120, 0.6f, false, Color.Yellow), ],
         [(new EntityConstructor(Enemy.NewExcursionBoss, new Vector2(0, -6*50), Vector2.Zero, 0), [ Condition.Kill ])],
         "Showdown",
-        "Defeat the advanced drone prototype, Excursion. Be warned: It may call for reinforcements.", 1.1f, 0, 0, null, true),
+        "Defeat the advanced drone prototype, Excursion. Be warned: It may call for reinforcements.", 1.1f, new Vector2(0, 1), 0, 0, null, true),
 
         new([new(Vector2.Zero, Vector2.Zero, 30000, 10f, true, Color.HotPink, true) ],
         [],
         "cool planet",
-        "Super earth", 0, 0, 1, null, true),
+        "Super earth", 0, new Vector2(0, 1), 0, 1, null, true),
 
         new([new(Vector2.Zero, Vector2.Zero, 20000, 9f, true, Color.Cyan, false),
-                    new(new Vector2(0, 2100), GravitationalSource.GetOrbitalVelocity(new Vector2(0, 2100), Vector2.Zero, 20000), 1500, 2f, false, Color.Cyan) ],
+        new(new Vector2(0, 1800), GravitationalSource.GetOrbitalVelocity(new Vector2(0, 1800), Vector2.Zero, 20000), 1500, 2f, false, Color.Cyan) ],
         [
-            (new AdvancedConstructor(Enemy.NewTurret, new Vector2(MathF.Sin(1.88495f), -MathF.Cos(1.88495f)) * 9 * 50, Vector2.Zero, 1.88495f, false), [ Condition.Kill ]),
-            (new AdvancedConstructor(Enemy.NewTurret, new Vector2(MathF.Sin(4.39822f), -MathF.Cos(4.39822f)) * 9 * 50, Vector2.Zero, 4.39822f, false), [ Condition.Kill ]),
-            (new AdvancedConstructor(Enemy.NewTurret, new Vector2(MathF.Sin(0), -MathF.Cos(0)) * 9 * 50, Vector2.Zero, 0, false), [ Condition.Kill ]),
-            (new AdvancedConstructor(Enemy.NewMiner, new Vector2(MathF.Sin(MathF.PI), -MathF.Cos(MathF.PI)) * 9 * 50, Vector2.Zero, MathF.PI, false), [ Condition.Kill ]),
-            (new AdvancedConstructor(Enemy.NewMiner, new Vector2(MathF.Sin(MathF.PI * 5/3), -MathF.Cos(MathF.PI * 5/3)) * 9 * 50, Vector2.Zero, MathF.PI * 5 / 3, false), [ Condition.Kill ]),
-            (new EntityConstructor(Enemy.NewOrbiter, new Vector2(0, 1950), GravitationalSource.GetOrbitalVelocity(new Vector2(0, 1950), new Vector2(0, 2100), 1500) + GravitationalSource.GetOrbitalVelocity(new Vector2(0, 2200), Vector2.Zero, 20000), 0), [ Condition.Protect ])],
+            (new AdvancedConstructor(Enemy.NewTurret, new Vector2(MathF.Sin(5.5f), -MathF.Cos(5.5f)) * 9 * 50, Vector2.Zero, 5.5f, false), [ Condition.Kill ]),
+            (new AdvancedConstructor(Enemy.NewTurret, new Vector2(MathF.Sin(3.2f), -MathF.Cos(3.2f)) * 9 * 50, Vector2.Zero, 3.2f, false), [ Condition.Kill ]),
+            (new AdvancedConstructor(Enemy.NewTurret, new Vector2(MathF.Sin(2.6f), -MathF.Cos(2.6f)) * 9 * 50, Vector2.Zero, 2.6f, false), [ Condition.Kill ]),
+            (new AdvancedConstructor(Enemy.NewTurret, new Vector2(MathF.Sin(1.1f), -MathF.Cos(1.1f)) * 9 * 50, Vector2.Zero, 1.1f, false), [ Condition.Kill ]),
+            (new AdvancedConstructor(Enemy.NewMiner, new Vector2(MathF.Sin(3), -MathF.Cos(3)) * 9 * 50, Vector2.Zero, 3, false), [ Condition.Kill ]),
+            (new AdvancedConstructor(Enemy.NewMiner, new Vector2(MathF.Sin(5.2f), -MathF.Cos(5.2f)) * 9 * 50, Vector2.Zero, 5.2f, false), [ Condition.Kill ]),
+            (new EntityConstructor(Enemy.NewOrbiter, new Vector2(0, 1650), GravitationalSource.GetOrbitalVelocity(new Vector2(0, 1650), new Vector2(0, 1800), 1500)
+                + GravitationalSource.GetOrbitalVelocity(new Vector2(0, 1800), Vector2.Zero, 20000), 0), [ Condition.Protect ])],
         "Assault",
-        "You have been placed in high orbit. Destroy the enemy base on the surface planet, and all reinforcements that arrive.", 0.75f, 2, 1, null, false),
+        "You have been placed in high orbit. Destroy the enemy base on the surface planet, and all reinforcements that arrive.", 0.75f, new Vector2(0, 1650), 2, 1, null, false) { playerDocked = true },
+
+        new([ new(Vector2.Zero, Vector2.Zero, 20000, 9, true, Color.OrangeRed, true), 
+        new(new Vector2(1200, 0), GravitationalSource.GetOrbitalVelocity(new Vector2(1200, 0), Vector2.Zero, 20000), 750, 2f, false, Color.Red) ],
+        [],
+        "Last Stand",
+        "Survive",
+        0.25f, new Vector2(0, -8*50), 1000, 4),
     ];
     private Mission currentMission;
     public Mission CurrentMission => currentMission ?? missions[Engine.SaveGame.CurrentMissionIndex];
@@ -100,7 +109,6 @@ public class EntityManager
         addedEntities.Clear();
         enemies.Clear();
         projectiles.Clear();
-        Player.position = new Vector2(0, -CurrentMission.Planet.radius + 1);
         Player.velocity = Vector2.Zero;
         CurrentMission.Initialize();
     }
@@ -137,6 +145,7 @@ public class EntityManager
                 module.Value.isFailed = false;
             }
             Player.isExpired = false;
+            EventHandler.UpdateModulesStatus();
             EventHandler.MissionSelectTrigger();
         }
     }
@@ -153,7 +162,7 @@ public class EntityManager
         {
             if (projectile.ExtraUpdates > 1)
             {
-                for (int i = 0; i < projectile.ExtraUpdates - 1; i++)
+                for (int i = 0; i < projectile.ExtraUpdates - 1 && !projectile.isExpired; i++)
                 {
                     projectile.Update();
                 }
@@ -307,7 +316,8 @@ public class EntityManager
         }
         if (!entity.isFriendly)
         {
-            float distance = DistanceSqr(entity, Player);
+            //Enemies will prioritize the player
+            float distance = DistanceSqr(entity, Player) / 1.5f;
             if (Player.StealthAbility > entity.SensingAbility)
             {
                 return returnEnemy;
@@ -464,8 +474,6 @@ public class EntityManager
         {
             sound.Pause();
             SoundManager.PlayGlobalSound(Assets.Get(Sound.Death));
-            //Note: Make sure the player can't farm free core hp with this
-            Engine.SaveGame.Player.modules[ModuleType.Core].isFailed = true;
             Engine.ShakeScreen(1);
         }));
         return new Cutscene(events, actors, new PlayingGame());

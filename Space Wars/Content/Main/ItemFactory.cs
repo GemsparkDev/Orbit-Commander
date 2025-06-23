@@ -29,8 +29,8 @@ public static class ItemFactory
         { Modules.Sensors, new ModuleData(Sprite.SensorModule,Sprite.SensorModule, "Sensors", (int)ModuleType.Sensors, 20, delegate{ }) },
 
         { Modules.Dash, new ModuleData(Sprite.CoreModule,Sprite.CoreModule, "Dash Core", (int)ModuleType.Core, 20, delegate{ Player.Dash(); }) },
-        { Modules.GrapplingHook, new ModuleData(Sprite.EngineModule, Sprite.EngineModule, "Grapple Core", (int)ModuleType.Core, 20, delegate{ Player.SummonGrapplingHook(); }) },
-        { Modules.SummonShield, new ModuleData(Sprite.EngineModule, Sprite.EngineModule, "Shield Core", (int)ModuleType.Core, 20, delegate{ Player.SummonShield(); }) },
+        { Modules.GrapplingHook, new ModuleData(Sprite.CoreModule, Sprite.CoreModule, "Grapple Core", (int)ModuleType.Core, 20, delegate{ Player.SummonGrapplingHook(); }) },
+        { Modules.SummonShield, new ModuleData(Sprite.CoreModule, Sprite.CoreModule, "Shield Core", (int)ModuleType.Core, 20, delegate{ Player.SummonShield(); }) },
 
     };
     private static Dictionary<ConstructType, ConstructData> constructData = new() 

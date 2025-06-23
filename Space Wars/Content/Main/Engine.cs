@@ -81,6 +81,7 @@ public class Engine : Game
         };
 
         UIManager = new UIManager();
+        UIManager.BackBuffer = BackBuffer;
         EntityManager = new EntityManager();
         AddUIElements();
         CurrentGameState.SwitchState(new MainMenu());
@@ -167,13 +168,13 @@ public class Engine : Game
         var fuseCounter = new Decal(new Vector2(-20, -10), Assets.TextFont, "0", Color.Yellow, 10);
 
         //Global Menu
-        var globalSidePanelOpen = new Button(new Vector2(0, BackBuffer.Y / 2), Assets.Get(Sprite.ToggleButton));
-        fpsCounter = new Decal(new Vector2(BackBuffer.X - 40, 50), Assets.TextFont, "60", Color.White, 10);
-        fpsOneSec = new Decal(new Vector2(BackBuffer.X - 40, 100), Assets.TextFont, "60", Color.White, 10);
-        fpsLowest = new Decal(new Vector2(BackBuffer.X - 40, 150), Assets.TextFont, "60", Color.White, 10);
-        timer = new Decal(new Vector2(BackBuffer.X - 150, 0), Assets.TextFont, $"{IngameTime.DrawText}", Color.White, 10);
-        var playerHealth = new Slider(Line, new Vector2(10, 10), new Vector2(150, 15), true, Color.Red, Color.DarkGray);
-        var playerAbility = new Slider(Line, new Vector2(10, 35), new Vector2(100, 10), true, Color.Cyan, Color.DarkGray);
+        var globalSidePanelOpen = new Button(Vector2.Zero, Assets.Get(Sprite.ToggleButton));
+        fpsCounter = new Decal(new Vector2( - 20, 25), Assets.TextFont, "60", Color.White, 10);
+        fpsOneSec = new Decal(new Vector2( - 20, 50), Assets.TextFont, "60", Color.White, 10);
+        fpsLowest = new Decal(new Vector2( - 20, 75), Assets.TextFont, "60", Color.White, 10);
+        timer = new Decal(new Vector2(- 50, 0), Assets.TextFont, $"{IngameTime.DrawText}", Color.White, 10);
+        var playerHealth = new Slider(Line, new Vector2(5, 5), new Vector2(150, 15), true, Color.Red, Color.DarkGray);
+        var playerAbility = new Slider(Line, new Vector2(5, 15), new Vector2(100, 10), true, Color.Cyan, Color.DarkGray);
 
         var sidePanelClose = new Button(new Vector2(-Assets.Get(Sprite.ToggleButton).Width / 2 + Assets.Get(Sprite.Terminal).Width / 2, 0), Assets.Get(Sprite.ToggleButton));
         patchedConicsToggle.AddBehaviour(delegate
@@ -332,6 +333,7 @@ public class Engine : Game
                 {
                     scrap.isExpired = true;
                     var bomb =  ItemFactory.GetItem(ConstructType.Bomb, scrap.position, scrap.velocity, 0);
+                    bomb.isFriendly = false;
                     SaveGame.Player.leashedMaterials.Add(bomb);
                     EntityManager.Add(bomb);
                     return;

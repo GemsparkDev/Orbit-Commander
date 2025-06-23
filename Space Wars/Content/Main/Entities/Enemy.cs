@@ -1485,40 +1485,36 @@ public class Enemy : Entity
     }
     IEnumerable<int> TurretCannon(float _angle)
     {
-        float targetingAngle = 0;
-        float bulletOffset = 3;
+        float bulletOffset = 4;
         enemyRange.radius = 400;
         ChildEnemy = true;
         while (true)
         {
             velocity *= 0;
-            targetingAngle += Engine.DeltaSeconds;
-            var dir = new Vector2(MathF.Sin(_angle), MathF.Cos(_angle));
+            var dir = new Vector2(-MathF.Sin(_angle), MathF.Cos(_angle));
+            var gunDir = new Vector2(-MathF.Sin(angle), MathF.Cos(angle));
             Vector2 offset = dir * (Size.Y / 2 + 150);
             Entity nearestEnemy = Engine.EntityManager.NearestEnemy(NewDummyEnemy(position + offset, isFriendly));
             enemyRange.position = position + offset;
             if (nearestEnemy != null)
             {
-
+                var relPos = Vector2.Normalize(nearestEnemy.position - position);
                 float distance = (nearestEnemy.position - position - dir * (Size / 2)).Length();
-                Vector2 relativePosition = nearestEnemy.position - position - dir * (Size / 2) + nearestEnemy.velocity * distance / 8;
-                float targetAngle = MathF.Atan2(relativePosition.Y, relativePosition.X) + MathF.PI / 2;
-                if (angle - targetAngle > 0.1f && targetAngle > _angle - 1.7f)
+                float dot = relPos.X * dir.X + relPos.Y * dir.Y;
+                float cross = relPos.X * gunDir.Y - gunDir.X * relPos.Y;
+                if (cross < -0.1f)
                 {
                     angle -= 10 * Engine.DeltaSeconds;
                 }
-                else if (angle - targetAngle < -0.1f && targetAngle < _angle + 1.7f)
+                else if (cross > 0.1f)
                 {
                     angle += 10 * Engine.DeltaSeconds;
                 }
-                if (distance < 400 && cooldown <= 0 && MathF.Abs(angle - targetAngle) < 0.1f)
+                else if (distance < 400 && cooldown <= 0 && dot < 0)
                 {
-                    Vector2 normalVector = Vector2.Normalize(relativePosition);
-                    var rotatedOffset = new Vector2(-Size.Y / 2 * MathF.Sin(angle), Size.Y / 2 * MathF.Cos(angle));
-                    //EntityManager.Add(new PulseShot(position - new Vector2(0, Size.Y / 2) + new Vector2(normalVector.Y, -normalVector.X) * bulletOffset * 2, normalVector * 8, turretAngle, 0, isFriendly, 5));
-                    Engine.EntityManager.Add(NewMissile(position - rotatedOffset + new Vector2(normalVector.Y, -normalVector.X) * bulletOffset, normalVector * 8, angle, isFriendly));
+                    var rotatedOffset = gunDir * Size.Y / 2;
+                    Engine.EntityManager.Add(NewMissile(position - rotatedOffset + new Vector2(-dir.Y, dir.X) * bulletOffset, -gunDir * 8, angle, isFriendly));
                     Assets.Get(Sound.MissileFire).Play();
-                    //Assets.Get(Sound.PulseFire).Play();
                     cooldown = 0.9f;
                     bulletOffset *= -1;
                 }

@@ -75,7 +75,7 @@ public class Player : Entity
     public Dictionary<ModuleType, Module> modules = new()
     {
         { ModuleType.Hull, ItemFactory.GetItem(Modules.Hull) },
-        { ModuleType.Guns, ItemFactory.GetItem(Modules.Missile) },
+        { ModuleType.Guns, ItemFactory.GetItem(Modules.Sniper) },
         { ModuleType.Engines, ItemFactory.GetItem(Modules.Engines) },
         { ModuleType.Sensors, ItemFactory.GetItem(Modules.Sensors) },
         { ModuleType.Core, ItemFactory.GetItem(Modules.SummonShield) }
@@ -112,14 +112,6 @@ public class Player : Entity
     public override void Update()
     {
         time += Engine.DeltaSeconds;
-        if (Input.OldState.IsKeyUp(Keys.Escape) && Input.NewState.IsKeyDown(Keys.Escape))
-        {
-            if (Engine.UIManager.ToggleToMenu(Engine.UIManager.GetContainer((int)Containers.PauseMenu)))
-            {
-                SoundManager.SetAllSounds(false);
-                CurrentGameState.SwitchState(new PausedGame());
-            }
-        }
         if (Progression > 0 && Input.OldState.IsKeyUp(Keys.F) && Input.NewState.IsKeyDown(Keys.F))
         {
             SoundManager.SetAllSounds(false);
@@ -373,27 +365,7 @@ public class Player : Entity
             }
             if (Input.OldState.IsKeyUp(Keys.Space) && Input.NewState.IsKeyDown(Keys.Space))
             {
-                if (dockedEntity == null)
-                {
-                    DockableComponent dockableEntity = Engine.EntityManager.NearestDockableEntity(this);
-                    if (dockableEntity != null)
-                    {
-                        if (dockableEntity.Dock(this))
-                        {
-                            dockedEntity = dockableEntity;
-                            isEngineActive = false;
-                            if (abilityEntity != null)
-                            {
-                                abilityEntity.isExpired = true;
-                            }
-                        }
-                    }
-                }
-                else if (dockedEntity.Dock(this))
-                {
-                    dockedEntity = null;
-                    isEngineActive = false;
-                }
+                Dock();
             }
         }
         //Prevents unusual interations between various game states
@@ -417,6 +389,30 @@ public class Player : Entity
         {
             engineParticles.isEmitterActive = false;
             SoundManager.PauseSound(engineSounds);
+        }
+    }
+    public void Dock()
+    {
+        if (dockedEntity == null)
+        {
+            DockableComponent dockableEntity = Engine.EntityManager.NearestDockableEntity(this);
+            if (dockableEntity != null)
+            {
+                if (dockableEntity.Dock(this))
+                {
+                    dockedEntity = dockableEntity;
+                    isEngineActive = false;
+                    if (abilityEntity != null)
+                    {
+                        abilityEntity.isExpired = true;
+                    }
+                }
+            }
+        }
+        else if (dockedEntity.Dock(this))
+        {
+            dockedEntity = null;
+            isEngineActive = false;
         }
     }
     public override void Collide(int _damage)

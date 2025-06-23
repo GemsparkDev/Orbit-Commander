@@ -9,40 +9,44 @@ using Microsoft.Xna.Framework.Graphics;
 namespace Space_Wars.Content.Main;
 public class Mission
 {
-    private Entity escapeVehicle = null;
-    public string Name { get; }
-    public string Description { get; }
+    public delegate Enemy DelegateEnemy(Vector2 position, Vector2 velocity, float angle, bool _isFriendly = false);
     //Change me when multiple main planets are added
     public GravitationalSource Planet => planets[0];
-    private GravitationalSource[] planets; 
-    //Save original entity parameters to allow cloning
-    public List<(IConstructor, Condition[])> CopyObjectives { get; }
-    public List<(Entity entity, Condition[] conditions)> MissionObjectives { get; } = [];
-    private List<Entity> enemiesSpawned = [];
-    private bool currentWaveActive = false;
-    private Func<Cutscene> cutscene;
-    private float timerModifier;
+    public string Name { get; }
+    public string Description { get; }
     public int playerProgression = 2;
     public int WaveGoal { get; } = 0;
-    public float restartTimer = -1;
     public int Wave { get; private set; } = 0;
+    public int EnemiesSpawned { get; private set; } = 0;
+    public float restartTimer = -1;
+    public bool playerDocked = false;
+
+    private Player Player => Engine.SaveGame.Player;
+    private Entity escapeVehicle = null;
+    private GravitationalSource[] planets; 
+    //Save original entity parameters to allow cloning
+    private List<(IConstructor, Condition[])> CopyObjectives { get; }
+    private List<(Entity entity, Condition[] conditions)> MissionObjectives { get; } = [];
+    private List<Entity> enemiesSpawned = [];
     private List<(int cost, DelegateEnemy enemy)> enemyCreditValues;
     private List<DelegateEnemy> bosses;
+    private Vector2 playerPosition;
+    private Func<Cutscene> cutscene;
     private int currentBoss;
     private int tier;
+    private float timerModifier;
     private float waveTimer = 5;
     private float maxWaveTimer = 5;
     private float difficulty;
-    private Player Player => Engine.SaveGame.Player;
-    public delegate Enemy DelegateEnemy(Vector2 position, Vector2 velocity, float angle, bool _isFriendly = false);
-    public int EnemiesSpawned { get; private set; } = 0;
+    private bool currentWaveActive = false;
 
-    public Mission(GravitationalSource[] _planets, List<(IConstructor, Condition[] conditions)> _missionObjectives, string _name, string _description, float _timerModifier, int _waveGoal = 0, int _enemyTier = 0, Func<Cutscene> _cutscene = null, bool _escapeVehicle = false)
+    public Mission(GravitationalSource[] _planets, List<(IConstructor, Condition[] conditions)> _missionObjectives, string _name, string _description, float _timerModifier, Vector2 _playerPosition, int _waveGoal = 0, int _enemyTier = 0, Func<Cutscene> _cutscene = null, bool _escapeVehicle = false)
     {
         Name = _name;
         Description = _description;
         planets = _planets;
         CopyObjectives = _missionObjectives;
+        playerPosition = _playerPosition;
         foreach (var (entityConstructor, conditions) in _missionObjectives)
         {
             MissionObjectives.Add((entityConstructor.Construct(), (Condition[])conditions.Clone()));
@@ -69,10 +73,24 @@ public class Mission
                 (2, Enemy.NewHovercraft),
             ];
         }
-        else
+        else if(_enemyTier == 2)
         {
             enemyCreditValues = 
             [
+                (1, Enemy.NewStealthFighter),
+                (2, Enemy.NewHunter),
+            ];
+        }
+        else
+        {
+            enemyCreditValues =
+            [
+                (1, Enemy.NewFighter),
+                (3, Enemy.NewCarrier),
+                (3, Enemy.NewSniper),
+                (4, Enemy.NewShotgunner),
+                (1, Enemy.NewAdvancedFighter),
+                (2, Enemy.NewHovercraft),
                 (1, Enemy.NewStealthFighter),
                 (2, Enemy.NewHunter),
             ];
@@ -316,6 +334,11 @@ public class Mission
             Engine.EntityManager.Add(entity);
         }
         Engine.SaveGame.Player.Progression = playerProgression;
+        Engine.SaveGame.Player.position = playerPosition;
+        if (playerDocked)
+        {
+            Engine.SaveGame.Player.Dock();
+        }
     }
     public void AttractObject(Entity _entity)
     {
@@ -431,7 +454,7 @@ public class Mission
         {
             _planets[i] = planets[i].Copy();
         }
-        return new Mission(_planets, CopyObjectives, Name, Description, timerModifier, WaveGoal, tier, cutscene, escapeVehicle != null) { playerProgression = this.playerProgression };
+        return new Mission(_planets, CopyObjectives, Name, Description, timerModifier, playerPosition, WaveGoal, tier, cutscene, escapeVehicle != null) { playerProgression = this.playerProgression, playerDocked = this.playerDocked };
     }
     private Vector2 NewSpawnLocation()
     {
