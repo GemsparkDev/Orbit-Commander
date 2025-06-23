@@ -3,8 +3,16 @@
 Lagrange Commander is a game made using C# in monogame. It is a 2D top down wave based shooter where you must repair and upgrade your ship by salvaging from enemies you defeat. It features realistic N-Body gravitation, which affects all entities and projectiles.
   
 # Changelog  
-
-0.4.7.7 - 6/21/2025    
+    
+0.4.8 - 6/22/2025    
+ - Added the last stand mission.    
+ - Fixed some issues w/ turret aiming.    
+ - Planets now have a proper trail.    
+ - Some missions now start the player docked.    
+ - Moved some of the turrets around on the assault mission into clusters.    
+ - The entity manager stops checking projectiles w/ extra updates if they are expired.    
+ - Missions can now select where the player starts on the mission.    
+0.4.7.7 - 6/21/2025       
  - Added culling to entities not visible on the screen.    
  - Friendly enemy particle effect now only shows when the entire texture is offscreen.    
 0.4.7.6 - 6/20/2025      
