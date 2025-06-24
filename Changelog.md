@@ -4,6 +4,11 @@ Lagrange Commander is a game made using C# in monogame. It is a 2D top down wave
   
 # Changelog  
     
+0.4.8.1 - 6/23/2025    
+ - DockableComponents now support the Collide function.    
+ - The player can create makeshift mothership on the endless mission using 3 scrap.    
+ - If the player is docked and gets hit, all damage gets redirected to the entity it is docked to.    
+ - Missions are now able to use the aggressive mode, which increases how many enemies spawn per wave.    
 0.4.8 - 6/22/2025    
  - Added the last stand mission.    
  - Fixed some issues w/ turret aiming.    
