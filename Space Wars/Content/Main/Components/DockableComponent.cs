@@ -98,4 +98,8 @@ public class DockableComponent(Entity _parentEntity, Containers _menu) : ICompon
             }
         }
     }
+    public void Collide(int _damage)
+    {
+        _parentEntity.Collide(_damage);
+    }
 }

@@ -1,5 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
 using Space_Wars.Content.Main.Components;
 using Space_Wars.Content.Main.Particles;
 using System;
@@ -1364,7 +1365,6 @@ public class Enemy : Entity
         float furnaceCooldown = 15;
         float craftingCooldown = 12;
         int requiredCraftsLeft = 20;
-        float cooldown = 3;
         Pickup furnaceItem = null;
         bool currentlyCrafting = false;
         while (true)
@@ -1657,6 +1657,135 @@ public class Enemy : Entity
             yield return 0;
         }
     }
+    IEnumerable<int> MakeshiftMothership()
+    {
+        float furnaceCooldown = 15;
+        float craftingCooldown = 12;
+        Pickup furnaceItem = null;
+        bool currentlyCrafting = false;
+        int tier = 1;
+        int untilNextTier = 1;
+        while (true)
+        {
+            float tierBonus = 1 / MathF.Sqrt(tier);
+            if (EventHandler.AcknowledgeMessage(Message.MothershipCraftItem))
+            {
+                currentlyCrafting = true;
+            }
+            if (EventHandler.AcknowledgeMessage(Message.MothershipUpdateFurnace))
+            {
+                furnaceItem = ((ItemSlot<Pickup>)Engine.UIManager.GetFuncWidget((int)Containers.MothershipMenu, 1)).daughterItem;
+            }
+            var dockableComponent = (Components.GetComponent(ComponentType.DockableComponent));
+            if (EventHandler.AcknowledgeMessage(Message.MothershipUpdateInventory))
+            {
+                if (dockableComponent.IsValid) 
+                { 
+                    (dockableComponent as DockableComponent).SetInventory(Engine.InventorySlots); 
+                }
+            }
+            if (furnaceItem != null)
+            {
+                furnaceCooldown -= Engine.DeltaSeconds;
+                if (furnaceCooldown <= 0)
+                {
+                    if (furnaceItem is Module)
+                    {
+                        Engine.SaveGame.Scrap += 3;
+                    }
+                    else
+                    {
+                        Engine.SaveGame.Scrap++;
+                    }
+                    furnaceItem = null;
+                    SoundManager.PlaySound(Assets.Get(Sound.Interact), position);
+                }
+            }
+            else
+            {
+                furnaceCooldown = 15 * tierBonus;
+            }
+            if (currentlyCrafting)
+            {
+                craftingCooldown -= Engine.DeltaSeconds;
+                if (craftingCooldown <= 0)
+                {
+                    craftingCooldown = 12 * tierBonus;
+                    untilNextTier -= 1;
+                    if (untilNextTier <= 0)
+                    {
+                        tier++;
+                        untilNextTier = tier;
+                        maxHealth = 400 + (int)(100 * MathF.Sqrt(tier));
+                    }
+                    Collide(-100);
+                    currentlyCrafting = false;
+                }
+            }
+
+            EventHandler.UpdateFurnaceUI(15f * tierBonus - furnaceCooldown, 15f * tierBonus, furnaceItem);
+            EventHandler.UpdateCraftingUI(12f * tierBonus - craftingCooldown, 12f * tierBonus, untilNextTier);
+            LowerCooldown();
+            if (dockableComponent.IsValid && (dockableComponent as DockableComponent).IsDocked)
+            {
+                if (tier > 1 && Input.NewMouseState.LeftButton == ButtonState.Pressed && cooldown <= 0 && !UIManager.LockMouseInput)
+                {
+                    targetVector = Vector2.Normalize(new Vector2(Mouse.GetState().X, Mouse.GetState().Y) - Engine.BackBuffer / 2 - position + Engine.Camera.Position);
+                    targetAngle = MathF.Atan2(targetVector.X, -targetVector.Y) - Engine.Camera.Rotation;
+                    Engine.EntityManager.Add(new PulseShot(position, targetVector * 9 + velocity, targetAngle, 0, true, damage, true));
+                    SoundManager.PlaySound(Assets.Get(Sound.PulseFire), position);
+                    cooldown = 0.75f;
+                    if (tier > 3)
+                    {
+                        cooldown = 0.5f;
+                    }
+                    Engine.ShakeScreen(0.2f);
+                    velocity -= targetVector / 4;
+                }
+                Keys[] pressedKey = Input.NewState.GetPressedKeys();
+                Vector2 direction = Vector2.Zero;
+                bool isEngineActive = false;
+                for (int i = 0; i < pressedKey.Length; i++)
+                {
+                    switch (pressedKey[i])
+                    {
+                        case Keys.W:
+                            direction += new Vector2(0, -1);
+                            isEngineActive = true;
+                            break;
+                        case Keys.A:
+                            direction += new Vector2(-1, 0);
+                            isEngineActive = true;
+                            break;
+                        case Keys.S:
+                            direction += new Vector2(0, 1);
+                            isEngineActive = true;
+                            break;
+                        case Keys.D:
+                            direction += new Vector2(1, 0);
+                            isEngineActive = true;
+                            break;
+                        default:
+                            break;
+                    }
+                }
+                if (isEngineActive)
+                {
+                    angle = angle * 0.5f + MathF.Atan2(direction.X, -direction.Y) * 0.5f;
+                    velocity += Engine.ToUnitVector(angle) * 60 * Engine.DeltaSeconds * 0.1f;
+                }
+            }
+            Engine.EntityManager.CurrentMission.CalculateTrajectory(position, velocity, ColliderRadius);
+            //Prevents the player from losing it accidentally
+            var planet = Engine.EntityManager.CurrentMission.Planet;
+            if (position.Length() >= 40 * 50 + planet.radius)
+            {
+                velocity *= 0.8f;
+                velocity += Vector2.Normalize(-position) * Engine.DeltaSeconds * (position.Length() - (40 * 50 + planet.radius));
+            }
+            yield return 0;
+        }
+    }
     public static Enemy NewDummyEnemy(Vector2 _position, bool _isFriendly = false)
     {
         return new(_position, Vector2.Zero, 0, 0, 0, Assets.Get(Sprite.Fighter), _isFriendly);
@@ -1812,6 +1941,14 @@ public class Enemy : Entity
         Enemy enemy = new(position, velocity, angle, 8, 15, Assets.Get(Sprite.Fighter), _isFriendly);
         enemy.AddBehaviour(enemy.Hunter());
         enemy.AddBehaviour(enemy.EnemyDeath(1));
+        return enemy;
+    }
+    public static Enemy NewMakeshiftMothership(Vector2 position, Vector2 velocity, float angle, bool _isFriendly = true)
+    {
+        Enemy enemy = new(position, velocity, angle, 8, 500, Assets.Get(Sprite.Mothership), _isFriendly);
+        enemy.AddBehaviour(enemy.MakeshiftMothership());
+        enemy.AddBehaviour(enemy.EnemyDeath(0.01f));
+        enemy.Components.Add(new DockableComponent(enemy, Containers.MothershipMenu));
         return enemy;
     }
 }

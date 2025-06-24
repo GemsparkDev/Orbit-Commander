@@ -70,12 +70,12 @@ public class EntityManager
         "Assault",
         "You have been placed in high orbit. Destroy the enemy base on the surface planet, and all reinforcements that arrive.", 0.75f, new Vector2(0, 1650), 2, 1, null, false) { playerDocked = true },
 
-        new([ new(Vector2.Zero, Vector2.Zero, 20000, 9, true, Color.OrangeRed, true), 
+        new([ new(Vector2.Zero, Vector2.Zero, 20000, 9, true, Color.OrangeRed, true),
         new(new Vector2(1200, 0), GravitationalSource.GetOrbitalVelocity(new Vector2(1200, 0), Vector2.Zero, 20000), 750, 2f, false, Color.Red) ],
         [],
         "Last Stand",
         "Survive",
-        0.25f, new Vector2(0, -8*50), 1000, 4),
+        0.25f, new Vector2(0, -8*50), 1000, 4) { isAggressive = true, playerProgression = 3 },
     ];
     private Mission currentMission;
     public Mission CurrentMission => currentMission ?? missions[Engine.SaveGame.CurrentMissionIndex];
@@ -258,12 +258,12 @@ public class EntityManager
     }
     public static void Collide(Entity entity, Entity targetEntity)
     {
-        //Checks if two entities are closer than the radii combined
         if (entity == null || targetEntity == null)
         {
             return;
         }
-        if (DistanceSqr(entity, targetEntity) <= MathF.Pow(entity.ColliderRadius + targetEntity.ColliderRadius, 2) && entity.isFriendly != targetEntity.isFriendly)
+        float combinedRadius = entity.ColliderRadius + targetEntity.ColliderRadius;
+        if (entity.isFriendly != targetEntity.isFriendly && DistanceSqr(entity, targetEntity) <= combinedRadius * combinedRadius)
         {
             entity.Collide(targetEntity.damage);
             targetEntity.Collide(entity.damage);
@@ -299,11 +299,7 @@ public class EntityManager
         Entity returnEnemy = null;
         foreach (Entity targetEnemy in enemies)
         {
-            if (targetEnemy.isFriendly == entity.isFriendly)
-            {
-                continue;
-            }
-            if (targetEnemy.StealthAbility > entity.SensingAbility)
+            if (targetEnemy.StealthAbility > entity.SensingAbility || targetEnemy.isFriendly == entity.isFriendly)
             {
                 continue;
             }

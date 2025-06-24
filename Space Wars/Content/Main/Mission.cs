@@ -20,6 +20,7 @@ public class Mission
     public int EnemiesSpawned { get; private set; } = 0;
     public float restartTimer = -1;
     public bool playerDocked = false;
+    public bool isAggressive = false;
 
     private Player Player => Engine.SaveGame.Player;
     private Entity escapeVehicle = null;
@@ -238,7 +239,14 @@ public class Mission
             }
             else
             {
-                difficulty = (int)((Wave + 1) * MathF.Log(Wave + 1, MathF.E) - Wave) / 15 + 1;
+                if (isAggressive)
+                {
+                    difficulty = (int)(Math.Pow(Wave, 1.5) + 5);
+                }
+                else
+                {
+                    difficulty = (int)((Wave + 1) * MathF.Log(Wave + 1, MathF.E) - Wave) + 1;
+                }
                 List<int> newCosts = [];
                 int availableEnemies = Math.Min(enemyCreditValues.Count, Wave / 10 + 1);
                 Enemy squadLeader = null;
@@ -247,7 +255,7 @@ public class Mission
                 {
                     newCosts.Add(enemyCreditValues[i].cost);
                 }
-                var enemyCredits = Engine.Random.Next((int)(3 * difficulty), (int)(5 * difficulty));
+                var enemyCredits = Engine.Random.Next((int)(difficulty), (int)(difficulty * 2));
                 while (enemyCredits > 0)
                 {
                     for (int i = 0; i < availableEnemies; i++)

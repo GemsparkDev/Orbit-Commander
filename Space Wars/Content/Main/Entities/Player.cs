@@ -75,7 +75,7 @@ public class Player : Entity
     public Dictionary<ModuleType, Module> modules = new()
     {
         { ModuleType.Hull, ItemFactory.GetItem(Modules.Hull) },
-        { ModuleType.Guns, ItemFactory.GetItem(Modules.Sniper) },
+        { ModuleType.Guns, ItemFactory.GetItem(Modules.LMG) },
         { ModuleType.Engines, ItemFactory.GetItem(Modules.Engines) },
         { ModuleType.Sensors, ItemFactory.GetItem(Modules.Sensors) },
         { ModuleType.Core, ItemFactory.GetItem(Modules.SummonShield) }
@@ -295,6 +295,26 @@ public class Player : Entity
             {
                 EventHandler.ToggleDockingMenus();
             }
+            if (Progression > 2 && Input.OldState.IsKeyUp(Keys.C) && Input.NewState.IsKeyDown(Keys.C))
+            {
+                int count = 0;
+                foreach (var pickup in leashedMaterials)
+                {
+                    if (pickup is not Construct && pickup is not Module)
+                    {
+                        count++;
+                    }
+                }
+                if (count >= 3)
+                {
+                    foreach (var pickup in leashedMaterials)
+                    {
+                        pickup.isExpired = true;
+                    }
+                    leashedMaterials.Clear();
+                    Engine.EntityManager.Add(Enemy.NewMakeshiftMothership(position, velocity, 0));
+                }
+            }
             if (dockedEntity == null)
             {
                 targetVector = Vector2.Normalize(new Vector2(Mouse.GetState().X, Mouse.GetState().Y) - Engine.BackBuffer / 2 - position + Engine.Camera.Position);
@@ -358,8 +378,8 @@ public class Player : Entity
                         float fuseRatio = (float)(CountFuses(ModuleType.Engines)) / 3;
                         engineParticles.speedOfEmission = 450f * fuseRatio;
                         engineSounds.Volume = Math.Clamp(fuseRatio, 0, 1);
-                        float speed = 0.2f;
-                        velocity += Engine.ToUnitVector(angle) * 60 * Engine.DeltaSeconds * speed * 2 * fuseRatio / (leashedMaterials.Count + 2);
+                        float speed = 0.4f;
+                        velocity += Engine.ToUnitVector(angle) * 60 * Engine.DeltaSeconds * speed * fuseRatio / (leashedMaterials.Count + 2);
                     }
                 }
             }
@@ -417,6 +437,11 @@ public class Player : Entity
     }
     public override void Collide(int _damage)
     {
+        if (dockedEntity != null)
+        {
+            dockedEntity.Collide(_damage);
+            return;
+        }
         if (_damage > 0 && invincibilityCooldown <= 0)
         {
             Engine.ShakeScreen(0.08f * _damage);
@@ -571,9 +596,9 @@ public class Player : Entity
         };
         Engine.EntityManager.Add(shot);
         SoundManager.PlaySound(Assets.Get(Sound.LMGFire), position);
-        Engine.ShakeScreen(0.15f);
-        velocity -= targetVector / 16;
-        modules[ModuleType.Guns].cooldown = 0.09f;
+        Engine.ShakeScreen(0.01f);
+        velocity -= targetVector / 8;
+        modules[ModuleType.Guns].cooldown = 0f;
     }
     public void Silenced()
     {
