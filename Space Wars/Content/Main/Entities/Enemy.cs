@@ -720,6 +720,106 @@ public class Enemy : Entity
             yield return 0;
         }
     }
+    IEnumerable<int> Exodus()
+    {
+        float thrust = 10;
+        float cooldown1 = 0;
+        float cooldown2 = 2.5f;
+        float missileGap = 0;
+        Vector2 randomPos = Vector2.Zero;
+        enemyRange.radius = 250;
+        var col = Color.DarkRed;
+        col.A = 0;
+        ParticleEmitter engineParticles = new(Assets.Get(Sprite.Dot), 0.15f, Vector2.Zero, 0, 45, 2, 0,
+            450f, Color.Yellow, col, EmitterType.EmissionOverTime);
+        while (true)
+        {
+            Entity nearestEnemy = Engine.EntityManager.NearestEnemy(this);
+            Entity nearestProjectile = Engine.EntityManager.NearestProjectile(this, isFriendly);
+            Vector2 relativePosition = Player.position - position;
+            Vector2 normalizedAcceleration = GetNormalizedAcceleration() * 10;
+            Vector2 targetVelocity = Vector2.Normalize(relativePosition) * 5 + Player.velocity;
+            Vector2 offset = targetVelocity - velocity;
+            var dir = new Vector2(MathF.Sin(angle), -MathF.Cos(angle));
+            if (cooldown1 > 0)
+            {
+                cooldown1 -= Engine.DeltaSeconds;
+            }
+            if (cooldown2 > 0)
+            {
+                cooldown2 -= Engine.DeltaSeconds;
+            }
+            if (missileGap > 0)
+            {
+                missileGap -= Engine.DeltaSeconds;
+            }
+            if ((nearestEnemy as Enemy) != null && (nearestEnemy as Enemy).deleteOnCollide && (nearestEnemy.position - position).Length() < 100)
+            {
+                if (cooldown <= 0)
+                {
+                    cooldown = 1;
+                    Vector2 direction = Engine.ToUnitVector(angle + MathF.PI / 2);
+                    Engine.EntityManager.Add(new PulseShot(position, direction * 5 + velocity, angle, 0, isFriendly, damage));
+                    SoundManager.PlaySound(Assets.Get(Sound.PulseFire), position);
+                }
+            }
+            if ((offset.Length() < 0.1f || MathF.Abs(targetAngle - angle) > 0.2f))
+            {
+                thrust = 0;
+            }
+            else
+            {
+                thrust = 10 + normalizedAcceleration.Length();
+            }
+            float playerAngle = MathF.Atan2(relativePosition.Y, relativePosition.X) + MathF.PI / 2;
+            if (MathF.Abs(playerAngle - angle) < 0.15f && missileGap <= 0)
+            {
+                bool fire = false;
+                if (cooldown1 <= 0)
+                {
+                    cooldown1 = 5;
+                    fire = true;
+                }
+                else if (cooldown2 <= 0)
+                {
+                    cooldown2 = 5;
+                    fire = true;
+                }
+                if (fire)
+                {
+                    missileGap = 0.5f;
+                    Vector2 direction = Engine.ToUnitVector(angle);
+                    Engine.EntityManager.Add(NewMissile(position, direction * 5 + velocity, angle, isFriendly));
+                    SoundManager.PlaySound(Assets.Get(Sound.MissileFire), position);
+                }
+            }
+            targetAngle = MathF.Atan2(offset.Y, offset.X) + MathF.PI / 2;
+            if (relativePosition.Length() > 1000)
+            {
+                targetAngle = MathF.Atan2(relativePosition.Y, relativePosition.X) + MathF.PI / 2;
+            }
+            if (nearestProjectile != null)
+            {
+                Vector2 pos = Vector2.Normalize(position - nearestProjectile.position);
+                Vector2 vel = Vector2.Normalize(velocity - nearestProjectile.velocity);
+                if ((pos * vel).Length() > 0.8f)
+                {
+                    targetAngle += MathF.PI / 2;
+                    thrust = 10;
+                }
+            }
+            RotateTowards(targetAngle, 0.2f);
+            LowerCooldown();
+            velocity += dir * thrust * Engine.DeltaSeconds;
+            engineParticles.position = position;
+            //engineParticles.offsetVelocity = velocity;
+            engineParticles.sprayAngle = angle * 180 / MathF.PI + 180;
+            engineParticles.speedOfEmission = thrust * 100;
+            engineParticles.particleVelocity = 3 - 3 / (thrust + 1);
+            engineParticles.Update();
+            yield return 0;
+        }
+    }
     //Enemies
     IEnumerable<int> Fighter()
     {
@@ -1786,6 +1886,7 @@ public class Enemy : Entity
             yield return 0;
         }
     }
+
     public static Enemy NewDummyEnemy(Vector2 _position, bool _isFriendly = false)
     {
         return new(_position, Vector2.Zero, 0, 0, 0, Assets.Get(Sprite.Fighter), _isFriendly);
@@ -1949,6 +2050,13 @@ public class Enemy : Entity
         enemy.AddBehaviour(enemy.MakeshiftMothership());
         enemy.AddBehaviour(enemy.EnemyDeath(0.01f));
         enemy.Components.Add(new DockableComponent(enemy, Containers.MothershipMenu));
+        return enemy;
+    }
+    public static Enemy NewExodus(Vector2 position, Vector2 velocity, float angle, bool _isFriendly = false)
+    {
+        Enemy enemy = new(position, velocity, angle, 8, 80, Assets.Get(Sprite.SymmetryBoss), _isFriendly);
+        enemy.AddBehaviour(enemy.Exodus());
+        enemy.AddBehaviour(enemy.EnemyDeath(1));
         return enemy;
     }
 }

@@ -347,6 +347,13 @@ public class Mission
         {
             Engine.SaveGame.Player.Dock();
         }
+        if (Engine.SaveGame.CurrentMissionCompleted && Engine.Random.Next(0, 10000) == 0)
+        {
+            foreach (var planet in planets)
+            {
+                planet.EasterEgg = true;
+            }
+        }
     }
     public void AttractObject(Entity _entity)
     {

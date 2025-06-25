@@ -2,8 +2,6 @@
 using Microsoft.Xna.Framework.Graphics;
 using Space_Wars.Content.Main.Particles;
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
 
 namespace Space_Wars.Content.Main.Entities;
 
@@ -17,8 +15,9 @@ public class GravitationalSource
     private ParticleEmitter trajectory;
     public bool isImmovable;
     private bool hasRing;
+    public bool EasterEgg { get; set; } = false;
     private Color color;
-    private float ringAngle = 0;
+    private float time = 0;
     public GravitationalSource(Vector2 _position, Vector2 _velocity, float _mass, float _radius, bool _isImmovable, Color _color, bool _hasRing = false)
     {
         position = _position;
@@ -108,13 +107,19 @@ public class GravitationalSource
     }
     public void Update()
     {
-        if(!isImmovable)
+        time += Engine.DeltaSeconds;
+        if (!isImmovable)
         {
             position += velocity * Engine.DeltaSeconds * 60;
         }
+        if (EasterEgg)
+        {
+            color = new Color((MathF.Cos(time) + 1) / 2, (MathF.Cos(time + MathF.PI * 2 / 3) + 1) / 2, (MathF.Cos(time - MathF.PI * 2 / 3) + 1) / 2);
+            surface.particleColor = color;
+            trajectory.particleColor = color;
+        }
         if (hasRing)
         {
-            ringAngle += Engine.DeltaSeconds;
             int randomAngle = 3;
             for (float i = 0; i < 2 * radius; i++)
             {
@@ -123,7 +128,7 @@ public class GravitationalSource
                 float speed = MathF.Sqrt(mass / distance) * 60;
                 randomAngle = (randomAngle * 65535 + 997) % 628;
                 //Golden Ratio
-                float particleAngle = (i + (float)(randomAngle)/628 + ringAngle * speed / distance) % MathF.Tau;
+                float particleAngle = (i + (float)(randomAngle)/628 + time * speed / distance) % MathF.Tau;
                 Vector2 particlePosition = new Vector2(MathF.Cos(particleAngle), MathF.Sin(particleAngle) * 0.25f) * distance;
                 if (particlePosition.LengthSquared() > radius * radius || particlePosition.Y > 0)
                 {
