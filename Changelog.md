@@ -3,7 +3,11 @@
 Lagrange Commander is a game made using C# in monogame. It is a 2D top down wave based shooter where you must repair and upgrade your ship by salvaging from enemies you defeat. It features realistic N-Body gravitation, which affects all entities and projectiles.
   
 # Changelog  
-    
+
+0.4.8.2 - 6/24/2025    
+ - Begun development of the tier 2 boss, Exodus.    
+ - Implimented a small easter egg.    
+ - Added a mission for the exodus encounter.    
 0.4.8.1 - 6/23/2025    
  - DockableComponents now support the Collide function.    
  - The player can create makeshift mothership on the endless mission using 3 scrap.    
