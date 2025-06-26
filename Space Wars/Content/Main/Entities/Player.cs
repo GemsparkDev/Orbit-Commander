@@ -75,7 +75,7 @@ public class Player : Entity
     public Dictionary<ModuleType, Module> modules = new()
     {
         { ModuleType.Hull, ItemFactory.GetItem(Modules.Hull) },
-        { ModuleType.Guns, ItemFactory.GetItem(Modules.LMG) },
+        { ModuleType.Guns, ItemFactory.GetItem(Modules.Basic) },
         { ModuleType.Engines, ItemFactory.GetItem(Modules.Engines) },
         { ModuleType.Sensors, ItemFactory.GetItem(Modules.Sensors) },
         { ModuleType.Core, ItemFactory.GetItem(Modules.SummonShield) }
@@ -581,7 +581,7 @@ public class Player : Entity
     {
         Engine.EntityManager.Add(Enemy.NewMissile(position + Engine.ToUnitVector(gunAngle.angle + MathF.PI / 2) * 6, targetVector * 9 + velocity, gunAngle.angle, true));
         SoundManager.PlaySound(Assets.Get(Sound.MissileFire), position);
-        modules[ModuleType.Guns].cooldown = 0.15f;
+        modules[ModuleType.Guns].cooldown = 1.5f;
         velocity -= targetVector / 4;
         Engine.ShakeScreen(0.3f);
     }
@@ -598,7 +598,7 @@ public class Player : Entity
         SoundManager.PlaySound(Assets.Get(Sound.LMGFire), position);
         Engine.ShakeScreen(0.01f);
         velocity -= targetVector / 8;
-        modules[ModuleType.Guns].cooldown = 0f;
+        modules[ModuleType.Guns].cooldown = 0.15f;
     }
     public void Silenced()
     {

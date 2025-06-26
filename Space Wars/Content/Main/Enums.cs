@@ -20,6 +20,7 @@ public enum Modules
     Missile,
     LMG,
     Sniper,
+    Silenced,
     //Cores
     Dash,
     GrapplingHook,
@@ -55,6 +56,7 @@ public enum Sprite
     Trap,
     Explosion,
     Bomb,
+    ExodusBoss,
 
     MetalScrap,
     RealMetalScrap,

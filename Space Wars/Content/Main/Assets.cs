@@ -48,6 +48,7 @@ public static class Assets
         Sprites.Add(Sprite.Barricade, Content.Load<Texture2D>("Images/Entity_22"));
         Sprites.Add(Sprite.Explosion, Content.Load<Texture2D>("Images/Explosion"));
         Sprites.Add(Sprite.Bomb, Content.Load<Texture2D>("Images/Entity_23"));
+        Sprites.Add(Sprite.ExodusBoss, Content.Load<Texture2D>("Images/Entity_24"));
 
         //Items
         Sprites.Add(Sprite.MetalScrap, Content.Load<Texture2D>("Images/Item_0"));

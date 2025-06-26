@@ -77,12 +77,12 @@ public class EntityManager
         "Survive",
         0.25f, new Vector2(0, -8*50), 1000, 4) { isAggressive = true, playerProgression = 3 },
 
-        new([ new(Vector2.Zero, Vector2.Zero, 5000, 3, true, Color.Cyan),
-        new(new Vector2(400, 0), GravitationalSource.GetOrbitalVelocity(new Vector2(400, 0), Vector2.Zero, 5000), 240, 1f, false, Color.Cyan),
-        new(new Vector2(-600, 0), -GravitationalSource.GetOrbitalVelocity(new Vector2(-600, 0), Vector2.Zero, 5000) * 1.2f, 120, 0.6f, false, Color.Yellow), ],
+        new([ new(Vector2.Zero, Vector2.Zero, 5000, 4.5f, true, Color.Cyan),
+        new(new Vector2(600, 0), GravitationalSource.GetOrbitalVelocity(new Vector2(600, 0), Vector2.Zero, 5000), 240, 1f, false, Color.Cyan),
+        new(new Vector2(-600, 0), GravitationalSource.GetOrbitalVelocity(new Vector2(-600, 0), Vector2.Zero, 5000), 240, 1f, false, Color.Cyan), ],
         [(new AdvancedConstructor(Enemy.NewExodus, new Vector2(0, -6*50), Vector2.Zero, 0, false), [ Condition.Kill ])],
         "Showdown Pt. 2",
-        "Defeat the advanced drone prototype, Exodus. Be warned: It may call for reinforcements.", 1.1f, new Vector2(0, 1), 0, 0, null, true),
+        "Defeat the advanced drone prototype, Exodus. Be warned: It may call for reinforcements.", 1.1f, new Vector2(0, 1), 0, 1, null, true),
     ];
     private Mission currentMission;
     public Mission CurrentMission => currentMission ?? missions[Engine.SaveGame.CurrentMissionIndex].Clone();
