@@ -121,6 +121,7 @@ public class Enemy : Entity
             health -= damage;
             Engine.ShakeScreen(10 / ((position - Engine.Camera.Position).Length() + 200) * damage);
             ParticleManager.Add(new Particle(null, 1, position + new Vector2(0,-1), new Vector2(0,-1.5f), 0, 0, Color.Orange, new Color(255, 0, 0, 0)) { drawText = $"{damage}" });
+            revealDuration = Math.Max(revealDuration, 0.1f * damage);
         }
         else if (damage < 0)
         {
@@ -852,7 +853,7 @@ public class Enemy : Entity
                 }
                 isExpired = true;
                 SoundManager.PlaySound(Assets.Get(Sound.Death), position);
-                Engine.EntityManager.Add(ItemFactory.GetItem(Modules.Silenced, position, GetNormalizedAcceleration() * 10, angularVelocity));
+                Engine.EntityManager.Add(ItemFactory.GetItem(Modules.Crossbow, position, GetNormalizedAcceleration() * 10, angularVelocity));
             }
             engineParticles.sprayAngle = (angle + MathF.PI) * 180 / MathF.PI;
             engineParticles.speedOfEmission = accelerationVector.Length() * 150 + 350;

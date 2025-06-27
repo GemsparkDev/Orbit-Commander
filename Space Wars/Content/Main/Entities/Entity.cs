@@ -104,10 +104,15 @@ public abstract class Entity
                 stealthColor *= MathF.Sqrt(maxDistance - MathF.Sqrt(distanceSqr)) / MathF.Sqrt(maxDistance);
             }
         }
-        else if(Engine.SaveGame.Player.SensingAbility < StealthAbility)
+        else if (Engine.SaveGame.Player.SensingAbility < StealthAbility)
         {
             stealthColor *= 0;
         }
+        float revealLerp = Math.Clamp(revealDuration, 0, 1);
+        stealthColor = new Color(
+            stealthColor.R * (1 - revealLerp) + color.R * revealLerp, 
+            stealthColor.G * (1 - revealLerp) + color.G * revealLerp, 
+            stealthColor.B * (1 - revealLerp) + color.B * revealLerp);
         _spriteBatch.Draw(texture, position, null, stealthColor, angle, Size / 2, 1, 0, 0);
 
         if (Engine.DebugMode)

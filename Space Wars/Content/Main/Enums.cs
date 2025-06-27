@@ -20,7 +20,7 @@ public enum Modules
     Missile,
     LMG,
     Sniper,
-    Silenced,
+    Crossbow,
     //Cores
     Dash,
     GrapplingHook,
@@ -73,6 +73,8 @@ public enum Sprite
     RealTrap,
     RealBarricade,
     RealBomb,
+    CrossbowModule,
+    RealCrossbowModule,
 
     SpiralShot,
     PulseShot,
