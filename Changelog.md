@@ -2,7 +2,11 @@
   
 Lagrange Commander is a game made using C# in monogame. It is a 2D top down wave based shooter where you must repair and upgrade your ship by salvaging from enemies you defeat. It features realistic N-Body gravitation, which affects all entities and projectiles.
   
-# Changelog  
+# Changelog      
+0.4.8.4 - 6/26/2025    
+ - Added a sprite for the crossbow module, renamed from the silenced module.     
+ - Damaging an entity reveals it for a short duration depending on damage.       
+ - Revealed entities are always rendered, and fades out during the last second of reveal.    
 0.4.8.3 - 6/25/2025    
  - Completed the Exodus boss ai, mission, and sprite.    
  - The Exodus boss now drops the silenced weapon type.    
