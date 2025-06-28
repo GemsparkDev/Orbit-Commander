@@ -776,7 +776,7 @@ public class Enemy : Entity
             {
                 Vector2 pos = Vector2.Normalize(position - nearestProjectile.position);
                 Vector2 vel = Vector2.Normalize(velocity - nearestProjectile.velocity);
-                if ((pos.X * vel.X + pos.Y * vel.Y) > 0.5f)
+                if ((pos.X * vel.X + pos.Y * vel.Y) < -0.5f)
                 {
                     int sign = Math.Sign(pos.X * vel.Y - vel.X * pos.Y);
                     if (sign == 0)
@@ -1190,7 +1190,7 @@ public class Enemy : Entity
             {
                 Vector2 pos = Vector2.Normalize(position - nearestProjectile.position);
                 Vector2 vel = Vector2.Normalize(velocity - nearestProjectile.velocity);
-                if ((pos.X * vel.X + pos.Y * vel.Y) > 0.5f)
+                if ((pos.X * vel.X + pos.Y * vel.Y) < -0.75f)
                 {
                     int sign = Math.Sign(pos.X * vel.Y - vel.X * pos.Y);
                     if (sign == 0)
@@ -1273,13 +1273,16 @@ public class Enemy : Entity
             Entity nearestProjectile = Engine.EntityManager.NearestProjectile(NewDummyEnemy(position + Vector2.Normalize(Player.position - position) * 30, isFriendly), isFriendly);
             if (nearestProjectile != null)
             {
-                Vector2 relativePos = position - nearestProjectile.position;
-                float relativeAngle = MathF.Atan2(relativePos.Y, relativePos.X) - MathF.Atan2(nearestProjectile.velocity.Y, nearestProjectile.velocity.X) % MathF.PI;
-                //-15 to 15 degrees
-                if (MathF.Abs(relativeAngle) < MathF.PI/12)
+                Vector2 pos = Vector2.Normalize(position - nearestProjectile.position);
+                Vector2 vel = Vector2.Normalize(velocity - nearestProjectile.velocity);
+                if ((pos.X * vel.X + pos.Y * vel.Y) < -0.5f)
                 {
-                    Vector2 direction = Vector2.Normalize(relativePos);
-                    velocity += new Vector2(direction.Y, -direction.X) * Math.Sign(-relativeAngle);
+                    int sign = Math.Sign(pos.X * vel.Y - vel.X * pos.Y);
+                    if (sign == 0)
+                    {
+                        sign = 1;
+                    }
+                    velocity += new Vector2(-pos.Y, pos.X) * sign;
                 }
             }
             float timeToHit;
@@ -1519,6 +1522,69 @@ public class Enemy : Entity
                 float diff = MathF.Abs(angle - targetAngle);
                 RotateTowards(targetAngle, diff / 10);
             }
+            yield return 0;
+        }
+    }
+    IEnumerable<int> Healer()
+    {
+        enemyRange.radius = 300;
+        float weaponCooldown = 0;
+        while(true)
+        {
+            velocity *= 0.8f;
+            Entity nearestAlly = Engine.EntityManager.NearestAlly(this);
+            Entity nearestEnemy = Engine.EntityManager.NearestEnemy(this);
+            Entity nearestProjectile = Engine.EntityManager.NearestProjectile(this, isFriendly);
+            if (nearestAlly != null)
+            {
+                if (Vector2.Distance(nearestAlly.position, position) > 300)
+                {
+                    GoToPosition(nearestAlly.position, 9);
+                }
+                else if(cooldown <= 0)
+                {
+                    cooldown = 5;
+                    nearestAlly.Collide(-3);
+                    for (float i = 0; i < 16; i++)
+                    {
+                        float angle = MathF.PI / 8 * i;
+                        ParticleManager.Add(new Particle(Assets.Get(Sprite.Dot), 1, position, Engine.ToUnitVector(angle), angle, 0, Color.Green, Color.Transparent));
+                    }
+                    SoundManager.PlaySound(Assets.Get(Sound.Interact), position);
+                }
+            }
+            else if(nearestEnemy != null && Vector2.Distance(nearestEnemy.position, position) < 500)
+            {
+                Vector2 dir = Vector2.Normalize(position - nearestEnemy.position);
+                GoToPosition(position + dir * 10, 5);
+            }   
+            if (nearestEnemy != null && weaponCooldown <= 0 && Vector2.Distance(nearestEnemy.position, position) < 300)
+            {
+                Vector2 dir = Vector2.Normalize(nearestEnemy.position - position);
+                weaponCooldown = 1;
+                Engine.EntityManager.Add(new PulseShot(position, dir * 10, MathF.Atan2(dir.Y, dir.X) + MathF.PI / 2, 0, isFriendly, damage));
+                SoundManager.PlaySound(Assets.Get(Sound.PulseFire), position);
+            }
+            if (nearestProjectile != null)
+            {
+                Vector2 pos = Vector2.Normalize(position - nearestProjectile.position);
+                Vector2 vel = Vector2.Normalize(velocity - nearestProjectile.velocity);
+                if ((pos.X * vel.X + pos.Y * vel.Y) < -0.75f)
+                {
+                    int sign = Math.Sign(pos.X * vel.Y - vel.X * pos.Y);
+                    if (sign == 0)
+                    {
+                        sign = 1;
+                    }
+                    GoToPosition(position + new Vector2(-pos.Y, pos.X) * sign * 10, 4);
+                }
+            }
+            if (weaponCooldown > 0)
+            {
+                weaponCooldown -= Engine.DeltaSeconds;
+            }
+            LowerCooldown();
+            RotateTowards(MathF.Atan2(velocity.Y, velocity.X) + MathF.PI / 2, 0.15f);
             yield return 0;
         }
     }
@@ -2120,6 +2186,12 @@ public class Enemy : Entity
     {
         Enemy enemy = new(position, velocity, angle, 8, 80, Assets.Get(Sprite.ExodusBoss), _isFriendly);
         enemy.AddBehaviour(enemy.Exodus());
+        return enemy;
+    }
+    public static Enemy NewHealer(Vector2 position, Vector2 velocity, float angle, bool _isFriendly = false)
+    {
+        Enemy enemy = new(position, velocity, angle, 4, 10, Assets.Get(Sprite.Healer), _isFriendly);
+        enemy.AddBehaviour(enemy.Healer());
         return enemy;
     }
 }

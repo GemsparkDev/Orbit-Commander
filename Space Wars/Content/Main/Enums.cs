@@ -57,6 +57,7 @@ public enum Sprite
     Explosion,
     Bomb,
     ExodusBoss,
+    Healer,
 
     MetalScrap,
     RealMetalScrap,

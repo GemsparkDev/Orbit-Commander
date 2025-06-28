@@ -72,6 +72,7 @@ public class Mission
             [
                 (1, Enemy.NewAdvancedFighter),
                 (2, Enemy.NewHovercraft),
+                (2, Enemy.NewHealer),
             ];
         }
         else if(_enemyTier == 2)
