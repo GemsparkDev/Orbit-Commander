@@ -2016,7 +2016,129 @@ public class Enemy : Entity
             yield return 0;
         }
     }
+    IEnumerable<int> LargeMiner()
+    {
+        var arms = new List<Enemy>()
+        {
+            NewLargeMinerArm(position - Engine.ToUnitVector(angle + MathF.PI/2) * texture.Width / 2, velocity, angle, isFriendly, 0, this),
+            NewLargeMinerArm(position + Engine.ToUnitVector(angle + MathF.PI/2) * texture.Width / 2, velocity, angle, isFriendly, 2.5f, this),
+        };
+        float sparkCooldown = 0;
+        foreach (var arm in arms)
+        {
+            Engine.EntityManager.Add(arm);
+        }
+        while (true)
+        {
+            velocity = Vector2.Zero;
+            if (sparkCooldown > 0)
+            {
+                sparkCooldown -= Engine.DeltaSeconds;
+            }
+            for(int i = 0; i < 2; i++)
+            {
+                var entity = arms[i];
+                if (!entity.isExpired)
+                {
 
+                }
+                else
+                {
+                    if (Engine.Random.NextSingle() > sparkCooldown)
+                    {
+                        sparkCooldown = 1.5f;
+                        if (arms[0].isExpired && arms[1].isExpired)
+                        {
+                            sparkCooldown = 1.1f;
+                        }
+                        float sign = (i * 2 - 1);
+                        var dir = Engine.ToUnitVector(this.angle + MathF.PI / 2);
+                        var offset = new Vector2(Engine.Random.NextSingle(), Engine.Random.NextSingle() * 2 - 1);
+                        float angle = MathF.Atan2(dir.Y, dir.X) + MathF.PI / 2;
+                        Engine.EntityManager.Add(new PulseShot(position + dir * sign * texture.Width / 2, dir * sign * 5 + offset * 2 * sign, angle * sign, 0, isFriendly, damage) { texture = Assets.Get(Sprite.Microshot), timeLeft = 3f });
+                        SoundManager.PlaySound(Assets.Get(Sound.LMGFire), position);
+                    }
+                }
+            }
+            var nearestPickup = Engine.EntityManager.NearestItem(this, false);
+            if (nearestPickup != null)
+            {
+                float dist = Vector2.Distance(nearestPickup.position, position);
+                if (dist < 1000 && dist > 100)
+                {
+                    Texture2D texture = Assets.Get(Sprite.Dot);
+                    Vector2 direction = Vector2.Normalize(position - nearestPickup.position);
+                    float angle = MathF.Atan2(direction.Y, direction.X);
+                    float distance = Vector2.Distance(position, nearestPickup.position);
+                    for (float i = 0; i < distance / texture.Height / 2; i++)
+                    {
+                        ParticleManager.Add(new Particle(texture, position - direction * i * texture.Height * 2, angle, color * ((1000f - distance) / 1000f)));
+                    }
+                    nearestPickup.velocity += direction * Engine.DeltaSeconds * 3;
+                }
+                else if (dist < 100)
+                {
+                    nearestPickup.isExpired = true;
+                    Collide(-20);
+                }
+            }
+            if (health != maxHealth && (!arms[0].isExpired || !arms[1].isExpired))
+            {
+                var diff = maxHealth - health;
+                foreach (var entity in arms)
+                {
+                    entity.health -= diff / 2;
+                }
+            }
+            if (health <= 0)
+            {
+                isExpired = true;
+            }
+            yield return 0;
+        }
+    }
+    IEnumerable<int> LargeMinerArm(float _pos, Entity _parent)
+    {
+        float pos = _pos;
+        Vector2 initialPos = position - _parent.position;
+        Vector2 dir = Engine.ToUnitVector(angle);
+        bool createSparks = true;
+        while(true)
+        {
+            velocity = Vector2.Zero;
+            pos += Engine.DeltaSeconds;
+            if (pos < 3.5f)
+            {
+                position = initialPos + _parent.position + new Vector2(Engine.Random.NextSingle() * 2 - 1, Engine.Random.NextSingle() * 2 - 1) * 3 + dir * 3 * pos;
+            }
+            else if (pos < 4)
+            {
+                position = initialPos + _parent.position + dir * 10.5f * (4f - pos) * 2;
+            }
+            else
+            {
+                if (createSparks)
+                {
+                    for (int i = Engine.Random.Next(7, 10); i > 0; i--)
+                    {
+                        ParticleManager.Add(new Particle(Assets.Get(Sprite.Dot), 0.5f, position + new Vector2(0, texture.Height / 2), dir * 3 + new Vector2(Engine.Random.NextSingle() * 2 - 1, Engine.Random.NextSingle() * 2 - 1), 0, 0, Color.Cyan, Color.Transparent));
+                    }
+                    createSparks = false;
+                }
+                position = initialPos + _parent.position + new Vector2(Engine.Random.NextSingle() * 2 - 1, Engine.Random.NextSingle() * 2 - 1) * (5f - pos) * (5f - pos) * 5;
+            }
+            if (pos > 5)
+            {
+                pos -= 5;
+                createSparks = true;
+            }
+            if (health <= 0)
+            {
+                isExpired = true;
+            }
+            yield return 0;
+        }
+    }
     public static Enemy NewDummyEnemy(Vector2 _position, bool _isFriendly = false)
     {
         return new(_position, Vector2.Zero, 0, 0, 0, Assets.Get(Sprite.Fighter), _isFriendly);
@@ -2192,6 +2314,18 @@ public class Enemy : Entity
     {
         Enemy enemy = new(position, velocity, angle, 4, 10, Assets.Get(Sprite.Healer), _isFriendly);
         enemy.AddBehaviour(enemy.Healer());
+        return enemy;
+    }
+    public static Enemy NewLargeMiner(Vector2 position, Vector2 velocity, float angle)
+    {
+        Enemy enemy = new(position, velocity, angle, 5, 500, Assets.Get(Sprite.Miner), false);
+        enemy.AddBehaviour(enemy.LargeMiner());
+        return enemy;
+    }
+    public static Enemy NewLargeMinerArm(Vector2 position, Vector2 velocity, float angle, bool _isFriendly, float _pos, Entity _parent)
+    {
+        Enemy enemy = new(position, velocity, angle, 5, 200, Assets.Get(Sprite.Miner), _isFriendly);
+        enemy.AddBehaviour(enemy.LargeMinerArm(_pos, _parent));
         return enemy;
     }
 }

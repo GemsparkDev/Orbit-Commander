@@ -40,9 +40,9 @@ public class EntityManager
         "A small outpost is located orbiting this rogue planet. Defend it.", 0.75f, new Vector2(0, 1), 40) { playerProgression = 1 },
 
         new( [ new(Vector2.Zero, Vector2.Zero, 25000, 7f, true, Color.Cyan), new(new Vector2(800, 0), GravitationalSource.GetOrbitalVelocity(new Vector2(800, 0), Vector2.Zero, 25000), 150, 0.5f, false, Color.Cyan), ],
-        [(new EntityConstructor(Enemy.NewMiner, new Vector2(0, -7*50), Vector2.Zero, 0), [ Condition.Protect ])],
-        "Extraction",
-        "This deceptively dense planet is rich with materials that our deployed miner will extract.", 1, new Vector2(0, 1), 20) { playerProgression = 1 },
+        [(new EntityConstructor(Enemy.NewLargeMiner, new Vector2(0, -8*50), Vector2.Zero, 0), [ Condition.Kill ])],
+        "Assault prequel",
+        "Defeat the mega miner", 0.5f, new Vector2(0, 1), 20) { playerProgression = 1, isAggressive = true },
 
         new([ new(Vector2.Zero, Vector2.Zero, 5000, 3, true, Color.Cyan),
             new(new Vector2(400, 0), GravitationalSource.GetOrbitalVelocity(new Vector2(400, 0), Vector2.Zero, 5000), 240, 1f, false, Color.Cyan),
@@ -83,6 +83,11 @@ public class EntityManager
         [(new AdvancedConstructor(Enemy.NewExodus, new Vector2(0, -6*50), Vector2.Zero, 0, false), [ Condition.Kill ])],
         "Showdown Pt. 2",
         "Defeat the advanced drone prototype, Exodus. Be warned: It may call for reinforcements.", 1.1f, new Vector2(0, 1), 0, 1, null, true),
+
+        new( [ new(Vector2.Zero, Vector2.Zero, 25000, 7f, true, Color.Cyan), new(new Vector2(800, 0), GravitationalSource.GetOrbitalVelocity(new Vector2(800, 0), Vector2.Zero, 25000), 150, 0.5f, false, Color.Cyan), ],
+        [(new EntityConstructor(Enemy.NewMiner, new Vector2(0, -7*50), Vector2.Zero, 0), [ Condition.Protect ])],
+        "Extraction",
+        "This deceptively dense planet is rich with materials that our deployed miner will extract.", 1, new Vector2(0, 1), 20),
     ];
     private Mission currentMission;
     public Mission CurrentMission => currentMission ?? missions[Engine.SaveGame.CurrentMissionIndex].Clone();
