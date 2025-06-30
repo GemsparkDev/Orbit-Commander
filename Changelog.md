@@ -2,7 +2,19 @@
   
 Lagrange Commander is a game made using C# in monogame. It is a 2D top down wave based shooter where you must repair and upgrade your ship by salvaging from enemies you defeat. It features realistic N-Body gravitation, which affects all entities and projectiles.
   
-# Changelog      
+# Changelog     
+0.4.9 - 6/29/2025    
+ - Added sprites for the crossbow shot and the large miner.    
+ - Added various particle effects, sounds, and other polish to the large miner.    
+ - The large miner now drops the grappling hook.    
+ - Normalized acceleration now uses planet acceleration rather than it's radius squared over distance.    
+ - Added a debug diagram sampling gravity across the screen.    
+ - The damage reveal bonus has been increased for low damage bullets.    
+ - Some enemies now use the larger SpiralShot sprite instead of the Microshot sprite.    
+ - The crossbow now shoots slower and does more damage.    
+ - Tweaked the large miner assault mission.    
+ - isAggressive now spawns waves early if you take too long.    
+ - Fixed bug #24.    
  0.4.8.6 - 6/28/2025    
  - Added the large miner enemy.    
  - Added an assault mission to the first system.    
