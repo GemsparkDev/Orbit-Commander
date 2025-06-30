@@ -26,7 +26,8 @@ public class EntityManager
     public int MissionLength => missions.Count;
     private readonly List<Mission> missions =
     [
-        new([ new(Vector2.Zero, Vector2.Zero, 10000, 8, true, Color.Cyan), new(new Vector2(1000, 0), GravitationalSource.GetOrbitalVelocity(new Vector2(1000, 0), Vector2.Zero, 10000), 250, 1.5f, false, Color.Cyan) ],
+        new([ new(Vector2.Zero, Vector2.Zero, 10000, 8, true, Color.Cyan), 
+        new(new Vector2(1000, 0), GravitationalSource.GetOrbitalVelocity(new Vector2(1000, 0), Vector2.Zero, 10000), 250, 1.5f, false, Color.Cyan) ],
         [ (new EntityConstructor(Enemy.NewMothership, new Vector2(0, -8*50 - Assets.DimsOf(Sprite.Mothership).Y / 2), Vector2.Zero, 0f), [ Condition.Protect, Condition.CustomIncomplete ])],
         "Crash Landing",
         "A simple system with a large planet and one closely orbiting moon. Drone activity detected, but minimal.",
@@ -37,12 +38,13 @@ public class EntityManager
             (new EntityConstructor(Enemy.NewTurret, new Vector2(0, -200 - Assets.DimsOf(Sprite.TurretBase).Y / 2), Vector2.Zero, 0), [ Condition.Protect ]),
             (new EntityConstructor(Enemy.NewOrbiter, new Vector2(400, 0), GravitationalSource.GetOrbitalVelocity(new Vector2(400, 0), Vector2.Zero, 3500), 0), [ Condition.Protect ])],
         "Sentry Defense",
-        "A small outpost is located orbiting this rogue planet. Defend it.", 0.75f, new Vector2(0, 1), 40) { playerProgression = 1 },
+        "A small outpost is located orbiting this rogue planet. Defend it.", 0.75f, new Vector2(0, 1), 40) { playerProgression = 1, isAggressive = true },
 
-        new( [ new(Vector2.Zero, Vector2.Zero, 25000, 7f, true, Color.Cyan), new(new Vector2(800, 0), GravitationalSource.GetOrbitalVelocity(new Vector2(800, 0), Vector2.Zero, 25000), 150, 0.5f, false, Color.Cyan), ],
-        [(new EntityConstructor(Enemy.NewLargeMiner, new Vector2(0, -8*50), Vector2.Zero, 0), [ Condition.Kill ])],
+        new( [ new(Vector2.Zero, Vector2.Zero, 15000, 6f, true, Color.Cyan), 
+        new(new Vector2(0, 800), GravitationalSource.GetOrbitalVelocity(new Vector2(0, 800), Vector2.Zero, 15000) * 0.85f, 1000, 1f, false, Color.Cyan), ],
+        [(new EntityConstructor(Enemy.NewLargeMiner, new Vector2(0, -6*50 - Assets.Get(Sprite.LargeMiner).Height/2), Vector2.Zero, 0), [ Condition.Kill ])],
         "Assault prequel",
-        "Defeat the mega miner", 0.5f, new Vector2(0, 1), 20) { playerProgression = 1, isAggressive = true },
+        "Defeat the mega miner", 0.5f, new Vector2(0, 1), 0) { playerProgression = 1, isAggressive = true },
 
         new([ new(Vector2.Zero, Vector2.Zero, 5000, 3, true, Color.Cyan),
             new(new Vector2(400, 0), GravitationalSource.GetOrbitalVelocity(new Vector2(400, 0), Vector2.Zero, 5000), 240, 1f, false, Color.Cyan),
@@ -68,7 +70,7 @@ public class EntityManager
             (new EntityConstructor(Enemy.NewOrbiter, new Vector2(0, 1650), GravitationalSource.GetOrbitalVelocity(new Vector2(0, 1650), new Vector2(0, 1800), 1500)
                 + GravitationalSource.GetOrbitalVelocity(new Vector2(0, 1800), Vector2.Zero, 20000), 0), [ Condition.Protect ])],
         "Assault",
-        "You have been placed in high orbit. Destroy the enemy base on the surface planet, and all reinforcements that arrive.", 0.75f, new Vector2(0, 1650), 2, 1, null, false) { playerDocked = true },
+        "You have been placed in high orbit. Destroy the enemy base on the surface planet, and all reinforcements that arrive.", 0.75f, new Vector2(0, 1650), 2, 1, null, false) { playerDocked = true, isAggressive = true },
 
         new([ new(Vector2.Zero, Vector2.Zero, 20000, 9, true, Color.OrangeRed, true),
         new(new Vector2(1200, 0), GravitationalSource.GetOrbitalVelocity(new Vector2(1200, 0), Vector2.Zero, 20000), 750, 2f, false, Color.Red) ],

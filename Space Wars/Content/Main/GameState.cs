@@ -58,6 +58,22 @@ public abstract class GameState
                 _spriteBatch.Draw(Engine.Line, new Vector2(Engine.Camera.Position.X - Engine.ScreenSize.X / 2, y * 50), new Rectangle(0, (int)(y * 50), (int)Engine.ScreenSize.X, 1), Color.Gray * 0.5f, 0, Vector2.Zero, 1, SpriteEffects.None, 0.4f);
                 _spriteBatch.DrawString(Assets.TextFont, ((int)y).ToString(), new Vector2(Engine.Camera.Position.X - Engine.ScreenSize.X / 2, y * 50), Color.White, 0, Vector2.Zero, 1, SpriteEffects.None, 0.4f);
             }
+            Vector2 screen = Engine.ScreenSize / 16;
+            for (int i = (int)(-screen.X); i < screen.X + 1; i++)
+            {
+                for (int j = (int)(-screen.Y); j < screen.Y + 1; j++)
+                {
+                    Vector2 pos = Engine.Camera.Position + new Vector2(i, j) * 8;
+                    float col = 0;
+                    float strength = Engine.EntityManager.CurrentMission.GetNormalizedAcceleration(pos).Length() * 30;
+                    int nearestInt = (int)Math.Round(strength);
+                    if (Math.Abs(strength - nearestInt) < 0.01f * strength)
+                    {
+                        col = 1;
+                    }
+                    _spriteBatch.Draw(Assets.Get(Sprite.Dot), pos, new Color(1f, 1f - strength / 25f, 1f - strength / 25f) * col);
+                }
+            }
         }
     }
 }
@@ -168,7 +184,7 @@ public class MissionSelect : GameState
     private List<(float distance, List<int> prerequisites, int system)> missions =
     [
         (200, [], 0), (160, [0], 0), (140, [0], 0), (100, [1, 2], 0),
-        (210, [3], 1), (170, [4], 1), (145, [5], 1), (50, [5], 1)
+        (210, [3], 1), (170, [4], 1), (145, [5], 1), (130, [5], 1), (50, [6], 1)
     ];
     private Vector2 playerPosition;
     private List<(int system, ParticleEmitter orbit)> missionOrbits = [];

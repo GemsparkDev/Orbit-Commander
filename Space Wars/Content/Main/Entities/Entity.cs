@@ -23,7 +23,8 @@ public abstract class Entity
     public bool isFriendly;
     public int damage;
     public virtual int SensingAbility { get; protected set; } = 1;
-    public virtual int StealthAbility { get; protected set; } = 0;
+    public virtual int StealthAbility { get { return stealthAbility; } protected set { stealthAbility = value; } }
+    private int stealthAbility = 0;
     protected float revealDuration = 0;
     public EntityType entityType;
     public ComponentList Components { get; } = new();
@@ -87,33 +88,31 @@ public abstract class Entity
         {
             return;
         }
-        Color stealthColor = color;
+        Vector4 stealthColor = new Vector4(color.R, color.G, color.B, color.A);
+        stealthColor /= 255;
+        float revealLerp = (float)Math.Clamp(revealDuration, 0f, 1f);
         float maxDistance = EntityManager.StealthRange * (float)Engine.SaveGame.Player.CountFuses(ModuleType.Sensors) / 4;
         //Player has superior sensing to stealth -> full detection
         //Player has equal sensing to stealth -> partial detection when nearby
         //Player has inferior sensing to stealth -> no detection
-        if (Engine.SaveGame.Player.SensingAbility == StealthAbility)
+        if (Engine.SaveGame.Player.SensingAbility == stealthAbility)
         {
             float distanceSqr = EntityManager.DistanceSqr(Engine.SaveGame.Player, this);
             if ((distanceSqr > maxDistance * maxDistance))
             {
-                stealthColor *= 0;
+                stealthColor.W = 0;
             }
             else
             {
-                stealthColor *= MathF.Sqrt(maxDistance - MathF.Sqrt(distanceSqr)) / MathF.Sqrt(maxDistance);
+                stealthColor.W = MathF.Sqrt(maxDistance - MathF.Sqrt(distanceSqr)) / MathF.Sqrt(maxDistance);
             }
         }
-        else if (Engine.SaveGame.Player.SensingAbility < StealthAbility)
+        else if (Engine.SaveGame.Player.SensingAbility < stealthAbility)
         {
-            stealthColor *= 0;
+            stealthColor.W = 0;
         }
-        float revealLerp = Math.Clamp(revealDuration, 0, 1);
-        stealthColor = new Color(
-            stealthColor.R * (1 - revealLerp) + color.R * revealLerp, 
-            stealthColor.G * (1 - revealLerp) + color.G * revealLerp, 
-            stealthColor.B * (1 - revealLerp) + color.B * revealLerp);
-        _spriteBatch.Draw(texture, position, null, stealthColor, angle, Size / 2, 1, 0, 0);
+        stealthColor.W = MathF.Max(stealthColor.W, revealLerp);
+        _spriteBatch.Draw(texture, position, null, new Color(stealthColor.X, stealthColor.Y, stealthColor.Z) * stealthColor.W, angle, Size / 2, 1, 0, 0);
 
         if (Engine.DebugMode)
         {

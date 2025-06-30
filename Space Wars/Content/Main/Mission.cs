@@ -93,6 +93,7 @@ public class Mission
                 (4, Enemy.NewShotgunner),
                 (1, Enemy.NewAdvancedFighter),
                 (2, Enemy.NewHovercraft),
+                (2, Enemy.NewHealer),
                 (1, Enemy.NewStealthFighter),
                 (2, Enemy.NewHunter),
             ];
@@ -197,17 +198,32 @@ public class Mission
                         float pow = (500 - i) / 500;
                         ParticleManager.Add(new Particle(Assets.Get(Sprite.Dot), 0.5f, enemy.position + dir * i * height, Vector2.Zero, angle, 0, new Color(255, 0, 0), Color.Transparent));
                     }
+                    if (isAggressive)
+                    {
+                        waveTimer = (enemiesSpawned.Count * 4f + 5f) * timerModifier;
+                        maxWaveTimer = waveTimer;
+                    }
                 }
                 currentWaveActive = true;
             }
             else
             {
                 waveTimer -= Engine.DeltaSeconds;
-                EventHandler.UpdateEnemyCountdownUI(waveTimer, maxWaveTimer, Wave);
                 foreach (var enemy in enemiesSpawned)
                 {
                     ParticleManager.Add(new Particle(enemy.texture, enemy.position, enemy.angle, new Color(255,127, 0) * (Engine.Random.NextSingle() / 2 + 0.25f)));
                 }
+            }
+        }
+        if (isAggressive && currentWaveActive)
+        {
+            if (waveTimer <= 0)
+            {
+                isReady = true;
+            }
+            else
+            {
+                waveTimer -= Engine.DeltaSeconds;
             }
         }
         if (isReady)
@@ -235,21 +251,17 @@ public class Mission
                 enemiesSpawned.Add(boss);
                 EnemiesSpawned = 1;
                 currentBoss = (currentBoss + 1) % bosses.Count;
-                EventHandler.UpdateEnemyCountdownUI(waveTimer, maxWaveTimer, Wave);
                 return;
             }
             else
             {
+                difficulty = (int)((Wave + 1) * MathF.Log(Wave + 1, MathF.E) - Wave) + 1;
                 if (isAggressive)
                 {
-                    difficulty = (int)(Math.Pow(Wave, 1.5) + 5);
-                }
-                else
-                {
-                    difficulty = (int)((Wave + 1) * MathF.Log(Wave + 1, MathF.E) - Wave) + 1;
+                    difficulty += (int)(Math.Pow(Wave, 1.5) + 5);
                 }
                 List<int> newCosts = [];
-                int availableEnemies = Math.Min(enemyCreditValues.Count, Wave / 10 + 1);
+                int availableEnemies = Math.Min(enemyCreditValues.Count, Wave / 10 + 1 + ((isAggressive) ? 1 : 0));
                 Enemy squadLeader = null;
                 int count = 0;
                 for (int i = 0; i < availableEnemies; i++)
@@ -298,6 +310,7 @@ public class Mission
                 }
             }
         }
+        EventHandler.UpdateEnemyCountdownUI(waveTimer, maxWaveTimer, Wave);
     }
     public void PlanetUpdate()
     {
@@ -458,10 +471,19 @@ public class Mission
         Vector2 acceleration = Vector2.Zero;
         foreach (var planet in planets)
         {
-            Vector2 normalVector = Vector2.Normalize(_position - planet.position);
-            acceleration += normalVector * (planet.radius * planet.radius / EntityManager.DistanceSqr(planet.position, _position));
+            acceleration -= planet.GetAcceleration(_position);
         }
         return acceleration;
+    }
+    public float GetPotentialEnergy(Vector2 _position)
+    {
+        float energy = 0;
+        foreach (var planet in planets)
+        {
+            float distance = (_position - planet.position).Length();
+            energy += planet.mass / distance;
+        }
+        return energy;
     }
     public Mission Clone()
     {
@@ -470,7 +492,7 @@ public class Mission
         {
             _planets[i] = planets[i].Copy();
         }
-        return new Mission(_planets, CopyObjectives, Name, Description, timerModifier, playerPosition, WaveGoal, tier, cutscene, escapeVehicle != null) { playerProgression = this.playerProgression, playerDocked = this.playerDocked };
+        return new Mission(_planets, CopyObjectives, Name, Description, timerModifier, playerPosition, WaveGoal, tier, cutscene, escapeVehicle != null) { playerProgression = this.playerProgression, playerDocked = this.playerDocked, isAggressive = this.isAggressive };
     }
     private Vector2 NewSpawnLocation()
     {

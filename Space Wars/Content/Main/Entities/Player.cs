@@ -75,7 +75,7 @@ public class Player : Entity
     public Dictionary<ModuleType, Module> modules = new()
     {
         { ModuleType.Hull, ItemFactory.GetItem(Modules.Hull) },
-        { ModuleType.Guns, ItemFactory.GetItem(Modules.Basic) },
+        { ModuleType.Guns, ItemFactory.GetItem(Modules.LMG) },
         { ModuleType.Engines, ItemFactory.GetItem(Modules.Engines) },
         { ModuleType.Sensors, ItemFactory.GetItem(Modules.Sensors) },
         { ModuleType.Core, ItemFactory.GetItem(Modules.SummonShield) }
@@ -603,17 +603,16 @@ public class Player : Entity
     public void Silenced()
     {
         Vector2 offset = Engine.ToUnitVector(gunAngle.angle + MathF.PI / 2) * Engine.Random.Next(-2, 3);
-        Texture2D dot = Assets.Get(Sprite.Microshot);
-        Projectile shot = new PulseShot(position + offset, targetVector * 12 + velocity + offset / 4, gunAngle.angle, 0, true, 5, false, 1)
+        Texture2D dot = Assets.Get(Sprite.CrossbowShot);
+        Projectile shot = new PulseShot(position + offset, targetVector * 8 + velocity + offset / 4, gunAngle.angle, 0, true, 8, false, 1)
         {
             texture = dot,
-            timeLeft = 3
         };
         Engine.EntityManager.Add(shot);
         SoundManager.PlaySound(Assets.Get(Sound.LMGFire), position);
-        Engine.ShakeScreen(0.15f);
-        velocity -= targetVector / 16;
-        modules[ModuleType.Guns].cooldown = 0.2f;
+        Engine.ShakeScreen(0.2f);
+        velocity -= targetVector / 4;
+        modules[ModuleType.Guns].cooldown = 0.5f;
     }
     public void Dash()
     {

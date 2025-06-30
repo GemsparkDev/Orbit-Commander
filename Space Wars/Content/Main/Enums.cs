@@ -58,6 +58,8 @@ public enum Sprite
     Bomb,
     ExodusBoss,
     Healer,
+    LargeMinerArm,
+    LargeMiner,
 
     MetalScrap,
     RealMetalScrap,
@@ -80,6 +82,7 @@ public enum Sprite
     SpiralShot,
     PulseShot,
     Microshot,
+    CrossbowShot,
 
     Dot,
     Dollar,

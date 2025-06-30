@@ -50,6 +50,8 @@ public static class Assets
         Sprites.Add(Sprite.Bomb, Content.Load<Texture2D>("Images/Entity_23"));
         Sprites.Add(Sprite.ExodusBoss, Content.Load<Texture2D>("Images/Entity_24"));
         Sprites.Add(Sprite.Healer, Content.Load<Texture2D>("Images/Entity_25"));
+        Sprites.Add(Sprite.LargeMinerArm, Content.Load<Texture2D>("Images/Entity_26"));
+        Sprites.Add(Sprite.LargeMiner, Content.Load<Texture2D>("Images/Entity_27"));
 
         //Items
         Sprites.Add(Sprite.MetalScrap, Content.Load<Texture2D>("Images/Item_0"));
@@ -74,6 +76,7 @@ public static class Assets
         Sprites.Add(Sprite.SpiralShot, Content.Load<Texture2D>("Images/Projectile_0"));
         Sprites.Add(Sprite.PulseShot, Content.Load<Texture2D>("Images/Projectile_1"));
         Sprites.Add(Sprite.Microshot, Content.Load<Texture2D>("Images/Projectile_2"));
+        Sprites.Add(Sprite.CrossbowShot, Content.Load<Texture2D>("Images/Projectile_3"));
 
         //Particles
         Sprites.Add(Sprite.Dot, Content.Load<Texture2D>("Images/Particle_0"));
