@@ -52,8 +52,8 @@ public class Enemy : Entity
         {
             angle += MathF.PI * 2;
         }
-        position += velocity;
-        angle += angularVelocity;
+        position += velocity * Engine.DeltaSeconds * 60;
+        angle += angularVelocity * Engine.DeltaSeconds * 60;
 
         ApplyBehaviours();
         if (health > maxHealth)
@@ -945,7 +945,7 @@ public class Enemy : Entity
             }
             else
             {
-                velocity += gravityForce * Engine.DeltaSeconds * 60;
+                velocity += gravityForce * Engine.DeltaSeconds * 60 * 2;
                 if (cooldown <= 0)
                 {
                     Engine.EntityManager.Add(NewMissile(position, Engine.ToUnitVector(angle) * 2, angle, isFriendly));

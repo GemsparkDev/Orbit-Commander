@@ -71,6 +71,8 @@ public static class Assets
         Sprites.Add(Sprite.RealBomb, Content.Load<Texture2D>("Images/UI_32"));
         Sprites.Add(Sprite.CrossbowModule, Content.Load<Texture2D>("Images/Item_4"));
         Sprites.Add(Sprite.RealCrossbowModule, Content.Load<Texture2D>("Images/UI_33"));
+        Sprites.Add(Sprite.RealSpiralModule, Content.Load<Texture2D>("Images/UI_34"));
+        Sprites.Add(Sprite.SpiralModule, Content.Load<Texture2D>("Images/Item_5"));
 
         //Projectiles
         Sprites.Add(Sprite.SpiralShot, Content.Load<Texture2D>("Images/Projectile_0"));
