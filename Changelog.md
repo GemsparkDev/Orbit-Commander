@@ -2,7 +2,21 @@
   
 Lagrange Commander is a game made using C# in monogame. It is a 2D top down wave based shooter where you must repair and upgrade your ship by salvaging from enemies you defeat. It features realistic N-Body gravitation, which affects all entities and projectiles.
   
-# Changelog    
+# Changelog   
+0.4.9.2 - 7/1/2025    
+ - Added the AvoidNearbyEnemies behavior.    
+ - Most enemies now avoid clustering together.    
+ - Added the flamethrower and fireball weapons.    
+ - Added the nanomachine core ability.    
+ - Core abilities now set the core modules cooldown rather than the engine module.    
+ - Moved construct construction to tier 3 player progression.    
+ - Added a new menu for construct construction.    
+ - Added the ability to heal the player with the collide function.    
+ - Added the FlameBolt projectile.    
+ - The mega miner mission now spawns enemies slower.    
+ - Rearranged the order of missions.    
+ - The carrier is now the 4th enemy type to be spawned rather than the 2nd.    
+ - Reduced the isAggressive difficulty bonus.    
 0.4.9.1 - 6/30/2025    
  - Added sprites for the spiral module.    
  - Enemies now move equally irreguardless of the frame rate.    
