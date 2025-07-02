@@ -21,10 +21,13 @@ public enum Modules
     LMG,
     Sniper,
     Crossbow,
+    Flamethrower,
+    Fireball,
     //Cores
     Dash,
     GrapplingHook,
     SummonShield,
+    Nanomachines,
 }
 public enum Sprite
 {

@@ -32,12 +32,12 @@ public abstract class Entity
     {
         get { return (texture.Height + texture.Width) / 4 + 1; }
     }
-    private ParticleEmitter collider;
+    protected ParticleEmitter collider;
     public Vector2 Size
     {
         get { return texture == null ? Vector2.Zero : new Vector2(texture.Width, texture.Height); }
     }
-    internal Player Player => Engine.SaveGame.Player;
+    protected Player Player => Engine.SaveGame.Player;
     public Entity(Texture2D _texture, Vector2 _position, Vector2 _velocity, float _angle, float _angularVelocity, int _damage, bool _isFriendly)
     {
         texture = _texture;

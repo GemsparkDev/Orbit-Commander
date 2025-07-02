@@ -194,6 +194,23 @@ public class Enemy : Entity
             yield return 0;
         }
     }
+    IEnumerable<int> AvoidNearbyAllies()
+    {
+        while (true)
+        {
+            Entity nearestAlly = Engine.EntityManager.NearestAlly(this);
+            if (nearestAlly != null)
+            {
+                if ((position - nearestAlly.position).LengthSquared() < 0.001f)
+                {
+                    position += new Vector2(0, 0.1f);
+                }
+                Vector2 relativePosition = nearestAlly.position - position;
+                position -= Size.Length() * Vector2.Normalize(relativePosition) / (MathF.Sqrt(relativePosition.Length())) / 10;
+            }
+            yield return 0;
+        }
+    }
     //Bosses
     IEnumerable<int> Symmetry()
     {
@@ -877,17 +894,6 @@ public class Enemy : Entity
         {
             velocity *= 0.8f;
             Vector2 normalizedAcceleration = GetNormalizedAcceleration();
-            Entity nearestAlly = Engine.EntityManager.NearestAlly(this);
-            if (nearestAlly != null)
-            {
-                if((position - nearestAlly.position).LengthSquared() < 0.001f)
-                {
-                    position += new Vector2(0,0.1f);
-                }
-                Vector2 relativePosition = nearestAlly.position - position;
-                position -= Size.Length() * Vector2.Normalize(relativePosition) / (MathF.Sqrt(relativePosition.Length())) / 10;
-
-            }
             Entity nearestEnemy = Engine.EntityManager.NearestEnemy(this);
             if(nearestEnemy == null)
             {
@@ -982,7 +988,7 @@ public class Enemy : Entity
             }
             else
             {
-                velocity += gravityForce * Engine.DeltaSeconds * 60;
+                velocity += gravityForce * Engine.DeltaSeconds * 60 * 2;
                 if (cooldown <= 0 && MathF.Abs(targetAngle - angle) < 0.1f)
                 {
                     Engine.EntityManager.Add(new AssassinShot(position, Engine.ToUnitVector(angle) * 15, angle, 0, false, damage));
@@ -1245,17 +1251,6 @@ public class Enemy : Entity
         {
             velocity *= 0.8f;
             Vector2 normalizedAcceleration = GetNormalizedAcceleration();
-            Entity nearestAlly = Engine.EntityManager.NearestAlly(this);
-            if (nearestAlly != null)
-            {
-                if ((position - nearestAlly.position).LengthSquared() < 0.001f)
-                {
-                    position += new Vector2(0, 0.1f);
-                }
-                Vector2 relativePosition = nearestAlly.position - position;
-                position -= Size.Length() * Vector2.Normalize(relativePosition) / (MathF.Sqrt(relativePosition.Length())) / 10;
-
-            }
             float speed = 8 + Math.Max((Player.position - position).Length() - 500, 0) / 500;
             Entity nearestEnemy = Engine.EntityManager.NearestEnemy(this);
             if (nearestEnemy == null)
@@ -1698,6 +1693,7 @@ public class Enemy : Entity
             {
                 isExpired = true;
                 turretCannon.isExpired = true;
+                Explode(20, ColliderRadius);
             }
             if (turretCannon.health != health)
             {
@@ -2162,6 +2158,7 @@ public class Enemy : Entity
     {
         Enemy enemy = new(position, velocity, angle, 5, 8, Assets.Get(Sprite.Fighter), _isFriendly);
         enemy.AddBehaviour(enemy.Fighter());
+        enemy.AddBehaviour(enemy.AvoidNearbyAllies());
         enemy.AddBehaviour(enemy.EnemyDeath(2));
         return enemy;
     }
@@ -2169,6 +2166,7 @@ public class Enemy : Entity
     {
         Enemy enemy = new(position, velocity, angle, 5, 15, Assets.Get(Sprite.Cruiser), _isFriendly);
         enemy.AddBehaviour(enemy.Carrier());
+        enemy.AddBehaviour(enemy.AvoidNearbyAllies());
         enemy.AddBehaviour(enemy.EnemyDeath(1));
         return enemy;
     }
@@ -2176,6 +2174,7 @@ public class Enemy : Entity
     {
         Enemy enemy = new(position, velocity, angle, 8, 5, Assets.Get(Sprite.Sniper), _isFriendly);
         enemy.AddBehaviour(enemy.Sniper());
+        enemy.AddBehaviour(enemy.AvoidNearbyAllies());
         enemy.AddBehaviour(enemy.EnemyDeath(1));
         return enemy;
     }
@@ -2183,12 +2182,14 @@ public class Enemy : Entity
     {
         Enemy enemy = new(position, velocity, angle, 8, 10, Assets.Get(Sprite.Missile), _isFriendly);
         enemy.AddBehaviour(enemy.Missile());
+        enemy.AddBehaviour(enemy.AvoidNearbyAllies());
         return enemy;
     }
     public static Enemy NewShotgunner(Vector2 position, Vector2 velocity, float angle, bool _isFriendly = false)
     {
         Enemy enemy = new(position, velocity, angle, 5, 10, Assets.Get(Sprite.Shotgunner), _isFriendly);
         enemy.AddBehaviour(enemy.Shotgunner());
+        enemy.AddBehaviour(enemy.AvoidNearbyAllies());
         enemy.AddBehaviour(enemy.EnemyDeath(1));
         return enemy;
     }
@@ -2279,6 +2280,7 @@ public class Enemy : Entity
     {
         Enemy enemy = new(position, velocity, angle, 3, 15, Assets.Get(Sprite.AdvancedFighter), _isFriendly);
         enemy.AddBehaviour(enemy.AdvancedFighter());
+        enemy.AddBehaviour(enemy.AvoidNearbyAllies());
         enemy.AddBehaviour(enemy.EnemyDeath(1.5f));
         return enemy;
     }
@@ -2301,6 +2303,7 @@ public class Enemy : Entity
     {
         Enemy enemy = new(position, velocity, angle, 10, 8, Assets.Get(Sprite.Fighter), _isFriendly);
         enemy.AddBehaviour(enemy.StealthFighter());
+        enemy.AddBehaviour(enemy.AvoidNearbyAllies());
         enemy.AddBehaviour(enemy.EnemyDeath(2));
         return enemy;
     }
@@ -2308,6 +2311,7 @@ public class Enemy : Entity
     {
         Enemy enemy = new(position, velocity, angle, 8, 15, Assets.Get(Sprite.Fighter), _isFriendly);
         enemy.AddBehaviour(enemy.Hunter());
+        enemy.AddBehaviour(enemy.AvoidNearbyAllies());
         enemy.AddBehaviour(enemy.EnemyDeath(1));
         return enemy;
     }

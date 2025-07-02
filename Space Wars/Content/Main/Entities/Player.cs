@@ -75,10 +75,10 @@ public class Player : Entity
     public Dictionary<ModuleType, Module> modules = new()
     {
         { ModuleType.Hull, ItemFactory.GetItem(Modules.Hull) },
-        { ModuleType.Guns, ItemFactory.GetItem(Modules.Spiral) },
+        { ModuleType.Guns, ItemFactory.GetItem(Modules.Flamethrower) },
         { ModuleType.Engines, ItemFactory.GetItem(Modules.Engines) },
         { ModuleType.Sensors, ItemFactory.GetItem(Modules.Sensors) },
-        { ModuleType.Core, ItemFactory.GetItem(Modules.SummonShield) }
+        { ModuleType.Core, ItemFactory.GetItem(Modules.Nanomachines) }
     };
     private bool[,] moduleFuses = new bool[5, 4]
     {
@@ -226,7 +226,7 @@ public class Player : Entity
         //Only displays if the player has abilities unlocked
         if (Progression > 1) 
         {
-            slider.SetInterval(1 - (modules[ModuleType.Engines].cooldown / abilityMaxCooldown), 1);
+            slider.SetInterval(1 - (modules[ModuleType.Core].cooldown / abilityMaxCooldown), 1);
             colorVec = new Vector3(0, 1, 1) * val + new Vector3(0.2f, 1, 0.8f) * (1f - val);
             slider.enabledColor = new Color(colorVec.X, colorVec.Y, colorVec.Z);
             slider.disabledColor = Color.DarkGray;
@@ -295,29 +295,101 @@ public class Player : Entity
             {
                 EventHandler.ToggleDockingMenus();
             }
-            if (Progression > 2 && Input.OldState.IsKeyUp(Keys.C) && Input.NewState.IsKeyDown(Keys.C))
+            if (Progression > 2)
             {
-                int count = 0;
-                foreach (var pickup in leashedMaterials)
+                if (Input.NewState.IsKeyDown(Keys.C))
                 {
-                    if (pickup is not Construct && pickup is not Module)
+                    int count = 3 + ((Progression > 3) ? 1 : 0);
+                    float dist = (new Vector2(Input.NewMouseState.X, Input.NewMouseState.Y) - Engine.BackBuffer / 2).Length();
+                    var constructs = new Texture2D[4]
                     {
-                        count++;
+                        Assets.Get(Sprite.Barricade),
+                        Assets.Get(Sprite.Trap),
+                        Assets.Get(Sprite.Bomb),
+                        Assets.Get(Sprite.Mothership)
+                    };
+                    float angle = 0;
+                    Color color;
+                    for (float i = 0; i < count; i++)
+                    {
+                        Vector2 dir = Engine.ToUnitVector(angle);
+                        Vector2 mouseDir = Engine.ToUnitVector(gunAngle.angle);
+                        if (dir.X * mouseDir.X + dir.Y * mouseDir.Y > 0.6f && dist > 150)
+                        {
+                            color = Color.White;
+                        }
+                        else
+                        {
+                            color = Color.Cyan;
+                        }
+                        ParticleManager.Add(new Particle(constructs[(int)i], dir * 45 + Engine.Camera.Position, 0, color));
+                        angle += MathF.PI * 2 / count;
                     }
                 }
-                if (count >= 3)
+                else if (Input.OldState.IsKeyDown(Keys.C) && Input.NewState.IsKeyUp(Keys.C))
                 {
+                    int count = 3 + ((Progression > 3) ? 1 : 0);
+                    float dist = (new Vector2(Input.NewMouseState.X, Input.NewMouseState.Y) - Engine.BackBuffer / 2).Length();
+                    int scrapCount = 0;
+                    Entity firstScrap = null;
                     foreach (var pickup in leashedMaterials)
                     {
-                        pickup.isExpired = true;
+                        if (pickup is not Construct && pickup is not Module)
+                        {
+                            scrapCount++;
+                            if (firstScrap == null)
+                            {
+                                firstScrap = pickup;
+                            }
+                        }
                     }
-                    leashedMaterials.Clear();
-                    Engine.EntityManager.Add(Enemy.NewMakeshiftMothership(position, velocity, 0));
+                    float angle = 0;
+                    for (int i = 0; i < count; i++)
+                    {
+                        Vector2 dir = Engine.ToUnitVector(angle);
+                        Vector2 mouseDir = Engine.ToUnitVector(gunAngle.angle);
+                        if (dir.X * mouseDir.X + dir.Y * mouseDir.Y > 0.6f && dist > 150 && firstScrap != null)
+                        {
+                            switch (i)
+                            {
+                                case 0:
+                                    firstScrap.isExpired = true;
+                                    var barricade = ItemFactory.GetItem(ConstructType.Barricade, firstScrap.position, firstScrap.velocity, 0);
+                                    leashedMaterials.Add(barricade);
+                                    Engine.EntityManager.Add(barricade);
+                                    break;
+                                case 1:
+                                    firstScrap.isExpired = true;
+                                    var trap = ItemFactory.GetItem(ConstructType.Trap, firstScrap.position, firstScrap.velocity, 0);
+                                    leashedMaterials.Add(trap);
+                                    Engine.EntityManager.Add(trap);
+                                    break;
+                                case 2:
+                                    firstScrap.isExpired = true;
+                                    var bomb = ItemFactory.GetItem(ConstructType.Bomb, firstScrap.position, firstScrap.velocity, 0);
+                                    leashedMaterials.Add(bomb);
+                                    Engine.EntityManager.Add(bomb);
+                                    break;
+                                case 3:
+                                    if (scrapCount >= 3)
+                                    {
+                                        foreach (var pickup in leashedMaterials)
+                                        {
+                                            pickup.isExpired = true;
+                                        }
+                                        leashedMaterials.Clear();
+                                        Engine.EntityManager.Add(Enemy.NewMakeshiftMothership(position, velocity, 0));
+                                    }
+                                    break;
+                            }
+                        }
+                        angle += MathF.PI * 2 / (float)(count);
+                    }
                 }
             }
             if (dockedEntity == null)
             {
-                targetVector = Vector2.Normalize(new Vector2(Mouse.GetState().X, Mouse.GetState().Y) - Engine.BackBuffer / 2 - position + Engine.Camera.Position);
+                targetVector = Vector2.Normalize(new Vector2(Mouse.GetState().X, Mouse.GetState().Y) - Engine.BackBuffer / 2 + Engine.Camera.Position - position);
                 gunAngle.angle = MathF.Atan2(targetVector.X, -targetVector.Y) - Engine.Camera.Rotation;
                 if (Input.NewMouseState.LeftButton == ButtonState.Pressed && modules[ModuleType.Guns].IsCooldownReady() && !UIManager.LockMouseInput && !modules[ModuleType.Guns].isFailed)
                 {
@@ -487,6 +559,22 @@ public class Player : Entity
                 }
             }
         }
+        else if (_damage < 0)
+        {
+            int healed = 0;
+            while (_damage < 0)
+            {
+                Module module = modules[(ModuleType)Engine.Random.Next(0, 5)];
+                if (module.Health < module.MaxHealth)
+                {
+                    module.Health++;
+                    healed++;
+                }
+                _damage += 1;
+            }
+            SoundManager.PlaySound(Assets.Get(Sound.Full), position);
+            ParticleManager.Add(new Particle(null, 1, position + new Vector2(0, -1), new Vector2(0, -1.5f), 0, 0, Color.Green, Color.Transparent) { drawText = $"{healed}" });
+        }
     }
     public void ToggleFuse(int x, int y)
     {
@@ -547,7 +635,7 @@ public class Player : Entity
     }
     public void Sniper()
     {
-        Engine.EntityManager.Add(new AssassinShot(position, targetVector * 100, gunAngle.angle, 0, true, 10));
+        Engine.EntityManager.Add(new AssassinShot(position, targetVector * 100, gunAngle.angle, 0, true, 20));
         SoundManager.PlaySound(Assets.Get(Sound.SniperFire), position);
         modules[ModuleType.Guns].cooldown = 2f;
         Engine.ShakeScreen(0.3f);
@@ -589,7 +677,7 @@ public class Player : Entity
     {
         Vector2 offset = Engine.ToUnitVector(gunAngle.angle + MathF.PI / 2) * Engine.Random.Next(-2, 3);
         Texture2D dot = Assets.Get(Sprite.Microshot);
-        Projectile shot = new PulseShot(position + offset, targetVector * 8 + velocity + offset / 4, gunAngle.angle, 0, true, 1)
+        Projectile shot = new PulseShot(position + offset, targetVector * 8 + velocity + offset / 4, gunAngle.angle, 0, true, 2)
         {
             texture = dot,
             timeLeft = 3
@@ -614,9 +702,23 @@ public class Player : Entity
         velocity -= targetVector / 4;
         modules[ModuleType.Guns].cooldown = 0.5f;
     }
+    public void Flamethrower()
+    {
+        Engine.EntityManager.Add(new FlameBolt(position, targetVector * 5 + velocity + new Vector2(Engine.Random.NextSingle()/2 - 0.25f, Engine.Random.NextSingle()/2 - 0.25f), true, 1));
+        SoundManager.PlaySound(Assets.Get(Sound.LMGFire), position);
+        modules[ModuleType.Guns].cooldown = 0.08f;
+        Engine.ShakeScreen(0.02f);
+    }
+    public void Fireball()
+    {
+        Engine.EntityManager.Add(new FlameBolt(position, targetVector * 8 + velocity + new Vector2(Engine.Random.NextSingle() - 0.5f, Engine.Random.NextSingle() - 0.5f), true, 8, 4, 0.5f));
+        SoundManager.PlaySound(Assets.Get(Sound.LMGFire), position);
+        modules[ModuleType.Guns].cooldown = 0.8f;
+        Engine.ShakeScreen(0.1f);
+    }
     public void Dash()
     {
-        if (!modules[ModuleType.Engines].IsCooldownReady())
+        if (!modules[ModuleType.Core].IsCooldownReady())
         {
             return;
         }
@@ -631,12 +733,12 @@ public class Player : Entity
         }
         position += normalVector * 200;
         float c = 2f;
-        modules[ModuleType.Engines].cooldown = c;
+        modules[ModuleType.Core].cooldown = c;
         abilityMaxCooldown = c;
     }
     public void SummonShield()
     {
-        if (!modules[ModuleType.Engines].IsCooldownReady())
+        if (!modules[ModuleType.Core].IsCooldownReady())
         {
             return;
         }
@@ -648,12 +750,12 @@ public class Player : Entity
         abilityEntity.isExpired = false;
         Engine.EntityManager.Add(abilityEntity);
         float c = 5f;
-        modules[ModuleType.Engines].cooldown = c;
+        modules[ModuleType.Core].cooldown = c;
         abilityMaxCooldown = c;
     }
     public void SummonGrapplingHook()
     {
-        if ((abilityEntity == null || abilityEntity.isExpired) && modules[ModuleType.Engines].IsCooldownReady())
+        if ((abilityEntity == null || abilityEntity.isExpired) && modules[ModuleType.Core].IsCooldownReady())
         {
             abilityEntity = new GrapplingHook(position, targetVector * 50, gunAngle.angle, this);
             SoundManager.PlaySound(Assets.Get(Sound.Click), position);
@@ -661,13 +763,31 @@ public class Player : Entity
             velocity -= targetVector / 2;
             Engine.EntityManager.Add(abilityEntity);
             float c = 5f;
-            modules[ModuleType.Engines].cooldown = c;
+            modules[ModuleType.Core].cooldown = c;
             abilityMaxCooldown = c;
         }
         else if(abilityEntity != null && !abilityEntity.isExpired)
         {
             abilityEntity.isExpired = true;
-            modules[ModuleType.Engines].cooldown /= 2;
+            modules[ModuleType.Core].cooldown /= 2;
+        }
+    }
+    public void Nanomachines()
+    {
+        if (modules[ModuleType.Core].IsCooldownReady())
+        {
+            foreach (var pickup in leashedMaterials)
+            {
+                if (pickup is not Module && pickup is not Construct)
+                {
+                    pickup.isExpired = true;
+                    Collide(-10);
+                    var c = 30;
+                    modules[ModuleType.Core].cooldown = c;
+                    abilityMaxCooldown = c;
+                    return;
+                }
+            }
         }
     }
     public override void Draw(SpriteBatch _spriteBatch)

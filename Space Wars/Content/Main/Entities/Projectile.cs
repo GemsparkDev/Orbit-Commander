@@ -4,13 +4,13 @@ using Space_Wars.Content.Main.Particles;
 using System;
 using Microsoft.Xna.Framework.Graphics;
 using System.Diagnostics;
+using Assimp;
 
 namespace Space_Wars.Content.Main.Entities;
 
 public abstract class Projectile : Entity
 {
     private Random random = new ();
-    public Entity targetEntity;
     public float timeLeft = 8;
     public int ExtraUpdates { get; protected set; } = 1;
     //Projectiles should always be able to hit potential targets
@@ -57,7 +57,7 @@ public class PulseShot : Projectile
         isHoming = _isHoming;
         color = _isFriendly ? Color.Orange : Color.Red;
     }
-
+    public ParticleEmitter emitter { get; set; }
     public override void AI()
     {
         position += velocity * Engine.DeltaSeconds * 60;
@@ -239,4 +239,45 @@ public class LatchedPlanet(GravitationalSource _planet, Vector2 _position) : ILa
     //Prevents deorbiting planets
     public void ApplyForce(Vector2 _force) { }
 }
+public class FlameBolt : Projectile
+{
+    float piercingCooldown = 0;
+    float maxTimeLeft;
+    private ParticleEmitter emitter = new ParticleEmitter(Assets.Get(Sprite.Circle), 0.75f, Vector2.Zero, 0, 360, 1, 1, 1500, new Color(1f, 1f, 0.25f, 1f), new Color(1f, 0, 0, 0), EmitterType.EmissionOverTime);
+    public new float ColliderRadius => (Math.Min(1, MathF.Sqrt(maxTimeLeft)) * 0.9f * emitter.particleVelocity * Math.Min((maxTimeLeft - timeLeft) / (maxTimeLeft) / emitter.particleVelocity, 1)) * 60;
+    public FlameBolt(Vector2 _position, Vector2 _velocity, bool _isFriendly, int _damage, float _timeLeft = 0.6f, float _particleVelocity = 1, int _stealth = 0)
+        : base(Assets.Get(Sprite.Circle), _position, _velocity, 0, 0, _isFriendly, _damage, _stealth)
+    {
+        entityType = EntityType.Projectile;
+        color = Color.Transparent;
+        timeLeft = _timeLeft;
+        maxTimeLeft = _timeLeft;
+        emitter.particleVelocity = _particleVelocity;
+    }
+    public override void AI()
+    {
+        collider.radius = ColliderRadius;
+        emitter.position = position;
+        emitter.Update();
+        emitter.offsetVelocity = velocity;
+        position += velocity * Engine.DeltaSeconds * 60;
+        angle += angularVelocity * Engine.DeltaSeconds * 60;
+        emitter.particleTimeAlive = Math.Min(1, MathF.Sqrt(timeLeft));
+        if (piercingCooldown > 0)
+        {
+            piercingCooldown -= Engine.DeltaSeconds;
+        }
+        Entity nearestEnemy = Engine.EntityManager.NearestEnemy(this);
+        if (nearestEnemy != null)
+        {
+            float combinedRadius = ColliderRadius + nearestEnemy.ColliderRadius;
+            if (piercingCooldown <= 0 && isFriendly != nearestEnemy.isFriendly && EntityManager.DistanceSqr(this, nearestEnemy) <= combinedRadius * combinedRadius)
+            {
+                piercingCooldown = 0.1f;
+                nearestEnemy.Collide(damage);
+            }
+        }
+    }
+}
+
 

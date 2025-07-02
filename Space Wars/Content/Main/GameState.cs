@@ -119,8 +119,8 @@ public class PlayingGame : GameState
             Engine.UIManager.GetContainer((int)Containers.PauseMenu).enabled = true;
             CurrentGameState.SwitchState(new PausedGame());
         }
-        Engine.EntityManager.PlayerUpdate();
         Engine.EntityManager.IngameUpdate();
+        Engine.EntityManager.PlayerUpdate();
         ParticleManager.Update();
         if (Input.OldState.IsKeyUp(Keys.Escape) && Input.NewState.IsKeyDown(Keys.Escape))
         {

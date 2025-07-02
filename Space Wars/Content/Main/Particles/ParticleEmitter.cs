@@ -83,7 +83,7 @@ namespace Space_Wars.Content.Main.Particles
                 float particleAngleRadians;
                 Vector2 normalVector;
                 int iterations = 1;
-                if (cooldown / (1/ -speedOfEmission) > 1)
+                if (cooldown * -speedOfEmission > 1)
                 {
                     iterations = (int)(cooldown / (1 / -speedOfEmission));
                 }

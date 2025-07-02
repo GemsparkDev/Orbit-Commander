@@ -14,7 +14,7 @@ public class Mission
     public GravitationalSource Planet => planets[0];
     public string Name { get; }
     public string Description { get; }
-    public int playerProgression = 2;
+    public int playerProgression = 3;
     public int WaveGoal { get; } = 0;
     public int Wave { get; private set; } = 0;
     public int EnemiesSpawned { get; private set; } = 0;
@@ -61,9 +61,9 @@ public class Mission
             enemyCreditValues = 
             [
                 (1, Enemy.NewFighter),
-                (3, Enemy.NewCarrier),
                 (3, Enemy.NewSniper),
                 (4, Enemy.NewShotgunner),
+                (4, Enemy.NewCarrier),
             ];
         }
         else if (_enemyTier == 1)
@@ -88,9 +88,9 @@ public class Mission
             enemyCreditValues =
             [
                 (1, Enemy.NewFighter),
-                (3, Enemy.NewCarrier),
                 (3, Enemy.NewSniper),
                 (4, Enemy.NewShotgunner),
+                (4, Enemy.NewCarrier),
                 (1, Enemy.NewAdvancedFighter),
                 (2, Enemy.NewHovercraft),
                 (2, Enemy.NewHealer),
@@ -255,10 +255,13 @@ public class Mission
             }
             else
             {
-                difficulty = (int)((Wave + 1) * MathF.Log(Wave + 1, MathF.E) - Wave) + 1;
                 if (isAggressive)
                 {
-                    difficulty += (int)(Math.Pow(Wave, 1.5) + 5);
+                    difficulty = (int)(Math.Pow(Wave, 1.5) + 5);
+                }
+                else
+                {
+                    difficulty = (int)((Wave + 1) * MathF.Log(Wave + 1, MathF.E) - Wave) + 1;
                 }
                 List<int> newCosts = [];
                 int availableEnemies = Math.Min(enemyCreditValues.Count, Wave / 10 + 1 + ((isAggressive) ? 1 : 0));
@@ -271,41 +274,39 @@ public class Mission
                 var enemyCredits = Engine.Random.Next((int)(difficulty), (int)(difficulty * 2));
                 while (enemyCredits > 0)
                 {
-                    for (int i = 0; i < availableEnemies; i++)
+                    int i = Engine.Random.Next(0, availableEnemies);
+                    if (Engine.Random.Next(0, enemyCreditValues[i].cost / 2) == 0 && newCosts[i] <= enemyCredits)
                     {
-                        if (Engine.Random.Next(0, enemyCreditValues[i].cost / 2) == 0 && newCosts[i] <= enemyCredits)
+                        Vector2 pos;
+
+                        if (squadLeader != null && (count < 2 || Engine.Random.Next(0, 4) != 0))
                         {
-                            Vector2 pos;
-                            
-                            if (squadLeader != null && (count < 2 || Engine.Random.Next(0, 4) != 0))
-                            {
-                                Vector2 offset = Vector2.Normalize(new Vector2(squadLeader.position.X, squadLeader.position.Y));
-                                int isOdd = (count % 2 == 0) ? 1 : -1;
-                                
-                                pos = squadLeader.position 
-                                    //Horizontal offset
-                                    + new Vector2(offset.Y, -offset.X) * 10 * isOdd * (count / 2 + 1) 
-                                    //Vertical offset
-                                    + offset * (count / 2 + 1) * 10;
-                                count++;
-                            }
-                            else
-                            {
-                                pos = NewSpawnLocation();
-                                squadLeader = null;
-                                count = 0;
-                            }
-                            var enemy = enemyCreditValues[i].enemy(pos, Player.velocity, MathF.Atan2(-pos.X, pos.Y));
-                            enemiesSpawned.Add(enemy);
-                            squadLeader ??= enemy;
-                            enemyCredits -= newCosts[i];
-                            newCosts[i] += 1;
-                            EnemiesSpawned++;
+                            Vector2 offset = Vector2.Normalize(new Vector2(squadLeader.position.X, squadLeader.position.Y));
+                            int isOdd = (count % 2 == 0) ? 1 : -1;
+
+                            pos = squadLeader.position
+                                //Horizontal offset
+                                + new Vector2(offset.Y, -offset.X) * 10 * isOdd * (count / 2 + 1)
+                                //Vertical offset
+                                + offset * (count / 2 + 1) * 10;
+                            count++;
                         }
-                        if (enemyCredits < newCosts.Min(c => c))
+                        else
                         {
-                            return;
+                            pos = NewSpawnLocation();
+                            squadLeader = null;
+                            count = 0;
                         }
+                        var enemy = enemyCreditValues[i].enemy(pos, Player.velocity, MathF.Atan2(-pos.X, pos.Y));
+                        enemiesSpawned.Add(enemy);
+                        squadLeader ??= enemy;
+                        enemyCredits -= newCosts[i];
+                        newCosts[i] += 1;
+                        EnemiesSpawned++;
+                    }
+                    if (enemyCredits < newCosts.Min(c => c))
+                    {
+                        return;
                     }
                 }
             }
