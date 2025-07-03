@@ -919,7 +919,7 @@ public class Enemy : Entity
                 velocity += normalizedAcceleration * Engine.DeltaSeconds * 60;
                 if (cooldown <= 0)
                 {
-                    Engine.EntityManager.Add(new PulseShot(position, Engine.ToUnitVector(angle) * 8, angle, 0, isFriendly, damage, true));
+                    Engine.EntityManager.Add(new PulseShot(position, Engine.ToUnitVector(angle) * 8, angle, 0, isFriendly, damage, false));
                     SoundManager.PlaySound(Assets.Get(Sound.PulseFire), position);
                     cooldown = 1;
                 }
@@ -2150,6 +2150,48 @@ public class Enemy : Entity
             yield return 0;
         }
     }
+    IEnumerable<int> WarpGate()
+    {
+        float time = -3;
+        ChildEnemy = true;
+        bool isThrough = false;
+        while (true)
+        {
+            time += Engine.DeltaSeconds * (isThrough ? -5 : 1);
+            float count = Math.Clamp(time, 0, 10);
+            angularVelocity = count / 350;
+            float angle = time;
+            for (float i = 0; i < count * count * 20 && !isThrough; i++)
+            {
+                float maxCount = 2000;
+                float ratio = 1 - (i / maxCount) * (i / maxCount);
+                Vector3 col = (new Vector3(126, 118, 230) * (1 - ratio) + new Vector3(72, 61, 139) * (ratio)) * (MathF.Sin(angle * 10 + ratio * 10 + time * 3)/3 + 0.67f);
+                angle += 1.61803398875f;
+                ParticleManager.Add(new Particle(Assets.Get(Sprite.Circle), Engine.ToUnitVector(angle) * (texture.Height / 2f) * ratio + position, angle, new Color(col.X / 255, col.Y / 255, col.Z / 255)));
+            }
+            if (Engine.Random.NextSingle() > 1f - Engine.DeltaSeconds * count / 5)
+            {
+                ParticleManager.Add(new Particle(Assets.Get(Sprite.Dot), 10f, Engine.ToUnitVector(Engine.Random.NextSingle() * MathF.Tau) * (150 + Engine.Random.NextSingle() * 300) + position, new Vector2(Engine.Random.NextSingle() - 0.5f, Engine.Random.NextSingle() - 0.5f),
+                    Engine.Random.NextSingle() * MathF.Tau, Engine.Random.NextSingle() - 0.5f, Color.SlateBlue * 0.5f, Color.Transparent));
+            }
+            if (!isThrough && Vector2.Distance(position, Engine.SaveGame.Player.position) < (texture.Height / 2f) && count >= 10)
+            {
+                ParticleManager.Add(new Particle(Assets.Get(Sprite.Explosion), 1f, position, Vector2.Zero, 0, 0, Color.White, Color.Transparent));
+                SoundManager.PlayGlobalSound(Assets.Get(Sound.Full));
+                isThrough = true;
+                time = 10;
+                Engine.SaveGame.System++;
+                Engine.SaveGame.Player.Progression = -1;
+                Engine.EntityManager.CurrentMission.CompleteCustomRule(this);
+            }
+            if (isThrough)
+            {
+                Engine.SaveGame.Player.position = position;
+                Engine.SaveGame.Player.velocity = velocity;
+            }
+            yield return 0;
+        }
+    }
     public static Enemy NewDummyEnemy(Vector2 _position, bool _isFriendly = false)
     {
         return new(_position, Vector2.Zero, 0, 0, 0, Assets.Get(Sprite.Fighter), _isFriendly);
@@ -2345,6 +2387,12 @@ public class Enemy : Entity
     {
         Enemy enemy = new(position, velocity, angle, 5, 200, Assets.Get(Sprite.LargeMinerArm), _isFriendly);
         enemy.AddBehaviour(enemy.LargeMinerArm(_pos, _parent));
+        return enemy;
+    }
+    public static Enemy NewWarpGate(Vector2 position, Vector2 velocity, float angle)
+    {
+        Enemy enemy = new(position, velocity, angle, 0, 1000, Assets.Get(Sprite.WarpGate), true);
+        enemy.AddBehaviour(enemy.WarpGate());
         return enemy;
     }
 }

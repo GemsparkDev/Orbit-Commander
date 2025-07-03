@@ -63,6 +63,7 @@ public enum Sprite
     Healer,
     LargeMinerArm,
     LargeMiner,
+    WarpGate,
 
     MetalScrap,
     RealMetalScrap,

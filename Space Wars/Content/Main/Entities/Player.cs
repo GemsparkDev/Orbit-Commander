@@ -31,7 +31,7 @@ public class Player : Entity
     private int spareFuses = 0;
     private float time = 0;
     //0 is basic stuff only, 1 adds restarting, constructs, and fuses, 2 adds abilities
-    public int Progression { get; set; } = 2;
+    public int Progression { get; set; } = 3;
     public override int SensingAbility
     {
         get
@@ -75,7 +75,7 @@ public class Player : Entity
     public Dictionary<ModuleType, Module> modules = new()
     {
         { ModuleType.Hull, ItemFactory.GetItem(Modules.Hull) },
-        { ModuleType.Guns, ItemFactory.GetItem(Modules.Flamethrower) },
+        { ModuleType.Guns, ItemFactory.GetItem(Modules.Fireball) },
         { ModuleType.Engines, ItemFactory.GetItem(Modules.Engines) },
         { ModuleType.Sensors, ItemFactory.GetItem(Modules.Sensors) },
         { ModuleType.Core, ItemFactory.GetItem(Modules.Nanomachines) }
@@ -128,9 +128,7 @@ public class Player : Entity
             return;
         }
         engineParticles.position = position - new Vector2(MathF.Sin(angle), -MathF.Cos(angle)) * 8;
-        engineParticles.Update();
         smokeParticles.position = position;
-        smokeParticles.Update();
         leashedMaterials = leashedMaterials.Where(x => !x.isExpired).ToList();
         if (EventHandler.AcknowledgeMessage(Message.RestartModules))
         {
@@ -283,13 +281,17 @@ public class Player : Entity
                 module.UpdateCooldown();
             }
         }
+        if (Progression < 0)
+        {
+            isEngineActive = false;
+        }
         gunAngle.position = position;
         base.Update();
     }
     public void RestrictedActions()
     {
         //Prevents undocking when in the garage menu
-        if (!modules[ModuleType.Core].isFailed)
+        if (!modules[ModuleType.Core].isFailed && Progression > -1)
         {
             if (Input.OldState.IsKeyUp(Keys.I) && Input.NewState.IsKeyDown(Keys.I))
             {
@@ -459,6 +461,8 @@ public class Player : Entity
             {
                 Dock();
             }
+            engineParticles.Update();
+            smokeParticles.Update();
         }
         //Prevents unusual interations between various game states
         if (EventHandler.AcknowledgeMessage(Message.ToggleTerminal))
@@ -792,6 +796,10 @@ public class Player : Entity
     }
     public override void Draw(SpriteBatch _spriteBatch)
     {
+        if (Progression <= -1)
+        {
+            return;
+        }
         if (position.Length() > Engine.EntityManager.CurrentMission.Planet.radius + 25 * 50)
         {
             //_spriteBatch.Draw(Assets.Get(Sprite.Arrow), position - Vector2.Normalize(position) * 25, null, color, MathF.Atan2(-position.X, position.Y), Assets.DimsOf(Sprite.Arrow) / 2, 1, 0, 0.2f);

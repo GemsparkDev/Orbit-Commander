@@ -53,6 +53,9 @@ public class EntityManager
         "Showdown",
         "Defeat the advanced drone prototype, Excursion. Be warned: It may call for reinforcements.", 1.1f, new Vector2(0, 1), 0, 0, null, true) { playerProgression = 2 },
 
+        new([], [(new EntityConstructor(Enemy.NewWarpGate, Vector2.Zero, Vector2.Zero, 0), [ Condition.CustomIncomplete ])], 
+        "Warp Gate", "Warp to the next mission once you are done here", -1, new Vector2(0, 500)),
+
         new([new(Vector2.Zero, Vector2.Zero, 30000, 10f, true, Color.HotPink, true) ],
         [],
         "cool planet",
@@ -83,6 +86,10 @@ public class EntityManager
         [(new AdvancedConstructor(Enemy.NewExodus, new Vector2(0, -6*50), Vector2.Zero, 0, false), [ Condition.Kill ])],
         "Showdown Pt. 2",
         "Defeat the advanced drone prototype, Exodus. Be warned: It may call for reinforcements.", 1.1f, new Vector2(0, 1), 0, 1, null, true),
+
+        new([new(Vector2.Zero, Vector2.Zero, 150, 3, true, Color.OldLace)], 
+        [(new EntityConstructor(Enemy.NewWarpGate, new Vector2(0, 450), -GravitationalSource.GetOrbitalVelocity(new Vector2(0, 450), Vector2.Zero, 150), 0), [ Condition.CustomIncomplete ])],
+        "Warp Gate", "Warp to the next mission once you are done here", -1, new Vector2(0, 500)),
 
         new([ new(Vector2.Zero, Vector2.Zero, 20000, 9, true, Color.OrangeRed, true),
         new(new Vector2(1200, 0), GravitationalSource.GetOrbitalVelocity(new Vector2(1200, 0), Vector2.Zero, 20000), 750, 2f, false, Color.Red) ],
@@ -134,7 +141,7 @@ public class EntityManager
     {
         Player.Update();
         CurrentMission.AttractObject(Player);
-        if (Player.dockedEntity == null)
+        if (Player.dockedEntity == null && Player.Progression > -1)
         {
             CurrentMission.CalculateTrajectory(Player.position, Player.velocity, Player.ColliderRadius);
         }
@@ -350,6 +357,10 @@ public class EntityManager
                 continue;
             }
             if (targetEnemy == entity)
+            {
+                continue;
+            }
+            if ((targetEnemy as Enemy) != null && (targetEnemy as Enemy).ChildEnemy)
             {
                 continue;
             }

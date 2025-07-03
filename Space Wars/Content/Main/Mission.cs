@@ -11,7 +11,7 @@ public class Mission
 {
     public delegate Enemy DelegateEnemy(Vector2 position, Vector2 velocity, float angle, bool _isFriendly = false);
     //Change me when multiple main planets are added
-    public GravitationalSource Planet => planets[0];
+    public GravitationalSource Planet { get { if (planets.Length > 0) { return planets[0]; } else { return new GravitationalSource(Vector2.Zero, Vector2.Zero, 0, 1, true, Color.White); } } }
     public string Name { get; }
     public string Description { get; }
     public int playerProgression = 3;

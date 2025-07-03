@@ -308,6 +308,18 @@
 /processorParam:TextureFormat=Color
 /build:Images/Entity_27.png
 
+#begin Images/Entity_28.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:Images/Entity_28.png
+
 #begin Images/Entity_3.png
 /importer:TextureImporter
 /processor:TextureProcessor

@@ -495,7 +495,10 @@ public class Engine : Game
     protected override void Update(GameTime gameTime)
     {
         Input.Update();
-        UIManager.Update();
+        if (IsActive)
+        {
+            UIManager.Update();
+        }
         SoundManager.Update();
         CurrentGameState.Update();
 
