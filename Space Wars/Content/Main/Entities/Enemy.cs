@@ -745,8 +745,8 @@ public class Enemy : Entity
         float missileGap = 0;
         var col = Color.DarkRed;
         col.A = 0;
-        ParticleEmitter engineParticles = new(Assets.Get(Sprite.Dot), 0.15f, Vector2.Zero, 0, 90, 2, 0, 
-            450f, Color.Yellow, col, EmitterType.EmissionOverTime);
+        ParticleEmitter engineParticles = new(Assets.Get(Sprite.Circle), 0.1f, Vector2.Zero, 0, 90, 2, 0, 
+            200f, Color.Yellow, col, EmitterType.EmissionOverTime);
         while (true)
         {
             targetVector = Vector2.Normalize(Player.position - position);
@@ -873,10 +873,10 @@ public class Enemy : Entity
                 Engine.EntityManager.Add(ItemFactory.GetItem(Modules.Crossbow, position, GetNormalizedAcceleration() * 10, angularVelocity));
             }
             engineParticles.sprayAngle = (angle + MathF.PI) * 180 / MathF.PI;
-            engineParticles.speedOfEmission = accelerationVector.Length() * 150 + 350;
+            engineParticles.speedOfEmission = accelerationVector.Length() * 50 + 200;
             engineParticles.offsetVelocity = velocity;
             engineParticles.Update();
-            engineParticles.position = position + new Vector2(-MathF.Sin(angle), MathF.Cos(angle)) * 8;
+            engineParticles.position = position + new Vector2(-MathF.Sin(angle), MathF.Cos(angle)) * 11;
 
             yield return 0;
         }
@@ -1011,8 +1011,8 @@ public class Enemy : Entity
         deleteOnCollide = true;
         var col = Color.DarkRed;
         col.A = 0;
-        ParticleEmitter engineParticles = new(Assets.Get(Sprite.Dot), 0.15f, Vector2.Zero, 0, 45, 2, 0, 
-            450f, Color.Yellow, col, EmitterType.EmissionOverTime) { isEmitterActive = false };
+        ParticleEmitter engineParticles = new(Assets.Get(Sprite.Circle), 0.1f, Vector2.Zero, 0, 45, 2, 0, 
+            200f, Color.Yellow, col, EmitterType.EmissionOverTime) { isEmitterActive = false };
         while (true)
         {
             if (fuel <= 0)
@@ -1074,8 +1074,9 @@ public class Enemy : Entity
                 engineParticles.isEmitterActive = true;
             }
             engineParticles.sprayAngle = (angle + MathF.PI) * 180 / MathF.PI;
-            engineParticles.position = position + new Vector2(-MathF.Sin(angle), MathF.Cos(angle)) * 4;
+            engineParticles.offsetVelocity = velocity;
             engineParticles.Update();
+            engineParticles.position = position + new Vector2(-MathF.Sin(angle), MathF.Cos(angle)) * 7;
             if (EntityManager.DistanceSqr(this, nearestEnemy) < 10 * 10)
             {
                 Explode(8, 12);
@@ -1162,14 +1163,14 @@ public class Enemy : Entity
         enemyRange.radius = 250;
         var col = Color.DarkRed;
         col.A = 0;
-        ParticleEmitter engineParticles = new(Assets.Get(Sprite.Dot), 0.15f, Vector2.Zero, 0, 45, 2, 0,
-            450f, Color.Yellow, col, EmitterType.EmissionOverTime);
+        ParticleEmitter engineParticles = new(Assets.Get(Sprite.Circle), 0.15f, Vector2.Zero, 0, 45, 2, 0,
+            200f, Color.Yellow, col, EmitterType.EmissionOverTime);
         while (true)
         {
             Entity nearestEnemy = Engine.EntityManager.NearestEnemy(this);
             Vector2 relativePosition = position - nearestEnemy.position;
-            Vector2 normalizedAcceleration = GetNormalizedAcceleration();
-            Vector2 Offset = Vector2.Normalize(Engine.EntityManager.CurrentMission.GetNormalizedAcceleration(nearestEnemy.position))*100;
+            Vector2 normalizedAcceleration = GetNormalizedAcceleration() * 2;
+            Vector2 Offset = Vector2.Normalize(Engine.EntityManager.CurrentMission.GetNormalizedAcceleration(nearestEnemy.position)) * 100;
             Vector2 targetLocation = relativePosition - Offset;
             Vector2 targetAcceleration;
             if (Vector2.Distance(nearestEnemy.position + Offset, position) < 50)
@@ -1235,10 +1236,10 @@ public class Enemy : Entity
             velocity += (new Vector2(MathF.Sin(angle), -MathF.Cos(angle)) * thrust) * Engine.DeltaSeconds;
             engineParticles.offsetVelocity = velocity;
             engineParticles.sprayAngle = angle * 180 / MathF.PI + 180;
-            engineParticles.speedOfEmission = thrust * 100;
+            engineParticles.speedOfEmission = thrust * 75;
             engineParticles.particleVelocity = 3 - 3 / (thrust + 1);
             engineParticles.Update();
-            engineParticles.position = position;
+            engineParticles.position = position + new Vector2(-MathF.Sin(angle), MathF.Cos(angle)) * 8;
             yield return 0;
         }
     }
@@ -1834,8 +1835,8 @@ public class Enemy : Entity
     }
     IEnumerable<int> Miner()
     {
-        ParticleEmitter miningDebris = new(Assets.Get(Sprite.Dot), 0.15f, position, angle * 180 / 3.1415926f, 90, 2,
-            Engine.Random.NextSingle() - 0.5f, 1000, Color.Cyan, Color.Transparent, EmitterType.EmissionOverTime);
+        ParticleEmitter miningDebris = new(Assets.Get(Sprite.Circle), 0.1f, position, angle * 180 / 3.1415926f, 90, 2,
+            Engine.Random.NextSingle() - 0.5f, 500, Color.Cyan, Color.Transparent, EmitterType.EmissionOverTime);
         float healTimer = 30;
         while (true)
         {
@@ -2128,7 +2129,7 @@ public class Enemy : Entity
                 {
                     for (int i = Engine.Random.Next(7, 10); i > 0; i--)
                     {
-                        ParticleManager.Add(new Particle(Assets.Get(Sprite.Dot), 0.5f, position + new Vector2(0, texture.Height / 2), dir + new Vector2(Engine.Random.NextSingle() * 2 - 1, Engine.Random.NextSingle() * 2 - 1) / 2, 0, 0, Color.Cyan, Color.Transparent));
+                        ParticleManager.Add(new Particle(Assets.Get(Sprite.Circle), 0.5f, position + new Vector2(0, this.texture.Height / 2), dir + new Vector2(Engine.Random.NextSingle() * 2 - 1, Engine.Random.NextSingle() * 2 - 1) / 2, 0, 0, Color.Cyan, Color.Transparent));
                         Engine.ShakeScreen(0.1f);
                         SoundManager.PlaySound(Assets.Get(Sound.ShieldHit), position);
                     }
@@ -2160,12 +2161,13 @@ public class Enemy : Entity
             time += Engine.DeltaSeconds * (isThrough ? -5 : 1);
             float count = Math.Clamp(time, 0, 10);
             angularVelocity = count / 350;
-            float angle = time;
+            float angle = this.angle;
             for (float i = 0; i < count * count * 20 && !isThrough; i++)
             {
                 float maxCount = 2000;
                 float ratio = 1 - (i / maxCount) * (i / maxCount);
-                Vector3 col = (new Vector3(126, 118, 230) * (1 - ratio) + new Vector3(72, 61, 139) * (ratio)) * (MathF.Sin(angle * 10 + ratio * 10 + time * 3)/3 + 0.67f);
+                //Vector3 col = (new Vector3(126, 118, 230) * (1 - ratio) + new Vector3(72, 61, 139) * (ratio)) * (MathF.Sin(angle * 10 + ratio * 10 + time * 3)/3 + 0.67f);
+                Vector3 col = (new Vector3(0, 0, 0) * (1 - ratio) + new Vector3(72, 61, 139) * (ratio)) * (MathF.Sin(angle * 10 + ratio * 10 + time * 3) / 3 + 0.67f);
                 angle += 1.61803398875f;
                 ParticleManager.Add(new Particle(Assets.Get(Sprite.Circle), Engine.ToUnitVector(angle) * (texture.Height / 2f) * ratio + position, angle, new Color(col.X / 255, col.Y / 255, col.Z / 255)));
             }

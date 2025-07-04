@@ -75,7 +75,7 @@ public class Player : Entity
     public Dictionary<ModuleType, Module> modules = new()
     {
         { ModuleType.Hull, ItemFactory.GetItem(Modules.Hull) },
-        { ModuleType.Guns, ItemFactory.GetItem(Modules.Fireball) },
+        { ModuleType.Guns, ItemFactory.GetItem(Modules.Flamethrower) },
         { ModuleType.Engines, ItemFactory.GetItem(Modules.Engines) },
         { ModuleType.Sensors, ItemFactory.GetItem(Modules.Sensors) },
         { ModuleType.Core, ItemFactory.GetItem(Modules.Nanomachines) }
