@@ -84,6 +84,8 @@ public enum Sprite
     RealCrossbowModule,
     SpiralModule,
     RealSpiralModule,
+    FlamethrowerModule,
+    RealFlamethrowerModule,
 
     SpiralShot,
     PulseShot,
