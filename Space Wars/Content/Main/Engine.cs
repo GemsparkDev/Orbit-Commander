@@ -132,9 +132,6 @@ public class Engine : Game
         var requiredCraftsText = new Decal(new Vector2(0) + new Vector2(0, -6), Assets.TextFont, "25", Color.White, 10);
         var furnaceSlider = new Slider(Line, new Vector2(-20, -MainMenu.Size.Y / 6), new Vector2(60, 2), true, new Color(255, 239, 85), new Color(50, 51, 67));
         var craftingSlider = new Slider(Line, new Vector2(0, -MainMenu.Size.Y / 4), new Vector2(60, 2), true, Color.Cyan, Color.Gray);
-        var constructBarricade = new Button(new Vector2(-MainMenu.Size.X / 5, -MainMenu.Size.Y / 4), Assets.Get(Sprite.Button), Assets.TextFont, "Barricade", Color.White);
-        var constructTrap = new Button(new Vector2(-MainMenu.Size.X / 5, MainMenu.Size.Y / 4), Assets.Get(Sprite.Button), Assets.TextFont, "Trap", Color.White);
-        var constructBomb = new Button(new Vector2(-MainMenu.Size.X / 5, 0), Assets.Get(Sprite.Button), Assets.TextFont, "Bomb", Color.White);
 
         //Garage Menu
         var repairSlot = new ItemSlot<Module>(new Vector2(-GarageMenu.Size.X / 4 - 25, 0), Assets.Get(Sprite.EmptySlot), UIManager, -1);
@@ -289,61 +286,6 @@ public class Engine : Game
                 EntityManager.QueuedItems.RemoveAt(EntityManager.QueuedItems.Count - 1);
             }
         });
-        constructBarricade.AddBehaviour(delegate ()
-        {
-            foreach (var scrap in SaveGame.Player.leashedMaterials)
-            {
-                if (scrap is not Module && scrap is not Construct)
-                {
-                    scrap.isExpired = true;
-                    var barricade = ItemFactory.GetItem(ConstructType.Barricade, scrap.position, scrap.velocity, 0);
-                    SaveGame.Player.leashedMaterials.Add(barricade);
-                    EntityManager.Add(barricade);
-                    return;
-                }
-            }
-        });
-        tooltip = new Window(Vector2.Zero, wideButton);
-        tooltip.AddWidget(new Decal(new Vector2(0, -3), Assets.TextFont, "1 metal cost, resists enemy fire.", Color.White, 3f));
-        tooltip.AddWidget(new Decal(new Vector2(0, 3), Assets.TextFont, "20 integrity.", Color.White, 3f));
-        constructBarricade.AddTooltip(tooltip);
-        constructTrap.AddBehaviour(delegate ()
-        {
-            foreach (var scrap in SaveGame.Player.leashedMaterials)
-            {
-                if (scrap is not Module && scrap is not Construct)
-                {
-                    scrap.isExpired = true;
-                    var trap = ItemFactory.GetItem(ConstructType.Trap, scrap.position, scrap.velocity, 0.02f);
-                    SaveGame.Player.leashedMaterials.Add(trap);
-                    EntityManager.Add(trap);
-                    return;
-                }
-            }
-        });
-        tooltip = new Window(Vector2.Zero, wideButton);
-        tooltip.AddWidget(new Decal(new Vector2(0, -3), Assets.TextFont, "1 metal cost, fires on nearby enemies.", Color.White, 3f));
-        tooltip.AddWidget(new Decal(new Vector2(0, 3), Assets.TextFont, "8 integrity.", Color.White, 3f));
-        constructTrap.AddTooltip(tooltip);
-        constructBomb.AddBehaviour(delegate ()
-        {
-            foreach (var scrap in SaveGame.Player.leashedMaterials)
-            {
-                if (scrap is not Module && scrap is not Construct)
-                {
-                    scrap.isExpired = true;
-                    var bomb =  ItemFactory.GetItem(ConstructType.Bomb, scrap.position, scrap.velocity, 0);
-                    bomb.isFriendly = false;
-                    SaveGame.Player.leashedMaterials.Add(bomb);
-                    EntityManager.Add(bomb);
-                    return;
-                }
-            }
-        });
-        tooltip = new Window(Vector2.Zero, wideButton);
-        tooltip.AddWidget(new Decal(new Vector2(0, -3), Assets.TextFont, "1 metal cost, activates when destroyed.", Color.White, 3f));
-        tooltip.AddWidget(new Decal(new Vector2(0, 3), Assets.TextFont, "3 integrity, 100 dmg to all in radius", Color.White, 3f));
-        constructBomb.AddTooltip(tooltip);
 
         MainMenu.AddWidget(exitButton as IFunctional, 0);
         MainMenu.AddWidget(singleplayerButton as IFunctional, 0);
@@ -418,9 +360,6 @@ public class Engine : Game
             var decal = new Decal(new Vector2(40, (i - 2) * 20 - 8), null);
             FuseMenu.AddWidget(decal);
         }
-        FuseMenu.AddWidget(constructBarricade as IFunctional);
-        FuseMenu.AddWidget(constructTrap as IFunctional);
-        FuseMenu.AddWidget(constructBomb as IFunctional);
 
         UIManager.ScreenWindow.AddWidget(globalSidePanelOpen as IFunctional, (int)Alignment.Left);
         UIManager.ScreenWindow.AddWidget(fpsCounter, (int)Alignment.TopRight);

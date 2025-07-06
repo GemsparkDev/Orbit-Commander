@@ -310,21 +310,29 @@ public class Player : Entity
                         Assets.Get(Sprite.Bomb),
                         Assets.Get(Sprite.Mothership)
                     };
+                    var descriptions = new String[4]
+                    {
+                        "Req. 1 scrap, blocks enemy fire. 20 integrity.",
+                        "Req. 1 scrap, attacks enemies. 8 integrity.",
+                        "Req. 1 scrap, 100 dmg to all in radius when destroyed. 3 integrity.",
+                        "Req. 3 scrap, deployable garage. Use metal to upgrade."
+                    };
                     float angle = 0;
                     Color color;
                     for (float i = 0; i < count; i++)
                     {
                         Vector2 dir = Engine.ToUnitVector(angle);
                         Vector2 mouseDir = Engine.ToUnitVector(gunAngle.angle);
-                        if (dir.X * mouseDir.X + dir.Y * mouseDir.Y > 0.6f && dist > 150)
+                        if (dir.X * mouseDir.X + dir.Y * mouseDir.Y > (0.2f * count) && dist > 500)
                         {
                             color = Color.White;
+                            ParticleManager.Add(new Particle(null, new Vector2(0, -100) + position, 0, Color.White) { drawText = descriptions[(int)i] });
                         }
                         else
                         {
                             color = Color.Cyan;
                         }
-                        ParticleManager.Add(new Particle(constructs[(int)i], dir * 45 + Engine.Camera.Position, 0, color));
+                        ParticleManager.Add(new Particle(constructs[(int)i], dir * 45 + position, 0, color));
                         angle += MathF.PI * 2 / count;
                     }
                 }
@@ -339,10 +347,7 @@ public class Player : Entity
                         if (pickup is not Construct && pickup is not Module)
                         {
                             scrapCount++;
-                            if (firstScrap == null)
-                            {
-                                firstScrap = pickup;
-                            }
+                            firstScrap ??= pickup;
                         }
                     }
                     float angle = 0;
@@ -350,7 +355,7 @@ public class Player : Entity
                     {
                         Vector2 dir = Engine.ToUnitVector(angle);
                         Vector2 mouseDir = Engine.ToUnitVector(gunAngle.angle);
-                        if (dir.X * mouseDir.X + dir.Y * mouseDir.Y > 0.6f && dist > 150 && firstScrap != null)
+                        if (dir.X * mouseDir.X + dir.Y * mouseDir.Y > (0.2f * count) && dist > 500 && firstScrap != null)
                         {
                             switch (i)
                             {
