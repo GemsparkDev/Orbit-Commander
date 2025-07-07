@@ -12,6 +12,8 @@ public abstract class Queueable(int _cost, Texture2D _texture)
 {
     public bool IsExpired => !CanConstruct() || _cost == 0;
     public int Cost => _cost;
+    private int maxCost = _cost;
+    public int MaxCost => maxCost;
     public Texture2D Texture => _texture;
     public int AttemptConstruct(int _time)
     {

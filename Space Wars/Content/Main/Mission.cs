@@ -352,6 +352,7 @@ public class Mission
     }
     public void Initialize()
     {
+        Engine.SaveGame.Player.dockedEntity = null;
         foreach(var (entity, _) in MissionObjectives)
         {
             Engine.EntityManager.Add(entity);

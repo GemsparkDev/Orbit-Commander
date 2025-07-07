@@ -234,7 +234,13 @@ public class Engine : Game
         selectMission.AddBehaviour(delegate() { if (EventHandler.SyncModules()) { Startgame(); } });
         launchButton.AddBehaviour(delegate() { EventHandler.SendMessage(Message.EscapeDroneLeave); });
         shaderToggle.AddBehaviour(delegate () { UseShader = !UseShader; shaderToggle.text = $"Shader: {UseShader}"; });
-        createFuse.AddBehaviour(delegate () { EntityManager.QueuedItems.Add(new FuseQueue()); });
+        createFuse.AddBehaviour(delegate () 
+        {
+            if (EntityManager.QueuedItems.Count < 10)
+            {
+                EntityManager.QueuedItems.Add(new FuseQueue());
+            } 
+        });
         tooltip = new Window(Vector2.Zero, wideButton);
         tooltip.AddWidget(new Decal(new Vector2(0, -3), Assets.TextFont, "Queue fuse construction. Cheap but delicate.", Color.White, 3f));
         tooltip.AddWidget(new Decal(new Vector2(0, 3), Assets.TextFont, "Required time: 10 waves.", Color.White, 3f));
@@ -245,7 +251,7 @@ public class Engine : Game
             {
                 foreach (var item in MissionSelectItems)
                 {
-                    if (item.daughterItem == null)
+                    if (item.daughterItem == null && EntityManager.QueuedItems.Count < 10)
                     {
                         item.daughterItem = UIManager.selectedIcon as Pickup;
                         UIManager.selectedIcon = null;
@@ -265,7 +271,7 @@ public class Engine : Game
             {
                 foreach (var item in MissionSelectItems)
                 {
-                    if (item.daughterItem == null)
+                if (item.daughterItem == null && EntityManager.QueuedItems.Count < 10)
                     {
                         item.daughterItem = UIManager.selectedIcon as Module;
                         UIManager.selectedIcon = null;

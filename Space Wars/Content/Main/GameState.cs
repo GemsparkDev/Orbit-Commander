@@ -279,8 +279,14 @@ public class MissionSelect : GameState
         }
         for(int i = 0; i < Engine.EntityManager.QueuedItems.Count; i++)
         {
-            var texture = Engine.EntityManager.QueuedItems[i].Texture;
-            _spriteBatch.Draw(texture, (new Vector2(10, 10) + new Vector2(20, 0) * i) * UIManager.UIScale - Engine.ScreenSize/2, null, Color.White, 0, Vector2.Zero, UIManager.UIScale, 0, 0);
+            var item = Engine.EntityManager.QueuedItems[i];
+            var texture = item.Texture;
+            var pos = (new Vector2(20, 20) + new Vector2(30, 0) * i) * UIManager.UIScale - Engine.ScreenSize / 2;
+            _spriteBatch.Draw(texture, pos, null, Color.White, 0, new Vector2(texture.Width, texture.Height) / 2, UIManager.UIScale, 0, 0);
+            for (float j = 0; j <= MathF.Tau * ((float)item.Cost / (float)item.MaxCost) + float.Epsilon; j+= MathF.Tau/(3 * UIManager.UIScale * UIManager.UIScale))
+            {
+                _spriteBatch.Draw(Assets.Get(Sprite.Dot), Engine.ToUnitVector(j) * texture.Height / 1.5f * UIManager.UIScale + pos, null, Color.White, j, Assets.DimsOf(Sprite.Dot)/2, UIManager.UIScale, 0, 0);
+            }
         }
     }
 }
