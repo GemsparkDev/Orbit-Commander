@@ -501,6 +501,10 @@ public class Engine : Game
     {
         return _valueOne * (1 - _length) + _valueTwo * _length;
     }
+    public static float OneToNegOne()
+    {
+        return Random.NextSingle() * 2 - 1f;
+    }
     public static void DrawFilledLine(SpriteBatch _spriteBatch, Vector2 _position, Rectangle _sourceRectangle, float _percentFilled, Color _lowerColor, Color _higherColor)
     {
         _spriteBatch.Draw(Line,_position,_sourceRectangle,_lowerColor);

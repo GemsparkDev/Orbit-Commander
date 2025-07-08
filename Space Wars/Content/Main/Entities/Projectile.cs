@@ -278,5 +278,55 @@ public class FlameBolt : Projectile
         }
     }
 }
+public class Explosive : Projectile
+{
+    ParticleEmitter radius;
+    ParticleEmitter activationRadius;
+    float explosionRadius;
+    public Explosive(Vector2 _position, Vector2 _velocity, float _angle, float _angularVelocity, bool _isFriendly, int _damage, float _radius, int _stealth = 0) 
+        : base(Assets.Get(Sprite.Fighter), _position, _velocity, _angle, _angularVelocity, _isFriendly, _damage, _stealth)
+    {
+        explosionRadius = _radius;
+        radius = new ParticleEmitter(Assets.Get(Sprite.Dot), _position, _radius, Color.Red * 0.5f);
+        activationRadius = new ParticleEmitter(Assets.Get(Sprite.Dot), _position, _radius / 2, Color.Red * 0.25f);
+        timeLeft = 4;
+    }
+    public override void AI()
+    {
+        position += velocity * Engine.DeltaSeconds * 60;
+        velocity *= (1 - Engine.DeltaSeconds);
+        angle += angularVelocity * Engine.DeltaSeconds * 60;
+        angularVelocity *= (1 - Engine.DeltaSeconds * 2);
+        radius.position = position;
+        activationRadius.position = position;
+        radius.Update();
+        activationRadius.Update();
+        var nearestEnemy = Engine.EntityManager.NearestEnemy(this);
+        if (nearestEnemy != null && explosionRadius / 2 > Vector2.Distance(nearestEnemy.position, position))
+        {
+            isExpired = true;
+        }
+        if (isExpired)
+        {
+            int particles = Engine.Random.Next(15, 25);
+            for (int i = 0; i < particles; i++)
+            {
+                float angle = Engine.Random.NextSingle() * MathF.PI * 2;
+                Vector2 particleVelocity = new Vector2(MathF.Cos(angle), MathF.Sin(angle)) * (Engine.Random.NextSingle() * 2 + 2);
+                ParticleManager.Add(new Particle(Assets.Get(Sprite.Dot), 0.25f, position, particleVelocity + velocity, angle, 0, Color.Yellow, new Color(255, 0, 0, 0)));
+            }
+            particles = Engine.Random.Next(8, 16);
+            for (int i = 0; i < particles; i++)
+            {
+                float angle = Engine.Random.NextSingle() * MathF.PI * 2;
+                Vector2 particleVelocity = new Vector2(MathF.Cos(angle), MathF.Sin(angle)) * (Engine.Random.NextSingle() * 2 + 2);
+                ParticleManager.Add(new Particle(Assets.Get(Sprite.Circle), 0.25f, position, particleVelocity + velocity, angle, 0, Color.DarkSlateGray, Color.Transparent));
+            }
+            Engine.EntityManager.Explode(damage, explosionRadius, position);
+            Engine.ShakeScreen(150 / ((position - Engine.Camera.Position).Length() + 300));
+            SoundManager.PlaySound(Assets.Get(Sound.Death), position);
+        }
+    }
+}
 
 

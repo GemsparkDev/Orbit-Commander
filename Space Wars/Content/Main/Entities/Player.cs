@@ -75,7 +75,7 @@ public class Player : Entity
     public Dictionary<ModuleType, Module> modules = new()
     {
         { ModuleType.Hull, ItemFactory.GetItem(Modules.Hull) },
-        { ModuleType.Guns, ItemFactory.GetItem(Modules.Flamethrower) },
+        { ModuleType.Guns, ItemFactory.GetItem(Modules.GrenadeLauncher) },
         { ModuleType.Engines, ItemFactory.GetItem(Modules.Engines) },
         { ModuleType.Sensors, ItemFactory.GetItem(Modules.Sensors) },
         { ModuleType.Core, ItemFactory.GetItem(Modules.Nanomachines) }
@@ -724,6 +724,14 @@ public class Player : Entity
         SoundManager.PlaySound(Assets.Get(Sound.LMGFire), position);
         modules[ModuleType.Guns].cooldown = 0.8f;
         Engine.ShakeScreen(0.1f);
+    }
+    public void GrenadeLauncher()
+    {
+        Engine.EntityManager.Add(new Explosive(position, targetVector * 8 + velocity + new Vector2(Engine.OneToNegOne(), Engine.OneToNegOne()), gunAngle.angle, Engine.OneToNegOne() / 8, true, 16, 40, 1));
+        SoundManager.PlaySound(Assets.Get(Sound.PulseFire), position);
+        modules[ModuleType.Guns].cooldown = 1f;
+        Engine.ShakeScreen(0.3f);
+        velocity -= targetVector / 2;
     }
     public void Dash()
     {
