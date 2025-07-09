@@ -65,6 +65,7 @@ public enum Sprite
     LargeMinerArm,
     LargeMiner,
     WarpGate,
+    VeilBoss,
 
     MetalScrap,
     RealMetalScrap,

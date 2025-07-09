@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -8,24 +9,29 @@ using Space_Wars.Content.Main.Entities;
 using UILib.Content.Main;
 
 namespace Space_Wars.Content.Main;
-public abstract class Queueable(int _cost, Texture2D _texture)
+public abstract class Queueable
 {
-    public bool IsExpired => !CanConstruct() || _cost == 0;
-    public int Cost => _cost;
-    private int maxCost = _cost;
-    public int MaxCost => maxCost;
-    public Texture2D Texture => _texture;
+    public Queueable(int _cost, Texture2D _texture)
+    {
+        Cost = _cost;
+        MaxCost = _cost;
+        Texture = _texture;
+    }
+    public bool IsExpired => !CanConstruct() || Cost == 0;
+    public int Cost { get; private set; }
+    public int MaxCost { get; }
+    public Texture2D Texture { get; }
     public int AttemptConstruct(int _time)
     {
         if (CanConstruct())
         {
-            if (_time >= _cost)
+            if (_time >= Cost)
             {
                 Construct();
-                _cost = 0;
-                return _time - _cost;
+                Cost = 0;
+                return _time - Cost;
             }
-            _cost -= _time;
+            Cost -= _time;
             return 0;
         }
         return _time;

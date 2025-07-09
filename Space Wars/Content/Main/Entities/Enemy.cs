@@ -881,6 +881,131 @@ public class Enemy : Entity
             yield return 0;
         }
     }
+    IEnumerable<int> VeilBoss()
+    {
+        //StealthAbility = 2;
+        SensingAbility = -1;
+        float detectionCooldown = 0;
+        enemyRange.radius = 450;
+        Entity detectedEntity = null;
+        while (true)
+        {
+            var entity = Engine.EntityManager.NearestEnemy(this);
+            if (entity == null && detectionCooldown > 0)
+            {
+                detectionCooldown -= Engine.DeltaSeconds;
+            }
+            if (detectionCooldown <= 0)
+            {
+                detectedEntity = null;
+            }
+            if (entity != null)
+            {
+                detectedEntity = entity;
+                detectionCooldown = 5;
+            }
+            if (detectedEntity != null)
+            {
+                targetVector = Vector2.Normalize(detectedEntity.position - position);
+                targetAngle = MathF.Atan2(targetVector.X, -targetVector.Y);
+                Vector2 normalAcceleration = Vector2.Normalize(new Vector2(velocity.Y, -velocity.X));
+                if (velocity.Length() <= 0.01f)
+                {
+                    normalAcceleration = Vector2.Zero;
+                }
+                float closingVelocity = Vector2.Dot(targetVector, velocity);
+                Vector2 relativePosition = detectedEntity.position - position;
+                Vector2 relativeVelocity = detectedEntity.velocity - velocity;
+                Vector2 futureTargetVector = relativePosition + relativeVelocity;
+                Vector2 direction = Vector2.Normalize(relativePosition);
+                Entity nearestProjectile = Engine.EntityManager.NearestProjectile(NewDummyEnemy(position - direction * 10, isFriendly), isFriendly);
+                float playerAngle = MathF.Atan2(relativePosition.Y, relativePosition.X) + MathF.PI / 2;
+                if (nearestProjectile != null)
+                {
+                    Vector2 pos = Vector2.Normalize(position - nearestProjectile.position);
+                    Vector2 vel = Vector2.Normalize(velocity - nearestProjectile.velocity);
+                    if ((pos.X * vel.X + pos.Y * vel.Y) < -0.5f)
+                    {
+                        int sign = Math.Sign(pos.X * vel.Y - vel.X * pos.Y);
+                        if (sign == 0)
+                        {
+                            sign = 1;
+                        }
+                        targetAngle += MathF.PI / 2 * sign;
+                    }
+                }
+                float angleRateOfChange = (targetAngle - MathF.Atan2(futureTargetVector.X, -futureTargetVector.Y)) / Engine.DeltaSeconds;
+                //Note: Add bonus to speed if moving very fast toward planet
+                Vector2 accelerationVector = (normalAcceleration * closingVelocity * angleRateOfChange * 2) * Engine.DeltaSeconds + GetNormalizedAcceleration() * (2);
+                if (accelerationVector.LengthSquared() > 1f)
+                {
+                    accelerationVector = Vector2.Normalize(accelerationVector);
+                }
+                velocity += accelerationVector;
+                if (MathF.Abs(angleRateOfChange) < 0.5f && relativeVelocity.X * direction.X + relativeVelocity.Y * direction.Y > -8f)
+                {
+                    Vector2 thrustForce = targetVector * 12;
+                    velocity += thrustForce * Engine.DeltaSeconds;
+                    accelerationVector += thrustForce;
+                }
+                if (accelerationVector.LengthSquared() < 0.05f)
+                {
+                    RotateTowards(MathF.Atan2(velocity.Y, velocity.X) + MathF.PI / 2, 0.2f);
+                }
+                else
+                {
+                    RotateTowards(MathF.Atan2(accelerationVector.X, -accelerationVector.Y), 0.2f);
+                }
+                if (cooldown <= 0)
+                {
+                    cooldown = 0.25f;
+                    Vector2 relPos = Vector2.Normalize(detectedEntity.position - position);
+                    Engine.EntityManager.Add(new Explosive(position, velocity + relPos * 10 + new Vector2(Engine.OneToNegOne(), Engine.OneToNegOne()) * 5, Engine.OneToNegOne() * MathF.PI, Engine.OneToNegOne(), isFriendly, damage / 2, 40));
+                    SoundManager.PlaySound(Assets.Get(Sound.LMGFire), position);
+                }
+            }
+            else
+            {
+                var planet = Engine.EntityManager.CurrentMission.Planet;
+                Vector2 relativePosition = position - planet.position;
+                Vector2 dir = Vector2.Normalize(relativePosition);
+                velocity -= dir * (relativePosition.Length() - planet.radius * 1.5f) * Engine.DeltaSeconds;
+                Vector2 targetVelocity = new Vector2(dir.Y, -dir.X) * planet.GetOrbitalVelocity((dir * planet.radius * 1.5f));
+                Vector2 diffVelocity = targetVelocity - velocity;
+                velocity += diffVelocity * Engine.DeltaSeconds;
+                RotateTowards(MathF.Atan2(velocity.Y, velocity.X) + MathF.PI / 2);
+                if (cooldown <= 0)
+                {
+                    cooldown = 1;
+                    Engine.EntityManager.Add(new Explosive(position, velocity + GetNormalizedAcceleration() * 160, Engine.OneToNegOne() * MathF.PI, Engine.OneToNegOne(), isFriendly, damage, 100));
+                    SoundManager.PlaySound(Assets.Get(Sound.LMGFire), position);
+                }
+            }
+            LowerCooldown();
+            if (health <= 0)
+            {
+                Explode(6, ColliderRadius);
+                int particles = Engine.Random.Next(3, 5);
+                for (int i = 0; i < particles; i++)
+                {
+                    float angle = Engine.Random.NextSingle() * MathF.PI * 2;
+                    Vector2 particleVelocity = new Vector2(MathF.Cos(angle), MathF.Sin(angle)) * (Engine.Random.NextSingle() * 2 + 2) / 2;
+                    ParticleManager.Add(new Particle(Assets.Get(Sprite.Circle), 0.5f, position, particleVelocity + velocity, angle, 0, Color.Yellow, new Color(255, 0, 0, 0)));
+                }
+                particles = Engine.Random.Next(3, 5);
+                for (int i = 0; i < particles; i++)
+                {
+                    float angle = Engine.Random.NextSingle() * MathF.PI * 2;
+                    Vector2 particleVelocity = new Vector2(MathF.Cos(angle), MathF.Sin(angle)) * (Engine.Random.NextSingle() * 2 + 2) / 2;
+                    ParticleManager.Add(new Particle(Assets.Get(Sprite.Circle), 0.5f, position, particleVelocity + velocity, angle, 0, Color.DarkSlateGray, Color.Transparent));
+                }
+                isExpired = true;
+                SoundManager.PlaySound(Assets.Get(Sound.Death), position);
+                Engine.EntityManager.Add(ItemFactory.GetItem(Modules.Crossbow, position, GetNormalizedAcceleration() * 10, angularVelocity));
+            }
+            yield return 0;
+        }
+    }
     //Enemies
     IEnumerable<int> Fighter()
     {
@@ -2395,6 +2520,12 @@ public class Enemy : Entity
     {
         Enemy enemy = new(position, velocity, angle, 0, 1000, Assets.Get(Sprite.WarpGate), true);
         enemy.AddBehaviour(enemy.WarpGate());
+        return enemy;
+    }
+    public static Enemy NewVeilBoss(Vector2 position, Vector2 velocity, float angle)
+    {
+        Enemy enemy = new(position, velocity, angle, 12, 150, Assets.Get(Sprite.VeilBoss), false);
+        enemy.AddBehaviour(enemy.VeilBoss());
         return enemy;
     }
 }

@@ -91,6 +91,13 @@ public class EntityManager
         [(new EntityConstructor(Enemy.NewWarpGate, new Vector2(0, 450), -GravitationalSource.GetOrbitalVelocity(new Vector2(0, 450), Vector2.Zero, 150), 0), [ Condition.CustomIncomplete ])],
         "Warp Gate", "Warp to the next mission once you are done here", -1, new Vector2(0, 500)),
 
+        new([ new(Vector2.Zero, Vector2.Zero, 5000, 4.5f, true, Color.Cyan),
+        new(new Vector2(600, 0), GravitationalSource.GetOrbitalVelocity(new Vector2(600, 0), Vector2.Zero, 5000), 240, 1f, false, Color.Cyan),
+        new(new Vector2(-600, 0), GravitationalSource.GetOrbitalVelocity(new Vector2(-600, 0), Vector2.Zero, 5000), 240, 1f, false, Color.Cyan), ],
+        [(new EntityConstructor(Enemy.NewVeilBoss, new Vector2(0, -6*50), Vector2.Zero, 0), [ Condition.Kill ])],
+        "Showdown Pt. 3",
+        "Defeat the advanced drone prototype, Veil. Be warned: It may call for reinforcements.", 1.1f, new Vector2(0, 1), 0, 2, null, true),
+
         new([ new(Vector2.Zero, Vector2.Zero, 20000, 9, true, Color.OrangeRed, true),
         new(new Vector2(1200, 0), GravitationalSource.GetOrbitalVelocity(new Vector2(1200, 0), Vector2.Zero, 20000), 750, 2f, false, Color.Red) ],
         [],
@@ -225,7 +232,7 @@ public class EntityManager
         foreach (var entity in entities)
         {
             dist = Vector2.Distance(_position, entity.position);
-            if (dist < _radius && dist > 0.001f)
+            if (dist < _radius + entity.ColliderRadius && dist > float.Epsilon)
             {
                 entity.Collide(_damage);
             }

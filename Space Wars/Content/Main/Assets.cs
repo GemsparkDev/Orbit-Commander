@@ -52,7 +52,8 @@ public static class Assets
         Sprites.Add(Sprite.Healer, Content.Load<Texture2D>("Images/Entity_25"));
         Sprites.Add(Sprite.LargeMinerArm, Content.Load<Texture2D>("Images/Entity_26"));
         Sprites.Add(Sprite.LargeMiner, Content.Load<Texture2D>("Images/Entity_27"));
-        Sprites.Add(Sprite.WarpGate, Content.Load<Texture2D>("Images/Entity_28"))   ;
+        Sprites.Add(Sprite.WarpGate, Content.Load<Texture2D>("Images/Entity_28"));
+        Sprites.Add(Sprite.VeilBoss, Content.Load<Texture2D>("Images/Entity_29"));
 
         //Items
         Sprites.Add(Sprite.MetalScrap, Content.Load<Texture2D>("Images/Item_0"));

@@ -290,6 +290,7 @@ public class Explosive : Projectile
         radius = new ParticleEmitter(Assets.Get(Sprite.Dot), _position, _radius, Color.Red * 0.5f);
         activationRadius = new ParticleEmitter(Assets.Get(Sprite.Dot), _position, _radius / 2, Color.Red * 0.25f);
         timeLeft = 4;
+        color = _isFriendly ? Color.Orange : Color.Red;
     }
     public override void AI()
     {
