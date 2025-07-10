@@ -91,12 +91,15 @@ public class EntityManager
         [(new EntityConstructor(Enemy.NewWarpGate, new Vector2(0, 450), -GravitationalSource.GetOrbitalVelocity(new Vector2(0, 450), Vector2.Zero, 150), 0), [ Condition.CustomIncomplete ])],
         "Warp Gate", "Warp to the next mission once you are done here", -1, new Vector2(0, 500)),
 
-        new([ new(Vector2.Zero, Vector2.Zero, 5000, 4.5f, true, Color.Cyan),
-        new(new Vector2(600, 0), GravitationalSource.GetOrbitalVelocity(new Vector2(600, 0), Vector2.Zero, 5000), 240, 1f, false, Color.Cyan),
-        new(new Vector2(-600, 0), GravitationalSource.GetOrbitalVelocity(new Vector2(-600, 0), Vector2.Zero, 5000), 240, 1f, false, Color.Cyan), ],
+        new([ new(Vector2.Zero, Vector2.Zero, 4000, 4.5f, true, new Color(0.03f, 0.05f, 0.08f)),
+        new(new Vector2(600, 0), GravitationalSource.GetOrbitalVelocity(new Vector2(600, 0), Vector2.Zero, 4000) * 1.05f, 500, 1.5f, false, new Color(0.03f, 0.05f, 0.08f)), ],
         [(new EntityConstructor(Enemy.NewVeilBoss, new Vector2(0, -6*50), Vector2.Zero, 0), [ Condition.Kill ])],
         "Showdown Pt. 3",
         "Defeat the advanced drone prototype, Veil. Be warned: It may call for reinforcements.", 1.1f, new Vector2(0, 1), 0, 2, null, true),
+
+        new([new(new Vector2(600, 0), new Vector2(0, 1f), 3000, 6, false, Color.Cyan), 
+        new(new Vector2(-600, 0), new Vector2(0, -1f), 3000, 6, false, Color.Cyan)], 
+        new(), "Binary system", "Demo Binary System", -1, new Vector2(0, 400), 0, 0, null, true),
 
         new([ new(Vector2.Zero, Vector2.Zero, 20000, 9, true, Color.OrangeRed, true),
         new(new Vector2(1200, 0), GravitationalSource.GetOrbitalVelocity(new Vector2(1200, 0), Vector2.Zero, 20000), 750, 2f, false, Color.Red) ],

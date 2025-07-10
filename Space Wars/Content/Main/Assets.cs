@@ -83,6 +83,7 @@ public static class Assets
         Sprites.Add(Sprite.PulseShot, Content.Load<Texture2D>("Images/Projectile_1"));
         Sprites.Add(Sprite.Microshot, Content.Load<Texture2D>("Images/Projectile_2"));
         Sprites.Add(Sprite.CrossbowShot, Content.Load<Texture2D>("Images/Projectile_3"));
+        Sprites.Add(Sprite.Explosive, Content.Load<Texture2D>("Images/Projectile_4"));
 
         //Particles
         Sprites.Add(Sprite.Dot, Content.Load<Texture2D>("Images/Particle_0"));

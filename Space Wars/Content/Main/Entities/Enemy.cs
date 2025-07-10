@@ -150,12 +150,17 @@ public class Enemy : Entity
     }
     public override void Draw(SpriteBatch _spriteBatch)
     {
-        if(!ChildEnemy && Player.SensingAbility > StealthAbility)
+        if(!ChildEnemy)
         {
+            float val = (Engine.SaveGame.Player.SensingAbility > base.StealthAbility ? 1 : 0);
+            if (Engine.SaveGame.Player.SensingAbility <= base.StealthAbility)
+            {
+                val = Math.Clamp(val + revealDuration, 0, 1);
+            }
             //Health bar
             Vector2 barPosition = position + new Vector2(-texture.Width * 2, texture.Height) / 2;
             Rectangle sourceRectangle = new (0, 0, texture.Width * 2, 2);
-            Engine.DrawFilledLine(_spriteBatch, barPosition, sourceRectangle, (float)(health) / (float)(maxHealth), new Color(0, 50, 25), Color.Green);
+            Engine.DrawFilledLine(_spriteBatch, barPosition, sourceRectangle, (float)(health) / (float)(maxHealth), new Color(0, 50, 25) * val, Color.Green * val);
         }
         Vector2 halfSize = Engine.BackBuffer / 2;
         if (!ChildEnemy && !deleteOnCollide && isFriendly &&
@@ -883,43 +888,32 @@ public class Enemy : Entity
     }
     IEnumerable<int> VeilBoss()
     {
-        //StealthAbility = 2;
+        StealthAbility = 2;
         SensingAbility = -1;
         float detectionCooldown = 0;
         enemyRange.radius = 450;
         Entity detectedEntity = null;
         while (true)
         {
-            var entity = Engine.EntityManager.NearestEnemy(this);
-            if (entity == null && detectionCooldown > 0)
+            if (detectionCooldown <= 0)
+            {
+                detectionCooldown = 1;
+                if (Engine.Random.Next(0, 2) == 0)
+                {
+                    detectedEntity = Engine.EntityManager.NearestEnemy(this);
+                }
+            }
+            else
             {
                 detectionCooldown -= Engine.DeltaSeconds;
             }
-            if (detectionCooldown <= 0)
-            {
-                detectedEntity = null;
-            }
-            if (entity != null)
-            {
-                detectedEntity = entity;
-                detectionCooldown = 5;
-            }
             if (detectedEntity != null)
             {
-                targetVector = Vector2.Normalize(detectedEntity.position - position);
-                targetAngle = MathF.Atan2(targetVector.X, -targetVector.Y);
-                Vector2 normalAcceleration = Vector2.Normalize(new Vector2(velocity.Y, -velocity.X));
-                if (velocity.Length() <= 0.01f)
-                {
-                    normalAcceleration = Vector2.Zero;
-                }
-                float closingVelocity = Vector2.Dot(targetVector, velocity);
+                velocity *= 0.8f;
                 Vector2 relativePosition = detectedEntity.position - position;
-                Vector2 relativeVelocity = detectedEntity.velocity - velocity;
-                Vector2 futureTargetVector = relativePosition + relativeVelocity;
-                Vector2 direction = Vector2.Normalize(relativePosition);
-                Entity nearestProjectile = Engine.EntityManager.NearestProjectile(NewDummyEnemy(position - direction * 10, isFriendly), isFriendly);
-                float playerAngle = MathF.Atan2(relativePosition.Y, relativePosition.X) + MathF.PI / 2;
+                targetVector = Vector2.Normalize(relativePosition);
+                targetAngle = MathF.Atan2(targetVector.X, -targetVector.Y);
+                Entity nearestProjectile = Engine.EntityManager.NearestProjectile(NewDummyEnemy(position + targetVector * 10, isFriendly), isFriendly);
                 if (nearestProjectile != null)
                 {
                     Vector2 pos = Vector2.Normalize(position - nearestProjectile.position);
@@ -931,37 +925,22 @@ public class Enemy : Entity
                         {
                             sign = 1;
                         }
-                        targetAngle += MathF.PI / 2 * sign;
+                        velocity += new Vector2(-pos.Y, pos.X) * sign * Engine.DeltaSeconds * 500;
                     }
                 }
-                float angleRateOfChange = (targetAngle - MathF.Atan2(futureTargetVector.X, -futureTargetVector.Y)) / Engine.DeltaSeconds;
-                //Note: Add bonus to speed if moving very fast toward planet
-                Vector2 accelerationVector = (normalAcceleration * closingVelocity * angleRateOfChange * 2) * Engine.DeltaSeconds + GetNormalizedAcceleration() * (2);
-                if (accelerationVector.LengthSquared() > 1f)
-                {
-                    accelerationVector = Vector2.Normalize(accelerationVector);
-                }
-                velocity += accelerationVector;
-                if (MathF.Abs(angleRateOfChange) < 0.5f && relativeVelocity.X * direction.X + relativeVelocity.Y * direction.Y > -8f)
-                {
-                    Vector2 thrustForce = targetVector * 12;
-                    velocity += thrustForce * Engine.DeltaSeconds;
-                    accelerationVector += thrustForce;
-                }
-                if (accelerationVector.LengthSquared() < 0.05f)
-                {
-                    RotateTowards(MathF.Atan2(velocity.Y, velocity.X) + MathF.PI / 2, 0.2f);
-                }
-                else
-                {
-                    RotateTowards(MathF.Atan2(accelerationVector.X, -accelerationVector.Y), 0.2f);
-                }
+                Vector2 relativeVelocity = velocity - Player.velocity - targetVector * 4;
+                GoToPosition(detectedEntity.position, (-Math.Min(0, relativeVelocity.X * targetVector.X + relativeVelocity.Y * targetVector.Y) * 1.75f));
+                RotateTowards(targetAngle);
                 if (cooldown <= 0)
                 {
                     cooldown = 0.25f;
-                    Vector2 relPos = Vector2.Normalize(detectedEntity.position - position);
-                    Engine.EntityManager.Add(new Explosive(position, velocity + relPos * 10 + new Vector2(Engine.OneToNegOne(), Engine.OneToNegOne()) * 5, Engine.OneToNegOne() * MathF.PI, Engine.OneToNegOne(), isFriendly, damage / 2, 40));
+                    revealDuration += 0.2f;
+                    Engine.EntityManager.Add(new Explosive(position, velocity + targetVector * 10 + new Vector2(Engine.OneToNegOne(), Engine.OneToNegOne()) * 5, Engine.OneToNegOne() * MathF.PI, Engine.OneToNegOne(), isFriendly, damage / 2, 40, 1));
                     SoundManager.PlaySound(Assets.Get(Sound.LMGFire), position);
+                }
+                if (relativePosition.Length() < 100)
+                {
+                    velocity -= targetVector * 180 * Engine.DeltaSeconds;
                 }
             }
             else
@@ -969,15 +948,17 @@ public class Enemy : Entity
                 var planet = Engine.EntityManager.CurrentMission.Planet;
                 Vector2 relativePosition = position - planet.position;
                 Vector2 dir = Vector2.Normalize(relativePosition);
-                velocity -= dir * (relativePosition.Length() - planet.radius * 1.5f) * Engine.DeltaSeconds;
+                velocity -= Vector2.Normalize(dir * (relativePosition.Length() - planet.radius * 1.5f)) * Engine.DeltaSeconds * 4;
                 Vector2 targetVelocity = new Vector2(dir.Y, -dir.X) * planet.GetOrbitalVelocity((dir * planet.radius * 1.5f));
                 Vector2 diffVelocity = targetVelocity - velocity;
                 velocity += diffVelocity * Engine.DeltaSeconds;
-                RotateTowards(MathF.Atan2(velocity.Y, velocity.X) + MathF.PI / 2);
+                targetAngle = MathF.Atan2(velocity.Y, velocity.X) + MathF.PI / 2;
+                RotateTowards(targetAngle);
                 if (cooldown <= 0)
                 {
                     cooldown = 1;
-                    Engine.EntityManager.Add(new Explosive(position, velocity + GetNormalizedAcceleration() * 160, Engine.OneToNegOne() * MathF.PI, Engine.OneToNegOne(), isFriendly, damage, 100));
+                    revealDuration += 0.5f;
+                    Engine.EntityManager.Add(new Explosive(position, velocity + GetNormalizedAcceleration() * 160, Engine.OneToNegOne() * MathF.PI, Engine.OneToNegOne(), isFriendly, damage, 200, 1) { timeLeft = 10 });
                     SoundManager.PlaySound(Assets.Get(Sound.LMGFire), position);
                 }
             }
@@ -1001,7 +982,7 @@ public class Enemy : Entity
                 }
                 isExpired = true;
                 SoundManager.PlaySound(Assets.Get(Sound.Death), position);
-                Engine.EntityManager.Add(ItemFactory.GetItem(Modules.Crossbow, position, GetNormalizedAcceleration() * 10, angularVelocity));
+                Engine.EntityManager.Add(ItemFactory.GetItem(Modules.GrenadeLauncher, position, GetNormalizedAcceleration() * 10, angularVelocity));
             }
             yield return 0;
         }

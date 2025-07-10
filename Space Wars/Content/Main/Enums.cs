@@ -93,6 +93,7 @@ public enum Sprite
     PulseShot,
     Microshot,
     CrossbowShot,
+    Explosive,
 
     Dot,
     Dollar,

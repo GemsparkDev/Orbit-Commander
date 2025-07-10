@@ -283,29 +283,41 @@ public class Explosive : Projectile
     ParticleEmitter radius;
     ParticleEmitter activationRadius;
     float explosionRadius;
+    float time = 0;
+    Vector3 col;
     public Explosive(Vector2 _position, Vector2 _velocity, float _angle, float _angularVelocity, bool _isFriendly, int _damage, float _radius, int _stealth = 0) 
-        : base(Assets.Get(Sprite.Fighter), _position, _velocity, _angle, _angularVelocity, _isFriendly, _damage, _stealth)
+        : base(Assets.Get(Sprite.Explosive), _position, _velocity, _angle, _angularVelocity, _isFriendly, _damage, _stealth)
     {
         explosionRadius = _radius;
         radius = new ParticleEmitter(Assets.Get(Sprite.Dot), _position, _radius, Color.Red * 0.5f);
         activationRadius = new ParticleEmitter(Assets.Get(Sprite.Dot), _position, _radius / 2, Color.Red * 0.25f);
         timeLeft = 4;
+        col = _isFriendly ? new Vector3(1, 0.65f, 0) : new Vector3(1, 0, 0);
         color = _isFriendly ? Color.Orange : Color.Red;
     }
     public override void AI()
     {
+        time += Engine.DeltaSeconds;
         position += velocity * Engine.DeltaSeconds * 60;
         velocity *= (1 - Engine.DeltaSeconds);
-        angle += angularVelocity * Engine.DeltaSeconds * 60;
+        angle += angularVelocity * Engine.DeltaSeconds * 60 + MathF.Sin(time * 4) / 15;
         angularVelocity *= (1 - Engine.DeltaSeconds * 2);
         radius.position = position;
         activationRadius.position = position;
-        radius.Update();
-        activationRadius.Update();
-        var nearestEnemy = Engine.EntityManager.NearestEnemy(this);
-        if (nearestEnemy != null && explosionRadius / 2 > Vector2.Distance(nearestEnemy.position, position))
+        if (isFriendly)
         {
-            isExpired = true;
+            radius.Update();
+            activationRadius.Update();
+        }
+        var nearestEnemy = Engine.EntityManager.NearestEnemy(this);
+        if (nearestEnemy != null)
+        {
+            float val = MathF.Cos(time * 100 / ((Math.Abs(Vector2.Distance(nearestEnemy.position, position) - explosionRadius / 2) + 1))) / 4 + 0.75f;
+            color = new Color(col.X * val + (1 - val), col.Y * val + (1 - val), col.Z * val + (1 - val));
+            if (explosionRadius / 2 > Vector2.Distance(nearestEnemy.position, position))
+            {
+                isExpired = true;
+            }
         }
         if (isExpired)
         {

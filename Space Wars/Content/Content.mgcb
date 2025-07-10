@@ -632,6 +632,18 @@
 /processorParam:TextureFormat=Color
 /build:Images/Projectile_3.png
 
+#begin Images/Projectile_4.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:Images/Projectile_4.png
+
 #begin Images/UI_1.png
 /importer:TextureImporter
 /processor:TextureProcessor

@@ -185,7 +185,7 @@ public class MissionSelect : GameState
     [
         (200, [], 0), (160, [0], 0), (140, [0], 0), (100, [1, 2], 0),
         (210, [3], 1), (170, [4], 1), (145, [5], 1), (130, [5], 1), (150, [6], 1), (50, [7], 1),
-        (200, [8], 2), (150, [8], 2)
+        (200, [8], 2), (150, [8], 2), (100, [9], 2)
     ];
     private Vector2 playerPosition;
     private List<(int system, ParticleEmitter orbit)> missionOrbits = [];
