@@ -27,7 +27,7 @@ public class GravitationalSource
         isImmovable = _isImmovable;
         color = _color;
         surface = new ParticleEmitter(Assets.Get(Sprite.Dot), position, radius, _color);
-        trajectory = new ParticleEmitter(Assets.Get(Sprite.Dot), 100, position, 0, 0, 0, 0, 1f, _color * 0.5f, Color.Transparent, EmitterType.EmissionOverDistance);
+        trajectory = new ParticleEmitter(Assets.Get(Sprite.Dot), 10, position, 0, 0, 0, 0, 1f, _color * 0.5f, Color.Transparent, EmitterType.EmissionOverDistance);
         hasRing = _hasRing;
     }
     public Vector2 GetAcceleration(Vector2 _position)
@@ -67,9 +67,9 @@ public class GravitationalSource
         else
         {
             int collisionForce = 0;
-            Vector2 normalVector = Vector2.Normalize(relativePosition);
-            Vector2 frictionVector = new (normalVector.Y, -normalVector.X);
-            Vector2 relativeVelocity = velocity - _entity.velocity;
+            var normalVector = Vector2.Normalize(relativePosition);
+            var frictionVector = new Vector2(normalVector.Y, -normalVector.X);
+            var relativeVelocity = velocity - _entity.velocity;
             if (Math.Floor((relativeVelocity).Length() / 2) > 5)
             {
                 collisionForce = (int)Math.Floor((relativeVelocity).Length() / 2);
@@ -96,9 +96,9 @@ public class GravitationalSource
         }
         else
         {
-            Vector2 normalVector = Vector2.Normalize(relativePosition);
-            Vector2 frictionVector = new(normalVector.Y, -normalVector.X);
-            Vector2 relativeVelocity = velocity - _celestialBody.velocity;
+            var normalVector = Vector2.Normalize(relativePosition);
+            var frictionVector = new Vector2(normalVector.Y, -normalVector.X);
+            var relativeVelocity = velocity - _celestialBody.velocity;
 
             _celestialBody.velocity += normalVector * Math.Max(0, Vector2.Dot(relativeVelocity, normalVector)) + frictionVector * Vector2.Dot(relativeVelocity, frictionVector) * 0.1f;
             _celestialBody.position += normalVector * (radius + _celestialBody.radius - Vector2.Distance(position, _celestialBody.position));

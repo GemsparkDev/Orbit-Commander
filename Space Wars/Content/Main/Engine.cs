@@ -73,12 +73,7 @@ public class Engine : Game
         Line = new Texture2D(graphics.GraphicsDevice, 1, 1, false, SurfaceFormat.Color);
         Line.SetData(new[] { Color.White });
 
-        Camera = new Camera(GraphicsDevice.Viewport)
-        {
-            Origin = ScreenSize / 2,
-            Zoom = new Vector2(1f, 1f),
-            Position = Vector2.Zero
-        };
+        Camera = new Camera(Vector2.Zero, ScreenSize / 2, 1f, 0);
 
         UIManager = new UIManager();
         UIManager.BackBuffer = BackBuffer;
@@ -229,8 +224,8 @@ public class Engine : Game
         restartButton.AddBehaviour(delegate() { EventHandler.SendMessage(Message.RestartModules); });
         globalSidePanelOpen.AddBehaviour(EventHandler.ToggleDockingMenus);
         sidePanelClose.AddBehaviour(EventHandler.ToggleDockingMenus);
-        prevMission.AddBehaviour(EntityManager.PrevMission);
-        nextMission.AddBehaviour(EntityManager.NextMission);
+        prevMission.AddBehaviour(delegate() { SaveGame.PrevMission(); });
+        nextMission.AddBehaviour(delegate () { SaveGame.NextMission(); });
         selectMission.AddBehaviour(delegate() { if (EventHandler.SyncModules()) { Startgame(); } });
         launchButton.AddBehaviour(delegate() { EventHandler.SendMessage(Message.EscapeDroneLeave); });
         shaderToggle.AddBehaviour(delegate () { UseShader = !UseShader; shaderToggle.text = $"Shader: {UseShader}"; });
@@ -426,7 +421,7 @@ public class Engine : Game
         EventHandler.UpdateModulesStatus();
         SoundManager.PlayGlobalSound(Assets.Get(Sound.Interact));
         SoundManager.ChangeTrack(Assets.Get(Sound.main));
-        EntityManager.CurrentMission.PlayIntroCutscene();
+        SaveGame.CurrentMission.PlayIntroCutscene();
         ScreenShakeFactor = 0;
     }
 
@@ -508,7 +503,6 @@ public class Engine : Game
     public static void DrawFilledLine(SpriteBatch _spriteBatch, Vector2 _position, Rectangle _sourceRectangle, float _percentFilled, Color _lowerColor, Color _higherColor)
     {
         _spriteBatch.Draw(Line,_position,_sourceRectangle,_lowerColor);
-
         _spriteBatch.Draw(Line, _position, new Rectangle(_sourceRectangle.Location, new Point((int)(_sourceRectangle.Width * _percentFilled), _sourceRectangle.Height)), _higherColor);
     }
 
@@ -519,7 +513,7 @@ public class Engine : Game
         //Render to renderTarget
         GraphicsDevice.SetRenderTarget(renderTarget);
         GraphicsDevice.Clear(Color.Black);
-        spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, null, null, null, transformMatrix: Camera.ViewMatrix);
+        spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, null, null, null, transformMatrix: Camera.Transform);
         CurrentGameState.Draw(spriteBatch);
         spriteBatch.End();
 

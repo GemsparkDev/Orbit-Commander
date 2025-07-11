@@ -151,13 +151,9 @@ public static class Assets
         SoundFX.Add(Sound.menu, Content.Load<SoundEffect>("Sounds/menu"));
         SoundFX.Add(Sound.boss, Content.Load<SoundEffect>("Sounds/boss"));
 
-
-        //Current Text Font
         TextFont = Content.Load<SpriteFont>("Fonts/RobotoMono");
 
         effect = Content.Load<Effect>("Shaders/BloomShader");
-        //TODO: Add more sound effects for menu sounds
-        //TODO: Rename basic module elements to Item_2 - Item_6
     }
     public static Texture2D Get(Sprite sprite)
     {

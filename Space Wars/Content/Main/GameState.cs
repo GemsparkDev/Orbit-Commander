@@ -6,6 +6,7 @@ using Space_Wars.Content.Main.Particles;
 using System.Collections.Generic;
 using UILib.Content.Main;
 using System;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace Space_Wars.Content.Main;
 
@@ -33,9 +34,9 @@ public abstract class GameState
     public virtual void Initialize() { }
     public abstract void Update();
     public abstract void Draw(SpriteBatch _spriteBatch);
-    private Player Player => Engine.SaveGame.Player;
+    private static Player Player => Engine.SaveGame.Player;
     //Useful if several game states want to render the same game space
-    internal void RenderGamespace(SpriteBatch _spriteBatch)
+    protected static void RenderGamespace(SpriteBatch _spriteBatch)
     {
         if (Player.modules[ModuleType.Core].isFailed)
         {
@@ -48,32 +49,43 @@ public abstract class GameState
         ParticleManager.Draw(_spriteBatch);
         if (Engine.DebugMode)
         {
-            for (int x = (int)(Engine.Camera.Position.X - Engine.ScreenSize.X / 2) / 50; x < (Engine.Camera.Position.X + Engine.ScreenSize.X / 2) / 50; x++)
+            Vector2 cameraPos = Engine.Camera.Position + Engine.MousePositionOffset;
+            for (int x = (int)Math.Ceiling((cameraPos.X - Engine.ScreenSize.X / 2) / 50); x < (cameraPos.X + Engine.ScreenSize.X / 2) / 50; x++)
             {
-                _spriteBatch.Draw(Engine.Line, new Vector2(x * 50, Engine.Camera.Position.Y - Engine.ScreenSize.Y / 2), new Rectangle((int)(x * 50), 0, 1, (int)Engine.ScreenSize.Y), Color.Gray * 0.5f, 0, Vector2.Zero, 1, SpriteEffects.None, 0.4f);
-                _spriteBatch.DrawString(Assets.TextFont, ((int)x).ToString(), new Vector2(x * 50, Engine.Camera.Position.Y - Engine.ScreenSize.Y / 2), Color.White, 0, Vector2.Zero, 1, SpriteEffects.None, 0.4f);
+                Color col = ((x % 10 == 0) ? new Color(0.2f, 0.2f, 0.2f) : new Color(0.1f, 0.1f, 0.1f));
+                _spriteBatch.Draw(Engine.Line, new Vector2(x * 50, cameraPos.Y - Engine.ScreenSize.Y / 2), new Rectangle(x * 50, 0, 1, (int)Engine.ScreenSize.Y), col, 0, Vector2.Zero, 1, 0, 0);
             }
-            for (int y = (int)(Engine.Camera.Position.Y - Engine.ScreenSize.X / 2) / 50 - 1; y < (Engine.Camera.Position.Y + Engine.ScreenSize.Y / 2) / 50 + 1; y++)
+            for (int y = (int)Math.Ceiling((cameraPos.Y - Engine.ScreenSize.Y / 2) / 50); y < (cameraPos.Y + Engine.ScreenSize.Y / 2) / 50; y++)
             {
-                _spriteBatch.Draw(Engine.Line, new Vector2(Engine.Camera.Position.X - Engine.ScreenSize.X / 2, y * 50), new Rectangle(0, (int)(y * 50), (int)Engine.ScreenSize.X, 1), Color.Gray * 0.5f, 0, Vector2.Zero, 1, SpriteEffects.None, 0.4f);
-                _spriteBatch.DrawString(Assets.TextFont, ((int)y).ToString(), new Vector2(Engine.Camera.Position.X - Engine.ScreenSize.X / 2, y * 50), Color.White, 0, Vector2.Zero, 1, SpriteEffects.None, 0.4f);
-            }
-            Vector2 screen = Engine.ScreenSize / 16;
-            for (int i = (int)(-screen.X); i < screen.X + 1; i++)
-            {
-                for (int j = (int)(-screen.Y); j < screen.Y + 1; j++)
+                Color col = ((y % 10 == 0) ? new Color(0.2f, 0.2f, 0.2f) : new Color(0.1f, 0.1f, 0.1f));
+                _spriteBatch.Draw(Engine.Line, new Vector2(cameraPos.X - Engine.ScreenSize.X / 2, y * 50), new Rectangle(0, y * 50, (int)Engine.ScreenSize.X, 1), col, 0, Vector2.Zero, 1, 0, 0);
+                if (y % 10 == 0)
                 {
-                    Vector2 pos = Engine.Camera.Position + new Vector2(i, j) * 8;
-                    float col = 0;
-                    float strength = Engine.EntityManager.CurrentMission.GetNormalizedAcceleration(pos).Length() * 30;
-                    int nearestInt = (int)Math.Round(strength);
-                    if (Math.Abs(strength - nearestInt) < 0.01f * strength)
+                    for (int x = (int)Math.Ceiling((cameraPos.X - Engine.ScreenSize.X / 2) / 500) * 10; x < (cameraPos.X + Engine.ScreenSize.X / 2) / 50; x += 10)
                     {
-                        col = 1;
+                        var text = $"{x},{y}";
+                        _spriteBatch.DrawString(Assets.TextFont, text, new Vector2(x * 50, y * 50), Color.White, 0, Assets.TextFont.MeasureString(text)/2, 1, 0, 0);
                     }
-                    _spriteBatch.Draw(Assets.Get(Sprite.Dot), pos, new Color(1f, 1f - strength / 25f, 1f - strength / 25f) * col);
                 }
             }
+            /*
+            Vector2 screen = Engine.ScreenSize / 32;
+            for (int i = (int)(-screen.X); i <= screen.X; i++)
+            {
+                for (int j = (int)(-screen.Y); j <= screen.Y; j++)
+                {
+                    Vector2 pos = Engine.Camera.Position + new Vector2(i, j) * 32 + Engine.MousePositionOffset;
+                    Vector2 acceleration = Engine.SaveGame.CurrentMission.GetNormalizedAcceleration(pos);
+                    float strength = acceleration.Length() * 60;
+                    var angle = MathF.Atan2(acceleration.Y, acceleration.X) - MathF.PI / 2;
+                    if (strength < 10)
+                    {
+                        float col = Math.Clamp((10 - strength)/10, 0, 0.25f);
+                        _spriteBatch.Draw(Assets.Get(Sprite.Arrow), new Rectangle((int)pos.X, (int)pos.Y, 5, (int)(10 * strength)), new Rectangle(0, 0, 8, 15), Color.White * col, angle, Vector2.Zero, 0, 0);
+                    }
+                }
+            }
+            */
         }
     }
 }
@@ -113,14 +125,8 @@ public class PlayingGame : GameState
     }
     public override void Update()
     {
-        if (!Engine.Self.IsActive)
-        {
-            Engine.UIManager.DisableAll();
-            Engine.UIManager.GetContainer((int)Containers.PauseMenu).enabled = true;
-            CurrentGameState.SwitchState(new PausedGame());
-        }
         Engine.EntityManager.IngameUpdate();
-        Engine.EntityManager.PlayerUpdate();
+        Engine.SaveGame.Player.RestrictedActions();
         ParticleManager.Update();
         if (Input.OldState.IsKeyUp(Keys.Escape) && Input.NewState.IsKeyDown(Keys.Escape))
         {
@@ -129,6 +135,12 @@ public class PlayingGame : GameState
                 SoundManager.SetAllSounds(false);
                 CurrentGameState.SwitchState(new PausedGame());
             }
+        }
+        if (!Engine.Self.IsActive)
+        {
+            Engine.UIManager.DisableAll();
+            Engine.UIManager.GetContainer((int)Containers.PauseMenu).enabled = true;
+            CurrentGameState.SwitchState(new PausedGame());
         }
     }
     public override void Draw(SpriteBatch _spriteBatch)
@@ -205,11 +217,11 @@ public class MissionSelect : GameState
     public override void Initialize()
     {
         Engine.UIManager.ScreenWindow.enabled = false;
-        EventHandler.UpdateMissionText();
         Engine.Camera.Position = Vector2.Zero;
         Engine.MousePositionOffset = Vector2.Zero;
         ParticleManager.Initialize();
         EventHandler.UpdateModulesUI();
+        EventHandler.UpdateMissionText();
     }
     public override void Update() 
     {
@@ -256,7 +268,7 @@ public class MissionSelect : GameState
                 color = Color.White;
                 if (Input.NewMouseState.LeftButton == ButtonState.Released && Input.OldMouseState.LeftButton == ButtonState.Pressed)
                 {
-                    Engine.EntityManager.SetMission(i);
+                    Engine.SaveGame.SetMission(i);
                 }
             }
             

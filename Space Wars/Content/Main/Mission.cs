@@ -22,7 +22,7 @@ public class Mission
     public bool playerDocked = false;
     public bool isAggressive = false;
 
-    private Player Player => Engine.SaveGame.Player;
+    private static Player Player => Engine.SaveGame.Player;
     private Entity escapeVehicle = null;
     private GravitationalSource[] planets; 
     //Save original entity parameters to allow cloning
@@ -278,10 +278,9 @@ public class Mission
                     if (Engine.Random.Next(0, enemyCreditValues[i].cost / 2) == 0 && newCosts[i] <= enemyCredits)
                     {
                         Vector2 pos;
-
                         if (squadLeader != null && (count < 2 || Engine.Random.Next(0, 4) != 0))
                         {
-                            Vector2 offset = Vector2.Normalize(new Vector2(squadLeader.position.X, squadLeader.position.Y));
+                            var offset = Vector2.Normalize(new Vector2(squadLeader.position.X, squadLeader.position.Y));
                             int isOdd = (count % 2 == 0) ? 1 : -1;
 
                             pos = squadLeader.position
@@ -317,7 +316,6 @@ public class Mission
     {
         foreach (var planet in planets)
         {
-            planet.Update();
             foreach (var planet2 in planets)
             {
                 if (planet == planet2)
@@ -326,6 +324,10 @@ public class Mission
                 }
                 planet.AttractObject(planet2);
             }
+        }
+        foreach (var planet in planets)
+        {
+            planet.Update();
         }
     }
     public GravitationalSource IsColliding(Vector2 _position)
@@ -444,16 +446,13 @@ public class Mission
             Vector2 particlePos = futurePosition;
             if (Engine.PatchedConics)
             {
-                for(int i = 0; i < futurePlanetPositions.Length; i++)
+                for(int i = futurePlanetPositions.Length - 1; i >= 0; i--)
                 {
-                    if (i == 0)
-                    {
-                        continue;
-                    }
-                    float sphereOfInfluence = (float)Vector2.Distance(futurePlanetPositions[i], futurePlanetPositions[0]) * (float)Math.Pow(planets[i].mass / planets[0].mass, 2 / 5) / 3;
+                    float sphereOfInfluence = (i == 0) ? 9999 : (Vector2.Distance(futurePlanetPositions[i], futurePlanetPositions[0]) * (float)Math.Pow(planets[i].mass / planets[0].mass, 2 / 5) / 3);
                     if (Vector2.Distance(futurePosition, futurePlanetPositions[i]) < sphereOfInfluence)
                     {
                         particlePos = particlePos - futurePlanetPositions[i] + planets[i].position;
+                        break;
                     }
                 }
             }

@@ -64,7 +64,7 @@ public class EventHandler
             Engine.SaveGame.Scrap -= 1;
             SoundManager.PlayGlobalSound(Assets.Get(Sound.Interact));
             UpdateRepairText();
-            Decal mothershipScrap = Engine.UIManager.GetWidget((int)Containers.GarageMenu, 0) as Decal;
+            var mothershipScrap = Engine.UIManager.GetWidget((int)Containers.GarageMenu, 0) as Decal;
             mothershipScrap.text = Engine.SaveGame.Scrap.ToString();
         }
         else
@@ -74,7 +74,7 @@ public class EventHandler
     }
     public static void UpdateRepairText()
     {
-        Decal repairText = Engine.UIManager.GetWidget((int)Containers.GarageMenu, 1) as Decal;
+        var repairText = Engine.UIManager.GetWidget((int)Containers.GarageMenu, 1) as Decal;
         var slot = Engine.UIManager.GetFuncWidget((int)Containers.GarageMenu, 1) as ItemSlot<Module>;
         Module daughterModule = slot.daughterItem;
         if (daughterModule != null)
@@ -125,7 +125,7 @@ public class EventHandler
     }
     public static void UpdateModules()
     {
-        Decal validConfigText = Engine.UIManager.GetWidget((int)Containers.GarageMenu,3) as Decal;
+        var validConfigText = Engine.UIManager.GetWidget((int)Containers.GarageMenu,3) as Decal;
         foreach (var module in Engine.ModuleSlots)
         {
             if (module.daughterItem == null)
@@ -207,7 +207,7 @@ public class EventHandler
     public static void UpdateMissionText()
     {
         Container missionSelect = Engine.UIManager.GetContainer((int)Containers.MissionMenu);
-        Mission mission = Engine.EntityManager.CurrentMission;
+        Mission mission = Engine.SaveGame.CurrentMission;
         bool completed = Engine.SaveGame.CurrentMissionCompleted;
         (missionSelect.GetWidget(0) as Decal).text = mission.Name;
         (missionSelect.GetWidget(1) as Decal).text = mission.Description;
@@ -228,7 +228,7 @@ public class EventHandler
                 text = text + module.Key + ", ";
             }
         }
-        Decal textSource = Engine.UIManager.GetWidget((int)Containers.PlayerMenu, 1) as Decal;
+        var textSource = Engine.UIManager.GetWidget((int)Containers.PlayerMenu, 1) as Decal;
         if (text == "")
         {
             textSource.text = "All systems go!";

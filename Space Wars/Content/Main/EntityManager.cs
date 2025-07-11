@@ -18,7 +18,7 @@ public class EntityManager
     private List<Entity> enemies = [];
     private List<Projectile> projectiles = [];
     private static float currentKarma = 0;
-    private Player Player => Engine.SaveGame.Player;
+    private static Player Player => Engine.SaveGame.Player;
     //Maximum distance for any detection when sensing = stealth
     public static float StealthRange { get; private set; } = 750;
     //Threshold of detection for enemies
@@ -97,9 +97,9 @@ public class EntityManager
         "Showdown Pt. 3",
         "Defeat the advanced drone prototype, Veil. Be warned: It may call for reinforcements.", 1.1f, new Vector2(0, 1), 0, 2, null, true),
 
-        new([new(new Vector2(600, 0), new Vector2(0, 1f), 3000, 6, false, Color.Cyan), 
-        new(new Vector2(-600, 0), new Vector2(0, -1f), 3000, 6, false, Color.Cyan)], 
-        new(), "Binary system", "Demo Binary System", -1, new Vector2(0, 400), 0, 0, null, true),
+        new([new(new Vector2(320, 0), new Vector2(0, 1f), 10000, 7, false, Color.Cyan), 
+        new(new Vector2(-800, 0), new Vector2(0, -2.5f), 4000, 3.5f, false, Color.Cyan)],
+        [], "Binary system", "Demo Binary System", -1, new Vector2(0, 400), 0, 0, null, true),
 
         new([ new(Vector2.Zero, Vector2.Zero, 20000, 9, true, Color.OrangeRed, true),
         new(new Vector2(1200, 0), GravitationalSource.GetOrbitalVelocity(new Vector2(1200, 0), Vector2.Zero, 20000), 750, 2f, false, Color.Red) ],
@@ -108,8 +108,14 @@ public class EntityManager
         "Survive",
         0.25f, new Vector2(0, -8*50), 1000, 4) { isAggressive = true, playerProgression = 4 },
     ];
-    private Mission currentMission;
-    public Mission CurrentMission => currentMission ?? missions[Engine.SaveGame.CurrentMissionIndex].Clone();
+    public Mission GetMission(int _index)
+    {
+        return missions[_index].Clone();
+    }
+    public int Missions()
+    {
+        return missions.Count;
+    }
     public List<Queueable> QueuedItems { get; private set; } = [];
 
     public void Add(Entity entity)
@@ -135,25 +141,21 @@ public class EntityManager
     }
     public void Initialize()
     {
-        currentMission = missions[Engine.SaveGame.CurrentMissionIndex].Clone();
+        Engine.SaveGame.CurrentMission = missions[Engine.SaveGame.CurrentMissionIndex].Clone();
         entities.Clear();
         addedEntities.Clear();
         enemies.Clear();
         projectiles.Clear();
         Player.velocity = Vector2.Zero;
-        currentMission.Initialize();
-    }
-    public void PlayerUpdate()
-    {
-        Player.RestrictedActions();
+        Engine.SaveGame.CurrentMission.Initialize();
     }
     public void IngameUpdate()
     {
         Player.Update();
-        CurrentMission.AttractObject(Player);
+        Engine.SaveGame.CurrentMission.AttractObject(Player);
         if (Player.dockedEntity == null && Player.Progression > -1)
         {
-            CurrentMission.CalculateTrajectory(Player.position, Player.velocity, Player.ColliderRadius);
+            Engine.SaveGame.CurrentMission.CalculateTrajectory(Player.position, Player.velocity, Player.ColliderRadius);
         }
         Engine.MousePositionOffset = new Vector2(Mouse.GetState().X, Mouse.GetState().Y) / 10 - Engine.BackBuffer / 20
         + Engine.ScreenShakeFactor * Engine.ScreenShakeFactor * new Vector2(Engine.Random.NextSingle() - 0.5f, Engine.Random.NextSingle() - 0.5f) * 50;
@@ -165,7 +167,7 @@ public class EntityManager
         var time = Engine.IngameTime;
         time.Duration += Engine.DeltaSeconds;
         Engine.IngameTime = time;
-        CurrentMission.Update();
+        Engine.SaveGame.CurrentMission.Update();
         Update();
         if (Player.isExpired)
         {
@@ -187,7 +189,7 @@ public class EntityManager
         foreach (var entity in entities)
         {
             entity.Update();
-            CurrentMission.AttractObject(entity);
+            Engine.SaveGame.CurrentMission.AttractObject(entity);
         }
         foreach (var projectile in projectiles)
         {
@@ -258,24 +260,6 @@ public class EntityManager
             }
         }
         QueuedItems = (from item in QueuedItems where !item.IsExpired select item).ToList();
-    }
-    public void SetMission(int _count)
-    {
-        Engine.SaveGame.CurrentMissionIndex = Math.Clamp(_count, 0, missions.Count - 1);
-        currentMission = missions[Engine.SaveGame.CurrentMissionIndex].Clone();
-        EventHandler.UpdateMissionText();
-    }
-    public void NextMission()
-    {
-        Engine.SaveGame.CurrentMissionIndex = Math.Clamp(Engine.SaveGame.CurrentMissionIndex + 1, 0, missions.Count - 1);
-        currentMission = missions[Engine.SaveGame.CurrentMissionIndex].Clone();
-        EventHandler.UpdateMissionText();
-    }
-    public void PrevMission()
-    {
-        Engine.SaveGame.CurrentMissionIndex = Math.Clamp(Engine.SaveGame.CurrentMissionIndex - 1, 0, missions.Count - 1);
-        currentMission = missions[Engine.SaveGame.CurrentMissionIndex].Clone();
-        EventHandler.UpdateMissionText();
     }
     public void DecayPickups()
     {
@@ -485,7 +469,7 @@ public class EntityManager
         //Ensure planets still orbit and render
         events.Add(new Event(0, 3, delegate (float time)
         {
-            Engine.EntityManager.CurrentMission.PlanetUpdate();
+            Engine.SaveGame.CurrentMission.PlanetUpdate();
         }));
         //Starts engine sound
         events.Add(new TriggerEvent(0, delegate (float time)

@@ -64,8 +64,8 @@ public class PulseShot : Projectile
         Entity nearestEnemy = Engine.EntityManager.NearestEnemy(this);
         if(isHoming && nearestEnemy != null)
         {
-            Vector2 relativePosition = Vector2.Normalize(nearestEnemy.position - position);
-            Vector2 normalDirection = Vector2.Normalize(new Vector2(velocity.Y, -velocity.X));
+            var relativePosition = Vector2.Normalize(nearestEnemy.position - position);
+            var normalDirection = Vector2.Normalize(new Vector2(velocity.Y, -velocity.X));
             float dot = relativePosition.X * normalDirection.X + relativePosition.Y * normalDirection.Y;
             velocity += normalDirection * MathF.Sqrt(MathF.Abs(dot)) * MathF.Sign(dot) / 10;
         }
@@ -122,6 +122,31 @@ public class AssassinShot : Projectile
 }
 public class GrapplingHook : Projectile
 {
+    internal interface ILatchable
+    {
+        public Vector2 Position { get; }
+        public bool IsExpired { get; }
+        public void ApplyForce(Vector2 _force);
+    }
+    internal class LatchedEntity(Entity _entity) : ILatchable
+    {
+        public Vector2 Position => _entity.position;
+        public bool IsExpired => _entity.isExpired;
+
+        public void ApplyForce(Vector2 _force)
+        {
+            _entity.velocity -= _force;
+        }
+    }
+    internal class LatchedPlanet(GravitationalSource _planet, Vector2 _position) : ILatchable
+    {
+        private Vector2 offset = Vector2.Normalize(_position - _planet.position) * _planet.radius;
+        public Vector2 Position => _planet.position + offset;
+        public bool IsExpired => false;
+
+        //Prevents deorbiting planets
+        public void ApplyForce(Vector2 _force) { }
+    }
     private Entity parent;
     private ILatchable target;
     private float maxDistance = 800;
@@ -142,8 +167,8 @@ public class GrapplingHook : Projectile
             float distance = Vector2.Distance(position, parent.position);
             if (distance > maxDistance)
             {
-                Vector2 direction = Vector2.Normalize(position - parent.position);
-                Vector2 force = direction * (distance - maxDistance) * Engine.DeltaSeconds;
+                var direction = Vector2.Normalize(position - parent.position);
+                var force = direction * (distance - maxDistance) * Engine.DeltaSeconds;
                 parent.velocity += force;
                 target.ApplyForce(force);
             }
@@ -159,7 +184,7 @@ public class GrapplingHook : Projectile
             {
                 isExpired = true;
             }
-            var planet = Engine.EntityManager.CurrentMission.IsColliding(position + velocity * Engine.DeltaSeconds * 60);
+            var planet = Engine.SaveGame.CurrentMission.IsColliding(position + velocity * Engine.DeltaSeconds * 60);
             if (planet != null)
             {
                 target = new LatchedPlanet(planet, position);
@@ -181,7 +206,7 @@ public class GrapplingHook : Projectile
         {
             velocity = Vector2.Zero;
             Texture2D texture = Assets.Get(Sprite.Dot);
-            Vector2 direction = Vector2.Normalize(parent.position - position);
+            var direction = Vector2.Normalize(parent.position - position);
             float angle = MathF.Atan2(direction.Y, direction.X);
             float distance = Vector2.Distance(parent.position, position);
             float trans = distance * distance / maxDistance / maxDistance;
@@ -198,7 +223,7 @@ public class GrapplingHook : Projectile
     public override void Draw(SpriteBatch _spriteBatch)
     {
         Texture2D texture = Assets.Get(Sprite.Dot);
-        Vector2 direction = Vector2.Normalize(parent.position - position);
+        var direction = Vector2.Normalize(parent.position - position);
         float angle = MathF.Atan2(direction.Y, direction.X);
         float distance = Vector2.Distance(parent.position, position);
         float trans = distance * distance / maxDistance / maxDistance;
@@ -212,31 +237,6 @@ public class GrapplingHook : Projectile
     {
 
     }
-}
-public interface ILatchable 
-{ 
-    public Vector2 Position { get; } 
-    public bool IsExpired { get; }
-    public void ApplyForce(Vector2 _force);
-}
-public class LatchedEntity(Entity _entity) : ILatchable 
-{
-    public Vector2 Position => _entity.position;
-    public bool IsExpired => _entity.isExpired;
-
-    public void ApplyForce(Vector2 _force)
-    {
-        _entity.velocity -= _force;
-    }
-}
-public class LatchedPlanet(GravitationalSource _planet, Vector2 _position) : ILatchable 
-{
-    private Vector2 offset = Vector2.Normalize(_position - _planet.position) * _planet.radius;
-    public Vector2 Position => _planet.position + offset;
-    public bool IsExpired => false;
-
-    //Prevents deorbiting planets
-    public void ApplyForce(Vector2 _force) { }
 }
 public class FlameBolt : Projectile
 {

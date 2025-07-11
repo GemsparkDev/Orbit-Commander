@@ -11,7 +11,8 @@ using Microsoft.Xna.Framework.Media;
 namespace Space_Wars.Content.Main;
 public static class SoundManager
 {
-    private static List<SoundEffectInstance> sounds =[];
+    private static List<SoundEffectInstance> sounds = [];
+    private static List<SoundEffectInstance> loopedSounds = [];
     private static Random random = new();
     private static Player player => Engine.SaveGame.Player;
     private static SoundEffectInstance currentTrack;
@@ -26,21 +27,19 @@ public static class SoundManager
     {
         SetAllSounds(false);
         sounds.Clear();
+        loopedSounds.Clear();
     }
-    public static void PlaySound(SoundEffectInstance _soundEffectInstance)
+    public static void PlayLoopedSound(SoundEffectInstance _sound)
     {
-        if (!sounds.Contains(_soundEffectInstance))
+        if (!loopedSounds.Contains(_sound))
         {
-            sounds.Add(_soundEffectInstance);
+            _sound.Volume = sfxVolume;
+            loopedSounds.Add(_sound);
+            _sound.Play();
         }
-        _soundEffectInstance.Volume = SFXVolume;
-        _soundEffectInstance.Play();
-    }
-    public static void AddSound(SoundEffectInstance _soundEffectInstance)
-    {
-        if (!sounds.Contains(_soundEffectInstance))
+        else
         {
-            sounds.Add(_soundEffectInstance);
+            _sound.Resume();
         }
     }
     private static void UpdateVolume()
@@ -53,6 +52,10 @@ public static class SoundManager
         {
             currentTrack.Volume = musicVolume;
         }
+    }
+    public static void SetSoundVolume(SoundEffectInstance _sound, float _volume)
+    {
+        _sound.Volume = _volume * sfxVolume;
     }
     public static void PlaySound(SoundEffect _sound, Vector2 _playLocation)
     {
@@ -71,25 +74,26 @@ public static class SoundManager
     {
         sound.Play(SFXVolume, 0, 0);
     }
-    public static void PauseSound(SoundEffectInstance _soundEffectInstance)
-    {
-        if (sounds.Contains(_soundEffectInstance))
-        {
-            _soundEffectInstance.Pause();
-        }
-    }
     public static void SetAllSounds(bool _playingSounds)
     {
         if(_playingSounds)
         {
-            foreach (SoundEffectInstance soundEffect in sounds)
+            foreach (var soundEffect in sounds)
+            {
+                soundEffect.Resume();
+            }
+            foreach (var soundEffect in loopedSounds)
             {
                 soundEffect.Resume();
             }
         }
         else
         {
-            foreach (SoundEffectInstance soundEffect in sounds)
+            foreach (var soundEffect in sounds)
+            {
+                soundEffect.Pause();
+            }
+            foreach (var soundEffect in loopedSounds)
             {
                 soundEffect.Pause();
             }
@@ -97,7 +101,13 @@ public static class SoundManager
     }
     public static void Update()
     {
+        //Clears out completed sounds
         sounds = sounds.Where(sound => !(sound.State == SoundState.Stopped)).ToList();
+        loopedSounds = loopedSounds.Where(sound => !(sound.State == SoundState.Stopped)).ToList();
+        foreach (var sound in loopedSounds)
+        {
+            sound.Pause();
+        }
 
         if (soundTimer > 0)
         {

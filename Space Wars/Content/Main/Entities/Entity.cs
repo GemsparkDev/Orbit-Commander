@@ -37,7 +37,7 @@ public abstract class Entity
     {
         get { return texture == null ? Vector2.Zero : new Vector2(texture.Width, texture.Height); }
     }
-    protected Player Player => Engine.SaveGame.Player;
+    protected static Player Player => Engine.SaveGame.Player;
     public Entity(Texture2D _texture, Vector2 _position, Vector2 _velocity, float _angle, float _angularVelocity, int _damage, bool _isFriendly)
     {
         texture = _texture;
@@ -88,10 +88,10 @@ public abstract class Entity
         {
             return;
         }
-        Vector4 stealthColor = new Vector4(color.R, color.G, color.B, color.A);
+        var stealthColor = new Vector4(color.R, color.G, color.B, color.A);
         stealthColor /= 255;
-        float revealLerp = (float)Math.Clamp(revealDuration, 0f, 1f);
-        float maxDistance = EntityManager.StealthRange * (float)Engine.SaveGame.Player.CountFuses(ModuleType.Sensors) / 4;
+        var revealLerp = (float)Math.Clamp(revealDuration, 0f, 1f);
+        var maxDistance = EntityManager.StealthRange * (float)Engine.SaveGame.Player.CountFuses(ModuleType.Sensors) / 4;
         //Player has superior sensing to stealth -> full detection
         //Player has equal sensing to stealth -> partial detection when nearby
         //Player has inferior sensing to stealth -> no detection

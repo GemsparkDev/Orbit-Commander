@@ -30,6 +30,7 @@ public class Player : Entity
     public bool canGatherResources = false;
     private int spareFuses = 0;
     private float time = 0;
+    private float engineTime = 0;
     //0 is basic stuff only, 1 adds restarting, constructs, and fuses, 2 adds abilities
     public int Progression { get; set; } = 3;
     public override int SensingAbility
@@ -75,7 +76,7 @@ public class Player : Entity
     public Dictionary<ModuleType, Module> modules = new()
     {
         { ModuleType.Hull, ItemFactory.GetItem(Modules.Hull) },
-        { ModuleType.Guns, ItemFactory.GetItem(Modules.GrenadeLauncher) },
+        { ModuleType.Guns, ItemFactory.GetItem(Modules.Flamethrower) },
         { ModuleType.Engines, ItemFactory.GetItem(Modules.Engines) },
         { ModuleType.Sensors, ItemFactory.GetItem(Modules.Sensors) },
         { ModuleType.Core, ItemFactory.GetItem(Modules.Nanomachines) }
@@ -86,22 +87,19 @@ public class Player : Entity
         { true, true, true, false },
         { true, true, true, false },
         { true, true, true, false },
-        { true, true, true, false }
+        { true, true, true, true  }
     };
 
     public Player(Vector2 _position, Vector2 _velocity, float _angle, float _angularVelocity)
         : base(Assets.Get(Sprite.Player), _position, _velocity, _angle, _angularVelocity, 5, true)
     {
         gunAngle = Enemy.NewDummyEnemy(position, true);
-        abilityEntity = Enemy.NewShield(gunAngle, 10, 1, 0, 1, true);
-        abilityEntity.isExpired = true;
         color = new Color(0, 255, 0);
         smokeParticles.isEmitterActive = false;
         engineParticles.isEmitterActive = false;
         engineSounds = Assets.Get(Sound.FireEngines).CreateInstance();
         engineSounds.IsLooped = true;
-        SoundManager.AddSound(engineSounds);
-        Texture2D[] textures = new Texture2D[modules.Count];
+        var textures = new Texture2D[modules.Count];
         for(int i = 0; i < modules.Count; i++)
         {
             textures[i] = modules[(ModuleType)i].itemData.RealSprite;
@@ -121,7 +119,7 @@ public class Player : Entity
         if (modules[ModuleType.Core].Health <= 0)
         {
             isExpired = true;
-            SoundManager.PauseSound(engineSounds);
+            engineSounds.Stop();
             Assets.Get(Sound.Death).Play();
             SoundManager.SFXVolume = (Engine.UIManager.GetFuncWidget(0, 3) as Slider).sliderInterval;
             SoundManager.MusicVolume = (Engine.UIManager.GetFuncWidget(0, 4) as Slider).sliderInterval;
@@ -244,7 +242,7 @@ public class Player : Entity
             smokeParticles.isEmitterActive = true;
             smokeParticles.speedOfEmission = 25f - currentHealth/4;
         }
-        var planet = Engine.EntityManager.CurrentMission.Planet;
+        var planet = Engine.SaveGame.CurrentMission.Planet;
         if (position.Length() >= 40 * 50 + planet.radius)
         {
             velocity *= 0.8f;
@@ -344,7 +342,7 @@ public class Player : Entity
                     Entity firstScrap = null;
                     foreach (var pickup in leashedMaterials)
                     {
-                        if (pickup is not Construct && pickup is not Module)
+                        if (pickup is not Module and not Construct)
                         {
                             scrapCount++;
                             firstScrap ??= pickup;
@@ -397,10 +395,14 @@ public class Player : Entity
             if (dockedEntity == null)
             {
                 targetVector = Vector2.Normalize(new Vector2(Mouse.GetState().X, Mouse.GetState().Y) - Engine.BackBuffer / 2 + Engine.Camera.Position - position);
-                gunAngle.angle = MathF.Atan2(targetVector.X, -targetVector.Y) - Engine.Camera.Rotation;
-                if (Input.NewMouseState.LeftButton == ButtonState.Pressed && modules[ModuleType.Guns].IsCooldownReady() && !UIManager.LockMouseInput && !modules[ModuleType.Guns].isFailed)
+                gunAngle.angle = MathF.Atan2(targetVector.X, -targetVector.Y);
+                if (Input.NewMouseState.LeftButton == ButtonState.Pressed && !UIManager.LockMouseInput)
                 {
-                    modules[ModuleType.Guns].ModuleFunction();
+                    angle = angle * 0.5f + gunAngle.angle * 0.5f;
+                    if (!modules[ModuleType.Guns].isFailed && modules[ModuleType.Guns].IsCooldownReady())
+                    {
+                        modules[ModuleType.Guns].ModuleFunction();
+                    }
                 }
                 if (Input.NewMouseState.RightButton == ButtonState.Pressed && Input.OldMouseState.RightButton == ButtonState.Released && !UIManager.LockMouseInput)
                 {
@@ -451,14 +453,21 @@ public class Player : Entity
                     }
                     if (isEngineActive)
                     {
+                        engineTime = Math.Clamp(engineTime + Engine.DeltaSeconds, 0, 1);
+                        float engineTimeModifier = 1 - (1 - engineTime) * (1 - engineTime);
                         engineParticles.offsetVelocity = velocity;
                         angle = angle * 0.5f + MathF.Atan2(direction.X, -direction.Y) * 0.5f;
                         engineParticles.sprayAngle = angle * 180 / MathF.PI + 180;
                         float fuseRatio = (float)(CountFuses(ModuleType.Engines)) / 3;
-                        engineParticles.speedOfEmission = 450f * fuseRatio;
-                        engineSounds.Volume = Math.Clamp(fuseRatio, 0, 1);
-                        float speed = 0.4f;
-                        velocity += Engine.ToUnitVector(angle) * 60 * Engine.DeltaSeconds * speed * fuseRatio / (leashedMaterials.Count + 2);
+                        engineParticles.speedOfEmission = 450f * fuseRatio * engineTimeModifier;
+                        if (direction != Vector2.Zero)
+                        {
+                            velocity += Vector2.Normalize(direction) * 24 * Engine.DeltaSeconds * engineTimeModifier * fuseRatio / (leashedMaterials.Count + 2);
+                        }
+                    }
+                    else
+                    {
+                        engineTime = Math.Clamp(engineTime - Engine.DeltaSeconds * 2, 0, 1);
                     }
                 }
             }
@@ -481,15 +490,10 @@ public class Player : Entity
                 Engine.UIManager.ToggleMenu((int)Containers.PlayerMenu);
             }
         }
+        engineParticles.isEmitterActive = isEngineActive;
         if (isEngineActive)
         {
-            engineParticles.isEmitterActive = true;
-            SoundManager.PlaySound(engineSounds);
-        }
-        else
-        {
-            engineParticles.isEmitterActive = false;
-            SoundManager.PauseSound(engineSounds);
+            SoundManager.PlayLoopedSound(engineSounds);
         }
     }
     public void Dock()
@@ -535,7 +539,7 @@ public class Player : Entity
             //Part and Fuse Failure
             if (Progression > 0 && Engine.Random.Next(0, 5) == 0)
             {
-                ModuleType failedPart = (ModuleType)Engine.Random.Next(0, 4);
+                var failedPart = (ModuleType)Engine.Random.Next(0, 4);
                 if (modules[failedPart].Health < modules[failedPart].MaxHealth / 2)
                 {
                     if (modules[failedPart].isFailed)
@@ -795,7 +799,7 @@ public class Player : Entity
         {
             foreach (var pickup in leashedMaterials)
             {
-                if (pickup is not Module && pickup is not Construct)
+                if (pickup is not Module and not Construct)
                 {
                     pickup.isExpired = true;
                     Collide(-10);
@@ -813,10 +817,10 @@ public class Player : Entity
         {
             return;
         }
-        if (position.Length() > Engine.EntityManager.CurrentMission.Planet.radius + 25 * 50)
+        if (position.Length() > Engine.SaveGame.CurrentMission.Planet.radius + 25 * 50)
         {
-            //_spriteBatch.Draw(Assets.Get(Sprite.Arrow), position - Vector2.Normalize(position) * 25, null, color, MathF.Atan2(-position.X, position.Y), Assets.DimsOf(Sprite.Arrow) / 2, 1, 0, 0.2f);
-            _spriteBatch.DrawString(Assets.TextFont, "Return to planet.", Engine.Camera.Position - new Vector2(105, 225), Color.Crimson);
+            _spriteBatch.Draw(Assets.Get(Sprite.Arrow), position - Vector2.Normalize(position) * 25, null, color, MathF.Atan2(-position.X, position.Y), Assets.DimsOf(Sprite.Arrow) / 2, 1, 0, 0.2f);
+            _spriteBatch.DrawString(Assets.TextFont, "Return to planet.", Engine.Camera.Position - new Vector2(Assets.TextFont.MeasureString("Return to planet.").X/2, 225), Color.Crimson);
         }
         if(dockedEntity != null)
         {

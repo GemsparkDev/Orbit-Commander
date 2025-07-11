@@ -72,7 +72,7 @@ public class DockableComponent(Entity _parentEntity, Containers _menu) : ICompon
             for (int i = 0; i < _player.leashedMaterials.Count; i++)
             {
                 //Launches the leashed material away if the docking module cannot store it
-                _player.leashedMaterials[i].velocity += Engine.EntityManager.CurrentMission.GetNormalizedAcceleration(_player.leashedMaterials[i].position) * 15;
+                _player.leashedMaterials[i].velocity += Engine.SaveGame.CurrentMission.GetNormalizedAcceleration(_player.leashedMaterials[i].position) * 15;
                 if (IsFull())
                 {
                     continue;
