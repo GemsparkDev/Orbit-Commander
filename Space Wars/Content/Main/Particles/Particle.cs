@@ -64,7 +64,7 @@ namespace Space_Wars.Content.Main.Particles
         {
             if(drawText != null)
             {
-                _spriteBatch.DrawString(Assets.TextFont, drawText, position, renderColor * ((float)renderColor.A/255f), angle, new Vector2(drawText.Length*4, 6), 0.75f, 0, 0.2f);
+                _spriteBatch.DrawString(Assets.TextFont, drawText, position, renderColor * ((float)renderColor.A/255f), angle, Assets.TextFont.MeasureString(drawText) / 2, 0.75f, 0, 0.2f);
                 return;
             }
             _spriteBatch.Draw(texture, position, null, renderColor * ((float)renderColor.A / 255f), angle, Size/2, 1f, 0, 0.2f);

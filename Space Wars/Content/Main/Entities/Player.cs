@@ -8,6 +8,7 @@ using Microsoft.Xna.Framework.Audio;
 using System.Linq;
 using UILib.Content.Main;
 using Space_Wars.Content.Main.Components;
+using System.Diagnostics;
 
 namespace Space_Wars.Content.Main.Entities;
 
@@ -28,6 +29,7 @@ public class Player : Entity
     private Vector2 direction;
     public bool isEngineActive = false;
     public bool canGatherResources = false;
+    private bool aimAssist = true;
     private int spareFuses = 0;
     private float time = 0;
     private float engineTime = 0;
@@ -79,7 +81,7 @@ public class Player : Entity
         { ModuleType.Guns, ItemFactory.GetItem(Modules.Flamethrower) },
         { ModuleType.Engines, ItemFactory.GetItem(Modules.Engines) },
         { ModuleType.Sensors, ItemFactory.GetItem(Modules.Sensors) },
-        { ModuleType.Core, ItemFactory.GetItem(Modules.Nanomachines) }
+        { ModuleType.Core, ItemFactory.GetItem(Modules.GrapplingHook) }
     };
     private bool[,] moduleFuses = new bool[5, 4]
     {
@@ -147,8 +149,10 @@ public class Player : Entity
         if (isRestarting && restartCooldown <= 0)
         {
             bool restartedModules = false;
-            foreach (var module in modules.Values)
+            //Reverse order prioritizes most important modules first
+            for(int i = modules.Count-1; i >= 0; i--)
             {
+                var module = modules[(ModuleType)(i)];
                 if (restartedModules && module.isFailed)
                 {
                     restartCooldown = 1;
@@ -267,7 +271,7 @@ public class Player : Entity
             //Square root of the ratio reduces balancing impact with an additional fuse (especially with the gun dps)
             //Note: Do not have any active abilities that are based on the cooldown, as the player could remove all fuses and get infinite of the ability
             float fuseRatio = MathF.Sqrt((float)CountFuses((ModuleType)i)/3);
-            if(fuseRatio > 1.01f)
+            if(fuseRatio - 1 > float.Epsilon)
             {
                 //Bonus for 4 fuses
                 module.UpdateCooldown();
@@ -294,6 +298,16 @@ public class Player : Entity
             if (Input.OldState.IsKeyUp(Keys.I) && Input.NewState.IsKeyDown(Keys.I))
             {
                 EventHandler.ToggleDockingMenus();
+            }
+            if (Progression > 1 && Input.OldState.IsKeyUp(Keys.LeftControl) && Input.NewState.IsKeyDown(Keys.LeftControl))
+            {
+                aimAssist = !aimAssist;
+                SoundEffectInstance sound = Assets.Get(Sound.Click).CreateInstance();
+                if (aimAssist)
+                {
+                    sound.Pitch = 0.5f;
+                }
+                SoundManager.PlayGlobalSound(sound);
             }
             if (Progression > 2)
             {
@@ -394,16 +408,10 @@ public class Player : Entity
             }
             if (dockedEntity == null)
             {
-                targetVector = Vector2.Normalize(new Vector2(Mouse.GetState().X, Mouse.GetState().Y) - Engine.BackBuffer / 2 + Engine.Camera.Position - position);
+                //Ensures that target vector performs identically in all resolutions
+                Vector2 ratio = Engine.ScreenSize / Engine.BackBuffer;
+                targetVector = Vector2.Normalize(new Vector2(Input.NewMouseState.X * ratio.X, Input.NewMouseState.Y * ratio.Y) - Engine.ScreenSize / 2 - position + Engine.Camera.Position + Engine.MousePositionOffset);
                 gunAngle.angle = MathF.Atan2(targetVector.X, -targetVector.Y);
-                if (Input.NewMouseState.LeftButton == ButtonState.Pressed && !UIManager.LockMouseInput)
-                {
-                    angle = angle * 0.5f + gunAngle.angle * 0.5f;
-                    if (!modules[ModuleType.Guns].isFailed && modules[ModuleType.Guns].IsCooldownReady())
-                    {
-                        modules[ModuleType.Guns].ModuleFunction();
-                    }
-                }
                 if (Input.NewMouseState.RightButton == ButtonState.Pressed && Input.OldMouseState.RightButton == ButtonState.Released && !UIManager.LockMouseInput)
                 {
                     canGatherResources = true;
@@ -470,6 +478,17 @@ public class Player : Entity
                         engineTime = Math.Clamp(engineTime - Engine.DeltaSeconds * 2, 0, 1);
                     }
                 }
+                if (Input.NewMouseState.LeftButton == ButtonState.Pressed && !UIManager.LockMouseInput)
+                {
+                    if (!isEngineActive)
+                    {
+                        angle = angle * 0.5f + gunAngle.angle * 0.5f;
+                    }
+                    if (!modules[ModuleType.Guns].isFailed && modules[ModuleType.Guns].IsCooldownReady())
+                    {
+                        modules[ModuleType.Guns].ModuleFunction();
+                    }
+                }
             }
             if (Input.OldState.IsKeyUp(Keys.Space) && Input.NewState.IsKeyDown(Keys.Space))
             {
@@ -495,6 +514,33 @@ public class Player : Entity
         {
             SoundManager.PlayLoopedSound(engineSounds);
         }
+    }
+    private Vector2 IdealSpeedWithVelocity(float _speed)
+    {
+        //Derivation
+        //Assume target vector is normalized and is ideal bullet velocity
+        //Thus, velocity should be any point on the line (x, y) = t * (targetVector.X, targetVector.Y)
+        //Using the circle formula, speed^2 = (x pos of point on line - current x velocity)^2 + (y pos on line - y velocity)^2
+        //Substitute and rearrange: t^2(targetVector.X^2 + targetVector.Y^2) - 2t(targetVector.X * velocity.X + targetVector.Y * velocity.Y) + (velocity.Y^2 + velocity.X^2 - speed^2)
+        //Then, use quadratic formula and solve for t, then multiply by targetVector to get the best possible velocity for the bullet
+
+        if (aimAssist)
+        {
+            Vector2 acc = Engine.SaveGame.CurrentMission.GetNormalizedAcceleration(position + targetVector * _speed * 3) * 180 / _speed;
+            Vector2 vel = velocity - acc;
+            float b = targetVector.X * vel.X + targetVector.Y * vel.Y;
+            float c = vel.X * vel.X + vel.Y * vel.Y - _speed * _speed;
+            float disc = b * b - c;
+            if (disc >= 0)
+            {
+                float t = b + MathF.Sqrt(disc);
+                if (t > 0)
+                {
+                    return targetVector * t + acc;
+                }
+            }
+        }
+        return targetVector * _speed + velocity;
     }
     public void Dock()
     {
@@ -553,8 +599,8 @@ public class Player : Entity
                     modules[failedPart].isFailed = true;
                     string text = $"{failedPart} has failed!";
                     //Picks a random fuse to burn out if a module fails
-                    int burntOutFuse = Engine.Random.Next(0, 3);
-                    if (moduleFuses[(int)failedPart, burntOutFuse])
+                    int burntOutFuse = Engine.Random.Next(0, moduleFuses.GetLength(1));
+                    if (Engine.Random.Next(0, 2) == 0 && moduleFuses[(int)failedPart, burntOutFuse])
                     {
                         moduleFuses[(int)failedPart, burntOutFuse] = false;
                         SoundManager.PlayGlobalSound(Assets.Get(Sound.FireEngines));
@@ -640,7 +686,7 @@ public class Player : Entity
     }
     public void Basic()
     {
-        Engine.EntityManager.Add(new PulseShot(position, targetVector * 9 + velocity, gunAngle.angle, 0, true, 3, true));
+        Engine.EntityManager.Add(new PulseShot(position, IdealSpeedWithVelocity(9), gunAngle.angle, 0, true, 3, true));
         SoundManager.PlaySound(Assets.Get(Sound.PulseFire), position);
         modules[ModuleType.Guns].cooldown = 0.25f;
         Engine.ShakeScreen(0.2f);
@@ -648,7 +694,7 @@ public class Player : Entity
     }
     public void Sniper()
     {
-        Engine.EntityManager.Add(new AssassinShot(position, targetVector * 100, gunAngle.angle, 0, true, 20));
+        Engine.EntityManager.Add(new AssassinShot(position, IdealSpeedWithVelocity(100), gunAngle.angle, 0, true, 20));
         SoundManager.PlaySound(Assets.Get(Sound.SniperFire), position);
         modules[ModuleType.Guns].cooldown = 2f;
         Engine.ShakeScreen(0.3f);
@@ -656,8 +702,9 @@ public class Player : Entity
     }
     public void Spiral()
     {
-        Engine.EntityManager.Add(new SpiralShot(position, targetVector * 8 + velocity, gunAngle.angle, 0, true, 5, false));
-        Engine.EntityManager.Add(new SpiralShot(position, targetVector * 8 + velocity, gunAngle.angle, 0, true, 5, true));
+        Vector2 speed = IdealSpeedWithVelocity(8);
+        Engine.EntityManager.Add(new SpiralShot(position, speed, gunAngle.angle, 0, true, 5, false));
+        Engine.EntityManager.Add(new SpiralShot(position, speed, gunAngle.angle, 0, true, 5, true));
         SoundManager.PlaySound(Assets.Get(Sound.PulseFire), position);
         modules[ModuleType.Guns].cooldown = 0.7f;
         Engine.ShakeScreen(0.2f);
@@ -669,9 +716,9 @@ public class Player : Entity
         {
             float angleDegrees = (Engine.Random.NextSingle() - 0.5f) * 5;
             float offsetAngle = angleDegrees * MathF.PI / 180;
-            Vector2 targetVector = Engine.ToUnitVector(gunAngle.angle + offsetAngle);
+            Vector2 targetVector = IdealSpeedWithVelocity(8) + new Vector2(Engine.OneToNegOne(), Engine.OneToNegOne());
             Vector2 positionOffset = Engine.ToUnitVector(gunAngle.angle + MathF.PI/2) * offsetAngle * 100;
-            Engine.EntityManager.Add(new PulseShot(position + positionOffset, targetVector * 8 + velocity , gunAngle.angle + offsetAngle, 0, true, 2));
+            Engine.EntityManager.Add(new PulseShot(position + positionOffset, targetVector, gunAngle.angle + offsetAngle, 0, true, 2));
         }
         SoundManager.PlaySound(Assets.Get(Sound.ShotgunFire), position);
         velocity -= targetVector / 2;
@@ -680,7 +727,7 @@ public class Player : Entity
     }
     public void Missile()
     {
-        Engine.EntityManager.Add(Enemy.NewMissile(position + Engine.ToUnitVector(gunAngle.angle + MathF.PI / 2) * 6, targetVector * 9 + velocity, gunAngle.angle, true));
+        Engine.EntityManager.Add(Enemy.NewMissile(position + Engine.ToUnitVector(gunAngle.angle + MathF.PI / 2) * 6, IdealSpeedWithVelocity(9), gunAngle.angle, true));
         SoundManager.PlaySound(Assets.Get(Sound.MissileFire), position);
         modules[ModuleType.Guns].cooldown = 1.5f;
         velocity -= targetVector / 4;
@@ -690,7 +737,7 @@ public class Player : Entity
     {
         Vector2 offset = Engine.ToUnitVector(gunAngle.angle + MathF.PI / 2) * Engine.Random.Next(-2, 3);
         Texture2D dot = Assets.Get(Sprite.Microshot);
-        Projectile shot = new PulseShot(position + offset, targetVector * 8 + velocity + offset / 4, gunAngle.angle, 0, true, 2)
+        Projectile shot = new PulseShot(position + offset, IdealSpeedWithVelocity(8) + offset / 4, gunAngle.angle, 0, true, 2)
         {
             texture = dot,
             timeLeft = 3
@@ -705,7 +752,7 @@ public class Player : Entity
     {
         Vector2 offset = Engine.ToUnitVector(gunAngle.angle + MathF.PI / 2) * Engine.Random.Next(-2, 3);
         Texture2D dot = Assets.Get(Sprite.CrossbowShot);
-        Projectile shot = new PulseShot(position + offset, targetVector * 8 + velocity + offset / 4, gunAngle.angle, 0, true, 8, false, 1)
+        Projectile shot = new PulseShot(position + offset, IdealSpeedWithVelocity(8) + offset / 4, gunAngle.angle, 0, true, 8, false, 1)
         {
             texture = dot,
         };
@@ -717,21 +764,21 @@ public class Player : Entity
     }
     public void Flamethrower()
     {
-        Engine.EntityManager.Add(new FlameBolt(position, targetVector * 5 + velocity + new Vector2(Engine.Random.NextSingle()/2 - 0.25f, Engine.Random.NextSingle()/2 - 0.25f), true, 1));
+        Engine.EntityManager.Add(new FlameBolt(position, IdealSpeedWithVelocity(5) + new Vector2(Engine.OneToNegOne(), Engine.OneToNegOne()) / 4, true, 1));
         SoundManager.PlaySound(Assets.Get(Sound.LMGFire), position);
         modules[ModuleType.Guns].cooldown = 0.08f;
         Engine.ShakeScreen(0.02f);
     }
     public void Fireball()
     {
-        Engine.EntityManager.Add(new FlameBolt(position, targetVector * 8 + velocity + new Vector2(Engine.Random.NextSingle() - 0.5f, Engine.Random.NextSingle() - 0.5f), true, 8, 4, 0.5f));
+        Engine.EntityManager.Add(new FlameBolt(position, IdealSpeedWithVelocity(8) + new Vector2(Engine.OneToNegOne(), Engine.OneToNegOne()) / 2, true, 8, 4, 0.5f));
         SoundManager.PlaySound(Assets.Get(Sound.LMGFire), position);
         modules[ModuleType.Guns].cooldown = 0.8f;
         Engine.ShakeScreen(0.1f);
     }
     public void GrenadeLauncher()
     {
-        Engine.EntityManager.Add(new Explosive(position, targetVector * 8 + velocity + new Vector2(Engine.OneToNegOne(), Engine.OneToNegOne()), gunAngle.angle, Engine.OneToNegOne() / 8, true, 16, 40, 1));
+        Engine.EntityManager.Add(new Explosive(position, IdealSpeedWithVelocity(8) + new Vector2(Engine.OneToNegOne(), Engine.OneToNegOne()), gunAngle.angle, Engine.OneToNegOne() / 8, true, 16, 40, 1));
         SoundManager.PlaySound(Assets.Get(Sound.PulseFire), position);
         modules[ModuleType.Guns].cooldown = 1f;
         Engine.ShakeScreen(0.3f);

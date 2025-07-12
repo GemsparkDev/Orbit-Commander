@@ -13,6 +13,7 @@ public static class SoundManager
 {
     private static List<SoundEffectInstance> sounds = [];
     private static List<SoundEffectInstance> loopedSounds = [];
+    private static List<SoundEffectInstance> loopsToStop = [];
     private static Random random = new();
     private static Player player => Engine.SaveGame.Player;
     private static SoundEffectInstance currentTrack;
@@ -34,13 +35,14 @@ public static class SoundManager
         if (!loopedSounds.Contains(_sound))
         {
             _sound.Volume = sfxVolume;
+            _sound.IsLooped = true;
             loopedSounds.Add(_sound);
+        }
+        if (_sound.State != SoundState.Playing)
+        {
             _sound.Play();
         }
-        else
-        {
-            _sound.Resume();
-        }
+        loopsToStop.Remove(_sound);
     }
     private static void UpdateVolume()
     {
@@ -52,6 +54,7 @@ public static class SoundManager
         {
             currentTrack.Volume = musicVolume;
         }
+
     }
     public static void SetSoundVolume(SoundEffectInstance _sound, float _volume)
     {
@@ -73,6 +76,11 @@ public static class SoundManager
     public static void PlayGlobalSound(SoundEffect sound)
     {
         sound.Play(SFXVolume, 0, 0);
+    }
+    public static void PlayGlobalSound(SoundEffectInstance sound)
+    {
+        sound.Volume *= SFXVolume;
+        sound.Play();
     }
     public static void SetAllSounds(bool _playingSounds)
     {
@@ -104,9 +112,17 @@ public static class SoundManager
         //Clears out completed sounds
         sounds = sounds.Where(sound => !(sound.State == SoundState.Stopped)).ToList();
         loopedSounds = loopedSounds.Where(sound => !(sound.State == SoundState.Stopped)).ToList();
-        foreach (var sound in loopedSounds)
+        loopsToStop = loopsToStop.Where(sound => !(sound.State == SoundState.Stopped)).ToList();
+        foreach (var sound in loopsToStop)
         {
             sound.Pause();
+        }
+        foreach (var sound in loopedSounds)
+        {
+            if (!loopsToStop.Contains(sound))
+            {
+                loopsToStop.Add(sound);
+            }
         }
 
         if (soundTimer > 0)

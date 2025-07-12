@@ -31,20 +31,20 @@ public class EntityManager
         [ (new EntityConstructor(Enemy.NewMothership, new Vector2(0, -8*50 - Assets.DimsOf(Sprite.Mothership).Y / 2), Vector2.Zero, 0f), [ Condition.Protect, Condition.CustomIncomplete ])],
         "Crash Landing",
         "A simple system with a large planet and one closely orbiting moon. Drone activity detected, but minimal.",
-        1, new Vector2(0, -8*50 - Assets.DimsOf(Sprite.Mothership).Y / 2), 0, 0, IntroCutscene) { playerProgression = 0, playerDocked = true },
+        1, new Vector2(0, -8*50 - Assets.DimsOf(Sprite.Mothership).Y / 2), 0, 0, IntroCutscene) { playerProgression = 0, playerDocked = true, tip = "WASD to move, Space to dock and undock.\nRmb to collect scrap, Lmb to shoot." },
 
         new( [ new(Vector2.Zero, Vector2.Zero, 3500, 4, true, Color.Cyan, true) ],
         [
             (new EntityConstructor(Enemy.NewTurret, new Vector2(0, -200 - Assets.DimsOf(Sprite.TurretBase).Y / 2), Vector2.Zero, 0), [ Condition.Protect ]),
             (new EntityConstructor(Enemy.NewOrbiter, new Vector2(400, 0), GravitationalSource.GetOrbitalVelocity(new Vector2(400, 0), Vector2.Zero, 3500), 0), [ Condition.Protect ])],
         "Sentry Defense",
-        "A small outpost is located orbiting this rogue planet. Defend it.", 0.75f, new Vector2(0, 1), 40) { playerProgression = 1, isAggressive = true },
+        "A small outpost is located orbiting this rogue planet. Defend it.", 0.75f, new Vector2(0, 1), 40) { playerProgression = 1, isAggressive = true, tip = "Open the side panel to restart failed modules. \nPress F to open the fuse menu and switch around your setup.\nFuses power your modules, keep them safe." },
 
         new( [ new(Vector2.Zero, Vector2.Zero, 15000, 6f, true, Color.Cyan),
         new(new Vector2(0, 800), GravitationalSource.GetOrbitalVelocity(new Vector2(0, 800), Vector2.Zero, 15000) * 0.85f, 1000, 1f, false, Color.Cyan), ],
         [(new EntityConstructor(Enemy.NewLargeMiner, new Vector2(0, -6*50 - Assets.Get(Sprite.LargeMiner).Height/2), Vector2.Zero, 0), [ Condition.Kill ])],
         "Assault prequel",
-        "Defeat the mega miner", 0.75f, new Vector2(0, 1), 0) { playerProgression = 1, isAggressive = true },
+        "Defeat the mega miner", 0.75f, new Vector2(0, 1), 0, 0, null, true) { playerProgression = 2, isAggressive = true, tip = "Press Q to use your special ability.\nCtrl to toggle aim assist." },
 
         new([ new(Vector2.Zero, Vector2.Zero, 5000, 3, true, Color.Cyan),
             new(new Vector2(400, 0), GravitationalSource.GetOrbitalVelocity(new Vector2(400, 0), Vector2.Zero, 5000), 240, 1f, false, Color.Cyan),
@@ -73,7 +73,7 @@ public class EntityManager
             (new EntityConstructor(Enemy.NewOrbiter, new Vector2(0, 1650), GravitationalSource.GetOrbitalVelocity(new Vector2(0, 1650), new Vector2(0, 1800), 1500)
                 + GravitationalSource.GetOrbitalVelocity(new Vector2(0, 1800), Vector2.Zero, 20000), 0), [ Condition.Protect ])],
         "Assault",
-        "You have been placed in high orbit. Destroy the enemy base on the surface planet, and all reinforcements that arrive.", 0.75f, new Vector2(0, 1650), 2, 1, null, false) { playerDocked = true, isAggressive = true },
+        "You have been placed in high orbit. Destroy the enemy base on the surface planet, and all reinforcements that arrive.", 0.75f, new Vector2(0, 1650), 2, 1, null, false) { playerDocked = true, isAggressive = true, tip = "Press C to open the construct menu.\nEach construct requires one scrap to craft." },
 
         new( [ new(Vector2.Zero, Vector2.Zero, 25000, 7f, true, Color.Cyan), new(new Vector2(800, 0), GravitationalSource.GetOrbitalVelocity(new Vector2(800, 0), Vector2.Zero, 25000), 150, 0.5f, false, Color.Cyan), ],
         [(new EntityConstructor(Enemy.NewMiner, new Vector2(0, -7*50), Vector2.Zero, 0), [ Condition.Protect ])],
@@ -106,7 +106,7 @@ public class EntityManager
         [],
         "Last Stand",
         "Survive",
-        0.25f, new Vector2(0, -8*50), 1000, 4) { isAggressive = true, playerProgression = 4 },
+        0.25f, new Vector2(0, -8*50), 1000, 4) { isAggressive = true, playerProgression = 4, tip = "You can now construct the makeshift mothership in the construct menu.\n Requires 3 scrap." },
     ];
     public Mission GetMission(int _index)
     {
@@ -141,6 +141,7 @@ public class EntityManager
     }
     public void Initialize()
     {
+
         Engine.SaveGame.CurrentMission = missions[Engine.SaveGame.CurrentMissionIndex].Clone();
         entities.Clear();
         addedEntities.Clear();

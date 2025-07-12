@@ -21,6 +21,7 @@ public class Mission
     public float restartTimer = -1;
     public bool playerDocked = false;
     public bool isAggressive = false;
+    public string tip = null;
 
     private static Player Player => Engine.SaveGame.Player;
     private Entity escapeVehicle = null;
@@ -113,9 +114,13 @@ public class Mission
             escapeVehicle = Enemy.NewPickupDrone(new Vector2(-2000, -2000), Vector2.Zero, 0);
         }
     }
-    //Whether to decay the pickups or not
     public void Update()
     {
+        if (tip != null)
+        {
+            ParticleManager.Add(new Particle(null, tip.Length, Engine.SaveGame.Player.position + new Vector2(0, -50), Vector2.Zero, 0, 0, Color.White, Color.Transparent) { drawText = tip });
+            tip = null;
+        }
         PlanetUpdate();
         bool allCompleted = true;
         foreach (var (entity, conditions) in MissionObjectives)
@@ -493,7 +498,8 @@ public class Mission
         {
             _planets[i] = planets[i].Copy();
         }
-        return new Mission(_planets, CopyObjectives, Name, Description, timerModifier, playerPosition, WaveGoal, tier, cutscene, escapeVehicle != null) { playerProgression = this.playerProgression, playerDocked = this.playerDocked, isAggressive = this.isAggressive };
+        return new Mission(_planets, CopyObjectives, Name, Description, timerModifier, playerPosition, WaveGoal, tier, cutscene, escapeVehicle != null) 
+        { playerProgression = this.playerProgression, playerDocked = this.playerDocked, isAggressive = this.isAggressive, tip = this.tip };
     }
     private Vector2 NewSpawnLocation()
     {

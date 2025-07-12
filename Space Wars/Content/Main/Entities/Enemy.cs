@@ -610,12 +610,17 @@ public class Enemy : Entity
         {
             nearestPickup = Engine.EntityManager.NearestItem(this, true);
             Vector2 relativePosition = Player.position + Player.velocity - position - velocity;
+            Vector2 normalizedAcceleration = GetNormalizedAcceleration();
             targetAngle = MathF.Atan2(relativePosition.X, -relativePosition.Y);
             if (health >= maxHealth / 2 || laserCooldown > 0)
             {
                 if (nearestPickup != null)
                 {
                     GoToPosition(nearestPickup.position, 5);
+                    if (Vector2.Distance(nearestPickup.position, position) < 100)
+                    {
+                        velocity -= normalizedAcceleration * 8 * 60 * Engine.DeltaSeconds;
+                    }
                     if (EntityManager.DistanceSqr(this, nearestPickup) < 25 * 25)
                     {
                         nearestPickup.isExpired = true;
@@ -720,7 +725,7 @@ public class Enemy : Entity
             if (health <= 0)
             {
                 Explode(6, ColliderRadius);
-                Engine.EntityManager.Add(ItemFactory.GetItem(Modules.Sniper, position, GetNormalizedAcceleration() * 10, angularVelocity));
+                Engine.EntityManager.Add(ItemFactory.GetItem(Modules.Sniper, position, normalizedAcceleration * 10, angularVelocity));
                 int particles = Engine.Random.Next(3, 5);
                 for (int i = 0; i < particles; i++)
                 {
@@ -1826,7 +1831,7 @@ public class Enemy : Entity
             enemyRange.position = position + offset;
             if (nearestEnemy != null)
             {
-                var relPos = Vector2.Normalize(nearestEnemy.position - position);
+                var relPos = Vector2.Normalize(nearestEnemy.position - position + Engine.SaveGame.CurrentMission.GetNormalizedAcceleration(nearestEnemy.position) * 1000);
                 float distance = (nearestEnemy.position - position - dir * (Size / 2)).Length();
                 float dot = relPos.X * dir.X + relPos.Y * dir.Y;
                 float cross = relPos.X * gunDir.Y - gunDir.X * relPos.Y;
@@ -1838,7 +1843,7 @@ public class Enemy : Entity
                 {
                     angle += 10 * Engine.DeltaSeconds;
                 }
-                else if (distance < 400 && cooldown <= 0 && dot < 0)
+                else if (distance < 400 && cooldown <= 0 && dot < 0.5f)
                 {
                     var rotatedOffset = gunDir * Size.Y / 2;
                     Engine.EntityManager.Add(NewMissile(position - rotatedOffset + new Vector2(-dir.Y, dir.X) * bulletOffset, -gunDir * 8, angle, isFriendly));
