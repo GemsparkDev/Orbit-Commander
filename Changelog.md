@@ -10,7 +10,8 @@ Lagrange Commander is a game made using C# in monogame. It is a 2D top down wave
  - The player can toggle aim assist using ctrl.    
  - Restarting modules now goes in reverse order.    
  - Fuses now burn out half as often.    
- - Some missions now have tips that display at the start of the mission.    
+ - Some missions now have tips that display at the start of the mission.
+ - Fixed bug #26.    
 0.5.0.1 - 7/10/2025    
  - Moved the currentMission field from EntityManager to SaveGame.    
  - Simplified camera code.    
