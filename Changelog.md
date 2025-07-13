@@ -2,7 +2,12 @@
   
 Lagrange Commander is a game made using C# in monogame. It is a 2D top down wave based shooter where you must repair and upgrade your ship by salvaging from enemies you defeat. It features realistic N-Body gravitation, which affects all entities and projectiles.
   
-# Changelog    
+# Changelog  
+0.5.1.1 - 7/12/2025    
+ - All bosses now alternate between dropping a weapon and dropping an alternative module.    
+ - The intro mission now spawns two scrap on starting.    
+ - New enemies now spawn every 5 waves, from 10.    
+ - Bosses only begin spawning for missions with player progression equal to 2 or greater.    
 0.5.1 - 7/11/2025    
  - Excursion no longer gets stuck trying to pick up scrap that's on the planet surface.    
  - Increased the maximum angle of the turret cannon.    
