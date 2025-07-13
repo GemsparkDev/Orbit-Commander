@@ -5,8 +5,6 @@ using Space_Wars.Content.Main.Particles;
 using UILib.Content.Main;
 using System.Collections.Generic;
 using System.Linq;
-using System.Diagnostics;
-using System;
 using Space_Wars.Content.Main.Components;
 using Microsoft.Xna.Framework.Graphics;
 

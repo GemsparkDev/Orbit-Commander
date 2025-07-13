@@ -9,18 +9,12 @@ using Space_Wars.Content.Main.Entities;
 using UILib.Content.Main;
 
 namespace Space_Wars.Content.Main;
-public abstract class Queueable
+public abstract class Queueable(int _cost, Texture2D _texture)
 {
-    public Queueable(int _cost, Texture2D _texture)
-    {
-        Cost = _cost;
-        MaxCost = _cost;
-        Texture = _texture;
-    }
     public bool IsExpired => !CanConstruct() || Cost == 0;
-    public int Cost { get; private set; }
-    public int MaxCost { get; }
-    public Texture2D Texture { get; }
+    public int Cost { get; private set; } = _cost;
+    public int MaxCost { get; } = _cost;
+    public Texture2D Texture => _texture;
     public int AttemptConstruct(int _time)
     {
         if (CanConstruct())

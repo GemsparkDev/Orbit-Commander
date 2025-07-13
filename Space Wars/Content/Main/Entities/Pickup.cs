@@ -43,7 +43,7 @@ public class Pickup : Entity, IData
                     SoundManager.PlaySound(Assets.Get(Sound.Full), position);
                 }
             }
-            velocity /= 2 * Engine.DeltaSeconds + 1;
+            velocity *= 1 - Engine.DeltaSeconds * 2;
         }
         else
         {

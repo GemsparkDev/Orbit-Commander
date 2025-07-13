@@ -78,10 +78,10 @@ public class Player : Entity
     public Dictionary<ModuleType, Module> modules = new()
     {
         { ModuleType.Hull, ItemFactory.GetItem(Modules.Hull) },
-        { ModuleType.Guns, ItemFactory.GetItem(Modules.Flamethrower) },
+        { ModuleType.Guns, ItemFactory.GetItem(Modules.Basic) },
         { ModuleType.Engines, ItemFactory.GetItem(Modules.Engines) },
         { ModuleType.Sensors, ItemFactory.GetItem(Modules.Sensors) },
-        { ModuleType.Core, ItemFactory.GetItem(Modules.GrapplingHook) }
+        { ModuleType.Core, ItemFactory.GetItem(Modules.Dash) }
     };
     private bool[,] moduleFuses = new bool[5, 4]
     {

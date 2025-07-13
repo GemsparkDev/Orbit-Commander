@@ -5,6 +5,7 @@ using Space_Wars.Content.Main.Components;
 using Space_Wars.Content.Main.Particles;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using UILib.Content.Main;
 
 namespace Space_Wars.Content.Main.Entities;
@@ -312,7 +313,14 @@ public class Enemy : Entity
                 }
                 isExpired = true;
                 SoundManager.PlaySound(Assets.Get(Sound.Death), position);
-                Engine.EntityManager.Add(ItemFactory.GetItem(Modules.Missile, position, GetNormalizedAcceleration() * 10, angularVelocity));
+                if (Engine.SaveGame.GiveWeapon)
+                {
+                    Engine.EntityManager.Add(ItemFactory.GetItem(Modules.Missile, position, GetNormalizedAcceleration() * 10, angularVelocity));
+                }
+                else
+                {
+                    Engine.EntityManager.Add(ItemFactory.GetItem(Modules.SummonShield, position, GetNormalizedAcceleration() * 10, angularVelocity));
+                }
             }
             velocity *= 0.8f;
             yield return 0;
@@ -467,8 +475,15 @@ public class Enemy : Entity
             {
                 Explode(6, ColliderRadius);
                 isExpired = true;
-                Engine.EntityManager.Add(ItemFactory.GetItem(Modules.Shotgun, position, GetNormalizedAcceleration() * 10, angularVelocity));
                 SoundManager.PlaySound(Assets.Get(Sound.Death), position);
+                if (Engine.SaveGame.GiveWeapon)
+                {
+                    Engine.EntityManager.Add(ItemFactory.GetItem(Modules.Shotgun, position, GetNormalizedAcceleration() * 10, angularVelocity));
+                }
+                else
+                {
+                    throw new NotImplementedException();
+                }
             }
             yield return 0;
         }
@@ -507,8 +522,15 @@ public class Enemy : Entity
                     else
                     {
                         hasExploded = true;
-                        Engine.EntityManager.Add(ItemFactory.GetItem(Modules.LMG, position, normalizedAcceleration * 10, angularVelocity));
                         position = new Vector2(10000, 10000);
+                        if (Engine.SaveGame.GiveWeapon)
+                        {
+                            Engine.EntityManager.Add(ItemFactory.GetItem(Modules.LMG, position, normalizedAcceleration * 10, angularVelocity));
+                        }
+                        else
+                        {
+                            throw new NotImplementedException();
+                        }
                     }
                 }
                 else
@@ -725,7 +747,6 @@ public class Enemy : Entity
             if (health <= 0)
             {
                 Explode(6, ColliderRadius);
-                Engine.EntityManager.Add(ItemFactory.GetItem(Modules.Sniper, position, normalizedAcceleration * 10, angularVelocity));
                 int particles = Engine.Random.Next(3, 5);
                 for (int i = 0; i < particles; i++)
                 {
@@ -742,6 +763,14 @@ public class Enemy : Entity
                 }
                 isExpired = true;
                 SoundManager.PlaySound(Assets.Get(Sound.Death), position);
+                if (Engine.SaveGame.GiveWeapon)
+                {
+                    Engine.EntityManager.Add(ItemFactory.GetItem(Modules.Sniper, position, normalizedAcceleration * 10, angularVelocity));
+                }
+                else
+                {
+                    Engine.EntityManager.Add(ItemFactory.GetItem(Modules.Nanomachines, position, normalizedAcceleration * 10, angularVelocity));
+                }
             }
             velocity *= 0.8f;
             yield return 0;
@@ -880,7 +909,14 @@ public class Enemy : Entity
                 }
                 isExpired = true;
                 SoundManager.PlaySound(Assets.Get(Sound.Death), position);
-                Engine.EntityManager.Add(ItemFactory.GetItem(Modules.Crossbow, position, GetNormalizedAcceleration() * 10, angularVelocity));
+                if (Engine.SaveGame.GiveWeapon)
+                {
+                    Engine.EntityManager.Add(ItemFactory.GetItem(Modules.Crossbow, position, GetNormalizedAcceleration() * 10, angularVelocity));
+                }
+                else
+                {
+                    throw new NotImplementedException();
+                }
             }
             engineParticles.sprayAngle = (angle + MathF.PI) * 180 / MathF.PI;
             engineParticles.speedOfEmission = accelerationVector.Length() * 50 + 200;
@@ -987,7 +1023,14 @@ public class Enemy : Entity
                 }
                 isExpired = true;
                 SoundManager.PlaySound(Assets.Get(Sound.Death), position);
-                Engine.EntityManager.Add(ItemFactory.GetItem(Modules.GrenadeLauncher, position, GetNormalizedAcceleration() * 10, angularVelocity));
+                if (Engine.SaveGame.GiveWeapon)
+                {
+                    Engine.EntityManager.Add(ItemFactory.GetItem(Modules.GrenadeLauncher, position, GetNormalizedAcceleration() * 10, angularVelocity));
+                }
+                else
+                {
+                    throw new NotImplementedException();
+                }
             }
             Engine.WriteLine(position);
             yield return 0;

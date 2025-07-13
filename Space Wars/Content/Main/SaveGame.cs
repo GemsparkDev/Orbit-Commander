@@ -1,14 +1,12 @@
 ﻿using Space_Wars.Content.Main.Entities;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Numerics;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
-using UILib.Content.Main;
+using System.IO;
+using System.Runtime.Serialization;
+using System.Runtime.Serialization.Formatters.Binary;
 
 namespace Space_Wars.Content.Main;
+[Serializable()]
 public class SaveGame
 {
     public Player Player { get; } = new Player(Vector2.Zero, Vector2.Zero, 0, 0);
@@ -19,6 +17,8 @@ public class SaveGame
     public int CurrentMissionIndex { get; set; } = 0;
     private Mission currentMission;
     public Mission CurrentMission { get { currentMission ??= Engine.EntityManager.GetMission(CurrentMissionIndex); return currentMission; } set { currentMission = value; } }
+    private bool giveWeapon = true;
+    public bool GiveWeapon { get { giveWeapon = !giveWeapon;  return !giveWeapon; } }
     public void SetMission(int _count)
     {
         CurrentMissionIndex = Math.Clamp(_count, 0, Engine.EntityManager.Missions() - 1);
@@ -36,5 +36,9 @@ public class SaveGame
         CurrentMissionIndex = Math.Clamp(CurrentMissionIndex - 1, 0, Engine.EntityManager.Missions() - 1);
         currentMission = Engine.EntityManager.GetMission(CurrentMissionIndex);
         EventHandler.UpdateMissionText();
+    }
+    public void Serialize()
+    {
+        throw new NotImplementedException();
     }
 }

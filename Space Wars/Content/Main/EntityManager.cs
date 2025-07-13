@@ -28,7 +28,9 @@ public class EntityManager
     [
         new([ new(Vector2.Zero, Vector2.Zero, 10000, 8, true, Color.Cyan),
         new(new Vector2(1000, 0), GravitationalSource.GetOrbitalVelocity(new Vector2(1000, 0), Vector2.Zero, 10000), 250, 1.5f, false, Color.Cyan) ],
-        [ (new EntityConstructor(Enemy.NewMothership, new Vector2(0, -8*50 - Assets.DimsOf(Sprite.Mothership).Y / 2), Vector2.Zero, 0f), [ Condition.Protect, Condition.CustomIncomplete ])],
+        [ (new EntityConstructor(Enemy.NewMothership, new Vector2(0, -8*50 - Assets.DimsOf(Sprite.Mothership).Y / 2), Vector2.Zero, 0f), [ Condition.Protect, Condition.CustomIncomplete ]),
+        (new PickupConstructor(ItemFactory.GetItem, ItemType.Scrap, new Vector2(0, -8*50), new Vector2(10, -10), 0.07f),[]),
+        (new PickupConstructor(ItemFactory.GetItem, ItemType.Scrap, new Vector2(0, -8*50), new Vector2(-8, -4), -0.03f),[])],
         "Crash Landing",
         "A simple system with a large planet and one closely orbiting moon. Drone activity detected, but minimal.",
         1, new Vector2(0, -8*50 - Assets.DimsOf(Sprite.Mothership).Y / 2), 0, 0, IntroCutscene) { playerProgression = 0, playerDocked = true, tip = "WASD to move, Space to dock and undock.\nRmb to collect scrap, Lmb to shoot." },

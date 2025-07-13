@@ -233,10 +233,6 @@ public class Mission
         }
         if (isReady)
         {
-            if (Wave % 20 == 0)
-            {
-                SoundManager.ChangeTrack(Assets.Get(Sound.main));
-            }
             currentWaveActive = false;
             enemiesSpawned.Clear();
             EnemiesSpawned = 0;
@@ -244,7 +240,7 @@ public class Mission
             maxWaveTimer = waveTimer;
             Wave++;
             Engine.EntityManager.DecayPickups();
-            if (Wave % 20 == 0)
+            if(playerProgression > 1 && (Wave % 20 == 0))
             {
                 SoundManager.ChangeTrack(Assets.Get(Sound.boss));
                 var pos = NewSpawnLocation();
@@ -260,6 +256,7 @@ public class Mission
             }
             else
             {
+                SoundManager.ChangeTrack(Assets.Get(Sound.main));
                 if (isAggressive)
                 {
                     difficulty = (int)(Math.Pow(Wave, 1.5) + 5);
@@ -522,16 +519,21 @@ public class EntityConstructor(Func<Vector2, Vector2, float, Entity> _constructo
 {
     public Entity Construct()
     {
-        var entity = _constructor(_position, _velocity, _angle);
-        return entity;
+        return _constructor(_position, _velocity, _angle);
     }
 }
 public class AdvancedConstructor(Func<Vector2, Vector2, float, bool, Entity> _constructor, Vector2 _position, Vector2 _velocity, float _angle, bool _isFriendly) : IConstructor
 {
     public Entity Construct()
     {
-        var entity = _constructor(_position, _velocity, _angle, _isFriendly);
-        return entity;
+        return _constructor(_position, _velocity, _angle, _isFriendly);
+    }
+}
+public class PickupConstructor(Func<ItemType, Vector2, Vector2, float, Entity> _constructor, ItemType _item, Vector2 _position, Vector2 _velocity, float _angularVelocity) : IConstructor
+{
+    public Entity Construct()
+    {
+        return _constructor(_item, _position, _velocity, _angularVelocity);
     }
 }
 public interface IConstructor
