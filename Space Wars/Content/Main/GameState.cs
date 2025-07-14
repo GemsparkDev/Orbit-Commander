@@ -6,7 +6,6 @@ using Space_Wars.Content.Main.Particles;
 using System.Collections.Generic;
 using UILib.Content.Main;
 using System;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace Space_Wars.Content.Main;
 
@@ -225,11 +224,11 @@ public class MissionSelect : GameState
     }
     public override void Update() 
     {
-        for (int i = 0; i < Engine.EntityManager.QueuedItems.Count; i++)
+        for (int i = 0; i < Engine.SaveGame.QueuedItems.Count; i++)
         {
-            if (Engine.EntityManager.QueuedItems[i].IsExpired)
+            if (Engine.SaveGame.QueuedItems[i].IsExpired)
             {
-                Engine.EntityManager.QueuedItems.RemoveAt(i);
+                Engine.SaveGame.QueuedItems.RemoveAt(i);
             }
         }
         time += Engine.DeltaSeconds;
@@ -289,9 +288,9 @@ public class MissionSelect : GameState
         {
             _spriteBatch.Draw(Assets.Get(Sprite.Miniplayer), playerPosition, null, new Color(0, 255, 0), 0, Vector2.Zero, 1, 0, 0);
         }
-        for(int i = 0; i < Engine.EntityManager.QueuedItems.Count; i++)
+        for(int i = 0; i < Engine.SaveGame.QueuedItems.Count; i++)
         {
-            var item = Engine.EntityManager.QueuedItems[i];
+            var item = Engine.SaveGame.QueuedItems[i];
             var texture = item.Texture;
             var pos = (new Vector2(20, 20) + new Vector2(30, 0) * i) * UIManager.UIScale - Engine.ScreenSize / 2;
             _spriteBatch.Draw(texture, pos, null, Color.White, 0, new Vector2(texture.Width, texture.Height) / 2, UIManager.UIScale, 0, 0);

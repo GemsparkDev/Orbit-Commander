@@ -1756,7 +1756,7 @@ public class Enemy : Entity
             if (EventHandler.AcknowledgeMessage(Message.MothershipUpdateInventory))
             {
                 var dockableComponent = Components.GetComponent(ComponentType.DockableComponent);
-                if (dockableComponent.IsValid) { (dockableComponent as DockableComponent).SetInventory(Engine.InventorySlots); }
+                if (dockableComponent.IsValid) { (dockableComponent as DockableComponent).SetInventory(SaveGame.InventorySlots); }
             }
             if (health <= 0)
             {
@@ -1923,7 +1923,7 @@ public class Enemy : Entity
                 var dockableComponent = Components.GetComponent(ComponentType.DockableComponent);
                 if (dockableComponent.IsValid)
                 {
-                    (dockableComponent as DockableComponent).SetInventory(Engine.InventorySlots);
+                    (dockableComponent as DockableComponent).SetInventory(SaveGame.InventorySlots);
                 }
             }
             if (health <= 0)
@@ -2057,7 +2057,7 @@ public class Enemy : Entity
             {
                 if (dockableComponent.IsValid) 
                 { 
-                    (dockableComponent as DockableComponent).SetInventory(Engine.InventorySlots); 
+                    (dockableComponent as DockableComponent).SetInventory(SaveGame.InventorySlots); 
                 }
             }
             if (furnaceItem != null)

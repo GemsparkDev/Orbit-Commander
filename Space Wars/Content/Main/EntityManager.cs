@@ -118,8 +118,6 @@ public class EntityManager
     {
         return missions.Count;
     }
-    public List<Queueable> QueuedItems { get; private set; } = [];
-
     public void Add(Entity entity)
     {
         if (!isUpdating)
@@ -250,19 +248,6 @@ public class EntityManager
         {
             Player.Collide(_damage);
         }
-    }
-    public void CompleteMission(int _duration)
-    {
-        int points = _duration / 10;
-        foreach (var item in QueuedItems)
-        {
-            points = item.AttemptConstruct(points);
-            if (points <= 0)
-            {
-                break;
-            }
-        }
-        QueuedItems = (from item in QueuedItems where !item.IsExpired select item).ToList();
     }
     public void DecayPickups()
     {

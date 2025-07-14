@@ -156,9 +156,8 @@ public class Mission
             }
             else
             {
-                Engine.SaveGame.CompletedMissions[Engine.SaveGame.CurrentMissionIndex] = true;
                 restartTimer = 2;
-                Engine.EntityManager.CompleteMission(Wave);
+                Engine.SaveGame.CompleteMission(Wave);
             }
         }
         if (restartTimer != -1)

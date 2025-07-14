@@ -8,15 +8,23 @@ namespace Space_Wars.Content.Main.Entities;
 
 public class Module : Pickup, IData
 {
-    private ModuleData moduleData;
+    //Serialized fields
     private float health;
+    public bool isFailed = false;
+
+    private ModuleData moduleData;
     public float Health { get { return health; } set { health = value; UpdateHealth(); } }
     public float MaxHealth => moduleData.MaxHealth;
     public override Color Color => isFailed ? Color.Red : Color.White;
-    public bool isFailed = false;
     public float cooldown = 0;
 
-    public Module(ModuleData _itemData, Color _worldColor, Vector2 _position, Vector2 _velocity, float _angularVelocity) : base(_itemData, _worldColor, _position, _velocity, _angularVelocity)
+    public Module(ModuleData _itemData, Vector2 _position, Vector2 _velocity, float _angularVelocity) : base(_itemData, _position, _velocity, _angularVelocity)
+    {
+        health = _itemData.MaxHealth;
+        moduleData = _itemData;
+        Tooltip.AddWidget(new Decal(new Vector2(0, 5), Assets.TextFont, $"{Health} / {moduleData.MaxHealth}", Color.Pink, 5f));
+    }
+    public Module(ModuleData _itemData) : base(_itemData, Vector2.Zero, Vector2.Zero, 0)
     {
         health = _itemData.MaxHealth;
         moduleData = _itemData;
@@ -66,10 +74,11 @@ public class Module : Pickup, IData
         }
     }
 }
-public class ModuleData(Sprite _realSprite, Sprite _virtualSprite, String _name, int _id, int _health, Action _action) 
+public class ModuleData(Sprite _realSprite, Sprite _virtualSprite, String _name, int _id, int _health, Action _action, Modules _module) 
     : ItemData(_realSprite, _virtualSprite, _name, _id, Color.White)
 {
     public float MaxHealth { get; } = _health;
     public Action Action { get; } = _action;
+    public Modules Modules { get; } = _module;
 }
 

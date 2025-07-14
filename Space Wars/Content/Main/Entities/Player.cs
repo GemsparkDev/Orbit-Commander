@@ -9,13 +9,36 @@ using System.Linq;
 using UILib.Content.Main;
 using Space_Wars.Content.Main.Components;
 using System.Diagnostics;
+using System.Text;
 
 namespace Space_Wars.Content.Main.Entities;
 
 public class Player : Entity
 {
+    //Serialized variables
+    private int spareFuses = 0;
+    private bool aimAssist = true;
+    private bool[,] moduleFuses = new bool[5, 4]
+    {
+        { true, true, true, false },
+        { true, true, true, false },
+        { true, true, true, false },
+        { true, true, true, false },
+        { true, true, true, true  }
+    };
+    public Dictionary<ModuleType, Module> modules = new()
+    {
+        { ModuleType.Hull, ItemFactory.GetItem(Modules.Hull) },
+        { ModuleType.Guns, ItemFactory.GetItem(Modules.Basic) },
+        { ModuleType.Engines, ItemFactory.GetItem(Modules.Engines) },
+        { ModuleType.Sensors, ItemFactory.GetItem(Modules.Sensors) },
+        { ModuleType.Core, ItemFactory.GetItem(Modules.Dash) }
+    };
+
     public DockableComponent dockedEntity;
+    public List<Pickup> leashedMaterials = [];
     private Entity abilityEntity;
+    private Entity gunAngle;
     private ParticleEmitter engineParticles = new(Assets.Get(Sprite.Circle), 0.15f, Vector2.Zero, 0, 45, 2, 0, 450f, Color.Cyan, new Color(72, 61, 139, 0), EmitterType.EmissionOverTime) { isEmitterActive = false };
     private ParticleEmitter smokeParticles = new(Assets.Get(Sprite.Circle), 1f, Vector2.Zero, 0, 45, 1, 0, 0.25f, Color.Gray, new Color(169, 169, 169, 0), EmitterType.EmissionOverTime) { isEmitterActive = false };
     private SoundEffectInstance engineSounds;
@@ -24,16 +47,12 @@ public class Player : Entity
     private float restartCooldown = 0;
     private float abilityMaxCooldown = 1f;
     private bool isRestarting = false;
-    private Entity gunAngle;
-    private Vector2 targetVector;
-    private Vector2 direction;
     public bool isEngineActive = false;
     public bool canGatherResources = false;
-    private bool aimAssist = true;
-    private int spareFuses = 0;
+    private Vector2 targetVector;
+    private Vector2 direction;
     private float time = 0;
     private float engineTime = 0;
-    //0 is basic stuff only, 1 adds restarting, constructs, and fuses, 2 adds abilities
     public int Progression { get; set; } = 3;
     public override int SensingAbility
     {
@@ -74,23 +93,6 @@ public class Player : Entity
             return stealth;
         }
     }
-    public List<Pickup> leashedMaterials = [];
-    public Dictionary<ModuleType, Module> modules = new()
-    {
-        { ModuleType.Hull, ItemFactory.GetItem(Modules.Hull) },
-        { ModuleType.Guns, ItemFactory.GetItem(Modules.Basic) },
-        { ModuleType.Engines, ItemFactory.GetItem(Modules.Engines) },
-        { ModuleType.Sensors, ItemFactory.GetItem(Modules.Sensors) },
-        { ModuleType.Core, ItemFactory.GetItem(Modules.Dash) }
-    };
-    private bool[,] moduleFuses = new bool[5, 4]
-    {
-        { true, true, true, false },
-        { true, true, true, false },
-        { true, true, true, false },
-        { true, true, true, false },
-        { true, true, true, true  }
-    };
 
     public Player(Vector2 _position, Vector2 _velocity, float _angle, float _angularVelocity)
         : base(Assets.Get(Sprite.Player), _position, _velocity, _angle, _angularVelocity, 5, true)
@@ -881,5 +883,46 @@ public class Player : Entity
         {
             Engine.DrawFilledLine(_spriteBatch, linePosition, sourceRectangle, (1 - modules[0].cooldown / 8), Color.DarkGray, Color.Yellow);
         }
+    }
+    public Player(string _serialization, LoadLogger _logger)
+    : base(Assets.Get(Sprite.Player), Vector2.One, Vector2.One, 0, 0, 5, true)
+    {
+        List<string> disassembly = SaveGame.Disassemble(_serialization);
+
+        _logger.Try(delegate { spareFuses = Int32.Parse(disassembly[0]); }, 0);
+        _logger.Try(delegate { aimAssist = bool.Parse(disassembly[1]); }, 1);
+        var fuses = SaveGame.Disassemble(disassembly[2]);
+        for (int i = 0; i < moduleFuses.LongLength; i++)
+        {
+            _logger.Try(delegate { moduleFuses[i / 4, i % 4] = bool.Parse(fuses[i]); }, i);
+        }
+
+        //If I am doing saving during missions, make sure to set these to the deserialized value
+        position = Vector2.Zero;
+        velocity = Vector2.Zero;
+
+        gunAngle = Enemy.NewDummyEnemy(position, true);
+        color = new Color(0, 255, 0);
+        smokeParticles.isEmitterActive = false;
+        engineParticles.isEmitterActive = false;
+        engineSounds = Assets.Get(Sound.FireEngines).CreateInstance();
+        engineSounds.IsLooped = true;
+        var textures = new Texture2D[modules.Count];
+        for (int i = 0; i < modules.Count; i++)
+        {
+            textures[i] = modules[(ModuleType)i].itemData.RealSprite;
+        }
+        EventHandler.SetFuseModuleDecals(textures);
+        EventHandler.UpdateFuseUI(moduleFuses, spareFuses);
+    }
+    public string Serialize()
+    {
+        var fuses = new StringBuilder();
+        foreach (var fuse in moduleFuses)
+        {
+            fuses.Append($"{fuse.ToString()},");
+        }
+        fuses.Remove(fuses.Length - 1, 1);
+        return $"{{{spareFuses},{aimAssist},{{{fuses}}}}}";
     }
 }

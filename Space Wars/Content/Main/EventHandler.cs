@@ -91,7 +91,7 @@ public class EventHandler
         {
             for (int x = 0; x < dockableComponent.Inventory.GetLength(0); x++)
             {
-                Engine.InventorySlots[x, y].daughterItem = dockableComponent.Inventory[x, y];
+                SaveGame.InventorySlots[x, y].daughterItem = dockableComponent.Inventory[x, y];
             }
         }
     }

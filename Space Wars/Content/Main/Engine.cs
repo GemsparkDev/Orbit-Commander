@@ -8,7 +8,8 @@ using UILib.Content.Main;
 using Space_Wars.Content.Main.Particles;
 using Space_Wars.Content.Main.Entities;
 using System.Linq;
-using Assimp.Configs;
+using System.Diagnostics;
+using System.IO;
 
 namespace Space_Wars.Content.Main;
 
@@ -29,25 +30,21 @@ public class Engine : Game
     public static Camera Camera { get; private set; }
     public static Engine Self { get; private set; }
     public static Random Random { get; } = new();
-    //Render target size
-    public static Vector2 ScreenSize => new(1920, 1080);
-    //Monitor size
-    public static Vector2 BackBuffer { get; private set; }
+    public static Texture2D Line { get; private set; }
+    public static Vector2 ScreenSize => new(1920, 1080); //Render target size
+    public static Vector2 BackBuffer { get; private set; } //Monitor size
     public static Vector2 MousePositionOffset { get; set; }
     public static Timespan IngameTime { get; set; } = new();
     public static float DeltaSeconds { get; private set; }
     private readonly float timeScale = 1f;
     private readonly int targetFramerate = 60;
     public static float EnemyHitboxModifier { get; private set; } = 1.2f;
-    public static Texture2D Line { get; private set; }
     public static bool DebugMode { get; private set; }
     public static bool PatchedConics { get; private set; } = true;
     public static bool UseShader { get; private set; } = true;
     public static float ScreenShakeFactor { get; private set; } = 0;
-    //Convenient access point for player modules and dockable inventories
+    //Convenient access point for player modules
     public static ItemSlot<Module>[] ModuleSlots { get; private set; } = new ItemSlot<Module>[5];
-    public static ItemSlot<Pickup>[,] InventorySlots { get; private set; } = new ItemSlot<Pickup>[1, 4];
-    public static ItemSlot<Pickup>[] MissionSelectItems { get; private set; } = new ItemSlot<Pickup>[4];
 
     public Engine()
     {
@@ -119,6 +116,7 @@ public class Engine : Game
         var quitToMenuButton = new Button(new Vector2(0, 20), wideButton, Assets.TextFont, "Quit to Menu", Color.White);
         var quitToMissionButton = new Button(new Vector2(0, -20), wideButton, Assets.TextFont, "Return", Color.White);
         var titleName = new Decal(new Vector2(0, -MainMenu.Size.Y), Assets.Get(Sprite.Title));
+        var loadButton = new Button(new Vector2(0, 0), wideButton, Assets.TextFont, "Load", Color.White);
 
         //Mothership Menu
         var furnaceSlot = new ItemSlot<Pickup>(new Vector2(-20, 0), Assets.Get(Sprite.EmptySlot), UIManager, -1);
@@ -155,6 +153,7 @@ public class Engine : Game
         var repairModule = new Button(new Vector2(-85, 15), Assets.Get(Sprite.Button), Assets.TextFont, "Queue Module", Color.Yellow);
         var cancelQueue = new Button(new Vector2(-85, 45), Assets.Get(Sprite.Button), Assets.TextFont, "Cancel Latest", Color.Red);
         var launchButton = new Button(new Vector2(-20, 0), Assets.Get(Sprite.Button), Assets.TextFont, "Leave", Color.LightBlue);
+        var saveButton = new Button(new Vector2(-20, 30), Assets.Get(Sprite.Button), Assets.TextFont, "Save", Color.LightBlue);
 
         //Fuse Menu
         var fuseCounter = new Decal(new Vector2(-20, -10), Assets.TextFont, "0", Color.Yellow, 10);
@@ -207,7 +206,16 @@ public class Engine : Game
         musicSlider.ApplyBehaviours();
         uiScaleSlider.ApplyBehaviours();
 
-        singleplayerButton.AddBehaviour(delegate () { SaveGame = new(); EventHandler.MissionSelectTrigger(); });
+        singleplayerButton.AddBehaviour(delegate () 
+        { 
+            SaveGame = new();
+            string serialization = SaveGame.Serialize();
+            Debug.WriteLine(serialization);
+            var newSave = new SaveGame(serialization);
+            Debug.WriteLine(newSave.Player.position);
+            Debug.WriteLine(newSave.Serialize());
+            EventHandler.MissionSelectTrigger(); 
+        });
         quitToMenuButton.AddBehaviour(EventHandler.QuitToMenu);
         quitToMissionButton.AddBehaviour(EventHandler.MissionSelectTrigger);
         garageButton.AddBehaviour(EventHandler.GarageTrigger);
@@ -231,9 +239,9 @@ public class Engine : Game
         shaderToggle.AddBehaviour(delegate () { UseShader = !UseShader; shaderToggle.text = $"Shader: {UseShader}"; });
         createFuse.AddBehaviour(delegate () 
         {
-            if (EntityManager.QueuedItems.Count < 10)
+            if (SaveGame.QueuedItems.Count < 10)
             {
-                EntityManager.QueuedItems.Add(new FuseQueue());
+                SaveGame.QueuedItems.Add(new FuseQueue());
             } 
         });
         tooltip = new Window(Vector2.Zero, wideButton);
@@ -244,13 +252,13 @@ public class Engine : Game
         {
             if (UIManager.selectedIcon != null)
             {
-                foreach (var item in MissionSelectItems)
+                foreach (var item in SaveGame.MissionSelectItems)
                 {
-                    if (item.daughterItem == null && EntityManager.QueuedItems.Count < 10)
+                    if (item.daughterItem == null && SaveGame.QueuedItems.Count < 10)
                     {
                         item.daughterItem = UIManager.selectedIcon as Pickup;
                         UIManager.selectedIcon = null;
-                        EntityManager.QueuedItems.Add(new SmeltQueue(item));
+                        SaveGame.QueuedItems.Add(new SmeltQueue(item));
                         return;
                     }
                 }
@@ -264,13 +272,13 @@ public class Engine : Game
         {
             if (UIManager.selectedIcon as Module != null)
             {
-                foreach (var item in MissionSelectItems)
+                foreach (var item in SaveGame.MissionSelectItems)
                 {
-                if (item.daughterItem == null && EntityManager.QueuedItems.Count < 10)
+                if (item.daughterItem == null && SaveGame.QueuedItems.Count < 10)
                     {
                         item.daughterItem = UIManager.selectedIcon as Module;
                         UIManager.selectedIcon = null;
-                        EntityManager.QueuedItems.Add(new RepairQueue(item));
+                        SaveGame.QueuedItems.Add(new RepairQueue(item));
                         return;
                     }
                 }
@@ -282,10 +290,27 @@ public class Engine : Game
         repairModule.AddTooltip(tooltip);
         cancelQueue.AddBehaviour(delegate () 
         {
-            if(EntityManager.QueuedItems.Count != 0)
+            if(SaveGame.QueuedItems.Count != 0)
             {
-                EntityManager.QueuedItems.RemoveAt(EntityManager.QueuedItems.Count - 1);
+                SaveGame.QueuedItems.RemoveAt(SaveGame.QueuedItems.Count - 1);
             }
+        });
+        saveButton.AddBehaviour(delegate () 
+        {
+            string saveLocation = "";
+        });
+        loadButton.AddBehaviour(delegate () 
+        {
+            var filePath = Path.Combine(Content.RootDirectory, "Saves/Save_1.txt");
+            string text;
+            using (var stream = TitleContainer.OpenStream(filePath))
+            {
+                using (var reader = new StreamReader(stream))
+                {
+                    text = reader.ReadToEnd();
+                }
+            }
+            Debug.WriteLine(text);
         });
 
         MainMenu.AddWidget(exitButton as IFunctional, 0);
@@ -300,6 +325,7 @@ public class Engine : Game
         MainMenu.AddWidget(musicVolume, 1);
         MainMenu.AddWidget(uiScale, 1);
         MainMenu.AddWidget(shaderToggle as IFunctional, 1);
+        MainMenu.AddWidget(loadButton as IFunctional, 0);
 
         PauseMenu.AddWidget(quitToMenuButton as IFunctional);
         PauseMenu.AddWidget(quitToMissionButton as IFunctional);
@@ -340,6 +366,7 @@ public class Engine : Game
         MissionSelect.AddWidget(smeltScrap as IFunctional, 1);
         MissionSelect.AddWidget(repairModule as IFunctional, 1);
         MissionSelect.AddWidget(cancelQueue as IFunctional, 1);
+        MissionSelect.AddWidget(saveButton as IFunctional, 0);
 
         PickupDroneMenu.AddWidget(launchButton as IFunctional);
 
@@ -371,7 +398,7 @@ public class Engine : Game
         UIManager.ScreenWindow.AddWidget(playerAbility as IFunctional, (int)Alignment.TopLeft);
 
         ModuleSlots = new ItemSlot<Module>[5];
-        InventorySlots = new ItemSlot<Pickup>[1, 4];
+        SaveGame.InventorySlots = new ItemSlot<Pickup>[1, 4];
         for (int x = 0; x < ModuleSlots.GetLength(0); x++)
         {
             if (x % 2 == 0)
@@ -388,19 +415,19 @@ public class Engine : Game
             MissionSelect.AddWidget(ModuleSlots[x] as IFunctional, 1);
             ModuleSlots[x].AddBehaviour(EventHandler.UpdateModules);
         }
-        for (int x = 0; x < InventorySlots.GetLength(0); x++)
+        for (int x = 0; x < SaveGame.InventorySlots.GetLength(0); x++)
         {
-            for (int y = 0; y < InventorySlots.GetLength(1); y++)
+            for (int y = 0; y < SaveGame.InventorySlots.GetLength(1); y++)
             {
-                InventorySlots[x, y] = new ItemSlot<Pickup>(new Vector2(Assets.DimsOf(Sprite.EmptySlot).X * x + Assets.DimsOf(Sprite.LargePanel).X / 4,
+                SaveGame.InventorySlots[x, y] = new ItemSlot<Pickup>(new Vector2(Assets.DimsOf(Sprite.EmptySlot).X * x + Assets.DimsOf(Sprite.LargePanel).X / 4,
                     Assets.DimsOf(Sprite.EmptySlot).Y * (y+1) - Assets.DimsOf(Sprite.LargePanel).X / 2), Assets.Get(Sprite.EmptySlot), UIManager, -1);
-                MissionSelectItems[y] = new ItemSlot<Pickup>(new Vector2(Assets.DimsOf(Sprite.EmptySlot).X * x + Assets.DimsOf(Sprite.LargePanel).X / 2,
+                SaveGame.MissionSelectItems[y] = new ItemSlot<Pickup>(new Vector2(Assets.DimsOf(Sprite.EmptySlot).X * x + Assets.DimsOf(Sprite.LargePanel).X / 2,
                     Assets.DimsOf(Sprite.EmptySlot).Y * (y + 1) - Assets.DimsOf(Sprite.LargePanel).X / 2), Assets.Get(Sprite.EmptySlot), UIManager, -1);
-                MothershipMenu.AddWidget(InventorySlots[x, y] as IFunctional, 0);
-                PickupDroneMenu.AddWidget(InventorySlots[x,y] as IFunctional);
-                MissionSelect.AddWidget(InventorySlots[x, y] as IFunctional, 1);
-                MissionSelect.AddWidget(MissionSelectItems[y] as IFunctional, 1);
-                InventorySlots[x, y].AddBehaviour(new Action(EventHandler.UpdateInventory));
+                MothershipMenu.AddWidget(SaveGame.InventorySlots[x, y] as IFunctional, 0);
+                PickupDroneMenu.AddWidget(SaveGame.InventorySlots[x,y] as IFunctional);
+                MissionSelect.AddWidget(SaveGame.InventorySlots[x, y] as IFunctional, 1);
+                MissionSelect.AddWidget(SaveGame.MissionSelectItems[y] as IFunctional, 1);
+                SaveGame.InventorySlots[x, y].AddBehaviour(new Action(EventHandler.UpdateInventory));
             }
         }
         UIManager.AddContainer(MainMenu);

@@ -9,8 +9,8 @@ public class Construct : Pickup
     private ConstructType type;
     private float cooldown = 0;
     private ParticleEmitter attackRadius;
-    public Construct(ConstructData _constructData, Color _worldColor, Vector2 _position, Vector2 _velocity, float _angle, float _angularVelocity, ConstructType _type)
-        : base(_constructData, _worldColor, _position, _velocity, _angularVelocity, _constructData.Integrity)
+    public Construct(ConstructData _constructData, Vector2 _position, Vector2 _velocity, float _angle, float _angularVelocity, ConstructType _type)
+        : base(_constructData, _position, _velocity, _angularVelocity, _constructData.Integrity)
     {
         angle = _angle;
         type = _type;
