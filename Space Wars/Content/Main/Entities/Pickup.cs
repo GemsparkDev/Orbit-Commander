@@ -9,12 +9,14 @@ using System.Diagnostics;
 namespace Space_Wars.Content.Main.Entities;
 public class Pickup : Entity, IData
 {
-    internal ItemData itemData;
+    private int hitsLeft;
+    public Items Type { get; } = Items.Scrap;
+
+    protected ItemData itemData;
     public Texture2D Texture => itemData.RealSprite;
     public Window Tooltip { get; } = new Window(Vector2.Zero, Assets.Get(Sprite.WideButton));
     public String Name => itemData.Name;
     public virtual Color Color => itemData.Color;
-    private int hitsLeft;
     protected float invincibilityCooldown = 5;
     public int ID => itemData.ID;
     public Pickup(ItemData _itemData, Vector2 _position, Vector2 _velocity, float _angularVelocity, int _integrity = 3)
@@ -26,7 +28,15 @@ public class Pickup : Entity, IData
         Tooltip.AddWidget(new Decal(new Vector2(0, -5), Assets.TextFont, _itemData.Name, Color.White,  5f));
         hitsLeft = _integrity;
     }
-
+    public Pickup(ItemData _itemData, List<string> _disassembly, LoadLogger _logger)
+        : base(_itemData.VirtualSprite, default, default, 0, 0, 0, true)
+    {
+        itemData = _itemData;
+        color = Color.Cyan;
+        Tooltip.AddWidget(new Decal(new Vector2(-Tooltip.Size.X / 3, 0), _itemData.RealSprite));
+        Tooltip.AddWidget(new Decal(new Vector2(0, -5), Assets.TextFont, _itemData.Name, Color.White, 5f));
+        _logger.Try(delegate { hitsLeft = Int32.Parse(_disassembly[1]);}, 1);
+    }
     public override void Update()
     {
         if (!Player.leashedMaterials.Contains(this))
@@ -103,6 +113,14 @@ public class Pickup : Entity, IData
         Engine.ShakeScreen(10 / ((position - Engine.Camera.Position).Length() + 150));
         ParticleManager.Add(new Particle(null, 1, position + new Vector2(0, -1), new Vector2(0, -1.5f), 0, 0, Color.Orange, new Color(255, 0, 0, 0)) { drawText = $"Integrity: {hitsLeft}" });
     }
+    public string SerializeAttributes()
+    {
+        return $"{hitsLeft}";
+    }
+    public string Serialize()
+    {
+        return $"{{{Type},{hitsLeft}}}";
+    }
 }
 public class ItemData(Sprite _realSprite, Sprite _virtualSprite, String _name, int _id, Color _color)
 {
@@ -111,4 +129,8 @@ public class ItemData(Sprite _realSprite, Sprite _virtualSprite, String _name, i
     public string Name { get; } = _name;
     public int ID { get; } = _id;
     public Color Color { get; } = _color;
+}
+public enum Items
+{
+    Scrap
 }

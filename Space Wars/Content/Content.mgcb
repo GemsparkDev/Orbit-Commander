@@ -1029,19 +1029,13 @@
 /build:Images/UI_9.png
 
 #begin Saves/Save_1.txt
-/importer:
-/processor:
-/build:Saves/Save_1.txt
+/copy:Saves/Save_1.txt
 
 #begin Saves/Save_2.txt
-/importer:
-/processor:
-/build:Saves/Save_2.txt
+/copy:Saves/Save_2.txt
 
 #begin Saves/Save_3.txt
-/importer:
-/processor:
-/build:Saves/Save_3.txt
+/copy:Saves/Save_3.txt
 
 #begin Shaders/BloomShader.fx
 /importer:EffectImporter

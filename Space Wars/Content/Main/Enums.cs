@@ -161,7 +161,6 @@ public enum Message
 {
     MothershipCraftItem,
     MothershipUpdateFurnace,
-    MothershipUpdateInventory,
     ToggleTerminal,
     RestartModules,
     EscapeDroneLeave,

@@ -4,8 +4,10 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Numerics;
+using Microsoft.Xna.Framework;
+using System.Text;
 using UILib.Content.Main;
+using Assimp.Configs;
 
 namespace Space_Wars.Content.Main;
 public class SaveGame
@@ -16,11 +18,11 @@ public class SaveGame
     private bool giveWeapon = true;
     public bool[] CompletedMissions { get; } = new bool[Engine.EntityManager.MissionLength];
     public Player Player { get; } = new Player(Vector2.Zero, Vector2.Zero, 0, 0);
-    private Mission currentMission;
-    public static ItemSlot<Pickup>[,] InventorySlots { get; set; }
-    public static ItemSlot<Pickup>[] MissionSelectItems { get; set; } = new ItemSlot<Pickup>[5];
+    public Pickup[] Inventory { get; } = new Pickup[4];
+    public Pickup[] MissionSelectInventory { get; } = new Pickup[4];
     public List<Queueable> QueuedItems { get; private set; } = [];
 
+    private Mission currentMission;
     public Mission CurrentMission 
     { 
         get 
@@ -39,20 +41,36 @@ public class SaveGame
     public SaveGame(string _serialization)
     {
         List<string> disassembly = Disassemble(_serialization);
-
         var logger = new LoadLogger();
 
-        logger.Try(delegate { Scrap = Int32.Parse(disassembly[0]); },0);
+        logger.Try(delegate { Scrap = Int32.Parse(disassembly[0]); }, 0);
         logger.Try(delegate { System = Int32.Parse(disassembly[1]); }, 1);
         logger.Try(delegate { CurrentMissionIndex = Int32.Parse(disassembly[2]); }, 2);
         logger.Try(delegate { giveWeapon = bool.Parse(disassembly[3]); }, 3);
-        List<string> array = Disassemble(disassembly[4]);
+        List<string> array = [];
+        logger.Try(delegate { array = Disassemble(disassembly[4]); }, 4);
         for (int j = 0; j < CompletedMissions.Length; j++)
         {
-            logger.Try(delegate { CompletedMissions[j] = bool.Parse(array[j]);}, j);
+            logger.Try(delegate { CompletedMissions[j] = bool.Parse(array[j]); }, j);
         }
-        Player = new Player(disassembly[5], logger);
-        //logger.Log();
+        Player player = null;
+        logger.Try(delegate{ player = new Player(disassembly[5], logger); }, 5);
+        Player = (player ?? new Player(Vector2.Zero, Vector2.Zero, 0, 0));
+
+        array = [];
+        logger.Try(delegate { array = Disassemble(disassembly[6]); }, 6);
+        for (int j = 0; j < Inventory.Length; j++)
+        {
+            logger.Try(delegate { Inventory[j] = ItemFactory.TryDeserialize(array[j], logger); }, 6);
+        }
+
+        array = [];
+        logger.Try(delegate { array = Disassemble(disassembly[7]); }, 7);
+        for (int j = 0; j < MissionSelectInventory.Length; j++)
+        {
+            logger.Try(delegate { MissionSelectInventory[j] = ItemFactory.TryDeserialize(array[j], logger); }, 7);
+        }
+        logger.Log();
     }
     public static List<string> Disassemble(string _serialization)
     {
@@ -130,7 +148,33 @@ public class SaveGame
     }
     public string Serialize()
     {
-        return $"{Scrap},{System},{CurrentMissionIndex},{giveWeapon},{{{string.Join(",", CompletedMissions)}}},{Player.Serialize()}";
+        var inv = new StringBuilder();
+        foreach (var item in Inventory)
+        {
+            if (item != null)
+            {
+                inv.Append($"{item.Serialize()},");
+            }
+            else
+            {
+                inv.Append($"{{}},");
+            }
+        }
+        inv.Remove(inv.Length - 1, 1);
+        var globalInv = new StringBuilder();
+        foreach (var item in MissionSelectInventory)
+        {
+            if (item != null)
+            {
+                globalInv.Append($"{item.Serialize()},");
+            }
+            else
+            {
+                globalInv.Append($"{{}},");
+            }
+        }
+        globalInv.Remove(globalInv.Length - 1, 1);
+        return $"{Scrap},{System},{CurrentMissionIndex},{giveWeapon},{{{string.Join(",", CompletedMissions)}}},{Player.Serialize()},{{{inv}}},{{{globalInv}}}";
     }
 }
 public class LoadLogger
@@ -149,6 +193,10 @@ public class LoadLogger
     }
     public void Log()
     {
+        if (exceptions.Count == 0)
+        {
+            return;
+        }
         Debug.WriteLine("The following errors occurred during loading:");
         foreach (var (index, error) in exceptions)
         {

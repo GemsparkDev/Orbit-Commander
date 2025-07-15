@@ -2,25 +2,43 @@
 using System;
 using Microsoft.Xna.Framework.Graphics;
 using Space_Wars.Content.Main.Particles;
+using System.Collections.Generic;
 
 namespace Space_Wars.Content.Main.Entities;
 public class Construct : Pickup
 {
-    private ConstructType type;
+    public new Constructs Type { get; }
+
     private float cooldown = 0;
     private ParticleEmitter attackRadius;
-    public Construct(ConstructData _constructData, Vector2 _position, Vector2 _velocity, float _angle, float _angularVelocity, ConstructType _type)
-        : base(_constructData, _position, _velocity, _angularVelocity, _constructData.Integrity)
+    public Construct(Constructs _type, Vector2 _position, Vector2 _velocity, float _angle, float _angularVelocity)
+        : base(ItemFactory.constructData[_type], _position, _velocity, _angularVelocity, ItemFactory.constructData[_type].Integrity)
     {
         angle = _angle;
-        type = _type;
+        Type = _type;
         int radius = 0;
-        if (_type == ConstructType.Bomb)
+        if (_type == Constructs.Bomb)
         {
             isFriendly = false;
             radius = 100;
         }
-        else if (_type == ConstructType.Trap)
+        else if (_type == Constructs.Trap)
+        {
+            radius = 300;
+        }
+        attackRadius = new ParticleEmitter(Assets.Get(Sprite.Dot), position, radius, new Color(255, 0, 0));
+    }
+    public Construct(Constructs _type, List<string> _disassembly, LoadLogger _logger)
+    : base(ItemFactory.constructData[_type], _disassembly, _logger)
+    {
+        Type = _type;
+        int radius = 0;
+        if (_type == Constructs.Bomb)
+        {
+            isFriendly = false;
+            radius = 100;
+        }
+        else if (_type == Constructs.Trap)
         {
             radius = 300;
         }
@@ -33,13 +51,13 @@ public class Construct : Pickup
             cooldown -= Engine.DeltaSeconds;
         }
         attackRadius.position = position;
-        switch (type)
+        switch (Type)
         {
-            case ConstructType.Barricade:
+            case Constructs.Barricade:
                 velocity = Vector2.Zero;
                 angle = MathF.Atan2(position.X, -position.Y);
                 break;
-            case ConstructType.Trap:
+            case Constructs.Trap:
                 velocity = Vector2.Zero;
                 var nearestEnemy = Engine.EntityManager.NearestEnemy(new Enemy(position, Vector2.Zero, 0, 0, 0, null, true));
                 if (cooldown <= 0 && nearestEnemy != null && Vector2.Distance(nearestEnemy.position, position) < 300)
@@ -60,7 +78,7 @@ public class Construct : Pickup
                     attackRadius.Update();
                 }
                 break;
-            case ConstructType.Bomb:
+            case Constructs.Bomb:
                 var nearestProjectile = Engine.EntityManager.NearestProjectile(this, !isFriendly);
                 if (nearestProjectile != null && Vector2.Distance(nearestProjectile.position, position) < ColliderRadius + nearestProjectile.ColliderRadius)
                 {
@@ -76,12 +94,16 @@ public class Construct : Pickup
     {
         bool isActive = !isExpired;
         base.Collide(_damage);
-        if (type == ConstructType.Bomb && isExpired && isActive)
+        if (Type == Constructs.Bomb && isExpired && isActive)
         {
             var tex = Assets.Get(Sprite.Explosion);
             ParticleManager.Add(new Particle(tex, 3, position, Vector2.Zero, 0, 0, Color.White, Color.Transparent));
             Engine.EntityManager.Explode(100, 100, position);
         }
+    }
+    public new string Serialize()
+    {
+        return $"{{{Type},{SerializeAttributes()}}}";
     }
 }
 public class ConstructData(Sprite _realSprite, Sprite _virtualSprite, String _name, int _id, int _integrity)
@@ -89,7 +111,7 @@ public class ConstructData(Sprite _realSprite, Sprite _virtualSprite, String _na
 {
     public int Integrity { get; } = _integrity;
 }
-public enum ConstructType
+public enum Constructs
 {
     Barricade,
     Trap,

@@ -28,11 +28,11 @@ public class Player : Entity
     };
     public Dictionary<ModuleType, Module> modules = new()
     {
-        { ModuleType.Hull, ItemFactory.GetItem(Modules.Hull) },
-        { ModuleType.Guns, ItemFactory.GetItem(Modules.Basic) },
-        { ModuleType.Engines, ItemFactory.GetItem(Modules.Engines) },
-        { ModuleType.Sensors, ItemFactory.GetItem(Modules.Sensors) },
-        { ModuleType.Core, ItemFactory.GetItem(Modules.Dash) }
+        { ModuleType.Hull, new Module(Modules.Hull) },
+        { ModuleType.Guns, new Module(Modules.Basic) },
+        { ModuleType.Engines, new Module(Modules.Engines) },
+        { ModuleType.Sensors, new Module(Modules.Sensors) },
+        { ModuleType.Core, new Module(Modules.Dash) }
     };
 
     public DockableComponent dockedEntity;
@@ -106,7 +106,7 @@ public class Player : Entity
         var textures = new Texture2D[modules.Count];
         for(int i = 0; i < modules.Count; i++)
         {
-            textures[i] = modules[(ModuleType)i].itemData.RealSprite;
+            textures[i] = modules[(ModuleType)i].Texture;
         }
         EventHandler.SetFuseModuleDecals(textures);
         EventHandler.UpdateFuseUI(moduleFuses, spareFuses);
@@ -375,19 +375,19 @@ public class Player : Entity
                             {
                                 case 0:
                                     firstScrap.isExpired = true;
-                                    var barricade = ItemFactory.GetItem(ConstructType.Barricade, firstScrap.position, firstScrap.velocity, 0);
+                                    var barricade = new Construct(Constructs.Barricade, firstScrap.position, firstScrap.velocity, 0, 0);
                                     leashedMaterials.Add(barricade);
                                     Engine.EntityManager.Add(barricade);
                                     break;
                                 case 1:
                                     firstScrap.isExpired = true;
-                                    var trap = ItemFactory.GetItem(ConstructType.Trap, firstScrap.position, firstScrap.velocity, 0);
+                                    var trap = new Construct(Constructs.Trap, firstScrap.position, firstScrap.velocity, 0, 0);
                                     leashedMaterials.Add(trap);
                                     Engine.EntityManager.Add(trap);
                                     break;
                                 case 2:
                                     firstScrap.isExpired = true;
-                                    var bomb = ItemFactory.GetItem(ConstructType.Bomb, firstScrap.position, firstScrap.velocity, 0);
+                                    var bomb = new Construct(Constructs.Bomb, firstScrap.position, firstScrap.velocity, 0, 0);
                                     leashedMaterials.Add(bomb);
                                     Engine.EntityManager.Add(bomb);
                                     break;
@@ -684,7 +684,7 @@ public class Player : Entity
             cachedDamage = 0;
             return;
         }
-        modules[0].Health = MathF.Max(0, modules[0].Health - cachedDamage / 2);
+        modules[0].Health = (int)MathF.Max(0, modules[0].Health - cachedDamage / 2);
     }
     public void Basic()
     {
@@ -894,12 +894,13 @@ public class Player : Entity
         var fuses = SaveGame.Disassemble(disassembly[2]);
         for (int i = 0; i < moduleFuses.LongLength; i++)
         {
-            _logger.Try(delegate { moduleFuses[i / 4, i % 4] = bool.Parse(fuses[i]); }, i);
+            _logger.Try(delegate { moduleFuses[i / 4, i % 4] = bool.Parse(fuses[i]); }, 2);
         }
-
-        //If I am doing saving during missions, make sure to set these to the deserialized value
-        position = Vector2.Zero;
-        velocity = Vector2.Zero;
+        _logger.Try(delegate { modules[ModuleType.Hull] = (Module)(ItemFactory.TryDeserialize(disassembly[3], _logger)); }, 3);
+        _logger.Try(delegate { modules[ModuleType.Guns] = (Module)(ItemFactory.TryDeserialize(disassembly[4], _logger)); }, 4);
+        _logger.Try(delegate { modules[ModuleType.Engines] = (Module)(ItemFactory.TryDeserialize(disassembly[5], _logger)); }, 5);
+        _logger.Try(delegate { modules[ModuleType.Sensors] = (Module)(ItemFactory.TryDeserialize(disassembly[6], _logger)); }, 6);
+        _logger.Try(delegate { modules[ModuleType.Core] = (Module)(ItemFactory.TryDeserialize(disassembly[7], _logger)); }, 7);
 
         gunAngle = Enemy.NewDummyEnemy(position, true);
         color = new Color(0, 255, 0);
@@ -910,7 +911,7 @@ public class Player : Entity
         var textures = new Texture2D[modules.Count];
         for (int i = 0; i < modules.Count; i++)
         {
-            textures[i] = modules[(ModuleType)i].itemData.RealSprite;
+            textures[i] = modules[(ModuleType)i].Texture;
         }
         EventHandler.SetFuseModuleDecals(textures);
         EventHandler.UpdateFuseUI(moduleFuses, spareFuses);
@@ -920,9 +921,15 @@ public class Player : Entity
         var fuses = new StringBuilder();
         foreach (var fuse in moduleFuses)
         {
-            fuses.Append($"{fuse.ToString()},");
+            fuses.Append($"{fuse},");
         }
         fuses.Remove(fuses.Length - 1, 1);
-        return $"{{{spareFuses},{aimAssist},{{{fuses}}}}}";
+        var modules = new StringBuilder();
+        foreach (var module in this.modules)
+        {
+            modules.Append($"{module.Value.Serialize()},");
+        }
+        modules.Remove(modules.Length - 1, 1);
+        return $"{{{spareFuses},{aimAssist},{{{fuses}}},{modules}}}";
     }
 }

@@ -315,11 +315,11 @@ public class Enemy : Entity
                 SoundManager.PlaySound(Assets.Get(Sound.Death), position);
                 if (Engine.SaveGame.GiveWeapon)
                 {
-                    Engine.EntityManager.Add(ItemFactory.GetItem(Modules.Missile, position, GetNormalizedAcceleration() * 10, angularVelocity));
+                    Engine.EntityManager.Add(new Module(Modules.Missile, position, GetNormalizedAcceleration() * 10, angularVelocity));
                 }
                 else
                 {
-                    Engine.EntityManager.Add(ItemFactory.GetItem(Modules.SummonShield, position, GetNormalizedAcceleration() * 10, angularVelocity));
+                    Engine.EntityManager.Add(new Module(Modules.SummonShield, position, GetNormalizedAcceleration() * 10, angularVelocity));
                 }
             }
             velocity *= 0.8f;
@@ -478,7 +478,7 @@ public class Enemy : Entity
                 SoundManager.PlaySound(Assets.Get(Sound.Death), position);
                 if (Engine.SaveGame.GiveWeapon)
                 {
-                    Engine.EntityManager.Add(ItemFactory.GetItem(Modules.Shotgun, position, GetNormalizedAcceleration() * 10, angularVelocity));
+                    Engine.EntityManager.Add(new Module(Modules.Shotgun, position, GetNormalizedAcceleration() * 10, angularVelocity));
                 }
                 else
                 {
@@ -525,7 +525,7 @@ public class Enemy : Entity
                         position = new Vector2(10000, 10000);
                         if (Engine.SaveGame.GiveWeapon)
                         {
-                            Engine.EntityManager.Add(ItemFactory.GetItem(Modules.LMG, position, normalizedAcceleration * 10, angularVelocity));
+                            Engine.EntityManager.Add(new Module(Modules.LMG, position, normalizedAcceleration * 10, angularVelocity));
                         }
                         else
                         {
@@ -765,11 +765,11 @@ public class Enemy : Entity
                 SoundManager.PlaySound(Assets.Get(Sound.Death), position);
                 if (Engine.SaveGame.GiveWeapon)
                 {
-                    Engine.EntityManager.Add(ItemFactory.GetItem(Modules.Sniper, position, normalizedAcceleration * 10, angularVelocity));
+                    Engine.EntityManager.Add(new Module(Modules.Sniper, position, normalizedAcceleration * 10, angularVelocity));
                 }
                 else
                 {
-                    Engine.EntityManager.Add(ItemFactory.GetItem(Modules.Nanomachines, position, normalizedAcceleration * 10, angularVelocity));
+                    Engine.EntityManager.Add(new Module(Modules.Nanomachines, position, normalizedAcceleration * 10, angularVelocity));
                 }
             }
             velocity *= 0.8f;
@@ -911,7 +911,7 @@ public class Enemy : Entity
                 SoundManager.PlaySound(Assets.Get(Sound.Death), position);
                 if (Engine.SaveGame.GiveWeapon)
                 {
-                    Engine.EntityManager.Add(ItemFactory.GetItem(Modules.Crossbow, position, GetNormalizedAcceleration() * 10, angularVelocity));
+                    Engine.EntityManager.Add(new Module(Modules.Crossbow, position, GetNormalizedAcceleration() * 10, angularVelocity));
                 }
                 else
                 {
@@ -1025,7 +1025,7 @@ public class Enemy : Entity
                 SoundManager.PlaySound(Assets.Get(Sound.Death), position);
                 if (Engine.SaveGame.GiveWeapon)
                 {
-                    Engine.EntityManager.Add(ItemFactory.GetItem(Modules.GrenadeLauncher, position, GetNormalizedAcceleration() * 10, angularVelocity));
+                    Engine.EntityManager.Add(new Module(Modules.GrenadeLauncher, position, GetNormalizedAcceleration() * 10, angularVelocity));
                 }
                 else
                 {
@@ -1753,11 +1753,6 @@ public class Enemy : Entity
             {
                 furnaceItem = ((ItemSlot<Pickup>)Engine.UIManager.GetFuncWidget((int)Containers.MothershipMenu, 1)).daughterItem;
             }
-            if (EventHandler.AcknowledgeMessage(Message.MothershipUpdateInventory))
-            {
-                var dockableComponent = Components.GetComponent(ComponentType.DockableComponent);
-                if (dockableComponent.IsValid) { (dockableComponent as DockableComponent).SetInventory(SaveGame.InventorySlots); }
-            }
             if (health <= 0)
             {
                 isExpired = true;
@@ -1918,14 +1913,6 @@ public class Enemy : Entity
             {
                 furnaceItem = ((ItemSlot<Pickup>)Engine.UIManager.GetFuncWidget((int)Containers.MothershipMenu, 1)).daughterItem;
             }
-            if (EventHandler.AcknowledgeMessage(Message.MothershipUpdateInventory))
-            {
-                var dockableComponent = Components.GetComponent(ComponentType.DockableComponent);
-                if (dockableComponent.IsValid)
-                {
-                    (dockableComponent as DockableComponent).SetInventory(SaveGame.InventorySlots);
-                }
-            }
             if (health <= 0)
             {
                 isExpired = true;
@@ -2053,13 +2040,6 @@ public class Enemy : Entity
                 furnaceItem = ((ItemSlot<Pickup>)Engine.UIManager.GetFuncWidget((int)Containers.MothershipMenu, 1)).daughterItem;
             }
             var dockableComponent = (Components.GetComponent(ComponentType.DockableComponent));
-            if (EventHandler.AcknowledgeMessage(Message.MothershipUpdateInventory))
-            {
-                if (dockableComponent.IsValid) 
-                { 
-                    (dockableComponent as DockableComponent).SetInventory(SaveGame.InventorySlots); 
-                }
-            }
             if (furnaceItem != null)
             {
                 furnaceCooldown -= Engine.DeltaSeconds;
@@ -2255,7 +2235,7 @@ public class Enemy : Entity
                 isExpired = true;
                 Explode(10, ColliderRadius);
                 SoundManager.PlaySound(Assets.Get(Sound.Explosion), position);
-                Engine.EntityManager.Add(ItemFactory.GetItem(Modules.GrapplingHook, position, GetNormalizedAcceleration() * 10, angularVelocity));
+                Engine.EntityManager.Add(new Module(Modules.GrapplingHook, position, GetNormalizedAcceleration() * 10, angularVelocity));
             }
             yield return 0;
         }

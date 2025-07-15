@@ -33,8 +33,8 @@ public class EventHandler
         player.velocity = Vector2.Zero;
         Engine.IngameTime = new();
         Engine.MousePositionOffset = Vector2.Zero;
-        Engine.UIManager.ToggleMenu((int)Containers.PauseMenu);
-        Engine.UIManager.ToggleMenu((int)Containers.MainMenu);
+        Engine.UIManager.DisableAll();
+        Engine.UIManager.GetContainer((int)Containers.MainMenu).enabled = true;
         ParticleManager.Initialize();
         SoundManager.SetAllSounds(false);
         SoundManager.Initialize();  
@@ -85,19 +85,27 @@ public class EventHandler
         }
     }
 
-    public static void UpdateInventoryUI(DockableComponent dockableComponent)
+    public static void UpdateInventoryUI()
     {
-        for (int y = 0; y < dockableComponent.Inventory.GetLength(1); y++)
+        for (int i = 0; i < Engine.InventorySlots.Length; i++)
         {
-            for (int x = 0; x < dockableComponent.Inventory.GetLength(0); x++)
-            {
-                SaveGame.InventorySlots[x, y].daughterItem = dockableComponent.Inventory[x, y];
-            }
+            Engine.InventorySlots[i].daughterItem = Engine.SaveGame.Inventory[i];
+        }
+        for (int i = 0; i < Engine.MissionSelectSlots.Length; i++)
+        {
+            Engine.MissionSelectSlots[i].daughterItem = Engine.SaveGame.MissionSelectInventory[i];
         }
     }
     public static void UpdateInventory()
     {
-        SendMessage(Message.MothershipUpdateInventory);
+        for (int i = 0; i < Engine.InventorySlots.Length; i++)
+        {
+            Engine.SaveGame.Inventory[i] = Engine.InventorySlots[i].daughterItem;
+        }
+        for (int i = 0; i < Engine.MissionSelectSlots.Length; i++)
+        {
+            Engine.SaveGame.MissionSelectInventory[i] = Engine.MissionSelectSlots[i].daughterItem;
+        }
     }
     public static void UpdateModulesUI()
     {
@@ -105,6 +113,19 @@ public class EventHandler
         {
             Engine.ModuleSlots[x].daughterItem = player.modules.ElementAt(x).Value;
         }
+    }
+    public static void UpdateModules()
+    {
+        var validConfigText = Engine.UIManager.GetWidget((int)Containers.GarageMenu, 3) as Decal;
+        foreach (var module in Engine.ModuleSlots)
+        {
+            if (module.daughterItem == null)
+            {
+                validConfigText.text = "";
+                return;
+            }
+        }
+        validConfigText.text = "Ready for Combat";
     }
     public static bool SyncModules()
     {
@@ -120,19 +141,6 @@ public class EventHandler
             player.modules[(ModuleType)x] = Engine.ModuleSlots[x].daughterItem;
         }
         return true;
-    }
-    public static void UpdateModules()
-    {
-        var validConfigText = Engine.UIManager.GetWidget((int)Containers.GarageMenu,3) as Decal;
-        foreach (var module in Engine.ModuleSlots)
-        {
-            if (module.daughterItem == null)
-            {
-                validConfigText.text = "";
-                return;
-            }
-        }
-        validConfigText.text = "Ready for Combat";
     }
     public static void UpdateFurnaceUI(float _value, float _maxValue, Pickup furnaceItem)
     {

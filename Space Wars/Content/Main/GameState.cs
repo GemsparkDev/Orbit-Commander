@@ -221,6 +221,7 @@ public class MissionSelect : GameState
         ParticleManager.Initialize();
         EventHandler.UpdateModulesUI();
         EventHandler.UpdateMissionText();
+        EventHandler.UpdateInventoryUI();
     }
     public override void Update() 
     {

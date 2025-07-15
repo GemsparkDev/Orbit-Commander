@@ -2,6 +2,9 @@
 using Microsoft.Xna.Framework.Graphics;
 using Space_Wars.Content.Main.Particles;
 using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Text.Json.Serialization;
 using UILib.Content.Main;
 
 namespace Space_Wars.Content.Main.Entities;
@@ -9,26 +12,27 @@ namespace Space_Wars.Content.Main.Entities;
 public class Module : Pickup, IData
 {
     //Serialized fields
-    private float health;
+    private int health = 20;
     public bool isFailed = false;
+    public new Modules Type { get; }
 
-    private ModuleData moduleData;
-    public float Health { get { return health; } set { health = value; UpdateHealth(); } }
-    public float MaxHealth => moduleData.MaxHealth;
+    public int Health { get { return health; } set { health = value; UpdateHealth(); } }
+    public int MaxHealth => (itemData as ModuleData).MaxHealth;
     public override Color Color => isFailed ? Color.Red : Color.White;
     public float cooldown = 0;
 
-    public Module(ModuleData _itemData, Vector2 _position, Vector2 _velocity, float _angularVelocity) : base(_itemData, _position, _velocity, _angularVelocity)
+    public Module(Modules _type, Vector2 _position = default, Vector2 _velocity = default, float _angularVelocity = 0) : base(ItemFactory.moduleData[_type], _position, _velocity, _angularVelocity)
     {
-        health = _itemData.MaxHealth;
-        moduleData = _itemData;
-        Tooltip.AddWidget(new Decal(new Vector2(0, 5), Assets.TextFont, $"{Health} / {moduleData.MaxHealth}", Color.Pink, 5f));
+        health = MaxHealth;
+        Type = _type;
+        Tooltip.AddWidget(new Decal(new Vector2(0, 5), Assets.TextFont, $"{Health} / {MaxHealth}", Color.Pink, 5f));
     }
-    public Module(ModuleData _itemData) : base(_itemData, Vector2.Zero, Vector2.Zero, 0)
+    public Module(Modules _type, List<string> _disassembly, LoadLogger _logger) : base(ItemFactory.moduleData[_type], _disassembly, _logger)
     {
-        health = _itemData.MaxHealth;
-        moduleData = _itemData;
-        Tooltip.AddWidget(new Decal(new Vector2(0, 5), Assets.TextFont, $"{Health} / {moduleData.MaxHealth}", Color.Pink, 5f));
+        _logger.Try(delegate { health = Int32.Parse(_disassembly[2]); }, 2);
+        _logger.Try(delegate { isFailed = bool.Parse(_disassembly[3]); }, 3);
+        Type = _type;
+        Tooltip.AddWidget(new Decal(new Vector2(0, 5), Assets.TextFont, $"{Health} / {MaxHealth}", Color.Pink, 5f));
     }
     public void UpdateCooldown()
     {
@@ -39,7 +43,7 @@ public class Module : Pickup, IData
     }
     private void UpdateHealth()
     {
-        Tooltip.GetWidget(2).text = $"{Health} / {moduleData.MaxHealth}";
+        Tooltip.GetWidget(2).text = $"{Health} / {MaxHealth}";
     }
     public bool IsCooldownReady()
     {
@@ -47,7 +51,7 @@ public class Module : Pickup, IData
     }
     public void ModuleFunction()
     {
-        moduleData.Action();
+        (itemData as ModuleData).Action();
     }
     public override void Collide(int _damage)
     {
@@ -73,12 +77,15 @@ public class Module : Pickup, IData
             isExpired = true;
         }
     }
+    public new string Serialize()
+    {
+        return $"{{{Type},{SerializeAttributes()},{health},{isFailed}}}";
+    }
 }
-public class ModuleData(Sprite _realSprite, Sprite _virtualSprite, String _name, int _id, int _health, Action _action, Modules _module) 
+public class ModuleData(Sprite _realSprite, Sprite _virtualSprite, String _name, int _id, int _health, Action _action)
     : ItemData(_realSprite, _virtualSprite, _name, _id, Color.White)
 {
-    public float MaxHealth { get; } = _health;
+    public int MaxHealth { get; } = _health;
     public Action Action { get; } = _action;
-    public Modules Modules { get; } = _module;
 }
 

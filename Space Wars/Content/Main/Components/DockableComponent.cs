@@ -9,7 +9,6 @@ public class DockableComponent(Entity _parentEntity, Containers _menu) : ICompon
 {
     public Vector2 Position => _parentEntity.position;
     public Vector2 Velocity => _parentEntity.velocity;
-    public Pickup[,] Inventory { get; private set; } = new Pickup[1, 4];
     public bool IsDocked { get; private set; } = false;
     public ComponentType Type => ComponentType.DockableComponent;
     public bool IsValid => !_parentEntity.isExpired;
@@ -17,30 +16,24 @@ public class DockableComponent(Entity _parentEntity, Containers _menu) : ICompon
 
     public void AddItem(Pickup _pickup)
     {
-        for (int y = 0; y < Inventory.GetLength(1); y++)
+        for (int i = 0; i < Engine.SaveGame.Inventory.Length; i++)
         {
-            for (int x = 0; x < Inventory.GetLength(0); x++)
+            if (Engine.SaveGame.Inventory[i] != null)
             {
-                if (Inventory[x, y] != null)
-                {
-                    continue;
-                }
-                Inventory[x, y] = _pickup;
-                EventHandler.UpdateInventoryUI(this);
-                return;
+                continue;
             }
+            Engine.SaveGame.Inventory[i] = _pickup;
+            EventHandler.UpdateInventoryUI();
+            return;
         }
     }
     public bool IsFull()
     {
-        for (int y = 0; y < Inventory.GetLength(1); y++)
+        for (int i = 0; i < Engine.SaveGame.Inventory.Length; i++)
         {
-            for (int x = 0; x < Inventory.GetLength(0); x++)
+            if (Engine.SaveGame.Inventory[i] == null)
             {
-                if (Inventory[x, y] == null)
-                {
-                    return false;
-                }
+                return false;
             }
         }
         return true;
@@ -59,7 +52,7 @@ public class DockableComponent(Entity _parentEntity, Containers _menu) : ICompon
             Pickup pickup = Engine.MoveSelectedPickup();
             if (pickup != null)
             {
-                EventHandler.UpdateInventoryUI(this);
+                EventHandler.UpdateInventoryUI();
                 pickup.isExpired = false;
                 pickup.position = Position;
                 _player.leashedMaterials.Add(pickup);
@@ -87,16 +80,6 @@ public class DockableComponent(Entity _parentEntity, Containers _menu) : ICompon
         IsDocked = !IsDocked;
         Engine.ShakeScreen(0.35f);
         return true;
-    }
-    public void SetInventory(ItemSlot<Pickup>[,] _daughterInventory)
-    {
-        for (int y = 0; y < Inventory.GetLength(1); y++)
-        {
-            for (int x = 0; x < Inventory.GetLength(0); x++)
-            {
-                Inventory[x, y] = _daughterInventory[x, y].daughterItem;
-            }
-        }
     }
     public void Collide(int _damage)
     {

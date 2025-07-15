@@ -528,11 +528,11 @@ public class AdvancedConstructor(Func<Vector2, Vector2, float, bool, Entity> _co
         return _constructor(_position, _velocity, _angle, _isFriendly);
     }
 }
-public class PickupConstructor(Func<ItemType, Vector2, Vector2, float, Entity> _constructor, ItemType _item, Vector2 _position, Vector2 _velocity, float _angularVelocity) : IConstructor
+public class PickupConstructor(Func<Vector2, Vector2, float, Entity> _constructor, Vector2 _position, Vector2 _velocity, float _angularVelocity) : IConstructor
 {
     public Entity Construct()
     {
-        return _constructor(_item, _position, _velocity, _angularVelocity);
+        return _constructor(_position, _velocity, _angularVelocity);
     }
 }
 public interface IConstructor
