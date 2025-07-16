@@ -254,6 +254,7 @@ public class Engine : Game
                         item.daughterItem = UIManager.selectedIcon as Pickup;
                         UIManager.selectedIcon = null;
                         SaveGame.QueuedItems.Add(new SmeltQueue(item));
+                        EventHandler.UpdateInventory();
                         return;
                     }
                 }
@@ -274,6 +275,7 @@ public class Engine : Game
                         item.daughterItem = UIManager.selectedIcon as Module;
                         UIManager.selectedIcon = null;
                         SaveGame.QueuedItems.Add(new RepairQueue(item));
+                        EventHandler.UpdateInventory();
                         return;
                     }
                 }
@@ -304,10 +306,6 @@ public class Engine : Game
             {
                 SaveGame = new SaveGame(text);
                 EventHandler.MissionSelectTrigger();
-            }
-            else
-            {
-                throw new FileNotFoundException();
             }
         });
 

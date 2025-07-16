@@ -6,8 +6,6 @@ using System.Diagnostics;
 using System.Linq;
 using Microsoft.Xna.Framework;
 using System.Text;
-using UILib.Content.Main;
-using Assimp.Configs;
 
 namespace Space_Wars.Content.Main;
 public class SaveGame
@@ -56,19 +54,26 @@ public class SaveGame
         Player player = null;
         logger.Try(delegate{ player = new Player(disassembly[5], logger); }, 5);
         Player = (player ?? new Player(Vector2.Zero, Vector2.Zero, 0, 0));
-
         array = [];
         logger.Try(delegate { array = Disassemble(disassembly[6]); }, 6);
         for (int j = 0; j < Inventory.Length; j++)
         {
             logger.Try(delegate { Inventory[j] = ItemFactory.TryDeserialize(array[j], logger); }, 6);
         }
-
         array = [];
         logger.Try(delegate { array = Disassemble(disassembly[7]); }, 7);
         for (int j = 0; j < MissionSelectInventory.Length; j++)
         {
             logger.Try(delegate { MissionSelectInventory[j] = ItemFactory.TryDeserialize(array[j], logger); }, 7);
+        }
+        array = [];
+        logger.Try(delegate { array = Disassemble(disassembly[8]); }, 8);
+        if(Int32.TryParse(array[0], out int i))
+        {
+            for (int j = 0; j < i; j++)
+            {
+                logger.Try(delegate { QueuedItems.Add(Queueable.Deserialize(array[j + 1], logger)); }, 7);
+            }
         }
         logger.Log();
     }
@@ -149,6 +154,9 @@ public class SaveGame
     public string Serialize()
     {
         var inv = new StringBuilder();
+        var globalInv = new StringBuilder();
+        var queueables = new StringBuilder();
+        queueables.Append($"{QueuedItems.Count},");
         foreach (var item in Inventory)
         {
             if (item != null)
@@ -160,8 +168,7 @@ public class SaveGame
                 inv.Append($"{{}},");
             }
         }
-        inv.Remove(inv.Length - 1, 1);
-        var globalInv = new StringBuilder();
+        Debug.WriteLine(MissionSelectInventory[0] == null);
         foreach (var item in MissionSelectInventory)
         {
             if (item != null)
@@ -173,8 +180,14 @@ public class SaveGame
                 globalInv.Append($"{{}},");
             }
         }
+        foreach (var item in QueuedItems)
+        {
+            queueables.Append($"{item.Serialize()},");
+        }
+        inv.Remove(inv.Length - 1, 1);
         globalInv.Remove(globalInv.Length - 1, 1);
-        return $"{Scrap},{System},{CurrentMissionIndex},{giveWeapon},{{{string.Join(",", CompletedMissions)}}},{Player.Serialize()},{{{inv}}},{{{globalInv}}}";
+        queueables.Remove(queueables.Length - 1, 1);
+        return $"{Scrap},{System},{CurrentMissionIndex},{giveWeapon},{{{string.Join(",", CompletedMissions)}}},{Player.Serialize()},{{{inv}}},{{{globalInv}}},{{{queueables}}}";
     }
 }
 public class LoadLogger

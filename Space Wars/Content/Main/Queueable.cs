@@ -9,35 +9,28 @@ using Space_Wars.Content.Main.Entities;
 using UILib.Content.Main;
 
 namespace Space_Wars.Content.Main;
-public abstract class Queueable(int _cost, Texture2D _texture, string _name)
+public abstract class Queueable
 {
-    public Queueable Deserialize(string _data, LoadLogger _logger)
-    {
-        List<string> disassembly = SaveGame.Disassemble(_data);
-        if (disassembly[0] == "")
-        {
-            return null;
-        }
-        if (disassembly[0] == "Fuse")
-        {
-
-        }
-        if (disassembly[0] == "Repair")
-        {
-
-        }
-        if (disassembly[0] == "Smelt")
-        {
-
-        }
-        throw new IOException();
-    }
-    public int Cost { get; private set; } = _cost;
-    public string Name { get; } = _name;
+    public int Cost { get; private set; }
+    public string Name { get; }
 
     public bool IsExpired => !CanConstruct() || Cost == 0;
-    public int MaxCost { get; } = _cost;
-    public Texture2D Texture => _texture;
+    public int MaxCost { get; }
+    public Texture2D Texture { get; }
+    public Queueable(int _cost, Texture2D _texture, string _name)
+    {
+        Cost = _cost;
+        Name = _name;
+        MaxCost = _cost;
+        Texture = _texture;
+    }
+    public Queueable(List<string> _data, LoadLogger _logger, int _maxCost, Texture2D _texture, string _name)
+    {
+        _logger.Try(delegate { Cost = Int32.Parse(_data[1]); }, 0);
+        Name = _name;
+        MaxCost = _maxCost;
+        Texture = _texture;
+    }
     public int AttemptConstruct(int _time)
     {
         if (CanConstruct())
@@ -53,12 +46,35 @@ public abstract class Queueable(int _cost, Texture2D _texture, string _name)
         }
         return _time;
     }
+    public static Queueable Deserialize(string _data, LoadLogger _logger)
+    {
+        List<string> disassembly = SaveGame.Disassemble(_data);
+        if (disassembly[0] == "")
+        {
+            return null;
+        }
+        if (disassembly[0] == "Fuse")
+        {
+            return new FuseQueue(disassembly, _logger);
+        }
+        if (disassembly[0] == "Repair")
+        {
+            return new RepairQueue(disassembly, _logger);
+        }
+        if (disassembly[0] == "Smelt")
+        {
+            return new SmeltQueue(disassembly, _logger);
+        }
+        throw new IOException();
+    }
     protected abstract void Construct();
     protected abstract bool CanConstruct();
     public abstract string Serialize();
 }
-public class FuseQueue() : Queueable(1, Assets.Get(Sprite.Fuse), "Fuse")
+public class FuseQueue : Queueable
 {
+    public FuseQueue() : base(1, Assets.Get(Sprite.Fuse), "Fuse") { }
+    public FuseQueue(List<string> _disassembly, LoadLogger _logger) : base(_disassembly, _logger, 1, Assets.Get(Sprite.Fuse), "Fuse") { }
     protected override void Construct()
     {
         Engine.SaveGame.Player.AddFuse();
@@ -72,34 +88,53 @@ public class FuseQueue() : Queueable(1, Assets.Get(Sprite.Fuse), "Fuse")
         return $"{{{Name},{Cost}}}";
     }
 }
-public class RepairQueue(ItemSlot<Pickup> _module) : Queueable(2, Assets.Get(Sprite.HullModule), "Repair")
+public class RepairQueue : Queueable
 {
+    ItemSlot<Pickup> module;
+    public RepairQueue(ItemSlot<Pickup> _module) : base(2, Assets.Get(Sprite.HullModule), "Repair")
+    {
+        module = _module;
+    }
+    public RepairQueue(List<string> _data, LoadLogger _logger) : base(_data, _logger, 2, Assets.Get(Sprite.HullModule), "Repair")
+    {
+        _logger.Try(delegate { module = Engine.MissionSelectSlots[Int32.Parse(_data[2])]; }, 2);
+    }
     protected override void Construct()
     {
-        var module = _module.daughterItem as Module;
-        module.Health = module.MaxHealth;
+        var storedModule = module.daughterItem as Module;
+        storedModule.Health = storedModule.MaxHealth;
     }
     protected override bool CanConstruct()
     {
-        return (_module.daughterItem as Module) != null;
+        return (module.daughterItem as Module) != null;
     }
     public override string Serialize()
     {
         for(int i = 0; i < Engine.MissionSelectSlots.Length; i++)
         {
-            if (Engine.MissionSelectSlots[i] == _module)
+            if (Engine.MissionSelectSlots[i] == module)
             {
                 return $"{{{Name},{Cost},{i}}}";
             }
         }
-        return $"{{{Name},{Cost},{0}}}";
+        //Prevents invalid queueables from being saved
+        return "{}";
     }
 }
-public class SmeltQueue(ItemSlot<Pickup> _pickup) : Queueable(2, Assets.Get(Sprite.RealMetalScrap), "Smelt")
+public class SmeltQueue : Queueable
 {
+    private ItemSlot<Pickup> pickup;
+    public SmeltQueue(ItemSlot<Pickup> _pickup) : base(2, Assets.Get(Sprite.RealMetalScrap), "Smelt")
+    {
+        pickup = _pickup;
+    }
+    public SmeltQueue(List<String> _data, LoadLogger _logger) : base(_data, _logger, 2, Assets.Get(Sprite.RealMetalScrap), "Smelt")
+    {
+        _logger.Try(delegate { pickup = Engine.MissionSelectSlots[Int32.Parse(_data[2])]; }, 2);
+    }
     protected override void Construct()
     {
-        if (_pickup.daughterItem is Module)
+        if (pickup.daughterItem is Module)
         {
             Engine.SaveGame.Scrap += 3;
         }
@@ -107,21 +142,22 @@ public class SmeltQueue(ItemSlot<Pickup> _pickup) : Queueable(2, Assets.Get(Spri
         {
             Engine.SaveGame.Scrap += 2;
         }
-        _pickup.daughterItem = null;
+        pickup.daughterItem.isExpired = true;
+        pickup.daughterItem = null;
     }
     protected override bool CanConstruct()
     {
-        return _pickup.daughterItem != null;
+        return pickup.daughterItem != null;
     }
     public override string Serialize()
     {
         for (int i = 0; i < Engine.MissionSelectSlots.Length; i++)
         {
-            if (Engine.MissionSelectSlots[i] == _pickup)
+            if (Engine.MissionSelectSlots[i] == pickup)
             {
                 return $"{{{Name},{Cost},{i}}}";
             }
         }
-        return $"{{{Name},{Cost},{0}}}";
+        return "{}";
     }
 }
