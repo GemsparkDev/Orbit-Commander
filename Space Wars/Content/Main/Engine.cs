@@ -200,7 +200,7 @@ public class Engine : Game
             uiScale.text = $"UI Scale: {Math.Truncate((i + 1) * 10) / 10}";
         });
         sfxSlider.SetInterval(1, 1);
-        musicSlider.SetInterval(0, 1);
+        musicSlider.SetInterval(1, 1);
         uiScaleSlider.SetInterval(1, 1);
 
         sfxSlider.ApplyBehaviours();
@@ -438,7 +438,6 @@ public class Engine : Game
         SoundManager.Initialize();
         EventHandler.UpdateModulesStatus();
         SoundManager.PlayGlobalSound(Assets.Get(Sound.Interact));
-        SoundManager.ChangeTrack(Assets.Get(Sound.main));
         SaveGame.CurrentMission.PlayIntroCutscene();
         ScreenShakeFactor = 0;
     }

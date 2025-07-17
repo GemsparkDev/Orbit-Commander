@@ -56,8 +56,14 @@ public class EntityManager
         "Showdown",
         "Defeat the advanced drone prototype, Excursion. Be warned: It may call for reinforcements.", 1.1f, new Vector2(0, 1), 0, 0, null, true) { playerProgression = 2 },
 
-        new([], [(new EntityConstructor(Enemy.NewWarpGate, Vector2.Zero, Vector2.Zero, 0), [ Condition.CustomIncomplete ])], 
-        "Warp Gate", "Warp to the next mission once you are done here", -1, new Vector2(0, 500)),
+        new([], [(new EntityConstructor(Enemy.NewWarpGate, Vector2.Zero, Vector2.Zero, 0), [ Condition.CustomIncomplete ])],
+        "Warp Gate", "Warp to the next mission once you are done here", -1, new Vector2(0, 500)) { music = false },
+
+        //Note: The player construct menu and the Quantum Resonator both use the name of this mission for their special behavior. When changing, make sure their name is updated as well.
+        new([new(Vector2.Zero, Vector2.Zero, 10000, 12, true, Color.OldLace, true) ],
+        [],
+        "???",
+        "", -1, new Vector2(-2000, -2000), 0, 1, null, true) { playerDocked = true, music = false},
 
         new([new(Vector2.Zero, Vector2.Zero, 30000, 10f, true, Color.HotPink, true) ],
         [],
@@ -90,9 +96,9 @@ public class EntityManager
         "Showdown Pt. 2",
         "Defeat the advanced drone prototype, Exodus. Be warned: It may call for reinforcements.", 1.1f, new Vector2(0, 1), 0, 1, null, true),
 
-        new([new(Vector2.Zero, Vector2.Zero, 150, 3, true, Color.OldLace)], 
+        new([new(Vector2.Zero, Vector2.Zero, 150, 3, true, Color.OldLace)],
         [(new EntityConstructor(Enemy.NewWarpGate, new Vector2(0, 450), -GravitationalSource.GetOrbitalVelocity(new Vector2(0, 450), Vector2.Zero, 150), 0), [ Condition.CustomIncomplete ])],
-        "Warp Gate", "Warp to the next mission once you are done here", -1, new Vector2(0, 500)),
+        "Warp Gate", "Warp to the next mission once you are done here", -1, new Vector2(0, 500)) { music = false },
 
         new([ new(Vector2.Zero, Vector2.Zero, 4000, 4.5f, true, new Color(0.03f, 0.05f, 0.08f)),
         new(new Vector2(600, 0), GravitationalSource.GetOrbitalVelocity(new Vector2(600, 0), Vector2.Zero, 4000) * 1.05f, 500, 1.5f, false, new Color(0.03f, 0.05f, 0.08f)), ],
@@ -100,7 +106,7 @@ public class EntityManager
         "Showdown Pt. 3",
         "Defeat the advanced drone prototype, Veil. Be warned: It may call for reinforcements.", 1.1f, new Vector2(0, 1), 0, 2, null, true),
 
-        new([new(new Vector2(320, 0), new Vector2(0, 1f), 10000, 7, false, Color.Cyan), 
+        new([new(new Vector2(320, 0), new Vector2(0, 1f), 10000, 7, false, Color.Cyan),
         new(new Vector2(-800, 0), new Vector2(0, -2.5f), 4000, 3.5f, false, Color.Cyan)],
         [], "Binary system", "Demo Binary System", -1, new Vector2(0, 400), 0, 0, null, true),
 

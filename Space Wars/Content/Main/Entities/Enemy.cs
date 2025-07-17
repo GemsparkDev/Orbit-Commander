@@ -1,4 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Space_Wars.Content.Main.Components;
@@ -1033,6 +1034,148 @@ public class Enemy : Entity
                 }
             }
             Engine.WriteLine(position);
+            yield return 0;
+        }
+    }
+    IEnumerable<int> Inferno(Enemy _flare)
+    {
+        enemyRange.radius = 400;
+        float time = 0;
+        bool isDamaged = false;
+        while (true)
+        {
+            if (!isDamaged || Engine.Random.Next(0, 2) == 0)
+            {
+                LowerCooldown();
+            }
+            time += Engine.DeltaSeconds;
+            Vector2 normalizedAcceleration = GetNormalizedAcceleration();
+            Vector2 relativeVelocity = Player.velocity - velocity;
+            Vector2 relativePosition = Player.position - position;
+            var playerAcceleration = Vector2.Normalize(Engine.SaveGame.CurrentMission.GetNormalizedAcceleration(Player.position));
+            Vector2 relativeTargetPosition = relativePosition + new Vector2(playerAcceleration.Y, -playerAcceleration.X) * 100 + normalizedAcceleration * 20;
+            Vector2 playerIterativePosition = Player.position;
+            float timeToHit = MathF.Sqrt(EntityManager.DistanceSqr(position, playerIterativePosition)) / 8;
+            playerIterativePosition += relativeVelocity * timeToHit;
+            targetVector = (playerIterativePosition - position);
+            targetAngle = MathF.Atan2(targetVector.X, -targetVector.Y);
+            RotateTowards(targetAngle + MathF.Sin(time * 2) / 2, 0.03f);
+
+            Vector2 velocityChange = (relativeVelocity + relativeTargetPosition / 12) - velocity;
+            if (velocityChange.Length() > 60)
+            {
+                velocityChange = Vector2.Normalize(velocityChange) * 60;
+            }
+            velocity += velocityChange * Engine.DeltaSeconds;
+            if (cooldown <= 0 && Vector2.Distance(Player.position, position) < 400)
+            {
+                Engine.EntityManager.Add(new FlameBolt(position, velocity + Engine.ToUnitVector(angle) * 12 + new Vector2(Engine.OneToNegOne(), Engine.OneToNegOne()) / 4, false, damage, 0.3f, 2f));
+                SoundManager.PlaySound(Assets.Get(Sound.LMGFire), position);
+                cooldown = 0.08f;
+            }
+            if (health <= 0 && !isDamaged)
+            {
+                isDamaged = true;
+                SoundManager.PlaySound(Assets.Get(Sound.ShieldHit), position);
+                Explode(0, 0);
+            }
+            if (health <= 0 && _flare.health <= 0)
+            {
+                Explode(6, ColliderRadius);
+                int particles = Engine.Random.Next(3, 5);
+                for (int i = 0; i < particles; i++)
+                {
+                    float angle = Engine.Random.NextSingle() * MathF.PI * 2;
+                    Vector2 particleVelocity = new Vector2(MathF.Cos(angle), MathF.Sin(angle)) * (Engine.Random.NextSingle() * 2 + 2) / 2;
+                    ParticleManager.Add(new Particle(Assets.Get(Sprite.Circle), 0.5f, position, particleVelocity + velocity, angle, 0, Color.Yellow, new Color(255, 0, 0, 0)));
+                }
+                particles = Engine.Random.Next(3, 5);
+                for (int i = 0; i < particles; i++)
+                {
+                    float angle = Engine.Random.NextSingle() * MathF.PI * 2;
+                    Vector2 particleVelocity = new Vector2(MathF.Cos(angle), MathF.Sin(angle)) * (Engine.Random.NextSingle() * 2 + 2) / 2;
+                    ParticleManager.Add(new Particle(Assets.Get(Sprite.Circle), 0.5f, position, particleVelocity + velocity, angle, 0, Color.DarkSlateGray, Color.Transparent));
+                }
+                isExpired = true;
+                SoundManager.PlaySound(Assets.Get(Sound.Death), position);
+                if (Engine.SaveGame.GiveWeapon)
+                {
+                    Engine.EntityManager.Add(new Module(Modules.GrenadeLauncher, position, GetNormalizedAcceleration() * 10, angularVelocity));
+                }
+                else
+                {
+                    throw new NotImplementedException();
+                }
+            }
+            yield return 0;
+        }
+    }
+    IEnumerable<int> Flare(Enemy _inferno)
+    {
+        enemyRange.radius = 1000;
+        bool isDamaged = false;
+        while (true)
+        {
+            if (!isDamaged || Engine.Random.Next(0, 2) == 0)
+            {
+                LowerCooldown();
+            }
+            Vector2 relativeVelocity = Player.velocity - velocity;
+            Vector2 relativePosition = Player.position - position;
+            Vector2 relativeTargetPosition = relativePosition + Vector2.Normalize(Engine.SaveGame.CurrentMission.GetNormalizedAcceleration(Player.position)) * 250;
+            Vector2 playerIterativePosition = Player.position;
+            float timeToHit = MathF.Sqrt(EntityManager.DistanceSqr(position, playerIterativePosition)) / 15;
+            playerIterativePosition += relativeVelocity * timeToHit;
+            targetVector = (playerIterativePosition - position);
+            targetAngle = MathF.Atan2(targetVector.X, -targetVector.Y);
+            RotateTowards(targetAngle);
+
+            Vector2 velocityChange = (relativeVelocity + relativeTargetPosition / 15) - velocity;
+            if (velocityChange.Length() > 60)
+            {
+                velocityChange = Vector2.Normalize(velocityChange) * 60;
+            }
+            velocity += velocityChange * Engine.DeltaSeconds;
+            if (cooldown <= 0 && Vector2.Distance(Player.position, position) < 1000)
+            {
+                Engine.EntityManager.Add(new FlameBolt(position, velocity + Vector2.Normalize(targetVector) * 15 + new Vector2(Engine.OneToNegOne(), Engine.OneToNegOne()) / 2, false, damage, 4, 1f));
+                SoundManager.PlaySound(Assets.Get(Sound.LMGFire), position);
+                cooldown = 0.8f;
+            }
+            if (health <= 0 && !isDamaged)
+            {
+                isDamaged = true;
+                SoundManager.PlaySound(Assets.Get(Sound.ShieldHit), position);
+                Explode(0, 0);
+            }
+            if (health <= 0 && _inferno.health <= 0)
+            {
+                Explode(6, ColliderRadius);
+                int particles = Engine.Random.Next(3, 5);
+                for (int i = 0; i < particles; i++)
+                {
+                    float angle = Engine.Random.NextSingle() * MathF.PI * 2;
+                    Vector2 particleVelocity = new Vector2(MathF.Cos(angle), MathF.Sin(angle)) * (Engine.Random.NextSingle() * 2 + 2) / 2;
+                    ParticleManager.Add(new Particle(Assets.Get(Sprite.Circle), 0.5f, position, particleVelocity + velocity, angle, 0, Color.Yellow, new Color(255, 0, 0, 0)));
+                }
+                particles = Engine.Random.Next(3, 5);
+                for (int i = 0; i < particles; i++)
+                {
+                    float angle = Engine.Random.NextSingle() * MathF.PI * 2;
+                    Vector2 particleVelocity = new Vector2(MathF.Cos(angle), MathF.Sin(angle)) * (Engine.Random.NextSingle() * 2 + 2) / 2;
+                    ParticleManager.Add(new Particle(Assets.Get(Sprite.Circle), 0.5f, position, particleVelocity + velocity, angle, 0, Color.DarkSlateGray, Color.Transparent));
+                }
+                isExpired = true;
+                SoundManager.PlaySound(Assets.Get(Sound.Death), position);
+                if (Engine.SaveGame.GiveWeapon)
+                {
+                    Engine.EntityManager.Add(new Module(Modules.Fireball, position, GetNormalizedAcceleration() * 10, angularVelocity));
+                }
+                else
+                {
+                    throw new NotImplementedException();
+                }
+            }
             yield return 0;
         }
     }
@@ -2329,6 +2472,53 @@ public class Enemy : Entity
             yield return 0;
         }
     }
+    IEnumerable<int> QuantumResonator()
+    {
+        cooldown = 5;
+        angularVelocity = 0.01f;
+        int waveCount = 0;
+        while (true)
+        {
+            velocity = Vector2.Zero;
+            if (Engine.SaveGame.CurrentMission.Name == "???")
+            {
+                if (cooldown <= 0)
+                {
+                    if (waveCount < 3)
+                    {
+                        float angle = 0;
+                        for (int i = 0; i < 1000; i++)
+                        {
+                            Vector2 dir = Engine.ToUnitVector(angle);
+                            ParticleManager.Add(new Particle(Assets.Get(Sprite.Dot), 0.5f, position, dir * 2, angle, 0, Color.Cyan, Color.Transparent));
+                            angle += MathF.PI / 500 * i;
+                        }
+                        SoundManager.PlaySound(Assets.Get(Sound.Interact), position);
+                        cooldown = 0.75f;
+                    }
+                    else if (waveCount == 3)
+                    {
+                        cooldown = 4;
+                    }
+                    else
+                    {
+                        isExpired = true;
+                        Explode(0, 0);
+                        SoundManager.PlaySound(Assets.Get(Sound.Explosion), position);
+                        Enemy flare = null;
+                        Enemy inferno = NewInfernoBoss(position + new Vector2(1000, 0), Vector2.Zero, 0, flare);
+                        flare = NewFlareBoss(position + new Vector2(-1000, 0), Vector2.Zero, 0, inferno);
+                        Engine.EntityManager.Add(flare);
+                        Engine.EntityManager.Add(inferno);
+                        SoundManager.ChangeTrack(Assets.Get(Sound.boss));
+                    }
+                    waveCount++; 
+                }
+                LowerCooldown();
+            }
+            yield return 0;
+        }
+    }
     public static Enemy NewDummyEnemy(Vector2 _position, bool _isFriendly = false)
     {
         return new(_position, Vector2.Zero, 0, 0, 0, Assets.Get(Sprite.Fighter), _isFriendly);
@@ -2536,6 +2726,24 @@ public class Enemy : Entity
     {
         Enemy enemy = new(position, velocity, angle, 12, 150, Assets.Get(Sprite.VeilBoss), false);
         enemy.AddBehaviour(enemy.VeilBoss());
+        return enemy;
+    }
+    public static Enemy NewQuantumResonator(Vector2 _position)
+    {
+        var enemy = new Enemy(_position, Vector2.Zero, 0, 0, 10, Assets.Get(Sprite.Fighter), true);
+        enemy.AddBehaviour(enemy.QuantumResonator());
+        return enemy;
+    }
+    public static Enemy NewInfernoBoss(Vector2 _position, Vector2 _velocity, float _angle, Enemy _flare)
+    {
+        var enemy = new Enemy(_position, _velocity, _angle, 6, 175, Assets.Get(Sprite.Fighter));
+        enemy.AddBehaviour(enemy.Inferno(_flare));
+        return enemy;
+    }
+    public static Enemy NewFlareBoss(Vector2 _position, Vector2 _velocity, float _angle, Enemy _inferno)
+    {
+        var enemy = new Enemy(_position, _velocity, _angle, 15, 125, Assets.Get(Sprite.Fighter));
+        enemy.AddBehaviour(enemy.Flare(_inferno));
         return enemy;
     }
 }

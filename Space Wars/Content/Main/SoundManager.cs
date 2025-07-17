@@ -54,7 +54,6 @@ public static class SoundManager
         {
             currentTrack.Volume = musicVolume;
         }
-
     }
     public static void SetSoundVolume(SoundEffectInstance _sound, float _volume)
     {
@@ -127,7 +126,10 @@ public static class SoundManager
 
         if (soundTimer > 0)
         {
-            currentTrack.Volume = (swapTime - soundTimer) * MusicVolume / swapTime;
+            if (currentTrack != null)
+            {
+                currentTrack.Volume = (swapTime - soundTimer) * MusicVolume / swapTime;
+            }
             if (prevTrack != null)
             {
                 prevTrack.Volume = soundTimer * MusicVolume / swapTime;
@@ -147,12 +149,19 @@ public static class SoundManager
     public static void ChangeTrack(SoundEffect _track)
     {
         prevTrack?.Pause();
-        SoundEffectInstance track = _track.CreateInstance();
-        track.IsLooped = true;
-        track.Volume = MusicVolume;
         prevTrack = currentTrack;
-        currentTrack = track;
-        currentTrack.Play();
+        if (_track != null)
+        {
+            SoundEffectInstance track = _track.CreateInstance();
+            track.IsLooped = true;
+            track.Volume = MusicVolume;
+            currentTrack = track;
+            currentTrack.Play();
+        }
+        else
+        {
+            currentTrack = null;
+        }
         soundTimer = swapTime;
     }
 }

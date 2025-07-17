@@ -243,7 +243,7 @@ public class FlameBolt : Projectile
     float piercingCooldown = 0;
     float maxTimeLeft;
     private ParticleEmitter emitter = new(Assets.Get(Sprite.Circle), 0.75f, Vector2.Zero, 0, 360, 1, 1, 1500, new Color(1f, 1f, 0.25f, 1f), new Color(1f, 0, 0, 0), EmitterType.EmissionOverTime);
-    public new float ColliderRadius => (Math.Min(1, MathF.Sqrt(maxTimeLeft)) * 0.9f * emitter.particleVelocity * Math.Min((maxTimeLeft - timeLeft) / (maxTimeLeft) / emitter.particleVelocity, 1)) * 60;
+    public new float ColliderRadius => Math.Min((maxTimeLeft - timeLeft) * emitter.particleVelocity, emitter.particleVelocity * emitter.particleTimeAlive) * 60;
     public FlameBolt(Vector2 _position, Vector2 _velocity, bool _isFriendly, int _damage, float _timeLeft = 0.6f, float _particleVelocity = 1, int _stealth = 0)
         : base(Assets.Get(Sprite.Circle), _position, _velocity, 0, 0, _isFriendly, _damage, _stealth)
     {

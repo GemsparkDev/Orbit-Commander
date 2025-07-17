@@ -33,17 +33,9 @@ public abstract class GameState
     public virtual void Initialize() { }
     public abstract void Update();
     public abstract void Draw(SpriteBatch _spriteBatch);
-    private static Player Player => Engine.SaveGame.Player;
     //Useful if several game states want to render the same game space
     protected static void RenderGamespace(SpriteBatch _spriteBatch)
     {
-        if (Player.modules[ModuleType.Core].isFailed)
-        {
-            string text = "Power failure detected. Please restart system.";
-            Vector2 middlePoint = Assets.TextFont.MeasureString(text) / 2;
-            _spriteBatch.DrawString(Assets.TextFont, text, Engine.Camera.Position - middlePoint, Color.Red);
-            return;
-        }
         Engine.EntityManager.Draw(_spriteBatch);
         ParticleManager.Draw(_spriteBatch);
         if (Engine.DebugMode)

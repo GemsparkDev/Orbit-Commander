@@ -21,6 +21,7 @@ public class Mission
     public float restartTimer = -1;
     public bool playerDocked = false;
     public bool isAggressive = false;
+    public bool music = true;
     public string tip = null;
 
     private static Player Player => Engine.SaveGame.Player;
@@ -114,6 +115,32 @@ public class Mission
             escapeVehicle = Enemy.NewPickupDrone(new Vector2(-2000, -2000), Vector2.Zero, 0);
         }
     }
+    public void Initialize()
+    {
+        Engine.SaveGame.Player.dockedEntity = null;
+        foreach (var (entity, _) in MissionObjectives)
+        {
+            Engine.EntityManager.Add(entity);
+        }
+        Engine.SaveGame.Player.Progression = playerProgression;
+        Engine.SaveGame.Player.position = playerPosition;
+        TestCompletion();
+        if (playerDocked)
+        {
+            Engine.SaveGame.Player.Dock();
+        }
+        if (Engine.SaveGame.CurrentMissionCompleted && Engine.Random.Next(0, 10000) == 0)
+        {
+            foreach (var planet in planets)
+            {
+                planet.EasterEgg = true;
+            }
+        }
+        if (!music)
+        {
+            SoundManager.ChangeTrack(null);
+        }
+    }
     public void Update()
     {
         if (tip != null)
@@ -122,44 +149,7 @@ public class Mission
             tip = null;
         }
         PlanetUpdate();
-        bool allCompleted = true;
-        foreach (var (entity, conditions) in MissionObjectives)
-        {
-            foreach (var condition in conditions)
-            {
-                if (condition == Condition.Protect && entity.isExpired)
-                {
-                    FailMission();
-                }
-                if (condition == Condition.Kill && !entity.isExpired)
-                {
-                    allCompleted = false;
-                }
-                if (condition == Condition.CustomIncomplete)
-                {
-                    allCompleted = false;
-                }
-            }
-        }
-        if (WaveGoal > 0 && (WaveGoal >= Wave))
-        {
-            allCompleted = false;
-        }
-        if (allCompleted && restartTimer == -1)
-        {
-            if (escapeVehicle != null)
-            {
-                MissionObjectives.Add((escapeVehicle, new Condition[2] { Condition.Protect, Condition.CustomIncomplete }));
-                Engine.EntityManager.Add(escapeVehicle);
-                escapeVehicle = null;
-                allCompleted = false;
-            }
-            else
-            {
-                restartTimer = 2;
-                Engine.SaveGame.CompleteMission(Wave);
-            }
-        }
+        TestCompletion();
         if (restartTimer != -1)
         {
             if (restartTimer > 0)
@@ -241,7 +231,10 @@ public class Mission
             Engine.EntityManager.DecayPickups();
             if(playerProgression > 1 && (Wave % 20 == 0))
             {
-                SoundManager.ChangeTrack(Assets.Get(Sound.boss));
+                if (music)
+                {
+                    SoundManager.ChangeTrack(Assets.Get(Sound.boss));
+                }
                 var pos = NewSpawnLocation();
                 Enemy boss = bosses[currentBoss](pos, Vector2.Zero, MathF.Atan2(-pos.X, pos.Y));
                 if (Wave == 40)
@@ -255,7 +248,10 @@ public class Mission
             }
             else
             {
-                SoundManager.ChangeTrack(Assets.Get(Sound.main));
+                if (music)
+                {
+                    SoundManager.ChangeTrack(Assets.Get(Sound.main));
+                }
                 if (isAggressive)
                 {
                     difficulty = (int)(Math.Pow(Wave, 1.5) + 5);
@@ -351,27 +347,6 @@ public class Mission
         else
         {
             CurrentGameState.SwitchState(new PlayingGame());
-        }
-    }
-    public void Initialize()
-    {
-        Engine.SaveGame.Player.dockedEntity = null;
-        foreach(var (entity, _) in MissionObjectives)
-        {
-            Engine.EntityManager.Add(entity);
-        }
-        Engine.SaveGame.Player.Progression = playerProgression;
-        Engine.SaveGame.Player.position = playerPosition;
-        if (playerDocked)
-        {
-            Engine.SaveGame.Player.Dock();
-        }
-        if (Engine.SaveGame.CurrentMissionCompleted && Engine.Random.Next(0, 10000) == 0)
-        {
-            foreach (var planet in planets)
-            {
-                planet.EasterEgg = true;
-            }
         }
     }
     public void AttractObject(Entity _entity)
@@ -494,8 +469,8 @@ public class Mission
         {
             _planets[i] = planets[i].Copy();
         }
-        return new Mission(_planets, CopyObjectives, Name, Description, timerModifier, playerPosition, WaveGoal, tier, cutscene, escapeVehicle != null) 
-        { playerProgression = this.playerProgression, playerDocked = this.playerDocked, isAggressive = this.isAggressive, tip = this.tip };
+        return new Mission(_planets, CopyObjectives, Name, Description, timerModifier, playerPosition, WaveGoal, tier, cutscene, escapeVehicle != null)
+        { playerProgression = this.playerProgression, playerDocked = this.playerDocked, isAggressive = this.isAggressive, music = this.music, tip = this.tip };
     }
     private Vector2 NewSpawnLocation()
     {
@@ -512,6 +487,46 @@ public class Mission
             }
         }
         return spawnLocation;
+    }
+    private void TestCompletion()
+    {
+        bool allCompleted = true;
+        foreach (var (entity, conditions) in MissionObjectives)
+        {
+            foreach (var condition in conditions)
+            {
+                if (condition == Condition.Protect && entity.isExpired)
+                {
+                    FailMission();
+                }
+                if (condition == Condition.Kill && !entity.isExpired)
+                {
+                    allCompleted = false;
+                }
+                if (condition == Condition.CustomIncomplete)
+                {
+                    allCompleted = false;
+                }
+            }
+        }
+        if (WaveGoal > 0 && (WaveGoal >= Wave))
+        {
+            allCompleted = false;
+        }
+        if (allCompleted && restartTimer == -1)
+        {
+            if (escapeVehicle != null)
+            {
+                MissionObjectives.Add((escapeVehicle, new Condition[2] { Condition.Protect, Condition.CustomIncomplete }));
+                Engine.EntityManager.Add(escapeVehicle);
+                escapeVehicle = null;
+            }
+            else
+            {
+                restartTimer = 2;
+                Engine.SaveGame.CompleteMission(Wave);
+            }
+        }
     }
 }
 public class EntityConstructor(Func<Vector2, Vector2, float, Entity> _constructor, Vector2 _position, Vector2 _velocity, float _angle) : IConstructor
