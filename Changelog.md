@@ -3,6 +3,15 @@
 Lagrange Commander is a game made using C# in monogame. It is a 2D top down wave based shooter where you must repair and upgrade your ship by salvaging from enemies you defeat. It features realistic N-Body gravitation, which affects all entities and projectiles.
   
 # Changelog    
+0.5.2 - 7/16/2025    
+ - Failed modules now only reduce their effects.    
+ - Fuses no longer burn out when modules fail, and instead burn out on further collisions.    
+ - Added the inferno and flare optional boss.    
+ - Added a new mission and special method of summoning for the inferno and flare boss.    
+ - Added the ability for missions to not start with music.    
+ - Warp gate missions and the new ??? mission now start with no music.    
+ - Simplified the fireball collider radius property.    
+ - Missions can now start the player from the escape drone.    
 0.5.1.4 - 7/15/2025    
  - Finished serialization and deserializaion for Queueables.    
  - Fixed an issue with the repair and smelt queueables not properly updating the inventory on use.    
