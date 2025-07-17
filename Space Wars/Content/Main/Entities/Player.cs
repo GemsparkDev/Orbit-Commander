@@ -595,7 +595,7 @@ public class Player : Entity
             if (Progression > 0 && Engine.Random.Next(0, 5) == 0)
             {
                 //If a module is failed, further collisions damage fuses
-                Vector2 targetFuse = new Vector2(Engine.Random.Next(0, moduleFuses.GetLength(0)), Engine.Random.Next(0, moduleFuses.GetLength(1));
+                var targetFuse = new Vector2(Engine.Random.Next(0, moduleFuses.GetLength(0)), Engine.Random.Next(0, moduleFuses.GetLength(1)));
                 if (modules[(ModuleType)targetFuse.X].isFailed && moduleFuses[(int)targetFuse.X, (int)targetFuse.Y])
                 {
                     moduleFuses[(int)targetFuse.X, (int)targetFuse.Y] = false;
