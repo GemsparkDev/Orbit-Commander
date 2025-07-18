@@ -3,6 +3,18 @@
 Lagrange Commander is a game made using C# in monogame. It is a 2D top down wave based shooter where you must repair and upgrade your ship by salvaging from enemies you defeat. It features realistic N-Body gravitation, which affects all entities and projectiles.
   
 # Changelog    
+0.5.2.1 - 7/17/2025    
+ - Added sprites for the inferno, flare, and resonator enemies.    
+ - Flare and inferno now get harder if their counterpart is below zero health.    
+ - Flare now periodically shoots a series of 8 shots in every direction.    
+ - Inferno now periodically switches from left to right.    
+ - Inferno now has shorter range rather than a slower cooldown when damaged.    
+ - Planets no longer collide pickups.    
+ - If the player has the shield module, the health bar is now yellow when the shield is charged.    
+ - Reduced the strength of the pull factor when the player is far from the planet.    
+ - Added a song for the secret bosses.    
+ - The chance to lose a fuse is now higher.    
+ - Increased the mass of the secret boss planet to 50000, from 10000.    
 0.5.2 - 7/16/2025    
  - Failed modules now only reduce their effects.    
  - Fuses no longer burn out when modules fail, and instead burn out on further collisions.    
