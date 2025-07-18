@@ -13,6 +13,7 @@ public enum Modules
     Engines,
     Sensors,
     Hull,
+    Shield,
     //Weapons
     Basic,
     Spiral,
@@ -66,6 +67,9 @@ public enum Sprite
     LargeMiner,
     WarpGate,
     VeilBoss,
+    InfernoBoss,
+    FlareBoss,
+    QuantumResonator,
 
     MetalScrap,
     RealMetalScrap,
@@ -151,6 +155,7 @@ public enum Sound
     main,
     boss,
     menu,
+    secretBoss,
 }
 public enum ComponentType
 {

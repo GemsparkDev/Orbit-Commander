@@ -74,7 +74,10 @@ public class GravitationalSource
             {
                 collisionForce = (int)Math.Floor((relativeVelocity).Length() / 2);
             }
-            _entity.Collide(collisionForce);
+            if (_entity as Pickup == null)
+            {
+                _entity.Collide(collisionForce);
+            }
             _entity.velocity += normalVector * Math.Max(0, Vector2.Dot(relativeVelocity, normalVector)) + frictionVector * Vector2.Dot(relativeVelocity, frictionVector) * 0.1f;
             _entity.position += normalVector * (radius + _entity.ColliderRadius - Vector2.Distance(position, _entity.position));
             return Vector2.Zero;

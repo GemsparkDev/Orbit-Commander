@@ -60,7 +60,7 @@ public class EntityManager
         "Warp Gate", "Warp to the next mission once you are done here", -1, new Vector2(0, 500)) { music = false },
 
         //Note: The player construct menu and the Quantum Resonator both use the name of this mission for their special behavior. When changing, make sure their name is updated as well.
-        new([new(Vector2.Zero, Vector2.Zero, 10000, 12, true, Color.OldLace, true) ],
+        new([new(Vector2.Zero, Vector2.Zero, 50000, 12, true, new Color(255, 219, 0), true) ],
         [],
         "???",
         "", -1, new Vector2(-2000, -2000), 0, 1, null, true) { playerDocked = true, music = false},

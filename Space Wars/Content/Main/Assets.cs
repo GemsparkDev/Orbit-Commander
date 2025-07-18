@@ -54,6 +54,9 @@ public static class Assets
         Sprites.Add(Sprite.LargeMiner, Content.Load<Texture2D>("Images/Entity_27"));
         Sprites.Add(Sprite.WarpGate, Content.Load<Texture2D>("Images/Entity_28"));
         Sprites.Add(Sprite.VeilBoss, Content.Load<Texture2D>("Images/Entity_29"));
+        Sprites.Add(Sprite.InfernoBoss, Content.Load<Texture2D>("Images/Entity_30"));
+        Sprites.Add(Sprite.FlareBoss, Content.Load<Texture2D>("Images/Entity_31"));
+        Sprites.Add(Sprite.QuantumResonator, Content.Load<Texture2D>("Images/Entity_32"));
 
         //Items
         Sprites.Add(Sprite.MetalScrap, Content.Load<Texture2D>("Images/Item_0"));
@@ -150,6 +153,7 @@ public static class Assets
         SoundFX.Add(Sound.main, Content.Load<SoundEffect>("Sounds/main"));
         SoundFX.Add(Sound.menu, Content.Load<SoundEffect>("Sounds/menu"));
         SoundFX.Add(Sound.boss, Content.Load<SoundEffect>("Sounds/boss"));
+        SoundFX.Add(Sound.secretBoss, Content.Load<SoundEffect>("Sounds/secretBoss"));
 
         TextFont = Content.Load<SpriteFont>("Fonts/RobotoMono");
 

@@ -1037,29 +1037,54 @@ public class Enemy : Entity
             yield return 0;
         }
     }
-    IEnumerable<int> Inferno(Enemy _flare)
+    IEnumerable<int> Inferno()
     {
-        enemyRange.radius = 400;
+        Enemy flare = NewFlareBoss(position - new Vector2(2000, 0), velocity, 0, this);
+        Engine.EntityManager.Add(flare);
+        ;
+        cooldown = 1.5f;
+        float rangeFactor = 1;
+        float rotationSpeed = 0.03f;
+        float sign = 1;
+        float swapCooldown = 10;
         float time = 0;
         bool isDamaged = false;
         while (true)
         {
-            if (!isDamaged || Engine.Random.Next(0, 2) == 0)
+            LowerCooldown();
+            if (swapCooldown > 0)
             {
-                LowerCooldown();
+                swapCooldown -= Engine.DeltaSeconds;
             }
+            else
+            {
+                swapCooldown = 10;
+                sign *= -1;
+            }
+            //If the first to die, reduce attack power
+            //If the second to die, increase attack power
+            if (isDamaged)
+            {
+                rangeFactor = 0.75f;
+            }
+            else if (flare.health <= 0)
+            {
+                rangeFactor = 1.25f;
+                rotationSpeed = 0.05f;
+            }
+            enemyRange.radius = 400 * rangeFactor;
             time += Engine.DeltaSeconds;
             Vector2 normalizedAcceleration = GetNormalizedAcceleration();
             Vector2 relativeVelocity = Player.velocity - velocity;
             Vector2 relativePosition = Player.position - position;
             var playerAcceleration = Vector2.Normalize(Engine.SaveGame.CurrentMission.GetNormalizedAcceleration(Player.position));
-            Vector2 relativeTargetPosition = relativePosition + new Vector2(playerAcceleration.Y, -playerAcceleration.X) * 100 + normalizedAcceleration * 20;
+            Vector2 relativeTargetPosition = relativePosition + new Vector2(playerAcceleration.Y, -playerAcceleration.X) * 100 * sign + normalizedAcceleration * 20;
             Vector2 playerIterativePosition = Player.position;
             float timeToHit = MathF.Sqrt(EntityManager.DistanceSqr(position, playerIterativePosition)) / 8;
             playerIterativePosition += relativeVelocity * timeToHit;
             targetVector = (playerIterativePosition - position);
             targetAngle = MathF.Atan2(targetVector.X, -targetVector.Y);
-            RotateTowards(targetAngle + MathF.Sin(time * 2) / 2, 0.03f);
+            RotateTowards(targetAngle + MathF.Sin(time * 3) / 3, rotationSpeed);
 
             Vector2 velocityChange = (relativeVelocity + relativeTargetPosition / 12) - velocity;
             if (velocityChange.Length() > 60)
@@ -1067,9 +1092,9 @@ public class Enemy : Entity
                 velocityChange = Vector2.Normalize(velocityChange) * 60;
             }
             velocity += velocityChange * Engine.DeltaSeconds;
-            if (cooldown <= 0 && Vector2.Distance(Player.position, position) < 400)
+            if (cooldown <= 0 && Vector2.Distance(Player.position, position) < 400 * rangeFactor)
             {
-                Engine.EntityManager.Add(new FlameBolt(position, velocity + Engine.ToUnitVector(angle) * 12 + new Vector2(Engine.OneToNegOne(), Engine.OneToNegOne()) / 4, false, damage, 0.3f, 2f));
+                Engine.EntityManager.Add(new FlameBolt(position, velocity + Engine.ToUnitVector(angle) * 12 * rangeFactor + new Vector2(Engine.OneToNegOne(), Engine.OneToNegOne()) / 4, false, damage, 0.3f * rangeFactor, 2f));
                 SoundManager.PlaySound(Assets.Get(Sound.LMGFire), position);
                 cooldown = 0.08f;
             }
@@ -1079,7 +1104,7 @@ public class Enemy : Entity
                 SoundManager.PlaySound(Assets.Get(Sound.ShieldHit), position);
                 Explode(0, 0);
             }
-            if (health <= 0 && _flare.health <= 0)
+            if (health <= 0 && flare.health <= 0)
             {
                 Explode(6, ColliderRadius);
                 int particles = Engine.Random.Next(3, 5);
@@ -1113,12 +1138,28 @@ public class Enemy : Entity
     IEnumerable<int> Flare(Enemy _inferno)
     {
         enemyRange.radius = 1000;
+        cooldown = 1.5f;
+        float octoshot = 15;
+        float shotCooldown = 0.75f;
+        int shotCount = 0;
         bool isDamaged = false;
         while (true)
         {
             if (!isDamaged || Engine.Random.Next(0, 2) == 0)
             {
                 LowerCooldown();
+                if (octoshot > 0)
+                {
+                    octoshot -= Engine.DeltaSeconds;
+                }
+            }
+            if (_inferno.health <= 0 && Engine.Random.Next(0, 2) == 0)
+            {
+                LowerCooldown();
+                if (octoshot > 0)
+                {
+                    octoshot -= Engine.DeltaSeconds;
+                }
             }
             Vector2 relativeVelocity = Player.velocity - velocity;
             Vector2 relativePosition = Player.position - position;
@@ -1126,7 +1167,7 @@ public class Enemy : Entity
             Vector2 playerIterativePosition = Player.position;
             float timeToHit = MathF.Sqrt(EntityManager.DistanceSqr(position, playerIterativePosition)) / 15;
             playerIterativePosition += relativeVelocity * timeToHit;
-            targetVector = (playerIterativePosition - position);
+            targetVector = Vector2.Normalize(playerIterativePosition - position);
             targetAngle = MathF.Atan2(targetVector.X, -targetVector.Y);
             RotateTowards(targetAngle);
 
@@ -1136,11 +1177,45 @@ public class Enemy : Entity
                 velocityChange = Vector2.Normalize(velocityChange) * 60;
             }
             velocity += velocityChange * Engine.DeltaSeconds;
-            if (cooldown <= 0 && Vector2.Distance(Player.position, position) < 1000)
+            if (octoshot <= 0)
             {
-                Engine.EntityManager.Add(new FlameBolt(position, velocity + Vector2.Normalize(targetVector) * 15 + new Vector2(Engine.OneToNegOne(), Engine.OneToNegOne()) / 2, false, damage, 4, 1f));
-                SoundManager.PlaySound(Assets.Get(Sound.LMGFire), position);
-                cooldown = 0.8f;
+                if (shotCooldown > 0)
+                {
+                    shotCooldown -= Engine.DeltaSeconds;
+                }
+                else
+                {
+                    if (shotCount < 8)
+                    {
+                        shotCooldown = 0.05f;
+                        float speed = 4 * ((shotCount % 2 == 0) ? 1.5f : 1);
+                        Engine.EntityManager.Add(new FlameBolt(position, velocity + Engine.ToUnitVector((float)(shotCount) * MathF.Tau / 8) * speed + new Vector2(Engine.OneToNegOne(), Engine.OneToNegOne()) / 2, false, damage, 30, 1f));
+                        SoundManager.PlaySound(Assets.Get(Sound.LMGFire), position);
+                        shotCount++;
+                    }
+                    else
+                    {
+                        shotCount = 0;
+                        octoshot = 15f;
+                        cooldown = 0.2f;
+                        shotCooldown = 0.75f;
+                    }
+                }
+                float cd = (shotCount == 0) ? shotCooldown : 0;
+                for (int i = 0; i < 8; i++)
+                {
+                    DrawLine((float)(i) * MathF.Tau / 8, cd + 0.1f, 0.85f);
+                }
+            }
+            else
+            {
+                if (cooldown <= 0 && Vector2.Distance(Player.position, position) < 1000 && shotCount == 0)
+                {
+                    Engine.EntityManager.Add(new FlameBolt(position, velocity + targetVector * 15 + new Vector2(Engine.OneToNegOne(), Engine.OneToNegOne()) / 2, false, damage, 4, 1f));
+                    SoundManager.PlaySound(Assets.Get(Sound.LMGFire), position);
+                    cooldown = 0.8f;
+                }
+                DrawLine(angle, cooldown, 0.8f);
             }
             if (health <= 0 && !isDamaged)
             {
@@ -1173,7 +1248,16 @@ public class Enemy : Entity
                 }
                 else
                 {
-                    throw new NotImplementedException();
+                    //throw new NotImplementedException();
+                }
+            }
+            void DrawLine(float _angle, float _cooldown, float _maxCooldown)
+            {
+                Vector2 dir = Engine.ToUnitVector(_angle);
+                float cd = (1 - _cooldown / _maxCooldown) * (1 - _cooldown / _maxCooldown);
+                for (int i = 0; i < 500; i++)
+                {
+                    ParticleManager.Add(new Particle(Assets.Get(Sprite.Dot), position + dir * (i * 2 + 8), _angle, Color.Red * (1 - (float)(i) / 500f) * cd));
                 }
             }
             yield return 0;
@@ -2486,12 +2570,10 @@ public class Enemy : Entity
                 {
                     if (waveCount < 3)
                     {
-                        float angle = 0;
-                        for (int i = 0; i < 1000; i++)
+                        for (float angle = MathF.PI / 30; angle < MathF.Tau; angle += MathF.PI/30)
                         {
                             Vector2 dir = Engine.ToUnitVector(angle);
                             ParticleManager.Add(new Particle(Assets.Get(Sprite.Dot), 0.5f, position, dir * 2, angle, 0, Color.Cyan, Color.Transparent));
-                            angle += MathF.PI / 500 * i;
                         }
                         SoundManager.PlaySound(Assets.Get(Sound.Interact), position);
                         cooldown = 0.75f;
@@ -2505,12 +2587,9 @@ public class Enemy : Entity
                         isExpired = true;
                         Explode(0, 0);
                         SoundManager.PlaySound(Assets.Get(Sound.Explosion), position);
-                        Enemy flare = null;
-                        Enemy inferno = NewInfernoBoss(position + new Vector2(1000, 0), Vector2.Zero, 0, flare);
-                        flare = NewFlareBoss(position + new Vector2(-1000, 0), Vector2.Zero, 0, inferno);
-                        Engine.EntityManager.Add(flare);
+                        Enemy inferno = NewInfernoBoss(Engine.SaveGame.Player.position + new Vector2(1000, 0), Vector2.Zero, 0);
                         Engine.EntityManager.Add(inferno);
-                        SoundManager.ChangeTrack(Assets.Get(Sound.boss));
+                        SoundManager.ChangeTrack(Assets.Get(Sound.secretBoss));
                     }
                     waveCount++; 
                 }
@@ -2730,19 +2809,19 @@ public class Enemy : Entity
     }
     public static Enemy NewQuantumResonator(Vector2 _position)
     {
-        var enemy = new Enemy(_position, Vector2.Zero, 0, 0, 10, Assets.Get(Sprite.Fighter), true);
+        var enemy = new Enemy(_position, Vector2.Zero, 0, 0, 10, Assets.Get(Sprite.QuantumResonator), true);
         enemy.AddBehaviour(enemy.QuantumResonator());
         return enemy;
     }
-    public static Enemy NewInfernoBoss(Vector2 _position, Vector2 _velocity, float _angle, Enemy _flare)
+    public static Enemy NewInfernoBoss(Vector2 _position, Vector2 _velocity, float _angle)
     {
-        var enemy = new Enemy(_position, _velocity, _angle, 6, 175, Assets.Get(Sprite.Fighter));
-        enemy.AddBehaviour(enemy.Inferno(_flare));
+        var enemy = new Enemy(_position, _velocity, _angle, 6, 175, Assets.Get(Sprite.InfernoBoss));
+        enemy.AddBehaviour(enemy.Inferno());
         return enemy;
     }
     public static Enemy NewFlareBoss(Vector2 _position, Vector2 _velocity, float _angle, Enemy _inferno)
     {
-        var enemy = new Enemy(_position, _velocity, _angle, 15, 125, Assets.Get(Sprite.Fighter));
+        var enemy = new Enemy(_position, _velocity, _angle, 15, 125, Assets.Get(Sprite.FlareBoss));
         enemy.AddBehaviour(enemy.Flare(_inferno));
         return enemy;
     }
