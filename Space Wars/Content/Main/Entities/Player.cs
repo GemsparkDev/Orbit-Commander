@@ -30,7 +30,7 @@ public class Player : Entity
     public Dictionary<ModuleType, Module> modules = new()
     {
         { ModuleType.Hull, new Module(Modules.Shield) },
-        { ModuleType.Guns, new Module(Modules.Sniper) },
+        { ModuleType.Guns, new Module(Modules.Spewer) },
         { ModuleType.Engines, new Module(Modules.Engines) },
         { ModuleType.Sensors, new Module(Modules.Sensors) },
         { ModuleType.Core, new Module(Modules.Dash) }
@@ -800,6 +800,14 @@ public class Player : Entity
     public void GrenadeLauncher()
     {
         Engine.EntityManager.Add(new Explosive(position, IdealSpeedWithVelocity(8) + new Vector2(Engine.OneToNegOne(), Engine.OneToNegOne()), gunAngle.angle, Engine.OneToNegOne() / 8, true, 16, 40, 1));
+        SoundManager.PlaySound(Assets.Get(Sound.PulseFire), position);
+        modules[ModuleType.Guns].cooldown = 1f;
+        Engine.ShakeScreen(0.3f);
+        velocity -= targetVector / 2;
+    }
+    public void Spewer()
+    {
+        Engine.EntityManager.Add(new Spewer(position, IdealSpeedWithVelocity(4) + new Vector2(Engine.OneToNegOne(), Engine.OneToNegOne()) / 2, gunAngle.angle, Engine.OneToNegOne() / 8, true, 2));
         SoundManager.PlaySound(Assets.Get(Sound.PulseFire), position);
         modules[ModuleType.Guns].cooldown = 1f;
         Engine.ShakeScreen(0.3f);

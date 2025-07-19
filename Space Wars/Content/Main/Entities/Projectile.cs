@@ -341,5 +341,32 @@ public class Explosive : Projectile
         }
     }
 }
+public class Spewer : Projectile
+{
+    float cooldown = 0.1f;
+    public Spewer(Vector2 _position, Vector2 _velocity, float _angle, float _angularVelocity, bool _isFriendly, int _damage, int _stealth = 0)
+        : base(Assets.Get(Sprite.Explosive), _position, _velocity, _angle, _angularVelocity, _isFriendly, _damage, _stealth)
+    {
+        entityType = EntityType.Projectile;
+        color = _isFriendly ? Color.Orange : Color.Red;
+    }
+    public override void AI()
+    {
+        position += velocity * Engine.DeltaSeconds * 60;
+        angle += angularVelocity * Engine.DeltaSeconds * 60;
+        if (cooldown > 0)
+        {
+            cooldown -= Engine.DeltaSeconds;
+        }
+        else
+        {
+            float angle = Engine.Random.NextSingle() * MathF.Tau;
+            Vector2 dir = Engine.ToUnitVector(angle);
+            Engine.EntityManager.Add(new PulseShot(position, velocity + dir * 6, angle, 0, isFriendly, damage, true));
+            cooldown = 0.1f;
+            SoundManager.PlaySound(Assets.Get(Sound.LMGFire), position);
+        }
+    }
+}
 
 

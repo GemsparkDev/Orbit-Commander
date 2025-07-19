@@ -24,7 +24,8 @@ public enum Modules
     Crossbow,
     Flamethrower,
     Fireball,
-    GrenadeLauncher,
+    GrenadeLauncher, 
+    Spewer,
     //Cores
     Dash,
     GrapplingHook,

@@ -29,6 +29,7 @@ public static class ItemFactory
         { Modules.Flamethrower, new ModuleData(Sprite.RealFlamethrowerModule,Sprite.FlamethrowerModule, "Flamethrower", (int)ModuleType.Guns, 20, delegate{ Player.Flamethrower(); })},
         { Modules.Fireball, new ModuleData(Sprite.RealCrossbowModule,Sprite.CrossbowModule, "Fireball", (int)ModuleType.Guns, 20, delegate{ Player.Fireball(); })},
         { Modules.GrenadeLauncher, new ModuleData(Sprite.RealCrossbowModule,Sprite.CrossbowModule, "Grenade Launcher", (int)ModuleType.Guns, 20, delegate{ Player.GrenadeLauncher(); })},
+        { Modules.Spewer, new ModuleData(Sprite.RealCrossbowModule,Sprite.CrossbowModule, "Spewer", (int)ModuleType.Guns, 20, delegate{ Player.Spewer(); })},
 
         { Modules.Engines, new ModuleData(Sprite.EngineModule, Sprite.EngineModule, "Engines", (int)ModuleType.Engines, 20, delegate(){ }) },
 
