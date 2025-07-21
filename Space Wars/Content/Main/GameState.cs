@@ -186,9 +186,9 @@ public class MissionSelect : GameState
     private float time = Engine.Random.NextSingle() * 1000f;
     private List<(float distance, List<int> prerequisites, int system)> missions =
     [
-        (200, [], 0), (160, [0], 0), (140, [0], 0), (100, [1, 2], 0),
-        (210, [3], 1), (170, [4], 1), (145, [5], 1), (130, [5], 1), (150, [6], 1), (50, [7], 1),
-        (200, [8], 2), (150, [8], 2), (100, [9], 2)
+        (200, [], 0), (160, [0], 0), (140, [0], 0), (100, [1, 2], 0), (400, [3], 0), (50, [3], 0),
+        (210, [], 1), (170, [6], 1), (145, [7], 1), (130, [8], 1), (150, [9], 1),
+        (200, [], 2), (150, [11], 2), (100, [12], 2)
     ];
     private Vector2 playerPosition;
     private List<(int system, ParticleEmitter orbit)> missionOrbits = [];
