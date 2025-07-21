@@ -449,6 +449,45 @@ public class EntityManager
         currentKarma += (1 / _rarity);
         return false;
     }
+    public List<Entity> Hitscan(Vector2 _pos, Vector2 _dir, float _maxLength, bool _getAll, out Vector2 _end)
+    {
+        var dir = Vector2.Normalize(_dir);
+        var list = new List<Entity>();
+        float dist = 9999;
+        Entity nearestEnemy = null;
+        float maxDist = Engine.SaveGame.CurrentMission.Hitscan(_pos, dir);
+        if (maxDist > _maxLength)
+        {
+            maxDist = _maxLength;
+        }
+        foreach (var entity in entities)
+        {
+            Vector2 relativePos = entity.position - _pos;
+            float closestLength = (relativePos.X * dir.X + relativePos.Y * dir.Y);
+            if (Vector2.Distance((dir * closestLength + _pos), entity.position) < entity.ColliderRadius)
+            {
+                if (_getAll)
+                {
+                    list.Add(entity);
+                }
+                else
+                {
+                    if (dist > closestLength) 
+                    {
+                        dist = closestLength;
+                        nearestEnemy = entity;
+                    }
+                }
+            }
+        }
+        if (!_getAll && nearestEnemy != null)
+        {
+            list.Add(nearestEnemy);
+        }
+        _end = _pos + _dir * maxDist;
+        return list;
+
+    }
     private static Cutscene IntroCutscene()
     {
         List<IEvent> events = [];

@@ -488,6 +488,20 @@ public class Mission
         }
         return spawnLocation;
     }
+    public float Hitscan(Vector2 _pos, Vector2 _dir)
+    {
+        float distance = 999999;
+        foreach (var planet in planets)
+        {
+            Vector2 relativePos = planet.position - _pos;
+            float closestLength = (relativePos.X * _dir.X + relativePos.Y * _dir.Y);
+            if (Vector2.Distance((_dir * closestLength + _pos), planet.position) < planet.radius && distance > closestLength)
+            {
+                distance = closestLength;
+            }
+        }
+        return distance;
+    }
     private void TestCompletion()
     {
         bool allCompleted = true;
