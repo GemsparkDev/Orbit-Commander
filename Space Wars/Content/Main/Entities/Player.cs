@@ -32,7 +32,7 @@ public class Player : Entity
         { ModuleType.Hull, new Module(Modules.Shield) },
         { ModuleType.Guns, new Module(Modules.Spewer) },
         { ModuleType.Engines, new Module(Modules.Engines) },
-        { ModuleType.Sensors, new Module(Modules.Sensors) },
+        { ModuleType.Sensors, new Module(Modules.Radar) },
         { ModuleType.Core, new Module(Modules.Dash) }
     };
 
@@ -314,6 +314,7 @@ public class Player : Entity
                 }
                 SoundManager.PlayGlobalSound(sound);
             }
+            modules[ModuleType.Sensors].ModuleFunction();
             if (dockedEntity == null)
             {
                 if (Progression > 2)
@@ -885,6 +886,37 @@ public class Player : Entity
                     return;
                 }
             }
+        }
+    }
+    public void Lidar()
+    {
+        if (modules[ModuleType.Sensors].IsCooldownReady())
+        {
+            Vector2 dir = targetVector + new Vector2(Engine.OneToNegOne(), Engine.OneToNegOne()) / 5;
+            Engine.EntityManager.Hitscan(position, dir, 1000, false, out Vector2 end);
+            ParticleManager.Add(new Particle(Assets.Get(Sprite.Dot), 1f, end, Vector2.Zero, 0, 0, Color.White, Color.Transparent));
+        }
+    }
+    public void Radar()
+    {
+        if (modules[ModuleType.Sensors].IsCooldownReady())
+        {
+            int fuses = CountFuses(ModuleType.Sensors);
+            Vector2 dir = Engine.ToUnitVector(time * (float)(fuses) / 3);
+            List<Entity> revealedEntities = Engine.EntityManager.Hitscan(position, dir, 2000, true, out Vector2 end);
+            foreach (var entity in revealedEntities)
+            {
+                entity.Reveal(2f);
+            }
+            if (revealedEntities.Count > 0)
+            {
+                SoundManager.PlaySound(Assets.Get(Sound.Beep), position);
+            }
+            for (int i = 0; i < 10; i++)
+            {
+                ParticleManager.Add(new Particle(Assets.Get(Sprite.Dot), position + dir * 10 * i, 0, Color.Green * (1 - (float)(i) / 10)));
+            }
+            ParticleManager.Add(new Particle(Assets.Get(Sprite.Dot), end, 0, Color.White));
         }
     }
     public override void Draw(SpriteBatch _spriteBatch)

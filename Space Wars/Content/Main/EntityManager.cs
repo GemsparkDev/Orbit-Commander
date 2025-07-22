@@ -464,7 +464,8 @@ public class EntityManager
         {
             Vector2 relativePos = entity.position - _pos;
             float closestLength = (relativePos.X * dir.X + relativePos.Y * dir.Y);
-            if (Vector2.Distance((dir * closestLength + _pos), entity.position) < entity.ColliderRadius)
+            float closestDistance = Vector2.Distance((dir * closestLength + _pos), entity.position);
+            if (closestLength > 0 && closestLength < maxDist && closestDistance < entity.ColliderRadius)
             {
                 if (_getAll)
                 {
@@ -472,19 +473,24 @@ public class EntityManager
                 }
                 else
                 {
-                    if (dist > closestLength) 
+                    float discriminant = MathF.Sqrt(entity.ColliderRadius * entity.ColliderRadius - closestDistance * closestDistance);
+                    if (dist > closestLength - discriminant) 
                     {
-                        dist = closestLength;
+                        dist = closestLength - discriminant;
                         nearestEnemy = entity;
                     }
                 }
             }
         }
+        if (maxDist > dist)
+        {
+            maxDist = dist;
+        }
         if (!_getAll && nearestEnemy != null)
         {
             list.Add(nearestEnemy);
         }
-        _end = _pos + _dir * maxDist;
+        _end = _pos + dir * maxDist;
         return list;
 
     }

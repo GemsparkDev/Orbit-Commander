@@ -10,10 +10,15 @@ public enum ModuleType
 }
 public enum Modules
 {
-    Engines,
-    Sensors,
+    //Hulls
     Hull,
     Shield,
+    //Engines
+    Engines,
+    //Sensors
+    Sensors,
+    Lidar,
+    Radar,
     //Weapons
     Basic,
     Spiral,

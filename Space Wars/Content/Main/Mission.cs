@@ -140,6 +140,10 @@ public class Mission
         {
             SoundManager.ChangeTrack(null);
         }
+        else
+        {
+            SoundManager.ChangeTrack(Assets.Get(Sound.main));
+        }
     }
     public void Update()
     {
@@ -229,12 +233,9 @@ public class Mission
             maxWaveTimer = waveTimer;
             Wave++;
             Engine.EntityManager.DecayPickups();
+
             if(playerProgression > 1 && (Wave % 20 == 0))
             {
-                if (music)
-                {
-                    SoundManager.ChangeTrack(Assets.Get(Sound.boss));
-                }
                 var pos = NewSpawnLocation();
                 Enemy boss = bosses[currentBoss](pos, Vector2.Zero, MathF.Atan2(-pos.X, pos.Y));
                 if (Wave == 40)
@@ -248,10 +249,6 @@ public class Mission
             }
             else
             {
-                if (music)
-                {
-                    SoundManager.ChangeTrack(Assets.Get(Sound.main));
-                }
                 if (isAggressive)
                 {
                     difficulty = (int)(Math.Pow(Wave, 1.5) + 5);
@@ -304,6 +301,17 @@ public class Mission
                     {
                         return;
                     }
+                }
+            }
+            if (music)
+            {
+                if ((Wave - 1) % 20 == 0)
+                {
+                    SoundManager.ChangeTrack(Assets.Get(Sound.main));
+                }
+                if (Wave % 20 == 0)
+                {
+                    SoundManager.ChangeTrack(Assets.Get(Sound.boss));
                 }
             }
         }
@@ -495,9 +503,11 @@ public class Mission
         {
             Vector2 relativePos = planet.position - _pos;
             float closestLength = (relativePos.X * _dir.X + relativePos.Y * _dir.Y);
-            if (Vector2.Distance((_dir * closestLength + _pos), planet.position) < planet.radius && distance > closestLength)
+            float closestDistance = Vector2.Distance(_dir * closestLength + _pos, planet.position);
+            float discriminant = MathF.Sqrt(planet.radius * planet.radius - closestDistance * closestDistance);
+            if (closestLength > 0 && closestDistance < planet.radius && distance > closestLength - discriminant)
             {
-                distance = closestLength;
+                distance = closestLength - discriminant;
             }
         }
         return distance;
