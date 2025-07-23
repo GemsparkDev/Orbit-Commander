@@ -30,9 +30,9 @@ public class Player : Entity
     public Dictionary<ModuleType, Module> modules = new()
     {
         { ModuleType.Hull, new Module(Modules.Shield) },
-        { ModuleType.Guns, new Module(Modules.Spewer) },
+        { ModuleType.Guns, new Module(Modules.Antimaterial) },
         { ModuleType.Engines, new Module(Modules.Engines) },
-        { ModuleType.Sensors, new Module(Modules.Radar) },
+        { ModuleType.Sensors, new Module(Modules.PulseEmitter) },
         { ModuleType.Core, new Module(Modules.Dash) }
     };
 
@@ -722,6 +722,22 @@ public class Player : Entity
         Engine.ShakeScreen(0.3f);
         velocity -= targetVector / 2;
     }
+    public void Antimaterial()
+    {
+        List<Entity> entities = Engine.EntityManager.Hitscan(position, targetVector, 3000, true, out Vector2 _);
+        foreach (var entity in entities)
+        {
+            entity.Collide(30);
+        }
+        SoundManager.PlaySound(Assets.Get(Sound.SniperFire), position);
+        modules[ModuleType.Guns].cooldown = 4f;
+        Engine.ShakeScreen(0.5f);
+        velocity -= targetVector * 3;
+        for (int i = 0; i < 300; i++)
+        {
+            ParticleManager.Add(new Particle(Assets.Get(Sprite.Dot), 2, position + targetVector * 4 * i, Vector2.Zero, gunAngle.angle, 0, Color.Red, Color.Transparent));
+        }
+    }
     public void Spiral()
     {
         Vector2 speed = IdealSpeedWithVelocity(8);
@@ -917,6 +933,16 @@ public class Player : Entity
                 ParticleManager.Add(new Particle(Assets.Get(Sprite.Dot), position + dir * 10 * i, 0, Color.Green * (1 - (float)(i) / 10)));
             }
             ParticleManager.Add(new Particle(Assets.Get(Sprite.Dot), end, 0, Color.White));
+        }
+    }
+    public void PulseEmitter()
+    {
+        if (modules[ModuleType.Sensors].IsCooldownReady())
+        {
+            Engine.EntityManager.NearestEnemy(this)?.Reveal(1);
+            Engine.EntityManager.NearestProjectile(this, isFriendly)?.Reveal(1);
+            modules[ModuleType.Sensors].cooldown = 2;
+            SoundManager.PlayGlobalSound(Assets.Get(Sound.Beep));
         }
     }
     public override void Draw(SpriteBatch _spriteBatch)

@@ -19,6 +19,7 @@ public enum Modules
     Sensors,
     Lidar,
     Radar,
+    PulseEmitter,
     //Weapons
     Basic,
     Spiral,
@@ -31,6 +32,7 @@ public enum Modules
     Fireball,
     GrenadeLauncher, 
     Spewer,
+    Antimaterial,
     //Cores
     Dash,
     GrapplingHook,
