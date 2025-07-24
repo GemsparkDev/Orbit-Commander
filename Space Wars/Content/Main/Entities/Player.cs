@@ -10,7 +10,6 @@ using UILib.Content.Main;
 using Space_Wars.Content.Main.Components;
 using System.Diagnostics;
 using System.Text;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace Space_Wars.Content.Main.Entities;
 
@@ -29,10 +28,10 @@ public class Player : Entity
     };
     public Dictionary<ModuleType, Module> modules = new()
     {
-        { ModuleType.Hull, new Module(Modules.Shield) },
-        { ModuleType.Guns, new Module(Modules.Antimaterial) },
-        { ModuleType.Engines, new Module(Modules.Engines) },
-        { ModuleType.Sensors, new Module(Modules.PulseEmitter) },
+        { ModuleType.Hull, new Module(Modules.Reflective) },
+        { ModuleType.Guns, new Module(Modules.Sniper) },
+        { ModuleType.Engines, new Module(Modules.Plasma) },
+        { ModuleType.Sensors, new Module(Modules.Sensors) },
         { ModuleType.Core, new Module(Modules.Dash) }
     };
 
@@ -82,10 +81,18 @@ public class Player : Entity
             if (isEngineActive)
             {
                 stealth -= 1;
+                if (modules[ModuleType.Engines].Type == Modules.Plasma)
+                {
+                    stealth -= 1;
+                }
             }
             if (modules[ModuleType.Guns].cooldown > 0)
             {
                 stealth -= 1;
+            }
+            if (modules[ModuleType.Hull].Type == Modules.Stealth)
+            {
+                stealth += 1;
             }
             return stealth;
         }
@@ -212,9 +219,10 @@ public class Player : Entity
             cachedDamage = 0;
         }
         float currentHealth = modules[ModuleType.Hull].Health + modules[ModuleType.Guns].Health + modules[ModuleType.Engines].Health + modules[ModuleType.Sensors].Health + modules[ModuleType.Core].Health;
+        float maxHealth = modules[ModuleType.Hull].MaxHealth + modules[ModuleType.Guns].MaxHealth + modules[ModuleType.Engines].MaxHealth + modules[ModuleType.Sensors].MaxHealth + modules[ModuleType.Core].MaxHealth;
 
         var slider = (Engine.UIManager.ScreenWindow.GetFuncWidget(1) as Slider);
-        slider.SetInterval(currentHealth, 100);
+        slider.SetInterval(currentHealth, maxHealth);
         Vector3 colorVec;
         float val = (MathF.Sin(time) + 1f) / 2;
         if (modules[ModuleType.Hull].Type == Modules.Shield && modules[ModuleType.Hull].cooldown <= 0)
@@ -479,24 +487,9 @@ public class Player : Entity
                             break;
                     }
                 }
-                if (isEngineActive)
-                {
-                    engineTime = Math.Clamp(engineTime + Engine.DeltaSeconds, 0, 1);
-                    float engineTimeModifier = 1 - (1 - engineTime) * (1 - engineTime);
-                    engineParticles.offsetVelocity = velocity;
-                    angle = angle * 0.5f + MathF.Atan2(direction.X, -direction.Y) * 0.5f;
-                    engineParticles.sprayAngle = angle * 180 / MathF.PI + 180;
-                    float fuseRatio = (float)(CountFuses(ModuleType.Engines)) / 3;
-                    engineParticles.speedOfEmission = 450f * fuseRatio * engineTimeModifier;
-                    if (direction != Vector2.Zero)
-                    {
-                        velocity += Vector2.Normalize(direction) * 24 * Engine.DeltaSeconds * engineTimeModifier * fuseRatio / (leashedMaterials.Count + 2);
-                    }
-                }
-                else
-                {
-                    engineTime = Math.Clamp(engineTime - Engine.DeltaSeconds * 2, 0, 1);
-                }
+                modules[ModuleType.Engines].ModuleFunction();
+                engineParticles.offsetVelocity = velocity;
+                angle = angle * 0.5f + MathF.Atan2(direction.X, -direction.Y) * 0.5f;
                 if (Input.NewMouseState.LeftButton == ButtonState.Pressed && !UIManager.LockMouseInput)
                 {
                     if (!isEngineActive)
@@ -706,6 +699,63 @@ public class Player : Entity
         }
         modules[0].Health = (int)MathF.Max(0, modules[0].Health - cachedDamage / 2);
     }
+    public void Stealth()
+    {
+        cachedDamage /= 3;
+    }
+    public void Reflective()
+    {
+        if (Engine.Random.Next(0, 3) == 0)
+        {
+            cachedDamage = 0;
+            for (float angle = 0; angle < MathF.Tau; angle += MathF.PI / 3)
+            {
+                Engine.EntityManager.Add(new AssassinShot(position, Engine.ToUnitVector(angle) * 8, angle, 0, isFriendly, 6, 1));
+            }
+        }
+    }
+    public void StandardEngine()
+    {
+        if (isEngineActive)
+        {
+            engineTime = Math.Clamp(engineTime + Engine.DeltaSeconds, 0, 1);
+            float engineTimeModifier = 1 - (1 - engineTime) * (1 - engineTime);
+            engineParticles.sprayAngle = angle * 180 / MathF.PI + 180;
+            float fuseRatio = (float)(CountFuses(ModuleType.Engines)) / 3;
+            engineParticles.speedOfEmission = 450f * fuseRatio * engineTimeModifier;
+            engineParticles.particleColor = Color.Cyan;
+            engineParticles.particleFadeToColor = new Color(72, 61, 139, 0);
+            if (direction != Vector2.Zero)
+            {
+                velocity += Vector2.Normalize(direction) * 24 * Engine.DeltaSeconds * engineTimeModifier * fuseRatio / (leashedMaterials.Count + 2);
+            }
+        }
+        else
+        {
+            engineTime = Math.Clamp(engineTime - Engine.DeltaSeconds * 2, 0, 1);
+        }
+    }
+    public void PlasmaEngine()
+    {
+        if (isEngineActive)
+        {
+            engineTime = Math.Clamp(engineTime + Engine.DeltaSeconds * 2, 0, 1);
+            float engineTimeModifier = 1 - (1 - engineTime) * (1 - engineTime);
+            engineParticles.sprayAngle = angle * 180 / MathF.PI + 180;
+            float fuseRatio = (float)(CountFuses(ModuleType.Engines)) / 3;
+            engineParticles.speedOfEmission = 450f * fuseRatio * engineTimeModifier;
+            engineParticles.particleColor = Color.Cyan;
+            engineParticles.particleFadeToColor = new Color(1f, 0.5f, 0, 0);
+            if (direction != Vector2.Zero)
+            {
+                velocity += Vector2.Normalize(direction) * 20 * Engine.DeltaSeconds * engineTimeModifier * fuseRatio / (leashedMaterials.Count + 1);
+            }
+        }
+        else
+        {
+            engineTime = Math.Clamp(engineTime - Engine.DeltaSeconds, 0, 1);
+        }
+    }
     public void Basic()
     {
         Engine.EntityManager.Add(new PulseShot(position, IdealSpeedWithVelocity(9), gunAngle.angle, 0, true, 3, true));
@@ -716,7 +766,7 @@ public class Player : Entity
     }
     public void Sniper()
     {
-        Engine.EntityManager.Add(new AssassinShot(position, IdealSpeedWithVelocity(100), gunAngle.angle, 0, true, 20));
+        Engine.EntityManager.Add(new AssassinShot(position, IdealSpeedWithVelocity(20), gunAngle.angle, 0, true, 20) { texture = Assets.Get(Sprite.Arrow) });
         SoundManager.PlaySound(Assets.Get(Sound.SniperFire), position);
         modules[ModuleType.Guns].cooldown = 2f;
         Engine.ShakeScreen(0.3f);

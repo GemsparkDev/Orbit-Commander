@@ -13,8 +13,11 @@ public enum Modules
     //Hulls
     Hull,
     Shield,
+    Stealth,
+    Reflective,
     //Engines
     Engines,
+    Plasma,
     //Sensors
     Sensors,
     Lidar,
