@@ -41,6 +41,7 @@ public enum Modules
     GrapplingHook,
     SummonShield,
     Nanomachines,
+    CreateFighter,
 }
 public enum Sprite
 {

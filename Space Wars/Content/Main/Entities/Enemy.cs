@@ -483,7 +483,7 @@ public class Enemy : Entity
                 }
                 else
                 {
-                    throw new NotImplementedException();
+                    Engine.EntityManager.Add(new Module(Modules.Shield, position, GetNormalizedAcceleration() * 10, angularVelocity));
                 }
             }
             yield return 0;
@@ -916,7 +916,7 @@ public class Enemy : Entity
                 }
                 else
                 {
-                    throw new NotImplementedException();
+                    Engine.EntityManager.Add(new Module(Modules.Plasma, position, GetNormalizedAcceleration() * 10, angularVelocity));
                 }
             }
             engineParticles.sprayAngle = (angle + MathF.PI) * 180 / MathF.PI;
@@ -1030,7 +1030,7 @@ public class Enemy : Entity
                 }
                 else
                 {
-                    throw new NotImplementedException();
+                    Engine.EntityManager.Add(new Module(Modules.Stealth, position, GetNormalizedAcceleration() * 10, angularVelocity));
                 }
             }
             Engine.WriteLine(position);
@@ -1123,14 +1123,7 @@ public class Enemy : Entity
                 }
                 isExpired = true;
                 SoundManager.PlaySound(Assets.Get(Sound.Death), position);
-                if (Engine.SaveGame.GiveWeapon)
-                {
-                    Engine.EntityManager.Add(new Module(Modules.GrenadeLauncher, position, GetNormalizedAcceleration() * 10, angularVelocity));
-                }
-                else
-                {
-                    throw new NotImplementedException();
-                }
+                Engine.EntityManager.Add(new Module(Modules.GrenadeLauncher, position, GetNormalizedAcceleration() * 10, angularVelocity));
             }
             yield return 0;
         }
@@ -1242,14 +1235,7 @@ public class Enemy : Entity
                 }
                 isExpired = true;
                 SoundManager.PlaySound(Assets.Get(Sound.Death), position);
-                if (Engine.SaveGame.GiveWeapon)
-                {
-                    Engine.EntityManager.Add(new Module(Modules.Fireball, position, GetNormalizedAcceleration() * 10, angularVelocity));
-                }
-                else
-                {
-                    //throw new NotImplementedException();
-                }
+                Engine.EntityManager.Add(new Module(Modules.Fireball, position, GetNormalizedAcceleration() * 10, angularVelocity));
             }
             void DrawLine(float _angle, float _cooldown, float _maxCooldown)
             {
@@ -1645,7 +1631,6 @@ public class Enemy : Entity
                 targetVector = Player.position - position + (Player.velocity - velocity) * 8;
                 targetAngle = MathF.Atan2(targetVector.X, -targetVector.Y);
                 yield return 0;
-                continue;
             }
 
             Entity nearestProjectile = Engine.EntityManager.NearestProjectile(NewDummyEnemy(position + Vector2.Normalize(Player.position - position) * 30, isFriendly), isFriendly);

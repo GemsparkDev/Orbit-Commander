@@ -32,7 +32,7 @@ public class Player : Entity
         { ModuleType.Guns, new Module(Modules.Sniper) },
         { ModuleType.Engines, new Module(Modules.Plasma) },
         { ModuleType.Sensors, new Module(Modules.Sensors) },
-        { ModuleType.Core, new Module(Modules.Dash) }
+        { ModuleType.Core, new Module(Modules.CreateFighter) }
     };
 
     public DockableComponent dockedEntity;
@@ -947,6 +947,24 @@ public class Player : Entity
                     pickup.isExpired = true;
                     Collide(-10);
                     var c = 30;
+                    modules[ModuleType.Core].cooldown = c;
+                    abilityMaxCooldown = c;
+                    return;
+                }
+            }
+        }
+    }
+    public void CreateFighter()
+    {
+        if (modules[ModuleType.Core].IsCooldownReady())
+        {
+            foreach (var pickup in leashedMaterials)
+            {
+                if (pickup is not Module and not Construct)
+                {
+                    pickup.isExpired = true;
+                    Engine.EntityManager.Add(Enemy.NewAdvancedFighter(position, velocity, angle, isFriendly));
+                    var c = 60;
                     modules[ModuleType.Core].cooldown = c;
                     abilityMaxCooldown = c;
                     return;

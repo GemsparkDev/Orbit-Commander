@@ -106,7 +106,7 @@ public class AssassinShot : Projectile
         color = _isFriendly ? Color.Orange : Color.Red;
         timeLeft = 3;
         var col = Color.Gold;
-        ExtraUpdates = (int)(_velocity.Length() / 6);
+        ExtraUpdates = 1;
         col.A = 0;
         beam = new(Assets.Get(Sprite.Dot), 0.5f, position, angle, 0, 0, 0, 0.5f, color, col, EmitterType.EmissionOverDistance);
     }
