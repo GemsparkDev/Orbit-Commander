@@ -29,8 +29,8 @@ public class Player : Entity
     public Dictionary<ModuleType, Module> modules = new()
     {
         { ModuleType.Hull, new Module(Modules.Reflective) },
-        { ModuleType.Guns, new Module(Modules.Sniper) },
-        { ModuleType.Engines, new Module(Modules.Plasma) },
+        { ModuleType.Guns, new Module(Modules.Triangle) },
+        { ModuleType.Engines, new Module(Modules.Work) },
         { ModuleType.Sensors, new Module(Modules.Sensors) },
         { ModuleType.Core, new Module(Modules.CreateFighter) }
     };
@@ -756,6 +756,27 @@ public class Player : Entity
             engineTime = Math.Clamp(engineTime - Engine.DeltaSeconds, 0, 1);
         }
     }
+    public void WorkEngine()
+    {
+        if (isEngineActive)
+        {
+            engineTime = Math.Clamp(engineTime + Engine.DeltaSeconds / 3, 0, 1);
+            float engineTimeModifier = 1 - (1 - engineTime) * (1 - engineTime);
+            engineParticles.sprayAngle = angle * 180 / MathF.PI + 180;
+            float fuseRatio = (float)(CountFuses(ModuleType.Engines)) / 3;
+            engineParticles.speedOfEmission = 450f * fuseRatio * engineTimeModifier;
+            engineParticles.particleColor = Color.Orange;
+            engineParticles.particleFadeToColor = new Color(1f, 0.1f, 0, 0);
+            if (direction != Vector2.Zero)
+            {
+                velocity += Vector2.Normalize(direction) * 14 * Engine.DeltaSeconds * engineTimeModifier * fuseRatio;
+            }
+        }
+        else
+        {
+            engineTime = Math.Clamp(engineTime - Engine.DeltaSeconds, 0, 1);
+        }
+    }
     public void Basic()
     {
         Engine.EntityManager.Add(new PulseShot(position, IdealSpeedWithVelocity(9), gunAngle.angle, 0, true, 3, true));
@@ -879,6 +900,18 @@ public class Player : Entity
         modules[ModuleType.Guns].cooldown = 1f;
         Engine.ShakeScreen(0.3f);
         velocity -= targetVector / 2;
+    }
+    public void Triangle()
+    {
+        Vector2 dir = IdealSpeedWithVelocity(8) - velocity;
+        Vector2 offset = Vector2.Normalize(new Vector2(dir.Y, -dir.X));
+        Engine.EntityManager.Add(new PulseShot(position, dir + velocity, gunAngle.angle, 0, true, 6));
+        Engine.EntityManager.Add(new PulseShot(position, -dir + offset * 5 + velocity, gunAngle.angle, 0, true, 10) { texture = Assets.Get(Sprite.Explosive) });
+        Engine.EntityManager.Add(new PulseShot(position, -dir - offset * 5 + velocity, gunAngle.angle, 0, true, 10) { texture = Assets.Get(Sprite.Explosive) });
+        SoundManager.PlaySound(Assets.Get(Sound.PulseFire), position);
+        modules[ModuleType.Guns].cooldown = 0.5f;
+        Engine.ShakeScreen(0.3f);
+        velocity += targetVector;
     }
     public void Dash()
     {

@@ -18,6 +18,7 @@ public enum Modules
     //Engines
     Engines,
     Plasma,
+    Work,
     //Sensors
     Sensors,
     Lidar,
@@ -36,6 +37,7 @@ public enum Modules
     GrenadeLauncher, 
     Spewer,
     Antimaterial,
+    Triangle,
     //Cores
     Dash,
     GrapplingHook,
