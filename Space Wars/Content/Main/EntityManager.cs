@@ -98,7 +98,7 @@ public class EntityManager
 
         new([new(Vector2.Zero, Vector2.Zero, 150, 3, true, Color.OldLace)],
         [(new EntityConstructor(Enemy.NewWarpGate, new Vector2(0, 450), -GravitationalSource.GetOrbitalVelocity(new Vector2(0, 450), Vector2.Zero, 150), 0), [ Condition.CustomIncomplete ])],
-        "Warp Gate", "Warp to the next mission once you are done here", -1, new Vector2(0, 500)) { music = false },
+        "Warp Gate", "Warp to the next mission once you are done here", -1, new Vector2(0, 500)) { music = false, tip = "Press left shift to return to the previous system. Press right shift to enter the next system." },
 
         new([ new(Vector2.Zero, Vector2.Zero, 4000, 4.5f, true, new Color(0.03f, 0.05f, 0.08f)),
         new(new Vector2(600, 0), GravitationalSource.GetOrbitalVelocity(new Vector2(600, 0), Vector2.Zero, 4000) * 1.05f, 500, 1.5f, false, new Color(0.03f, 0.05f, 0.08f)), ],
