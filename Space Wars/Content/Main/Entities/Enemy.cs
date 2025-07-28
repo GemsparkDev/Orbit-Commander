@@ -21,6 +21,7 @@ public class Enemy : Entity
     private int maxHealth;
     private bool deleteOnCollide = false;
     public bool ChildEnemy { get; private set; }
+    private bool wasHit = false;
     public override int StealthAbility 
     { 
         get => base.StealthAbility + ((revealDuration > 0) ? -5 : 0); 
@@ -58,6 +59,7 @@ public class Enemy : Entity
         angle += angularVelocity * Engine.DeltaSeconds * 60;
 
         ApplyBehaviours();
+        wasHit = false;
         if (health > maxHealth)
         {
             health = maxHealth;
@@ -112,12 +114,14 @@ public class Enemy : Entity
     {
         if (deleteOnCollide && damage >= 0)
         {
+            wasHit = true; ;
             health = 0;
             SoundManager.PlaySound(hitSound, position);
             return;
         }
         if (damage > 0)
         {
+            wasHit = true;
             SoundManager.PlaySound(hitSound, position);
             health -= damage;
             Engine.ShakeScreen(10 / ((position - Engine.Camera.Position).Length() + 200) * damage);
@@ -512,6 +516,13 @@ public class Enemy : Entity
             Vector2 normalizedAcceleration = GetNormalizedAcceleration();
             if (health <= 0)
             {
+                if (wasHit && Engine.Random.Next(0, 10) == 0)
+                {
+                    for (float angle = 0; angle < MathF.Tau; angle += MathF.PI / 3)
+                    {
+                        Engine.EntityManager.Add(new AssassinShot(position, Engine.ToUnitVector(angle) * 8, angle, 0, isFriendly, 6, 1));
+                    }
+                }
                 if (!hasExploded)
                 {
                     Explode(6, ColliderRadius);
@@ -530,7 +541,7 @@ public class Enemy : Entity
                         }
                         else
                         {
-                            throw new NotImplementedException();
+                            Engine.EntityManager.Add(new Module(Modules.Reflective, position, normalizedAcceleration * 10, angularVelocity));
                         }
                     }
                 }
@@ -2606,6 +2617,31 @@ public class Enemy : Entity
             yield return 0;
         }
     }
+    IEnumerable<int> Communicator()
+    {
+        float cooldown = 5;
+        while (true)
+        {
+            if (wasHit)
+            {
+                var dir = Vector2.Normalize(new Vector2(Engine.OneToNegOne(), Engine.OneToNegOne()));
+                SoundManager.PlaySound(Assets.Get(Sound.LMGFire), position);
+                Engine.EntityManager.Add(new AssassinShot(position, dir * 10, MathF.Atan2(dir.Y, dir.X), 0, isFriendly, 5, 1));
+            }
+            if (cooldown > 0)
+            {
+                cooldown -= Engine.DeltaSeconds;
+            }
+            else
+            {
+                cooldown = 5;
+                for (float angle = MathF.PI / 30; angle < MathF.Tau; angle += MathF.PI / 30)
+                {
+                    ParticleManager.Add(new Particle(Assets.Get(Sprite.Dot), 0.25f, position, Engine.ToUnitVector(angle) * 2, angle, 0, Color.Cyan, Color.Transparent));
+                }
+            }
+        }
+    }
     public static Enemy NewDummyEnemy(Vector2 _position, bool _isFriendly = false)
     {
         return new(_position, Vector2.Zero, 0, 0, 0, Assets.Get(Sprite.Fighter), _isFriendly);
@@ -2831,6 +2867,13 @@ public class Enemy : Entity
     {
         var enemy = new Enemy(_position, _velocity, _angle, 15, 125, Assets.Get(Sprite.FlareBoss));
         enemy.AddBehaviour(enemy.Flare(_inferno));
+        return enemy;
+    }
+    public static Enemy NewCommunicator(Vector2 _position, Vector2 _velocity, float _angle, bool _isFriendly = true) 
+    {
+        var enemy = new Enemy(_position, _velocity, _angle, 6, 400, Assets.Get(Sprite.Fighter), _isFriendly);
+        enemy.AddBehaviour(enemy.Communicator());
+        enemy.AddBehaviour(enemy.EnemyDeath(1));
         return enemy;
     }
 }

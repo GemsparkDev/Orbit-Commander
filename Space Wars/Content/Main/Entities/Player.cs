@@ -904,7 +904,7 @@ public class Player : Entity
     public void Triangle()
     {
         Vector2 dir = IdealSpeedWithVelocity(8) - velocity;
-        Vector2 offset = Vector2.Normalize(new Vector2(dir.Y, -dir.X));
+        var offset = Vector2.Normalize(new Vector2(dir.Y, -dir.X));
         Engine.EntityManager.Add(new PulseShot(position, dir + velocity, gunAngle.angle, 0, true, 6));
         Engine.EntityManager.Add(new PulseShot(position, -dir + offset * 5 + velocity, gunAngle.angle, 0, true, 10) { texture = Assets.Get(Sprite.Explosive) });
         Engine.EntityManager.Add(new PulseShot(position, -dir - offset * 5 + velocity, gunAngle.angle, 0, true, 10) { texture = Assets.Get(Sprite.Explosive) });
