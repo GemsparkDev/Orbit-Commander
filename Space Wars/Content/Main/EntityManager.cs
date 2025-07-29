@@ -66,9 +66,9 @@ public class EntityManager
         "", -1, new Vector2(-2000, -2000), 0, 1, null, true) { playerDocked = true, music = false},
 
         new([new(Vector2.Zero, Vector2.Zero, 30000, 10f, true, Color.HotPink, true) ],
-        [(new AdvancedConstructor(Enemy.NewCommunicator, new Vector2(MathF.Sin(1.02f), MathF.Cos(1.02f)), Vector2.Zero, 1.02f, true), [Condition.Protect]),
-            (new AdvancedConstructor(Enemy.NewCommunicator, new Vector2(MathF.Sin(2.7f), MathF.Cos(2.7f)), Vector2.Zero, 2.7f, true), [Condition.Protect]),
-            (new AdvancedConstructor(Enemy.NewCommunicator, new Vector2(MathF.Sin(5.33f), MathF.Cos(5.33f)), Vector2.Zero, 5.33f, true), [Condition.Protect]),
+        [(new AdvancedConstructor(Enemy.NewCommunicator, new Vector2(MathF.Sin(1.02f), -MathF.Cos(1.02f)), Vector2.Zero, 1.02f, true), [Condition.Protect]),
+            (new AdvancedConstructor(Enemy.NewCommunicator, new Vector2(MathF.Sin(2.7f), -MathF.Cos(2.7f)), Vector2.Zero, 2.7f, true), [Condition.Protect]),
+            (new AdvancedConstructor(Enemy.NewCommunicator, new Vector2(MathF.Sin(5.33f), -MathF.Cos(5.33f)), Vector2.Zero, 5.33f, true), [Condition.Protect]),
         ],
         "cool planet",
         "Super earth", 0, new Vector2(0, 1), 0, 1, null, true),

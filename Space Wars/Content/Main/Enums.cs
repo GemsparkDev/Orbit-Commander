@@ -84,6 +84,7 @@ public enum Sprite
     InfernoBoss,
     FlareBoss,
     QuantumResonator,
+    Communicator,
 
     MetalScrap,
     RealMetalScrap,

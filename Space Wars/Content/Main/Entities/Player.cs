@@ -903,15 +903,16 @@ public class Player : Entity
     }
     public void Triangle()
     {
-        Vector2 dir = IdealSpeedWithVelocity(8) - velocity;
-        var offset = Vector2.Normalize(new Vector2(dir.Y, -dir.X));
-        Engine.EntityManager.Add(new PulseShot(position, dir + velocity, gunAngle.angle, 0, true, 6));
-        Engine.EntityManager.Add(new PulseShot(position, -dir + offset * 5 + velocity, gunAngle.angle, 0, true, 10) { texture = Assets.Get(Sprite.Explosive) });
-        Engine.EntityManager.Add(new PulseShot(position, -dir - offset * 5 + velocity, gunAngle.angle, 0, true, 10) { texture = Assets.Get(Sprite.Explosive) });
+        Vector2 vel = IdealSpeedWithVelocity(8) - velocity;
+        var dir = Vector2.Normalize(vel);
+        velocity += dir;
+        var offset = new Vector2(dir.Y, -dir.X);
+        Engine.EntityManager.Add(new PulseShot(position, vel + velocity, gunAngle.angle, 0, true, 6));
+        Engine.EntityManager.Add(new PulseShot(position, -vel + offset * 5 + velocity, gunAngle.angle, 0, true, 10) { texture = Assets.Get(Sprite.Explosive) });
+        Engine.EntityManager.Add(new PulseShot(position, -vel - offset * 5 + velocity, gunAngle.angle, 0, true, 10) { texture = Assets.Get(Sprite.Explosive) });
         SoundManager.PlaySound(Assets.Get(Sound.PulseFire), position);
         modules[ModuleType.Guns].cooldown = 0.5f;
         Engine.ShakeScreen(0.3f);
-        velocity += targetVector;
     }
     public void Dash()
     {

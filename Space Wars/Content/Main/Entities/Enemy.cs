@@ -2640,6 +2640,7 @@ public class Enemy : Entity
                     ParticleManager.Add(new Particle(Assets.Get(Sprite.Dot), 0.25f, position, Engine.ToUnitVector(angle) * 2, angle, 0, Color.Cyan, Color.Transparent));
                 }
             }
+            yield return 0;
         }
     }
     public static Enemy NewDummyEnemy(Vector2 _position, bool _isFriendly = false)
@@ -2871,7 +2872,7 @@ public class Enemy : Entity
     }
     public static Enemy NewCommunicator(Vector2 _position, Vector2 _velocity, float _angle, bool _isFriendly = true) 
     {
-        var enemy = new Enemy(_position, _velocity, _angle, 6, 400, Assets.Get(Sprite.Fighter), _isFriendly);
+        var enemy = new Enemy(_position, _velocity, _angle, 6, 400, Assets.Get(Sprite.Communicator), _isFriendly);
         enemy.AddBehaviour(enemy.Communicator());
         enemy.AddBehaviour(enemy.EnemyDeath(1));
         return enemy;
