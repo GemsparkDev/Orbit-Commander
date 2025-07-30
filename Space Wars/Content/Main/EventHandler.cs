@@ -5,12 +5,11 @@ using Space_Wars.Content.Main.Particles;
 using UILib.Content.Main;
 using System.Collections.Generic;
 using System.Linq;
-using Space_Wars.Content.Main.Components;
 using Microsoft.Xna.Framework.Graphics;
 
 namespace Space_Wars.Content.Main;
 
-public class EventHandler
+public static class EventHandler
 {
     private static Player player => Engine.SaveGame.Player;
     private static readonly List<Message> eventLog = [];

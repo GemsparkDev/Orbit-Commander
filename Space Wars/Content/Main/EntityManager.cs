@@ -151,7 +151,6 @@ public class EntityManager
     }
     public void Initialize()
     {
-
         Engine.SaveGame.CurrentMission = missions[Engine.SaveGame.CurrentMissionIndex].Clone();
         entities.Clear();
         addedEntities.Clear();

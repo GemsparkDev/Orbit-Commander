@@ -153,11 +153,13 @@ public class Engine : Game
         var smeltScrap = new Button(new Vector2(-85, -15), Assets.Get(Sprite.Button), Assets.TextFont, "Queue Smelt", Color.Yellow);
         var repairModule = new Button(new Vector2(-85, 15), Assets.Get(Sprite.Button), Assets.TextFont, "Queue Module", Color.Yellow);
         var cancelQueue = new Button(new Vector2(-85, 45), Assets.Get(Sprite.Button), Assets.TextFont, "Cancel Latest", Color.Red);
-        var launchButton = new Button(new Vector2(-20, 0), Assets.Get(Sprite.Button), Assets.TextFont, "Leave", Color.LightBlue);
         var saveButton = new Button(new Vector2(0, -60), Assets.Get(Sprite.WideButton), Assets.TextFont, "Save & Exit", Color.LightBlue);
 
         //Fuse Menu
         var fuseCounter = new Decal(new Vector2(-20, -10), Assets.TextFont, "0", Color.Yellow, 10);
+
+        //Pickup Drone Menu
+        var launchButton = new Button(new Vector2(-20, 0), Assets.Get(Sprite.Button), Assets.TextFont, "Leave", Color.LightBlue);
 
         //Global Menu
         var globalSidePanelOpen = new Button(Vector2.Zero, Assets.Get(Sprite.ToggleButton));
@@ -210,7 +212,8 @@ public class Engine : Game
         singleplayerButton.AddBehaviour(delegate () 
         { 
             SaveGame = new();
-            EventHandler.MissionSelectTrigger(); 
+            EventHandler.UpdateModulesUI();
+            Startgame();
         });
         quitToMissionButton.AddBehaviour(EventHandler.MissionSelectTrigger);
         garageButton.AddBehaviour(EventHandler.GarageTrigger);
@@ -270,7 +273,7 @@ public class Engine : Game
             {
                 foreach (var item in MissionSelectSlots)
                 {
-                if (item.daughterItem == null && SaveGame.QueuedItems.Count < 10)
+                    if (item.daughterItem == null && SaveGame.QueuedItems.Count < 10)
                     {
                         item.daughterItem = UIManager.selectedIcon as Module;
                         UIManager.selectedIcon = null;
@@ -292,22 +295,8 @@ public class Engine : Game
                 SaveGame.QueuedItems.RemoveAt(SaveGame.QueuedItems.Count - 1);
             }
         });
-        saveButton.AddBehaviour(delegate () 
-        {
-            string filePath = Path.Combine(Directory.GetCurrentDirectory(), "Content\\Saves\\Save_1.txt");
-            File.WriteAllText(filePath, SaveGame.Serialize());
-            EventHandler.QuitToMenu();
-        });
-        loadButton.AddBehaviour(delegate () 
-        {
-            string filePath = Path.Combine(Directory.GetCurrentDirectory(), "Content\\Saves\\Save_1.txt");
-            string text = File.ReadAllText(filePath);
-            if (text != "")
-            {
-                SaveGame = new SaveGame(text);
-                EventHandler.MissionSelectTrigger();
-            }
-        });
+        saveButton.AddBehaviour(Save);
+        loadButton.AddBehaviour(Load);
 
         MainMenu.AddWidget(exitButton as IFunctional, 0);
         MainMenu.AddWidget(singleplayerButton as IFunctional, 0);
@@ -448,7 +437,22 @@ public class Engine : Game
 
         Assets.LoadAssets(Content);
     }
-
+    public static void Save()
+    {
+        string filePath = Path.Combine(Directory.GetCurrentDirectory(), "Content\\Saves\\Save_1.txt");
+        File.WriteAllText(filePath, SaveGame.Serialize());
+        EventHandler.QuitToMenu();
+    }
+    public static void Load()
+    {
+        string filePath = Path.Combine(Directory.GetCurrentDirectory(), "Content\\Saves\\Save_1.txt");
+        string text = File.ReadAllText(filePath);
+        if (text != "")
+        {
+            SaveGame = new SaveGame(text);
+            EventHandler.MissionSelectTrigger();
+        }
+    }
     protected override void Update(GameTime gameTime)
     {
         Input.Update();

@@ -150,6 +150,7 @@ public class SaveGame
             }
         }
         QueuedItems = (from item in QueuedItems where !item.IsExpired select item).ToList();
+        Engine.Save();
     }
     public string Serialize()
     {
