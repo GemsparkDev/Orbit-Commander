@@ -201,16 +201,6 @@ public class EntityManager
             entity.Update();
             Engine.SaveGame.CurrentMission.AttractObject(entity);
         }
-        foreach (var projectile in projectiles)
-        {
-            if (projectile.ExtraUpdates > 1)
-            {
-                for (int i = 0; i < projectile.ExtraUpdates - 1 && !projectile.isExpired; i++)
-                {
-                    projectile.Update();
-                }
-            }
-        }
         if (projectiles.Count >= 150)
         {
             for (int i = 0; i < projectiles.Count - 150; i++)
@@ -451,7 +441,7 @@ public class EntityManager
         currentKarma += (1 / _rarity);
         return false;
     }
-    public List<Entity> Hitscan(Vector2 _pos, Vector2 _dir, float _maxLength, bool _getAll, out Vector2 _end)
+    public List<Entity> Hitscan(Vector2 _pos, Vector2 _dir, float _maxLength, bool _getAll, out Vector2 _end, int _type = 0)
     {
         var dir = Vector2.Normalize(_dir);
         var list = new List<Entity>();
@@ -464,6 +454,10 @@ public class EntityManager
         }
         foreach (var entity in entities)
         {
+            if (_type != (entity.isFriendly ? 1 : -1))
+            {
+                continue;
+            }
             Vector2 relativePos = entity.position - _pos;
             float closestLength = (relativePos.X * dir.X + relativePos.Y * dir.Y);
             float closestDistance = Vector2.Distance((dir * closestLength + _pos), entity.position);

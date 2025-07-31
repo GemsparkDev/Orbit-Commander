@@ -1632,17 +1632,6 @@ public class Enemy : Entity
             velocity *= 0.8f;
             Vector2 normalizedAcceleration = GetNormalizedAcceleration();
             float speed = 8 + Math.Max((Player.position - position).Length() - 500, 0) / 500;
-            Entity nearestEnemy = Engine.EntityManager.NearestEnemy(this);
-            if (nearestEnemy == null)
-            {
-                if ((Player.position - position).LengthSquared() > 1000)
-                {
-                    GoToPosition(Player.position, (speed + (Player.position - position).Length() / 100));
-                }
-                targetVector = Player.position - position + (Player.velocity - velocity) * 8;
-                targetAngle = MathF.Atan2(targetVector.X, -targetVector.Y);
-                yield return 0;
-            }
 
             Entity nearestProjectile = Engine.EntityManager.NearestProjectile(NewDummyEnemy(position + Vector2.Normalize(Player.position - position) * 30, isFriendly), isFriendly);
             if (nearestProjectile != null)
@@ -1659,6 +1648,27 @@ public class Enemy : Entity
                     velocity += new Vector2(-pos.Y, pos.X) * sign;
                 }
             }
+
+            Entity nearestEnemy = Engine.EntityManager.NearestEnemy(this);
+            float playerDist = Vector2.Distance(Player.position, position);
+            if ((nearestEnemy == null || Vector2.Distance(nearestEnemy.position, position) > playerDist))
+            {
+                if (playerDist > 200)
+                {
+                    GoToPosition(Player.position, (speed + playerDist / 100));
+                }
+                if (nearestEnemy == null)
+                {
+                    targetVector = (position - Player.position);
+                }
+                else
+                {
+                    targetVector = position - nearestEnemy.position;
+                }
+                targetAngle = MathF.Atan2(targetVector.X, -targetVector.Y);
+                yield return 0;
+            }
+
             float timeToHit;
             Vector2 playerIterativePosition = nearestEnemy.position;
             timeToHit = MathF.Sqrt(EntityManager.DistanceSqr(position, playerIterativePosition)) / 8;
