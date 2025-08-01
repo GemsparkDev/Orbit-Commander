@@ -310,6 +310,7 @@ public class Victory : GameState
 public class Cutscene(List<IEvent> _events, List<Actor> _actors, GameState _nextGameState) : GameState 
 {
     private float time = 0;
+    private float escapeTime = 0;
     public override void Initialize()
     {
         time = 0;
@@ -317,6 +318,21 @@ public class Cutscene(List<IEvent> _events, List<Actor> _actors, GameState _next
     }
     public override void Update()
     {
+        if (Input.NewState.IsKeyDown(Keys.Escape))
+        {
+            if (escapeTime < 1)
+            {
+                escapeTime += Engine.DeltaSeconds;
+            }
+            else
+            {
+                time = 99999;
+            }
+        }
+        else if (escapeTime > 0)
+        {
+            escapeTime -= Engine.DeltaSeconds;
+        }
         ParticleManager.Update();
         time += Engine.DeltaSeconds;
         bool isActive = false;
@@ -338,6 +354,7 @@ public class Cutscene(List<IEvent> _events, List<Actor> _actors, GameState _next
         {
             actor.Draw(_spriteBatch);
         }
+        _spriteBatch.DrawString(Assets.TextFont, "esc to skip", Engine.Camera.Position + Engine.ScreenSize / 2 - Assets.TextFont.MeasureString("esc to skip") / 2 - new Vector2(100, 100), Color.White * (0.5f + escapeTime * 0.5f));
     }
 }
 public class InShip : GameState

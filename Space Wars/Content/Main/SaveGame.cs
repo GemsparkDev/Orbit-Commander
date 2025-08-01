@@ -10,6 +10,7 @@ using System.Text;
 namespace Space_Wars.Content.Main;
 public class SaveGame
 {
+    public string Name { get; private set; } = "0";
     public int Scrap { get; set; }
     public int System { get; set; } = 0;
     public int CurrentMissionIndex { get; set; } = 0;
@@ -40,39 +41,41 @@ public class SaveGame
     {
         List<string> disassembly = Disassemble(_serialization);
         var logger = new LoadLogger();
+        int i = 0;
 
-        logger.Try(delegate { Scrap = Int32.Parse(disassembly[0]); }, 0);
-        logger.Try(delegate { System = Int32.Parse(disassembly[1]); }, 1);
-        logger.Try(delegate { CurrentMissionIndex = Int32.Parse(disassembly[2]); }, 2);
-        logger.Try(delegate { giveWeapon = bool.Parse(disassembly[3]); }, 3);
+        logger.Try(delegate { Name = (disassembly[i]).ToString(); }, i++);
+        logger.Try(delegate { Scrap = Int32.Parse(disassembly[i]); }, i++);
+        logger.Try(delegate { System = Int32.Parse(disassembly[i]); }, i++);
+        logger.Try(delegate { CurrentMissionIndex = Int32.Parse(disassembly[i]); }, i++);
+        logger.Try(delegate { giveWeapon = bool.Parse(disassembly[i]); }, i++);
         List<string> array = [];
-        logger.Try(delegate { array = Disassemble(disassembly[4]); }, 4);
+        logger.Try(delegate { array = Disassemble(disassembly[i]); }, i++);
         for (int j = 0; j < CompletedMissions.Length; j++)
         {
             logger.Try(delegate { CompletedMissions[j] = bool.Parse(array[j]); }, j);
         }
         Player player = null;
-        logger.Try(delegate{ player = new Player(disassembly[5], logger); }, 5);
+        logger.Try(delegate{ player = new Player(disassembly[i], logger); }, i++);
         Player = (player ?? new Player(Vector2.Zero, Vector2.Zero, 0, 0));
         array = [];
-        logger.Try(delegate { array = Disassemble(disassembly[6]); }, 6);
+        logger.Try(delegate { array = Disassemble(disassembly[i]); }, i++);
         for (int j = 0; j < Inventory.Length; j++)
         {
             logger.Try(delegate { Inventory[j] = ItemFactory.TryDeserialize(array[j], logger); }, 6);
         }
         array = [];
-        logger.Try(delegate { array = Disassemble(disassembly[7]); }, 7);
+        logger.Try(delegate { array = Disassemble(disassembly[i]); }, i++);
         for (int j = 0; j < MissionSelectInventory.Length; j++)
         {
-            logger.Try(delegate { MissionSelectInventory[j] = ItemFactory.TryDeserialize(array[j], logger); }, 7);
+            logger.Try(delegate { MissionSelectInventory[j] = ItemFactory.TryDeserialize(array[j], logger); }, j);
         }
         array = [];
-        logger.Try(delegate { array = Disassemble(disassembly[8]); }, 8);
-        if(Int32.TryParse(array[0], out int i))
+        logger.Try(delegate { array = Disassemble(disassembly[i]); }, i++);
+        if(Int32.TryParse(array[0], out int _i))
         {
-            for (int j = 0; j < i; j++)
+            for (int j = 0; j < _i; j++)
             {
-                logger.Try(delegate { QueuedItems.Add(Queueable.Deserialize(array[j + 1], logger)); }, 7);
+                logger.Try(delegate { QueuedItems.Add(Queueable.Deserialize(array[j + 1], logger)); }, j+1);
             }
         }
         logger.Log();
@@ -188,7 +191,7 @@ public class SaveGame
         inv.Remove(inv.Length - 1, 1);
         globalInv.Remove(globalInv.Length - 1, 1);
         queueables.Remove(queueables.Length - 1, 1);
-        return $"{Scrap},{System},{CurrentMissionIndex},{giveWeapon},{{{string.Join(",", CompletedMissions)}}},{Player.Serialize()},{{{inv}}},{{{globalInv}}},{{{queueables}}}";
+        return $"{Name},{Scrap},{System},{CurrentMissionIndex},{giveWeapon},{{{string.Join(",", CompletedMissions)}}},{Player.Serialize()},{{{inv}}},{{{globalInv}}},{{{queueables}}}";
     }
 }
 public class LoadLogger
