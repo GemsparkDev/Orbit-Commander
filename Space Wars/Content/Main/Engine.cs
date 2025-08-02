@@ -104,6 +104,8 @@ public class Engine : Game
         var MissionSelect = new TabbedWindow(new Vector2(0, BackBuffer.Y / 2), Assets.Get(Sprite.GargantuanPanel), tabTexture, selectedTabTexture, selectSound, 2) { enabled = false, icons = iconGroup3, alignment = Alignment.Left };
         var PickupDroneMenu = new Window(BackBuffer / 2, largePanel, 1) { enabled = false };
         var FuseMenu = new Window(BackBuffer / 2, largePanel, 1) { enabled = false };
+        var SaveMenu = new Window(BackBuffer / 2, largePanel, 1);
+        var LoadMenu = new Window(BackBuffer / 2, largePanel, 1);
 
         //Main Menu Widgets
         var patchedConicsToggle = new Button(new Vector2(0, -MainMenu.Size.Y / 4), wideButton, Assets.TextFont, $"Patched Conics: {PatchedConics}", Color.White);
@@ -161,6 +163,14 @@ public class Engine : Game
 
         //Pickup Drone Menu
         var launchButton = new Button(new Vector2(-20, 0), Assets.Get(Sprite.Button), Assets.TextFont, "Leave", Color.LightBlue);
+
+        //Save and Load Menu
+        var saveToFile = new Button(Vector2.Zero, Assets.Get(Sprite.Button), Assets.TextFont, "Save", Color.White);
+        var loadFromFile = new Button(Vector2.Zero, Assets.Get(Sprite.Button), Assets.TextFont, "Load", Color.White);
+        var prevSave = new Button(new Vector2(-50, 0), Assets.Get(Sprite.Button), Assets.TextFont, "Prev", Color.White);
+        var nextSave = new Button(new Vector2(50, 0), Assets.Get(Sprite.Button), Assets.TextFont, "Next", Color.White);
+        var deleteSave = new Button(new Vector2(50, 20), Assets.Get(Sprite.Button), Assets.TextFont, "Next", Color.White);
+        var name = new Textbox(new Vector2(0, 20), Assets.Get(Sprite.Button));
 
         //Global Menu
         var globalSidePanelOpen = new Button(Vector2.Zero, Assets.Get(Sprite.ToggleButton));
@@ -354,6 +364,18 @@ public class Engine : Game
         MissionSelect.AddWidget(saveButton as IFunctional, 0);
 
         PickupDroneMenu.AddWidget(launchButton as IFunctional);
+
+        SaveMenu.AddWidget(saveToFile as IFunctional);
+        SaveMenu.AddWidget(prevSave as IFunctional);
+        SaveMenu.AddWidget(nextSave as IFunctional);
+        SaveMenu.AddWidget(deleteSave as IFunctional);
+        SaveMenu.AddWidget(name as IFunctional);
+
+        LoadMenu.AddWidget(loadFromFile as IFunctional);
+        LoadMenu.AddWidget(prevSave as IFunctional);
+        LoadMenu.AddWidget(nextSave as IFunctional);
+        LoadMenu.AddWidget(name as IFunctional);
+        LoadMenu.AddWidget(deleteSave as IFunctional);
 
         FuseMenu.AddWidget(fuseCounter);
         for (int i = 0; i < 4; i++)
