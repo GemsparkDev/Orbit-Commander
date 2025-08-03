@@ -43,7 +43,7 @@ public class Engine : Game
     public static bool PatchedConics { get; private set; } = true;
     public static bool UseShader { get; private set; } = true;
     public static float ScreenShakeFactor { get; private set; } = 0;
-    private static int saveSlot = 0;
+    public static int SaveSlot { get; private set; } = 0;
     //Convenient access point for player modules
     public static ItemSlot<Pickup>[] InventorySlots { get; set; } = new ItemSlot<Pickup>[4];
     public static ItemSlot<Pickup>[] MissionSelectSlots { get; set; } = new ItemSlot<Pickup>[4];
@@ -309,6 +309,19 @@ public class Engine : Game
         saveButton.AddBehaviour(Save);
         loadButton.AddBehaviour(Load);
 
+        prevSave.AddBehaviour(delegate
+        {
+            SaveSlot = Math.Clamp(SaveSlot - 1, 0, 10);
+            EventHandler.GetSave();
+        });
+        nextSave.AddBehaviour(delegate
+        {
+            SaveSlot = Math.Clamp(SaveSlot + 1, 0, 10);
+            EventHandler.GetSave();
+        });
+        name.AddBehaviour(EventHandler.UpdateSaveName);
+
+
         MainMenu.AddWidget(exitButton as IFunctional, 0);
         MainMenu.AddWidget(singleplayerButton as IFunctional, 0);
         MainMenu.AddWidget(titleName, 0);
@@ -441,6 +454,8 @@ public class Engine : Game
         UIManager.AddContainer(MissionSelect);
         UIManager.AddContainer(PickupDroneMenu);
         UIManager.AddContainer(FuseMenu);
+        UIManager.AddContainer(SaveMenu);
+        UIManager.AddContainer(LoadMenu);
     }
     public static void Startgame()
     {
@@ -462,7 +477,7 @@ public class Engine : Game
     }
     public static void Save()
     {
-        string filePath = Path.Combine(Directory.GetCurrentDirectory(), $"Content\\Saves\\Save_{saveSlot}.txt");
+        string filePath = Path.Combine(Directory.GetCurrentDirectory(), $"Content\\Saves\\Save_{SaveSlot}.txt");
         using (var outputFile = new StreamWriter(filePath))
         {
             outputFile.WriteLine(SaveGame.Serialize());
@@ -471,7 +486,7 @@ public class Engine : Game
     }
     public static void Load()
     {
-        string filePath = Path.Combine(Directory.GetCurrentDirectory(), $"Content\\Saves\\Save_{saveSlot}.txt");
+        string filePath = Path.Combine(Directory.GetCurrentDirectory(), $"Content\\Saves\\Save_{SaveSlot}.txt");
         string text = "";
         using (var outputFile = new StreamReader(filePath))
         {

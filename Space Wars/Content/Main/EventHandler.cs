@@ -6,6 +6,7 @@ using UILib.Content.Main;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Xna.Framework.Graphics;
+using System.IO;
 
 namespace Space_Wars.Content.Main;
 
@@ -306,6 +307,39 @@ public static class EventHandler
         {
             var decal = Engine.UIManager.GetContainer((int)Containers.FuseMenu).GetWidget(i + 1);
             decal.texture = moduleTextures[i];
+        }
+    }
+    public static void GetSave()
+    {
+        string filePath = Path.Combine(Directory.GetCurrentDirectory(), $"Content\\Saves\\Save_{Engine.SaveSlot}.txt");
+        string text = "";
+        using (var outputFile = new StreamReader(filePath))
+        {
+            text = outputFile.ReadLine();
+        }
+        if (text == "")
+        {
+            (Engine.UIManager.GetContainer((int)Containers.SaveMenu).GetFuncWidget(4) as Textbox).Text = "Empty";
+            return;
+        }
+        (Engine.UIManager.GetContainer((int)Containers.SaveMenu).GetFuncWidget(4) as Textbox).Text = SaveGame.Disassemble(text)[0];
+    }
+    public static void UpdateSaveName()
+    {
+        //Note: There may be a better way to do it
+        string filePath = Path.Combine(Directory.GetCurrentDirectory(), $"Content\\Saves\\Save_{Engine.SaveSlot}.txt");
+        string text = "";
+        using (var outputFile = new StreamReader(filePath))
+        {
+            text = outputFile.ReadLine();
+        }
+        var saveGame = new SaveGame(text)
+        {
+            Name = (Engine.UIManager.GetContainer((int)Containers.SaveMenu).GetFuncWidget(4) as Textbox).Text
+        };
+        using (var outputFile = new StreamWriter(filePath))
+        {
+            outputFile.WriteLine(saveGame.Serialize());
         }
     }
 }

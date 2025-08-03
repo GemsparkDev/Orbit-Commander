@@ -195,6 +195,8 @@ public enum Containers
     MissionMenu,
     PickupDroneMenu,
     FuseMenu,
+    SaveMenu,
+    LoadMenu,
 }
 public enum Condition
 {

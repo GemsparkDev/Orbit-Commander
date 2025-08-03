@@ -10,7 +10,7 @@ using System.Text;
 namespace Space_Wars.Content.Main;
 public class SaveGame
 {
-    public string Name { get; private set; } = "0";
+    public string Name { get; set; } = "0";
     public int Scrap { get; set; }
     public int System { get; set; } = 0;
     public int CurrentMissionIndex { get; set; } = 0;
