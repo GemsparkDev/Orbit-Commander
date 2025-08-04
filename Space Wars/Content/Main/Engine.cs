@@ -96,16 +96,18 @@ public class Engine : Game
         var tabTexture = Assets.Get(Sprite.Tab);
         var selectedTabTexture = Assets.Get(Sprite.SelectedTab);
         var selectSound = Assets.Get(Sound.Interact);
-        var PauseMenu = new Window(BackBuffer / 2, largePanel, 1) { enabled = false };
-        var PlayerMenu = new Window(new Vector2(0, BackBuffer.Y / 2), Assets.Get(Sprite.Terminal), 1) { enabled = false, alignment = Alignment.Left };
-        var GarageMenu = new Window(BackBuffer / 2, Assets.Get(Sprite.GargantuanPanel), 1) { enabled = false };
-        var MainMenu = new TabbedWindow(BackBuffer / 2, Assets.Get(Sprite.GargantuanPanel), tabTexture, selectedTabTexture, selectSound, 2, 1) { enabled = true, icons = iconGroup1 };
-        var MothershipMenu = new TabbedWindow(new Vector2(0, BackBuffer.Y / 2), Assets.Get(Sprite.Terminal), tabTexture, selectedTabTexture, selectSound, 3, 1) { enabled = false, icons = iconGroup2, alignment = Alignment.Left };
-        var MissionSelect = new TabbedWindow(new Vector2(0, BackBuffer.Y / 2), Assets.Get(Sprite.GargantuanPanel), tabTexture, selectedTabTexture, selectSound, 2) { enabled = false, icons = iconGroup3, alignment = Alignment.Left };
-        var PickupDroneMenu = new Window(BackBuffer / 2, largePanel, 1) { enabled = false };
-        var FuseMenu = new Window(BackBuffer / 2, largePanel, 1) { enabled = false };
-        var SaveMenu = new Window(BackBuffer / 2, largePanel, 1);
-        var LoadMenu = new Window(BackBuffer / 2, largePanel, 1);
+        Vector2 center = BackBuffer / 2;
+
+        var PauseMenu = new Window(center, largePanel);
+        var PlayerMenu = new Window(new Vector2(0, center.Y), Assets.Get(Sprite.Terminal)) { alignment = Alignment.Left };
+        var GarageMenu = new Window(center, Assets.Get(Sprite.GargantuanPanel));
+        var MainMenu = new TabbedWindow(center, Assets.Get(Sprite.GargantuanPanel), tabTexture, selectedTabTexture, selectSound, 2) { enabled = true, icons = iconGroup1 };
+        var MothershipMenu = new TabbedWindow(new Vector2(0, center.Y), Assets.Get(Sprite.Terminal), tabTexture, selectedTabTexture, selectSound, 3) { icons = iconGroup2, alignment = Alignment.Left };
+        var MissionSelect = new TabbedWindow(new Vector2(0, center.Y), Assets.Get(Sprite.GargantuanPanel), tabTexture, selectedTabTexture, selectSound, 2) { icons = iconGroup3, alignment = Alignment.Left };
+        var PickupDroneMenu = new Window(center, largePanel);
+        var FuseMenu = new Window(center, largePanel);
+        var SaveMenu = new Window(center, Assets.Get(Sprite.GargantuanPanel));
+        var LoadMenu = new Window(center, Assets.Get(Sprite.GargantuanPanel));
 
         //Main Menu Widgets
         var patchedConicsToggle = new Button(new Vector2(0, -MainMenu.Size.Y / 4), wideButton, Assets.TextFont, $"Patched Conics: {PatchedConics}", Color.White);
@@ -167,10 +169,13 @@ public class Engine : Game
         //Save and Load Menu
         var saveToFile = new Button(Vector2.Zero, Assets.Get(Sprite.Button), Assets.TextFont, "Save", Color.White);
         var loadFromFile = new Button(Vector2.Zero, Assets.Get(Sprite.Button), Assets.TextFont, "Load", Color.White);
-        var prevSave = new Button(new Vector2(-50, 0), Assets.Get(Sprite.Button), Assets.TextFont, "Prev", Color.White);
-        var nextSave = new Button(new Vector2(50, 0), Assets.Get(Sprite.Button), Assets.TextFont, "Next", Color.White);
-        var deleteSave = new Button(new Vector2(50, 20), Assets.Get(Sprite.Button), Assets.TextFont, "Next", Color.White);
-        var name = new Textbox(new Vector2(0, 20), Assets.Get(Sprite.Button));
+        var prevSave = new Button(new Vector2(-100, 0), Assets.Get(Sprite.Button), Assets.TextFont, "Prev", Color.White);
+        var nextSave = new Button(new Vector2(100, 0), Assets.Get(Sprite.Button), Assets.TextFont, "Next", Color.White);
+        var deleteSave = new Button(new Vector2(100, 40), Assets.Get(Sprite.Button), Assets.TextFont, "Delete", Color.White);
+        var name = new Textbox(new Vector2(0, -40), Assets.Get(Sprite.Button), Assets.TextFont);
+        var loadedName = new Decal(new Vector2(0, 40), Assets.TextFont, "", Color.White, 10);
+        var saveBack = new Button(new Vector2(-100, 40), Assets.Get(Sprite.Button), Assets.TextFont, "Back", Color.White);
+        var loadBack = new Button(new Vector2(-100, 40), Assets.Get(Sprite.Button), Assets.TextFont, "Back", Color.White);
 
         //Global Menu
         var globalSidePanelOpen = new Button(Vector2.Zero, Assets.Get(Sprite.ToggleButton));
@@ -306,8 +311,8 @@ public class Engine : Game
                 SaveGame.QueuedItems.RemoveAt(SaveGame.QueuedItems.Count - 1);
             }
         });
-        saveButton.AddBehaviour(Save);
-        loadButton.AddBehaviour(Load);
+        saveButton.AddBehaviour(delegate { UIManager.DisableAll(); SaveMenu.enabled = true; EventHandler.GetSave(); });
+        loadButton.AddBehaviour(delegate { MainMenu.enabled = false; LoadMenu.enabled = true; EventHandler.GetSave(); });
 
         prevSave.AddBehaviour(delegate
         {
@@ -319,7 +324,11 @@ public class Engine : Game
             SaveSlot = Math.Clamp(SaveSlot + 1, 0, 10);
             EventHandler.GetSave();
         });
-        name.AddBehaviour(EventHandler.UpdateSaveName);
+        name.AddBehaviour(delegate { SaveGame.Name = name.text; });
+        saveToFile.AddBehaviour(Save);
+        loadFromFile.AddBehaviour(Load);
+        saveBack.AddBehaviour(delegate { MissionSelect.enabled = true; SaveMenu.enabled = false;  });
+        loadBack.AddBehaviour(delegate { MainMenu.enabled = true; LoadMenu.enabled = false; });
 
 
         MainMenu.AddWidget(exitButton as IFunctional, 0);
@@ -383,12 +392,15 @@ public class Engine : Game
         SaveMenu.AddWidget(nextSave as IFunctional);
         SaveMenu.AddWidget(deleteSave as IFunctional);
         SaveMenu.AddWidget(name as IFunctional);
+        SaveMenu.AddWidget(loadedName);
+        SaveMenu.AddWidget(saveBack as IFunctional);
 
         LoadMenu.AddWidget(loadFromFile as IFunctional);
         LoadMenu.AddWidget(prevSave as IFunctional);
         LoadMenu.AddWidget(nextSave as IFunctional);
-        LoadMenu.AddWidget(name as IFunctional);
         LoadMenu.AddWidget(deleteSave as IFunctional);
+        LoadMenu.AddWidget(loadedName);
+        LoadMenu.AddWidget(loadBack as IFunctional);
 
         FuseMenu.AddWidget(fuseCounter);
         for (int i = 0; i < 4; i++)

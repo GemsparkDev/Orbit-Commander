@@ -1076,12 +1076,15 @@ public class Player : Entity
     {
         List<string> disassembly = SaveGame.Disassemble(_serialization);
 
-        _logger.Try(delegate { spareFuses = Int32.Parse(disassembly[0]); }, 0);
-        _logger.Try(delegate { aimAssist = bool.Parse(disassembly[1]); }, 1);
+        spareFuses = Int32.TryParse(disassembly[0], out int spares) ? spares : 1;
+        aimAssist = !Boolean.TryParse(disassembly[1], out bool assist) || assist;
         var fuses = SaveGame.Disassemble(disassembly[2]);
         for (int i = 0; i < moduleFuses.LongLength; i++)
         {
-            _logger.Try(delegate { moduleFuses[i / 4, i % 4] = bool.Parse(fuses[i]); }, 2);
+            if (Boolean.TryParse(fuses[i], out bool fuse))
+            {
+                moduleFuses[i / 4, i % 4] = fuse;
+            }
         }
         _logger.Try(delegate { modules[ModuleType.Hull] = (Module)(ItemFactory.TryDeserialize(disassembly[3], _logger)); }, 3);
         _logger.Try(delegate { modules[ModuleType.Guns] = (Module)(ItemFactory.TryDeserialize(disassembly[4], _logger)); }, 4);

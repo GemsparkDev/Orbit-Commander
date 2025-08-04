@@ -39,38 +39,47 @@ public class SaveGame
     public SaveGame() { }
     public SaveGame(string _serialization)
     {
+        ArgumentNullException.ThrowIfNull(_serialization);
+        if (_serialization == "")
+        {
+            return;
+        }
         List<string> disassembly = Disassemble(_serialization);
         var logger = new LoadLogger();
-        int i = 0;
 
-        logger.Try(delegate { Name = (disassembly[i]).ToString(); }, i++);
-        logger.Try(delegate { Scrap = Int32.Parse(disassembly[i]); }, i++);
-        logger.Try(delegate { System = Int32.Parse(disassembly[i]); }, i++);
-        logger.Try(delegate { CurrentMissionIndex = Int32.Parse(disassembly[i]); }, i++);
-        logger.Try(delegate { giveWeapon = bool.Parse(disassembly[i]); }, i++);
+        Name = disassembly[0];
+        Scrap = Int32.TryParse(disassembly[1], out int scrap) ? scrap : 0;
+        System = System = Int32.TryParse(disassembly[2], out int system) ? system : 0;
+        CurrentMissionIndex = Int32.TryParse(disassembly[3], out int index) ? index : 0;
+        giveWeapon = !Boolean.TryParse(disassembly[4], out bool give) || give;
+
         List<string> array = [];
-        logger.Try(delegate { array = Disassemble(disassembly[i]); }, i++);
+        logger.Try(delegate { array = Disassemble(disassembly[5]); }, 5);
         for (int j = 0; j < CompletedMissions.Length; j++)
         {
             logger.Try(delegate { CompletedMissions[j] = bool.Parse(array[j]); }, j);
         }
+
         Player player = null;
-        logger.Try(delegate{ player = new Player(disassembly[i], logger); }, i++);
+        logger.Try(delegate{ player = new Player(disassembly[6], logger); }, 6);
         Player = (player ?? new Player(Vector2.Zero, Vector2.Zero, 0, 0));
+
         array = [];
-        logger.Try(delegate { array = Disassemble(disassembly[i]); }, i++);
+        logger.Try(delegate { array = Disassemble(disassembly[7]); }, 7);
         for (int j = 0; j < Inventory.Length; j++)
         {
             logger.Try(delegate { Inventory[j] = ItemFactory.TryDeserialize(array[j], logger); }, 6);
         }
+
         array = [];
-        logger.Try(delegate { array = Disassemble(disassembly[i]); }, i++);
+        logger.Try(delegate { array = Disassemble(disassembly[8]); }, 8);
         for (int j = 0; j < MissionSelectInventory.Length; j++)
         {
             logger.Try(delegate { MissionSelectInventory[j] = ItemFactory.TryDeserialize(array[j], logger); }, j);
         }
+
         array = [];
-        logger.Try(delegate { array = Disassemble(disassembly[i]); }, i++);
+        logger.Try(delegate { array = Disassemble(disassembly[9]); }, 9);
         if(Int32.TryParse(array[0], out int _i))
         {
             for (int j = 0; j < _i; j++)
@@ -78,6 +87,7 @@ public class SaveGame
                 logger.Try(delegate { QueuedItems.Add(Queueable.Deserialize(array[j + 1], logger)); }, j+1);
             }
         }
+
         logger.Log();
     }
     public static List<string> Disassemble(string _serialization)

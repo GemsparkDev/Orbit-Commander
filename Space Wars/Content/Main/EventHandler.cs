@@ -312,34 +312,21 @@ public static class EventHandler
     public static void GetSave()
     {
         string filePath = Path.Combine(Directory.GetCurrentDirectory(), $"Content\\Saves\\Save_{Engine.SaveSlot}.txt");
-        string text = "";
-        using (var outputFile = new StreamReader(filePath))
+        if (File.Exists(filePath))
         {
-            text = outputFile.ReadLine();
-        }
-        if (text == "")
-        {
-            (Engine.UIManager.GetContainer((int)Containers.SaveMenu).GetFuncWidget(4) as Textbox).Text = "Empty";
+            using var outputFile = new StreamReader(filePath);
+            string text = outputFile.ReadLine();
+            if (text != null)
+            {
+                (Engine.UIManager.GetContainer((int)Containers.SaveMenu).GetWidget(0) as Decal).text = SaveGame.Disassemble(text)[0];
+            }
             return;
         }
-        (Engine.UIManager.GetContainer((int)Containers.SaveMenu).GetFuncWidget(4) as Textbox).Text = SaveGame.Disassemble(text)[0];
+        (Engine.UIManager.GetContainer((int)Containers.SaveMenu).GetWidget(0) as Decal).text = "Empty";
     }
-    public static void UpdateSaveName()
+    public static void DeleteSave()
     {
-        //Note: There may be a better way to do it
         string filePath = Path.Combine(Directory.GetCurrentDirectory(), $"Content\\Saves\\Save_{Engine.SaveSlot}.txt");
-        string text = "";
-        using (var outputFile = new StreamReader(filePath))
-        {
-            text = outputFile.ReadLine();
-        }
-        var saveGame = new SaveGame(text)
-        {
-            Name = (Engine.UIManager.GetContainer((int)Containers.SaveMenu).GetFuncWidget(4) as Textbox).Text
-        };
-        using (var outputFile = new StreamWriter(filePath))
-        {
-            outputFile.WriteLine(saveGame.Serialize());
-        }
+        File.Delete(filePath);
     }
 }
