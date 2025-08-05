@@ -454,7 +454,7 @@ public class EntityManager
         }
         foreach (var entity in entities)
         {
-            if (_type != (entity.isFriendly ? 1 : -1))
+            if (_type != (entity.isFriendly ? 1 : -1) && _type != 0)
             {
                 continue;
             }

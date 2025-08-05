@@ -34,6 +34,7 @@ public static class ItemFactory
         { Modules.Spewer, new ModuleData(Sprite.RealCrossbowModule,Sprite.CrossbowModule, "Spewer", (int)ModuleType.Guns, 15, delegate{ Player.Spewer(); })},
         { Modules.Antimaterial, new ModuleData(Sprite.RealCrossbowModule,Sprite.CrossbowModule, "Antimaterial Rifle", (int)ModuleType.Guns, 15, delegate{ Player.Antimaterial(); })},
         { Modules.Triangle, new ModuleData(Sprite.RealCrossbowModule,Sprite.CrossbowModule, "Triangle", (int)ModuleType.Guns, 20, delegate{ Player.Triangle(); })},
+        { Modules.PrismArray, new ModuleData(Sprite.RealCrossbowModule,Sprite.CrossbowModule, "Prism Array", (int)ModuleType.Guns, 15, delegate{ Player.PrismArray(); })},
 
         { Modules.Engines, new ModuleData(Sprite.EngineModule, Sprite.EngineModule, "Engines", (int)ModuleType.Engines, 20, delegate(){ Player.StandardEngine(); }) },
         { Modules.Plasma, new ModuleData(Sprite.EngineModule, Sprite.EngineModule, "Plasma", (int)ModuleType.Engines, 15, delegate(){ Player.PlasmaEngine();  }) },

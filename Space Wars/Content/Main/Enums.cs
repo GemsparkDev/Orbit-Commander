@@ -38,6 +38,7 @@ public enum Modules
     Spewer,
     Antimaterial,
     Triangle,
+    PrismArray,
     //Cores
     Dash,
     GrapplingHook,
