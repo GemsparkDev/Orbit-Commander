@@ -3,6 +3,11 @@
 Lagrange Commander is a game made using C# in monogame. It is a 2D top down wave based shooter where you must repair and upgrade your ship by salvaging from enemies you defeat. It features realistic N-Body gravitation, which affects all entities and projectiles.
   
 # Changelog    
+0.5.4 - 8/5/2025    
+ - Circle particle emitters now use various emitter attributes, allowing for more customizability.    
+ - Flamebolts can now have custom emitters.    
+ - Added the Matrix Launcher weapon.    
+ - Removed some parameters from the particle emitter constructor.    
 0.5.3.9  - 8/4/2025    
  - Added the Prism Array weapon type.    
  - Fixed the hitscan not detecting enemies when in global mode.    
