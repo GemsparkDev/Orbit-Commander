@@ -59,35 +59,15 @@ public abstract class GameState
                     }
                 }
             }
-            /*
-            Vector2 screen = Engine.ScreenSize / 32;
-            for (int i = (int)(-screen.X); i <= screen.X; i++)
-            {
-                for (int j = (int)(-screen.Y); j <= screen.Y; j++)
-                {
-                    Vector2 pos = Engine.Camera.Position + new Vector2(i, j) * 32 + Engine.MousePositionOffset;
-                    Vector2 acceleration = Engine.SaveGame.CurrentMission.GetNormalizedAcceleration(pos);
-                    float strength = acceleration.Length() * 60;
-                    var angle = MathF.Atan2(acceleration.Y, acceleration.X) - MathF.PI / 2;
-                    if (strength < 10)
-                    {
-                        float col = Math.Clamp((10 - strength)/10, 0, 0.25f);
-                        _spriteBatch.Draw(Assets.Get(Sprite.Arrow), new Rectangle((int)pos.X, (int)pos.Y, 5, (int)(10 * strength)), new Rectangle(0, 0, 8, 15), Color.White * col, angle, Vector2.Zero, 0, 0);
-                    }
-                }
-            }
-            */
         }
     }
 }
-
 public class MainMenu : GameState
 {
     private GravitationalSource menuPlanet = new(new Vector2(0, 750), Vector2.Zero, 5000, 9, true, Color.Cyan);
     private GravitationalSource moonPlanet = new(new Vector2(0, 1750), GravitationalSource.GetOrbitalVelocity(new Vector2(0, 1750), new Vector2(0, 750), 5000), 250, 1.5f, false, Color.Cyan);
-    private ParticleEmitter smokeParticles = new(Assets.Get(Sprite.Circle), 1f, new Vector2(0, 300 - Assets.DimsOf(Sprite.Mothership).Y + 10),
-        0, 45, 1, 0, 40, Color.Gray, new Color(169, 169, 169, 0), EmitterType.EmissionOverTime)
-    { probability = 0.25f };
+    private ParticleEmitter smokeParticles = new(Assets.Get(Sprite.Circle), 1f, new Vector2(0, 300 - Assets.DimsOf(Sprite.Mothership).Y + 10), 0, 45, 1, 40, Color.Gray, EmitterType.EmissionOverTime) 
+    { particleFadeToColor = new Color(169, 169, 169, 0), probability = 0.25f };
     public override void Initialize()
     {
         smokeParticles.isEmitterActive = true;

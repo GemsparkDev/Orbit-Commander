@@ -225,7 +225,7 @@ public class Enemy : Entity
     //Bosses
     IEnumerable<int> Symmetry()
     {
-        enemyRange.radius = 500;
+        enemyRange.particleVelocity = 500;
         float missileCooldown = 10;
         float missileCount = 0;
         float bulletCount = 0;
@@ -333,7 +333,7 @@ public class Enemy : Entity
     }
     IEnumerable<int> Overload()
     {
-        enemyRange.radius = 10;
+        enemyRange.particleVelocity = 10;
         float octoshotCooldown = 10;
         int octoshots = 0;
         float maxShieldCooldown = 3.33f;
@@ -495,7 +495,7 @@ public class Enemy : Entity
     }
     IEnumerable<int> Wyvern(Enemy _parent)
     {
-        enemyRange.radius = 500;
+        enemyRange.particleVelocity = 500;
         Enemy parent = _parent;
         Enemy tail1 = null;
         Enemy tail2 = null;
@@ -625,7 +625,7 @@ public class Enemy : Entity
     }
     IEnumerable<int> Excursion()
     {
-        enemyRange.radius = 500;
+        enemyRange.particleVelocity = 500;
         int currentWave = 0;
         int currentEnemy = 0;
         float waveTimer = 0;
@@ -790,14 +790,14 @@ public class Enemy : Entity
     }
     IEnumerable<int> Exodus()
     {
-        enemyRange.radius = 250;
+        enemyRange.particleVelocity = 250;
         float cooldown1 = 0;
         float cooldown2 = 2.5f;
         float missileGap = 0;
         var col = Color.DarkRed;
         col.A = 0;
-        ParticleEmitter engineParticles = new(Assets.Get(Sprite.Circle), 0.1f, Vector2.Zero, 0, 90, 2, 0, 
-            200f, Color.Yellow, col, EmitterType.EmissionOverTime);
+        var engineParticles = new ParticleEmitter(Assets.Get(Sprite.Circle), 0.1f, Vector2.Zero, 0, 90, 2, 
+            200f, Color.Yellow, EmitterType.EmissionOverTime) { particleFadeToColor = col };
         while (true)
         {
             targetVector = Vector2.Normalize(Player.position - position);
@@ -944,7 +944,7 @@ public class Enemy : Entity
         StealthAbility = 2;
         SensingAbility = -1;
         float detectionCooldown = 0;
-        enemyRange.radius = 450;
+        enemyRange.particleVelocity = 450;
         Entity detectedEntity = null;
         while (true)
         {
@@ -1083,7 +1083,7 @@ public class Enemy : Entity
                 rangeFactor = 1.25f;
                 rotationSpeed = 0.05f;
             }
-            enemyRange.radius = 400 * rangeFactor;
+            enemyRange.particleVelocity = 400 * rangeFactor;
             time += Engine.DeltaSeconds;
             Vector2 normalizedAcceleration = GetNormalizedAcceleration();
             Vector2 relativeVelocity = Player.velocity - velocity;
@@ -1141,7 +1141,7 @@ public class Enemy : Entity
     }
     IEnumerable<int> Flare(Enemy _inferno)
     {
-        enemyRange.radius = 1000;
+        enemyRange.particleVelocity = 1000;
         cooldown = 1.5f;
         float octoshot = 15;
         float shotCooldown = 0.75f;
@@ -1263,7 +1263,7 @@ public class Enemy : Entity
     //Enemies
     IEnumerable<int> Fighter()
     {
-        enemyRange.radius = 250;
+        enemyRange.particleVelocity = 250;
         float speed = 3;
         if (isFriendly)
         {
@@ -1308,7 +1308,7 @@ public class Enemy : Entity
     }
     IEnumerable<int> Carrier()
     {
-        enemyRange.radius = 500;
+        enemyRange.particleVelocity = 500;
         while (true)
         {
             targetVector = Player.position - position + (Player.velocity - velocity);
@@ -1346,7 +1346,7 @@ public class Enemy : Entity
     }
     IEnumerable<int> Sniper()
     {
-        enemyRange.radius = 400;
+        enemyRange.particleVelocity = 400;
         while (true)
         {
             float timeToHit;
@@ -1383,15 +1383,15 @@ public class Enemy : Entity
     }
     IEnumerable<int> Missile()
     {
-        enemyRange.radius = 10;
+        enemyRange.particleVelocity = 10;
         entityType = EntityType.Projectile;
         float fuel = 45;
         float deathCooldown = 2;
         deleteOnCollide = true;
         var col = Color.DarkRed;
         col.A = 0;
-        ParticleEmitter engineParticles = new(Assets.Get(Sprite.Circle), 0.1f, Vector2.Zero, 0, 45, 2, 0, 
-            200f, Color.Yellow, col, EmitterType.EmissionOverTime) { isEmitterActive = false };
+        ParticleEmitter engineParticles = new(Assets.Get(Sprite.Circle), 0.1f, Vector2.Zero, 0, 45, 2, 
+            200f, Color.Yellow, EmitterType.EmissionOverTime) { isEmitterActive = false, particleFadeToColor = col };
         while (true)
         {
             if (fuel <= 0)
@@ -1471,7 +1471,7 @@ public class Enemy : Entity
         Random random = new();
         Enemy shield = NewShield(this, 3, 25, 0, 0);
         Engine.EntityManager.Add(shield);
-        enemyRange.radius = 200;
+        enemyRange.particleVelocity = 200;
         while (true)
         {
             targetVector = Player.position - position + (Player.velocity - velocity) * 8;
@@ -1539,11 +1539,10 @@ public class Enemy : Entity
         int shots = 0;
         float weaponCooldown = 2;
         Vector2 randomPos = Vector2.Zero;
-        enemyRange.radius = 250;
+        enemyRange.particleVelocity = 250;
         var col = Color.DarkRed;
         col.A = 0;
-        ParticleEmitter engineParticles = new(Assets.Get(Sprite.Circle), 0.15f, Vector2.Zero, 0, 45, 2, 0,
-            200f, Color.Yellow, col, EmitterType.EmissionOverTime);
+        ParticleEmitter engineParticles = new(Assets.Get(Sprite.Circle), 0.15f, Vector2.Zero, 0, 45, 2, 200f, Color.Yellow, EmitterType.EmissionOverTime) { particleFadeToColor = col };
         while (true)
         {
             Entity nearestEnemy = Engine.EntityManager.NearestEnemy(this);
@@ -1587,7 +1586,7 @@ public class Enemy : Entity
                     thrust = 20;
                 }
             }
-            if (Vector2.Distance(position, nearestEnemy.position) < enemyRange.radius)
+            if (Vector2.Distance(position, nearestEnemy.position) < enemyRange.particleVelocity)
             {
                 if (weaponCooldown > 0)
                 {
@@ -1624,7 +1623,7 @@ public class Enemy : Entity
     }
     IEnumerable<int> AdvancedFighter()
     {
-        enemyRange.radius = 500;
+        enemyRange.particleVelocity = 500;
         float tripleCooldown = 0;
         int shotCount = 0;
         while (true)
@@ -1721,7 +1720,7 @@ public class Enemy : Entity
     }
     IEnumerable<int> StealthFighter()
     {
-        enemyRange.radius = 500;
+        enemyRange.particleVelocity = 500;
         SensingAbility = -1;
         StealthAbility = 0;
         Entity target = null;
@@ -1791,7 +1790,7 @@ public class Enemy : Entity
     }
     IEnumerable<int> Hunter()
     {
-        enemyRange.radius = 300;
+        enemyRange.particleVelocity = 300;
         SensingAbility = 0;
         StealthAbility = 1;
         Entity target = null;
@@ -1905,7 +1904,7 @@ public class Enemy : Entity
     }
     IEnumerable<int> Healer()
     {
-        enemyRange.radius = 300;
+        enemyRange.particleVelocity = 300;
         float weaponCooldown = 0;
         while(true)
         {
@@ -1969,7 +1968,7 @@ public class Enemy : Entity
     //Infrastructure
     IEnumerable<int> Mothership()
     {
-        enemyRange.radius = 300;
+        enemyRange.particleVelocity = 300;
         float furnaceCooldown = 15;
         float craftingCooldown = 12;
         int requiredCraftsLeft = 20;
@@ -2038,7 +2037,7 @@ public class Enemy : Entity
                     if (nearestEnemy != null)
                     {
                         Vector2 relativePosition = position - nearestEnemy.position;
-                        if (relativePosition.Length() < enemyRange.radius)
+                        if (relativePosition.Length() < enemyRange.particleVelocity)
                         {
                             Engine.EntityManager.Add(new AssassinShot(position, -Vector2.Normalize(relativePosition) * 100 + nearestEnemy.velocity, MathF.Atan2(relativePosition.Y, relativePosition.X) - MathF.PI / 2, 0, isFriendly, damage));
                             SoundManager.PlaySound(Assets.Get(Sound.MissileFire), position);
@@ -2090,7 +2089,7 @@ public class Enemy : Entity
     IEnumerable<int> TurretCannon(float _angle)
     {
         float bulletOffset = 4;
-        enemyRange.radius = 400;
+        enemyRange.particleVelocity = 400;
         ChildEnemy = true;
         while (true)
         {
@@ -2210,8 +2209,8 @@ public class Enemy : Entity
     }
     IEnumerable<int> Miner()
     {
-        ParticleEmitter miningDebris = new(Assets.Get(Sprite.Circle), 0.1f, position, angle * 180 / 3.1415926f, 90, 2,
-            Engine.Random.NextSingle() - 0.5f, 500, Color.Cyan, Color.Transparent, EmitterType.EmissionOverTime);
+        ParticleEmitter miningDebris = new(Assets.Get(Sprite.Circle), 0.1f, position, angle * 180 / 3.1415926f, 90, 2, 500, Color.Cyan, EmitterType.EmissionOverTime) 
+        { particleFadeToColor = Color.Transparent, particleAngularVelocity = Engine.OneToNegOne() / 2 };
         float healTimer = 30;
         while (true)
         {

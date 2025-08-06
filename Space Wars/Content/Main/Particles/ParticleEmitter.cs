@@ -8,29 +8,30 @@ namespace Space_Wars.Content.Main.Particles
     public enum EmitterType
     {
         EmissionOverTime = 0,
-        EmissionOverDistance = 1
+        EmissionOverDistance = 1,
+        Circle = 2,
     }
     public class ParticleEmitter
     {
         public Vector2 position;
-        public Vector2 prevPosition;
+        private Vector2 prevPosition;
         public Vector2 offsetVelocity = Vector2.Zero;
         public Color particleColor;
         public Color particleFadeToColor;
         public Texture2D particleTexture;
         public float particleTimeAlive;
         public float sprayAngle;
-        public float cachedDistance = 0;
+        private float cachedDistance = 0;
         public int sprayCone;
         public float particleVelocity;
-        public float particleAngularVelocity;
+        public float particleAngularVelocity = 0;
         public float speedOfEmission;
-        public float radius;
         public bool isEmitterActive = true;
         public float probability = 1;
+        public EmitterType EmitterType { get; }
         float cooldown = 1;
         private Action emitterFunction;
-        public ParticleEmitter(Texture2D _particleTexture, float _particleTimeAlive, Vector2 _position, float _sprayAngle, int _sprayCone, float _particleVelocity, float _particleAngularVelocity, float _speedOfEmission, Color _particleColor, Color _particleFadeToColor, EmitterType _emitterType)
+        public ParticleEmitter(Texture2D _particleTexture, float _particleTimeAlive, Vector2 _position, float _sprayAngle, int _sprayCone, float _particleVelocity, float _speedOfEmission, Color _particleColor, EmitterType _emitterType)
         {
             particleTexture = _particleTexture;
             particleTimeAlive = _particleTimeAlive;
@@ -38,11 +39,11 @@ namespace Space_Wars.Content.Main.Particles
             sprayAngle = _sprayAngle;
             sprayCone = _sprayCone;
             particleVelocity = _particleVelocity;
-            particleAngularVelocity = _particleAngularVelocity;
             speedOfEmission = _speedOfEmission;
             cooldown = 1/_speedOfEmission;
             particleColor = _particleColor;
-            particleFadeToColor = _particleFadeToColor;
+            particleFadeToColor = particleColor;
+            EmitterType = _emitterType;
             if(_emitterType == EmitterType.EmissionOverTime)
             {
                 emitterFunction = EmissionOverTime;
@@ -56,11 +57,14 @@ namespace Space_Wars.Content.Main.Particles
         public ParticleEmitter(Texture2D _particleTexture, Vector2 _position, float _radius, Color _particleColor)
         {
             particleTexture = _particleTexture;
-            particleTimeAlive = Engine.DeltaSeconds;
+            particleTimeAlive = 1;
+            sprayCone = 360;
+            speedOfEmission = 1;
             position = _position;
-            radius = _radius;
+            particleVelocity = _radius;
             particleColor = _particleColor;
             emitterFunction = DrawCircle;
+            EmitterType = EmitterType.Circle;
         }
         public void Update()
         {
@@ -129,13 +133,12 @@ namespace Space_Wars.Content.Main.Particles
         private void DrawCircle()
         {
             Vector2 normalVector;
-            float angle;
-            for (int i = 0; i < radius; i++)
+            for (float angle = sprayAngle / 180 * MathF.PI; angle < MathF.Tau * sprayCone / 360 + sprayAngle / 180 * MathF.PI; angle += MathF.Tau / particleVelocity / particleTimeAlive / speedOfEmission)
             {
-                angle = (MathF.Tau / radius) * i;
-                normalVector = new Vector2(MathF.Sin(angle), -MathF.Cos(angle)) * radius;
-                ParticleManager.Add(new Particle(particleTexture, position + normalVector, angle, particleColor));
+                normalVector = Engine.ToUnitVector(angle) * particleVelocity * particleTimeAlive;
+                ParticleManager.Add(new Particle(particleTexture, position + normalVector + offsetVelocity, angle, particleColor));
             }
+            sprayAngle += particleAngularVelocity * Engine.DeltaSeconds * 60;
         }
     }
 }

@@ -39,6 +39,7 @@ public enum Modules
     Antimaterial,
     Triangle,
     PrismArray,
+    MatrixLauncher,
     //Cores
     Dash,
     GrapplingHook,

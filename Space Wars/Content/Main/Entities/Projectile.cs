@@ -107,7 +107,7 @@ public class AssassinShot : Projectile
         timeLeft = 3;
         var col = Color.Gold;
         col.A = 0;
-        beam = new(Assets.Get(Sprite.Dot), 0.5f, position, angle, 0, 0, 0, 0.5f, color, col, EmitterType.EmissionOverDistance);
+        beam = new(Assets.Get(Sprite.Dot), 0.5f, position, angle, 0, 0, 0.5f, color, EmitterType.EmissionOverDistance) { particleFadeToColor = col };
     }
     public override void AI()
     {
@@ -244,11 +244,19 @@ public class FlameBolt : Projectile
 {
     float piercingCooldown = 0;
     float maxTimeLeft;
-    private ParticleEmitter emitter = new(Assets.Get(Sprite.Circle), 0.75f, Vector2.Zero, 0, 360, 1, 1, 1500, new Color(1f, 1f, 0.25f, 1f), new Color(1f, 0, 0, 0), EmitterType.EmissionOverTime);
-    public new float ColliderRadius => Math.Min((maxTimeLeft - timeLeft) * emitter.particleVelocity, emitter.particleVelocity * emitter.particleTimeAlive) * 60;
-    public FlameBolt(Vector2 _position, Vector2 _velocity, bool _isFriendly, int _damage, float _timeLeft = 0.7f, float _particleVelocity = 1, int _stealth = 0)
+    private ParticleEmitter emitter;
+    public new float ColliderRadius => emitter.EmitterType == EmitterType.Circle ? emitter.particleVelocity : Math.Min((maxTimeLeft - timeLeft) * emitter.particleVelocity, emitter.particleVelocity * emitter.particleTimeAlive) * 60;
+    public FlameBolt(Vector2 _position, Vector2 _velocity, bool _isFriendly, int _damage, float _timeLeft = 0.7f, float _particleVelocity = 1, int _stealth = 0, ParticleEmitter _emitter = null)
         : base(Assets.Get(Sprite.Circle), _position, _velocity, 0, 0, _isFriendly, _damage, _stealth)
     {
+        if (_emitter == null)
+        {
+            emitter = new ParticleEmitter(Assets.Get(Sprite.Circle), 0.75f, Vector2.Zero, 0, 360, 1, 1500, new Color(1f, 1f, 0.25f, 1f), EmitterType.EmissionOverTime) { particleFadeToColor = new Color(1f, 0, 0, 0) };
+        }
+        else
+        {
+            emitter = _emitter;
+        }
         entityType = EntityType.Projectile;
         color = Color.Transparent;
         timeLeft = _timeLeft;
@@ -257,13 +265,17 @@ public class FlameBolt : Projectile
     }
     public override void AI()
     {
-        collider.radius = ColliderRadius;
+        collider.particleVelocity = ColliderRadius;
         emitter.position = position;
         emitter.Update();
         emitter.offsetVelocity = velocity;
         position += velocity * Engine.DeltaSeconds * 60;
         angle += angularVelocity * Engine.DeltaSeconds * 60;
         emitter.particleTimeAlive = Math.Min(1, MathF.Sqrt(timeLeft));
+        if (emitter.EmitterType == EmitterType.Circle)
+        {
+            emitter.particleVelocity = Math.Min((maxTimeLeft - timeLeft), emitter.particleTimeAlive) * 60;
+        }
         if (piercingCooldown > 0)
         {
             piercingCooldown -= Engine.DeltaSeconds;

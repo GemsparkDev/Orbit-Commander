@@ -29,7 +29,7 @@ public class Player : Entity
     public Dictionary<ModuleType, Module> modules = new()
     {
         { ModuleType.Hull, new Module(Modules.Reflective) },
-        { ModuleType.Guns, new Module(Modules.PrismArray) },
+        { ModuleType.Guns, new Module(Modules.MatrixLauncher) },
         { ModuleType.Engines, new Module(Modules.Plasma) },
         { ModuleType.Sensors, new Module(Modules.Sensors) },
         { ModuleType.Core, new Module(Modules.CreateFighter) }
@@ -39,8 +39,8 @@ public class Player : Entity
     public List<Pickup> leashedMaterials = [];
     private Entity abilityEntity;
     private Entity gunAngle;
-    private ParticleEmitter engineParticles = new(Assets.Get(Sprite.Circle), 0.15f, Vector2.Zero, 0, 45, 2, 0, 450f, Color.Cyan, new Color(72, 61, 139, 0), EmitterType.EmissionOverTime) { isEmitterActive = false };
-    private ParticleEmitter smokeParticles = new(Assets.Get(Sprite.Circle), 1f, Vector2.Zero, 0, 45, 1, 0, 0.5f, Color.Gray, new Color(169, 169, 169, 0), EmitterType.EmissionOverTime) { isEmitterActive = false };
+    private ParticleEmitter engineParticles = new(Assets.Get(Sprite.Circle), 0.15f, Vector2.Zero, 0, 45, 2, 450f, Color.Cyan, EmitterType.EmissionOverTime) { isEmitterActive = false, particleFadeToColor = new Color(72, 61, 139, 0) };
+    private ParticleEmitter smokeParticles = new(Assets.Get(Sprite.Circle), 1f, Vector2.Zero, 0, 45, 1, 0.5f, Color.Gray, EmitterType.EmissionOverTime) { isEmitterActive = false, particleFadeToColor = new Color(169, 169, 169, 0) };
     private SoundEffectInstance engineSounds;
     private float invincibilityCooldown = 0;
     private float cachedDamage = 0;
@@ -993,6 +993,17 @@ public class Player : Entity
         {
             enemy.Collide(1);
         }
+    }
+    public void MatrixLauncher()
+    {
+        if (!modules[ModuleType.Guns].IsCooldownReady())
+        {
+            return;
+        }
+        Engine.EntityManager.Add(new FlameBolt(position, IdealSpeedWithVelocity(15) + new Vector2(Engine.OneToNegOne(), Engine.OneToNegOne()) / 2, true, 10, 4, 1f, 1, new ParticleEmitter(Assets.Get(Sprite.Dot), position, 100, Color.Cyan)));
+        SoundManager.PlaySound(Assets.Get(Sound.SniperFire), position);
+        modules[ModuleType.Guns].cooldown = 1f;
+        Engine.ShakeScreen(0.3f);
     }
     public void Dash()
     {

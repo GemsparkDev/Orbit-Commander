@@ -499,8 +499,7 @@ public class EntityManager
         sound.IsLooped = true;
         var col = Color.Coral;
         col.A = 0;
-        var emitter = new ParticleEmitter(Assets.Get(Sprite.Circle), 1, new Vector2(1500, -2000), 165 + 45, 360, 2,
-            Engine.Random.NextSingle() - 0.5f, 200, Color.Gray, col, EmitterType.EmissionOverTime);
+        var emitter = new ParticleEmitter(Assets.Get(Sprite.Circle), 1, new Vector2(1500, -2000), 165 + 45, 360, 2, 200, Color.Gray, EmitterType.EmissionOverTime) { particleFadeToColor = col, particleAngularVelocity = Engine.Random.NextSingle() - 0.5f };
         actors.Add(mothership);
         //Ensure planets still orbit and render
         events.Add(new Event(0, 3, delegate (float time)
