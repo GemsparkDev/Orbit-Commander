@@ -39,8 +39,8 @@ public class Player : Entity
     public List<Pickup> leashedMaterials = [];
     private Entity abilityEntity;
     private Entity gunAngle;
-    private ParticleEmitter engineParticles = new(Assets.Get(Sprite.Circle), 0.15f, Vector2.Zero, 0, 45, 2, 450f, Color.Cyan, EmitterType.EmissionOverTime) { isEmitterActive = false, particleFadeToColor = new Color(72, 61, 139, 0) };
-    private ParticleEmitter smokeParticles = new(Assets.Get(Sprite.Circle), 1f, Vector2.Zero, 0, 45, 1, 0.5f, Color.Gray, EmitterType.EmissionOverTime) { isEmitterActive = false, particleFadeToColor = new Color(169, 169, 169, 0) };
+    private ParticleEmitter engineParticles = new(Assets.Get(Sprite.Circle), 0.15f, Vector2.Zero, 0, MathF.PI/4, 2, 450f, Color.Cyan, EmitterType.EmissionOverTime) { isEmitterActive = false, particleFadeToColor = new Color(72, 61, 139, 0) };
+    private ParticleEmitter smokeParticles = new(Assets.Get(Sprite.Circle), 1f, Vector2.Zero, 0, MathF.PI/4, 1, 0.5f, Color.Gray, EmitterType.EmissionOverTime) { isEmitterActive = false, particleFadeToColor = new Color(169, 169, 169, 0) };
     private SoundEffectInstance engineSounds;
     private float invincibilityCooldown = 0;
     private float cachedDamage = 0;
@@ -717,7 +717,7 @@ public class Player : Entity
         {
             engineTime = Math.Clamp(engineTime + Engine.DeltaSeconds, 0, 1);
             float engineTimeModifier = 1 - (1 - engineTime) * (1 - engineTime);
-            engineParticles.sprayAngle = angle * 180 / MathF.PI + 180;
+            engineParticles.sprayAngle = angle + MathF.PI;
             float fuseRatio = (float)(CountFuses(ModuleType.Engines)) / 3;
             engineParticles.speedOfEmission = 450f * fuseRatio * engineTimeModifier;
             engineParticles.particleColor = Color.Cyan;
@@ -769,7 +769,7 @@ public class Player : Entity
         {
             engineTime = Math.Clamp(engineTime + Engine.DeltaSeconds / 3, 0, 1);
             float engineTimeModifier = 1 - (1 - engineTime) * (1 - engineTime);
-            engineParticles.sprayAngle = angle * 180 / MathF.PI + 180;
+            engineParticles.sprayAngle = angle + MathF.PI;
             float fuseRatio = (float)(CountFuses(ModuleType.Engines)) / 3;
             engineParticles.speedOfEmission = 450f * fuseRatio * engineTimeModifier;
             engineParticles.particleColor = Color.Orange;
@@ -1000,7 +1000,8 @@ public class Player : Entity
         {
             return;
         }
-        Engine.EntityManager.Add(new FlameBolt(position, IdealSpeedWithVelocity(15) + new Vector2(Engine.OneToNegOne(), Engine.OneToNegOne()) / 2, true, 10, 4, 1f, 1, new ParticleEmitter(Assets.Get(Sprite.Dot), position, 100, Color.Cyan)));
+        Engine.EntityManager.Add(new FlameBolt(position, IdealSpeedWithVelocity(15) + new Vector2(Engine.OneToNegOne(), Engine.OneToNegOne()) / 2, true, 10,
+            new ParticleEmitter(Assets.Get(Sprite.Dot), position, 0, Color.Cyan) { sprayCone = MathF.PI/2, sprayAngle = gunAngle.angle }, 4));
         SoundManager.PlaySound(Assets.Get(Sound.SniperFire), position);
         modules[ModuleType.Guns].cooldown = 1f;
         Engine.ShakeScreen(0.3f);

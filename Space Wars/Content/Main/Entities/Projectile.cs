@@ -246,22 +246,23 @@ public class FlameBolt : Projectile
     float maxTimeLeft;
     private ParticleEmitter emitter;
     public new float ColliderRadius => emitter.EmitterType == EmitterType.Circle ? emitter.particleVelocity : Math.Min((maxTimeLeft - timeLeft) * emitter.particleVelocity, emitter.particleVelocity * emitter.particleTimeAlive) * 60;
-    public FlameBolt(Vector2 _position, Vector2 _velocity, bool _isFriendly, int _damage, float _timeLeft = 0.7f, float _particleVelocity = 1, int _stealth = 0, ParticleEmitter _emitter = null)
+    public FlameBolt(Vector2 _position, Vector2 _velocity, bool _isFriendly, int _damage, float _timeLeft = 0.7f, float _particleVelocity = 1, int _stealth = 0)
         : base(Assets.Get(Sprite.Circle), _position, _velocity, 0, 0, _isFriendly, _damage, _stealth)
     {
-        if (_emitter == null)
-        {
-            emitter = new ParticleEmitter(Assets.Get(Sprite.Circle), 0.75f, Vector2.Zero, 0, 360, 1, 1500, new Color(1f, 1f, 0.25f, 1f), EmitterType.EmissionOverTime) { particleFadeToColor = new Color(1f, 0, 0, 0) };
-        }
-        else
-        {
-            emitter = _emitter;
-        }
+        emitter = new ParticleEmitter(Assets.Get(Sprite.Circle), 0.75f, Vector2.Zero, 0, MathF.Tau, _particleVelocity, 1500, new Color(1f, 1f, 0.25f, 1f), EmitterType.EmissionOverTime) { particleFadeToColor = new Color(1f, 0, 0, 0) };
         entityType = EntityType.Projectile;
         color = Color.Transparent;
         timeLeft = _timeLeft;
         maxTimeLeft = _timeLeft;
-        emitter.particleVelocity = _particleVelocity;
+    }
+    public FlameBolt(Vector2 _position, Vector2 _velocity, bool _isFriendly, int _damage, ParticleEmitter _emitter, float _timeLeft = 0.7f, int _stealth = 0)
+        : base(Assets.Get(Sprite.Circle), _position, _velocity, 0, 0, _isFriendly, _damage, _stealth)
+    {
+        emitter = _emitter;
+        entityType = EntityType.Projectile;
+        color = Color.Transparent;
+        timeLeft = _timeLeft;
+        maxTimeLeft = _timeLeft;
     }
     public override void AI()
     {

@@ -22,7 +22,7 @@ namespace Space_Wars.Content.Main.Particles
         public float particleTimeAlive;
         public float sprayAngle;
         private float cachedDistance = 0;
-        public int sprayCone;
+        public float sprayCone;
         public float particleVelocity;
         public float particleAngularVelocity = 0;
         public float speedOfEmission;
@@ -31,7 +31,7 @@ namespace Space_Wars.Content.Main.Particles
         public EmitterType EmitterType { get; }
         float cooldown = 1;
         private Action emitterFunction;
-        public ParticleEmitter(Texture2D _particleTexture, float _particleTimeAlive, Vector2 _position, float _sprayAngle, int _sprayCone, float _particleVelocity, float _speedOfEmission, Color _particleColor, EmitterType _emitterType)
+        public ParticleEmitter(Texture2D _particleTexture, float _particleTimeAlive, Vector2 _position, float _sprayAngle, float _sprayCone, float _particleVelocity, float _speedOfEmission, Color _particleColor, EmitterType _emitterType)
         {
             particleTexture = _particleTexture;
             particleTimeAlive = _particleTimeAlive;
@@ -58,7 +58,7 @@ namespace Space_Wars.Content.Main.Particles
         {
             particleTexture = _particleTexture;
             particleTimeAlive = 1;
-            sprayCone = 360;
+            sprayCone = MathF.Tau;
             speedOfEmission = 1;
             position = _position;
             particleVelocity = _radius;
@@ -84,7 +84,6 @@ namespace Space_Wars.Content.Main.Particles
             {
                 float randomAngle;
                 float particleAngle;
-                float particleAngleRadians;
                 Vector2 normalVector;
                 int iterations = 1;
                 if (cooldown * -speedOfEmission > 1)
@@ -93,11 +92,10 @@ namespace Space_Wars.Content.Main.Particles
                 }
                 for (int i = 0; i < iterations; i++)
                 {
-                    randomAngle = Engine.Random.Next(0, sprayCone);
+                    randomAngle = Engine.Random.NextSingle() * sprayCone;
                     particleAngle = randomAngle - sprayCone / 2 + sprayAngle;
-                    particleAngleRadians = particleAngle * MathF.PI / 180;
-                    normalVector = new(MathF.Sin(particleAngleRadians), -MathF.Cos(particleAngleRadians));
-                    Particle particle = new(particleTexture, particleTimeAlive, position - normalVector * i / speedOfEmission * particleVelocity, normalVector * particleVelocity + offsetVelocity, particleAngleRadians, particleAngularVelocity, particleColor, particleFadeToColor);
+                    normalVector = Engine.ToUnitVector(particleAngle);
+                    Particle particle = new(particleTexture, particleTimeAlive, position - normalVector * i / speedOfEmission * particleVelocity, normalVector * particleVelocity + offsetVelocity, particleAngle, particleAngularVelocity, particleColor, particleFadeToColor);
                     ParticleManager.Add(particle);
                 }
                 cooldown = 1/speedOfEmission;
@@ -115,17 +113,15 @@ namespace Space_Wars.Content.Main.Particles
             }
             float randomAngle;
             float particleAngle;
-            float particleAngleRadians;
             Vector2 normalVector;
             Vector2 positionDifference = (position - prevPosition);
             float iterations = (Vector2.Distance(position, prevPosition) * speedOfEmission + cachedDistance);
             for (float i = 0; i < iterations; i++)
             {
-                randomAngle = Engine.Random.Next(0, sprayCone);
-                particleAngle = randomAngle - sprayCone / 2 + sprayAngle;
-                particleAngleRadians = particleAngle * MathF.PI / 180 - MathF.Atan2(positionDifference.X, positionDifference.Y);
-                normalVector = new(MathF.Sin(particleAngleRadians), -MathF.Cos(particleAngleRadians));
-                Particle particle = new(particleTexture, particleTimeAlive, prevPosition * (1 - i / iterations) + position * (i / iterations), normalVector * particleVelocity + offsetVelocity, particleAngleRadians, particleAngularVelocity, particleColor, particleFadeToColor);
+                randomAngle = Engine.Random.NextSingle() * sprayCone;
+                particleAngle = randomAngle - sprayCone / 2 + sprayAngle - MathF.Atan2(positionDifference.X, positionDifference.Y);
+                normalVector = Engine.ToUnitVector(particleAngle);
+                Particle particle = new(particleTexture, particleTimeAlive, prevPosition * (1 - i / iterations) + position * (i / iterations), normalVector * particleVelocity + offsetVelocity, particleAngle, particleAngularVelocity, particleColor, particleFadeToColor);
                 ParticleManager.Add(particle);
             }
             cachedDistance = iterations - (MathF.Truncate(iterations));
@@ -133,9 +129,9 @@ namespace Space_Wars.Content.Main.Particles
         private void DrawCircle()
         {
             Vector2 normalVector;
-            for (float angle = sprayAngle / 180 * MathF.PI; angle < MathF.Tau * sprayCone / 360 + sprayAngle / 180 * MathF.PI; angle += MathF.Tau / particleVelocity / particleTimeAlive / speedOfEmission)
+            for (float angle = 0; angle < sprayCone; angle += MathF.Tau / particleVelocity / particleTimeAlive / speedOfEmission)
             {
-                normalVector = Engine.ToUnitVector(angle) * particleVelocity * particleTimeAlive;
+                normalVector = Engine.ToUnitVector(angle + sprayAngle - MathF.PI/4) * particleVelocity * particleTimeAlive;
                 ParticleManager.Add(new Particle(particleTexture, position + normalVector + offsetVelocity, angle, particleColor));
             }
             sprayAngle += particleAngularVelocity * Engine.DeltaSeconds * 60;

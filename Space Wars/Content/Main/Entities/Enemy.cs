@@ -796,7 +796,7 @@ public class Enemy : Entity
         float missileGap = 0;
         var col = Color.DarkRed;
         col.A = 0;
-        var engineParticles = new ParticleEmitter(Assets.Get(Sprite.Circle), 0.1f, Vector2.Zero, 0, 90, 2, 
+        var engineParticles = new ParticleEmitter(Assets.Get(Sprite.Circle), 0.1f, Vector2.Zero, 0, MathF.PI/2, 2, 
             200f, Color.Yellow, EmitterType.EmissionOverTime) { particleFadeToColor = col };
         while (true)
         {
@@ -1052,7 +1052,6 @@ public class Enemy : Entity
     {
         Enemy flare = NewFlareBoss(position - new Vector2(2000, 0), velocity, 0, this);
         Engine.EntityManager.Add(flare);
-        ;
         cooldown = 1.5f;
         float rangeFactor = 1;
         float rotationSpeed = 0.03f;
@@ -1390,7 +1389,7 @@ public class Enemy : Entity
         deleteOnCollide = true;
         var col = Color.DarkRed;
         col.A = 0;
-        ParticleEmitter engineParticles = new(Assets.Get(Sprite.Circle), 0.1f, Vector2.Zero, 0, 45, 2, 
+        ParticleEmitter engineParticles = new(Assets.Get(Sprite.Circle), 0.1f, Vector2.Zero, 0, MathF.PI/4, 2, 
             200f, Color.Yellow, EmitterType.EmissionOverTime) { isEmitterActive = false, particleFadeToColor = col };
         while (true)
         {
@@ -1542,7 +1541,7 @@ public class Enemy : Entity
         enemyRange.particleVelocity = 250;
         var col = Color.DarkRed;
         col.A = 0;
-        ParticleEmitter engineParticles = new(Assets.Get(Sprite.Circle), 0.15f, Vector2.Zero, 0, 45, 2, 200f, Color.Yellow, EmitterType.EmissionOverTime) { particleFadeToColor = col };
+        ParticleEmitter engineParticles = new(Assets.Get(Sprite.Circle), 0.15f, Vector2.Zero, 0, MathF.PI/4, 2, 200f, Color.Yellow, EmitterType.EmissionOverTime) { particleFadeToColor = col };
         while (true)
         {
             Entity nearestEnemy = Engine.EntityManager.NearestEnemy(this);
@@ -2209,7 +2208,7 @@ public class Enemy : Entity
     }
     IEnumerable<int> Miner()
     {
-        ParticleEmitter miningDebris = new(Assets.Get(Sprite.Circle), 0.1f, position, angle * 180 / 3.1415926f, 90, 2, 500, Color.Cyan, EmitterType.EmissionOverTime) 
+        ParticleEmitter miningDebris = new(Assets.Get(Sprite.Circle), 0.1f, position, angle, MathF.PI/2, 2, 500, Color.Cyan, EmitterType.EmissionOverTime) 
         { particleFadeToColor = Color.Transparent, particleAngularVelocity = Engine.OneToNegOne() / 2 };
         float healTimer = 30;
         while (true)
