@@ -574,6 +574,11 @@ public class Engine : Game
     {
         return _valueOne * (1 - _length) + _valueTwo * _length;
     }
+    public static float ToAngle(Vector2 _direction)
+    {
+        //Rotated 90 degrees due to asset rotation
+        return MathF.Atan2(_direction.X, -_direction.Y);
+    }
     public static float OneToNegOne()
     {
         return Random.NextSingle() * 2 - 1f;

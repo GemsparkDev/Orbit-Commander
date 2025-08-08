@@ -1000,11 +1000,12 @@ public class Player : Entity
         {
             return;
         }
-        Engine.EntityManager.Add(new FlameBolt(position, IdealSpeedWithVelocity(15) + new Vector2(Engine.OneToNegOne(), Engine.OneToNegOne()) / 2, true, 10,
-            new ParticleEmitter(Assets.Get(Sprite.Dot), position, 0, Color.Cyan) { sprayCone = MathF.PI/2, sprayAngle = gunAngle.angle }, 4));
+        Vector2 vel = IdealSpeedWithVelocity(15);
+        Engine.EntityManager.Add(new FlameBolt(position, vel + new Vector2(Engine.OneToNegOne(), Engine.OneToNegOne()) / 2, true, 10,
+            new ParticleEmitter(Assets.Get(Sprite.Circle), position, 0, Color.Cyan) { sprayCone = MathF.PI * 2 / 3, sprayAngle = Engine.ToAngle(vel), speedOfEmission = 0.5f }, 4));
         SoundManager.PlaySound(Assets.Get(Sound.SniperFire), position);
-        modules[ModuleType.Guns].cooldown = 1f;
-        Engine.ShakeScreen(0.3f);
+        modules[ModuleType.Guns].cooldown = 1.5f;
+        Engine.ShakeScreen(0.5f);
     }
     public void Dash()
     {

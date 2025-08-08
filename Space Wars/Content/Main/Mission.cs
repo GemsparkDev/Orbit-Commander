@@ -392,6 +392,7 @@ public class Mission
         Vector2 futureVelocity = _startVelocity;
         Vector2[] futurePlanetPositions = planets.Select(planet => planet.position).ToArray();
         Vector2[] futurePlanetVelocities = planets.Select(planet => planet.velocity).ToArray();
+        var emitter = new ParticleEmitter(Assets.Get(Sprite.Dot), Engine.DeltaSeconds, _startPosition, 0, 0, 0, 0.01f, Color.Cyan, EmitterType.EmissionOverDistance);
         bool exit = false;
 
         for (int n = 0; n < 1000; n++)
@@ -445,9 +446,10 @@ public class Mission
                 ParticleManager.Add(new Particle(Assets.Get(Sprite.Dot), particlePos, 0, Color.Red * 0.5f));
                 return;
             }
-            if (n % 3 == 0)
+            if (n % 20 == 0)
             {
-                ParticleManager.Add(new Particle(Assets.Get(Sprite.Dot), particlePos, 0, Color.Cyan * 0.5f));
+                emitter.position = futurePosition;
+                emitter.Update();
             }
         }
     }

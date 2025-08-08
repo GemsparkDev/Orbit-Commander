@@ -40,7 +40,6 @@ namespace Space_Wars.Content.Main.Particles
             {
                 particle.Update();
             }
-
             if (particles.Count >= 50000)
             {
                 for(int i = 0; i < particles.Count - 50000; i++)
@@ -48,8 +47,6 @@ namespace Space_Wars.Content.Main.Particles
                     particles[i].isExpired = true;
                 }
             }
-
-            //Clears all expired entities from the entity lists
             particles = particles.Where(x => !x.isExpired).ToList();
 
             isUpdating = false;

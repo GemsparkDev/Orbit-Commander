@@ -53,6 +53,10 @@ namespace Space_Wars.Content.Main.Particles
                 emitterFunction = EmissionOverDistance;
                 prevPosition = _position;
             }
+            else if(_emitterType == EmitterType.Circle)
+            {
+                emitterFunction = DrawCircle;
+            }
         }
         public ParticleEmitter(Texture2D _particleTexture, Vector2 _position, float _radius, Color _particleColor)
         {
@@ -114,24 +118,27 @@ namespace Space_Wars.Content.Main.Particles
             float randomAngle;
             float particleAngle;
             Vector2 normalVector;
-            Vector2 positionDifference = (position - prevPosition);
-            float iterations = (Vector2.Distance(position, prevPosition) * speedOfEmission + cachedDistance);
+            Vector2 positionDifference = position - prevPosition;
+            float differenceMagnitude = positionDifference.Length();
+            float iterations = (differenceMagnitude * speedOfEmission);
             for (float i = 0; i < iterations; i++)
             {
                 randomAngle = Engine.Random.NextSingle() * sprayCone;
                 particleAngle = randomAngle - sprayCone / 2 + sprayAngle - MathF.Atan2(positionDifference.X, positionDifference.Y);
                 normalVector = Engine.ToUnitVector(particleAngle);
-                Particle particle = new(particleTexture, particleTimeAlive, prevPosition * (1 - i / iterations) + position * (i / iterations), normalVector * particleVelocity + offsetVelocity, particleAngle, particleAngularVelocity, particleColor, particleFadeToColor);
-                ParticleManager.Add(particle);
+                float lerp = i / iterations;
+                ParticleManager.Add(new Particle(particleTexture, particleTimeAlive, prevPosition * (1 - lerp) + position * lerp + normalVector * Math.Min(10, cachedDistance), 
+                normalVector * particleVelocity + offsetVelocity, particleAngle, particleAngularVelocity, particleColor, particleFadeToColor));
             }
-            cachedDistance = iterations - (MathF.Truncate(iterations));
+            float val = 1 - (iterations - MathF.Truncate(iterations)) / iterations;
+            cachedDistance = (prevPosition * (1 - val) + position * val).Length();
         }
         private void DrawCircle()
         {
             Vector2 normalVector;
             for (float angle = 0; angle < sprayCone; angle += MathF.Tau / particleVelocity / particleTimeAlive / speedOfEmission)
             {
-                normalVector = Engine.ToUnitVector(angle + sprayAngle - MathF.PI/4) * particleVelocity * particleTimeAlive;
+                normalVector = Engine.ToUnitVector(angle + sprayAngle - sprayCone/2) * particleVelocity * particleTimeAlive;
                 ParticleManager.Add(new Particle(particleTexture, position + normalVector + offsetVelocity, angle, particleColor));
             }
             sprayAngle += particleAngularVelocity * Engine.DeltaSeconds * 60;
