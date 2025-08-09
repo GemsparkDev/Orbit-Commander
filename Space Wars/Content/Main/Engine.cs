@@ -18,11 +18,6 @@ public class Engine : Game
     private static readonly List<string> debugLog = [];
     private GraphicsDeviceManager graphics;
     private SpriteBatch spriteBatch;
-    private Decal fpsCounter;
-    private Decal fpsOneSec;
-    private Decal fpsLowest;
-    private List<float> fpsSamples = [];
-    private Decal timer;
     private RenderTarget2D renderTarget;
     public static UIManager UIManager { get; private set; }
     public static EntityManager EntityManager { get; private set; }
@@ -44,10 +39,6 @@ public class Engine : Game
     public static bool UseShader { get; private set; } = true;
     public static float ScreenShakeFactor { get; private set; } = 0;
     public static int SaveSlot { get; private set; } = 0;
-    //Convenient access point for player modules
-    public static ItemSlot<Pickup>[] InventorySlots { get; set; } = new ItemSlot<Pickup>[4];
-    public static ItemSlot<Pickup>[] MissionSelectSlots { get; set; } = new ItemSlot<Pickup>[4];
-    public static ItemSlot<Module>[] ModuleSlots { get; private set; } = new ItemSlot<Module>[5];
 
     public Engine()
     {
@@ -84,390 +75,45 @@ public class Engine : Game
 
         IsMouseVisible = false;
     }
-    private void AddUIElements()
+    private static void AddUIElements()
     {
-        Texture2D largePanel = Assets.Get(Sprite.LargePanel);
-        Texture2D wideButton = Assets.Get(Sprite.WideButton);
-        List<Texture2D> iconGroup1 = [Assets.Get(Sprite.PlayIcon), Assets.Get(Sprite.SettingsIcon)];
-        List<Texture2D> iconGroup2 = [Assets.Get(Sprite.SmeltIcon), Assets.Get(Sprite.RepairIcon), Assets.Get(Sprite.VictoryIcon)];
-        List<Texture2D> iconGroup3 = [Assets.Get(Sprite.PlanetIcon), Assets.Get(Sprite.RepairIcon)];
-
-        //Menus
-        var tabTexture = Assets.Get(Sprite.Tab);
-        var selectedTabTexture = Assets.Get(Sprite.SelectedTab);
-        var selectSound = Assets.Get(Sound.Interact);
-        Vector2 center = BackBuffer / 2;
-
-        var PauseMenu = new Window(center, largePanel);
-        var PlayerMenu = new Window(new Vector2(0, center.Y), Assets.Get(Sprite.Terminal)) { alignment = Alignment.Left };
-        var GarageMenu = new Window(center, Assets.Get(Sprite.GargantuanPanel));
-        var MainMenu = new TabbedWindow(center, Assets.Get(Sprite.GargantuanPanel), tabTexture, selectedTabTexture, selectSound, 2) { enabled = true, icons = iconGroup1 };
-        var MothershipMenu = new TabbedWindow(new Vector2(0, center.Y), Assets.Get(Sprite.Terminal), tabTexture, selectedTabTexture, selectSound, 3) { icons = iconGroup2, alignment = Alignment.Left };
-        var MissionSelect = new TabbedWindow(new Vector2(0, center.Y), Assets.Get(Sprite.GargantuanPanel), tabTexture, selectedTabTexture, selectSound, 2) { icons = iconGroup3, alignment = Alignment.Left };
-        var PickupDroneMenu = new Window(center, largePanel);
-        var FuseMenu = new Window(center, largePanel);
-        var SaveMenu = new Window(center, Assets.Get(Sprite.GargantuanPanel));
-        var LoadMenu = new Window(center, Assets.Get(Sprite.GargantuanPanel));
-
-        //Main Menu Widgets
-        var patchedConicsToggle = new Button(new Vector2(0, -MainMenu.Size.Y / 4), wideButton, Assets.TextFont, $"Patched Conics: {PatchedConics}", Color.White);
-        var sfxSlider = new Slider(Line, Assets.Get(Sprite.Knob), new Vector2(25, 0), new Vector2(50, 2), false, Color.White, Color.Gray);
-        var musicSlider = new Slider(Line, Assets.Get(Sprite.Knob), new Vector2(25, -15), new Vector2(50, 2), false, Color.White, Color.Gray);
-        var uiScaleSlider = new Slider(Line, Assets.Get(Sprite.Knob), new Vector2(25, 15), new Vector2(50, 2), false, Color.White, Color.Gray);
-        var sfxVolume = new Decal(new Vector2(-35, 0), Assets.TextFont, "Sound: 100%", Color.White, 5);
-        var musicVolume = new Decal(new Vector2(-35, -15), Assets.TextFont, "Music: 100%", Color.White, 5);
-        var uiScale = new Decal(new Vector2(-35, 15), Assets.TextFont, $"UI Scale: {Math.Truncate((uiScaleSlider.sliderInterval + 1) * 10) / 10}", Color.White, 5);
-        var shaderToggle = new Button(new Vector2(0, MainMenu.Size.Y / 4), wideButton, Assets.TextFont, $"Shader: {UseShader}", Color.White);
-        var singleplayerButton = new Button(new Vector2(0, -MainMenu.Size.Y / 4), wideButton, Assets.TextFont, "Singleplayer", Color.White);
-        var exitButton = new Button(new Vector2(0, MainMenu.Size.Y / 4), wideButton, Assets.TextFont, "Exit", Color.White);
-        var quitToMissionButton = new Button(new Vector2(0, -20), wideButton, Assets.TextFont, "Return", Color.White);
-        var titleName = new Decal(new Vector2(0, -MainMenu.Size.Y), Assets.Get(Sprite.Title));
-        var loadButton = new Button(new Vector2(0, 0), wideButton, Assets.TextFont, "Load", Color.White);
-
-        //Mothership Menu
-        var furnaceSlot = new ItemSlot<Pickup>(new Vector2(-20, 0), Assets.Get(Sprite.EmptySlot), UIManager, -1);
-        var garageButton = new Button(new Vector2(0, -MainMenu.Size.Y / 4), wideButton, Assets.TextFont, "To Garage", Color.White);
-        var craftButton = new Button(new Vector2(0, MainMenu.Size.Y / 4), Assets.Get(Sprite.Button), Assets.TextFont, "Repair", Color.LightBlue);
-        var requiredCraftsText = new Decal(new Vector2(0) + new Vector2(0, -6), Assets.TextFont, "25", Color.White, 10);
-        var furnaceSlider = new Slider(Line, new Vector2(-20, -MainMenu.Size.Y / 6), new Vector2(60, 2), true, new Color(255, 239, 85), new Color(50, 51, 67));
-        var craftingSlider = new Slider(Line, new Vector2(0, -MainMenu.Size.Y / 4), new Vector2(60, 2), true, Color.Cyan, Color.Gray);
-
-        //Garage Menu
-        var repairSlot = new ItemSlot<Module>(new Vector2(-GarageMenu.Size.X / 4 - 25, 0), Assets.Get(Sprite.EmptySlot), UIManager, -1);
-        var mothershipScrap = new Decal(new Vector2(GarageMenu.Size.X / 2.2f, 20) - GarageMenu.Size / 2, Assets.TextFont, "0", Color.Gray, 10);
-        var repairText = new Decal(new Vector2(-GarageMenu.Size.X / 4 - 60 / 2.5f, 40), Assets.TextFont, "", Color.White, 10);
-        var garagePlayerImage = new Decal(new Vector2(GarageMenu.Size.X / 4, 0), Assets.Get(Sprite.PlayerUI));
-        var validConfigText = new Decal(-GarageMenu.Size / 4 + new Vector2(20, GarageMenu.Size.Y / 1.5f), Assets.TextFont, "Ready for Combat", Color.Green, 10);
-        var repairButton = new Button(new Vector2(-GarageMenu.Size.X / 4 - 25, -40), Assets.Get(Sprite.Button), Assets.TextFont, "Repair", Color.LightBlue);
-
-        //Player Menu
-        var enemySlider = new Slider(Line, new Vector2(0, -PlayerMenu.Size.Y / 3), new Vector2(50, 2), true, Color.White, Color.Gray);
-        var waveText = new Decal(new Vector2(-5, 0), Assets.TextFont, "0", Color.White, 10);
-        var partStatus = new Decal(new Vector2(0, 20), Assets.TextFont, "All systems go", Color.Green, 10);
-        var restartButton = new Button(new Vector2(0, 50), Assets.Get(Sprite.Button), Assets.TextFont, "Restart", Color.LightBlue);
-        var restartSlider = new Slider(Line, new Vector2(0, 63), new Vector2(50, 2), true, Color.Cyan, Color.Black);
-
-        //Mission Select Menu
-        var missionName = new Decal(new Vector2(0, -30), Assets.TextFont, "Name", Color.White, 10);
-        var missionDescription = new Decal(new Vector2(0, -15), Assets.TextFont, "Description", Color.Gray, 3f);
-        var prevMission = new Button(new Vector2(-75, 20), Assets.Get(Sprite.Button), Assets.TextFont, "Prev", Color.LightBlue);
-        var nextMission = new Button(new Vector2(75, 20), Assets.Get(Sprite.Button), Assets.TextFont, "Next", Color.LightBlue);
-        var selectMission = new Button(new Vector2(0, 20), Assets.Get(Sprite.Button), Assets.TextFont, "Launch!", Color.Yellow);
-        var isComplete = new Decal(new Vector2(0, 45), Assets.TextFont, "Not Complete", Color.Red, 10);
-        var createFuse = new Button(new Vector2(-85,-45), Assets.Get(Sprite.Button), Assets.TextFont, "Queue Fuse", Color.Yellow);
-        var smeltScrap = new Button(new Vector2(-85, -15), Assets.Get(Sprite.Button), Assets.TextFont, "Queue Smelt", Color.Yellow);
-        var repairModule = new Button(new Vector2(-85, 15), Assets.Get(Sprite.Button), Assets.TextFont, "Queue Module", Color.Yellow);
-        var cancelQueue = new Button(new Vector2(-85, 45), Assets.Get(Sprite.Button), Assets.TextFont, "Cancel Latest", Color.Red);
-        var saveButton = new Button(new Vector2(0, -60), Assets.Get(Sprite.WideButton), Assets.TextFont, "Save & Exit", Color.LightBlue);
-
-        //Fuse Menu
-        var fuseCounter = new Decal(new Vector2(-20, -10), Assets.TextFont, "0", Color.Yellow, 10);
-
-        //Pickup Drone Menu
-        var launchButton = new Button(new Vector2(-20, 0), Assets.Get(Sprite.Button), Assets.TextFont, "Leave", Color.LightBlue);
-
-        //Save and Load Menu
-        var saveToFile = new Button(Vector2.Zero, Assets.Get(Sprite.Button), Assets.TextFont, "Save", Color.White);
-        var loadFromFile = new Button(Vector2.Zero, Assets.Get(Sprite.Button), Assets.TextFont, "Load", Color.White);
-        var prevSave = new Button(new Vector2(-100, 0), Assets.Get(Sprite.Button), Assets.TextFont, "Prev", Color.White);
-        var nextSave = new Button(new Vector2(100, 0), Assets.Get(Sprite.Button), Assets.TextFont, "Next", Color.White);
-        var deleteSave = new Button(new Vector2(100, 40), Assets.Get(Sprite.Button), Assets.TextFont, "Delete", Color.White);
-        var name = new Textbox(new Vector2(0, -40), Assets.Get(Sprite.Button), Assets.TextFont);
-        var loadedName = new Decal(new Vector2(0, 40), Assets.TextFont, "", Color.White, 10);
-        var saveBack = new Button(new Vector2(-100, 40), Assets.Get(Sprite.Button), Assets.TextFont, "Back", Color.White);
-        var loadBack = new Button(new Vector2(-100, 40), Assets.Get(Sprite.Button), Assets.TextFont, "Back", Color.White);
-
-        //Global Menu
-        var globalSidePanelOpen = new Button(Vector2.Zero, Assets.Get(Sprite.ToggleButton));
-        fpsCounter = new Decal(new Vector2( - 20, 25), Assets.TextFont, "60", Color.White, 10);
-        fpsOneSec = new Decal(new Vector2( - 20, 50), Assets.TextFont, "60", Color.White, 10);
-        fpsLowest = new Decal(new Vector2( - 20, 75), Assets.TextFont, "60", Color.White, 10);
-        timer = new Decal(new Vector2(- 50, 0), Assets.TextFont, $"{IngameTime.DrawText}", Color.White, 10);
-        var playerHealth = new Slider(Line, new Vector2(5, 5), new Vector2(150, 15), true, Color.Red, Color.DarkGray);
-        var playerAbility = new Slider(Line, new Vector2(5, 15), new Vector2(100, 10), true, Color.Cyan, Color.DarkGray);
-
-        var sidePanelClose = new Button(new Vector2(-Assets.Get(Sprite.ToggleButton).Width / 2 + Assets.Get(Sprite.Terminal).Width / 2, 0), Assets.Get(Sprite.ToggleButton));
-        patchedConicsToggle.AddBehaviour(delegate
+        //UI behaviors that need special permission
+        UI.PatchedConicsToggle.AddBehaviour(delegate
         {
             PatchedConics = !PatchedConics;
-            patchedConicsToggle.text = $"Patched Conics: {PatchedConics}";
+            UI.PatchedConicsToggle.text = $"Patched Conics: {PatchedConics}";
         });
-
-        exitButton.AddBehaviour(delegate ()
+        UI.SingleplayerButton.AddBehaviour(delegate ()
         {
-            Exit();
-            SoundManager.PlayGlobalSound(Assets.Get(Sound.Interact));
-        });
-        sfxSlider.AddBehaviour(delegate ()
-        {
-            float i = sfxSlider.sliderInterval;
-            SoundManager.SFXVolume = i;
-            UIManager.SFXVolume = i;
-            sfxVolume.text = $"Sound: {Math.Round(i * 100)}%";
-        });
-        musicSlider.AddBehaviour(delegate ()
-        {
-            float i = musicSlider.sliderInterval;
-            SoundManager.MusicVolume = i;
-            musicVolume.text = $"Music: {Math.Round(i * 100)}%";
-        });
-        uiScaleSlider.AddBehaviour(delegate ()
-        {
-            float i = uiScaleSlider.sliderInterval;
-            UIManager.UIScale = (i + 1f) * BackBuffer.X / ScreenSize.X;
-            uiScale.text = $"UI Scale: {Math.Truncate((i + 1) * 10) / 10}";
-        });
-        sfxSlider.SetInterval(1, 1);
-        musicSlider.SetInterval(1, 1);
-        uiScaleSlider.SetInterval(1, 1);
-
-        sfxSlider.ApplyBehaviours();
-        musicSlider.ApplyBehaviours();
-        uiScaleSlider.ApplyBehaviours();
-
-        singleplayerButton.AddBehaviour(delegate () 
-        { 
             SaveGame = new();
             EventHandler.UpdateModulesUI();
             Startgame();
         });
-        quitToMissionButton.AddBehaviour(EventHandler.MissionSelectTrigger);
-        garageButton.AddBehaviour(EventHandler.GarageTrigger);
-        repairButton.AddBehaviour(EventHandler.RepairModule);
-        var tooltip = new Window(Vector2.Zero, wideButton);
-        tooltip.AddWidget(new Decal(new Vector2(0, 0), Assets.TextFont, "1 metal to repair", Color.White, 3f));
-        repairButton.AddTooltip(tooltip);
-        craftButton.AddBehaviour(EventHandler.CraftItem);
-        tooltip = new Window(Vector2.Zero, wideButton);
-        tooltip.AddWidget(new Decal(new Vector2(0, 0), Assets.TextFont, "1 metal to repair", Color.White, 3f));
-        craftButton.AddTooltip(tooltip);
-        repairSlot.AddBehaviour(EventHandler.UpdateRepairText);
-        furnaceSlot.AddBehaviour(EventHandler.UpdateFurnace);
-        restartButton.AddBehaviour(delegate() { EventHandler.SendMessage(Message.RestartModules); });
-        globalSidePanelOpen.AddBehaviour(EventHandler.ToggleDockingMenus);
-        sidePanelClose.AddBehaviour(EventHandler.ToggleDockingMenus);
-        prevMission.AddBehaviour(delegate() { SaveGame.PrevMission(); });
-        nextMission.AddBehaviour(delegate () { SaveGame.NextMission(); });
-        selectMission.AddBehaviour(delegate() { if (EventHandler.SyncModules()) { Startgame(); } });
-        launchButton.AddBehaviour(delegate() { EventHandler.SendMessage(Message.EscapeDroneLeave); });
-        shaderToggle.AddBehaviour(delegate () { UseShader = !UseShader; shaderToggle.text = $"Shader: {UseShader}"; });
-        createFuse.AddBehaviour(delegate () 
-        {
-            if (SaveGame.QueuedItems.Count < 10)
-            {
-                SaveGame.QueuedItems.Add(new FuseQueue());
-            } 
-        });
-        tooltip = new Window(Vector2.Zero, wideButton);
-        tooltip.AddWidget(new Decal(new Vector2(0, -3), Assets.TextFont, "Queue fuse construction. Cheap but delicate.", Color.White, 3f));
-        tooltip.AddWidget(new Decal(new Vector2(0, 3), Assets.TextFont, "Required time: 10 waves.", Color.White, 3f));
-        createFuse.AddTooltip(tooltip);
-        smeltScrap.AddBehaviour(delegate () 
-        {
-            if (UIManager.selectedIcon != null)
-            {
-                foreach (var item in MissionSelectSlots)
-                {
-                    if (item.daughterItem == null && SaveGame.QueuedItems.Count < 10)
-                    {
-                        item.daughterItem = UIManager.selectedIcon as Pickup;
-                        UIManager.selectedIcon = null;
-                        SaveGame.QueuedItems.Add(new SmeltQueue(item));
-                        EventHandler.UpdateInventory();
-                        return;
-                    }
-                }
-            }
-        });
-        tooltip = new Window(Vector2.Zero, wideButton);
-        tooltip.AddWidget(new Decal(new Vector2(0, -3), Assets.TextFont, "Drag pickup over button to queue scrap melting.", Color.White, 3f));
-        tooltip.AddWidget(new Decal(new Vector2(0, 3), Assets.TextFont, "Required time: 10 waves. Gains additional metal per scrap.", Color.White, 3f));
-        smeltScrap.AddTooltip(tooltip);
-        repairModule.AddBehaviour(delegate () 
-        {
-            if (UIManager.selectedIcon as Module != null)
-            {
-                foreach (var item in MissionSelectSlots)
-                {
-                    if (item.daughterItem == null && SaveGame.QueuedItems.Count < 10)
-                    {
-                        item.daughterItem = UIManager.selectedIcon as Module;
-                        UIManager.selectedIcon = null;
-                        SaveGame.QueuedItems.Add(new RepairQueue(item));
-                        EventHandler.UpdateInventory();
-                        return;
-                    }
-                }
-            }
-        });
-        tooltip = new Window(Vector2.Zero, wideButton);
-        tooltip.AddWidget(new Decal(new Vector2(0, -3), Assets.TextFont, "Drag module over button to queue repair.", Color.White, 3f));
-        tooltip.AddWidget(new Decal(new Vector2(0, 3), Assets.TextFont, "Required time: 20 waves. Requires no metal to repair.", Color.White, 3f));
-        repairModule.AddTooltip(tooltip);
-        cancelQueue.AddBehaviour(delegate () 
-        {
-            if(SaveGame.QueuedItems.Count != 0)
-            {
-                SaveGame.QueuedItems.RemoveAt(SaveGame.QueuedItems.Count - 1);
-            }
-        });
-        saveButton.AddBehaviour(delegate { UIManager.DisableAll(); SaveMenu.enabled = true; EventHandler.GetSave(); });
-        loadButton.AddBehaviour(delegate { MainMenu.enabled = false; LoadMenu.enabled = true; EventHandler.GetSave(); });
-
-        prevSave.AddBehaviour(delegate
+        UI.ShaderToggle.AddBehaviour(delegate () { UseShader = !UseShader; UI.ShaderToggle.text = $"Shader: {UseShader}"; });
+        UI.PrevSave.AddBehaviour(delegate
         {
             SaveSlot = Math.Clamp(SaveSlot - 1, 0, 10);
             EventHandler.GetSave();
         });
-        nextSave.AddBehaviour(delegate
+        UI.NextSave.AddBehaviour(delegate
         {
             SaveSlot = Math.Clamp(SaveSlot + 1, 0, 10);
             EventHandler.GetSave();
         });
-        name.AddBehaviour(delegate { SaveGame.Name = name.text; });
-        saveToFile.AddBehaviour(Save);
-        loadFromFile.AddBehaviour(Load);
-        saveBack.AddBehaviour(delegate { MissionSelect.enabled = true; SaveMenu.enabled = false;  });
-        loadBack.AddBehaviour(delegate { MainMenu.enabled = true; LoadMenu.enabled = false; });
-
-
-        MainMenu.AddWidget(exitButton as IFunctional, 0);
-        MainMenu.AddWidget(singleplayerButton as IFunctional, 0);
-        MainMenu.AddWidget(titleName, 0);
-        MainMenu.AddWidget(titleName, 1);
-        MainMenu.AddWidget(patchedConicsToggle as IFunctional, 1);
-        MainMenu.AddWidget(sfxSlider as IFunctional, 1);
-        MainMenu.AddWidget(musicSlider as IFunctional, 1);
-        MainMenu.AddWidget(uiScaleSlider as IFunctional, 1);
-        MainMenu.AddWidget(sfxVolume, 1);
-        MainMenu.AddWidget(musicVolume, 1);
-        MainMenu.AddWidget(uiScale, 1);
-        MainMenu.AddWidget(shaderToggle as IFunctional, 1);
-        MainMenu.AddWidget(loadButton as IFunctional, 0);
-
-        PauseMenu.AddWidget(quitToMissionButton as IFunctional);
-
-        GarageMenu.AddWidget(mothershipScrap);
-        GarageMenu.AddWidget(repairButton as IFunctional);
-        GarageMenu.AddWidget(repairSlot as IFunctional);
-        GarageMenu.AddWidget(repairText);
-        GarageMenu.AddWidget(garagePlayerImage);
-        GarageMenu.AddWidget(validConfigText);
-
-        MothershipMenu.AddWidget(furnaceSlider as IFunctional, 0);
-        MothershipMenu.AddWidget(furnaceSlot as IFunctional, 0);
-        MothershipMenu.AddWidget(garageButton as IFunctional, 1);
-        MothershipMenu.AddWidget(craftingSlider as IFunctional, 2);
-        MothershipMenu.AddWidget(requiredCraftsText, 2);
-        MothershipMenu.AddWidget(craftButton as IFunctional, 2);
-        for (int i = 0; i < 3; i++)
+        UI.SFXSlider.AddBehaviour(delegate ()
         {
-            MothershipMenu.AddWidget(sidePanelClose as IFunctional, i);
-        }
-
-        PlayerMenu.AddWidget(enemySlider as IFunctional);
-        PlayerMenu.AddWidget(waveText);
-        PlayerMenu.AddWidget(partStatus);
-        PlayerMenu.AddWidget(restartButton as IFunctional);
-        PlayerMenu.AddWidget(restartSlider as IFunctional);
-        PlayerMenu.AddWidget(sidePanelClose as IFunctional);
-
-        MissionSelect.AddWidget(missionName, 0);
-        MissionSelect.AddWidget(missionDescription, 0);
-        MissionSelect.AddWidget(prevMission as IFunctional, 0);
-        MissionSelect.AddWidget(nextMission as IFunctional, 0);
-        MissionSelect.AddWidget(selectMission as IFunctional, 0);
-        MissionSelect.AddWidget(isComplete, 0);
-        MissionSelect.AddWidget(validConfigText, 1);
-        MissionSelect.AddWidget(createFuse as IFunctional, 1);
-        MissionSelect.AddWidget(smeltScrap as IFunctional, 1);
-        MissionSelect.AddWidget(repairModule as IFunctional, 1);
-        MissionSelect.AddWidget(cancelQueue as IFunctional, 1);
-        MissionSelect.AddWidget(saveButton as IFunctional, 0);
-
-        PickupDroneMenu.AddWidget(launchButton as IFunctional);
-
-        SaveMenu.AddWidget(saveToFile as IFunctional);
-        SaveMenu.AddWidget(prevSave as IFunctional);
-        SaveMenu.AddWidget(nextSave as IFunctional);
-        SaveMenu.AddWidget(deleteSave as IFunctional);
-        SaveMenu.AddWidget(name as IFunctional);
-        SaveMenu.AddWidget(loadedName);
-        SaveMenu.AddWidget(saveBack as IFunctional);
-
-        LoadMenu.AddWidget(loadFromFile as IFunctional);
-        LoadMenu.AddWidget(prevSave as IFunctional);
-        LoadMenu.AddWidget(nextSave as IFunctional);
-        LoadMenu.AddWidget(deleteSave as IFunctional);
-        LoadMenu.AddWidget(loadedName);
-        LoadMenu.AddWidget(loadBack as IFunctional);
-
-        FuseMenu.AddWidget(fuseCounter);
-        for (int i = 0; i < 4; i++)
+            float i = UI.SFXSlider.sliderInterval;
+            SoundManager.SFXVolume = i;
+            UIManager.SFXVolume = i;
+            UI.SFXVolume.text = $"Sound: {Math.Round(i * 100)}%";
+        });
+        UI.UIScaleSlider.AddBehaviour(delegate ()
         {
-            for (int j = -2; j < 3; j++)
-            {
-                var fuse = new Button(new Vector2(i * 10, j * 20), Assets.Get(Sprite.Fuse));
-                //Performs a shallow copy of the instance variable
-                int x = j + 2;
-                int y = i;
-                fuse.AddBehaviour(delegate () { SaveGame.Player.ToggleFuse(x, y); });
-                FuseMenu.AddWidget(fuse as IFunctional);
-            }
-        }
-        for (int i = 0; i < 5; i++)
-        {
-            var decal = new Decal(new Vector2(40, (i - 2) * 20 - 8), null);
-            FuseMenu.AddWidget(decal);
-        }
-
-        UIManager.ScreenWindow.AddWidget(globalSidePanelOpen as IFunctional, (int)Alignment.Left);
-        UIManager.ScreenWindow.AddWidget(fpsCounter, (int)Alignment.TopRight);
-        UIManager.ScreenWindow.AddWidget(fpsOneSec, (int)Alignment.TopRight);
-        UIManager.ScreenWindow.AddWidget(fpsLowest, (int)Alignment.TopRight);
-        UIManager.ScreenWindow.AddWidget(timer, (int)Alignment.TopRight);
-        UIManager.ScreenWindow.AddWidget(playerHealth as IFunctional, (int)Alignment.TopLeft);
-        UIManager.ScreenWindow.AddWidget(playerAbility as IFunctional, (int)Alignment.TopLeft);
-
-        for (int x = 0; x < ModuleSlots.GetLength(0); x++)
-        {
-            if (x % 2 == 0)
-            {
-                ModuleSlots[x] = new ItemSlot<Module>(new Vector2(-30,Assets.DimsOf(Sprite.EmptySlot).Y * x / 2 
-                    - Assets.DimsOf(Sprite.EmptySlot).Y), Assets.Get(Sprite.EmptySlot), UIManager, x);
-            }
-            else
-            {
-                ModuleSlots[x] = new ItemSlot<Module>(new Vector2(Assets.DimsOf(Sprite.EmptySlot).X / 1.4142f - 30,
-                    Assets.DimsOf(Sprite.EmptySlot).Y * x / 2 - Assets.DimsOf(Sprite.EmptySlot).Y), Assets.Get(Sprite.EmptySlot), UIManager, x);
-            }
-            GarageMenu.AddWidget(ModuleSlots[x] as IFunctional);
-            MissionSelect.AddWidget(ModuleSlots[x] as IFunctional, 1);
-            ModuleSlots[x].AddBehaviour(EventHandler.UpdateModules);
-        }
-        for (int i = 0; i < InventorySlots.GetLength(0); i++)
-        {
-            InventorySlots[i] = new ItemSlot<Pickup>(new Vector2(Assets.DimsOf(Sprite.LargePanel).X / 4,
-                Assets.DimsOf(Sprite.EmptySlot).Y * (i + 1) - Assets.DimsOf(Sprite.LargePanel).X / 2), Assets.Get(Sprite.EmptySlot), UIManager, -1);
-            MissionSelectSlots[i] = new ItemSlot<Pickup>(new Vector2(Assets.DimsOf(Sprite.LargePanel).X / 2,
-                Assets.DimsOf(Sprite.EmptySlot).Y * (i + 1) - Assets.DimsOf(Sprite.LargePanel).X / 2), Assets.Get(Sprite.EmptySlot), UIManager, -1);
-            MothershipMenu.AddWidget(InventorySlots[i] as IFunctional, 0);
-            PickupDroneMenu.AddWidget(InventorySlots[i] as IFunctional);
-            MissionSelect.AddWidget(InventorySlots[i] as IFunctional, 1);
-            MissionSelect.AddWidget(MissionSelectSlots[i] as IFunctional, 1);
-            InventorySlots[i].AddBehaviour(EventHandler.UpdateInventory);
-            MissionSelectSlots[i].AddBehaviour(EventHandler.UpdateInventory);
-        }
-        UIManager.AddContainer(MainMenu);
-        UIManager.AddContainer(PauseMenu);
-        UIManager.AddContainer(PlayerMenu);
-        UIManager.AddContainer(MothershipMenu);
-        UIManager.AddContainer(GarageMenu);
-        UIManager.AddContainer(MissionSelect);
-        UIManager.AddContainer(PickupDroneMenu);
-        UIManager.AddContainer(FuseMenu);
-        UIManager.AddContainer(SaveMenu);
-        UIManager.AddContainer(LoadMenu);
+            float i = UI.UIScaleSlider.sliderInterval;
+            UIManager.UIScale = (i + 1f) * BackBuffer.X / ScreenSize.X;
+            UI.UIScale.text = $"UI Scale: {Math.Truncate((i + 1) * 10) / 10}";
+        });
+        UI.AddUIElements();
     }
     public static void Startgame()
     {
@@ -533,24 +179,7 @@ public class Engine : Game
         {
             ScreenShakeFactor = 0;
         }
-        if (true)
-        {
-            fpsSamples.Add(DeltaSeconds);
-            if (fpsSamples.Count > 60)
-            {
-                fpsSamples.RemoveAt(0);
-            }
-            fpsCounter.text = $"{(int)(1 / DeltaSeconds)}";
-            float average = 0;
-            foreach (var sample in fpsSamples)
-            {
-                average += sample;
-            }
-            average /= 60;
-            fpsOneSec.text = $"{(int)(1 / average)}";
-            fpsLowest.text = $"{(int)(1 / fpsSamples.Max())}";
-            timer.text = $"{IngameTime.DrawText}";
-        }
+        UI.Timer.text = $"{IngameTime.DrawText}";
         base.Update(gameTime);
     }
     public static Pickup MoveSelectedPickup()

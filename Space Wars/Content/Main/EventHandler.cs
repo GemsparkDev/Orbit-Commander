@@ -34,7 +34,7 @@ public static class EventHandler
         Engine.IngameTime = new();
         Engine.MousePositionOffset = Vector2.Zero;
         Engine.UIManager.DisableAll();
-        Engine.UIManager.GetContainer((int)Containers.MainMenu).enabled = true;
+        UI.MainMenu.enabled = true;
         ParticleManager.Initialize();
         SoundManager.SetAllSounds(false);
         SoundManager.Initialize();  
@@ -44,11 +44,10 @@ public static class EventHandler
     }
     public static void RepairModule()
     {
-        var repairSlot = Engine.UIManager.GetFuncWidget((int)Containers.GarageMenu, 1) as ItemSlot<Module>;
         Module daughterModule;
-        if (repairSlot.daughterItem != null)
+        if (UI.RepairSlot.daughterItem != null)
         {
-            daughterModule = repairSlot.daughterItem;
+            daughterModule = UI.RepairSlot.daughterItem;
         }
         else
         { 
@@ -62,8 +61,7 @@ public static class EventHandler
             Engine.SaveGame.Scrap -= 1;
             SoundManager.PlayGlobalSound(Assets.Get(Sound.Interact));
             UpdateRepairText();
-            var mothershipScrap = Engine.UIManager.GetWidget((int)Containers.GarageMenu, 0) as Decal;
-            mothershipScrap.text = Engine.SaveGame.Scrap.ToString();
+            UI.MothershipScrap.text = Engine.SaveGame.Scrap.ToString();
         }
         else
         {
@@ -72,64 +70,60 @@ public static class EventHandler
     }
     public static void UpdateRepairText()
     {
-        var repairText = Engine.UIManager.GetWidget((int)Containers.GarageMenu, 1) as Decal;
-        var slot = Engine.UIManager.GetFuncWidget((int)Containers.GarageMenu, 1) as ItemSlot<Module>;
-        Module daughterModule = slot.daughterItem;
+        Module daughterModule = UI.RepairSlot.daughterItem;
         if (daughterModule != null)
         {
-            repairText.text = $"{daughterModule.Health}/20";
+            UI.RepairText.text = $"{daughterModule.Health}/20";
         }
         else
         {
-            repairText.text = "";
+            UI.RepairText.text = "";
         }
     }
-
     public static void UpdateInventoryUI()
     {
-        for (int i = 0; i < Engine.InventorySlots.Length; i++)
+        for (int i = 0; i < UI.InventorySlots.Length; i++)
         {
-            Engine.InventorySlots[i].daughterItem = Engine.SaveGame.Inventory[i];
+            UI.InventorySlots[i].daughterItem = Engine.SaveGame.Inventory[i];
         }
-        for (int i = 0; i < Engine.MissionSelectSlots.Length; i++)
+        for (int i = 0; i < UI.MissionSelectSlots.Length; i++)
         {
-            Engine.MissionSelectSlots[i].daughterItem = Engine.SaveGame.MissionSelectInventory[i];
+            UI.MissionSelectSlots[i].daughterItem = Engine.SaveGame.MissionSelectInventory[i];
         }
     }
     public static void UpdateInventory()
     {
-        for (int i = 0; i < Engine.InventorySlots.Length; i++)
+        for (int i = 0; i < UI.InventorySlots.Length; i++)
         {
-            Engine.SaveGame.Inventory[i] = Engine.InventorySlots[i].daughterItem;
+            Engine.SaveGame.Inventory[i] = UI.InventorySlots[i].daughterItem;
         }
-        for (int i = 0; i < Engine.MissionSelectSlots.Length; i++)
+        for (int i = 0; i < UI.MissionSelectSlots.Length; i++)
         {
-            Engine.SaveGame.MissionSelectInventory[i] = Engine.MissionSelectSlots[i].daughterItem;
+            Engine.SaveGame.MissionSelectInventory[i] = UI.MissionSelectSlots[i].daughterItem;
         }
     }
     public static void UpdateModulesUI()
     {
-        for (int x = 0; x < Engine.ModuleSlots.Length; x++)
+        for (int x = 0; x < UI.ModuleSlots.Length; x++)
         {
-            Engine.ModuleSlots[x].daughterItem = player.modules.ElementAt(x).Value;
+            UI.ModuleSlots[x].daughterItem = player.modules.ElementAt(x).Value;
         }
     }
     public static void UpdateModules()
     {
-        var validConfigText = Engine.UIManager.GetWidget((int)Containers.GarageMenu, 3) as Decal;
-        foreach (var module in Engine.ModuleSlots)
+        foreach (var module in UI.ModuleSlots)
         {
             if (module.daughterItem == null)
             {
-                validConfigText.text = "";
+                UI.ValidConfigText.text = "";
                 return;
             }
         }
-        validConfigText.text = "Ready for Combat";
+        UI.ValidConfigText.text = "Ready for Combat";
     }
     public static bool SyncModules()
     {
-        foreach (var module in Engine.ModuleSlots)
+        foreach (var module in UI.ModuleSlots)
         {
             if (module.daughterItem == null)
             {
@@ -138,16 +132,15 @@ public static class EventHandler
         }
         for (int x = 0; x < player.modules.Count; x++)
         {
-            player.modules[(ModuleType)x] = Engine.ModuleSlots[x].daughterItem;
+            player.modules[(ModuleType)x] = UI.ModuleSlots[x].daughterItem;
         }
         return true;
     }
     public static void UpdateFurnaceUI(float _value, float _maxValue, Pickup furnaceItem)
     {
-        var furnaceSlot = Engine.UIManager.GetFuncWidget((int)Containers.MothershipMenu, 1) as ItemSlot<Pickup>;
-        furnaceSlot.daughterItem = furnaceItem;
-        (Engine.UIManager.GetFuncWidget((int)Containers.MothershipMenu,0) as Slider).SetInterval(_value, _maxValue);
-        (Engine.UIManager.GetWidget((int)Containers.GarageMenu, 0) as Decal).text = Engine.SaveGame.Scrap.ToString();
+        UI.FurnaceSlot.daughterItem = furnaceItem;
+        UI.FurnaceSlider.SetInterval(_value, _maxValue);
+        UI.MothershipScrap.text = Engine.SaveGame.Scrap.ToString();
     }
     public static void UpdateFurnace()
     {
@@ -168,25 +161,25 @@ public static class EventHandler
     }
     public static void UpdateCraftingUI(float _value, float _maxValue, int requiredCraftsLeft)
     {
-        (Engine.UIManager.GetFuncWidget((int)Containers.MothershipMenu,3) as Slider).SetInterval(_value, _maxValue);
-        (Engine.UIManager.GetWidget((int)Containers.GarageMenu, 0) as Decal).text = Engine.SaveGame.Scrap.ToString();
-        (Engine.UIManager.GetWidget((int)Containers.MothershipMenu,0) as Decal).text = requiredCraftsLeft.ToString();
+        UI.CraftingSlider.SetInterval(_value, _maxValue);
+        UI.MothershipScrap.text = Engine.SaveGame.Scrap.ToString();
+        UI.RequiredCraftsText.text = requiredCraftsLeft.ToString();
     }
     public static void UpdateRestartSlider(float _value, float _maxValue)
     {
-        (Engine.UIManager.GetFuncWidget((int)Containers.PlayerMenu, 2) as Slider).SetInterval(_value, _maxValue);
+        UI.RestartSlider.SetInterval(_value, _maxValue);
     }
     public static void UpdateEnemyCountdownUI(float _value, float _maxValue, float _wave)
     {
-        (Engine.UIManager.GetFuncWidget((int)Containers.PlayerMenu,0) as Slider).sliderInterval = _value / _maxValue;
-        (Engine.UIManager.GetWidget((int)Containers.PlayerMenu,0) as Decal).text = $"{_wave}";
+        UI.EnemySlider.sliderInterval = _value / _maxValue;
+        UI.WaveText.text = $"{_wave}";
     }
     public static void GarageTrigger()
     {
         SoundManager.PlayGlobalSound(Assets.Get(Sound.Interact));
-        Engine.UIManager.ToggleMenu((int)Containers.MothershipMenu);
-        Engine.UIManager.ToggleMenu((int)Containers.GarageMenu);
-        if (Engine.UIManager.GetContainer((int)Containers.GarageMenu).enabled)
+        UI.MothershipMenu.enabled = !UI.MothershipMenu.enabled;
+        UI.GarageMenu.enabled = !UI.GarageMenu.enabled;
+        if (UI.GarageMenu.enabled)
         {
             CurrentGameState.SwitchState(new Garage());
         }
@@ -198,12 +191,11 @@ public static class EventHandler
     public static void MissionSelectTrigger()
     {
         SoundManager.PlayGlobalSound(Assets.Get(Sound.Interact));
-        Container missionSelect = Engine.UIManager.GetContainer((int)Containers.MissionMenu);
-        if (!Engine.UIManager.ToggleToMenu(missionSelect))
+        if (!Engine.UIManager.ToggleToMenu(UI.MissionSelect))
         {
-            missionSelect.enabled = !missionSelect.enabled;
+            UI.MissionSelect.enabled = !UI.MissionSelect.enabled;
         }
-        if (missionSelect.enabled)
+        if (UI.MissionSelect.enabled)
         {
             CurrentGameState.SwitchState(new MissionSelect());
             return;
@@ -212,17 +204,16 @@ public static class EventHandler
     }
     public static void UpdateMissionText()
     {
-        Container missionSelect = Engine.UIManager.GetContainer((int)Containers.MissionMenu);
         Mission mission = Engine.SaveGame.CurrentMission;
         bool completed = Engine.SaveGame.CurrentMissionCompleted;
-        (missionSelect.GetWidget(0) as Decal).text = mission.Name;
-        (missionSelect.GetWidget(1) as Decal).text = mission.Description;
-        (missionSelect.GetWidget(2) as Decal).text = completed ? "Completed" : "Not Completed";
-        (missionSelect.GetWidget(2) as Decal).textColor = completed ? Color.Green : Color.Red;
+        UI.MissionName.text = mission.Name;
+        UI.MissionDescription.text = mission.Description;
+        UI.IsComplete.text = completed ? "Completed" : "Not Completed";
+        UI.IsComplete.textColor = completed ? Color.Green : Color.Red;
     }
     public static void UpdateScrapText()
     {
-        (Engine.UIManager.GetWidget((int)Containers.GarageMenu, 0) as Decal).text = Engine.SaveGame.Scrap.ToString();
+        UI.MothershipScrap.text = Engine.SaveGame.Scrap.ToString();
     }
     public static void UpdateModulesStatus()
     {
@@ -234,25 +225,24 @@ public static class EventHandler
                 text = text + module.Key + ", ";
             }
         }
-        var textSource = Engine.UIManager.GetWidget((int)Containers.PlayerMenu, 1) as Decal;
         if (text == "")
         {
-            textSource.text = "All systems go!";
-            textSource.textColor = Color.Green;
+            UI.PartStatus.text = "All systems go!";
+            UI.PartStatus.textColor = Color.Green;
         }
         else
         {
             text = text.Remove(text.Length - 2, 1);
             text += "has failed!";
-            textSource.text = text;
-            textSource.textColor = Color.Red;
+            UI.PartStatus.text = text;
+            UI.PartStatus.textColor = Color.Red;
         }
     }
     public static void DisableDockingMenus()
     {
-        Engine.UIManager.GetContainer((int)Containers.MothershipMenu).enabled = false;
-        Engine.UIManager.GetContainer((int)Containers.PickupDroneMenu).enabled = false;
-        Engine.UIManager.GetContainer((int)Containers.PlayerMenu).enabled = false;
+        UI.MothershipMenu.enabled = false;
+        UI.PickupDroneMenu.enabled = false;
+        UI.PlayerMenu.enabled = false;
     }
     public static void ToggleDockingMenus()
     {
@@ -261,7 +251,6 @@ public static class EventHandler
     }
     public static void UpdateFuseUI(bool[,] _fuses, int _spareFuses)
     {
-        var menu = Engine.UIManager.GetContainer((int)Containers.FuseMenu);
         for (int i = 0; i < 5; i++)
         {
             for (int j = 0; j < 4; j++)
@@ -276,14 +265,14 @@ public static class EventHandler
                 {
                     color = Color.Red;
                 }
-                (menu.GetFuncWidget(i + j * 5) as Widget).color = color;
+                UI.Fuses[j, i].color = color;
             }
         }
-        menu.GetWidget(0).text = $"{_spareFuses}";
+        UI.FuseCounter.text = $"{_spareFuses}";
         Color[] possibleColors = [ Color.Red, Color.Orange, Color.Yellow, Color.White, Color.Cyan ];
         for (int i = 0; i < 5; i++)
         {
-            var decal = Engine.UIManager.GetContainer((int)Containers.FuseMenu).GetWidget(i + 1);
+            var decal = UI.ModuleIcons[i];
             int count = 0;
             for (int j = 0; j < 4; j++)
             {
@@ -305,8 +294,7 @@ public static class EventHandler
     {
         for (int i = 0; i < 5; i++)
         {
-            var decal = Engine.UIManager.GetContainer((int)Containers.FuseMenu).GetWidget(i + 1);
-            decal.texture = moduleTextures[i];
+            UI.ModuleIcons[i].texture = moduleTextures[i];
         }
     }
     public static void GetSave()
@@ -318,11 +306,11 @@ public static class EventHandler
             string text = outputFile.ReadLine();
             if (text != null)
             {
-                (Engine.UIManager.GetContainer((int)Containers.SaveMenu).GetWidget(0) as Decal).text = SaveGame.Disassemble(text)[0];
+                UI.LoadedName.text = SaveGame.Disassemble(text)[0];
             }
             return;
         }
-        (Engine.UIManager.GetContainer((int)Containers.SaveMenu).GetWidget(0) as Decal).text = "Empty";
+        UI.LoadedName.text = "Empty";
     }
     public static void DeleteSave()
     {

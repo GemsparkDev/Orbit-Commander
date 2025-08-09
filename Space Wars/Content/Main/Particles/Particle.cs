@@ -7,18 +7,18 @@ namespace Space_Wars.Content.Main.Particles
     public class Particle
     {
         public bool isExpired = false;
-        Vector2 position;
-        Vector2 velocity;
-        Color color;
-        Color renderColor;
-        Color fadeToColor;
-        public float timeLeft;
-        private float originalTimeLeft;
-        float angle;
-        float angularVelocity;
-        public Texture2D texture;
         public Vector2 Size => texture == null ? Vector2.Zero : new Vector2(texture.Width, texture.Height);
         public String drawText;
+        private Texture2D texture;
+        private Vector2 position;
+        private Vector2 velocity;
+        private Color color;
+        private Color renderColor;
+        private Color fadeToColor;
+        private float timeLeft;
+        private float originalTimeLeft;
+        private float angle;
+        private float angularVelocity;
         public Particle(Texture2D _texture, float _timeLeft, Vector2 _position, Vector2 _velocity, float _angle, float _angularVelocity, Color _color, Color _fadeToColor)
         {
             texture = _texture;

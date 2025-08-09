@@ -392,7 +392,9 @@ public class Mission
         Vector2 futureVelocity = _startVelocity;
         Vector2[] futurePlanetPositions = planets.Select(planet => planet.position).ToArray();
         Vector2[] futurePlanetVelocities = planets.Select(planet => planet.velocity).ToArray();
-        var emitter = new ParticleEmitter(Assets.Get(Sprite.Dot), Engine.DeltaSeconds, _startPosition, 0, 0, 0, 0.01f, Color.Cyan, EmitterType.EmissionOverDistance);
+        int currentPlanet = 0;
+        bool hasChanged = false;
+        var emitter = new ParticleEmitter(Assets.Get(Sprite.Dot), Engine.DeltaSeconds, _startPosition, 0, 0, 0, 5f, Color.Cyan, EmitterType.EmissionOverDistance);
         bool exit = false;
 
         for (int n = 0; n < 1000; n++)
@@ -431,25 +433,36 @@ public class Mission
             Vector2 particlePos = futurePosition;
             if (Engine.PatchedConics)
             {
+                hasChanged = false;
                 for(int i = futurePlanetPositions.Length - 1; i >= 0; i--)
                 {
                     float sphereOfInfluence = (i == 0) ? 9999 : (Vector2.Distance(futurePlanetPositions[i], futurePlanetPositions[0]) * (float)Math.Pow(planets[i].mass / planets[0].mass, 2 / 5) / 3);
                     if (Vector2.Distance(futurePosition, futurePlanetPositions[i]) < sphereOfInfluence)
                     {
-                        particlePos = particlePos - futurePlanetPositions[i] + planets[i].position;
+                        particlePos += planets[i].position - futurePlanetPositions[i];
+                        if (currentPlanet != i)
+                        {
+                            currentPlanet = i;
+                            hasChanged = true;
+                        }
                         break;
                     }
                 }
             }
+            if (!hasChanged)
+            {
+                emitter.position = particlePos;
+                emitter.Update();
+            }
+            else
+            {
+                emitter.position = particlePos;
+                emitter.prevPosition = particlePos;
+            }
             if (exit)
             {
-                ParticleManager.Add(new Particle(Assets.Get(Sprite.Dot), particlePos, 0, Color.Red * 0.5f));
+                ParticleManager.Add(new Particle(Assets.Get(Sprite.Dot), particlePos, 0, Color.Red * 0.75f));
                 return;
-            }
-            if (n % 20 == 0)
-            {
-                emitter.position = futurePosition;
-                emitter.Update();
             }
         }
     }

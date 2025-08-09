@@ -20,19 +20,22 @@ public class Module : Pickup, IData
     public int MaxHealth => (itemData as ModuleData).MaxHealth;
     public override Color Color => isFailed ? Color.Red : Color.White;
     public float cooldown = 0;
+    private Decal healthDecal;
 
     public Module(Modules _type, Vector2 _position = default, Vector2 _velocity = default, float _angularVelocity = 0) : base(ItemFactory.moduleData[_type], _position, _velocity, _angularVelocity)
     {
         health = MaxHealth;
         Type = _type;
-        Tooltip.AddWidget(new Decal(new Vector2(0, 5), Assets.TextFont, $"{Health} / {MaxHealth}", Color.Pink, 5f));
+        healthDecal = new Decal(new Vector2(0, 5), Assets.TextFont, $"{Health} / {MaxHealth}", Color.Pink, 5f);
+        Tooltip.AddWidget(healthDecal);
     }
     public Module(Modules _type, List<string> _disassembly, LoadLogger _logger) : base(ItemFactory.moduleData[_type], _disassembly, _logger)
     {
         _logger.Try(delegate { health = Int32.Parse(_disassembly[2]); }, 2);
         _logger.Try(delegate { isFailed = bool.Parse(_disassembly[3]); }, 3);
         Type = _type;
-        Tooltip.AddWidget(new Decal(new Vector2(0, 5), Assets.TextFont, $"{Health} / {MaxHealth}", Color.Pink, 5f));
+        healthDecal = new Decal(new Vector2(0, 5), Assets.TextFont, $"{Health} / {MaxHealth}", Color.Pink, 5f);
+        Tooltip.AddWidget(healthDecal);
     }
     public void UpdateCooldown()
     {
@@ -43,7 +46,7 @@ public class Module : Pickup, IData
     }
     private void UpdateHealth()
     {
-        Tooltip.GetWidget(2).text = $"{Health} / {MaxHealth}";
+        healthDecal.text = $"{Health} / {MaxHealth}";
     }
     public bool IsCooldownReady()
     {

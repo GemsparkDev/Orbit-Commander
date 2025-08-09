@@ -5,14 +5,14 @@ using Assimp;
 
 namespace Space_Wars.Content.Main.Components;
 
-public class DockableComponent(Entity _parentEntity, Containers _menu) : IComponent
+public class DockableComponent(Entity _parentEntity, Container _menu) : IComponent
 {
     public Vector2 Position => _parentEntity.position;
     public Vector2 Velocity => _parentEntity.velocity;
     public bool IsDocked { get; private set; } = false;
     public ComponentType Type => ComponentType.DockableComponent;
     public bool IsValid => !_parentEntity.isExpired;
-    public Containers Menu { get; private set; } = _menu;
+    public Container Menu { get; private set; } = _menu;
 
     public void AddItem(Pickup _pickup)
     {

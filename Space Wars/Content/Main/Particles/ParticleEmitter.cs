@@ -14,7 +14,7 @@ namespace Space_Wars.Content.Main.Particles
     public class ParticleEmitter
     {
         public Vector2 position;
-        private Vector2 prevPosition;
+        public Vector2 prevPosition;
         public Vector2 offsetVelocity = Vector2.Zero;
         public Color particleColor;
         public Color particleFadeToColor;
@@ -116,22 +116,15 @@ namespace Space_Wars.Content.Main.Particles
                 return;
             }
             float randomAngle;
-            float particleAngle;
-            Vector2 normalVector;
             Vector2 positionDifference = position - prevPosition;
-            float differenceMagnitude = positionDifference.Length();
-            float iterations = (differenceMagnitude * speedOfEmission);
-            for (float i = 0; i < iterations; i++)
+            var normalVector = Vector2.Normalize(positionDifference);
+            float increment = 100 / (speedOfEmission);
+            for (cachedDistance += positionDifference.Length(); cachedDistance > increment; cachedDistance -= increment)
             {
                 randomAngle = Engine.Random.NextSingle() * sprayCone;
-                particleAngle = randomAngle - sprayCone / 2 + sprayAngle - MathF.Atan2(positionDifference.X, positionDifference.Y);
-                normalVector = Engine.ToUnitVector(particleAngle);
-                float lerp = i / iterations;
-                ParticleManager.Add(new Particle(particleTexture, particleTimeAlive, prevPosition * (1 - lerp) + position * lerp + normalVector * Math.Min(10, cachedDistance), 
-                normalVector * particleVelocity + offsetVelocity, particleAngle, particleAngularVelocity, particleColor, particleFadeToColor));
+                ParticleManager.Add(new Particle(particleTexture, particleTimeAlive, position - normalVector * (cachedDistance - increment),
+                normalVector * particleVelocity + offsetVelocity, randomAngle - sprayCone / 2 + sprayAngle - Engine.ToAngle(positionDifference), particleAngularVelocity, particleColor, particleFadeToColor));
             }
-            float val = 1 - (iterations - MathF.Truncate(iterations)) / iterations;
-            cachedDistance = (prevPosition * (1 - val) + position * val).Length();
         }
         private void DrawCircle()
         {

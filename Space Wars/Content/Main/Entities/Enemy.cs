@@ -1982,7 +1982,7 @@ public class Enemy : Entity
             }
             if (EventHandler.AcknowledgeMessage(Message.MothershipUpdateFurnace))
             {
-                furnaceItem = ((ItemSlot<Pickup>)Engine.UIManager.GetFuncWidget((int)Containers.MothershipMenu, 1)).daughterItem;
+                furnaceItem = UI.FurnaceSlot.daughterItem;
             }
             if (health <= 0)
             {
@@ -2142,7 +2142,7 @@ public class Enemy : Entity
             }
             if (EventHandler.AcknowledgeMessage(Message.MothershipUpdateFurnace))
             {
-                furnaceItem = ((ItemSlot<Pickup>)Engine.UIManager.GetFuncWidget((int)Containers.MothershipMenu, 1)).daughterItem;
+                furnaceItem = UI.FurnaceSlot.daughterItem;
             }
             if (health <= 0)
             {
@@ -2268,7 +2268,7 @@ public class Enemy : Entity
             }
             if (EventHandler.AcknowledgeMessage(Message.MothershipUpdateFurnace))
             {
-                furnaceItem = ((ItemSlot<Pickup>)Engine.UIManager.GetFuncWidget((int)Containers.MothershipMenu, 1)).daughterItem;
+                furnaceItem = UI.FurnaceSlot.daughterItem;
             }
             var dockableComponent = (Components.GetComponent(ComponentType.DockableComponent));
             if (furnaceItem != null)
@@ -2725,7 +2725,7 @@ public class Enemy : Entity
     {
         Enemy enemy = new(position, velocity, angle, 8, 1000, Assets.Get(Sprite.Mothership), true);
         enemy.AddBehaviour(enemy.Mothership());
-        enemy.Components.Add(new DockableComponent(enemy, Containers.MothershipMenu));
+        enemy.Components.Add(new DockableComponent(enemy, UI.MothershipMenu));
         return enemy;
     }
     public static Enemy NewTurret(Vector2 position, Vector2 velocity, float angle, bool _isFriendly)
@@ -2789,7 +2789,7 @@ public class Enemy : Entity
     {
         Enemy enemy = new(position, velocity, angle, 10, 300, Assets.Get(Sprite.Orbiter), true);
         enemy.AddBehaviour(enemy.Orbiter());
-        enemy.Components.Add(new DockableComponent(enemy, Containers.MothershipMenu));
+        enemy.Components.Add(new DockableComponent(enemy, UI.MothershipMenu));
         enemy.angularVelocity = -0.01f;
         return enemy;
     }
@@ -2797,7 +2797,7 @@ public class Enemy : Entity
     {
         Enemy enemy = new(position, velocity, angle, 0, 250, Assets.Get(Sprite.PickupDrone), true);
         enemy.AddBehaviour(enemy.PickupDrone());
-        enemy.Components.Add(new DockableComponent(enemy, Containers.PickupDroneMenu));
+        enemy.Components.Add(new DockableComponent(enemy, UI.PickupDroneMenu));
         return enemy;
     }
     public static Enemy NewStealthFighter(Vector2 position, Vector2 velocity, float angle, bool _isFriendly = false)
@@ -2821,7 +2821,7 @@ public class Enemy : Entity
         Enemy enemy = new(position, velocity, angle, 8, 500, Assets.Get(Sprite.Mothership), _isFriendly);
         enemy.AddBehaviour(enemy.MakeshiftMothership());
         enemy.AddBehaviour(enemy.EnemyDeath(0.01f));
-        enemy.Components.Add(new DockableComponent(enemy, Containers.MothershipMenu));
+        enemy.Components.Add(new DockableComponent(enemy, UI.MothershipMenu));
         return enemy;
     }
     public static Enemy NewExodus(Vector2 position, Vector2 velocity, float angle, bool _isFriendly = false)

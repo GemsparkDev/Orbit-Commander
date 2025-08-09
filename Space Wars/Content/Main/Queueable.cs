@@ -97,7 +97,7 @@ public class RepairQueue : Queueable
     }
     public RepairQueue(List<string> _data, LoadLogger _logger) : base(_data, _logger, 2, Assets.Get(Sprite.HullModule), "Repair")
     {
-        _logger.Try(delegate { module = Engine.MissionSelectSlots[Int32.Parse(_data[2])]; }, 2);
+        _logger.Try(delegate { module = UI.MissionSelectSlots[Int32.Parse(_data[2])]; }, 2);
     }
     protected override void Construct()
     {
@@ -110,9 +110,9 @@ public class RepairQueue : Queueable
     }
     public override string Serialize()
     {
-        for(int i = 0; i < Engine.MissionSelectSlots.Length; i++)
+        for(int i = 0; i < UI.MissionSelectSlots.Length; i++)
         {
-            if (Engine.MissionSelectSlots[i] == module)
+            if (UI.MissionSelectSlots[i] == module)
             {
                 return $"{{{Name},{Cost},{i}}}";
             }
@@ -130,7 +130,7 @@ public class SmeltQueue : Queueable
     }
     public SmeltQueue(List<String> _data, LoadLogger _logger) : base(_data, _logger, 2, Assets.Get(Sprite.RealMetalScrap), "Smelt")
     {
-        _logger.Try(delegate { pickup = Engine.MissionSelectSlots[Int32.Parse(_data[2])]; }, 2);
+        _logger.Try(delegate { pickup = UI.MissionSelectSlots[Int32.Parse(_data[2])]; }, 2);
     }
     protected override void Construct()
     {
@@ -151,9 +151,9 @@ public class SmeltQueue : Queueable
     }
     public override string Serialize()
     {
-        for (int i = 0; i < Engine.MissionSelectSlots.Length; i++)
+        for (int i = 0; i < UI.MissionSelectSlots.Length; i++)
         {
-            if (Engine.MissionSelectSlots[i] == pickup)
+            if (UI.MissionSelectSlots[i] == pickup)
             {
                 return $"{{{Name},{Cost},{i}}}";
             }

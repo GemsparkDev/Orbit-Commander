@@ -110,7 +110,7 @@ public class PlayingGame : GameState
         if (!Engine.Self.IsActive)
         {
             Engine.UIManager.DisableAll();
-            Engine.UIManager.GetContainer((int)Containers.PauseMenu).enabled = true;
+            UI.PauseMenu.enabled = true;
             CurrentGameState.SwitchState(new PausedGame());
         }
     }
@@ -125,7 +125,7 @@ public class PausedGame : GameState
     {
         if (Input.OldState.IsKeyUp(Keys.Escape) && Input.NewState.IsKeyDown(Keys.Escape))
         {
-            if (Engine.UIManager.ToggleToMenu(Engine.UIManager.GetContainer((int)Containers.PauseMenu)))
+            if (Engine.UIManager.ToggleToMenu(UI.PauseMenu))
             {
                 CurrentGameState.SwitchState(new PlayingGame());
             }
@@ -351,7 +351,7 @@ public class InShip : GameState
         if (Input.OldState.IsKeyUp(Keys.F) && Input.NewState.IsKeyDown(Keys.F))
         {
             CurrentGameState.SwitchState(new PlayingGame());
-            Engine.UIManager.GetContainer((int)Containers.FuseMenu).enabled = false;
+            UI.FuseMenu.enabled = false;
         }
     }
     public override void Draw(SpriteBatch _spriteBatch) { }

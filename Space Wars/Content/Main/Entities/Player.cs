@@ -122,15 +122,15 @@ public class Player : Entity
         {
             SoundManager.SetAllSounds(false);
             CurrentGameState.SwitchState(new InShip());
-            Engine.UIManager.GetContainer((int)Containers.FuseMenu).enabled = true;
+            UI.FuseMenu.enabled = true;
         }
         if (modules[ModuleType.Core].Health <= 0)
         {
             isExpired = true;
             engineSounds.Stop();
             Assets.Get(Sound.Death).Play();
-            SoundManager.SFXVolume = (Engine.UIManager.GetFuncWidget(0, 3) as Slider).sliderInterval;
-            SoundManager.MusicVolume = (Engine.UIManager.GetFuncWidget(0, 4) as Slider).sliderInterval;
+            SoundManager.SFXVolume = UI.SFXSlider.sliderInterval;
+            SoundManager.MusicVolume = UI.MusicSlider.sliderInterval;
             return;
         }
         engineParticles.position = position - new Vector2(MathF.Sin(angle), -MathF.Cos(angle)) * 8;
@@ -221,33 +221,31 @@ public class Player : Entity
         float currentHealth = modules[ModuleType.Hull].Health + modules[ModuleType.Guns].Health + modules[ModuleType.Engines].Health + modules[ModuleType.Sensors].Health + modules[ModuleType.Core].Health;
         float maxHealth = modules[ModuleType.Hull].MaxHealth + modules[ModuleType.Guns].MaxHealth + modules[ModuleType.Engines].MaxHealth + modules[ModuleType.Sensors].MaxHealth + modules[ModuleType.Core].MaxHealth;
 
-        var slider = (Engine.UIManager.ScreenWindow.GetFuncWidget(1) as Slider);
-        slider.SetInterval(currentHealth, maxHealth);
+        UI.PlayerHealth.SetInterval(currentHealth, maxHealth);
         Vector3 colorVec;
         float val = (MathF.Sin(time) + 1f) / 2;
         if (modules[ModuleType.Hull].Type == Modules.Shield && modules[ModuleType.Hull].cooldown <= 0)
         {
-            slider.enabledColor = Color.Yellow;
+            UI.PlayerHealth.enabledColor = Color.Yellow;
         }
         else
         {
             colorVec = new Vector3(1, 0, 0) * val + new Vector3(1, 0.2f, 0.2f) * (1f - val);
-            slider.enabledColor = new Color(colorVec.X, colorVec.Y, colorVec.Z);
+            UI.PlayerHealth.enabledColor = new Color(colorVec.X, colorVec.Y, colorVec.Z);
         }
 
-        slider = (Engine.UIManager.ScreenWindow.GetFuncWidget(2) as Slider);
         //Only displays if the player has abilities unlocked
         if (Progression > 1) 
         {
-            slider.SetInterval(1 - (modules[ModuleType.Core].cooldown / abilityMaxCooldown), 1);
+            UI.PlayerAbility.SetInterval(1 - (modules[ModuleType.Core].cooldown / abilityMaxCooldown), 1);
             colorVec = new Vector3(0, 1, 1) * val + new Vector3(0.2f, 1, 0.8f) * (1f - val);
-            slider.enabledColor = new Color(colorVec.X, colorVec.Y, colorVec.Z);
-            slider.disabledColor = Color.DarkGray;
+            UI.PlayerAbility.enabledColor = new Color(colorVec.X, colorVec.Y, colorVec.Z);
+            UI.PlayerAbility.disabledColor = Color.DarkGray;
         }
         else
         {
-            slider.enabledColor = Color.Transparent;
-            slider.disabledColor = Color.Transparent;
+            UI.PlayerAbility.enabledColor = Color.Transparent;
+            UI.PlayerAbility.disabledColor = Color.Transparent;
         }
 
         if (currentHealth > 50)
@@ -515,11 +513,11 @@ public class Player : Entity
         {
             if (dockedEntity != null)
             {
-                Engine.UIManager.ToggleMenu((int)dockedEntity.Menu);
+                dockedEntity.Menu.enabled = !dockedEntity.Menu.enabled;
             }
             else
             {
-                Engine.UIManager.ToggleMenu((int)Containers.PlayerMenu);
+                UI.PlayerMenu.enabled = !UI.PlayerMenu.enabled;
             }
         }
         engineParticles.isEmitterActive = isEngineActive;
