@@ -56,7 +56,8 @@ public class GravitationalSource
         Vector2 relativePosition = _entity.position - position;
         if(relativePosition == Vector2.Zero)
         {
-            relativePosition = Vector2.One;
+            _entity.isExpired = true;
+            return Vector2.Zero;
         }
         if (relativePosition.Length() >= radius + _entity.ColliderRadius)
         {
@@ -66,23 +67,27 @@ public class GravitationalSource
         }
         else
         {
-            int collisionForce = 0;
             var normalVector = Vector2.Normalize(relativePosition);
             var frictionVector = new Vector2(normalVector.Y, -normalVector.X);
             var relativeVelocity = velocity - _entity.velocity;
-            if (Math.Floor((relativeVelocity).Length() / 2) > 5)
-            {
-                collisionForce = (int)Math.Floor((relativeVelocity).Length() / 2);
-            }
-            if (_entity as Pickup == null)
+            int collisionForce = (int)Math.Floor((relativeVelocity).Length() / 2);
+            if (_entity as Pickup == null && collisionForce > 5)
             {
                 _entity.Collide(collisionForce);
             }
-            _entity.velocity += normalVector * Math.Max(0, Vector2.Dot(relativeVelocity, normalVector)) + frictionVector * Vector2.Dot(relativeVelocity, frictionVector) * 0.1f;
+            float verticalVelocity = Math.Max(0, Vector2.Dot(relativeVelocity, normalVector));
+            _entity.velocity += normalVector * verticalVelocity + frictionVector * Vector2.Dot(relativeVelocity, frictionVector) * 0.1f;
             _entity.position += normalVector * (radius + _entity.ColliderRadius - Vector2.Distance(position, _entity.position));
+            float val = (int)MathF.Sqrt(collisionForce);
+            if (verticalVelocity > 1) 
+            {
+                for (int i = 0; i < val * 1.5f; i++)
+                {
+                    ParticleManager.Add(new Particle(Assets.Get(Sprite.Dot), 10, normalVector * (radius + 2), normalVector * val + new Vector2(Engine.OneToNegOne(), Engine.OneToNegOne()) * val / 2, 0, 0, color * 0.75f, Color.Transparent) { experienceGravity = true });
+                }
+            }
             return Vector2.Zero;
         }
-
     }
     public Vector2 AttractObject(GravitationalSource _celestialBody)
     {
@@ -105,6 +110,26 @@ public class GravitationalSource
 
             _celestialBody.velocity += normalVector * Math.Max(0, Vector2.Dot(relativeVelocity, normalVector)) + frictionVector * Vector2.Dot(relativeVelocity, frictionVector) * 0.1f;
             _celestialBody.position += normalVector * (radius + _celestialBody.radius - Vector2.Distance(position, _celestialBody.position));
+            return Vector2.Zero;
+        }
+    }
+    public Vector2 AttractObject(Particle _particle)
+    {
+        Vector2 relativePosition = _particle.Position - position;
+        if (relativePosition == Vector2.Zero)
+        {
+            _particle.isExpired = true;
+            return Vector2.Zero;
+        }
+        if (relativePosition.Length() >= radius + (_particle.Size.X + _particle.Size.Y) / 4)
+        {
+            Vector2 acceleration = Vector2.Normalize(-relativePosition) * mass / relativePosition.LengthSquared() * Engine.DeltaSeconds * 60;
+            _particle.Velocity += acceleration;
+            return acceleration;
+        }
+        else
+        {
+            _particle.isExpired = true;
             return Vector2.Zero;
         }
     }

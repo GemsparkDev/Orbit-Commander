@@ -129,9 +129,28 @@ namespace Space_Wars.Content.Main.Particles
         private void DrawCircle()
         {
             Vector2 normalVector;
-            for (float angle = 0; angle < sprayCone; angle += MathF.Tau / particleVelocity / particleTimeAlive / speedOfEmission)
+            float increment = MathF.Tau / particleVelocity / particleTimeAlive / speedOfEmission;
+            int count = (int)Math.Truncate(sprayCone / increment);
+            if(count % 2 == 0 && count != 0)
             {
-                normalVector = Engine.ToUnitVector(angle + sprayAngle - sprayCone/2) * particleVelocity * particleTimeAlive;
+                for (float angle = increment/2; angle < sprayCone / 2; angle += increment)
+                {
+                    DrawParticle(angle);
+                    DrawParticle(-angle);
+                }
+            }
+            else
+            {
+                DrawParticle(0);
+                for (float angle = increment; angle < sprayCone / 2; angle += increment)
+                {
+                    DrawParticle(angle);
+                    DrawParticle(-angle);
+                }
+            }
+            void DrawParticle(float angle)
+            {
+                normalVector = Engine.ToUnitVector(angle + sprayAngle) * particleVelocity * particleTimeAlive;
                 ParticleManager.Add(new Particle(particleTexture, position + normalVector + offsetVelocity, angle, particleColor));
             }
             sprayAngle += particleAngularVelocity * Engine.DeltaSeconds * 60;

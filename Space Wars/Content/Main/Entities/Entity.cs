@@ -83,8 +83,9 @@ public abstract class Entity
     public virtual void Draw(SpriteBatch _spriteBatch)
     {
         Vector2 halfSize = (Engine.BackBuffer + Size) / 2;
-        if (position.X - Engine.Camera.Position.X < -halfSize.X || position.Y - Engine.Camera.Position.Y < -halfSize.Y
-         || position.X - Engine.Camera.Position.X >  halfSize.X || position.Y - Engine.Camera.Position.Y >  halfSize.Y)
+        Vector2 pos = Engine.Camera.Position + Engine.MousePositionOffset;
+        if (position.X - pos.X < -halfSize.X || position.Y - pos.Y < -halfSize.Y
+         || position.X - pos.X >  halfSize.X || position.Y - pos.Y >  halfSize.Y)
         {
             return;
         }

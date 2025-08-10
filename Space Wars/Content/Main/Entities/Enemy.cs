@@ -187,7 +187,7 @@ public class Enemy : Entity
         }
         return enemy;
     }
-    //Useful behaviors
+    #region Useful Behaviors
     IEnumerable<int> EnemyDeath(float _rarity)
     {
         while (true)
@@ -222,7 +222,8 @@ public class Enemy : Entity
             yield return 0;
         }
     }
-    //Bosses
+#endregion
+    #region Bosses
     IEnumerable<int> Symmetry()
     {
         enemyRange.particleVelocity = 500;
@@ -1259,7 +1260,8 @@ public class Enemy : Entity
             yield return 0;
         }
     }
-    //Enemies
+#endregion
+    #region Enemies
     IEnumerable<int> Fighter()
     {
         enemyRange.particleVelocity = 250;
@@ -1964,7 +1966,8 @@ public class Enemy : Entity
             yield return 0;
         }
     }
-    //Infrastructure
+#endregion
+    #region Infrastructure
     IEnumerable<int> Mothership()
     {
         enemyRange.particleVelocity = 300;
@@ -2651,6 +2654,7 @@ public class Enemy : Entity
             yield return 0;
         }
     }
+    #endregion
     public static Enemy NewDummyEnemy(Vector2 _position, bool _isFriendly = false)
     {
         return new(_position, Vector2.Zero, 0, 0, 0, Assets.Get(Sprite.Fighter), _isFriendly);

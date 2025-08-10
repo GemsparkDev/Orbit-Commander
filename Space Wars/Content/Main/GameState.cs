@@ -101,7 +101,7 @@ public class PlayingGame : GameState
         ParticleManager.Update();
         if (Input.OldState.IsKeyUp(Keys.Escape) && Input.NewState.IsKeyDown(Keys.Escape))
         {
-            if (Engine.UIManager.ToggleToMenu(Engine.UIManager.GetContainer((int)Containers.PauseMenu)))
+            if (Engine.UIManager.ToggleToMenu(UI.PauseMenu))
             {
                 SoundManager.SetAllSounds(false);
                 CurrentGameState.SwitchState(new PausedGame());

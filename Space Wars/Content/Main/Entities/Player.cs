@@ -28,7 +28,7 @@ public class Player : Entity
     };
     public Dictionary<ModuleType, Module> modules = new()
     {
-        { ModuleType.Hull, new Module(Modules.Reflective) },
+        { ModuleType.Hull, new Module(Modules.Shield) },
         { ModuleType.Guns, new Module(Modules.MatrixLauncher) },
         { ModuleType.Engines, new Module(Modules.Plasma) },
         { ModuleType.Sensors, new Module(Modules.Sensors) },
@@ -41,6 +41,7 @@ public class Player : Entity
     private Entity gunAngle;
     private ParticleEmitter engineParticles = new(Assets.Get(Sprite.Circle), 0.15f, Vector2.Zero, 0, MathF.PI/4, 2, 450f, Color.Cyan, EmitterType.EmissionOverTime) { isEmitterActive = false, particleFadeToColor = new Color(72, 61, 139, 0) };
     private ParticleEmitter smokeParticles = new(Assets.Get(Sprite.Circle), 1f, Vector2.Zero, 0, MathF.PI/4, 1, 0.5f, Color.Gray, EmitterType.EmissionOverTime) { isEmitterActive = false, particleFadeToColor = new Color(169, 169, 169, 0) };
+    private ParticleEmitter shieldEffect;
     private SoundEffectInstance engineSounds;
     private float invincibilityCooldown = 0;
     private float cachedDamage = 0;
@@ -114,6 +115,7 @@ public class Player : Entity
         }
         EventHandler.SetFuseModuleDecals(textures);
         EventHandler.UpdateFuseUI(moduleFuses, spareFuses);
+        shieldEffect = new(Assets.Get(Sprite.Dot), position, 10, Color.Violet) { particleAngularVelocity = 0.1f };
     }
     public override void Update()
     {
@@ -175,8 +177,8 @@ public class Player : Entity
                     EventHandler.UpdateModulesStatus();
                     if (modules[ModuleType.Core] == module)
                     {
-                        SoundManager.SFXVolume = (Engine.UIManager.GetFuncWidget(0, 3) as Slider).sliderInterval;
-                        SoundManager.MusicVolume = (Engine.UIManager.GetFuncWidget(0, 4) as Slider).sliderInterval;
+                        SoundManager.SFXVolume = UI.SFXSlider.sliderInterval;
+                        SoundManager.MusicVolume = UI.MusicSlider.sliderInterval;
                     }
                 }
             }
@@ -224,9 +226,15 @@ public class Player : Entity
         UI.PlayerHealth.SetInterval(currentHealth, maxHealth);
         Vector3 colorVec;
         float val = (MathF.Sin(time) + 1f) / 2;
+        shieldEffect.position = position;
         if (modules[ModuleType.Hull].Type == Modules.Shield && modules[ModuleType.Hull].cooldown <= 0)
         {
-            UI.PlayerHealth.enabledColor = Color.Yellow;
+            UI.PlayerHealth.enabledColor = Color.Violet;
+            if (dockedEntity == null) 
+            {
+                shieldEffect.offsetVelocity = velocity;
+                shieldEffect.Update();
+            }
         }
         else
         {

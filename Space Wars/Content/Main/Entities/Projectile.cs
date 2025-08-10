@@ -245,7 +245,22 @@ public class FlameBolt : Projectile
     float piercingCooldown = 0;
     float maxTimeLeft;
     private ParticleEmitter emitter;
-    public new float ColliderRadius => emitter.EmitterType == EmitterType.Circle ? emitter.particleVelocity : Math.Min((maxTimeLeft - timeLeft) * emitter.particleVelocity, emitter.particleVelocity * emitter.particleTimeAlive) * 60;
+    public override float ColliderRadius 
+    { 
+        get 
+        {
+            float radius = 0;
+            if (emitter == null)
+            {
+                return radius;
+            }
+            if (emitter.EmitterType == EmitterType.Circle)
+            {
+                return emitter.particleVelocity;
+            }
+            return Math.Min((maxTimeLeft - timeLeft) * emitter.particleVelocity, emitter.particleVelocity * emitter.particleTimeAlive) * 60;
+        } 
+    }
     public FlameBolt(Vector2 _position, Vector2 _velocity, bool _isFriendly, int _damage, float _timeLeft = 0.7f, float _particleVelocity = 1, int _stealth = 0)
         : base(Assets.Get(Sprite.Circle), _position, _velocity, 0, 0, _isFriendly, _damage, _stealth)
     {

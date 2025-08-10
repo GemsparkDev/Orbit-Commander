@@ -361,6 +361,10 @@ public class Mission
     {
         foreach (var planet in planets) { planet.AttractObject(_entity); }
     }
+    public void AttractObject(Particle _particle)
+    {
+        foreach (var planet in planets) { planet.AttractObject(_particle); }
+    }
     public void FailMission()
     {
         if (restartTimer != -1)

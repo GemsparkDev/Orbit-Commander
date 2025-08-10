@@ -7,11 +7,14 @@ namespace Space_Wars.Content.Main.Particles
     public class Particle
     {
         public bool isExpired = false;
+        public bool experienceGravity = false;
         public Vector2 Size => texture == null ? Vector2.Zero : new Vector2(texture.Width, texture.Height);
         public String drawText;
         private Texture2D texture;
         private Vector2 position;
+        public Vector2 Position { get { return position; } set { velocity = value; } }
         private Vector2 velocity;
+        public Vector2 Velocity { get { return velocity; } set { velocity = value; } }
         private Color color;
         private Color renderColor;
         private Color fadeToColor;
@@ -45,6 +48,10 @@ namespace Space_Wars.Content.Main.Particles
         }
         public void Update()
         {
+            if (experienceGravity) 
+            {
+                Engine.SaveGame.CurrentMission.AttractObject(this);
+            }
             float timeScalar = Math.Clamp(timeLeft / originalTimeLeft, 0, 1);
             renderColor = new Color(
             (byte)Engine.Lerp(color.R, fadeToColor.R, 1 - timeScalar),

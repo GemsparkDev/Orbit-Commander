@@ -27,17 +27,6 @@ public class DockableComponent(Entity _parentEntity, Container _menu) : ICompone
             return;
         }
     }
-    public bool IsFull()
-    {
-        for (int i = 0; i < Engine.SaveGame.Inventory.Length; i++)
-        {
-            if (Engine.SaveGame.Inventory[i] == null)
-            {
-                return false;
-            }
-        }
-        return true;
-    }
     public bool Dock(Player _player)
     {
         EventHandler.DisableDockingMenus();
@@ -66,7 +55,16 @@ public class DockableComponent(Entity _parentEntity, Container _menu) : ICompone
             {
                 //Launches the leashed material away if the docking module cannot store it
                 _player.leashedMaterials[i].velocity += Engine.SaveGame.CurrentMission.GetNormalizedAcceleration(_player.leashedMaterials[i].position) * 15;
-                if (IsFull())
+                bool isFull = true;
+                for (int j = 0; j < Engine.SaveGame.Inventory.Length; j++)
+                {
+                    if (Engine.SaveGame.Inventory[j] == null)
+                    {
+                        isFull = false;
+                        break;
+                    }
+                }
+                if (isFull)
                 {
                     continue;
                 }
