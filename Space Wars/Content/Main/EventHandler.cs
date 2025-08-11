@@ -317,4 +317,12 @@ public static class EventHandler
         string filePath = Path.Combine(Directory.GetCurrentDirectory(), $"Content\\Saves\\Save_{Engine.SaveSlot}.txt");
         File.Delete(filePath);
     }
+    public static void UpgradeSensors(Modules _module)
+    {
+        if (Engine.SaveGame.Scrap > 0)
+        {
+            Engine.SaveGame.Scrap--;
+            Engine.SaveGame.Player.modules[ModuleType.Sensors] = new Module(_module);
+        }
+    }
 }

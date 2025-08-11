@@ -32,7 +32,7 @@ public class Player : Entity
         { ModuleType.Guns, new Module(Modules.MatrixLauncher) },
         { ModuleType.Engines, new Module(Modules.Plasma) },
         { ModuleType.Sensors, new Module(Modules.Sensors) },
-        { ModuleType.Core, new Module(Modules.CreateFighter) }
+        { ModuleType.Core, new Module(Modules.GrapplingHook) }
     };
 
     public DockableComponent dockedEntity;
@@ -1008,7 +1008,7 @@ public class Player : Entity
         }
         Vector2 vel = IdealSpeedWithVelocity(15);
         Engine.EntityManager.Add(new FlameBolt(position, vel + new Vector2(Engine.OneToNegOne(), Engine.OneToNegOne()) / 2, true, 10,
-            new ParticleEmitter(Assets.Get(Sprite.Circle), position, 0, Color.Cyan) { sprayCone = MathF.PI * 2 / 3, sprayAngle = Engine.ToAngle(vel), speedOfEmission = 0.5f }, 4));
+            new ParticleEmitter(Assets.Get(Sprite.Circle), position, 0, Color.Cyan) { sprayCone = MathF.PI * 2 / 3, sprayAngle = Engine.ToAngle(vel - velocity), speedOfEmission = 0.5f }, 4));
         SoundManager.PlaySound(Assets.Get(Sound.SniperFire), position);
         modules[ModuleType.Guns].cooldown = 1.5f;
         Engine.ShakeScreen(0.5f);
@@ -1054,7 +1054,7 @@ public class Player : Entity
     {
         if ((abilityEntity == null || abilityEntity.isExpired) && modules[ModuleType.Core].IsCooldownReady())
         {
-            abilityEntity = new GrapplingHook(position, targetVector * 50, gunAngle.angle, this);
+            abilityEntity = new GrapplingHook(position, IdealSpeedWithVelocity(50), gunAngle.angle, this);
             SoundManager.PlaySound(Assets.Get(Sound.Click), position);
             Engine.ShakeScreen(0.3f);
             velocity -= targetVector / 2;

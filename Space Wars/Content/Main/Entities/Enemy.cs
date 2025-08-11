@@ -1,12 +1,10 @@
 ﻿using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Space_Wars.Content.Main.Components;
 using Space_Wars.Content.Main.Particles;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using UILib.Content.Main;
 
 namespace Space_Wars.Content.Main.Entities;
@@ -2654,6 +2652,13 @@ public class Enemy : Entity
             yield return 0;
         }
     }
+    IEnumerable<int> Trader()
+    {
+        while(true)
+        {
+
+        }
+    }
     #endregion
     public static Enemy NewDummyEnemy(Vector2 _position, bool _isFriendly = false)
     {
@@ -2887,6 +2892,13 @@ public class Enemy : Entity
         var enemy = new Enemy(_position, _velocity, _angle, 6, 400, Assets.Get(Sprite.Communicator), _isFriendly);
         enemy.AddBehaviour(enemy.Communicator());
         enemy.AddBehaviour(enemy.EnemyDeath(1));
+        return enemy;
+    }
+    public static Enemy NewTrader(Vector2 _position, Vector2 _velocity, float _angle)
+    {
+        var enemy = new Enemy(_position, _velocity, _angle, 999, 400, Assets.Get(Sprite.Communicator), true);
+        enemy.AddBehaviour(enemy.Trader());
+        enemy.Components.Add(new DockableComponent(enemy, UI.UpgradeMenu, false));
         return enemy;
     }
 }

@@ -5,7 +5,7 @@ using Assimp;
 
 namespace Space_Wars.Content.Main.Components;
 
-public class DockableComponent(Entity _parentEntity, Container _menu) : IComponent
+public class DockableComponent(Entity _parentEntity, Container _menu, bool hasInventory = true) : IComponent
 {
     public Vector2 Position => _parentEntity.position;
     public Vector2 Velocity => _parentEntity.velocity;
@@ -13,8 +13,7 @@ public class DockableComponent(Entity _parentEntity, Container _menu) : ICompone
     public ComponentType Type => ComponentType.DockableComponent;
     public bool IsValid => !_parentEntity.isExpired;
     public Container Menu { get; private set; } = _menu;
-
-    public void AddItem(Pickup _pickup)
+    private void AddItem(Pickup _pickup)
     {
         for (int i = 0; i < Engine.SaveGame.Inventory.Length; i++)
         {
@@ -51,29 +50,32 @@ public class DockableComponent(Entity _parentEntity, Container _menu) : ICompone
         else
         {
             EventHandler.ToggleDockingMenus();
-            for (int i = 0; i < _player.leashedMaterials.Count; i++)
-            {
-                //Launches the leashed material away if the docking module cannot store it
-                _player.leashedMaterials[i].velocity += Engine.SaveGame.CurrentMission.GetNormalizedAcceleration(_player.leashedMaterials[i].position) * 15;
-                bool isFull = true;
-                for (int j = 0; j < Engine.SaveGame.Inventory.Length; j++)
-                {
-                    if (Engine.SaveGame.Inventory[j] == null)
-                    {
-                        isFull = false;
-                        break;
-                    }
-                }
-                if (isFull)
-                {
-                    continue;
-                }
-                AddItem(_player.leashedMaterials[i]);
-                _player.leashedMaterials[i].isExpired = true;
-            }
-            _player.leashedMaterials.Clear();
             SoundManager.PlayGlobalSound(Assets.Get(Sound.Dock));
-            EventHandler.UpdateScrapText();
+            if (hasInventory)
+            {
+                for (int i = 0; i < _player.leashedMaterials.Count; i++)
+                {
+                    //Launches the leashed material away if the docking module cannot store it
+                    _player.leashedMaterials[i].velocity += Engine.SaveGame.CurrentMission.GetNormalizedAcceleration(_player.leashedMaterials[i].position) * 15;
+                    bool isFull = true;
+                    for (int j = 0; j < Engine.SaveGame.Inventory.Length; j++)
+                    {
+                        if (Engine.SaveGame.Inventory[j] == null)
+                        {
+                            isFull = false;
+                            break;
+                        }
+                    }
+                    if (isFull)
+                    {
+                        continue;
+                    }
+                    AddItem(_player.leashedMaterials[i]);
+                    _player.leashedMaterials[i].isExpired = true;
+                }
+                _player.leashedMaterials.Clear();
+                EventHandler.UpdateScrapText();
+            }
         }
         IsDocked = !IsDocked;
         Engine.ShakeScreen(0.35f);

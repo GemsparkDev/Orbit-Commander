@@ -64,8 +64,8 @@ public abstract class GameState
 }
 public class MainMenu : GameState
 {
-    private GravitationalSource menuPlanet = new(new Vector2(0, 750), Vector2.Zero, 5000, 9, true, Color.Cyan);
-    private GravitationalSource moonPlanet = new(new Vector2(0, 1750), GravitationalSource.GetOrbitalVelocity(new Vector2(0, 1750), new Vector2(0, 750), 5000), 250, 1.5f, false, Color.Cyan);
+    private Planet menuPlanet = new(new Vector2(0, 750), Vector2.Zero, 5000, 9, true, Color.Cyan);
+    private Planet moonPlanet = new(new Vector2(0, 1750), Planet.GetOrbitalVelocity(new Vector2(0, 1750), new Vector2(0, 750), 5000), 250, 1.5f, false, Color.Cyan);
     private ParticleEmitter smokeParticles = new(Assets.Get(Sprite.Circle), 1f, new Vector2(0, 300 - Assets.DimsOf(Sprite.Mothership).Y + 10), 0, MathF.PI/4, 1, 40, Color.Gray, EmitterType.EmissionOverTime) 
     { particleFadeToColor = new Color(169, 169, 169, 0), probability = 0.25f };
     public override void Initialize()

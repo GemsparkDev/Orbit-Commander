@@ -5,7 +5,7 @@ using System;
 
 namespace Space_Wars.Content.Main.Entities;
 
-public class GravitationalSource
+public class Planet
 {
     public Vector2 position;
     public Vector2 velocity;
@@ -18,7 +18,7 @@ public class GravitationalSource
     public bool EasterEgg { get; set; } = false;
     private Color color;
     private float time = 0;
-    public GravitationalSource(Vector2 _position, Vector2 _velocity, float _mass, float _radius, bool _isImmovable, Color _color, bool _hasRing = false)
+    public Planet(Vector2 _position, Vector2 _velocity, float _mass, float _radius, bool _isImmovable, Color _color, bool _hasRing = false)
     {
         position = _position;
         velocity = _velocity;
@@ -89,7 +89,7 @@ public class GravitationalSource
             return Vector2.Zero;
         }
     }
-    public Vector2 AttractObject(GravitationalSource _celestialBody)
+    public Vector2 AttractObject(Planet _celestialBody)
     {
         if (_celestialBody.isImmovable)
         {
@@ -185,9 +185,9 @@ public class GravitationalSource
                 MathF.Atan2(velocity.Y, 0), Vector2.Zero, new Vector2(MathF.Abs(velocity.Y), 1), SpriteEffects.None, 0.4f);
         }
     }
-    public GravitationalSource Copy()
+    public Planet Copy()
     {
-        GravitationalSource planet = new(position, velocity, mass, radius/50, isImmovable, color, hasRing);
+        Planet planet = new(position, velocity, mass, radius/50, isImmovable, color, hasRing);
         return planet;
     }
 }

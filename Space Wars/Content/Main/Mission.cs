@@ -11,7 +11,7 @@ public class Mission
 {
     public delegate Enemy DelegateEnemy(Vector2 position, Vector2 velocity, float angle, bool _isFriendly = false);
     //Change me when multiple main planets are added
-    public GravitationalSource Planet { get { if (planets.Length > 0) { return planets[0]; } else { return new GravitationalSource(Vector2.Zero, Vector2.Zero, 0, 1, true, Color.White); } } }
+    public Planet Planet { get { if (planets.Length > 0) { return planets[0]; } else { return new Planet(Vector2.Zero, Vector2.Zero, 0, 1, true, Color.White); } } }
     public string Name { get; }
     public string Description { get; }
     public int playerProgression = 3;
@@ -26,7 +26,7 @@ public class Mission
 
     private static Player Player => Engine.SaveGame.Player;
     private Entity escapeVehicle = null;
-    private GravitationalSource[] planets; 
+    private Planet[] planets; 
     //Save original entity parameters to allow cloning
     private List<(IConstructor, Condition[])> CopyObjectives { get; }
     private List<(Entity entity, Condition[] conditions)> MissionObjectives { get; } = [];
@@ -43,7 +43,7 @@ public class Mission
     private float difficulty;
     private bool currentWaveActive = false;
 
-    public Mission(GravitationalSource[] _planets, List<(IConstructor, Condition[] conditions)> _missionObjectives, string _name, string _description, float _timerModifier, Vector2 _playerPosition, int _waveGoal = 0, int _enemyTier = 0, Func<Cutscene> _cutscene = null, bool _escapeVehicle = false)
+    public Mission(Planet[] _planets, List<(IConstructor, Condition[] conditions)> _missionObjectives, string _name, string _description, float _timerModifier, Vector2 _playerPosition, int _waveGoal = 0, int _enemyTier = 0, Func<Cutscene> _cutscene = null, bool _escapeVehicle = false)
     {
         Name = _name;
         Description = _description;
@@ -335,7 +335,7 @@ public class Mission
             planet.Update();
         }
     }
-    public GravitationalSource IsColliding(Vector2 _position)
+    public Planet IsColliding(Vector2 _position)
     {
         foreach(var planet in planets)
         {
@@ -491,7 +491,7 @@ public class Mission
     }
     public Mission Clone()
     {
-        var _planets = new GravitationalSource[planets.Length];
+        var _planets = new Planet[planets.Length];
         for(int i = 0; i < planets.Length; i++)
         {
             _planets[i] = planets[i].Copy();

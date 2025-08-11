@@ -187,19 +187,6 @@ public enum Message
     RestartModules,
     EscapeDroneLeave,
 }
-public enum Containers
-{
-    MainMenu,
-    PauseMenu,
-    PlayerMenu,
-    MothershipMenu,
-    GarageMenu,
-    MissionMenu,
-    PickupDroneMenu,
-    FuseMenu,
-    SaveMenu,
-    LoadMenu,
-}
 public enum Condition
 {
     None,

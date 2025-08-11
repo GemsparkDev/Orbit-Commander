@@ -23,6 +23,8 @@ public static class UI
     public static Window FuseMenu { get; } = new Window(center, Assets.Get(Sprite.LargePanel));
     public static Window SaveMenu { get; } = new Window(center, Assets.Get(Sprite.GargantuanPanel));
     public static Window LoadMenu { get; } = new Window(center, Assets.Get(Sprite.GargantuanPanel));
+    public static TabbedWindow UpgradeMenu { get; } = new TabbedWindow(center, Assets.Get(Sprite.GargantuanPanel), 
+        Assets.Get(Sprite.Tab), Assets.Get(Sprite.SelectedTab), Assets.Get(Sound.Interact), 2);
 
     //Main Menu Widgets
     public static Button PatchedConicsToggle { get; } = new Button(new Vector2(0, -MainMenu.Size.Y / 4), Assets.Get(Sprite.WideButton), Assets.TextFont, $"Patched Conics: {PatchedConics}", Color.White);
@@ -97,8 +99,17 @@ public static class UI
     //Global Menu
     public static Button GlobalSidePanelOpen { get; } = new Button(Vector2.Zero, Assets.Get(Sprite.ToggleButton));
     public static Decal Timer { get; } = new Decal(new Vector2(-50, 0), Assets.TextFont, $"{Engine.IngameTime.DrawText}", Color.White, 10);
-    public static Slider PlayerHealth { get; } = new Slider(Engine.Line, new Vector2(5, 5), new Vector2(150, 15), true, Color.Red, Color.DarkGray);
-    public static Slider PlayerAbility { get; } = new Slider(Engine.Line, new Vector2(5, 15), new Vector2(100, 10), true, Color.Cyan, Color.DarkGray);
+    public static Slider PlayerHealth { get; } = new Slider(Line, new Vector2(5, 5), new Vector2(150, 15), true, Color.Red, Color.DarkGray);
+    public static Slider PlayerAbility { get; } = new Slider(Line, new Vector2(5, 15), new Vector2(100, 10), true, Color.Cyan, Color.DarkGray);
+
+    //Upgrade Menu
+    public static ItemSlot<Module> UpgradeSlot { get; } = new ItemSlot<Module>(new Vector2(-50, 0), Assets.Get(Sprite.EmptySlot), Engine.UIManager, -1);
+    public static Button UpgradeButton { get; } = new Button(new Vector2(50, 0), Assets.Get(Sprite.Button), Assets.TextFont, "Upgrade", Color.Green);
+    public static Decal CanUpgrade { get; } = new Decal(new Vector2(-50, -30), null, "", Color.White, 10);
+    public static Decal UpgradeDescription { get; } = new Decal(new Vector2(0, 30), null, "", Color.White, 10);
+    public static Button LidarUpgrade { get; } = new Button(new Vector2(50, 0), Assets.Get(Sprite.Button), Assets.TextFont, "Lidar", Color.Green);
+    public static Button RadarUpgrade { get; } = new Button(new Vector2(0, 0), Assets.Get(Sprite.Button), Assets.TextFont, "Radar", Color.Green);
+    public static Button PulseEmitterUpgrade { get; } = new Button(new Vector2(-50, 0), Assets.Get(Sprite.Button), Assets.TextFont, "Pulse", Color.Green);
 
     //Misc
     public static Button SidePanelClose { get; } = new Button(new Vector2(-Assets.Get(Sprite.ToggleButton).Width / 2 + Assets.Get(Sprite.Terminal).Width / 2, 0), Assets.Get(Sprite.ToggleButton));
@@ -223,6 +234,21 @@ public static class UI
         SaveBack.AddBehaviour(delegate { MissionSelect.enabled = true; SaveMenu.enabled = false; });
         LoadBack.AddBehaviour(delegate { MainMenu.enabled = true; LoadMenu.enabled = false; });
 
+        LidarUpgrade.AddBehaviour(delegate { EventHandler.UpgradeSensors(Modules.Lidar); });
+        RadarUpgrade.AddBehaviour(delegate { EventHandler.UpgradeSensors(Modules.Radar); });
+        PulseEmitterUpgrade.AddBehaviour(delegate { EventHandler.UpgradeSensors(Modules.PulseEmitter); });
+        UpgradeSlot.AddBehaviour(delegate { });
+        UpgradeButton.AddBehaviour(
+        delegate {
+            var upgrades = new Dictionary<Modules, Modules>
+            {
+                { Modules.Flamethrower, Modules.PrismArray },
+                { Modules.Fireball, Modules.MatrixLauncher },
+                { Modules.Sniper, Modules.Antimaterial },
+            };
+
+            UpgradeSlot.daughterItem = new Module(upgrades[UpgradeSlot.daughterItem.Type]);
+        });
 
         MainMenu.AddWidget(ExitButton as IFunctional, 0);
         MainMenu.AddWidget(SingleplayerButton as IFunctional, 0);
@@ -316,6 +342,14 @@ public static class UI
             FuseMenu.AddWidget(decal);
         }
 
+        UpgradeMenu.AddWidget(LidarUpgrade as IFunctional, 0);
+        UpgradeMenu.AddWidget(RadarUpgrade as IFunctional, 0);
+        UpgradeMenu.AddWidget(PulseEmitterUpgrade as IFunctional, 0);
+        UpgradeMenu.AddWidget(UpgradeSlot as IFunctional, 1);
+        UpgradeMenu.AddWidget(UpgradeButton as IFunctional, 1);
+        UpgradeMenu.AddWidget(CanUpgrade, 1);
+        UpgradeMenu.AddWidget(UpgradeDescription, 1);
+
         Engine.UIManager.ScreenWindow.AddWidget(GlobalSidePanelOpen as IFunctional, (int)Alignment.Left);
         Engine.UIManager.ScreenWindow.AddWidget(Timer, (int)Alignment.TopRight);
         Engine.UIManager.ScreenWindow.AddWidget(PlayerHealth as IFunctional, (int)Alignment.TopLeft);
@@ -360,5 +394,6 @@ public static class UI
         Engine.UIManager.AddContainer(FuseMenu);
         Engine.UIManager.AddContainer(SaveMenu);
         Engine.UIManager.AddContainer(LoadMenu);
+        Engine.UIManager.AddContainer(UpgradeMenu);
     }
 }

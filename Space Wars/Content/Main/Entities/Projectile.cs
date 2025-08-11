@@ -140,7 +140,7 @@ public class GrapplingHook : Projectile
             _entity.velocity -= _force;
         }
     }
-    internal class LatchedPlanet(GravitationalSource _planet, Vector2 _position) : ILatchable
+    internal class LatchedPlanet(Planet _planet, Vector2 _position) : ILatchable
     {
         private Vector2 offset = Vector2.Normalize(_position - _planet.position) * _planet.radius;
         public Vector2 Position => _planet.position + offset;
