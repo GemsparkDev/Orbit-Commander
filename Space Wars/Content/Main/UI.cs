@@ -23,7 +23,7 @@ public static class UI
     public static Window FuseMenu { get; } = new Window(center, Assets.Get(Sprite.LargePanel));
     public static Window SaveMenu { get; } = new Window(center, Assets.Get(Sprite.GargantuanPanel));
     public static Window LoadMenu { get; } = new Window(center, Assets.Get(Sprite.GargantuanPanel));
-    public static TabbedWindow UpgradeMenu { get; } = new TabbedWindow(center, Assets.Get(Sprite.GargantuanPanel), 
+    public static TabbedWindow UpgradeMenu { get; } = new TabbedWindow(center, Assets.Get(Sprite.GargantuanPanel),
         Assets.Get(Sprite.Tab), Assets.Get(Sprite.SelectedTab), Assets.Get(Sound.Interact), 2);
 
     //Main Menu Widgets
@@ -103,13 +103,17 @@ public static class UI
     public static Slider PlayerAbility { get; } = new Slider(Line, new Vector2(5, 15), new Vector2(100, 10), true, Color.Cyan, Color.DarkGray);
 
     //Upgrade Menu
+    public static Decal TraderChat { get; } = new Decal(Vector2.Zero, Assets.TextFont, 
+        "Hey there!" +
+        "\nI can upgrade your sensors for a scrap." +
+        "\nIf you bring me rare materials, I can upgrade some of your other modules as well", Color.White, 10);
     public static ItemSlot<Module> UpgradeSlot { get; } = new ItemSlot<Module>(new Vector2(-50, 0), Assets.Get(Sprite.EmptySlot), Engine.UIManager, -1);
     public static Button UpgradeButton { get; } = new Button(new Vector2(50, 0), Assets.Get(Sprite.Button), Assets.TextFont, "Upgrade", Color.Green);
-    public static Decal CanUpgrade { get; } = new Decal(new Vector2(-50, -30), null, "", Color.White, 10);
-    public static Decal UpgradeDescription { get; } = new Decal(new Vector2(0, 30), null, "", Color.White, 10);
-    public static Button LidarUpgrade { get; } = new Button(new Vector2(50, 0), Assets.Get(Sprite.Button), Assets.TextFont, "Lidar", Color.Green);
+    public static Decal CanUpgrade { get; } = new Decal(new Vector2(-50, -30), Assets.TextFont, "", Color.White, 10);
+    public static Decal UpgradeDescription { get; } = new Decal(new Vector2(0, 30), Assets.TextFont, "", Color.White, 10);
+    public static Button LidarUpgrade { get; } = new Button(new Vector2(75, 0), Assets.Get(Sprite.Button), Assets.TextFont, "Lidar", Color.Green);
     public static Button RadarUpgrade { get; } = new Button(new Vector2(0, 0), Assets.Get(Sprite.Button), Assets.TextFont, "Radar", Color.Green);
-    public static Button PulseEmitterUpgrade { get; } = new Button(new Vector2(-50, 0), Assets.Get(Sprite.Button), Assets.TextFont, "Pulse", Color.Green);
+    public static Button PulseEmitterUpgrade { get; } = new Button(new Vector2(-75, 0), Assets.Get(Sprite.Button), Assets.TextFont, "Pulse", Color.Green);
 
     //Misc
     public static Button SidePanelClose { get; } = new Button(new Vector2(-Assets.Get(Sprite.ToggleButton).Width / 2 + Assets.Get(Sprite.Terminal).Width / 2, 0), Assets.Get(Sprite.ToggleButton));
@@ -237,17 +241,57 @@ public static class UI
         LidarUpgrade.AddBehaviour(delegate { EventHandler.UpgradeSensors(Modules.Lidar); });
         RadarUpgrade.AddBehaviour(delegate { EventHandler.UpgradeSensors(Modules.Radar); });
         PulseEmitterUpgrade.AddBehaviour(delegate { EventHandler.UpgradeSensors(Modules.PulseEmitter); });
-        UpgradeSlot.AddBehaviour(delegate { });
-        UpgradeButton.AddBehaviour(
-        delegate {
+        UpgradeSlot.AddBehaviour(delegate 
+        {
+            Construct firstScrap = EventHandler.CountSpecializedParts(out int count);
+            CanUpgrade.text = $"Collected parts: {count}";
+            if (UpgradeSlot.daughterItem == null)
+            {
+                UpgradeDescription.text = "Select module to begin.";
+                return;
+            }
+            if (count < 1)
+            {
+                UpgradeDescription.text = "Get specialized parts to upgrade.";
+                return;
+            }
             var upgrades = new Dictionary<Modules, Modules>
             {
                 { Modules.Flamethrower, Modules.PrismArray },
                 { Modules.Fireball, Modules.MatrixLauncher },
                 { Modules.Sniper, Modules.Antimaterial },
             };
-
+            if (!upgrades.TryGetValue(UpgradeSlot.daughterItem.Type, out Modules value))
+            {
+                UpgradeDescription.text = "Selected module cannot be upgraded.";
+                return;
+            }
+            UpgradeDescription.text = $"{UpgradeSlot.daughterItem.Name} upgrades to {new Module(value).Name}.";
+        });
+        UpgradeButton.AddBehaviour(
+        delegate {
+            Construct firstPart = EventHandler.CountSpecializedParts(out int count);
+            if (count < 1)
+            {
+                return;
+            }
+            var upgrades = new Dictionary<Modules, Modules>
+            {
+                { Modules.Flamethrower, Modules.PrismArray },
+                { Modules.Fireball, Modules.MatrixLauncher },
+                { Modules.Sniper, Modules.Antimaterial },
+            };
             UpgradeSlot.daughterItem = new Module(upgrades[UpgradeSlot.daughterItem.Type]);
+            firstPart.isExpired = true;
+            int index = Array.IndexOf(InventorySlots, firstPart);
+            if (index != -1)
+            {
+                InventorySlots[index] = null;
+            }
+            else
+            {
+                MissionSelectSlots[Array.IndexOf(MissionSelectSlots, firstPart)] = null;
+            }
         });
 
         MainMenu.AddWidget(ExitButton as IFunctional, 0);
@@ -341,14 +385,14 @@ public static class UI
             ModuleIcons.Add(decal);
             FuseMenu.AddWidget(decal);
         }
-
-        UpgradeMenu.AddWidget(LidarUpgrade as IFunctional, 0);
-        UpgradeMenu.AddWidget(RadarUpgrade as IFunctional, 0);
-        UpgradeMenu.AddWidget(PulseEmitterUpgrade as IFunctional, 0);
-        UpgradeMenu.AddWidget(UpgradeSlot as IFunctional, 1);
-        UpgradeMenu.AddWidget(UpgradeButton as IFunctional, 1);
-        UpgradeMenu.AddWidget(CanUpgrade, 1);
-        UpgradeMenu.AddWidget(UpgradeDescription, 1);
+        UpgradeMenu.AddWidget(TraderChat, 0);
+        UpgradeMenu.AddWidget(LidarUpgrade as IFunctional, 1);
+        UpgradeMenu.AddWidget(RadarUpgrade as IFunctional, 1);
+        UpgradeMenu.AddWidget(PulseEmitterUpgrade as IFunctional, 1);
+        UpgradeMenu.AddWidget(UpgradeSlot as IFunctional, 2);
+        UpgradeMenu.AddWidget(UpgradeButton as IFunctional, 2);
+        UpgradeMenu.AddWidget(CanUpgrade, 2);
+        UpgradeMenu.AddWidget(UpgradeDescription, 2);
 
         Engine.UIManager.ScreenWindow.AddWidget(GlobalSidePanelOpen as IFunctional, (int)Alignment.Left);
         Engine.UIManager.ScreenWindow.AddWidget(Timer, (int)Alignment.TopRight);

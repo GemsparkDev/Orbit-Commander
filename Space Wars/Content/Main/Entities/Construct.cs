@@ -116,4 +116,5 @@ public enum Constructs
     Barricade,
     Trap,
     Bomb,
+    SpecializedParts,
 }

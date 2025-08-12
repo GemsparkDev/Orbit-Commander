@@ -325,4 +325,26 @@ public static class EventHandler
             Engine.SaveGame.Player.modules[ModuleType.Sensors] = new Module(_module);
         }
     }
+    public static Construct CountSpecializedParts(out int _count)
+    {
+        Construct firstScrap = null;
+        _count = 0;
+        foreach (var item in UI.InventorySlots)
+        {
+            if (item.daughterItem is Construct selectedItem && selectedItem.Type == Constructs.SpecializedParts)
+            {
+                firstScrap ??= selectedItem;
+                _count++;
+            }
+        }
+        foreach (var item in UI.MissionSelectSlots)
+        {
+            if (item.daughterItem is Construct selectedItem && selectedItem.Type == Constructs.SpecializedParts)
+            {
+                firstScrap ??= selectedItem;
+                _count++;
+            }
+        }
+        return firstScrap;
+    }
 }

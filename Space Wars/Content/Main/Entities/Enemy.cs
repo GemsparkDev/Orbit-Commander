@@ -2656,7 +2656,7 @@ public class Enemy : Entity
     {
         while(true)
         {
-
+            yield return 0;
         }
     }
     #endregion
