@@ -106,14 +106,15 @@ public static class UI
     public static Decal TraderChat { get; } = new Decal(Vector2.Zero, Assets.TextFont, 
         "Hey there!" +
         "\nI can upgrade your sensors for a scrap." +
-        "\nIf you bring me rare materials, I can upgrade some of your other modules as well", Color.White, 10);
-    public static ItemSlot<Module> UpgradeSlot { get; } = new ItemSlot<Module>(new Vector2(-50, 0), Assets.Get(Sprite.EmptySlot), Engine.UIManager, -1);
-    public static Button UpgradeButton { get; } = new Button(new Vector2(50, 0), Assets.Get(Sprite.Button), Assets.TextFont, "Upgrade", Color.Green);
-    public static Decal CanUpgrade { get; } = new Decal(new Vector2(-50, -30), Assets.TextFont, "", Color.White, 10);
-    public static Decal UpgradeDescription { get; } = new Decal(new Vector2(0, 30), Assets.TextFont, "", Color.White, 10);
+        "\nIf you bring me rare materials, I can upgrade some of your other modules as well", Color.White, 8);
     public static Button LidarUpgrade { get; } = new Button(new Vector2(75, 0), Assets.Get(Sprite.Button), Assets.TextFont, "Lidar", Color.Green);
     public static Button RadarUpgrade { get; } = new Button(new Vector2(0, 0), Assets.Get(Sprite.Button), Assets.TextFont, "Radar", Color.Green);
     public static Button PulseEmitterUpgrade { get; } = new Button(new Vector2(-75, 0), Assets.Get(Sprite.Button), Assets.TextFont, "Pulse", Color.Green);
+    public static Button UpgradeHull { get; } = new Button(new Vector2(0, 0), Assets.Get(Sprite.Button), Assets.TextFont, "Upgrade Hull", Color.Green);
+    public static Button UpgradeGuns { get; } = new Button(new Vector2(0, 0), Assets.Get(Sprite.Button), Assets.TextFont, "Upgrade Guns", Color.Green);
+    public static Button UpgradeEngine { get; } = new Button(new Vector2(0, 0), Assets.Get(Sprite.Button), Assets.TextFont, "Upgrade Engines", Color.Green);
+    public static Button UpgradeCore { get; } = new Button(new Vector2(0, 0), Assets.Get(Sprite.Button), Assets.TextFont, "Upgrade Core", Color.Green);
+    public static Decal UpgradeText { get; } = new Decal(new Vector2(-30, -20), Assets.TextFont, "", Color.White, 10);
 
     //Misc
     public static Button SidePanelClose { get; } = new Button(new Vector2(-Assets.Get(Sprite.ToggleButton).Width / 2 + Assets.Get(Sprite.Terminal).Width / 2, 0), Assets.Get(Sprite.ToggleButton));
@@ -219,8 +220,7 @@ public static class UI
             }
         });
         tooltip = new Window(Vector2.Zero, wideButton);
-        tooltip.AddWidget(new Decal(new Vector2(0, -3), Assets.TextFont, "Drag module over button to queue repair.", Color.White, 3f));
-        tooltip.AddWidget(new Decal(new Vector2(0, 3), Assets.TextFont, "Required time: 20 waves. Requires no metal to repair.", Color.White, 3f));
+        tooltip.AddWidget(new Decal(new Vector2(0, -3), Assets.TextFont, "Drag module over button to queue repair.\nRequired time: 20 waves. Requires no metal to repair.", Color.White, 3f));
         RepairModule.AddTooltip(tooltip);
         CancelQueue.AddBehaviour(delegate ()
         {
@@ -241,58 +241,26 @@ public static class UI
         LidarUpgrade.AddBehaviour(delegate { EventHandler.UpgradeSensors(Modules.Lidar); });
         RadarUpgrade.AddBehaviour(delegate { EventHandler.UpgradeSensors(Modules.Radar); });
         PulseEmitterUpgrade.AddBehaviour(delegate { EventHandler.UpgradeSensors(Modules.PulseEmitter); });
-        UpgradeSlot.AddBehaviour(delegate 
+        tooltip = new Window(Vector2.Zero, wideButton);
+        tooltip.AddWidget(new Decal(new Vector2(0, -3), Assets.TextFont, "Drag module over button to queue repair.\nRequired time: 20 waves. Requires no metal to repair.", Color.White, 3f));
+        UpgradeHull.AddTooltip(tooltip);
+        UpgradeHull.AddBehaviour(delegate 
         {
-            Construct firstScrap = EventHandler.CountSpecializedParts(out int count);
-            CanUpgrade.text = $"Collected parts: {count}";
-            if (UpgradeSlot.daughterItem == null)
-            {
-                UpgradeDescription.text = "Select module to begin.";
-                return;
-            }
-            if (count < 1)
-            {
-                UpgradeDescription.text = "Get specialized parts to upgrade.";
-                return;
-            }
-            var upgrades = new Dictionary<Modules, Modules>
-            {
-                { Modules.Flamethrower, Modules.PrismArray },
-                { Modules.Fireball, Modules.MatrixLauncher },
-                { Modules.Sniper, Modules.Antimaterial },
-            };
-            if (!upgrades.TryGetValue(UpgradeSlot.daughterItem.Type, out Modules value))
-            {
-                UpgradeDescription.text = "Selected module cannot be upgraded.";
-                return;
-            }
-            UpgradeDescription.text = $"{UpgradeSlot.daughterItem.Name} upgrades to {new Module(value).Name}.";
+            EventHandler.UpgradeModule(ModuleType.Hull, Engine.SaveGame.Player.modules[ModuleType.Hull].Type);
         });
-        UpgradeButton.AddBehaviour(
-        delegate {
-            Construct firstPart = EventHandler.CountSpecializedParts(out int count);
-            if (count < 1)
-            {
-                return;
-            }
-            var upgrades = new Dictionary<Modules, Modules>
-            {
-                { Modules.Flamethrower, Modules.PrismArray },
-                { Modules.Fireball, Modules.MatrixLauncher },
-                { Modules.Sniper, Modules.Antimaterial },
-            };
-            UpgradeSlot.daughterItem = new Module(upgrades[UpgradeSlot.daughterItem.Type]);
-            firstPart.isExpired = true;
-            int index = Array.IndexOf(InventorySlots, firstPart);
-            if (index != -1)
-            {
-                InventorySlots[index] = null;
-            }
-            else
-            {
-                MissionSelectSlots[Array.IndexOf(MissionSelectSlots, firstPart)] = null;
-            }
+        UpgradeGuns.AddBehaviour(delegate
+        {
+            EventHandler.UpgradeModule(ModuleType.Guns, Engine.SaveGame.Player.modules[ModuleType.Guns].Type);
         });
+        UpgradeEngine.AddBehaviour(delegate
+        {
+            EventHandler.UpgradeModule(ModuleType.Engines, Engine.SaveGame.Player.modules[ModuleType.Engines].Type);
+        });
+        UpgradeCore.AddBehaviour(delegate
+        {
+            EventHandler.UpgradeModule(ModuleType.Core, Engine.SaveGame.Player.modules[ModuleType.Core].Type);
+        });
+
 
         MainMenu.AddWidget(ExitButton as IFunctional, 0);
         MainMenu.AddWidget(SingleplayerButton as IFunctional, 0);
@@ -389,10 +357,11 @@ public static class UI
         UpgradeMenu.AddWidget(LidarUpgrade as IFunctional, 1);
         UpgradeMenu.AddWidget(RadarUpgrade as IFunctional, 1);
         UpgradeMenu.AddWidget(PulseEmitterUpgrade as IFunctional, 1);
-        UpgradeMenu.AddWidget(UpgradeSlot as IFunctional, 2);
-        UpgradeMenu.AddWidget(UpgradeButton as IFunctional, 2);
-        UpgradeMenu.AddWidget(CanUpgrade, 2);
-        UpgradeMenu.AddWidget(UpgradeDescription, 2);
+        UpgradeMenu.AddWidget(UpgradeText, 2);
+        UpgradeMenu.AddWidget(UpgradeHull as IFunctional, 2);
+        UpgradeMenu.AddWidget(UpgradeGuns as IFunctional, 2);
+        UpgradeMenu.AddWidget(UpgradeEngine as IFunctional, 2);
+        UpgradeMenu.AddWidget(UpgradeCore as IFunctional, 2);
 
         Engine.UIManager.ScreenWindow.AddWidget(GlobalSidePanelOpen as IFunctional, (int)Alignment.Left);
         Engine.UIManager.ScreenWindow.AddWidget(Timer, (int)Alignment.TopRight);

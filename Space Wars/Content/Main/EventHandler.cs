@@ -347,4 +347,30 @@ public static class EventHandler
         }
         return firstScrap;
     }
+    public static void UpgradeModule(ModuleType _slot, Modules _moduleType)
+    {
+        Construct firstScrap = CountSpecializedParts(out int count);
+        string text;
+        if (count < 1)
+        {
+            UI.UpgradeText.text = "Get specialized parts to upgrade.";
+            return;
+        }
+        var upgrades = new Dictionary<Modules, Modules>
+            {
+                { Modules.Flamethrower, Modules.PrismArray },
+                { Modules.Fireball, Modules.MatrixLauncher },
+                { Modules.Sniper, Modules.Antimaterial },
+            };
+        if (!upgrades.TryGetValue(_moduleType, out Modules value))
+        {
+            UI.UpgradeText.text = "Selected module cannot be upgraded.";
+            return;
+        }
+        text = $"{new Module(_moduleType).Name} has been upgraded to {new Module(value).Name}.";
+        UI.UpgradeText.text = text;
+        Engine.SaveGame.Player.modules[_slot] = new Module(_moduleType);
+        firstScrap.isExpired = true;
+        firstScrap = null;
+    }
 }
