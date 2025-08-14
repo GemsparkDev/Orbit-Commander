@@ -168,7 +168,7 @@ public static class UI
         SidePanelClose.AddBehaviour(EventHandler.ToggleDockingMenus);
         PrevMission.AddBehaviour(delegate () { Engine.SaveGame.PrevMission(); });
         NextMission.AddBehaviour(delegate () { Engine.SaveGame.NextMission(); });
-        SelectMission.AddBehaviour(delegate () { if (EventHandler.SyncModules()) { Startgame(); } });
+        SelectMission.AddBehaviour(delegate () { if ((Engine.SaveGame.CurrentMission.relaunchable || !Engine.SaveGame.CurrentMissionCompleted) && EventHandler.SyncModules()) { Startgame(); } });
         LaunchButton.AddBehaviour(delegate () { EventHandler.SendMessage(Message.EscapeDroneLeave); });
         CreateFuse.AddBehaviour(delegate ()
         {

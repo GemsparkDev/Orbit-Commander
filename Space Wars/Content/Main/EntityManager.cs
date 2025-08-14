@@ -109,8 +109,8 @@ public class EntityManager
         "Showdown Pt. 3",
         "Defeat the advanced drone prototype, Veil. Be warned: It may call for reinforcements.", 1.1f, new Vector2(0, 1), 0, 2, null, true),
 
-        new Mission([new Planet(Vector2.Zero, Vector2.Zero, 10000, 6, true, Color.CornflowerBlue, true)], 
-        [(new EntityConstructor(Enemy.NewTrader, new Vector2(0, 500), Planet.GetOrbitalVelocity(new Vector2(0, 500), Vector2.Zero, 10000), 0), [ Condition.Protect ])], 
+        new Mission([new Planet(Vector2.Zero, Vector2.Zero, 6000, 6, true, Color.Cyan, true)], 
+        [(new EntityConstructor(Enemy.NewTrader, new Vector2(0, 500), Planet.GetOrbitalVelocity(new Vector2(0, 500), Vector2.Zero, 6000), 0), [ Condition.Protect ])], 
         "Trader", "This friendly trader invites us to upgrade our modules in exchange for resources", -1, Vector2.One, 
         0, 0, null, true),
 

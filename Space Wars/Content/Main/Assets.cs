@@ -58,6 +58,7 @@ public static class Assets
         Sprites.Add(Sprite.FlareBoss, Content.Load<Texture2D>("Images/Entity_31"));
         Sprites.Add(Sprite.QuantumResonator, Content.Load<Texture2D>("Images/Entity_32"));
         Sprites.Add(Sprite.Communicator, Content.Load<Texture2D>("Images/Entity_33"));
+        Sprites.Add(Sprite.Trader, Content.Load<Texture2D>("Images/Entity_34"));
 
         //Items
         Sprites.Add(Sprite.MetalScrap, Content.Load<Texture2D>("Images/Item_0"));

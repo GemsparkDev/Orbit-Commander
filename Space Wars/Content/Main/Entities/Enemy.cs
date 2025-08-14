@@ -934,7 +934,6 @@ public class Enemy : Entity
             engineParticles.offsetVelocity = velocity;
             engineParticles.Update();
             engineParticles.position = position + new Vector2(-MathF.Sin(angle), MathF.Cos(angle)) * 11;
-
             yield return 0;
         }
     }
@@ -970,6 +969,10 @@ public class Enemy : Entity
                 {
                     var pos = Vector2.Normalize(position - nearestProjectile.position);
                     var vel = Vector2.Normalize(velocity - nearestProjectile.velocity);
+                    if (float.IsNaN(vel.X))
+                    {
+                        vel = Vector2.Zero;
+                    }
                     if ((pos.X * vel.X + pos.Y * vel.Y) < -0.5f)
                     {
                         int sign = Math.Sign(pos.X * vel.Y - vel.X * pos.Y);
@@ -2652,13 +2655,6 @@ public class Enemy : Entity
             yield return 0;
         }
     }
-    IEnumerable<int> Trader()
-    {
-        while(true)
-        {
-            yield return 0;
-        }
-    }
     #endregion
     public static Enemy NewDummyEnemy(Vector2 _position, bool _isFriendly = false)
     {
@@ -2896,8 +2892,7 @@ public class Enemy : Entity
     }
     public static Enemy NewTrader(Vector2 _position, Vector2 _velocity, float _angle)
     {
-        var enemy = new Enemy(_position, _velocity, _angle, 999, 400, Assets.Get(Sprite.Communicator), true);
-        enemy.AddBehaviour(enemy.Trader());
+        var enemy = new Enemy(_position, _velocity, _angle, 999, 400, Assets.Get(Sprite.Trader), true);
         enemy.Components.Add(new DockableComponent(enemy, UI.UpgradeMenu, false));
         return enemy;
     }

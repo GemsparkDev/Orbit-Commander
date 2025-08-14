@@ -210,6 +210,7 @@ public static class EventHandler
         UI.MissionDescription.text = mission.Description;
         UI.IsComplete.text = completed ? "Completed" : "Not Completed";
         UI.IsComplete.textColor = completed ? Color.Green : Color.Red;
+        UI.SelectMission.textColor = completed && mission.relaunchable ? Color.Gray : Color.Yellow;
     }
     public static void UpdateScrapText()
     {
@@ -325,31 +326,27 @@ public static class EventHandler
             Engine.SaveGame.Player.modules[ModuleType.Sensors] = new Module(_module);
         }
     }
-    public static Construct CountSpecializedParts(out int _count)
+    public static void UpgradeModule(ModuleType _slot, Modules _moduleType)
     {
-        Construct firstScrap = null;
-        _count = 0;
+        ItemSlot<Pickup> firstScrap = null;
+        int count = 0;
         foreach (var item in UI.InventorySlots)
         {
             if (item.daughterItem is Construct selectedItem && selectedItem.Type == Constructs.SpecializedParts)
             {
-                firstScrap ??= selectedItem;
-                _count++;
+                firstScrap ??= item;
+                count++;
             }
         }
         foreach (var item in UI.MissionSelectSlots)
         {
             if (item.daughterItem is Construct selectedItem && selectedItem.Type == Constructs.SpecializedParts)
             {
-                firstScrap ??= selectedItem;
-                _count++;
+                firstScrap ??= item;
+                count++;
             }
         }
-        return firstScrap;
-    }
-    public static void UpgradeModule(ModuleType _slot, Modules _moduleType)
-    {
-        Construct firstScrap = CountSpecializedParts(out int count);
+
         string text;
         if (count < 1)
         {
@@ -370,7 +367,6 @@ public static class EventHandler
         text = $"{new Module(_moduleType).Name} has been upgraded to {new Module(value).Name}.";
         UI.UpgradeText.text = text;
         Engine.SaveGame.Player.modules[_slot] = new Module(_moduleType);
-        firstScrap.isExpired = true;
-        firstScrap = null;
+        firstScrap.daughterItem = null;
     }
 }

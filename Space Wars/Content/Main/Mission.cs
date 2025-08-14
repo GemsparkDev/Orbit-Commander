@@ -22,6 +22,7 @@ public class Mission
     public bool playerDocked = false;
     public bool isAggressive = false;
     public bool music = true;
+    public bool relaunchable = false;
     public string tip = null;
 
     private static Player Player => Engine.SaveGame.Player;
@@ -497,7 +498,7 @@ public class Mission
             _planets[i] = planets[i].Copy();
         }
         return new Mission(_planets, CopyObjectives, Name, Description, timerModifier, playerPosition, WaveGoal, tier, cutscene, escapeVehicle != null)
-        { playerProgression = this.playerProgression, playerDocked = this.playerDocked, isAggressive = this.isAggressive, music = this.music, tip = this.tip };
+        { playerProgression = this.playerProgression, playerDocked = this.playerDocked, isAggressive = this.isAggressive, music = this.music, tip = this.tip, relaunchable = this.relaunchable };
     }
     private Vector2 NewSpawnLocation()
     {

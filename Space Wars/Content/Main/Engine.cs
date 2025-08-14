@@ -46,7 +46,6 @@ public class Engine : Game
         Content.RootDirectory = "Content";
         Self = this;
     }
-
     protected override void Initialize()
     {
         base.Initialize();

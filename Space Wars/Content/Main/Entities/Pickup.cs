@@ -19,13 +19,15 @@ public class Pickup : Entity, IData
     public virtual Color Color => itemData.Color;
     protected float invincibilityCooldown = 5;
     public int ID => itemData.ID;
+    private Decal textbox;
     public Pickup(ItemData _itemData, Vector2 _position, Vector2 _velocity, float _angularVelocity, int _integrity = 3)
         : base(_itemData.VirtualSprite, _position, _velocity, 0, _angularVelocity, 0, true)
     {
         itemData = _itemData;
         color = Color.Cyan;
         Tooltip.AddWidget(new Decal(new Vector2(-Tooltip.Size.X / 3, 0), _itemData.RealSprite));
-        Tooltip.AddWidget(new Decal(new Vector2(0, -5), Assets.TextFont, _itemData.Name, Color.White,  5f));
+        textbox = new Decal(new Vector2(0, -5), Assets.TextFont, _itemData.Name, Color.White, 5f);
+        Tooltip.AddWidget(textbox);
         hitsLeft = _integrity;
     }
     public Pickup(ItemData _itemData, List<string> _disassembly, LoadLogger _logger)
@@ -34,7 +36,8 @@ public class Pickup : Entity, IData
         itemData = _itemData;
         color = Color.Cyan;
         Tooltip.AddWidget(new Decal(new Vector2(-Tooltip.Size.X / 3, 0), _itemData.RealSprite));
-        Tooltip.AddWidget(new Decal(new Vector2(0, -5), Assets.TextFont, _itemData.Name, Color.White, 5f));
+        textbox = new Decal(new Vector2(0, -5), Assets.TextFont, _itemData.Name, Color.White, 5f);
+        Tooltip.AddWidget(textbox);
         _logger.Try(delegate { hitsLeft = Int32.Parse(_disassembly[1]);}, 1);
     }
     public override void Update()
