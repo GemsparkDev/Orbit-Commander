@@ -2655,6 +2655,81 @@ public class Enemy : Entity
             yield return 0;
         }
     }
+    IEnumerable<int> RadarRange()
+    {
+        float furnaceCooldown = 15;
+        float craftingCooldown = 20;
+        int requiredCraftsLeft = 18;
+        Pickup furnaceItem = null;
+        bool currentlyCrafting = false;
+        List<Texture2D> tier =
+        [
+            Assets.Get(Sprite.Mothership),
+            Assets.Get(Sprite.Mothership),
+            Assets.Get(Sprite.Mothership),
+            Assets.Get(Sprite.Mothership),
+        ];
+        while (true)
+        {
+            velocity = Vector2.Zero;
+            if (EventHandler.AcknowledgeMessage(Message.MothershipCraftItem))
+            {
+                currentlyCrafting = true;
+            }
+            if (EventHandler.AcknowledgeMessage(Message.MothershipUpdateFurnace))
+            {
+                furnaceItem = UI.FurnaceSlot.daughterItem;
+            }
+            if (health <= 0)
+            {
+                isExpired = true;
+                SoundManager.PlaySound(Assets.Get(Sound.Death), position);
+            }
+            if (furnaceItem != null)
+            {
+                furnaceCooldown -= Engine.DeltaSeconds;
+                if (furnaceCooldown <= 0)
+                {
+                    if (furnaceItem is Module)
+                    {
+                        Engine.SaveGame.Scrap += 3;
+                    }
+                    else
+                    {
+                        Engine.SaveGame.Scrap++;
+                    }
+                    furnaceItem = null;
+                    SoundManager.PlaySound(Assets.Get(Sound.Interact), position);
+                }
+            }
+            else
+            {
+                furnaceCooldown = 15;
+            }
+            if (currentlyCrafting)
+            {
+                craftingCooldown -= Engine.DeltaSeconds;
+                if (craftingCooldown <= 0)
+                {
+                    craftingCooldown = 20 - requiredCraftsLeft;
+                    requiredCraftsLeft -= 1;
+                    Collide(-100);
+                    maxHealth += 50;
+                    texture = tier[3 - (int)(requiredCraftsLeft / 6)];
+                    currentlyCrafting = false;
+                }
+            }
+
+            EventHandler.UpdateFurnaceUI(15 - furnaceCooldown, 15, furnaceItem);
+            EventHandler.UpdateCraftingUI(20 - craftingCooldown - requiredCraftsLeft, 20 - requiredCraftsLeft, requiredCraftsLeft);
+
+            if (requiredCraftsLeft <= 0)
+            {
+                Engine.SaveGame.CurrentMission.CompleteCustomRule(this);
+            }
+            yield return 0;
+        }
+    }
     #endregion
     public static Enemy NewDummyEnemy(Vector2 _position, bool _isFriendly = false)
     {
@@ -2894,6 +2969,13 @@ public class Enemy : Entity
     {
         var enemy = new Enemy(_position, _velocity, _angle, 999, 400, Assets.Get(Sprite.Trader), true);
         enemy.Components.Add(new DockableComponent(enemy, UI.UpgradeMenu, false));
+        return enemy;
+    }
+    public static Enemy RadarRange(Vector2 _position, Vector2 _velocity, float _angle)
+    {
+        Enemy enemy = new(_position, _velocity, _angle, 0, 200, Assets.Get(Sprite.Mothership), true);
+        enemy.AddBehaviour(enemy.RadarRange());
+        enemy.Components.Add(new DockableComponent(enemy, UI.MothershipMenu));
         return enemy;
     }
 }
