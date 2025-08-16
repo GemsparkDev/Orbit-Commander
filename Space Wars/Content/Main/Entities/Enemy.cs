@@ -21,7 +21,7 @@ public class Enemy : Entity
     public bool ChildEnemy { get; private set; }
     private bool wasHit = false;
     public override int StealthAbility 
-    { 
+    {
         get => base.StealthAbility + ((revealDuration > 0) ? -5 : 0); 
         protected set => base.StealthAbility = value; 
     }
@@ -2655,7 +2655,7 @@ public class Enemy : Entity
             yield return 0;
         }
     }
-    IEnumerable<int> RadarRange()
+    IEnumerable<int> MassRelay()
     {
         float furnaceCooldown = 15;
         float craftingCooldown = 20;
@@ -2971,10 +2971,10 @@ public class Enemy : Entity
         enemy.Components.Add(new DockableComponent(enemy, UI.UpgradeMenu, false));
         return enemy;
     }
-    public static Enemy RadarRange(Vector2 _position, Vector2 _velocity, float _angle)
+    public static Enemy MassRelay(Vector2 _position, Vector2 _velocity, float _angle)
     {
-        Enemy enemy = new(_position, _velocity, _angle, 0, 200, Assets.Get(Sprite.Mothership), true);
-        enemy.AddBehaviour(enemy.RadarRange());
+        Enemy enemy = new(_position, _velocity, _angle, 0, 200, Assets.Get(Sprite.MassRelay), true);
+        enemy.AddBehaviour(enemy.MassRelay());
         enemy.Components.Add(new DockableComponent(enemy, UI.MothershipMenu));
         return enemy;
     }
