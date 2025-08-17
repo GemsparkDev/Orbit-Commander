@@ -88,7 +88,10 @@ public enum Sprite
     QuantumResonator,
     Communicator,
     Trader,
-    MassRelay,
+    MassRelayOne,
+    MassRelayTwo,
+    MassRelayThree,
+    MassRelayFour,
 
     MetalScrap,
     RealMetalScrap,
