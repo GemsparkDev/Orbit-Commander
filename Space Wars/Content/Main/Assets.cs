@@ -59,7 +59,11 @@ public static class Assets
         Sprites.Add(Sprite.QuantumResonator, Content.Load<Texture2D>("Images/Entity_32"));
         Sprites.Add(Sprite.Communicator, Content.Load<Texture2D>("Images/Entity_33"));
         Sprites.Add(Sprite.Trader, Content.Load<Texture2D>("Images/Entity_34"));
-        Sprites.Add(Sprite.MassRelay, Content.Load<Texture2D>("Images/Entity_35"));
+        Sprites.Add(Sprite.MassRelayOne, Content.Load<Texture2D>("Images/Entity_35-1"));
+        Sprites.Add(Sprite.MassRelayTwo, Content.Load<Texture2D>("Images/Entity_35-2"));
+        Sprites.Add(Sprite.MassRelayThree, Content.Load<Texture2D>("Images/Entity_35-3"));
+        Sprites.Add(Sprite.MassRelayFour, Content.Load<Texture2D>("Images/Entity_35-4"));
+
 
         //Items
         Sprites.Add(Sprite.MetalScrap, Content.Load<Texture2D>("Images/Item_0"));

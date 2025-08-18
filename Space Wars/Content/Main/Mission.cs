@@ -26,11 +26,11 @@ public class Mission
     public string tip = null;
 
     private static Player Player => Engine.SaveGame.Player;
-    private Entity escapeVehicle = null;
+    private EntityConstructor escapeVehicle = null;
     private Planet[] planets; 
     //Save original entity parameters to allow cloning
-    private List<(IConstructor, Condition[])> CopyObjectives { get; }
-    private List<(Entity entity, Condition[] conditions)> MissionObjectives { get; } = [];
+    private List<ICondition> CopyObjectives { get; }
+    private List<ICondition> MissionObjectives { get; } = [];
     private List<Entity> enemiesSpawned = [];
     private List<(int cost, DelegateEnemy enemy)> enemyCreditValues;
     private List<DelegateEnemy> bosses;
@@ -44,16 +44,16 @@ public class Mission
     private float difficulty;
     private bool currentWaveActive = false;
 
-    public Mission(Planet[] _planets, List<(IConstructor, Condition[] conditions)> _missionObjectives, string _name, string _description, float _timerModifier, Vector2 _playerPosition, int _waveGoal = 0, int _enemyTier = 0, Func<Cutscene> _cutscene = null, bool _escapeVehicle = false)
+    public Mission(Planet[] _planets, List<ICondition> _missionObjectives, string _name, string _description, float _timerModifier, Vector2 _playerPosition, int _waveGoal = 0, int _enemyTier = 0, Func<Cutscene> _cutscene = null, bool _escapeVehicle = false)
     {
         Name = _name;
         Description = _description;
         planets = _planets;
         CopyObjectives = _missionObjectives;
         playerPosition = _playerPosition;
-        foreach (var (entityConstructor, conditions) in _missionObjectives)
+        foreach (var condition in _missionObjectives)
         {
-            MissionObjectives.Add((entityConstructor.Construct(), (Condition[])conditions.Clone()));
+            MissionObjectives.Add(condition.Clone());
         }
         WaveGoal = _waveGoal;
         timerModifier = _timerModifier;
@@ -113,15 +113,15 @@ public class Mission
         cutscene = _cutscene;
         if (_escapeVehicle)
         {
-            escapeVehicle = Enemy.NewPickupDrone(new Vector2(-2000, -2000), Vector2.Zero, 0);
+            escapeVehicle = new EntityConstructor(Enemy.NewPickupDrone, new Vector2(-2000, -2000), Vector2.Zero, 0);
         }
     }
     public void Initialize()
     {
         Engine.SaveGame.Player.dockedEntity = null;
-        foreach (var (entity, _) in MissionObjectives)
+        foreach (var objective in MissionObjectives)
         {
-            Engine.EntityManager.Add(entity);
+            objective.Initialize();
         }
         Engine.SaveGame.Player.Progression = playerProgression;
         Engine.SaveGame.Player.position = playerPosition;
@@ -162,11 +162,8 @@ public class Mission
                 restartTimer -= Engine.DeltaSeconds;
                 return;
             }
-            foreach (var entity in MissionObjectives)
-            {
-                entity.entity.isExpired = true;
-            }
             EventHandler.MissionSelectTrigger();
+            Engine.SaveGame.CompleteMission(Wave);
         }
         //Natural enemy spawning toggle
         if (timerModifier == -1)
@@ -376,18 +373,11 @@ public class Mission
     }
     public void CompleteCustomRule(Entity _target) 
     {
-        for(int i = 0; i < MissionObjectives.Count; i++)
+        foreach(var objective in MissionObjectives)
         {
-            (Entity entity, Condition[] conditions) = MissionObjectives[i];
-            if (_target == entity)
+            if (objective is EntityCondition)
             {
-                for(int j = 0; j < conditions.Length; j++)
-                {
-                    if (conditions[j] == Condition.CustomIncomplete)
-                    {
-                        conditions[j] = Condition.CustomComplete;
-                    }
-                }
+                (objective as EntityCondition).CustomCompleteRule(_target);
             }
         }
     }
@@ -535,23 +525,9 @@ public class Mission
     private void TestCompletion()
     {
         bool allCompleted = true;
-        foreach (var (entity, conditions) in MissionObjectives)
+        foreach (var objective in MissionObjectives)
         {
-            foreach (var condition in conditions)
-            {
-                if (condition == Condition.Protect && entity.isExpired)
-                {
-                    FailMission();
-                }
-                if (condition == Condition.Kill && !entity.isExpired)
-                {
-                    allCompleted = false;
-                }
-                if (condition == Condition.CustomIncomplete)
-                {
-                    allCompleted = false;
-                }
-            }
+            allCompleted = objective.IsComplete() && allCompleted;
         }
         if (WaveGoal > 0 && (WaveGoal >= Wave))
         {
@@ -561,14 +537,14 @@ public class Mission
         {
             if (escapeVehicle != null)
             {
-                MissionObjectives.Add((escapeVehicle, new Condition[2] { Condition.Protect, Condition.CustomIncomplete }));
-                Engine.EntityManager.Add(escapeVehicle);
+                var objective = new EntityCondition(escapeVehicle, [ Condition.Protect, Condition.CustomIncomplete ]);
+                MissionObjectives.Add(objective);
+                objective.Initialize();
                 escapeVehicle = null;
             }
             else
             {
                 restartTimer = 2;
-                Engine.SaveGame.CompleteMission(Wave);
             }
         }
     }
@@ -597,4 +573,55 @@ public class PickupConstructor(Func<Vector2, Vector2, float, Entity> _constructo
 public interface IConstructor
 {
     public Entity Construct();
+}
+public interface ICondition
+{
+    public bool IsComplete();
+    public void Initialize();
+    public ICondition Clone();
+}
+public class EntityCondition(IConstructor _constructor, Condition[] _conditions) : ICondition
+{
+    Entity daughterEntity;
+    public bool IsComplete()
+    {
+        foreach (var condition in _conditions)
+        {
+            switch (condition)
+            {
+                case Condition.Protect:
+                    if (daughterEntity.isExpired)
+                    {
+                        Engine.SaveGame.CurrentMission.FailMission();
+                        return false;
+                    }
+                    break;
+                case Condition.Kill:
+                    if (!daughterEntity.isExpired)
+                    {
+                        return false;
+                    }
+                break;
+                case Condition.CustomIncomplete:
+                    return false;
+            }
+        }
+        return true;
+    }
+    public void Initialize()
+    {
+        daughterEntity = _constructor.Construct();
+        Engine.EntityManager.Add(daughterEntity);
+    }
+    public ICondition Clone()
+    {
+        return new EntityCondition(_constructor, _conditions);
+    }
+    public void CustomCompleteRule(Entity _entity)
+    {
+        if (daughterEntity == _entity && _conditions.Contains(Condition.CustomIncomplete))
+        {
+            _conditions[Array.IndexOf(_conditions, Condition.CustomIncomplete)] = Condition.CustomComplete;
+        }
+    }
 }

@@ -112,7 +112,7 @@ public class Enemy : Entity
     {
         if (deleteOnCollide && damage >= 0)
         {
-            wasHit = true; ;
+            wasHit = true;
             health = 0;
             SoundManager.PlaySound(hitSound, position);
             return;
@@ -2664,10 +2664,10 @@ public class Enemy : Entity
         bool currentlyCrafting = false;
         List<Texture2D> tier =
         [
-            Assets.Get(Sprite.Mothership),
-            Assets.Get(Sprite.Mothership),
-            Assets.Get(Sprite.Mothership),
-            Assets.Get(Sprite.Mothership),
+            Assets.Get(Sprite.MassRelayOne),
+            Assets.Get(Sprite.MassRelayTwo),
+            Assets.Get(Sprite.MassRelayThree),
+            Assets.Get(Sprite.MassRelayFour),
         ];
         while (true)
         {
@@ -2715,11 +2715,10 @@ public class Enemy : Entity
                     requiredCraftsLeft -= 1;
                     Collide(-100);
                     maxHealth += 50;
-                    texture = tier[3 - (int)(requiredCraftsLeft / 6)];
+                    texture = tier[3 - (int)Math.Round((float)requiredCraftsLeft / 6)];
                     currentlyCrafting = false;
                 }
             }
-
             EventHandler.UpdateFurnaceUI(15 - furnaceCooldown, 15, furnaceItem);
             EventHandler.UpdateCraftingUI(20 - craftingCooldown - requiredCraftsLeft, 20 - requiredCraftsLeft, requiredCraftsLeft);
 
@@ -2973,7 +2972,7 @@ public class Enemy : Entity
     }
     public static Enemy MassRelay(Vector2 _position, Vector2 _velocity, float _angle)
     {
-        Enemy enemy = new(_position, _velocity, _angle, 0, 200, Assets.Get(Sprite.MassRelay), true);
+        Enemy enemy = new(_position, _velocity, _angle, 0, 200, Assets.Get(Sprite.MassRelayOne), true);
         enemy.AddBehaviour(enemy.MassRelay());
         enemy.Components.Add(new DockableComponent(enemy, UI.MothershipMenu));
         return enemy;
