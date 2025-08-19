@@ -5,17 +5,17 @@ using Microsoft.Xna.Framework;
 using System.Linq;
 using Space_Wars.Content.Main.Particles;
 using Microsoft.Xna.Framework.Graphics;
+using System.Net.NetworkInformation;
 
 namespace Space_Wars.Content.Main;
 public class Mission
 {
     public delegate Enemy DelegateEnemy(Vector2 position, Vector2 velocity, float angle, bool _isFriendly = false);
     //Change me when multiple main planets are added
-    public Planet Planet { get { if (planets.Length > 0) { return planets[0]; } else { return new Planet(Vector2.Zero, Vector2.Zero, 0, 1, true, Color.White); } } }
+    public Planet Planet => (planets.Length > 0) ? planets[0] : new Planet(Vector2.Zero, Vector2.Zero, 0, 1, true, Color.White);
     public string Name { get; }
     public string Description { get; }
     public int playerProgression = 3;
-    public int WaveGoal { get; } = 0;
     public int Wave { get; private set; } = 0;
     public int EnemiesSpawned { get; private set; } = 0;
     public float restartTimer = -1;
@@ -37,14 +37,12 @@ public class Mission
     private Vector2 playerPosition;
     private Func<Cutscene> cutscene;
     private int currentBoss;
-    private int tier;
     private float timerModifier;
     private float waveTimer = 5;
     private float maxWaveTimer = 5;
-    private float difficulty;
     private bool currentWaveActive = false;
 
-    public Mission(Planet[] _planets, List<ICondition> _missionObjectives, string _name, string _description, float _timerModifier, Vector2 _playerPosition, int _waveGoal = 0, int _enemyTier = 0, Func<Cutscene> _cutscene = null, bool _escapeVehicle = false)
+    public Mission(Planet[] _planets, List<ICondition> _missionObjectives, string _name, string _description, float _timerModifier, Vector2 _playerPosition, List<(int, DelegateEnemy)> _enemies, Func<Cutscene> _cutscene = null, bool _escapeVehicle = false)
     {
         Name = _name;
         Description = _description;
@@ -55,53 +53,8 @@ public class Mission
         {
             MissionObjectives.Add(condition.Clone());
         }
-        WaveGoal = _waveGoal;
         timerModifier = _timerModifier;
-
-        tier = _enemyTier;
-        if (_enemyTier == 0)
-        {
-            enemyCreditValues = 
-            [
-                (1, Enemy.NewFighter),
-                (3, Enemy.NewSniper),
-                (4, Enemy.NewShotgunner),
-                (4, Enemy.NewCarrier),
-            ];
-        }
-        else if (_enemyTier == 1)
-        {
-            enemyCreditValues = 
-            [
-                (1, Enemy.NewAdvancedFighter),
-                (2, Enemy.NewHovercraft),
-                (2, Enemy.NewHealer),
-            ];
-        }
-        else if(_enemyTier == 2)
-        {
-            enemyCreditValues = 
-            [
-                (1, Enemy.NewStealthFighter),
-                (2, Enemy.NewHunter),
-            ];
-        }
-        else
-        {
-            enemyCreditValues =
-            [
-                (1, Enemy.NewFighter),
-                (3, Enemy.NewSniper),
-                (4, Enemy.NewShotgunner),
-                (4, Enemy.NewCarrier),
-                (1, Enemy.NewAdvancedFighter),
-                (2, Enemy.NewHovercraft),
-                (2, Enemy.NewHealer),
-                (1, Enemy.NewStealthFighter),
-                (2, Enemy.NewHunter),
-            ];
-        }
-
+        enemyCreditValues = _enemies;
         bosses = 
         [
             Enemy.NewSymmetryBoss,
@@ -247,6 +200,7 @@ public class Mission
             }
             else
             {
+                float difficulty = 0;
                 if (isAggressive)
                 {
                     difficulty = (int)(Math.Pow(Wave, 1.5) + 5);
@@ -470,16 +424,6 @@ public class Mission
         }
         return acceleration;
     }
-    public float GetPotentialEnergy(Vector2 _position)
-    {
-        float energy = 0;
-        foreach (var planet in planets)
-        {
-            float distance = (_position - planet.position).Length();
-            energy += planet.mass / distance;
-        }
-        return energy;
-    }
     public Mission Clone()
     {
         var _planets = new Planet[planets.Length];
@@ -487,12 +431,11 @@ public class Mission
         {
             _planets[i] = planets[i].Copy();
         }
-        return new Mission(_planets, CopyObjectives, Name, Description, timerModifier, playerPosition, WaveGoal, tier, cutscene, escapeVehicle != null)
+        return new Mission(_planets, CopyObjectives, Name, Description, timerModifier, playerPosition, enemyCreditValues, cutscene, escapeVehicle != null)
         { playerProgression = this.playerProgression, playerDocked = this.playerDocked, isAggressive = this.isAggressive, music = this.music, tip = this.tip, relaunchable = this.relaunchable };
     }
     private Vector2 NewSpawnLocation()
     {
-        //Creates a position vector defined by the angle from the player in radians and the distance from the edge of the screen
         float angle = (Engine.Random.NextSingle() - 0.5f) * MathF.Tau;
         float distanceMultiplier = 1 + (Engine.Random.NextSingle() - 0.5f) / 4;
         float distance = (Engine.ScreenSize.X + Engine.ScreenSize.Y) * distanceMultiplier / 3;
@@ -527,11 +470,7 @@ public class Mission
         bool allCompleted = true;
         foreach (var objective in MissionObjectives)
         {
-            allCompleted = objective.IsComplete() && allCompleted;
-        }
-        if (WaveGoal > 0 && (WaveGoal >= Wave))
-        {
-            allCompleted = false;
+            allCompleted &= objective.IsComplete();
         }
         if (allCompleted && restartTimer == -1)
         {
@@ -547,6 +486,48 @@ public class Mission
                 restartTimer = 2;
             }
         }
+    }
+    public static List<(int, DelegateEnemy)> TierOne()
+    {
+        return
+        [
+            (1, Enemy.NewFighter),
+            (3, Enemy.NewSniper),
+            (4, Enemy.NewShotgunner),
+            (4, Enemy.NewCarrier),
+        ];
+    }
+    public static List<(int, DelegateEnemy)> TierTwo()
+    {
+        return
+        [
+            (1, Enemy.NewAdvancedFighter),
+            (2, Enemy.NewHovercraft),
+            (2, Enemy.NewHealer),
+        ];
+    }
+    public static List<(int, DelegateEnemy)> TierThree()
+    {
+        return
+        [
+            (1, Enemy.NewStealthFighter),
+            (2, Enemy.NewHunter),
+        ];
+    }
+    public static List<(int, DelegateEnemy)> All()
+    {
+        return
+        [
+            (1, Enemy.NewFighter),
+            (3, Enemy.NewSniper),
+            (4, Enemy.NewShotgunner),
+            (4, Enemy.NewCarrier),
+            (1, Enemy.NewAdvancedFighter),
+            (2, Enemy.NewHovercraft),
+            (2, Enemy.NewHealer),
+            (1, Enemy.NewStealthFighter),
+            (2, Enemy.NewHunter),
+        ];
     }
 }
 public class EntityConstructor(Func<Vector2, Vector2, float, Entity> _constructor, Vector2 _position, Vector2 _velocity, float _angle) : IConstructor
@@ -582,7 +563,7 @@ public interface ICondition
 }
 public class EntityCondition(IConstructor _constructor, Condition[] _conditions) : ICondition
 {
-    Entity daughterEntity;
+    private Entity daughterEntity = _constructor.Construct();
     public bool IsComplete()
     {
         foreach (var condition in _conditions)
@@ -610,12 +591,11 @@ public class EntityCondition(IConstructor _constructor, Condition[] _conditions)
     }
     public void Initialize()
     {
-        daughterEntity = _constructor.Construct();
         Engine.EntityManager.Add(daughterEntity);
     }
     public ICondition Clone()
     {
-        return new EntityCondition(_constructor, _conditions);
+        return new EntityCondition(_constructor, (Condition[])_conditions.Clone());
     }
     public void CustomCompleteRule(Entity _entity)
     {
@@ -623,5 +603,17 @@ public class EntityCondition(IConstructor _constructor, Condition[] _conditions)
         {
             _conditions[Array.IndexOf(_conditions, Condition.CustomIncomplete)] = Condition.CustomComplete;
         }
+    }
+}
+public class WaveGoal(int _targetWave) : ICondition
+{
+    public void Initialize() { }
+    public bool IsComplete() 
+    {
+        return Engine.SaveGame.CurrentMission.Wave > _targetWave;
+    }
+    public ICondition Clone()
+    {
+        return new WaveGoal(_targetWave);
     }
 }
