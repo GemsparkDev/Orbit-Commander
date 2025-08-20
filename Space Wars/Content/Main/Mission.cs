@@ -4,8 +4,6 @@ using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using System.Linq;
 using Space_Wars.Content.Main.Particles;
-using Microsoft.Xna.Framework.Graphics;
-using System.Net.NetworkInformation;
 
 namespace Space_Wars.Content.Main;
 public class Mission
@@ -25,7 +23,6 @@ public class Mission
     public bool relaunchable = false;
     public string tip = null;
 
-    private static Player Player => Engine.SaveGame.Player;
     private EntityConstructor escapeVehicle = null;
     private Planet[] planets; 
     //Save original entity parameters to allow cloning
@@ -242,7 +239,7 @@ public class Mission
                             squadLeader = null;
                             count = 0;
                         }
-                        var enemy = enemyCreditValues[i].enemy(pos, Player.velocity, MathF.Atan2(-pos.X, pos.Y));
+                        var enemy = enemyCreditValues[i].enemy(pos, Engine.SaveGame.Player.velocity, MathF.Atan2(-pos.X, pos.Y));
                         enemiesSpawned.Add(enemy);
                         squadLeader ??= enemy;
                         enemyCredits -= newCosts[i];
@@ -439,7 +436,7 @@ public class Mission
         float angle = (Engine.Random.NextSingle() - 0.5f) * MathF.Tau;
         float distanceMultiplier = 1 + (Engine.Random.NextSingle() - 0.5f) / 4;
         float distance = (Engine.ScreenSize.X + Engine.ScreenSize.Y) * distanceMultiplier / 3;
-        Vector2 spawnLocation = Engine.ToUnitVector(angle) * distance + Player.position;
+        Vector2 spawnLocation = Engine.ToUnitVector(angle) * distance + Engine.SaveGame.Player.position;
         foreach (var planet in planets)
         {
             if (Vector2.Distance(spawnLocation, planet.position) < planet.radius)

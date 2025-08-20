@@ -25,6 +25,7 @@ public class EntityManager
     //Threshold of detection for enemies
     public static float StealthThreshold { get; private set; } = 0.75f;
     public int MissionLength => missions.Count;
+    private List<Dialogue> dialogues = [new Dialogue("Huauahuauhuguaguag", Assets.Get(Sprite.OverloadBoss)), new Dialogue("Hor hor hor hor hor", null)];
     private readonly List<Mission> missions =
 [
     new Mission([new Planet(Vector2.Zero, Vector2.Zero, 10000, 8, true, Color.Cyan),
@@ -178,6 +179,17 @@ public class EntityManager
         Engine.IngameTime = time;
         Engine.SaveGame.CurrentMission.Update();
         Update();
+        if (dialogues.Count > 0)
+        {
+            if (dialogues[0].IsComplete())
+            {
+                dialogues.RemoveAt(0);
+            }
+            else
+            {
+                dialogues[0].Update();
+            }
+        }
         if (Player.isExpired)
         {
             foreach (var module in Player.modules)
@@ -228,6 +240,10 @@ public class EntityManager
         {
             //Draws all entities in the main list
             entity.Draw(_spriteBatch);
+        }
+        if (dialogues.Count > 0)
+        {
+            dialogues[0].Draw(_spriteBatch);
         }
     }
     public void Explode(int _damage, float _radius, Vector2 _position)
