@@ -1,7 +1,6 @@
 ﻿using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework;
 using System;
-using System.Diagnostics;
 
 namespace Space_Wars.Content.Main;
 public class Dialogue(string _text, Texture2D _icon)
@@ -42,6 +41,5 @@ public class Dialogue(string _text, Texture2D _icon)
         }
         prevCharCount = characters;
         _spriteBatch.DrawString(Assets.TextFont, _text[0..characters], pos, Color.White, 0, Assets.TextFont.MeasureString(_text) / 2, size, 0, 0);
-        Engine.WriteLine(time);
     }
 }

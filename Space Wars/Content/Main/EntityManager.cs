@@ -109,10 +109,10 @@ public class EntityManager
         "Trader", "This friendly trader invites us to upgrade our modules in exchange for resources", -1, Vector2.One,
         Mission.TierOne(), null, true) { relaunchable = true },
 
-        new Mission([new(new Vector2(320, 0), new Vector2(0, 1f), 10000, 7, false, Color.Cyan),
-        new(new Vector2(-800, 0), new Vector2(0, -2.5f), 4000, 3.5f, false, Color.Cyan)],
+        new Mission([new(new Vector2(500, 0), new Vector2(0, 1.05f), 10000, 7, false, Color.Cyan),
+        new(new Vector2(-1000, 0), new Vector2(0, -2.1f), 5000, 4f, false, Color.Cyan)],
         [new EntityCondition(new EntityConstructor(Enemy.MassRelay, Vector2.Zero, Vector2.Zero, 0), [ Condition.Protect, Condition.CustomIncomplete ])],
-        "Binary system", "Construct the Mass Relay.", 0.5f, new Vector2(0, 400), Mission.TierThree(), null, true) { isAggressive = true },
+        "Binary system", "Construct the Mass Relay.", -1f, new Vector2(0, 400), Mission.TierThree(), null, true) { isAggressive = true },
 
         new Mission([ new(Vector2.Zero, Vector2.Zero, 20000, 9, true, Color.OrangeRed, true),
         new(new Vector2(1200, 0), Planet.GetOrbitalVelocity(new Vector2(1200, 0), Vector2.Zero, 20000), 750, 2f, false, Color.Red) ],

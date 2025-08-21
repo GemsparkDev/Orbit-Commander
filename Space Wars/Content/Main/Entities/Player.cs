@@ -8,7 +8,6 @@ using Microsoft.Xna.Framework.Audio;
 using System.Linq;
 using UILib.Content.Main;
 using Space_Wars.Content.Main.Components;
-using System.Diagnostics;
 using System.Text;
 
 namespace Space_Wars.Content.Main.Entities;
@@ -32,7 +31,7 @@ public class Player : Entity
         { ModuleType.Guns, new Module(Modules.Fireball) },
         { ModuleType.Engines, new Module(Modules.Plasma) },
         { ModuleType.Sensors, new Module(Modules.Sensors) },
-        { ModuleType.Core, new Module(Modules.GrapplingHook) }
+        { ModuleType.Core, new Module(Modules.Dash) }
     };
 
     public DockableComponent dockedEntity;
@@ -448,12 +447,27 @@ public class Player : Entity
                 Vector2 ratio = Engine.ScreenSize / Engine.BackBuffer;
                 targetVector = Vector2.Normalize(new Vector2(Input.NewMouseState.X * ratio.X, Input.NewMouseState.Y * ratio.Y) - Engine.ScreenSize / 2 - position + Engine.Camera.Position + Engine.MousePositionOffset);
                 gunAngle.angle = MathF.Atan2(targetVector.X, -targetVector.Y);
-                if (Input.NewMouseState.RightButton == ButtonState.Pressed && Input.OldMouseState.RightButton == ButtonState.Released && !UIManager.LockMouseInput)
+                if (!UIManager.LockMouseInput && Input.NewMouseState.RightButton == ButtonState.Pressed)
                 {
-                    canGatherResources = true;
-                    SoundManager.PlayGlobalSound(Assets.Get(Sound.OpenMenu));
+                    Vector2 dir = Engine.ToUnitVector(gunAngle.angle);
+                    List<Entity> miningEnemies = Engine.EntityManager.Hitscan(position, dir, 120, false, out Vector2 _end);
+                    if (miningEnemies.Count > 0 && miningEnemies[0] as Enemy != null)
+                    {
+                        (miningEnemies[0] as Enemy).Mine();
+                    }
+                    for (float i = 0; i < (_end - position - dir * 8).Length() / 2; i++)
+                    {
+                        float lerp = i / 60;
+                        Vector3 color = new Vector3(1, 1, 0) * (1 - lerp) + new Vector3(1, 0, 0) * (lerp);
+                        ParticleManager.Add(new Particle(Assets.Get(Sprite.Dot), dir * (i + 4f) * 2 + position + new Vector2(dir.Y, -dir.X) * MathF.Sin(i / 2 - time * 5) / 2, gunAngle.angle, new Color(color.X, color.Y, color.Z) * (1 - (lerp))));
+                    }
+                    if (Input.OldMouseState.RightButton == ButtonState.Released)
+                    {
+                        canGatherResources = true;
+                        SoundManager.PlayGlobalSound(Assets.Get(Sound.OpenMenu));
+                    }
                 }
-                else if (Input.NewMouseState.RightButton == ButtonState.Released && Input.OldMouseState.RightButton == ButtonState.Pressed && !UIManager.LockMouseInput)
+                if (Input.NewMouseState.RightButton == ButtonState.Released && Input.OldMouseState.RightButton == ButtonState.Pressed && !UIManager.LockMouseInput)
                 {
                     SoundManager.PlayGlobalSound(Assets.Get(Sound.CloseMenu));
                     canGatherResources = false;

@@ -16,6 +16,7 @@ public class Enemy : Entity
     private float targetAngle = 0;
     private float cooldown;
     public int health;
+    private float mineTime = 0;
     private int maxHealth;
     private bool deleteOnCollide = false;
     public bool ChildEnemy { get; private set; }
@@ -133,6 +134,14 @@ public class Enemy : Entity
             ParticleManager.Add(new Particle(null, 1, position + new Vector2(0, -1), new Vector2(0, -1.5f), 0, 0, Color.Orange, new Color(0, 255, 0, 0)) { drawText = $"{-damage}" });
         }
     }
+    public void Mine()
+    {
+        if (health <= 0)
+        {
+            mineTime += Engine.DeltaSeconds;
+            ParticleManager.Add(new Particle(Assets.Get(Sprite.Dot), 0.5f, position, new Vector2(Engine.OneToNegOne(), Engine.OneToNegOne()), Engine.OneToNegOne() * MathF.PI, Engine.OneToNegOne() / 2, Color.Yellow, Color.Transparent));
+        }
+    }
     public void Explode(int _damage, float _radius)
     {
         int particles = Engine.Random.Next(15, 25);
@@ -161,10 +170,13 @@ public class Enemy : Entity
             {
                 val = Math.Clamp(val + revealDuration, 0, 1);
             }
-            //Health bar
-            Vector2 barPosition = position + new Vector2(-texture.Width * 2, texture.Height) / 2;
-            Rectangle sourceRectangle = new (0, 0, texture.Width * 2, 2);
-            Engine.DrawFilledLine(_spriteBatch, barPosition, sourceRectangle, (float)(health) / (float)(maxHealth), new Color(0, 50, 25) * val, Color.Green * val);
+            if (health > 0)
+            {
+                //Health bar
+                Vector2 barPosition = position + new Vector2(-texture.Width * 2, texture.Height) / 2;
+                Rectangle sourceRectangle = new(0, 0, texture.Width * 2, 2);
+                Engine.DrawFilledLine(_spriteBatch, barPosition, sourceRectangle, (float)(health) / (float)(maxHealth), new Color(0, 50, 25) * val, Color.Green * val);
+            }
         }
         Vector2 halfSize = Engine.BackBuffer / 2;
         if (!ChildEnemy && !deleteOnCollide && isFriendly &&
@@ -188,13 +200,27 @@ public class Enemy : Entity
     #region Useful Behaviors
     IEnumerable<int> EnemyDeath(float _rarity)
     {
+        bool hasExploded = false;
         while (true)
         {
             if (health <= 0)
             {
-                Explode(4, ColliderRadius);
+                if (!hasExploded)
+                {
+                    Explode(4, ColliderRadius);
+                    hasExploded = true;
+                    color *= 0.75f;
+                    SoundManager.PlaySound(Assets.Get(Sound.Death), position);
+                }
+                velocity *= 0.5f;
+            }
+            if (mineTime > MathF.Sqrt((float)(maxHealth) / 8)) 
+            {
                 isExpired = true;
-                SoundManager.PlaySound(Assets.Get(Sound.Death), position);
+                for (float angle = 0; angle < MathF.Tau; angle += MathF.PI / 4)
+                {
+                    ParticleManager.Add(new Particle(Assets.Get(Sprite.Dot), 0.5f, position, Engine.ToUnitVector(angle) * 2, angle, 0, Color.Yellow, Color.Transparent));
+                }
                 if (EntityManager.RandomWithKarma(Engine.SaveGame.CurrentMission.EnemiesSpawned * _rarity))
                 {
                     Engine.EntityManager.Add(ItemFactory.NewScrap(position, GetNormalizedAcceleration() * 10, angularVelocity));
@@ -205,7 +231,7 @@ public class Enemy : Entity
     }
     IEnumerable<int> AvoidNearbyAllies()
     {
-        while (true)
+        while (health > 0)
         {
             Entity nearestAlly = Engine.EntityManager.NearestAlly(this);
             if (nearestAlly != null)
@@ -1271,7 +1297,7 @@ public class Enemy : Entity
         {
             speed = 7;
         }
-        while (true)
+        while (health > 0)
         {
             velocity *= 0.8f;
             Vector2 normalizedAcceleration = GetNormalizedAcceleration();
@@ -1311,7 +1337,7 @@ public class Enemy : Entity
     IEnumerable<int> Carrier()
     {
         enemyRange.particleVelocity = 500;
-        while (true)
+        while (health > 0)
         {
             targetVector = Player.position - position + (Player.velocity - velocity);
             targetAngle = MathF.Atan2(targetVector.X, -targetVector.Y);
@@ -1349,7 +1375,7 @@ public class Enemy : Entity
     IEnumerable<int> Sniper()
     {
         enemyRange.particleVelocity = 400;
-        while (true)
+        while (health > 0)
         {
             float timeToHit;
             float prevTimeToHit = 0;
@@ -1474,7 +1500,7 @@ public class Enemy : Entity
         Enemy shield = NewShield(this, 3, 25, 0, 0);
         Engine.EntityManager.Add(shield);
         enemyRange.particleVelocity = 200;
-        while (true)
+        while (health > 0)
         {
             targetVector = Player.position - position + (Player.velocity - velocity) * 8;
             targetAngle = MathF.Atan2(targetVector.X, -targetVector.Y);
@@ -1545,7 +1571,7 @@ public class Enemy : Entity
         var col = Color.DarkRed;
         col.A = 0;
         ParticleEmitter engineParticles = new(Assets.Get(Sprite.Circle), 0.15f, Vector2.Zero, 0, MathF.PI/4, 2, 200f, Color.Yellow, EmitterType.EmissionOverTime) { particleFadeToColor = col };
-        while (true)
+        while (health > 0)
         {
             Entity nearestEnemy = Engine.EntityManager.NearestEnemy(this);
             Vector2 relativePosition = position - nearestEnemy.position;
@@ -1628,7 +1654,7 @@ public class Enemy : Entity
         enemyRange.particleVelocity = 500;
         float tripleCooldown = 0;
         int shotCount = 0;
-        while (true)
+        while (health > 0)
         {
             velocity *= 0.8f;
             Vector2 normalizedAcceleration = GetNormalizedAcceleration();
@@ -1728,7 +1754,7 @@ public class Enemy : Entity
         Entity target = null;
         float trackTime = 0;
         Vector2 rand = position;
-        while (true)
+        while (health > 0)
         {
             velocity += GetNormalizedAcceleration() * Engine.DeltaSeconds * 60;
             velocity *= 0.8f;
@@ -1800,7 +1826,7 @@ public class Enemy : Entity
         float trackTime = 0;
         float hookCooldown = 0;
         Vector2 rand = position;
-        while (true)
+        while (health > 0)
         {
             velocity += GetNormalizedAcceleration() * Engine.DeltaSeconds * 60;
             velocity *= 0.8f;
@@ -1908,7 +1934,7 @@ public class Enemy : Entity
     {
         enemyRange.particleVelocity = 300;
         float weaponCooldown = 0;
-        while(true)
+        while(health > 0)
         {
             velocity *= 0.8f;
             Entity nearestAlly = Engine.EntityManager.NearestAlly(this);
@@ -2263,7 +2289,7 @@ public class Enemy : Entity
         bool currentlyCrafting = false;
         int tier = 1;
         int untilNextTier = 1;
-        while (true)
+        while (health > 0)
         {
             float tierBonus = 1 / MathF.Sqrt(tier);
             if (EventHandler.AcknowledgeMessage(Message.MothershipCraftItem))
@@ -2837,7 +2863,7 @@ public class Enemy : Entity
     {
         Enemy enemy = new(position, velocity, angle, 2, 12, Assets.Get(Sprite.Hovercraft), isFriendly);
         enemy.AddBehaviour(enemy.Hovercraft());
-        enemy.AddBehaviour(enemy.EnemyDeath(2));
+        enemy.AddBehaviour(enemy.EnemyDeath(1));
         return enemy;
     }
     public static Enemy NewExcursionBoss(Vector2 position, Vector2 velocity, float angle, bool isFriendly = false)

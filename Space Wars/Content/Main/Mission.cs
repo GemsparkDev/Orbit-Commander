@@ -28,7 +28,7 @@ public class Mission
     //Save original entity parameters to allow cloning
     private List<ICondition> CopyObjectives { get; }
     private List<ICondition> MissionObjectives { get; } = [];
-    private List<Entity> enemiesSpawned = [];
+    private List<Enemy> enemiesSpawned = [];
     private List<(int cost, DelegateEnemy enemy)> enemyCreditValues;
     private List<DelegateEnemy> bosses;
     private Vector2 playerPosition;
@@ -124,7 +124,7 @@ public class Mission
         var isReady = true;
         foreach (var enemy in enemiesSpawned)
         {
-            if (!enemy.isExpired)
+            if (enemy.health > 0)
             {
                 isReady = false;
             }

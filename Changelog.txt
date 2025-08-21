@@ -3,6 +3,11 @@
 Lagrange Commander is a game made using C# in monogame. It is a 2D top down wave based shooter where you must repair and upgrade your ship by salvaging from enemies you defeat. It features realistic N-Body gravitation, which affects all entities and projectiles.
   
 # Changelog    
+0.5.5.5 - 8/20/2025    
+ - Added the enemy mining system.    
+ - Standard enemies that reach zero health now don't expire until the player mines it.    
+ - Enemies that reach zero health are faded and don't draw their health bar.    
+ - Moved the mass distribution and planet distance for the binary planet mission.    
 0.5.5.4 - 8/19/2025    
  - Added a simple dialogue system.    
 0.5.5.3 - 8/18/2025    
