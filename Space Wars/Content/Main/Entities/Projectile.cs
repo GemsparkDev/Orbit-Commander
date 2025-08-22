@@ -4,8 +4,6 @@ using Space_Wars.Content.Main.Particles;
 using System;
 using Microsoft.Xna.Framework.Graphics;
 using System.Diagnostics;
-using Assimp;
-using static Assimp.Metadata;
 
 namespace Space_Wars.Content.Main.Entities;
 
@@ -107,7 +105,7 @@ public class AssassinShot : Projectile
         timeLeft = 3;
         var col = Color.Gold;
         col.A = 0;
-        beam = new(Assets.Get(Sprite.Dot), 0.5f, position, angle, 0, 0, 0.5f, color, EmitterType.EmissionOverDistance) { particleFadeToColor = col };
+        beam = new(Assets.Get(Sprite.Dot), 0.5f, position, angle, 0, 0, 5f, color, EmitterType.EmissionOverDistance) { particleFadeToColor = col };
     }
     public override void AI()
     {
@@ -302,7 +300,7 @@ public class FlameBolt : Projectile
             float combinedRadius = ColliderRadius + nearestEnemy.ColliderRadius;
             if (piercingCooldown <= 0 && isFriendly != nearestEnemy.isFriendly && EntityManager.DistanceSqr(this, nearestEnemy) <= combinedRadius * combinedRadius)
             {
-                piercingCooldown = 0.1f;
+                piercingCooldown = 0.05f;
                 nearestEnemy.Collide(damage);
             }
         }

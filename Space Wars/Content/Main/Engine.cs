@@ -21,6 +21,7 @@ public class Engine : Game
     private RenderTarget2D renderTarget;
     public static UIManager UIManager { get; private set; }
     public static EntityManager EntityManager { get; private set; }
+    public static DialogueManager DialogueManager { get; private set; }
     public static SaveGame SaveGame { get; private set; }
     public static Camera Camera { get; private set; }
     public static Engine Self { get; private set; }
@@ -68,6 +69,7 @@ public class Engine : Game
         UIManager = new UIManager();
         UIManager.BackBuffer = BackBuffer;
         EntityManager = new EntityManager();
+        DialogueManager = new DialogueManager();
         AddUIElements();
         CurrentGameState.SwitchState(new MainMenu());
         renderTarget = new RenderTarget2D(GraphicsDevice, (int)ScreenSize.X, (int)ScreenSize.Y);
@@ -236,6 +238,7 @@ public class Engine : Game
         spriteBatch.End();
 
         spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, null, null, null);
+        DialogueManager.Draw(spriteBatch);
         UIManager.Draw(spriteBatch);
         if (!UIManager.LockMouseInput)
         {
