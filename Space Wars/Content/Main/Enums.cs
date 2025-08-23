@@ -138,6 +138,7 @@ public enum Sprite
     ToggleButton,
     Terminal,
     Miniplayer,
+    Textbox,
 
     SmeltIcon,
     RepairIcon,

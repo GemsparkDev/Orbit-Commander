@@ -9,6 +9,10 @@ namespace Space_Wars.Content.Main;
 public class DialogueManager
 {
     private List<Dialogue> dialogues = [];
+    public void Clear()
+    {
+        dialogues = [];
+    }
     public void Update()
     {
         if (dialogues.Count <= 0)

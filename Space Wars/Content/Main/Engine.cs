@@ -70,6 +70,7 @@ public class Engine : Game
         UIManager.BackBuffer = BackBuffer;
         EntityManager = new EntityManager();
         DialogueManager = new DialogueManager();
+        DialogueManager.Add(new Dialogue("I will have you know, I am certified in over 100 types of kung fu", Assets.Get(Sprite.OverloadBoss)));
         AddUIElements();
         CurrentGameState.SwitchState(new MainMenu());
         renderTarget = new RenderTarget2D(GraphicsDevice, (int)ScreenSize.X, (int)ScreenSize.Y);
@@ -131,7 +132,6 @@ public class Engine : Game
     protected override void LoadContent()
     {
         spriteBatch = new SpriteBatch(GraphicsDevice);
-
         Assets.LoadAssets(Content);
     }
     public static void Save()

@@ -98,6 +98,7 @@ public class PlayingGame : GameState
     {
         Engine.EntityManager.IngameUpdate();
         Engine.SaveGame.Player.RestrictedActions();
+        Engine.DialogueManager.Update();
         ParticleManager.Update();
         if (Input.OldState.IsKeyUp(Keys.Escape) && Input.NewState.IsKeyDown(Keys.Escape))
         {
@@ -314,6 +315,7 @@ public class Cutscene(List<IEvent> _events, List<Actor> _actors, GameState _next
             escapeTime -= Engine.DeltaSeconds;
         }
         ParticleManager.Update();
+        Engine.DialogueManager.Update();
         time += Engine.DeltaSeconds;
         bool isActive = false;
         foreach (var _event in _events)
