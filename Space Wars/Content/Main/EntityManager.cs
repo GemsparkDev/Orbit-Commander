@@ -493,37 +493,56 @@ public class EntityManager
     {
         List<IEvent> events = [];
         List<Actor> actors = [];
-        var mothership = new Actor(Assets.Get(Sprite.Mothership), new Vector2(1500, -2000), new Color(0, 255, 0), MathF.PI / 12);
+        var mothership = new Actor(Assets.Get(Sprite.Mothership), new Vector2(1500, -2000), new Color(0, 255, 0), MathF.PI / 2);
+        var bullet = new Actor(Assets.Get(Sprite.Mothership), new Vector2(0, 0), new Color(1, 0, 0), MathF.PI / 3);
+        var enemy = new Actor(Assets.Get(Sprite.PickupDrone), new Vector2(1000, -1500), new Color(1, 0, 0), MathF.PI / 2);
         var sound = Assets.Get(Sound.FireEngines).CreateInstance();
         sound.IsLooped = true;
         var col = Color.Coral;
         col.A = 0;
         var emitter = new ParticleEmitter(Assets.Get(Sprite.Circle), 1, new Vector2(1500, -2000), 165 + 45, 360, 2, 200, Color.Gray, EmitterType.EmissionOverTime) { particleFadeToColor = col, particleAngularVelocity = Engine.Random.NextSingle() - 0.5f };
         actors.Add(mothership);
+        actors.Add(bullet);
+        actors.Add(enemy);
         //Ensure planets still orbit and render
-        events.Add(new Event(0, 3, delegate (float time)
+        events.Add(new Event(0, 12, delegate (float time)
         {
             Engine.SaveGame.CurrentMission.PlanetUpdate();
         }));
-        //Starts engine sound
-        events.Add(new TriggerEvent(0, delegate (float time)
+        events.Add(new Event(0, 5, delegate (float time)
         {
-            sound.Play();
+            mothership.Position = new Vector2(1500, -2000 + 100 * MathF.Sin(time));
+            Engine.Camera.Position = new Vector2(1500, -2000);
         }));
-        //Linearly moves the mothership toward the planet
-        events.Add(new Event(0, 3, delegate (float time)
+        events.Add(new Event(3, 12, delegate (float time)
         {
-            emitter.position = mothership.Position;
-            emitter.Update();
-            mothership.Position = new Vector2(1500, -2000) * (3 - time) / 3 + new Vector2(0, -425) * time / 3;
-            Engine.Camera.Position = mothership.Position + new Vector2(Engine.Random.NextSingle() * 10 - 5, Engine.Random.NextSingle() * 10 - 5);
+            enemy.Position = mothership.Position - new Vector2(0, 100);
         }));
-        //Fails player core, plays explosion sound, and stops engine sound
-        events.Add(new TriggerEvent(3, delegate (float time)
+        events.Add(new TriggerEvent(4f, delegate(float time) 
         {
-            sound.Pause();
-            SoundManager.PlayGlobalSound(Assets.Get(Sound.Death));
-            Engine.ShakeScreen(1);
+            Engine.DialogueManager.Add(new Dialogue("Stop immediately.", null));
+            Engine.DialogueManager.Add(new Dialogue("You are in violation of code 7 section 13.", null));
+            Engine.DialogueManager.Add(new Dialogue("Stop or I will open fire.", null));
+        }));
+        events.Add(new Event(12, 12.1f, delegate (float time)
+        {
+            float t = time - 12;
+            bullet.Position = enemy.Position * (0.1f - time) + mothership.Position * time;
+        }));
+        events.Add(new TriggerEvent(12.1f, delegate(float time)
+        {
+            Assets.Get(Sound.Explosion).Play();
+        }));
+        events.Add(new Event(12.1f, 13, delegate(float time)
+        {
+            float normalizedTime = (time - 12.1f) / 0.9f;
+            mothership.Angle = (1 - (1 - normalizedTime) * (1 - normalizedTime)) * 5f;
+        }));
+        events.Add(new Event(12.1f, 13.5f, delegate (float time)
+        {
+            float normalizedTime = (time - 12.1f) / 1.4f;
+            float lerp = normalizedTime * normalizedTime;
+            mothership.Position = new Vector2(1500, -2000 + 100 * MathF.Sin(time)) * lerp + new Vector2(0, 400) * (1 - lerp);
         }));
         return new Cutscene(events, actors, new PlayingGame());
     }

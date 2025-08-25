@@ -28,7 +28,7 @@ public class Dialogue(string _text, Texture2D _icon)
         {
             size = 1 - end;
         }
-        var pos = new Vector2(Engine.ScreenSize.X / 2, Engine.ScreenSize.Y / 2 - 20);
+        var pos = new Vector2(Engine.ScreenSize.X / 2, Engine.ScreenSize.Y * 2 / 3);
         _spriteBatch.Draw(Assets.Get(Sprite.Textbox), pos, null, Color.White, 0, Assets.DimsOf(Sprite.Textbox) / 2, new Vector2(size, size), 0, 0);
         if (_icon != null)
         {
