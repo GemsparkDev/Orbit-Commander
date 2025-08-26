@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Space_Wars.Content.Main;
+namespace Space_Wars.Content.Main.Story;
 public class DialogueManager
 {
     private List<Dialogue> dialogues = [];

@@ -1,8 +1,8 @@
 ﻿using System;
 
-namespace Space_Wars.Content.Main;
+namespace Space_Wars.Content.Main.Story;
 
-public class Event(float _start, float _end, Action<float> _action) : IEvent
+public class Event(float _start, float _length, Action<float> _action) : IEvent
 {
     public bool Update(float _time)
     {
@@ -10,7 +10,7 @@ public class Event(float _start, float _end, Action<float> _action) : IEvent
         {
             return true;
         }
-        if (_time > _end)
+        if (_time > _start + _length)
         {
             return false;
         }

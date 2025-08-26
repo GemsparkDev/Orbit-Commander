@@ -2,7 +2,7 @@
 using Microsoft.Xna.Framework;
 using System;
 
-namespace Space_Wars.Content.Main;
+namespace Space_Wars.Content.Main.Story;
 public class Dialogue(string _text, Texture2D _icon)
 {
     private float time = 0;
@@ -14,12 +14,12 @@ public class Dialogue(string _text, Texture2D _icon)
     }
     public bool IsComplete()
     {
-        return time > _text.Length * SPEED * 5 + 2;
+        return time > _text.Length * SPEED + 6;
     }
     public void Draw(SpriteBatch _spriteBatch)
     {
         float size = 1;
-        float end = time - _text.Length * SPEED * 5 - 1;
+        float end = time - _text.Length * SPEED - 5;
         if (time < 1)
         {
             size = time;
@@ -28,11 +28,11 @@ public class Dialogue(string _text, Texture2D _icon)
         {
             size = 1 - end;
         }
-        var pos = new Vector2(Engine.ScreenSize.X / 2, Engine.ScreenSize.Y * 2 / 3);
+        var pos = new Vector2(Engine.ScreenSize.X / 2, Engine.ScreenSize.Y * 3 / 4);
         _spriteBatch.Draw(Assets.Get(Sprite.Textbox), pos, null, Color.White, 0, Assets.DimsOf(Sprite.Textbox) / 2, new Vector2(size, size), 0, 0);
         if (_icon != null)
         {
-            _spriteBatch.Draw(_icon, pos - new Vector2(30, 0), null, Color.White, 0, new Vector2(_icon.Width, _icon.Height)/2 + new Vector2(Assets.Get(Sprite.WideButton).Width / 2 + 50, 0), new Vector2(size, size), 0, 0);
+            _spriteBatch.Draw(_icon, pos - new Vector2(30, 0), null, Color.White, 0, new Vector2(_icon.Width, _icon.Height) / 2 + new Vector2(Assets.Get(Sprite.WideButton).Width / 2 + 50, 0), new Vector2(size, size), 0, 0);
         }
         int characters = (int)Math.Clamp((time - 1) / SPEED, 0, _text.Length);
         if (characters != prevCharCount)
@@ -40,11 +40,10 @@ public class Dialogue(string _text, Texture2D _icon)
             SoundManager.PlayGlobalSound(Assets.Get(Sound.Interact));
         }
         prevCharCount = characters;
-        pos += new Vector2(-70, -40);
         int increment = 24;
         for (int i = 0; i < characters; i += increment)
         {
-            _spriteBatch.DrawString(Assets.TextFont, _text[i..Math.Min((i+ increment), characters)], pos + new Vector2(0, 12) * i / increment, Color.White, 0, Vector2.Zero, size, 0, 0);
+            _spriteBatch.DrawString(Assets.TextFont, _text[i..Math.Min(i + increment, characters)], pos, Color.White, 0, -new Vector2(0, 14) * i / increment - new Vector2(-70, -40), size, 0, 0);
         }
     }
 }

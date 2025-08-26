@@ -6,6 +6,7 @@ using Space_Wars.Content.Main.Particles;
 using System.Collections.Generic;
 using UILib.Content.Main;
 using System;
+using Space_Wars.Content.Main.Story;
 
 namespace Space_Wars.Content.Main;
 
@@ -327,6 +328,7 @@ public class Cutscene(List<IEvent> _events, List<Actor> _actors, GameState _next
         if (!isActive)
         {
             CurrentGameState.SwitchState(_nextGameState);
+            Engine.DialogueManager.Clear();
         }
     }
     public override void Draw(SpriteBatch _spriteBatch)

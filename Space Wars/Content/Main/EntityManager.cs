@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UILib.Content.Main;
+using Space_Wars.Content.Main.Story;
 
 namespace Space_Wars.Content.Main;
 
@@ -491,11 +492,10 @@ public class EntityManager
     }
     private static Cutscene IntroCutscene()
     {
-        List<IEvent> events = [];
         List<Actor> actors = [];
         var mothership = new Actor(Assets.Get(Sprite.Mothership), new Vector2(1500, -2000), new Color(0, 255, 0), MathF.PI / 2);
-        var bullet = new Actor(Assets.Get(Sprite.Mothership), new Vector2(0, 0), new Color(1, 0, 0), MathF.PI / 3);
-        var enemy = new Actor(Assets.Get(Sprite.PickupDrone), new Vector2(1000, -1500), new Color(1, 0, 0), MathF.PI / 2);
+        var bullet = new Actor(Assets.Get(Sprite.PulseShot), new Vector2(0, 0), new Color(255, 0, 0), MathF.PI / 3);
+        var enemy = new Actor(Assets.Get(Sprite.PickupDrone), new Vector2(0, -1800), new Color(255, 0, 0), 0);
         var sound = Assets.Get(Sound.FireEngines).CreateInstance();
         sound.IsLooped = true;
         var col = Color.Coral;
@@ -505,45 +505,63 @@ public class EntityManager
         actors.Add(bullet);
         actors.Add(enemy);
         //Ensure planets still orbit and render
-        events.Add(new Event(0, 12, delegate (float time)
-        {
-            Engine.SaveGame.CurrentMission.PlanetUpdate();
-        }));
-        events.Add(new Event(0, 5, delegate (float time)
-        {
-            mothership.Position = new Vector2(1500, -2000 + 100 * MathF.Sin(time));
-            Engine.Camera.Position = new Vector2(1500, -2000);
-        }));
-        events.Add(new Event(3, 12, delegate (float time)
-        {
-            enemy.Position = mothership.Position - new Vector2(0, 100);
-        }));
-        events.Add(new TriggerEvent(4f, delegate(float time) 
-        {
-            Engine.DialogueManager.Add(new Dialogue("Stop immediately.", null));
-            Engine.DialogueManager.Add(new Dialogue("You are in violation of code 7 section 13.", null));
-            Engine.DialogueManager.Add(new Dialogue("Stop or I will open fire.", null));
-        }));
-        events.Add(new Event(12, 12.1f, delegate (float time)
-        {
-            float t = time - 12;
-            bullet.Position = enemy.Position * (0.1f - time) + mothership.Position * time;
-        }));
-        events.Add(new TriggerEvent(12.1f, delegate(float time)
-        {
-            Assets.Get(Sound.Explosion).Play();
-        }));
-        events.Add(new Event(12.1f, 13, delegate(float time)
-        {
-            float normalizedTime = (time - 12.1f) / 0.9f;
-            mothership.Angle = (1 - (1 - normalizedTime) * (1 - normalizedTime)) * 5f;
-        }));
-        events.Add(new Event(12.1f, 13.5f, delegate (float time)
-        {
-            float normalizedTime = (time - 12.1f) / 1.4f;
-            float lerp = normalizedTime * normalizedTime;
-            mothership.Position = new Vector2(1500, -2000 + 100 * MathF.Sin(time)) * lerp + new Vector2(0, 400) * (1 - lerp);
-        }));
+        List<IEvent> events = 
+        [
+            new EndlessEvent(0, delegate (float time)
+            {
+                Engine.SaveGame.CurrentMission.PlanetUpdate();
+            }),
+            new Event(0, 24, delegate (float time)
+            {
+                mothership.Position = new Vector2(1500, -2000 + 100 * MathF.Sin(time));
+                Engine.Camera.Position = new Vector2(1500, -2000);
+            }),
+            new Event(3, 21, delegate (float time)
+            {
+                enemy.Position = enemy.Position * 0.95f + (mothership.Position + new Vector2(-250, 100)) * 0.05f;
+            }),
+            new TriggerEvent(3f, delegate(float time)
+            {
+                Engine.DialogueManager.Add(new Dialogue("Stop immediately.", null));
+                Engine.DialogueManager.Add(new Dialogue("You are in violation of code 7 section 13.", null));
+                Engine.DialogueManager.Add(new Dialogue("Stop or I will open fire.", null));
+            }),
+            new TriggerEvent(24.2f, delegate (float time)
+            {
+                Assets.Get(Sound.Explosion).Play();
+            }),
+            new Event(24, 0.2f, delegate (float time)
+            {
+                float lerp = time / 0.2f;
+                bullet.Position = enemy.Position * (1 - lerp) + mothership.Position * lerp;
+            }),
+            new TriggerEvent(24.2f, delegate(float time)
+            {
+                Assets.Get(Sound.Explosion).Play();
+                bullet.Position = enemy.Position;
+            }),
+            new Event(24.2f, 0.8f, delegate(float time)
+            {
+                float normalizedTime = time / 0.8f;
+                mothership.Angle = (1 - (1 - normalizedTime) * (1 - normalizedTime)) * 5f;
+            }),
+            new Event(24.2f, 2f, delegate (float time)
+            {
+                float normalizedTime = (time) / 2f;
+                float lerp = normalizedTime * normalizedTime * normalizedTime;
+                mothership.Position = new Vector2(1500, -2000) * (1 - lerp) + new Vector2(0, -400) * (lerp);
+                Engine.Camera.Position = mothership.Position * 0.1f + Engine.Camera.Position * 0.9f;
+                emitter.position = mothership.Position;
+                emitter.speedOfEmission = normalizedTime * 200;
+                emitter.Update();
+            }),
+            new TriggerEvent(26.2f, delegate(float time)
+            {
+                Assets.Get(Sound.Death).Play();
+                Engine.ShakeScreen(1f);
+                mothership.Position = new Vector2(0, -400 - Assets.DimsOf(Sprite.Mothership).Y / 2);
+            }),
+        ];
         return new Cutscene(events, actors, new PlayingGame());
     }
 }
