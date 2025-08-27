@@ -511,12 +511,12 @@ public class EntityManager
             {
                 Engine.SaveGame.CurrentMission.PlanetUpdate();
             }),
-            new Event(0, 24, delegate (float time)
+            new Event(0, 24.2f, delegate (float time)
             {
                 mothership.Position = new Vector2(1500, -2000 + 100 * MathF.Sin(time));
                 Engine.Camera.Position = new Vector2(1500, -2000);
             }),
-            new Event(3, 21, delegate (float time)
+            new Event(3, 21.2f, delegate (float time)
             {
                 enemy.Position = enemy.Position * 0.95f + (mothership.Position + new Vector2(-250, 100)) * 0.05f;
             }),
@@ -548,8 +548,9 @@ public class EntityManager
             new Event(24.2f, 2f, delegate (float time)
             {
                 float normalizedTime = (time) / 2f;
-                float lerp = normalizedTime * normalizedTime * normalizedTime;
-                mothership.Position = new Vector2(1500, -2000) * (1 - lerp) + new Vector2(0, -400) * (lerp);
+                float xLerp = normalizedTime * normalizedTime;
+                float yLerp = xLerp * normalizedTime;
+                mothership.Position = new Vector2(1500 * (1 - xLerp) + 100 * MathF.Sin(24.2f), -2000 * (1 - yLerp)) + new Vector2(0, -400 * yLerp);
                 Engine.Camera.Position = mothership.Position * 0.1f + Engine.Camera.Position * 0.9f;
                 emitter.position = mothership.Position;
                 emitter.speedOfEmission = normalizedTime * 200;

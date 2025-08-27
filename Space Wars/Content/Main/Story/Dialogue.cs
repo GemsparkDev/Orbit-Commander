@@ -1,6 +1,7 @@
 ﻿using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework;
 using System;
+using Microsoft.Toolkit.HighPerformance;
 
 namespace Space_Wars.Content.Main.Story;
 public class Dialogue(string _text, Texture2D _icon)
@@ -40,10 +41,28 @@ public class Dialogue(string _text, Texture2D _icon)
             SoundManager.PlayGlobalSound(Assets.Get(Sound.Interact));
         }
         prevCharCount = characters;
-        int increment = 24;
+        int increment;
+        int offset = 0;
         for (int i = 0; i < characters; i += increment)
         {
-            _spriteBatch.DrawString(Assets.TextFont, _text[i..Math.Min(i + increment, characters)], pos, Color.White, 0, -new Vector2(0, 14) * i / increment - new Vector2(-70, -40), size, 0, 0);
+            increment = NextSpace(i);
+            _spriteBatch.DrawString(Assets.TextFont, _text[i..Math.Min(i + increment, characters)], pos, Color.White, 0, -new Vector2(0, 15) * offset - new Vector2(-70, -45), size, 0, 0);
+            offset++;
         }
+    }
+    private int NextSpace(int start)
+    {
+        for (int end = start + 24; end >= start; end--)
+        {
+            if (end >= _text.Length)
+            {
+                return _text.Length;
+            }
+            if (_text[end] == ' ')
+            {
+                return end - start + 1;
+            }
+        }
+        return 0;
     }
 }
