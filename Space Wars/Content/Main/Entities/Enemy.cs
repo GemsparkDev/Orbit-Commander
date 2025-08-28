@@ -1,10 +1,12 @@
 ﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Content.Pipeline;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Space_Wars.Content.Main.Components;
 using Space_Wars.Content.Main.Particles;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UILib.Content.Main;
 
 namespace Space_Wars.Content.Main.Entities;
@@ -1284,6 +1286,77 @@ public class Enemy : Entity
                     ParticleManager.Add(new Particle(Assets.Get(Sprite.Dot), position + dir * (i * 2 + 8), _angle, Color.Red * (1 - (float)(i) / 500f) * cd));
                 }
             }
+            yield return 0;
+        }
+    }
+    IEnumerable<int> Surge()
+    {
+        List<Enemy> children = [];
+        for (float angle = 0; angle < MathF.Tau; angle += MathF.PI / 4)
+        {
+            Vector2 dir = Engine.ToUnitVector(angle);
+            var enemy = NewSurgeChild(position + dir * 5, dir * 2, angle, this, children);
+            children.Add(enemy);
+            Engine.EntityManager.Add(enemy);
+        }
+        while (true)
+        {
+            velocity *= 0.8f;
+            GoToPosition(Engine.SaveGame.Player.position, 1);
+            if (children.Count <= 0)
+            {
+                isExpired = true;
+            }
+            children = children.Where(child => !child.isExpired).ToList();
+            yield return 0;
+        }
+    }
+    IEnumerable<int> SurgeChild(Enemy _parent, List<Enemy> _allies)
+    {
+        int vision = 50;
+        while (true)
+        {
+            if (health <= 0)
+            {
+                isExpired = true;
+                Explode(2, 1f);
+            }
+            velocity += (_parent.position - position) / 3 * Engine.DeltaSeconds;
+            Vector2 velocitySum = Vector2.Zero;
+            float totalBirds = 0;
+            foreach (var ally in _allies)
+            {
+                if (ally == this)
+                {
+                    continue;
+                }
+                float distance = Vector2.Distance(ally.position, position);
+                if (distance < vision)
+                {
+                    if (distance < 15)
+                    {
+                        Vector2 relativePosition = position - ally.position;
+                        velocity += Vector2.Normalize(relativePosition) * Engine.DeltaSeconds * 10;
+                    }
+                    velocitySum += ally.velocity;
+                    totalBirds++;
+                }
+            }
+            if (totalBirds > 0)
+            {
+                velocity += (velocitySum / totalBirds - velocity) * Engine.DeltaSeconds;
+            }
+            velocity += GetNormalizedAcceleration() * Engine.DeltaSeconds * 2;
+            float speed = (velocity - _parent.velocity).Length();
+            if (speed < 5)
+            {
+                velocity += Vector2.Normalize(velocity) * Engine.DeltaSeconds * 10;
+            }
+            if (speed > 10)
+            {
+                velocity -= Vector2.Normalize(velocity) * Engine.DeltaSeconds * 10;
+            }
+            angle = Engine.ToAngle(velocity);
             yield return 0;
         }
     }
@@ -3001,6 +3074,18 @@ public class Enemy : Entity
         Enemy enemy = new(_position, _velocity, _angle, 0, 200, Assets.Get(Sprite.MassRelayOne), true);
         enemy.AddBehaviour(enemy.MassRelay());
         enemy.Components.Add(new DockableComponent(enemy, UI.MothershipMenu));
+        return enemy;
+    }
+    public static Enemy NewSurgeBoss(Vector2 position, Vector2 velocity, float angle)
+    {
+        Enemy enemy = new(position, velocity, angle, 5, 0, Assets.Get(Sprite.Circle), false);
+        enemy.AddBehaviour(enemy.Surge());
+        return enemy;
+    }
+    public static Enemy NewSurgeChild(Vector2 position, Vector2 velocity, float angle, Enemy _parent, List<Enemy> _allies)
+    {
+        Enemy enemy = new(position, velocity, angle, 5, 10, Assets.Get(Sprite.Fighter), false);
+        enemy.AddBehaviour(enemy.SurgeChild(_parent, _allies));
         return enemy;
     }
 }

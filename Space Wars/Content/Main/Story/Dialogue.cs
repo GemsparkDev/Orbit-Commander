@@ -1,7 +1,6 @@
 ﻿using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework;
 using System;
-using Microsoft.Toolkit.HighPerformance;
 
 namespace Space_Wars.Content.Main.Story;
 public class Dialogue(string _text, Texture2D _icon)
