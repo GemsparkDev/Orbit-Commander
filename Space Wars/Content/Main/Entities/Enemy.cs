@@ -248,6 +248,28 @@ public class Enemy : Entity
             yield return 0;
         }
     }
+    IEnumerable<int> AvoidProjectiles(float _strength)
+    {
+        while (health > 0)
+        {
+            Entity nearestProjectile = Engine.EntityManager.NearestProjectile(NewDummyEnemy(position + Vector2.Normalize(Player.position - position) * 30, isFriendly), isFriendly);
+            if (nearestProjectile != null)
+            {
+                var pos = Vector2.Normalize(position - nearestProjectile.position);
+                var vel = Vector2.Normalize(velocity - nearestProjectile.velocity);
+                if ((pos.X * vel.X + pos.Y * vel.Y) < -0.5f)
+                {
+                    int sign = Math.Sign(pos.X * vel.Y - vel.X * pos.Y);
+                    if (sign == 0)
+                    {
+                        sign = 1;
+                    }
+                    velocity += new Vector2(-pos.Y, pos.X) * sign * _strength;
+                }
+            }
+            yield return 0;
+        }
+    }
 #endregion
     #region Bosses
     IEnumerable<int> Symmetry()
@@ -1292,28 +1314,38 @@ public class Enemy : Entity
     IEnumerable<int> Surge()
     {
         List<Enemy> children = [];
-        for (float angle = 0; angle < MathF.Tau; angle += MathF.PI / 4)
+        for (float angle = 0; angle < MathF.Tau; angle += 1.61803398875f / 6)
         {
             Vector2 dir = Engine.ToUnitVector(angle);
-            var enemy = NewSurgeChild(position + dir * 5, dir * 2, angle, this, children);
+            var enemy = NewSurgeChild(position + dir * angle * 10, velocity, angle, this, children);
             children.Add(enemy);
             Engine.EntityManager.Add(enemy);
         }
         while (true)
         {
-            velocity *= 0.8f;
-            GoToPosition(Engine.SaveGame.Player.position, 1);
             if (children.Count <= 0)
             {
                 isExpired = true;
             }
             children = children.Where(child => !child.isExpired).ToList();
+
+            velocity += (Vector2.Normalize(Engine.SaveGame.Player.position - position) * 3 + GetNormalizedAcceleration() * 10) * Engine.DeltaSeconds * 5;
+            float speed = (velocity - Engine.SaveGame.Player.velocity).Length();
+            if (speed < 1)
+            {
+                velocity += Vector2.Normalize(velocity) * Engine.DeltaSeconds * 10;
+            }
+            if (speed > 10)
+            {
+                velocity -= Vector2.Normalize(velocity) * Engine.DeltaSeconds * 10;
+            }
             yield return 0;
         }
     }
     IEnumerable<int> SurgeChild(Enemy _parent, List<Enemy> _allies)
     {
         int vision = 50;
+        cooldown = Engine.Random.NextSingle() * 3;
         while (true)
         {
             if (health <= 0)
@@ -1321,7 +1353,7 @@ public class Enemy : Entity
                 isExpired = true;
                 Explode(2, 1f);
             }
-            velocity += (_parent.position - position) / 3 * Engine.DeltaSeconds;
+            velocity += (_parent.position - position) * 5 * Engine.DeltaSeconds / MathF.Sqrt((_parent.position - position).Length());
             Vector2 velocitySum = Vector2.Zero;
             float totalBirds = 0;
             foreach (var ally in _allies)
@@ -1333,10 +1365,9 @@ public class Enemy : Entity
                 float distance = Vector2.Distance(ally.position, position);
                 if (distance < vision)
                 {
-                    if (distance < 15)
+                    if (distance < 50)
                     {
-                        Vector2 relativePosition = position - ally.position;
-                        velocity += Vector2.Normalize(relativePosition) * Engine.DeltaSeconds * 10;
+                        velocity += Vector2.Normalize(position - ally.position) * Engine.DeltaSeconds * 12;
                     }
                     velocitySum += ally.velocity;
                     totalBirds++;
@@ -1344,19 +1375,32 @@ public class Enemy : Entity
             }
             if (totalBirds > 0)
             {
-                velocity += (velocitySum / totalBirds - velocity) * Engine.DeltaSeconds;
+                velocity += (velocitySum / totalBirds - velocity) * Engine.DeltaSeconds / 4;
             }
-            velocity += GetNormalizedAcceleration() * Engine.DeltaSeconds * 2;
+            velocity += Vector2.Normalize(Engine.SaveGame.Player.position - position) * 5 * Engine.DeltaSeconds;
             float speed = (velocity - _parent.velocity).Length();
-            if (speed < 5)
+            if (speed < 1)
             {
                 velocity += Vector2.Normalize(velocity) * Engine.DeltaSeconds * 10;
             }
-            if (speed > 10)
+            if (speed > 6)
             {
                 velocity -= Vector2.Normalize(velocity) * Engine.DeltaSeconds * 10;
             }
-            angle = Engine.ToAngle(velocity);
+            Vector2 acc = GetNormalizedAcceleration();
+            velocity += acc * Engine.DeltaSeconds * 250 / MathF.Sqrt(acc.Length());
+            var relativeVelocity = Vector2.Normalize(velocity - _parent.velocity);
+            var relPos = Engine.SaveGame.Player.position - position;
+            float bulletSpeed = 10;
+            var relativePosition = Vector2.Normalize(relPos + (Engine.SaveGame.Player.velocity - velocity) * relPos.Length() / bulletSpeed);
+            angle = Engine.ToAngle(relativeVelocity);
+            if (cooldown <= 0 && Vector2.Dot(relativeVelocity, relativePosition) > 0.8f)
+            {
+                Engine.EntityManager.Add(new PulseShot(position, relativeVelocity * bulletSpeed + velocity, angle, 0, isFriendly, 3));
+                SoundManager.PlaySound(Assets.Get(Sound.LMGFire), position);
+                cooldown = Engine.Random.NextSingle() * 3 + 1;
+            }
+            LowerCooldown();
             yield return 0;
         }
     }
@@ -1732,22 +1776,6 @@ public class Enemy : Entity
             velocity *= 0.8f;
             Vector2 normalizedAcceleration = GetNormalizedAcceleration();
             float speed = 8 + Math.Max((Player.position - position).Length() - 500, 0) / 500;
-
-            Entity nearestProjectile = Engine.EntityManager.NearestProjectile(NewDummyEnemy(position + Vector2.Normalize(Player.position - position) * 30, isFriendly), isFriendly);
-            if (nearestProjectile != null)
-            {
-                var pos = Vector2.Normalize(position - nearestProjectile.position);
-                var vel = Vector2.Normalize(velocity - nearestProjectile.velocity);
-                if ((pos.X * vel.X + pos.Y * vel.Y) < -0.5f)
-                {
-                    int sign = Math.Sign(pos.X * vel.Y - vel.X * pos.Y);
-                    if (sign == 0)
-                    {
-                        sign = 1;
-                    }
-                    velocity += new Vector2(-pos.Y, pos.X) * sign;
-                }
-            }
 
             Entity nearestEnemy = Engine.EntityManager.NearestEnemy(this);
             float playerDist = Vector2.Distance(Player.position, position);
@@ -2961,6 +2989,7 @@ public class Enemy : Entity
         enemy.AddBehaviour(enemy.AdvancedFighter());
         enemy.AddBehaviour(enemy.AvoidNearbyAllies());
         enemy.AddBehaviour(enemy.EnemyDeath(1.5f));
+        enemy.AddBehaviour(enemy.AvoidProjectiles(1));
         return enemy;
     }
     public static Enemy NewOrbiter(Vector2 position, Vector2 velocity, float angle)
@@ -3084,8 +3113,9 @@ public class Enemy : Entity
     }
     public static Enemy NewSurgeChild(Vector2 position, Vector2 velocity, float angle, Enemy _parent, List<Enemy> _allies)
     {
-        Enemy enemy = new(position, velocity, angle, 5, 10, Assets.Get(Sprite.Fighter), false);
+        Enemy enemy = new(position, velocity, angle, 5, 10, Assets.Get(Sprite.AdvancedFighter), false);
         enemy.AddBehaviour(enemy.SurgeChild(_parent, _allies));
+        enemy.AddBehaviour(enemy.AvoidProjectiles(0.33f));
         return enemy;
     }
 }

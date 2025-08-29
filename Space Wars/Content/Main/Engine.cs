@@ -56,7 +56,7 @@ public class Engine : Game
         graphics.ApplyChanges();
 
         IsFixedTimeStep = true;
-        TargetElapsedTime = TimeSpan.FromSeconds(1d / (double)(targetFramerate * timeScale));
+        TargetElapsedTime = TimeSpan.FromSeconds(1d / (double)(targetFramerate));
         
         BackBuffer = new Vector2(graphics.PreferredBackBufferWidth, graphics.PreferredBackBufferHeight);
         DebugMode = false;
