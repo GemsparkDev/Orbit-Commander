@@ -6,6 +6,7 @@ using Space_Wars.Content.Main.Components;
 using Space_Wars.Content.Main.Particles;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using UILib.Content.Main;
 
@@ -1329,31 +1330,32 @@ public class Enemy : Entity
             }
             children = children.Where(child => !child.isExpired).ToList();
 
-            velocity += (Vector2.Normalize(Engine.SaveGame.Player.position - position) * 3 + GetNormalizedAcceleration() * 10) * Engine.DeltaSeconds * 5;
-            float speed = (velocity - Engine.SaveGame.Player.velocity).Length();
-            if (speed < 1)
+            velocity += (Vector2.Normalize(Engine.SaveGame.Player.position - position) * 120) * Engine.DeltaSeconds;
+            if (velocity.Length() > 10)
             {
-                velocity += Vector2.Normalize(velocity) * Engine.DeltaSeconds * 10;
-            }
-            if (speed > 10)
-            {
-                velocity -= Vector2.Normalize(velocity) * Engine.DeltaSeconds * 10;
+                velocity = Vector2.Normalize(velocity) * 10;
             }
             yield return 0;
         }
     }
     IEnumerable<int> SurgeChild(Enemy _parent, List<Enemy> _allies)
     {
-        int vision = 50;
+        int vision = 75;
         cooldown = Engine.Random.NextSingle() * 3;
         while (true)
         {
+            velocity *= 0.95f;
             if (health <= 0)
             {
                 isExpired = true;
                 Explode(2, 1f);
             }
-            velocity += (_parent.position - position) * 5 * Engine.DeltaSeconds / MathF.Sqrt((_parent.position - position).Length());
+            Vector2 acceleration = Vector2.Zero;
+            if (cooldown > 0)
+            {
+                acceleration += (_parent.position - position);
+                acceleration += (_parent.velocity - velocity) * 3;
+            }
             Vector2 velocitySum = Vector2.Zero;
             float totalBirds = 0;
             foreach (var ally in _allies)
@@ -1365,9 +1367,9 @@ public class Enemy : Entity
                 float distance = Vector2.Distance(ally.position, position);
                 if (distance < vision)
                 {
-                    if (distance < 50)
+                    if (distance < 25)
                     {
-                        velocity += Vector2.Normalize(position - ally.position) * Engine.DeltaSeconds * 12;
+                        acceleration += Vector2.Normalize(position - ally.position) * 12;
                     }
                     velocitySum += ally.velocity;
                     totalBirds++;
@@ -1375,30 +1377,39 @@ public class Enemy : Entity
             }
             if (totalBirds > 0)
             {
-                velocity += (velocitySum / totalBirds - velocity) * Engine.DeltaSeconds / 4;
+                acceleration += (velocitySum / totalBirds - velocity) / 4;
             }
-            velocity += Vector2.Normalize(Engine.SaveGame.Player.position - position) * 5 * Engine.DeltaSeconds;
+            acceleration += Vector2.Normalize(Engine.SaveGame.Player.position - position) * 5 * (cooldown <= 0 ? 10 : 1);
             float speed = (velocity - _parent.velocity).Length();
             if (speed < 1)
             {
-                velocity += Vector2.Normalize(velocity) * Engine.DeltaSeconds * 10;
+                acceleration += Engine.ToUnitVector(angle) * 30;
             }
             if (speed > 6)
             {
-                velocity -= Vector2.Normalize(velocity) * Engine.DeltaSeconds * 10;
+               acceleration -= Engine.ToUnitVector(angle) * 30;
             }
             Vector2 acc = GetNormalizedAcceleration();
-            velocity += acc * Engine.DeltaSeconds * 250 / MathF.Sqrt(acc.Length());
+            acceleration += acc * 30;
+            if (Vector2.Dot(-acc, velocity) / acc.Length() > 4)
+            {
+                acceleration += Vector2.Normalize(acc) * 100;
+            }
+            if (acceleration.Length() > 25)
+            {
+                acceleration = Vector2.Normalize(acceleration) * 25;
+            }
+            velocity += acceleration * Engine.DeltaSeconds;
             var relativeVelocity = Vector2.Normalize(velocity - _parent.velocity);
             var relPos = Engine.SaveGame.Player.position - position;
             float bulletSpeed = 10;
             var relativePosition = Vector2.Normalize(relPos + (Engine.SaveGame.Player.velocity - velocity) * relPos.Length() / bulletSpeed);
-            angle = Engine.ToAngle(relativeVelocity);
-            if (cooldown <= 0 && Vector2.Dot(relativeVelocity, relativePosition) > 0.8f)
+            angle = Engine.ToAngle(acceleration);
+            if (cooldown <= 0 && relPos.Length() < 250 && Vector2.Dot(Engine.ToUnitVector(angle), relativePosition) > 0.85f)
             {
-                Engine.EntityManager.Add(new PulseShot(position, relativeVelocity * bulletSpeed + velocity, angle, 0, isFriendly, 3));
+                Engine.EntityManager.Add(new PulseShot(position, Engine.ToUnitVector(angle) * bulletSpeed + velocity, angle, 0, isFriendly, 3));
                 SoundManager.PlaySound(Assets.Get(Sound.LMGFire), position);
-                cooldown = Engine.Random.NextSingle() * 3 + 1;
+                cooldown = Engine.Random.NextSingle() * 8 + 5;
             }
             LowerCooldown();
             yield return 0;
