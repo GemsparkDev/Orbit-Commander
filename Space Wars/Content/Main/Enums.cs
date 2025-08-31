@@ -92,6 +92,8 @@ public enum Sprite
     MassRelayTwo,
     MassRelayThree,
     MassRelayFour,
+    SurgeChild,
+    SurgeBoss,
 
     MetalScrap,
     RealMetalScrap,

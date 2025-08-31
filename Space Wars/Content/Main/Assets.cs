@@ -63,7 +63,8 @@ public static class Assets
         Sprites.Add(Sprite.MassRelayTwo, Content.Load<Texture2D>("Images/Entity_35-2"));
         Sprites.Add(Sprite.MassRelayThree, Content.Load<Texture2D>("Images/Entity_35-3"));
         Sprites.Add(Sprite.MassRelayFour, Content.Load<Texture2D>("Images/Entity_35-4"));
-
+        Sprites.Add(Sprite.SurgeChild, Content.Load<Texture2D>("Images/Entity_36"));
+        Sprites.Add(Sprite.SurgeBoss, Content.Load<Texture2D>("Images/Entity_37"));
 
         //Items
         Sprites.Add(Sprite.MetalScrap, Content.Load<Texture2D>("Images/Item_0"));
