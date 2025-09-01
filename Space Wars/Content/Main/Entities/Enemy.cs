@@ -1324,6 +1324,7 @@ public class Enemy : Entity
         }
         while (true)
         {
+            LowerCooldown();
             if (children.Count <= 0)
             {
                 if (health <= 0)
@@ -1341,18 +1342,44 @@ public class Enemy : Entity
                 }
                 else
                 {
-                    //Enrage behavior
+                    velocity += (Engine.SaveGame.Player.position - position) * 30 * Engine.DeltaSeconds;
+                    if (velocity.Length() > 12)
+                    {
+                        velocity = Vector2.Normalize(velocity) * 12;
+                    }
+                    if (velocity.Length() < 1)
+                    {
+                        velocity += Engine.ToUnitVector(angle) * 30 * Engine.DeltaSeconds;
+                    }
+                    if (cooldown <= 0 && Vector2.Distance(Engine.SaveGame.Player.position, position) < 450 && Vector2.Dot(velocity, (Engine.SaveGame.Player.position - position)) / (velocity.Length() * (Engine.SaveGame.Player.position - position).Length()) > 0.75f)
+                    {
+                        cooldown = 0.8f;
+                        Vector2 dir = Engine.ToUnitVector(angle) * 12;
+                        Engine.EntityManager.Add(new SpiralShot(position, dir, angle, 0, isFriendly, damage, false));
+                        Engine.EntityManager.Add(new SpiralShot(position, dir, angle, 0, isFriendly, damage, true));
+                    }
+                    angle = Engine.ToAngle(velocity);
                 }
             }
             else
             {
                 if (health > 0)
                 {
-                    velocity += (Vector2.Normalize(Engine.SaveGame.Player.position - position) * 120) * Engine.DeltaSeconds;
+                    velocity += (Engine.SaveGame.Player.position - position * 12) * Engine.DeltaSeconds;
                     if (velocity.Length() > 10)
                     {
                         velocity = Vector2.Normalize(velocity) * 10;
                     }
+                    if (velocity.Length() < 1)
+                    {
+                        velocity += Engine.ToUnitVector(angle) * 300 * Engine.DeltaSeconds;
+                    }
+                    if (cooldown <= 0 && Vector2.Distance(Engine.SaveGame.Player.position, position) < 300 && Vector2.Dot(velocity, (Engine.SaveGame.Player.position - position)) / (velocity.Length() * (Engine.SaveGame.Player.position - position).Length()) > 0.75f)
+                    {
+                        cooldown = 1f;
+                        Engine.EntityManager.Add(new SpiralShot(position, Engine.ToUnitVector(angle) * 8, angle, 0, isFriendly, damage, false));
+                    }
+                    angle = Engine.ToAngle(velocity);
                 }
             }
             children = children.Where(child => !child.isExpired).ToList();
