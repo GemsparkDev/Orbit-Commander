@@ -94,6 +94,7 @@ public enum Sprite
     MassRelayFour,
     SurgeChild,
     SurgeBoss,
+    Engineer,
 
     MetalScrap,
     RealMetalScrap,

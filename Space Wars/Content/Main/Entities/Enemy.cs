@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Runtime.Intrinsics;
 using UILib.Content.Main;
 
 namespace Space_Wars.Content.Main.Entities;
@@ -2155,6 +2156,62 @@ public class Enemy : Entity
             yield return 0;
         }
     }
+    //Note: Add stealth behavior
+    IEnumerable<int> Engineer()
+    {
+        float constructCooldown = 10;
+        float constructionTime = 0;
+        Vector2 constructLocation = Vector2.Zero;
+        bool constructing = false;
+        while (true)
+        {
+            velocity *= 0.8f;
+            if (constructCooldown <= 0)
+            {
+                if (!constructing)
+                {
+                    constructLocation = Engine.ToUnitVector(Engine.OneToNegOne() * MathF.PI) * Engine.SaveGame.CurrentMission.Planet.radius * 1.5f;
+                    constructing = true;
+                    constructionTime = 10;
+                }
+                GoToPosition(constructLocation, 5);
+            }
+            else
+            {
+                constructCooldown -= Engine.DeltaSeconds;
+                GoToPosition(Engine.SaveGame.Player.position, 3);
+                if (Vector2.Distance(Engine.SaveGame.Player.position, position) < 100)
+                {
+                    cooldown = 1.5f;
+                    Engine.EntityManager.Add(new SpiralShot(position, velocity + Engine.ToUnitVector(angle) * 8, angle, 0, isFriendly, damage, false));
+                }
+            }
+            if (constructing && Vector2.Distance(position, constructLocation) < 15)
+            {
+                if (constructionTime <= 0)
+                {
+                    Engine.EntityManager.Add(new Construct(Constructs.Trap, position, Vector2.Zero, 0, 0) { isFriendly = this.isFriendly});
+                    constructing = false;
+                    constructCooldown = 15;
+                }
+                else
+                {
+                    constructionTime -= Engine.DeltaSeconds;
+                    ParticleManager.Add(new Particle(Assets.Get(Sprite.Dot), 0.5f, position, velocity + new Vector2(Engine.OneToNegOne(), Engine.OneToNegOne()) * 3, 0, Engine.OneToNegOne() / 3, Color.Yellow, Color.Transparent));
+                }
+            }
+            if (velocity.Length() > 0)
+            {
+                targetAngle = Engine.ToAngle(velocity);
+            }
+            else
+            {
+                targetAngle = 0;
+            }
+            RotateTowards(targetAngle);
+            yield return 0;
+        }
+    }
 #endregion
     #region Infrastructure
     IEnumerable<int> Mothership()
@@ -3177,6 +3234,14 @@ public class Enemy : Entity
         Enemy enemy = new(position, velocity, angle, 3, 12, Assets.Get(Sprite.SurgeChild), false);
         enemy.AddBehaviour(enemy.SurgeChild(_parent, _allies));
         enemy.AddBehaviour(enemy.AvoidProjectiles(0.33f));
+        return enemy;
+    }
+    public static Enemy NewEngineer(Vector2 position, Vector2 velocity, float angle, bool isFriendly)
+    {
+        Enemy enemy = new(position, velocity, angle, 3, 12, Assets.Get(Sprite.Engineer), isFriendly);
+        enemy.AddBehaviour(enemy.Engineer());
+        enemy.AddBehaviour(enemy.EnemyDeath(1));
+        enemy.AddBehaviour(enemy.AvoidProjectiles(1));
         return enemy;
     }
 }
