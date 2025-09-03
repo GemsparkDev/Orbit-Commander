@@ -1451,7 +1451,6 @@ public class Enemy : Entity
                 acceleration = Vector2.Normalize(acceleration) * 25;
             }
             velocity += acceleration * Engine.DeltaSeconds;
-            var relativeVelocity = Vector2.Normalize(velocity - _parent.velocity);
             var relPos = Engine.SaveGame.Player.position - position;
             float bulletSpeed = 10;
             var relativePosition = Vector2.Normalize(relPos + (Engine.SaveGame.Player.velocity - velocity) * relPos.Length() / bulletSpeed);
@@ -2159,13 +2158,37 @@ public class Enemy : Entity
     //Note: Add stealth behavior
     IEnumerable<int> Engineer()
     {
+        StealthAbility = 1;
+        enemyRange.particleVelocity = 500;
         float constructCooldown = 10;
         float constructionTime = 0;
         Vector2 constructLocation = Vector2.Zero;
         bool constructing = false;
+        Entity trackedEnemy = null;
+        float enemyCooldown = 5;
         while (true)
         {
-            velocity *= 0.8f;
+            var enemy = Engine.EntityManager.NearestEnemy(this);
+            if (trackedEnemy == null)
+            {
+                trackedEnemy = enemy;
+            }
+            else
+            {
+                if (enemy == trackedEnemy)
+                {
+                    enemyCooldown = 5;
+                }
+                if (enemy == null && enemyCooldown > 0)
+                {
+                    enemyCooldown -= Engine.DeltaSeconds;
+                }
+            }
+            if (enemyCooldown <= 0)
+            {
+                trackedEnemy = null;
+            }
+            velocity *= 0.9f;
             if (constructCooldown <= 0)
             {
                 if (!constructing)
@@ -2179,18 +2202,25 @@ public class Enemy : Entity
             else
             {
                 constructCooldown -= Engine.DeltaSeconds;
-                GoToPosition(Engine.SaveGame.Player.position, 3);
-                if (Vector2.Distance(Engine.SaveGame.Player.position, position) < 100)
+                if (trackedEnemy != null)
                 {
-                    cooldown = 1.5f;
-                    Engine.EntityManager.Add(new SpiralShot(position, velocity + Engine.ToUnitVector(angle) * 8, angle, 0, isFriendly, damage, false));
+                    GoToPosition(trackedEnemy.position, 3);
+                    if (Vector2.Distance(trackedEnemy.position, position) < 500)
+                    {
+                        cooldown = 1.5f;
+                        Engine.EntityManager.Add(new SpiralShot(position, velocity + Engine.ToUnitVector(angle) * 8, angle, 0, isFriendly, damage, false));
+                    }
+                }
+                else
+                {
+                    GoToPosition(constructLocation, 3);
                 }
             }
             if (constructing && Vector2.Distance(position, constructLocation) < 15)
             {
                 if (constructionTime <= 0)
                 {
-                    Engine.EntityManager.Add(new Construct(Constructs.Trap, position, Vector2.Zero, 0, 0) { isFriendly = this.isFriendly});
+                    Engine.EntityManager.Add(new Construct(Constructs.Trap, position, Vector2.Zero, 0, 0, 1));
                     constructing = false;
                     constructCooldown = 15;
                 }

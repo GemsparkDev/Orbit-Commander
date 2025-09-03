@@ -11,7 +11,7 @@ public class Construct : Pickup
 
     private float cooldown = 0;
     private ParticleEmitter attackRadius;
-    public Construct(Constructs _type, Vector2 _position, Vector2 _velocity, float _angle, float _angularVelocity)
+    public Construct(Constructs _type, Vector2 _position, Vector2 _velocity, float _angle, float _angularVelocity, int _stealth = 0, bool _isFriendly = true)
         : base(ItemFactory.constructData[_type], _position, _velocity, _angularVelocity, ItemFactory.constructData[_type].Integrity)
     {
         angle = _angle;
@@ -27,6 +27,12 @@ public class Construct : Pickup
             radius = 300;
         }
         attackRadius = new ParticleEmitter(Assets.Get(Sprite.Dot), position, radius, new Color(255, 0, 0));
+        isFriendly = _isFriendly;
+        StealthAbility = _stealth;
+        if (!_isFriendly)
+        {
+            color = Color.Red;
+        }
     }
     public Construct(Constructs _type, List<string> _disassembly, LoadLogger _logger)
     : base(ItemFactory.constructData[_type], _disassembly, _logger)
