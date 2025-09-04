@@ -509,6 +509,7 @@ public class Mission
         [
             (1, Enemy.NewStealthFighter),
             (2, Enemy.NewHunter),
+            (3, Enemy.NewEngineer),
         ];
     }
     public static List<(int, DelegateEnemy)> All()
@@ -524,6 +525,7 @@ public class Mission
             (2, Enemy.NewHealer),
             (1, Enemy.NewStealthFighter),
             (2, Enemy.NewHunter),
+            (3, Enemy.NewEngineer)
         ];
     }
 }

@@ -3,6 +3,7 @@ using System;
 using Microsoft.Xna.Framework.Graphics;
 using Space_Wars.Content.Main.Particles;
 using System.Collections.Generic;
+using System.Runtime.Intrinsics;
 
 namespace Space_Wars.Content.Main.Entities;
 public class Construct : Pickup
@@ -93,6 +94,28 @@ public class Construct : Pickup
                 }
                 attackRadius.Update();
                 break;
+            case Constructs.Furnace:
+                Vector2 offset = Engine.RotateVector2(new Vector2(Engine.OneToNegOne(), Engine.OneToNegOne()) * 5, angle);
+                ParticleManager.Add(new Particle(Assets.Get(Sprite.Dot), 1, position + offset, velocity, angle, 0, Color.Orange, Color.Transparent));
+                var nearestPickup = Engine.EntityManager.NearestItem(this, true);
+                if (nearestPickup == null)
+                {
+                    return;
+                }
+                Vector2 relativePosition = nearestPickup.position - position;
+                if (relativePosition.X < 5 && relativePosition.X > -5 && relativePosition.Y < 5 && relativePosition.Y > -5)
+                {
+                    nearestPickup.isExpired = true;
+                    if (nearestPickup is Module)
+                    {
+                        Engine.SaveGame.Scrap += 3;
+                    }
+                    else
+                    {
+                        Engine.SaveGame.Scrap++;
+                    }
+                }
+                break;
         }
         base.Update();
     }
@@ -123,4 +146,5 @@ public enum Constructs
     Trap,
     Bomb,
     SpecializedParts,
+    Furnace
 }
