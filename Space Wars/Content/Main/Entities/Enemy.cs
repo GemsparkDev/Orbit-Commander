@@ -8,7 +8,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Runtime.Intrinsics;
 using UILib.Content.Main;
 
 namespace Space_Wars.Content.Main.Entities;
@@ -1334,11 +1333,11 @@ public class Enemy : Entity
                     Explode(0, 0);
                     if (Engine.SaveGame.GiveWeapon)
                     {
-                        //Weapon
+                        Engine.EntityManager.Add(new Module(Modules.Spiral, position, GetNormalizedAcceleration() * 10, angularVelocity));
                     }
                     else
                     {
-                        //Item
+                        Engine.EntityManager.Add(new Module(Modules.CreateFighter, position, GetNormalizedAcceleration() * 10, angularVelocity));
                     }
                 }
                 else
@@ -3253,9 +3252,9 @@ public class Enemy : Entity
         enemy.Components.Add(new DockableComponent(enemy, UI.MothershipMenu));
         return enemy;
     }
-    public static Enemy NewSurgeBoss(Vector2 position, Vector2 velocity, float angle)
+    public static Enemy NewSurgeBoss(Vector2 position, Vector2 velocity, float angle, bool isFriendly = false)
     {
-        Enemy enemy = new(position, velocity, angle, 6, 50, Assets.Get(Sprite.SurgeBoss), false);
+        Enemy enemy = new(position, velocity, angle, 6, 50, Assets.Get(Sprite.SurgeBoss), isFriendly);
         enemy.AddBehaviour(enemy.Surge());
         return enemy;
     }

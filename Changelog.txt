@@ -3,6 +3,10 @@
 Lagrange Commander is a game made using C# in monogame. It is a 2D top down wave based shooter where you must repair and upgrade your ship by salvaging from enemies you defeat. It features realistic N-Body gravitation, which affects all entities and projectiles.
   
 # Changelog  
+0.6.1 - 9/4/2025    
+ - Surge now drops the spiral weapon and the create fighter ability.    
+ - The spiral weapon now shoots at 12 units per second, from 8.    
+ - Spiral also has 1 stealth from 0, and has increased offset amplitude and frequency.    
 0.6.0.9 - 9/3/2025    
  - Added the furnace, allowing for players to smelt scrap without docking.    
 0.6.0.8 - 9/2/2025    

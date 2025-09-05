@@ -58,6 +58,7 @@ public class Mission
             Enemy.NewOverloadBoss,
             Enemy.NewExcursionBoss,
             Enemy.NewWyvernBoss,
+            Enemy.NewSurgeBoss,
         ];
         currentBoss = Engine.Random.Next(bosses.Count);
         cutscene = _cutscene;

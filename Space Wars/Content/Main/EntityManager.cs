@@ -53,7 +53,7 @@ public class EntityManager
         new Mission([new Planet(Vector2.Zero, Vector2.Zero, 5000, 3, true, Color.Cyan),
             new Planet(new Vector2(400, 0), Planet.GetOrbitalVelocity(new Vector2(400, 0), Vector2.Zero, 5000), 240, 1f, false, Color.Cyan),
             new Planet(new Vector2(-600, 0), -Planet.GetOrbitalVelocity(new Vector2(-600, 0), Vector2.Zero, 5000) * 1.2f, 120, 0.6f, false, Color.Yellow), ],
-        [new EntityCondition(new EntityConstructor(Enemy.NewSurgeBoss, new Vector2(0, -6*50), Vector2.Zero, 0), [ Condition.Kill ])],
+        [new EntityCondition(new EntityConstructor(Enemy.NewExcursionBoss, new Vector2(0, -6*50), Vector2.Zero, 0), [ Condition.Kill ])],
         "Showdown", "Defeat the advanced drone prototype, Excursion. Be warned: It may call for reinforcements.", 1.1f, new Vector2(0, 1), Mission.TierOne(), null, true) { playerProgression = 2 },
 
         new Mission([], [new EntityCondition(new EntityConstructor(Enemy.NewWarpGate, Vector2.Zero, Vector2.Zero, 0), [ Condition.CustomIncomplete ])],

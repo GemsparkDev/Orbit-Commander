@@ -28,7 +28,7 @@ public class Player : Entity
     public Dictionary<ModuleType, Module> modules = new()
     {
         { ModuleType.Hull, new Module(Modules.Shield) },
-        { ModuleType.Guns, new Module(Modules.Spewer) },
+        { ModuleType.Guns, new Module(Modules.Spiral) },
         { ModuleType.Engines, new Module(Modules.Plasma) },
         { ModuleType.Sensors, new Module(Modules.Sensors) },
         { ModuleType.Core, new Module(Modules.Dash) }
@@ -854,9 +854,9 @@ public class Player : Entity
         {
             return;
         }
-        Vector2 speed = IdealSpeedWithVelocity(8);
-        Engine.EntityManager.Add(new SpiralShot(position, speed, gunAngle.angle, 0, true, 5, false));
-        Engine.EntityManager.Add(new SpiralShot(position, speed, gunAngle.angle, 0, true, 5, true));
+        Vector2 speed = IdealSpeedWithVelocity(12);
+        Engine.EntityManager.Add(new SpiralShot(position, speed, gunAngle.angle, 0, true, 5, false, 1));
+        Engine.EntityManager.Add(new SpiralShot(position, speed, gunAngle.angle, 0, true, 5, true, 1));
         SoundManager.PlaySound(Assets.Get(Sound.PulseFire), position);
         modules[ModuleType.Guns].cooldown = 0.7f;
         Engine.ShakeScreen(0.2f);

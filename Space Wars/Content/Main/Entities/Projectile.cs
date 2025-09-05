@@ -72,25 +72,23 @@ public class PulseShot : Projectile
 }
 public class SpiralShot : Projectile
 {
-    bool isOffset;
+    int offset;
     float time;
-    Vector2 positionNormal;
     public SpiralShot(Vector2 _position, Vector2 _velocity, float _angle, float _angularVelocity, bool _isFriendly, int _damage, bool _isOffset, int _stealth = 0)
         : base(Assets.Get(Sprite.SpiralShot), _position, _velocity, _angle, _angularVelocity, _isFriendly, _damage, _stealth)
     {
         entityType = EntityType.Projectile;
         time = 0;
-        isOffset = _isOffset;
+        offset = _isOffset ? 1 : -1;
         color = _isFriendly ? Color.Orange : Color.Red;
     }
-
     public override void AI()
     {
         position += velocity * Engine.DeltaSeconds * 60;
         angle += angularVelocity * Engine.DeltaSeconds * 60;
         time += Engine.DeltaSeconds;
-        positionNormal = Vector2.Normalize(new Vector2(MathF.Cos(angle), MathF.Sin(angle))) * MathF.Sin((time * 9) - MathF.PI / 2) * (isOffset ? 1 : -1);
-        position += positionNormal * Engine.DeltaSeconds * 60;
+        Vector2 posOffset = Engine.ToUnitVector(angle) * MathF.Cos(time * 8) * offset * 4;
+        position += new Vector2(posOffset.Y, -posOffset.X);
         EntityManager.Collide(this, Engine.EntityManager.NearestEnemy(this));
     }
 }
