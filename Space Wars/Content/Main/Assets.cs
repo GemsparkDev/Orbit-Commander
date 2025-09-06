@@ -90,6 +90,7 @@ public static class Assets
         Sprites.Add(Sprite.FlamethrowerModule, Content.Load<Texture2D>("Images/Item_6"));
         Sprites.Add(Sprite.RealFlamethrowerModule, Content.Load<Texture2D>("Images/UI_35"));
         Sprites.Add(Sprite.Textbox, Content.Load<Texture2D>("Images/UI_36"));
+        Sprites.Add(Sprite.SpecializedParts, Content.Load<Texture2D>("Images/Item_7"));
 
         //Projectiles
         Sprites.Add(Sprite.SpiralShot, Content.Load<Texture2D>("Images/Projectile_0"));
