@@ -56,13 +56,13 @@ public class Module : Pickup, IData
     {
         (itemData as ModuleData).Action();
     }
-    public override void Collide(int _damage)
+    public override void Collide(int _damage, bool _ignoreImmunity = false)
     {
         if (_damage <= 0)
         {
             return;
         }
-        if (invincibilityCooldown > 0)
+        if (invincibilityCooldown > 0 && !_ignoreImmunity)
         {
             invincibilityCooldown = 0;
             return;
@@ -73,7 +73,10 @@ public class Module : Pickup, IData
         if (Health > 0)
         {
             Health -= _damage;
-            invincibilityCooldown = 1;
+            if (!_ignoreImmunity) 
+            {
+                invincibilityCooldown = 1;
+            }
         }
         else
         {

@@ -163,6 +163,7 @@ public class SaveGame
             }
         }
         QueuedItems = (from item in QueuedItems where !item.IsExpired select item).ToList();
+        Engine.SaveGame.Player.ClearAll();
         Engine.Save();
     }
     public string Serialize()

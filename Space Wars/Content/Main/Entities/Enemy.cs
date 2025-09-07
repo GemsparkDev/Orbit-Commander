@@ -112,7 +112,7 @@ public class Enemy : Entity
             }
         }
     }
-    public override void Collide(int damage)
+    public override void Collide(int damage, bool _ignoreImmunity = false)
     {
         if (deleteOnCollide && damage >= 0)
         {

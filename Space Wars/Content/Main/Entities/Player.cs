@@ -115,6 +115,8 @@ public class Player : Entity
         EventHandler.SetFuseModuleDecals(textures);
         EventHandler.UpdateFuseUI(moduleFuses, spareFuses);
         shieldEffect = new(Assets.Get(Sprite.Dot), position, 10, Color.Violet) { particleAngularVelocity = 0.1f };
+        //ApplyStatus(new Bomb());
+        ApplyStatus(new Fire(10));
     }
     public override void Update()
     {
@@ -270,6 +272,7 @@ public class Player : Entity
             velocity *= (1 - Engine.DeltaSeconds);
             velocity += Vector2.Normalize(-position) * (position.Length() - (50 * 50 + planet.radius)) * Engine.DeltaSeconds / 10;
         }
+        base.Update();
         position += velocity * Engine.DeltaSeconds * 60;
         if (dockedEntity != null)
         {
@@ -306,7 +309,6 @@ public class Player : Entity
             isEngineActive = false;
         }
         gunAngle.position = position;
-        base.Update();
     }
     public void RestrictedActions()
     {
@@ -599,21 +601,24 @@ public class Player : Entity
             isEngineActive = false;
         }
     }
-    public override void Collide(int _damage)
+    public override void Collide(int _damage, bool _ignoreImmunity = false)
     {
         if (dockedEntity != null)
         {
             dockedEntity.Collide(_damage);
             return;
         }
-        if (_damage > 0 && invincibilityCooldown <= 0)
+        if (_damage > 0 && (invincibilityCooldown <= 0 || _ignoreImmunity))
         {
             Engine.ShakeScreen(0.08f * _damage);
             //Helps to cushion huge hits
             //Player will never be one shot (unless they deserve it)
             cachedDamage += Math.Min(50, _damage);
             SoundManager.PlaySound(Assets.Get(Sound.Hit), position);
-            invincibilityCooldown = 1;
+            if (!_ignoreImmunity) 
+            {
+                invincibilityCooldown = 1;
+            }
             ParticleManager.Add(new Particle(null, 1, position + new Vector2(0, -1), new Vector2(0, -1.5f), 0, 0, Color.Red, Color.Transparent) { drawText = $"{_damage}" });
             //Part and Fuse Failure
             if (Progression > 0)

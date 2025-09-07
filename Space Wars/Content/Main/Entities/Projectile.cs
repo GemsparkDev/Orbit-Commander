@@ -30,7 +30,7 @@ public abstract class Projectile : Entity
         base.Update();
     }
     public abstract void AI();
-    public override void Collide(int _damage)
+    public override void Collide(int _damage, bool _ignoreImmunity)
     {
         int particles = random.Next(2, 4);
         for(int i = 0; i < particles; i++)
@@ -231,7 +231,7 @@ public class GrapplingHook : Projectile
         }
         base.Draw(_spriteBatch);
     }
-    public override void Collide(int _damage)
+    public override void Collide(int _damage, bool _ignoreImmunity)
     {
 
     }
@@ -300,6 +300,7 @@ public class FlameBolt : Projectile
             {
                 piercingCooldown = 0.05f;
                 nearestEnemy.Collide(damage);
+                nearestEnemy.ApplyStatus(new Fire(2));
             }
         }
     }

@@ -89,13 +89,13 @@ public class Pickup : Entity, IData
         }
         base.Update();
     }
-    public override void Collide(int _damage)
+    public override void Collide(int _damage, bool _ignoreImmunity = false)
     {
         if (_damage <= 0)
         {
             return;
         }
-        if (invincibilityCooldown > 0)
+        if (invincibilityCooldown > 0 && !_ignoreImmunity)
         {
             invincibilityCooldown = 0;
             return;
@@ -107,7 +107,10 @@ public class Pickup : Entity, IData
         }
         //Prevents negative integrity values
         hitsLeft = Math.Max(hitsLeft, 0);
-        invincibilityCooldown = 1;
+        if (!_ignoreImmunity)
+        {
+            invincibilityCooldown = 1;
+        }
         if (hitsLeft <= 0)
         {
             isExpired = true;

@@ -119,7 +119,7 @@ public class Construct : Pickup
         }
         base.Update();
     }
-    public override void Collide(int _damage)
+    public override void Collide(int _damage, bool _ignoreImmunity = false)
     {
         bool isActive = !isExpired;
         base.Collide(_damage);
