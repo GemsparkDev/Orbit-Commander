@@ -118,6 +118,7 @@ public enum Sprite
     FlamethrowerModule,
     RealFlamethrowerModule,
     SpecializedParts,
+    RealSpecializedParts,
 
     SpiralShot,
     PulseShot,
