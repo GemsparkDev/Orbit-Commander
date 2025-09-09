@@ -2,6 +2,8 @@
 using Space_Wars.Content.Main.Particles;
 using System;
 using Microsoft.Xna.Framework;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Space_Wars.Content.Main;
 public abstract class Status
@@ -10,10 +12,46 @@ public abstract class Status
     public abstract StatusType Type { get; }
     public abstract void Update(Entity _parent);
     public abstract void Reset();
+    public virtual int StealthChange() { return 0; }
+    public virtual int SensingChange() { return 0; }
     public enum StatusType
     {
         Bomb,
         Fire,
+    }
+}
+public class StatusHolder
+{
+    List<Status> effects = [];
+    public int StealthChange { get; private set; }
+    public int SensingChange { get; private set; }
+    public void Update(Entity _parent)
+    {
+        StealthChange = 0;
+        SensingChange = 0;
+        effects = effects.Where(x => !x.IsExpired).ToList();
+        foreach (var effect in effects)
+        {
+            effect.Update(_parent);
+            StealthChange += effect.StealthChange();
+            SensingChange += effect.SensingChange();
+        }
+    }
+    public void ApplyStatus(Status _status)
+    {
+        if (_status == null)
+        {
+            return;
+        }
+        foreach (var status in effects)
+        {
+            if (status.Type == _status.Type)
+            {
+                status.Reset();
+                return;
+            }
+        }
+        effects.Add(_status);
     }
 }
 public class Bomb : Status
@@ -83,6 +121,10 @@ public class Fire : Status
         {
             IsExpired = true;
         }
+    }
+    public override int StealthChange()
+    {
+        return -1;
     }
     public override void Reset()
     {

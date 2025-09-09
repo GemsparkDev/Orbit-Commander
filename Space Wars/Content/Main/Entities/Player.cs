@@ -58,7 +58,7 @@ public class Player : Entity
     {
         get
         {
-            int sensing = 1;
+            int sensing = 1 + StatusHolder.SensingChange;
             if (modules[ModuleType.Sensors] == null)
             {
                 return -1;
@@ -77,7 +77,7 @@ public class Player : Entity
             {
                 return -10;
             }
-            int stealth = 0;
+            int stealth = StatusHolder.StealthChange;
             if (isEngineActive)
             {
                 stealth -= 1;
@@ -116,7 +116,7 @@ public class Player : Entity
         EventHandler.UpdateFuseUI(moduleFuses, spareFuses);
         shieldEffect = new(Assets.Get(Sprite.Dot), position, 10, Color.Violet) { particleAngularVelocity = 0.1f };
         //ApplyStatus(new Bomb());
-        ApplyStatus(new Fire(10));
+        StatusHolder.ApplyStatus(new Fire(10));
     }
     public override void Update()
     {

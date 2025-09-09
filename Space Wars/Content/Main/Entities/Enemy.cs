@@ -26,8 +26,13 @@ public class Enemy : Entity
     private bool wasHit = false;
     public override int StealthAbility 
     {
-        get => base.StealthAbility + ((revealDuration > 0) ? -5 : 0); 
+        get => base.StealthAbility + ((revealDuration > 0) ? -5 : 0 + StatusHolder.StealthChange); 
         protected set => base.StealthAbility = value; 
+    }
+    public override int SensingAbility 
+    { 
+        get => base.SensingAbility + StatusHolder.SensingChange; 
+        protected set => base.SensingAbility = value; 
     }
     public override float ColliderRadius => ((texture != null) ? Engine.EnemyHitboxModifier * ((texture.Height + texture.Width) / 4 + 1) : 0);
     private Vector2 targetVector;

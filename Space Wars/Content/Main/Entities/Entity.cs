@@ -2,11 +2,9 @@
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using Microsoft.Xna.Framework.Audio;
-using System.Collections.Generic;
 using Space_Wars.Content.Main.Components;
 using System.Diagnostics;
 using Space_Wars.Content.Main.Particles;
-using System.Linq;
 
 namespace Space_Wars.Content.Main.Entities;
 
@@ -39,7 +37,7 @@ public abstract class Entity
         get { return texture == null ? Vector2.Zero : new Vector2(texture.Width, texture.Height); }
     }
     protected static Player Player => Engine.SaveGame.Player;
-    private List<Status> effects = [];
+    public StatusHolder StatusHolder { get; private set; } = new();
     public Entity(Texture2D _texture, Vector2 _position, Vector2 _velocity, float _angle, float _angularVelocity, int _damage, bool _isFriendly)
     {
         texture = _texture;
@@ -57,35 +55,15 @@ public abstract class Entity
         {
             revealDuration -= Engine.DeltaSeconds;
         }
-        foreach (var buff in effects)
-        {
-            buff.Update(this);
-        }
-        effects = effects.Where(x => !x.IsExpired).ToList();
+        StatusHolder.Update(this);
         collider.position = position;
         collider.offsetVelocity = velocity;
         collider.Update();
     }
     public abstract void Collide(int _damage, bool _ignoreImmunity = false);
-    public void ApplyStatus(Status _status)
-    {
-        if (_status == null)
-        {
-            return;
-        }
-        foreach (var status in effects)
-        {
-            if (status.Type == _status.Type)
-            {
-                status.Reset();
-                return;
-            }
-        }
-        effects.Add(_status);
-    }
     public void ClearAll()
     {
-        effects = [];
+        StatusHolder = new();
     }
 
     public void ClampVelocity(float speed)
