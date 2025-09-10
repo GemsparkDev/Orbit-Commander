@@ -18,6 +18,7 @@ public abstract class Status
     {
         Bomb,
         Fire,
+        Healing,
     }
 }
 public class StatusHolder
@@ -80,18 +81,14 @@ public class Bomb : Status
         time = 0;
     }
 }
-public class Fire : Status
+public class Fire(float _duration) : Status
 {
-    float initialDuration;
-    float duration;
+    float initialDuration = _duration;
+    float duration = _duration;
     float fireCooldown = 0.05f;
     float attackCooldown = 0.5f;
     public override StatusType Type { get; } = StatusType.Fire;
-    public Fire(float _duration)
-    {
-        duration = _duration;
-        initialDuration = _duration;
-    }
+
     public override void Update(Entity _parent)
     {
         if (fireCooldown > 0)
@@ -129,5 +126,48 @@ public class Fire : Status
     public override void Reset()
     {
         duration = initialDuration;
+    }
+}
+public class Healing(float _duration) : Status
+{
+    float initialDuration = _duration;
+    float duration = _duration;
+    float fireCooldown = 0.1f;
+    float healCooldown = 0.5f;
+    public override StatusType Type { get; } = StatusType.Healing;
+
+    public override void Update(Entity _parent)
+    {
+        if (fireCooldown > 0)
+        {
+            fireCooldown -= Engine.DeltaSeconds;
+        }
+        else
+        {
+            fireCooldown = 0.2f;
+            ParticleManager.Add(new Particle(Assets.Get(Sprite.Circle), 0.5f + Engine.Random.NextSingle() / 10, _parent.position,
+                _parent.velocity + new Vector2(Engine.OneToNegOne() / 3, -Engine.Random.NextSingle() - 0.5f), -0, Engine.OneToNegOne() / 5, Color.Green, Color.Transparent));
+        }
+        if (healCooldown > 0)
+        {
+            healCooldown -= Engine.DeltaSeconds;
+        }
+        else
+        {
+            healCooldown = 1f;
+            _parent.Collide(-(int)Math.Ceiling(duration), true);
+        }
+        if (duration > 0)
+        {
+            duration -= Engine.DeltaSeconds;
+        }
+        else
+        {
+            IsExpired = true;
+        }
+    }
+    public override void Reset()
+    {
+        duration += initialDuration;
     }
 }

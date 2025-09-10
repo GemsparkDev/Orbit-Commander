@@ -1054,11 +1054,7 @@ public class Player : Entity
     }
     public void SummonShield()
     {
-        if (!modules[ModuleType.Core].IsCooldownReady())
-        {
-            return;
-        }
-        if (!abilityEntity.isExpired)
+        if (!modules[ModuleType.Core].IsCooldownReady() || !abilityEntity.isExpired)
         {
             return;
         }
@@ -1090,48 +1086,51 @@ public class Player : Entity
     }
     public void Nanomachines()
     {
-        if (modules[ModuleType.Core].IsCooldownReady())
+        if (!modules[ModuleType.Core].IsCooldownReady())
         {
-            foreach (var pickup in leashedMaterials)
+            return;
+        }
+        foreach (var pickup in leashedMaterials)
+        {
+            if (pickup is not Module and not Construct)
             {
-                if (pickup is not Module and not Construct)
-                {
-                    pickup.isExpired = true;
-                    Collide(-10);
-                    var c = 30;
-                    modules[ModuleType.Core].cooldown = c;
-                    abilityMaxCooldown = c;
-                    return;
-                }
+                pickup.isExpired = true;
+                StatusHolder.ApplyStatus(new Healing(4));
+                var c = 30;
+                modules[ModuleType.Core].cooldown = c;
+                abilityMaxCooldown = c;
+                return;
             }
         }
     }
     public void CreateFighter()
     {
-        if (modules[ModuleType.Core].IsCooldownReady())
+        if (!modules[ModuleType.Core].IsCooldownReady())
         {
-            foreach (var pickup in leashedMaterials)
+            return;
+        }
+        foreach (var pickup in leashedMaterials)
+        {
+            if (pickup is not Module and not Construct)
             {
-                if (pickup is not Module and not Construct)
-                {
-                    pickup.isExpired = true;
-                    Engine.EntityManager.Add(Enemy.NewAdvancedFighter(position, velocity, angle, isFriendly));
-                    var c = 60;
-                    modules[ModuleType.Core].cooldown = c;
-                    abilityMaxCooldown = c;
-                    return;
-                }
+                pickup.isExpired = true;
+                Engine.EntityManager.Add(Enemy.NewAdvancedFighter(position, velocity, angle, isFriendly));
+                var c = 60;
+                modules[ModuleType.Core].cooldown = c;
+                abilityMaxCooldown = c;
+                return;
             }
         }
     }
     public void Lidar()
     {
-        if (modules[ModuleType.Sensors].IsCooldownReady())
+        if (!modules[ModuleType.Sensors].IsCooldownReady())
         {
-            Vector2 dir = targetVector + new Vector2(Engine.OneToNegOne(), Engine.OneToNegOne()) / 5;
-            Engine.EntityManager.Hitscan(position, dir, 1000, false, out Vector2 end);
-            ParticleManager.Add(new Particle(Assets.Get(Sprite.Dot), 1f, end, Vector2.Zero, 0, 0, Color.White, Color.Transparent));
+            return;
         }
+        Vector2 dir = targetVector + new Vector2(Engine.OneToNegOne(), Engine.OneToNegOne()) / 5;
+        Engine.EntityManager.Hitscan(position, dir, 1000, false, out Vector2 end);
+        ParticleManager.Add(new Particle(Assets.Get(Sprite.Dot), 1f, end, Vector2.Zero, 0, 0, Color.White, Color.Transparent));
     }
     public void Radar()
     {
