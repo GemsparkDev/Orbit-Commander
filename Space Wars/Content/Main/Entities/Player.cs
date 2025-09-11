@@ -28,7 +28,7 @@ public class Player : Entity
     public Dictionary<ModuleType, Module> modules = new()
     {
         { ModuleType.Hull, new Module(Modules.Shield) },
-        { ModuleType.Guns, new Module(Modules.Spiral) },
+        { ModuleType.Guns, new Module(Modules.Torch) },
         { ModuleType.Engines, new Module(Modules.Plasma) },
         { ModuleType.Sensors, new Module(Modules.Sensors) },
         { ModuleType.Core, new Module(Modules.Dash) }
@@ -1051,6 +1051,20 @@ public class Player : Entity
         float c = 2f;
         modules[ModuleType.Core].cooldown = c;
         abilityMaxCooldown = c;
+    }
+    public void Torch()
+    {
+        if (!modules[ModuleType.Guns].IsCooldownReady())
+        {
+            return;
+        }
+        Vector2 offset = Engine.ToUnitVector(gunAngle.angle + MathF.PI / 2) * Engine.OneToNegOne() * 3;
+        Projectile shot = new FlameBolt(position + offset * 2, IdealSpeedWithVelocity(12) + offset, isFriendly, 1, 2, 0.1f);
+        Engine.EntityManager.Add(shot);
+        SoundManager.PlaySound(Assets.Get(Sound.LMGFire), position);
+        Engine.ShakeScreen(0.02f);
+        velocity -= targetVector / 6;
+        modules[ModuleType.Guns].cooldown = 0.1f;
     }
     public void SummonShield()
     {

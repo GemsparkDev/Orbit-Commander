@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Xna.Framework.Graphics;
 using System.IO;
+using System;
 
 namespace Space_Wars.Content.Main;
 
@@ -252,12 +253,13 @@ public static class EventHandler
     }
     public static void UpdateFuseUI(bool[,] _fuses, int _spareFuses)
     {
+        float totalFuses = 0;
         for (int i = 0; i < 5; i++)
         {
             for (int j = 0; j < 4; j++)
             {
                 //Active fuse is white, no fuse is gray, disabled fuse is red
-                Color color = Color.White;
+                Color color;
                 if (!_fuses[i, j])
                 {
                     color = Color.Gray;
@@ -266,10 +268,30 @@ public static class EventHandler
                 {
                     color = Color.Red;
                 }
+                else
+                {
+                    color = Color.White;
+                    totalFuses++;
+                }
                 UI.Fuses[j, i].color = color;
             }
         }
         UI.FuseCounter.text = $"{_spareFuses}";
+        string text;
+        if (totalFuses < 13)
+        {
+            text = "Low";
+        }
+        else if (totalFuses is >= 13 and <= 17)
+        {
+            text = "Med";
+        }
+        else
+        {
+            text = "High";
+        }
+        UI.FragilityTextbox.text = "Fuse Fragility: " + text;
+        UI.FragilityTextbox.textColor = new Color(Math.Clamp(totalFuses / 5 - 2, 0, 1), Math.Clamp(4 - totalFuses / 5, 0, 1), 0);
         Color[] possibleColors = [ Color.Red, Color.Orange, Color.Yellow, Color.White, Color.Cyan ];
         for (int i = 0; i < 5; i++)
         {
@@ -358,6 +380,7 @@ public static class EventHandler
                 { Modules.Flamethrower, Modules.PrismArray },
                 { Modules.Fireball, Modules.MatrixLauncher },
                 { Modules.Sniper, Modules.Antimaterial },
+                { Modules.LMG, Modules.Torch },
             };
         if (!upgrades.TryGetValue(_moduleType, out Modules value))
         {

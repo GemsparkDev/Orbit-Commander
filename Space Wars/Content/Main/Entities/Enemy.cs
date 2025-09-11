@@ -703,6 +703,20 @@ public class Enemy : Entity
             targetAngle = MathF.Atan2(relativePosition.X, -relativePosition.Y);
             if (health >= maxHealth / 2 || laserCooldown > 0)
             {
+                if (Engine.EntityManager.NearestAlly(this) is Enemy nearestExpiredAlly)
+                {
+                    float distance = Vector2.Distance(position, nearestExpiredAlly.position);
+                    if (nearestExpiredAlly.health <= 0 && distance < 300)
+                    {
+                        nearestExpiredAlly.Mine();
+                        var dir = Vector2.Normalize(nearestExpiredAlly.position - position);
+                        for (float i = 0; i < distance / 2; i++)
+                        {
+                            Vector3 color = new Vector3(1, 1, 0) * (1 - i / 150) + new Vector3(1, 0, 0) * (i / 150);
+                            ParticleManager.Add(new Particle(Assets.Get(Sprite.Dot), dir * (i + 4f) * 2 + position, Engine.ToAngle(dir), new Color(color.X, color.Y, color.Z) * (1 - (i / 150))));
+                        }
+                    }
+                }
                 if (nearestPickup != null)
                 {
                     GoToPosition(nearestPickup.position, 5);

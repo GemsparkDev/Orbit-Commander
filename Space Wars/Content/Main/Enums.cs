@@ -40,6 +40,7 @@ public enum Modules
     Triangle,
     PrismArray,
     MatrixLauncher,
+    Torch,
     //Cores
     Dash,
     GrapplingHook,

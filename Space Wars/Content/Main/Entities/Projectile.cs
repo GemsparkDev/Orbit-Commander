@@ -103,7 +103,7 @@ public class AssassinShot : Projectile
         timeLeft = 3;
         var col = Color.Gold;
         col.A = 0;
-        beam = new(Assets.Get(Sprite.Dot), 0.5f, position, angle, 0, 0, 5f, color, EmitterType.EmissionOverDistance) { particleFadeToColor = col };
+        beam = new(Assets.Get(Sprite.Dot), 0.5f, position, angle, 0, 0, 50f, color, EmitterType.EmissionOverDistance) { particleFadeToColor = col };
     }
     public override void AI()
     {
@@ -114,7 +114,8 @@ public class AssassinShot : Projectile
         beam.Update();
         if (nearestEnemy.Count > 0)
         {
-            EntityManager.Collide(this, nearestEnemy[0]);
+            nearestEnemy[0].Collide(damage);
+            Collide(1, false);
         }
     }
 }
@@ -300,7 +301,7 @@ public class FlameBolt : Projectile
             {
                 piercingCooldown = 0.05f;
                 nearestEnemy.Collide(damage);
-                nearestEnemy.ApplyStatus(new Fire(2));
+                nearestEnemy.StatusHolder.ApplyStatus(new Fire(2));
             }
         }
     }

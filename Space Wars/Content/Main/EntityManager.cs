@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UILib.Content.Main;
 using Space_Wars.Content.Main.Story;
+using static Assimp.Metadata;
 
 namespace Space_Wars.Content.Main;
 
@@ -54,7 +55,8 @@ public class EntityManager
             new Planet(new Vector2(400, 0), Planet.GetOrbitalVelocity(new Vector2(400, 0), Vector2.Zero, 5000), 240, 1f, false, Color.Cyan),
             new Planet(new Vector2(-600, 0), -Planet.GetOrbitalVelocity(new Vector2(-600, 0), Vector2.Zero, 5000) * 1.2f, 120, 0.6f, false, Color.Yellow), ],
         [new EntityCondition(new EntityConstructor(Enemy.NewExcursionBoss, new Vector2(0, -6*50), Vector2.Zero, 0), [ Condition.Kill ])],
-        "Showdown", "Defeat the advanced drone prototype, Excursion. Be warned: It may call for reinforcements.", 1.1f, new Vector2(0, 1), Mission.TierOne(), null, true) { playerProgression = 2 },
+        "Showdown", "Defeat the advanced drone prototype, Excursion. Be warned: It may call for reinforcements.", 1f, new Vector2(0, 1), Mission.TierOne(), null, true) 
+        { playerProgression = 2, isAggressive = true },
 
         new Mission([], [new EntityCondition(new EntityConstructor(Enemy.NewWarpGate, Vector2.Zero, Vector2.Zero, 0), [ Condition.CustomIncomplete ])],
         "Warp Gate", "Warp to the next mission once you are done here", -1, new Vector2(0, 500), Mission.TierOne()) { music = false },
@@ -454,30 +456,9 @@ public class EntityManager
         }
         foreach (var entity in entities)
         {
-            if (_type != (entity.isFriendly ? 1 : -1) && _type != 0)
-            {
-                continue;
-            }
-            Vector2 relativePos = entity.position - _pos;
-            float closestLength = (relativePos.X * dir.X + relativePos.Y * dir.Y);
-            float closestDistance = Vector2.Distance((dir * closestLength + _pos), entity.position);
-            if (closestLength > 0 && closestLength < maxDist && closestDistance < entity.ColliderRadius)
-            {
-                if (_getAll)
-                {
-                    list.Add(entity);
-                }
-                else
-                {
-                    float discriminant = MathF.Sqrt(entity.ColliderRadius * entity.ColliderRadius - closestDistance * closestDistance);
-                    if (dist > closestLength - discriminant) 
-                    {
-                        dist = closestLength - discriminant;
-                        nearestEnemy = entity;
-                    }
-                }
-            }
+            CalculateIntersection(entity);
         }
+        CalculateIntersection(Engine.SaveGame.Player);
         if (maxDist > dist)
         {
             maxDist = dist;
@@ -488,7 +469,32 @@ public class EntityManager
         }
         _end = _pos + dir * maxDist;
         return list;
-
+        void CalculateIntersection(Entity _entity)
+        {
+            if (_type != (_entity.isFriendly ? 1 : -1) && _type != 0)
+            {
+                return;
+            }
+            Vector2 relativePos = _entity.position - _pos;
+            float closestLength = (relativePos.X * dir.X + relativePos.Y * dir.Y);
+            float closestDistance = Vector2.Distance((dir * closestLength + _pos), _entity.position);
+            if (closestLength > 0 && closestLength < maxDist && closestDistance < _entity.ColliderRadius)
+            {
+                if (_getAll)
+                {
+                    list.Add(_entity);
+                }
+                else
+                {
+                    float discriminant = MathF.Sqrt(_entity.ColliderRadius * _entity.ColliderRadius - closestDistance * closestDistance);
+                    if (dist > closestLength - discriminant)
+                    {
+                        dist = closestLength - discriminant;
+                        nearestEnemy = _entity;
+                    }
+                }
+            }
+        }
     }
     private static Cutscene IntroCutscene()
     {

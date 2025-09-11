@@ -78,9 +78,10 @@ public static class UI
     public static Button SaveButton { get; } = new Button(new Vector2(0, -60), Assets.Get(Sprite.WideButton), Assets.TextFont, "Save & Exit", Color.LightBlue);
 
     //Fuse Menu
-    public static Decal FuseCounter { get; } = new Decal(new Vector2(-20, -10), Assets.TextFont, "0", Color.Yellow, 10);
+    public static Decal FuseCounter { get; } = new Decal(new Vector2(-20, -25), Assets.TextFont, "0", Color.Yellow, 10);
     public static Button[,] Fuses { get; } = new Button[4, 5];
     public static List<Decal> ModuleIcons { get; } = [];
+    public static Decal FragilityTextbox { get; } = new Decal(new Vector2(0, -55), Assets.TextFont, "Fuse Fragility: Med", Color.Yellow, 6);
 
     //Pickup Drone Menu
     public static Button LaunchButton { get; } = new Button(new Vector2(-20, 0), Assets.Get(Sprite.Button), Assets.TextFont, "Leave", Color.LightBlue);
@@ -353,6 +354,8 @@ public static class UI
             ModuleIcons.Add(decal);
             FuseMenu.AddWidget(decal);
         }
+        FuseMenu.AddWidget(FragilityTextbox);
+
         UpgradeMenu.AddWidget(TraderChat, 0);
         UpgradeMenu.AddWidget(LidarUpgrade as IFunctional, 1);
         UpgradeMenu.AddWidget(RadarUpgrade as IFunctional, 1);
