@@ -19,6 +19,7 @@ public abstract class Status
         Bomb,
         Fire,
         Healing,
+        Berserk,
     }
 }
 public class StatusHolder
@@ -169,5 +170,53 @@ public class Healing(float _duration) : Status
     public override void Reset()
     {
         duration += initialDuration;
+    }
+}
+public class Berserk : Status
+{
+    private bool bonus = false;
+    private float rageEffect = 0.01f;
+    float timeLeft = 10;
+
+    public override StatusType Type => StatusType.Berserk;
+
+    public override void Update(Entity _parent)
+    {
+        if (bonus)
+        {
+            _parent.LowerCooldown();
+        }
+        bonus = !bonus;
+        if (rageEffect > 0)
+        {
+            rageEffect -= Engine.DeltaSeconds;
+        }
+        else
+        {
+            rageEffect = 0.01f;
+            ParticleManager.Add(new Particle(Assets.Get(Sprite.Circle), 0.5f + Engine.Random.NextSingle() / 10, _parent.position,
+                _parent.velocity + new Vector2(Engine.OneToNegOne(), Engine.OneToNegOne()), 0, 0, Color.Red, Color.Transparent));
+        }
+        if (timeLeft > 0)
+        {
+            timeLeft -= Engine.DeltaSeconds;
+        }
+        else
+        {
+            IsExpired = true;
+        }
+    }
+    public override void Reset()
+    {
+        timeLeft = 10;
+        bonus = true;
+    }
+    public override int SensingChange() 
+    { 
+        return -1; 
+    }
+    public override int StealthChange()
+    {
+        return -1;
     }
 }

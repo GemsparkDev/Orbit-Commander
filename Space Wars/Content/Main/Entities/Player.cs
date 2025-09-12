@@ -115,8 +115,7 @@ public class Player : Entity
         EventHandler.SetFuseModuleDecals(textures);
         EventHandler.UpdateFuseUI(moduleFuses, spareFuses);
         shieldEffect = new(Assets.Get(Sprite.Dot), position, 10, Color.Violet) { particleAngularVelocity = 0.1f };
-        //ApplyStatus(new Bomb());
-        StatusHolder.ApplyStatus(new Fire(10));
+        StatusHolder.ApplyStatus(new Berserk());
     }
     public override void Update()
     {
@@ -286,13 +285,22 @@ public class Player : Entity
                 dockedEntity = null;
             }
         }
+        LowerCooldown();
+        if (Progression < 0)
+        {
+            isEngineActive = false;
+        }
+        gunAngle.position = position;
+    }
+    public override void LowerCooldown()
+    {
         for (int i = 0; i < modules.Count; i++)
         {
             var module = modules[(ModuleType)i];
             //Square root of the ratio reduces balancing impact with an additional fuse (especially with the gun dps)
             //Note: Do not have any active abilities that are based on the cooldown, as the player could remove all fuses and get infinite of the ability
-            float fuseRatio = MathF.Sqrt((float)CountFuses((ModuleType)i)/3);
-            if(fuseRatio - 1 > float.Epsilon)
+            float fuseRatio = MathF.Sqrt((float)CountFuses((ModuleType)i) / 3);
+            if (fuseRatio - 1 > float.Epsilon)
             {
                 //Bonus for 4 fuses
                 module.UpdateCooldown();
@@ -304,11 +312,6 @@ public class Player : Entity
                 module.UpdateCooldown();
             }
         }
-        if (Progression < 0)
-        {
-            isEngineActive = false;
-        }
-        gunAngle.position = position;
     }
     public void RestrictedActions()
     {
@@ -1059,7 +1062,7 @@ public class Player : Entity
             return;
         }
         Vector2 offset = Engine.ToUnitVector(gunAngle.angle + MathF.PI / 2) * Engine.OneToNegOne() * 3;
-        Projectile shot = new FlameBolt(position + offset * 2, IdealSpeedWithVelocity(12) + offset, isFriendly, 1, 2, 0.1f);
+        Projectile shot = new FlameBolt(position - offset * 5, IdealSpeedWithVelocity(12) + offset, isFriendly, 1, 2, 0.1f);
         Engine.EntityManager.Add(shot);
         SoundManager.PlaySound(Assets.Get(Sound.LMGFire), position);
         Engine.ShakeScreen(0.02f);

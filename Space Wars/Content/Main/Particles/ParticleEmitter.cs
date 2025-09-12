@@ -27,9 +27,10 @@ namespace Space_Wars.Content.Main.Particles
         public float particleAngularVelocity = 0;
         public float speedOfEmission;
         public bool isEmitterActive = true;
+        public bool particlesExperienceGravity = false;
         public float probability = 1;
         public EmitterType EmitterType { get; }
-        float cooldown = 1;
+        float cooldown = 0;
         private Action emitterFunction;
         public ParticleEmitter(Texture2D _particleTexture, float _particleTimeAlive, Vector2 _position, float _sprayAngle, float _sprayCone, float _particleVelocity, float _speedOfEmission, Color _particleColor, EmitterType _emitterType)
         {
@@ -40,7 +41,6 @@ namespace Space_Wars.Content.Main.Particles
             sprayCone = _sprayCone;
             particleVelocity = _particleVelocity;
             speedOfEmission = _speedOfEmission;
-            cooldown = 1/_speedOfEmission;
             particleColor = _particleColor;
             particleFadeToColor = particleColor;
             EmitterType = _emitterType;
@@ -99,7 +99,8 @@ namespace Space_Wars.Content.Main.Particles
                     randomAngle = Engine.Random.NextSingle() * sprayCone;
                     particleAngle = randomAngle - sprayCone / 2 + sprayAngle;
                     normalVector = Engine.ToUnitVector(particleAngle);
-                    Particle particle = new(particleTexture, particleTimeAlive, position - normalVector * i / speedOfEmission * particleVelocity, normalVector * particleVelocity + offsetVelocity, particleAngle, particleAngularVelocity, particleColor, particleFadeToColor);
+                    Particle particle = new(particleTexture, particleTimeAlive, position - normalVector * i / speedOfEmission * particleVelocity, normalVector * particleVelocity + offsetVelocity, 
+                        particleAngle, particleAngularVelocity, particleColor, particleFadeToColor) { experienceGravity = particlesExperienceGravity};
                     ParticleManager.Add(particle);
                 }
                 cooldown = 1/speedOfEmission;
@@ -122,8 +123,8 @@ namespace Space_Wars.Content.Main.Particles
             for (cachedDistance += positionDifference.Length(); cachedDistance > increment; cachedDistance -= increment)
             {
                 randomAngle = Engine.Random.NextSingle() * sprayCone;
-                ParticleManager.Add(new Particle(particleTexture, particleTimeAlive, position - normalVector * (cachedDistance - increment),
-                normalVector * particleVelocity + offsetVelocity, randomAngle - sprayCone / 2 + sprayAngle - Engine.ToAngle(positionDifference), particleAngularVelocity, particleColor, particleFadeToColor));
+                ParticleManager.Add(new Particle(particleTexture, particleTimeAlive, position - normalVector * (cachedDistance - increment), normalVector * particleVelocity + offsetVelocity,
+                    randomAngle - sprayCone / 2 + sprayAngle - Engine.ToAngle(positionDifference), particleAngularVelocity, particleColor, particleFadeToColor) { experienceGravity = particlesExperienceGravity });
             }
         }
         private void DrawCircle()
@@ -151,7 +152,7 @@ namespace Space_Wars.Content.Main.Particles
             void DrawParticle(float angle)
             {
                 normalVector = Engine.ToUnitVector(angle + sprayAngle) * particleVelocity * particleTimeAlive;
-                ParticleManager.Add(new Particle(particleTexture, position + normalVector + offsetVelocity, angle, particleColor));
+                ParticleManager.Add(new Particle(particleTexture, position + normalVector + offsetVelocity, angle, particleColor) { experienceGravity = particlesExperienceGravity });
             }
             sprayAngle += particleAngularVelocity * Engine.DeltaSeconds * 60;
         }
