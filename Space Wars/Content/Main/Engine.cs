@@ -24,7 +24,6 @@ public class Engine : Game
     public static SaveGame SaveGame { get; private set; }
     public static Camera Camera { get; private set; }
     public static Engine Self { get; private set; }
-    public static Random Random { get; } = new();
     public static Texture2D Line { get; private set; }
     public static Vector2 ScreenSize => new(1920, 1080); //Render target size
     public static Vector2 BackBuffer { get; private set; } //Monitor size
@@ -194,35 +193,11 @@ public class Engine : Game
     {
         ScreenShakeFactor = Math.Min(ScreenShakeFactor + _val * _val / (ScreenShakeFactor + _val), 1);
     }
-    public static Vector2 ToUnitVector(float _angle)
-    {
-        return new Vector2(MathF.Sin(_angle), -MathF.Cos(_angle));
-    }
-    public static float Lerp(float _valueOne, float _valueTwo, float _length)
-    {
-        return _valueOne * (1 - _length) + _valueTwo * _length;
-    }
-    public static float ToAngle(Vector2 _direction)
-    {
-        //Rotated 90 degrees due to asset rotation
-        return MathF.Atan2(_direction.X, -_direction.Y);
-    }
-    public static float OneToNegOne()
-    {
-        return Random.NextSingle() * 2 - 1f;
-    }
-    public static Vector2 RotateVector2(Vector2 v, float a)
-    {
-        float cos = MathF.Cos(a);
-        float sin = MathF.Sin(a);
-        return new Vector2(v.X * cos - v.Y * sin, v.X * sin + v.Y * cos);
-    }
     public static void DrawFilledLine(SpriteBatch _spriteBatch, Vector2 _position, Rectangle _sourceRectangle, float _percentFilled, Color _lowerColor, Color _higherColor)
     {
         _spriteBatch.Draw(Line,_position,_sourceRectangle,_lowerColor);
         _spriteBatch.Draw(Line, _position, new Rectangle(_sourceRectangle.Location, new Point((int)(_sourceRectangle.Width * _percentFilled), _sourceRectangle.Height)), _higherColor);
     }
-
     protected override void Draw(GameTime gameTime)
     {
         Camera.Origin = ScreenSize / 2 - MousePositionOffset;
@@ -279,4 +254,36 @@ public struct Timespan
     public readonly float Minutes => (int)(Duration / 60) % 60;
     public readonly float Hours => (int)(Duration / 3600);
     public readonly string DrawText => $"{Hours:00}:{Minutes:00}:{Seconds:00.00}";
+}
+public static class Util
+{
+    public static Random Random { get; } = new();
+    public static Vector2 ToUnitVector(float _angle)
+    {
+        return new Vector2(MathF.Sin(_angle), -MathF.Cos(_angle));
+    }
+    public static float Lerp(float _valueOne, float _valueTwo, float _length)
+    {
+        return _valueOne * (1 - _length) + _valueTwo * _length;
+    }
+    public static float ToAngle(Vector2 _direction)
+    {
+        //Rotated 90 degrees due to asset rotation
+        return MathF.Atan2(_direction.X, -_direction.Y);
+    }
+    public static float OneToNegOne()
+    {
+        return Random.NextSingle() * 2 - 1f;
+    }
+    //Frame independent exponential decay 
+    public static float FIED(float _decayPerSecond)
+    {
+        return MathF.Pow(_decayPerSecond, Engine.DeltaSeconds);
+    }
+    public static Vector2 RotateVector2(Vector2 v, float a)
+    {
+        float cos = MathF.Cos(a);
+        float sin = MathF.Sin(a);
+        return new Vector2(v.X * cos - v.Y * sin, v.X * sin + v.Y * cos);
+    }
 }

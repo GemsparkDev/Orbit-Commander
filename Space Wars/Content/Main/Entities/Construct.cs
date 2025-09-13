@@ -95,7 +95,7 @@ public class Construct : Pickup
                 attackRadius.Update();
                 break;
             case Constructs.Furnace:
-                Vector2 offset = Engine.RotateVector2(new Vector2(Engine.OneToNegOne(), Engine.OneToNegOne()) * 5, angle);
+                Vector2 offset = Util.RotateVector2(new Vector2(Util.OneToNegOne(), Util.OneToNegOne()) * 5, angle);
                 ParticleManager.Add(new Particle(Assets.Get(Sprite.Dot), 1, position + offset, velocity, angle, 0, Color.Orange, Color.Transparent));
                 var nearestPickup = Engine.EntityManager.NearestItem(this, true);
                 if (nearestPickup == null)
@@ -119,16 +119,17 @@ public class Construct : Pickup
         }
         base.Update();
     }
-    public override void Collide(int _damage, bool _ignoreImmunity = false)
+    public override bool Collide(int _damage, bool _ignoreImmunity = false)
     {
         bool isActive = !isExpired;
-        base.Collide(_damage);
+        bool result = base.Collide(_damage);
         if (Type == Constructs.Bomb && isExpired && isActive)
         {
             var tex = Assets.Get(Sprite.Explosion);
             ParticleManager.Add(new Particle(tex, 3, position, Vector2.Zero, 0, 0, Color.White, Color.Transparent));
             Engine.EntityManager.Explode(100, 100, position);
         }
+        return result;
     }
     public new string Serialize()
     {

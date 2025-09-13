@@ -60,7 +60,7 @@ public class Mission
             Enemy.NewWyvernBoss,
             Enemy.NewSurgeBoss,
         ];
-        currentBoss = Engine.Random.Next(bosses.Count);
+        currentBoss = Util.Random.Next(bosses.Count);
         cutscene = _cutscene;
         if (_escapeVehicle)
         {
@@ -81,7 +81,7 @@ public class Mission
         {
             Engine.SaveGame.Player.Dock();
         }
-        if (Engine.SaveGame.CurrentMissionCompleted && Engine.Random.Next(0, 10000) == 0)
+        if (Engine.SaveGame.CurrentMissionCompleted && Util.Random.Next(0, 10000) == 0)
         {
             foreach (var planet in planets)
             {
@@ -158,7 +158,7 @@ public class Mission
                 waveTimer -= Engine.DeltaSeconds;
                 foreach (var enemy in enemiesSpawned)
                 {
-                    ParticleManager.Add(new Particle(enemy.texture, enemy.position, enemy.angle, new Color(255,127, 0) * (Engine.Random.NextSingle() / 2 + 0.25f)));
+                    ParticleManager.Add(new Particle(enemy.texture, enemy.position, enemy.angle, new Color(255,127, 0) * (Util.Random.NextSingle() / 2 + 0.25f)));
                 }
             }
         }
@@ -215,14 +215,14 @@ public class Mission
                 {
                     newCosts.Add(enemyCreditValues[i].cost);
                 }
-                var enemyCredits = Engine.Random.Next((int)(difficulty), (int)(difficulty * 2));
+                var enemyCredits = Util.Random.Next((int)(difficulty), (int)(difficulty * 2));
                 while (enemyCredits > 0)
                 {
-                    int i = Engine.Random.Next(0, availableEnemies);
-                    if (Engine.Random.Next(0, enemyCreditValues[i].cost / 2) == 0 && newCosts[i] <= enemyCredits)
+                    int i = Util.Random.Next(0, availableEnemies);
+                    if (Util.Random.Next(0, enemyCreditValues[i].cost / 2) == 0 && newCosts[i] <= enemyCredits)
                     {
                         Vector2 pos;
-                        if (squadLeader != null && (count < 2 || Engine.Random.Next(0, 4) != 0))
+                        if (squadLeader != null && (count < 2 || Util.Random.Next(0, 4) != 0))
                         {
                             var offset = Vector2.Normalize(new Vector2(squadLeader.position.X, squadLeader.position.Y));
                             int isOdd = (count % 2 == 0) ? 1 : -1;
@@ -434,10 +434,10 @@ public class Mission
     }
     private Vector2 NewSpawnLocation()
     {
-        float angle = (Engine.Random.NextSingle() - 0.5f) * MathF.Tau;
-        float distanceMultiplier = 1 + (Engine.Random.NextSingle() - 0.5f) / 4;
+        float angle = (Util.Random.NextSingle() - 0.5f) * MathF.Tau;
+        float distanceMultiplier = 1 + (Util.Random.NextSingle() - 0.5f) / 4;
         float distance = (Engine.ScreenSize.X + Engine.ScreenSize.Y) * distanceMultiplier / 3;
-        Vector2 spawnLocation = Engine.ToUnitVector(angle) * distance + Engine.SaveGame.Player.position;
+        Vector2 spawnLocation = Util.ToUnitVector(angle) * distance + Engine.SaveGame.Player.position;
         foreach (var planet in planets)
         {
             if (Vector2.Distance(spawnLocation, planet.position) < planet.radius)

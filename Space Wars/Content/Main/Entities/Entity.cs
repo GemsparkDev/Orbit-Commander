@@ -62,7 +62,7 @@ public abstract class Entity
         collider.offsetVelocity = velocity;
         collider.Update();
     }
-    public abstract void Collide(int _damage, bool _ignoreImmunity = false);
+    public abstract bool Collide(int _damage, bool _ignoreImmunity = false);
     public void ClearAll()
     {
         StatusHolder = new();
@@ -104,7 +104,7 @@ public abstract class Entity
         //Player has superior sensing to stealth -> full detection
         //Player has equal sensing to stealth -> partial detection when nearby
         //Player has inferior sensing to stealth -> no detection
-        if (Engine.SaveGame.Player.SensingAbility == stealthAbility)
+        if (Engine.SaveGame.Player.SensingAbility == StealthAbility)
         {
             float distanceSqr = EntityManager.DistanceSqr(Engine.SaveGame.Player, this);
             if ((distanceSqr > maxDistance * maxDistance))
@@ -116,7 +116,7 @@ public abstract class Entity
                 stealthColor.W = MathF.Sqrt(maxDistance - MathF.Sqrt(distanceSqr)) / MathF.Sqrt(maxDistance);
             }
         }
-        else if (Engine.SaveGame.Player.SensingAbility < stealthAbility)
+        else if (Engine.SaveGame.Player.SensingAbility < StealthAbility)
         {
             stealthColor.W = 0;
         }

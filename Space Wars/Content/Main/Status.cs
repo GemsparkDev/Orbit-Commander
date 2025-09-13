@@ -99,8 +99,8 @@ public class Fire(float _duration) : Status
         else
         {
             fireCooldown = 0.05f;
-            ParticleManager.Add(new Particle(Assets.Get(Sprite.Circle), 0.5f + Engine.Random.NextSingle() / 10, _parent.position, 
-                _parent.velocity + new Vector2(Engine.OneToNegOne() / 3, -Engine.Random.NextSingle() - 0.5f), -0, Engine.OneToNegOne() / 5, Color.Orange, Color.Transparent));
+            ParticleManager.Add(new Particle(Assets.Get(Sprite.Circle), 0.5f + Util.Random.NextSingle() / 10, _parent.position - _parent.velocity, 
+                _parent.velocity + new Vector2(Util.OneToNegOne() / 3, -Util.Random.NextSingle() - 0.5f), 0, Util.OneToNegOne() / 5, Color.Orange, Color.Transparent));
         }
         if (attackCooldown > 0)
         {
@@ -122,7 +122,7 @@ public class Fire(float _duration) : Status
     }
     public override int StealthChange()
     {
-        return -1;
+        return -10;
     }
     public override void Reset()
     {
@@ -146,8 +146,8 @@ public class Healing(float _duration) : Status
         else
         {
             fireCooldown = 0.2f;
-            ParticleManager.Add(new Particle(Assets.Get(Sprite.Circle), 0.5f + Engine.Random.NextSingle() / 10, _parent.position,
-                _parent.velocity + new Vector2(Engine.OneToNegOne() / 3, -Engine.Random.NextSingle() - 0.5f), -0, Engine.OneToNegOne() / 5, Color.Green, Color.Transparent));
+            ParticleManager.Add(new Particle(Assets.Get(Sprite.Circle), 0.5f + Util.Random.NextSingle() / 10, _parent.position,
+                _parent.velocity + new Vector2(Util.OneToNegOne() / 3, -Util.Random.NextSingle() - 0.5f), -0, Util.OneToNegOne() / 5, Color.Green, Color.Transparent));
         }
         if (healCooldown > 0)
         {
@@ -175,8 +175,9 @@ public class Healing(float _duration) : Status
 public class Berserk : Status
 {
     private bool bonus = false;
-    private float rageEffect = 0.01f;
-    float timeLeft = 10;
+    float timeLeft = 30;
+    private ParticleEmitter effect = new ParticleEmitter(Assets.Get(Sprite.Circle), Vector2.Zero, 28.3f, Color.Red * 0.5f) 
+    { particleFadeToColor = Color.Transparent, particleTimeAlive = 0.5f, speedOfEmission = 0.25f };
 
     public override StatusType Type => StatusType.Berserk;
 
@@ -187,16 +188,10 @@ public class Berserk : Status
             _parent.LowerCooldown();
         }
         bonus = !bonus;
-        if (rageEffect > 0)
-        {
-            rageEffect -= Engine.DeltaSeconds;
-        }
-        else
-        {
-            rageEffect = 0.01f;
-            ParticleManager.Add(new Particle(Assets.Get(Sprite.Circle), 0.5f + Engine.Random.NextSingle() / 10, _parent.position,
-                _parent.velocity + new Vector2(Engine.OneToNegOne(), Engine.OneToNegOne()), 0, 0, Color.Red, Color.Transparent));
-        }
+        effect.position = _parent.position;
+        effect.sprayAngle += Engine.DeltaSeconds * 2;
+        effect.offsetVelocity = _parent.velocity;
+        effect.Update();
         if (timeLeft > 0)
         {
             timeLeft -= Engine.DeltaSeconds;

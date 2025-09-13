@@ -165,7 +165,7 @@ public class Garage : GameState
 }
 public class MissionSelect : GameState
 {
-    private float time = Engine.Random.NextSingle() * 1000f;
+    private float time = Util.Random.NextSingle() * 1000f;
     private List<(float distance, List<int> prerequisites, int system)> missions =
     [
         (200, [], 0), (160, [0], 0), (140, [0], 0), (100, [1, 2], 0), (400, [3], 0), (50, [3], 0),
@@ -271,7 +271,7 @@ public class MissionSelect : GameState
             _spriteBatch.Draw(texture, pos, null, Color.White, 0, new Vector2(texture.Width, texture.Height) / 2, UIManager.UIScale, 0, 0);
             for (float j = 0; j <= MathF.Tau * ((float)item.Cost / (float)item.MaxCost) + float.Epsilon; j+= MathF.Tau/(3 * UIManager.UIScale * UIManager.UIScale))
             {
-                _spriteBatch.Draw(Assets.Get(Sprite.Dot), Engine.ToUnitVector(j) * texture.Height / 1.5f * UIManager.UIScale + pos, null, Color.White, j, Assets.DimsOf(Sprite.Dot)/2, UIManager.UIScale, 0, 0);
+                _spriteBatch.Draw(Assets.Get(Sprite.Dot), Util.ToUnitVector(j) * texture.Height / 1.5f * UIManager.UIScale + pos, null, Color.White, j, Assets.DimsOf(Sprite.Dot)/2, UIManager.UIScale, 0, 0);
             }
         }
     }

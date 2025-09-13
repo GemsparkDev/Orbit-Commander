@@ -83,7 +83,7 @@ public class Planet
             {
                 for (int i = 0; i < val * 1.5f; i++)
                 {
-                    ParticleManager.Add(new Particle(Assets.Get(Sprite.Dot), 10, normalVector * (radius + 2) + position, normalVector * val + new Vector2(Engine.OneToNegOne(), Engine.OneToNegOne()) * val / 2, 0, 0, color * 0.75f, Color.Transparent) { experienceGravity = true });
+                    ParticleManager.Add(new Particle(Assets.Get(Sprite.Dot), 10, normalVector * (radius + 2) + position, normalVector * val + new Vector2(Util.OneToNegOne(), Util.OneToNegOne()) * val / 2, 0, 0, color * 0.75f, Color.Transparent) { experienceGravity = true });
                 }
             }
             return Vector2.Zero;

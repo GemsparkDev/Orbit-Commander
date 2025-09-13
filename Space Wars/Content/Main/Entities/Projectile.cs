@@ -30,7 +30,7 @@ public abstract class Projectile : Entity
         base.Update();
     }
     public abstract void AI();
-    public override void Collide(int _damage, bool _ignoreImmunity)
+    public override bool Collide(int _damage, bool _ignoreImmunity = false)
     {
         int particles = random.Next(2, 4);
         for(int i = 0; i < particles; i++)
@@ -42,6 +42,7 @@ public abstract class Projectile : Entity
         //Shaking is too intense with high fire rate weapons
         //Engine.ShakeScreen(100f * (float)damage / ((position - Engine.camera.Position).Length() + 1000f));
         isExpired = true;
+        return true;
     }
 }
 
@@ -87,7 +88,7 @@ public class SpiralShot : Projectile
         position += velocity * Engine.DeltaSeconds * 60;
         angle += angularVelocity * Engine.DeltaSeconds * 60;
         time += Engine.DeltaSeconds;
-        Vector2 posOffset = Engine.ToUnitVector(angle) * MathF.Cos(time * 8) * offset * 4;
+        Vector2 posOffset = Util.ToUnitVector(angle) * MathF.Cos(time * 8) * offset * 4;
         position += new Vector2(posOffset.Y, -posOffset.X);
         EntityManager.Collide(this, Engine.EntityManager.NearestEnemy(this));
     }
@@ -232,9 +233,9 @@ public class GrapplingHook : Projectile
         }
         base.Draw(_spriteBatch);
     }
-    public override void Collide(int _damage, bool _ignoreImmunity)
+    public override bool Collide(int _damage, bool _ignoreImmunity)
     {
-
+        return false;
     }
 }
 public class FlameBolt : Projectile
@@ -261,8 +262,7 @@ public class FlameBolt : Projectile
     public FlameBolt(Vector2 _position, Vector2 _velocity, bool _isFriendly, int _damage, float _timeLeft = 0.7f, float _particleVelocity = 1, int _stealth = 0)
         : base(Assets.Get(Sprite.Circle), _position, _velocity, 0, 0, _isFriendly, _damage, _stealth)
     {
-        float speedOfEmission = (_particleVelocity * _timeLeft) * (_particleVelocity * _timeLeft) * 375;
-        emitter = new ParticleEmitter(Assets.Get(Sprite.Circle), 0.75f, Vector2.Zero, 0, MathF.Tau, _particleVelocity, speedOfEmission, new Color(1f, 1f, 0.25f, 1f), EmitterType.EmissionOverTime)
+        emitter = new ParticleEmitter(Assets.Get(Sprite.Circle), 0.75f, Vector2.Zero, 0, MathF.Tau, _particleVelocity, 750 * _particleVelocity * _particleVelocity * MathF.Sqrt(_timeLeft), new Color(1f, 1f, 0.25f, 1f), EmitterType.EmissionOverTime)
         {
             particleFadeToColor = new Color(1f, 0, 0, 0),
             particlesExperienceGravity = true,
@@ -306,8 +306,10 @@ public class FlameBolt : Projectile
             if (piercingCooldown <= 0 && isFriendly != nearestEnemy.isFriendly && EntityManager.DistanceSqr(this, nearestEnemy) <= combinedRadius * combinedRadius)
             {
                 piercingCooldown = 0.05f;
-                nearestEnemy.Collide(damage);
-                nearestEnemy.StatusHolder.ApplyStatus(new Fire(2));
+                if(nearestEnemy.Collide(damage))
+                {
+                    nearestEnemy.StatusHolder.ApplyStatus(new Fire(2));
+                }
             }
         }
     }
@@ -355,18 +357,18 @@ public class Explosive : Projectile
         }
         if (isExpired)
         {
-            int particles = Engine.Random.Next(15, 25);
+            int particles = Util.Random.Next(15, 25);
             for (int i = 0; i < particles; i++)
             {
-                float angle = Engine.Random.NextSingle() * MathF.PI * 2;
-                Vector2 particleVelocity = new Vector2(MathF.Cos(angle), MathF.Sin(angle)) * (Engine.Random.NextSingle() * 2 + 2);
+                float angle = Util.Random.NextSingle() * MathF.PI * 2;
+                Vector2 particleVelocity = new Vector2(MathF.Cos(angle), MathF.Sin(angle)) * (Util.Random.NextSingle() * 2 + 2);
                 ParticleManager.Add(new Particle(Assets.Get(Sprite.Dot), 0.25f, position, particleVelocity + velocity, angle, 0, Color.Yellow, new Color(255, 0, 0, 0)));
             }
-            particles = Engine.Random.Next(8, 16);
+            particles = Util.Random.Next(8, 16);
             for (int i = 0; i < particles; i++)
             {
-                float angle = Engine.Random.NextSingle() * MathF.PI * 2;
-                Vector2 particleVelocity = new Vector2(MathF.Cos(angle), MathF.Sin(angle)) * (Engine.Random.NextSingle() * 2 + 2);
+                float angle = Util.Random.NextSingle() * MathF.PI * 2;
+                Vector2 particleVelocity = new Vector2(MathF.Cos(angle), MathF.Sin(angle)) * (Util.Random.NextSingle() * 2 + 2);
                 ParticleManager.Add(new Particle(Assets.Get(Sprite.Circle), 0.25f, position, particleVelocity + velocity, angle, 0, Color.DarkSlateGray, Color.Transparent));
             }
             Engine.EntityManager.Explode(damage, explosionRadius, position);
@@ -394,8 +396,8 @@ public class Spewer : Projectile
         }
         else
         {
-            float angle = Engine.Random.NextSingle() * MathF.Tau;
-            Vector2 dir = Engine.ToUnitVector(angle);
+            float angle = Util.Random.NextSingle() * MathF.Tau;
+            Vector2 dir = Util.ToUnitVector(angle);
             Engine.EntityManager.Add(new PulseShot(position, velocity + dir * 6, angle, 0, isFriendly, damage, true));
             cooldown = 0.1f;
             SoundManager.PlaySound(Assets.Get(Sound.LMGFire), position);

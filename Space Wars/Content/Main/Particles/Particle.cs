@@ -54,10 +54,10 @@ namespace Space_Wars.Content.Main.Particles
             }
             float timeScalar = Math.Clamp(timeLeft / originalTimeLeft, 0, 1);
             renderColor = new Color(
-            (byte)Engine.Lerp(color.R, fadeToColor.R, 1 - timeScalar),
-            (byte)Engine.Lerp(color.G, fadeToColor.G, 1 - timeScalar),
-            (byte)Engine.Lerp(color.B, fadeToColor.B, 1 - timeScalar),
-            (byte)Engine.Lerp(color.A, fadeToColor.A, 1 - timeScalar)
+            (byte)Util.Lerp(color.R, fadeToColor.R, 1 - timeScalar),
+            (byte)Util.Lerp(color.G, fadeToColor.G, 1 - timeScalar),
+            (byte)Util.Lerp(color.B, fadeToColor.B, 1 - timeScalar),
+            (byte)Util.Lerp(color.A, fadeToColor.A, 1 - timeScalar)
             );
             if (timeLeft <= 0)
             {

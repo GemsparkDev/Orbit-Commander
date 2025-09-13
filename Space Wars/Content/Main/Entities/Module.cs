@@ -56,16 +56,16 @@ public class Module : Pickup, IData
     {
         (itemData as ModuleData).Action();
     }
-    public override void Collide(int _damage, bool _ignoreImmunity = false)
+    public override bool Collide(int _damage, bool _ignoreImmunity = false)
     {
         if (_damage <= 0)
         {
-            return;
+            return false;
         }
         if (invincibilityCooldown > 0 && !_ignoreImmunity)
         {
             invincibilityCooldown = 0;
-            return;
+            return false;
         }
         ParticleManager.Add(new Particle(null, 1, position + new Vector2(0, -1), new Vector2(0, -1.5f), 0, 0, Color.Orange, new Color(255, 0, 0, 0)) { drawText = $"Integrity: {Health}" });
         SoundManager.PlaySound(Assets.Get(Sound.Death), position);
@@ -82,6 +82,7 @@ public class Module : Pickup, IData
         {
             isExpired = true;
         }
+        return true;
     }
     public new string Serialize()
     {

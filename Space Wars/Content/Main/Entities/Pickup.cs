@@ -61,7 +61,7 @@ public class Pickup : Entity, IData
         else
         {
             Vector2 playerVelocity = Player.velocity;
-            Vector2 leashPosition = Player.position - Engine.ToUnitVector(Player.angle) * 25;
+            Vector2 leashPosition = Player.position - Util.ToUnitVector(Player.angle) * 25;
             float distance = EntityManager.DistanceSqr(position, leashPosition);
             if (distance > 16)
             {
@@ -89,16 +89,16 @@ public class Pickup : Entity, IData
         }
         base.Update();
     }
-    public override void Collide(int _damage, bool _ignoreImmunity = false)
+    public override bool Collide(int _damage, bool _ignoreImmunity = false)
     {
         if (_damage <= 0)
         {
-            return;
+            return false;
         }
         if (invincibilityCooldown > 0 && !_ignoreImmunity)
         {
             invincibilityCooldown = 0;
-            return;
+            return false;
         }
         hitsLeft--;
         if (_damage >= 10)
@@ -118,6 +118,7 @@ public class Pickup : Entity, IData
         SoundManager.PlaySound(Assets.Get(Sound.Death), position);
         Engine.ShakeScreen(10 / ((position - Engine.Camera.Position).Length() + 150));
         ParticleManager.Add(new Particle(null, 1, position + new Vector2(0, -1), new Vector2(0, -1.5f), 0, 0, Color.Orange, new Color(255, 0, 0, 0)) { drawText = $"Integrity: {hitsLeft}" });
+        return true;
     }
     public string SerializeAttributes()
     {

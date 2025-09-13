@@ -170,8 +170,8 @@ public class EntityManager
             Engine.SaveGame.CurrentMission.CalculateTrajectory(Player.position, Player.velocity, Player.ColliderRadius);
         }
         Engine.MousePositionOffset = new Vector2(Mouse.GetState().X, Mouse.GetState().Y) / 10 - Engine.BackBuffer / 20
-        + Engine.ScreenShakeFactor * Engine.ScreenShakeFactor * new Vector2(Engine.Random.NextSingle() - 0.5f, Engine.Random.NextSingle() - 0.5f) * 50;
-        Engine.Camera.Rotation = Engine.ScreenShakeFactor * Engine.ScreenShakeFactor * (Engine.Random.NextSingle() - 0.5f) * 0.15f;
+        + Engine.ScreenShakeFactor * Engine.ScreenShakeFactor * new Vector2(Util.Random.NextSingle() - 0.5f, Util.Random.NextSingle() - 0.5f) * 50;
+        Engine.Camera.Rotation = Engine.ScreenShakeFactor * Engine.ScreenShakeFactor * (Util.Random.NextSingle() - 0.5f) * 0.15f;
         //If the player is further from the camera, put more weight on the player
         //Tanh prevents frac from going above 1
         float frac = MathF.Tanh(Vector2.Distance(Player.position, Engine.Camera.Position) / 750);
@@ -254,7 +254,7 @@ public class EntityManager
     {
         foreach (var pickup in entities)
         {
-            if (pickup is Pickup && Engine.Random.NextSingle() < 0.6f)
+            if (pickup is Pickup && Util.Random.NextSingle() < 0.6f)
             {
                 pickup.Collide(1);
             }
@@ -435,7 +435,7 @@ public class EntityManager
     public static bool RandomWithKarma(float _rarity)
     {
         float karmaBonus = (_rarity - 1) / (_rarity + _rarity * MathF.Exp(-10 * currentKarma + 12.5f));
-        if (Engine.Random.NextSingle() < (1 / _rarity) + karmaBonus)
+        if (Util.Random.NextSingle() < (1 / _rarity) + karmaBonus)
         {
             currentKarma = 0;
             return true;
@@ -506,7 +506,7 @@ public class EntityManager
         sound.IsLooped = true;
         var col = Color.Coral;
         col.A = 0;
-        var emitter = new ParticleEmitter(Assets.Get(Sprite.Circle), 1, new Vector2(1500, -2000), 165 + 45, 360, 2, 200, Color.Gray, EmitterType.EmissionOverTime) { particleFadeToColor = col, particleAngularVelocity = Engine.Random.NextSingle() - 0.5f };
+        var emitter = new ParticleEmitter(Assets.Get(Sprite.Circle), 1, new Vector2(1500, -2000), 165 + 45, 360, 2, 200, Color.Gray, EmitterType.EmissionOverTime) { particleFadeToColor = col, particleAngularVelocity = Util.Random.NextSingle() - 0.5f };
         actors.Add(mothership);
         actors.Add(bullet);
         actors.Add(enemy);
