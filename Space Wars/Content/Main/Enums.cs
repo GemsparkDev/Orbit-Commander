@@ -96,6 +96,8 @@ public enum Sprite
     SurgeChild,
     SurgeBoss,
     Engineer,
+    Torch,
+    TorchReal,
 
     MetalScrap,
     RealMetalScrap,
