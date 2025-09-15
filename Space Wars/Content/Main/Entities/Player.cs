@@ -27,32 +27,28 @@ public class Player : Entity
     };
     public Dictionary<ModuleType, Module> modules = new()
     {
-        { ModuleType.Hull, new Module(Modules.Shield) },
-        { ModuleType.Guns, new Module(Modules.Torch) },
-        { ModuleType.Engines, new Module(Modules.Plasma) },
-        { ModuleType.Sensors, new Module(Modules.Sensors) },
-        { ModuleType.Core, new Module(Modules.Dash) }
+        { ModuleType.Hull, new Shield() },
+        { ModuleType.Guns, new Torch() },
+        { ModuleType.Engines, new PlasmaEngine() },
+        { ModuleType.Sensors, new Sensors() },
+        { ModuleType.Core, new Dash() }
     };
 
     public DockableComponent dockedEntity;
     public List<Pickup> leashedMaterials = [];
-    private Entity abilityEntity;
-    private Entity gunAngle;
-    private ParticleEmitter engineParticles = new(Assets.Get(Sprite.Circle), 0.15f, Vector2.Zero, 0, MathF.PI/4, 2, 450f, Color.Cyan, EmitterType.EmissionOverTime) { isEmitterActive = false, particleFadeToColor = new Color(72, 61, 139, 0) };
     private ParticleEmitter smokeParticles = new(Assets.Get(Sprite.Circle), 1f, Vector2.Zero, 0, MathF.PI/4, 1, 0.5f, Color.Gray, EmitterType.EmissionOverTime) { isEmitterActive = false, particleFadeToColor = new Color(169, 169, 169, 0) };
     private ParticleEmitter shieldEffect;
     private SoundEffectInstance engineSounds;
-    private float invincibilityCooldown = 0;
-    private float cachedDamage = 0;
+    public float invincibilityCooldown = 0;
+    public float cachedDamage = 0;
     private float restartCooldown = 0;
     private float abilityMaxCooldown = 1f;
     private bool isRestarting = false;
     public bool isEngineActive = false;
     public bool canGatherResources = false;
     private Vector2 targetVector;
-    private Vector2 direction;
+    public Vector2 direction;
     private float time = 0;
-    private float engineTime = 0;
     public int Progression { get; set; } = 3;
     public override int SensingAbility
     {
@@ -86,10 +82,10 @@ public class Player : Entity
                     stealth -= 1;
                 }
             }
-            if (modules[ModuleType.Guns].cooldown > 0)
-            {
-                stealth -= 1;
-            }
+            //if (modules[ModuleType.Guns].cooldown > 0)
+            //{
+            //    stealth -= 1;
+            //}
             if (modules[ModuleType.Hull].Type == Modules.Stealth)
             {
                 stealth += 1;
@@ -101,10 +97,8 @@ public class Player : Entity
     public Player(Vector2 _position, Vector2 _velocity, float _angle, float _angularVelocity)
         : base(Assets.Get(Sprite.Player), _position, _velocity, _angle, _angularVelocity, 5, true)
     {
-        gunAngle = Enemy.NewDummyEnemy(position, true);
         color = new Color(0, 255, 0);
         smokeParticles.isEmitterActive = false;
-        engineParticles.isEmitterActive = false;
         engineSounds = Assets.Get(Sound.FireEngines).CreateInstance();
         engineSounds.IsLooped = true;
         var textures = new Texture2D[modules.Count];
@@ -135,7 +129,6 @@ public class Player : Entity
             SoundManager.MusicVolume = UI.MusicSlider.sliderInterval;
             return;
         }
-        engineParticles.position = position - new Vector2(MathF.Sin(angle), -MathF.Cos(angle)) * 8;
         smokeParticles.position = position;
         leashedMaterials = leashedMaterials.Where(x => !x.isExpired).ToList();
         float restart = 1.5f;
@@ -201,7 +194,6 @@ public class Player : Entity
         }
         if (cachedDamage > 0)
         {
-            modules[ModuleType.Hull].ModuleFunction();
             for (int i = 0; i < cachedDamage; i++)
             {
                 int randomNumber = Util.Random.Next(1, 4);
@@ -227,8 +219,10 @@ public class Player : Entity
         Vector3 colorVec;
         float val = (MathF.Sin(time) + 1f) / 2;
         shieldEffect.position = position;
-        if (modules[ModuleType.Hull].Type == Modules.Shield && modules[ModuleType.Hull].cooldown <= 0)
+        //if (modules[ModuleType.Hull].Type == Modules.Shield && modules[ModuleType.Hull].cooldown <= 0)
+        if(false)
         {
+            throw new NotImplementedException();
             UI.PlayerHealth.enabledColor = Color.Violet;
             if (dockedEntity == null) 
             {
@@ -245,7 +239,8 @@ public class Player : Entity
         //Only displays if the player has abilities unlocked
         if (Progression > 1) 
         {
-            UI.PlayerAbility.SetInterval(1 - (modules[ModuleType.Core].cooldown / abilityMaxCooldown), 1);
+            //UI.PlayerAbility.SetInterval(1 - (modules[ModuleType.Core].cooldown / abilityMaxCooldown), 1);
+            //TODO: Fix me
             colorVec = new Vector3(0, 1, 1) * val + new Vector3(0.2f, 1, 0.8f) * (1f - val);
             UI.PlayerAbility.enabledColor = new Color(colorVec.X, colorVec.Y, colorVec.Z);
             UI.PlayerAbility.disabledColor = Color.DarkGray;
@@ -290,7 +285,6 @@ public class Player : Entity
         {
             isEngineActive = false;
         }
-        gunAngle.position = position;
     }
     public override void LowerCooldown()
     {
@@ -303,13 +297,13 @@ public class Player : Entity
             if (fuseRatio - 1 > float.Epsilon)
             {
                 //Bonus for 4 fuses
-                module.UpdateCooldown();
+                module.OnUpdate();
                 //Allows for easy random check in all cases
                 fuseRatio -= 1f;
             }
             if (Util.Random.NextSingle() < fuseRatio)
             {
-                module.UpdateCooldown();
+                module.OnUpdate();
             }
         }
     }
@@ -332,7 +326,6 @@ public class Player : Entity
                 }
                 SoundManager.PlayGlobalSound(sound);
             }
-            modules[ModuleType.Sensors].ModuleFunction();
             if (dockedEntity == null)
             {
                 if (Progression > 2)
@@ -359,7 +352,7 @@ public class Player : Entity
                         for (float i = 0; i < constructs.Count; i++)
                         {
                             Vector2 dir = Util.ToUnitVector(angle);
-                            Vector2 mouseDir = Util.ToUnitVector(gunAngle.angle);
+                            Vector2 mouseDir = targetVector;
                             if (dir.X * mouseDir.X + dir.Y * mouseDir.Y > (0.2f * constructs.Count) && dist > 500)
                             {
                                 color = Color.White;
@@ -404,7 +397,7 @@ public class Player : Entity
                         for (int i = 0; i < types.Count; i++)
                         {
                             Vector2 dir = Util.ToUnitVector(angle);
-                            Vector2 mouseDir = Util.ToUnitVector(gunAngle.angle);
+                            Vector2 mouseDir = targetVector;
                             if (dir.X * mouseDir.X + dir.Y * mouseDir.Y > (0.2f * types.Count) && dist > 500)
                             {
                                 switch (types[i])
@@ -451,20 +444,18 @@ public class Player : Entity
                 //Ensures that target vector performs identically in all resolutions
                 Vector2 ratio = Engine.ScreenSize / Engine.BackBuffer;
                 targetVector = Vector2.Normalize(new Vector2(Input.NewMouseState.X * ratio.X, Input.NewMouseState.Y * ratio.Y) - Engine.ScreenSize / 2 - position + Engine.Camera.Position + Engine.MousePositionOffset);
-                gunAngle.angle = MathF.Atan2(targetVector.X, -targetVector.Y);
                 if (!UIManager.LockMouseInput && Input.NewMouseState.RightButton == ButtonState.Pressed)
                 {
-                    Vector2 dir = Util.ToUnitVector(gunAngle.angle);
-                    List<Entity> miningEnemies = Engine.EntityManager.Hitscan(position, dir, 120, false, out Vector2 _end);
+                    List<Entity> miningEnemies = Engine.EntityManager.Hitscan(position, targetVector, 120, false, out Vector2 _end);
                     if (miningEnemies.Count > 0 && miningEnemies[0] as Enemy != null)
                     {
                         (miningEnemies[0] as Enemy).Mine();
                     }
-                    for (float i = 0; i < (_end - position - dir * 8).Length() / 2; i++)
+                    for (float i = 0; i < (_end - position - targetVector * 8).Length() / 2; i++)
                     {
                         float lerp = i / 60;
                         Vector3 color = new Vector3(1, 1, 0) * (1 - lerp) + new Vector3(1, 0, 0) * (lerp);
-                        ParticleManager.Add(new Particle(Assets.Get(Sprite.Dot), dir * (i + 4f) * 2 + position + new Vector2(dir.Y, -dir.X) * MathF.Sin(i / 2 - time * 5) / 2, gunAngle.angle, new Color(color.X, color.Y, color.Z) * (1 - (lerp))));
+                        ParticleManager.Add(new Particle(Assets.Get(Sprite.Dot), targetVector * (i + 4f) * 2 + position + new Vector2(targetVector.Y, -targetVector.X) * MathF.Sin(i / 2 - time * 5) / 2, Util.ToAngle(targetVector), new Color(color.X, color.Y, color.Z) * (1 - (lerp))));
                     }
                     if (Input.OldMouseState.RightButton == ButtonState.Released)
                     {
@@ -483,7 +474,10 @@ public class Player : Entity
                 }
                 if (Progression > 1 && Input.OldState.IsKeyUp(Keys.Q) && Input.NewState.IsKeyDown(Keys.Q))
                 {
-                    modules[ModuleType.Core].ModuleFunction();
+                    foreach (var module in modules)
+                    {
+                        module.Value.OnAbility(targetVector);
+                    }
                 }
                 Keys[] pressedKey = Input.NewState.GetPressedKeys();
                 direction = Vector2.Zero;
@@ -512,23 +506,27 @@ public class Player : Entity
                             break;
                     }
                 }
-                modules[ModuleType.Engines].ModuleFunction();
-                engineParticles.offsetVelocity = velocity;
+                foreach (var module in modules)
+                {
+                    module.Value.OnEngine();
+                }
                 angle = angle * 0.5f + MathF.Atan2(direction.X, -direction.Y) * 0.5f;
                 if (Input.NewMouseState.LeftButton == ButtonState.Pressed && !UIManager.LockMouseInput)
                 {
                     if (!isEngineActive)
                     {
-                        angle = angle * 0.5f + gunAngle.angle * 0.5f;
+                        angle = angle * 0.5f + Util.ToAngle(targetVector) * 0.5f;
                     }
-                    modules[ModuleType.Guns].ModuleFunction();
+                    foreach (var module in modules)
+                    {
+                        module.Value.OnShoot(targetVector);
+                    }
                 }
             }
             if (Input.OldState.IsKeyUp(Keys.Space) && Input.NewState.IsKeyDown(Keys.Space))
             {
                 Dock();
             }
-            engineParticles.Update();
             smokeParticles.offsetVelocity = velocity;
             if (Util.Random.Next(0, 2) == 0)
             {
@@ -547,13 +545,12 @@ public class Player : Entity
                 UI.PlayerMenu.enabled = !UI.PlayerMenu.enabled;
             }
         }
-        engineParticles.isEmitterActive = isEngineActive;
         if (isEngineActive)
         {
             SoundManager.PlayLoopedSound(engineSounds);
         }
     }
-    private Vector2 IdealSpeedWithVelocity(float _speed)
+    public Vector2 IdealSpeedWithVelocity(float _speed)
     {
         //Derivation
         //Assume target vector is normalized and is ideal bullet velocity
@@ -591,10 +588,6 @@ public class Player : Entity
                 {
                     dockedEntity = dockableEntity;
                     isEngineActive = false;
-                    if (abilityEntity != null)
-                    {
-                        abilityEntity.isExpired = true;
-                    }
                 }
             }
         }
@@ -611,6 +604,10 @@ public class Player : Entity
             //Note: applied statuses will NOT apply to the docked entity
             dockedEntity.Collide(_damage);
             return false;
+        }
+        foreach (var module in modules)
+        {
+            _damage = module.Value.OnCollide(_damage);
         }
         if (_damage > 0 && (invincibilityCooldown <= 0 || _ignoreImmunity))
         {
@@ -714,476 +711,16 @@ public class Player : Entity
         }
         return count;
     }
-    public void Hull()
+    private int ReduceDamage(int _damage, int _reduction, float _resistance, float _reactivity)
     {
-        cachedDamage /= 2;
-    }
-    public void Shield()
-    {
-        if(modules[0].cooldown <= 0)
-        {
-            modules[0].cooldown = 8;
-            cachedDamage = 0;
-            return;
-        }
-        modules[0].Health = (int)MathF.Max(0, modules[0].Health - cachedDamage / 2);
-    }
-    public void Stealth()
-    {
-        cachedDamage /= 3;
-    }
-    public void Reflective()
-    {
-        if (Util.Random.Next(0, 3) == 0)
-        {
-            cachedDamage = 0;
-            for (float angle = 0; angle < MathF.Tau; angle += MathF.PI / 3)
-            {
-                Engine.EntityManager.Add(new AssassinShot(position, Util.ToUnitVector(angle) * 8, angle, 0, isFriendly, 6, 1));
-            }
-        }
-    }
-    public void StandardEngine()
-    {
-        if (isEngineActive)
-        {
-            engineTime = Math.Clamp(engineTime + Engine.DeltaSeconds, 0, 1);
-            float engineTimeModifier = 1 - (1 - engineTime) * (1 - engineTime);
-            engineParticles.sprayAngle = angle + MathF.PI;
-            float fuseRatio = (float)(CountFuses(ModuleType.Engines)) / 3;
-            engineParticles.speedOfEmission = 450f * fuseRatio * engineTimeModifier;
-            engineParticles.particleColor = Color.Cyan;
-            engineParticles.particleFadeToColor = new Color(72, 61, 139, 0);
-            if (direction != Vector2.Zero)
-            {
-                velocity += Vector2.Normalize(direction) * 24 * Engine.DeltaSeconds * engineTimeModifier * fuseRatio / (leashedMaterials.Count + 2);
-            }
-        }
-        else
-        {
-            engineTime = Math.Clamp(engineTime - Engine.DeltaSeconds * 2, 0, 1);
-        }
-    }
-    public void PlasmaEngine()
-    {
-        if (isEngineActive)
-        {
-            engineTime = Math.Clamp(engineTime + Engine.DeltaSeconds * 2, 0, 1);
-            float engineTimeModifier = 1 - (1 - engineTime) * (1 - engineTime);
-            float fuseRatio = (float)(CountFuses(ModuleType.Engines)) / 3;
-            /*
-            engineParticles.sprayAngle = angle * 180 / MathF.PI + 180;
-            engineParticles.speedOfEmission = 450f * fuseRatio * engineTimeModifier;
-            engineParticles.particleColor = Color.Cyan;
-            engineParticles.particleFadeToColor = new Color(1f, 0.5f, 0, 0);
-            */
-            engineParticles.speedOfEmission = 0;
-            Vector2 dir = -Util.ToUnitVector(angle + Util.OneToNegOne() / 20);
-            for (float i = 0; i < 5 * fuseRatio * engineTimeModifier; i++)
-            {
-                float lerp = i / (5 * fuseRatio * engineTimeModifier);
-                Vector3 color = new Vector3(0, 1, 1) * (1 - lerp) + new Vector3(1, 0.5f, 0) * (lerp);
-                ParticleManager.Add(new Particle(Assets.Get(Sprite.Circle), position + dir * (i + 2.5f) * 4, angle, new Color(color.X, color.Y, color.Z) * (1 - lerp)));
-            }
-            if (direction != Vector2.Zero)
-            {
-                velocity += Vector2.Normalize(direction) * 20 * Engine.DeltaSeconds * engineTimeModifier * fuseRatio / (leashedMaterials.Count + 1);
-            }
-        }
-        else
-        {
-            engineTime = Math.Clamp(engineTime - Engine.DeltaSeconds, 0, 1);
-        }
-    }
-    public void WorkEngine()
-    {
-        if (isEngineActive)
-        {
-            engineTime = Math.Clamp(engineTime + Engine.DeltaSeconds / 3, 0, 1);
-            float engineTimeModifier = 1 - (1 - engineTime) * (1 - engineTime);
-            engineParticles.sprayAngle = angle + MathF.PI;
-            float fuseRatio = (float)(CountFuses(ModuleType.Engines)) / 3;
-            engineParticles.speedOfEmission = 450f * fuseRatio * engineTimeModifier;
-            engineParticles.particleColor = Color.Orange;
-            engineParticles.particleFadeToColor = new Color(1f, 0.1f, 0, 0);
-            if (direction != Vector2.Zero)
-            {
-                velocity += Vector2.Normalize(direction) * 14 * Engine.DeltaSeconds * engineTimeModifier * fuseRatio;
-            }
-        }
-        else
-        {
-            engineTime = Math.Clamp(engineTime - Engine.DeltaSeconds, 0, 1);
-        }
-    }
-    public void Basic()
-    {
-        if (!modules[ModuleType.Guns].IsCooldownReady())
-        {
-            return;
-        }
-        Engine.EntityManager.Add(new PulseShot(position, IdealSpeedWithVelocity(9), gunAngle.angle, 0, true, 3, true));
-        SoundManager.PlaySound(Assets.Get(Sound.PulseFire), position);
-        modules[ModuleType.Guns].cooldown = 0.25f;
-        Engine.ShakeScreen(0.2f);
-        velocity -= targetVector / 4;
-    }
-    public void Sniper()
-    {
-        if (!modules[ModuleType.Guns].IsCooldownReady())
-        {
-            return;
-        }
-        Engine.EntityManager.Add(new AssassinShot(position, IdealSpeedWithVelocity(20), gunAngle.angle, 0, true, 20) { texture = Assets.Get(Sprite.Arrow) });
-        SoundManager.PlaySound(Assets.Get(Sound.SniperFire), position);
-        modules[ModuleType.Guns].cooldown = 2f;
-        Engine.ShakeScreen(0.3f);
-        velocity -= targetVector / 2;
-    }
-    public void Antimaterial()
-    {
-        if (!modules[ModuleType.Guns].IsCooldownReady())
-        {
-            return;
-        }
-        List<Entity> entities = Engine.EntityManager.Hitscan(position, targetVector, 3000, true, out Vector2 _);
-        foreach (var entity in entities)
-        {
-            entity.Collide(30);
-        }
-        SoundManager.PlaySound(Assets.Get(Sound.SniperFire), position);
-        modules[ModuleType.Guns].cooldown = 4f;
-        Engine.ShakeScreen(0.5f);
-        velocity -= targetVector * 3;
-        for (int i = 0; i < 300; i++)
-        {
-            ParticleManager.Add(new Particle(Assets.Get(Sprite.Dot), 2, position + targetVector * 4 * i, Vector2.Zero, gunAngle.angle, 0, Color.Red, Color.Transparent));
-        }
-    }
-    public void Spiral()
-    {
-        if (!modules[ModuleType.Guns].IsCooldownReady())
-        {
-            return;
-        }
-        Vector2 speed = IdealSpeedWithVelocity(12);
-        Engine.EntityManager.Add(new SpiralShot(position, speed, gunAngle.angle, 0, true, 5, false, 1));
-        Engine.EntityManager.Add(new SpiralShot(position, speed, gunAngle.angle, 0, true, 5, true, 1));
-        SoundManager.PlaySound(Assets.Get(Sound.PulseFire), position);
-        modules[ModuleType.Guns].cooldown = 0.7f;
-        Engine.ShakeScreen(0.2f);
-    }
-    public void Shotgun()
-    {
-        if (!modules[ModuleType.Guns].IsCooldownReady())
-        {
-            return;
-        }
-        int randomBulletCount = Util.Random.Next(4, 6);
-        for (int i = 0; i < randomBulletCount; i++)
-        {
-            float angleDegrees = (Util.Random.NextSingle() - 0.5f) * 5;
-            float offsetAngle = angleDegrees * MathF.PI / 180;
-            Vector2 targetVector = IdealSpeedWithVelocity(8) + new Vector2(Util.OneToNegOne(), Util.OneToNegOne());
-            Vector2 positionOffset = Util.ToUnitVector(gunAngle.angle + MathF.PI/2) * offsetAngle * 100;
-            Engine.EntityManager.Add(new PulseShot(position + positionOffset, targetVector, gunAngle.angle + offsetAngle, 0, true, 2));
-        }
-        SoundManager.PlaySound(Assets.Get(Sound.ShotgunFire), position);
-        velocity -= targetVector / 2;
-        modules[ModuleType.Guns].cooldown = 1f;
-        Engine.ShakeScreen(0.4f);
-    }
-    public void Missile()
-    {
-        if (!modules[ModuleType.Guns].IsCooldownReady())
-        {
-            return;
-        }
-        Engine.EntityManager.Add(Enemy.NewMissile(position + Util.ToUnitVector(gunAngle.angle + MathF.PI / 2) * 6, IdealSpeedWithVelocity(9), gunAngle.angle, true));
-        SoundManager.PlaySound(Assets.Get(Sound.MissileFire), position);
-        modules[ModuleType.Guns].cooldown = 1.5f;
-        velocity -= targetVector / 4;
-        Engine.ShakeScreen(0.3f);
-    }
-    public void LMG()
-    {
-        if (!modules[ModuleType.Guns].IsCooldownReady())
-        {
-            return;
-        }
-        Vector2 offset = Util.ToUnitVector(gunAngle.angle + MathF.PI / 2) * Util.Random.Next(-2, 3);
-        Texture2D dot = Assets.Get(Sprite.Microshot);
-        Projectile shot = new PulseShot(position + offset, IdealSpeedWithVelocity(8) + offset / 4, gunAngle.angle, 0, true, 2)
-        {
-            texture = dot,
-            timeLeft = 3
-        };
-        Engine.EntityManager.Add(shot);
-        SoundManager.PlaySound(Assets.Get(Sound.LMGFire), position);
-        Engine.ShakeScreen(0.01f);
-        velocity -= targetVector / 8;
-        modules[ModuleType.Guns].cooldown = 0.15f;
-    }
-    public void Silenced()
-    {
-        if (!modules[ModuleType.Guns].IsCooldownReady())
-        {
-            return;
-        }
-        Vector2 offset = Util.ToUnitVector(gunAngle.angle + MathF.PI / 2) * Util.Random.Next(-2, 3);
-        Texture2D dot = Assets.Get(Sprite.CrossbowShot);
-        Projectile shot = new PulseShot(position + offset, IdealSpeedWithVelocity(8) + offset / 4, gunAngle.angle, 0, true, 8, false, 1)
-        {
-            texture = dot,
-        };
-        Engine.EntityManager.Add(shot);
-        SoundManager.PlaySound(Assets.Get(Sound.LMGFire), position);
-        Engine.ShakeScreen(0.2f);
-        velocity -= targetVector / 4;
-        modules[ModuleType.Guns].cooldown = 0.5f;
-    }
-    public void Flamethrower()
-    {
-        if (!modules[ModuleType.Guns].IsCooldownReady())
-        {
-            return;
-        }
-        Engine.EntityManager.Add(new FlameBolt(position, IdealSpeedWithVelocity(5) + new Vector2(Util.OneToNegOne(), Util.OneToNegOne()) / 4, true, 1));
-        SoundManager.PlaySound(Assets.Get(Sound.LMGFire), position);
-        modules[ModuleType.Guns].cooldown = 0.08f;
-        Engine.ShakeScreen(0.02f);
-    }
-    public void Fireball()
-    {
-        if (!modules[ModuleType.Guns].IsCooldownReady())
-        {
-            return;
-        }
-        Engine.EntityManager.Add(new FlameBolt(position, IdealSpeedWithVelocity(8) + new Vector2(Util.OneToNegOne(), Util.OneToNegOne()) / 2, true, 8, 4, 0.5f));
-        SoundManager.PlaySound(Assets.Get(Sound.LMGFire), position);
-        modules[ModuleType.Guns].cooldown = 0.8f;
-        Engine.ShakeScreen(0.1f);
-    }
-    public void GrenadeLauncher()
-    {
-        if (!modules[ModuleType.Guns].IsCooldownReady())
-        {
-            return;
-        }
-        Engine.EntityManager.Add(new Explosive(position, IdealSpeedWithVelocity(8) + new Vector2(Util.OneToNegOne(), Util.OneToNegOne()), gunAngle.angle, Util.OneToNegOne() / 8, true, 16, 40, 1));
-        SoundManager.PlaySound(Assets.Get(Sound.PulseFire), position);
-        modules[ModuleType.Guns].cooldown = 1f;
-        Engine.ShakeScreen(0.3f);
-        velocity -= targetVector / 2;
-    }
-    public void Spewer()
-    {
-        if (!modules[ModuleType.Guns].IsCooldownReady())
-        {
-            return;
-        }
-        Engine.EntityManager.Add(new Spewer(position, IdealSpeedWithVelocity(4) + new Vector2(Util.OneToNegOne(), Util.OneToNegOne()) / 2, gunAngle.angle, Util.OneToNegOne() / 8, true, 2));
-        SoundManager.PlaySound(Assets.Get(Sound.PulseFire), position);
-        modules[ModuleType.Guns].cooldown = 1f;
-        Engine.ShakeScreen(0.3f);
-        velocity -= targetVector / 2;
-    }
-    public void Triangle()
-    {
-        if (!modules[ModuleType.Guns].IsCooldownReady())
-        {
-            return;
-        }
-        Vector2 vel = IdealSpeedWithVelocity(8) - velocity;
-        var dir = Vector2.Normalize(vel);
-        velocity += dir;
-        var offset = new Vector2(dir.Y, -dir.X);
-        Engine.EntityManager.Add(new PulseShot(position, vel + velocity, gunAngle.angle, 0, true, 6));
-        Engine.EntityManager.Add(new PulseShot(position, -vel + offset * 5 + velocity, gunAngle.angle, 0, true, 10) { texture = Assets.Get(Sprite.Explosive) });
-        Engine.EntityManager.Add(new PulseShot(position, -vel - offset * 5 + velocity, gunAngle.angle, 0, true, 10) { texture = Assets.Get(Sprite.Explosive) });
-        SoundManager.PlaySound(Assets.Get(Sound.PulseFire), position);
-        modules[ModuleType.Guns].cooldown = 0.5f;
-        Engine.ShakeScreen(0.3f);
-    }
-    public void PrismArray()
-    {
-        Vector2 dir = Util.ToUnitVector(gunAngle.angle);
-        List<Entity> enemies = Engine.EntityManager.Hitscan(position, dir, 250, true, out Vector2 _end);
-        for (float i = 0; i < (_end - position - dir * 10).Length() / 5; i++)
-        {
-            float lerp = i / 50;
-            Vector3 color = new Vector3(0, 1, 1) * (1 - lerp) + new Vector3(1, 1, 0) * (lerp);
-            ParticleManager.Add(new Particle(Assets.Get(Sprite.Circle), dir * (i + 2f) * 5 + position + new Vector2(dir.Y, -dir.X) * MathF.Sin(i / 2 - time * 5) / 2, gunAngle.angle, new Color(color.X, color.Y, color.Z) * (1 - (lerp))));
-        }
-        if (!modules[ModuleType.Guns].IsCooldownReady())
-        {
-            return;
-        }
-        modules[ModuleType.Guns].cooldown = 0.1f;
-        SoundManager.PlaySound(Assets.Get(Sound.LMGFire), position);
-        foreach (var enemy in enemies)
-        {
-            enemy.Collide(1);
-        }
-    }
-    public void MatrixLauncher()
-    {
-        if (!modules[ModuleType.Guns].IsCooldownReady())
-        {
-            return;
-        }
-        Vector2 vel = IdealSpeedWithVelocity(15);
-        Engine.EntityManager.Add(new FlameBolt(position, vel + new Vector2(Util.OneToNegOne(), Util.OneToNegOne()) / 2, true, 10,
-            new ParticleEmitter(Assets.Get(Sprite.Circle), position, 0, Color.Cyan) { sprayCone = MathF.PI * 2 / 3, sprayAngle = Util.ToAngle(vel - velocity), speedOfEmission = 0.5f }, 4));
-        SoundManager.PlaySound(Assets.Get(Sound.SniperFire), position);
-        modules[ModuleType.Guns].cooldown = 1.5f;
-        Engine.ShakeScreen(0.5f);
-    }
-    public void Dash()
-    {
-        if (!modules[ModuleType.Core].IsCooldownReady())
-        {
-            return;
-        }
-        invincibilityCooldown = 0.5f;
-        Vector2 normalVector = new(MathF.Sin(gunAngle.angle), -MathF.Cos(gunAngle.angle));
-        for (int i = 0; i < 200; i++)
-        {
-            float timeLeft = ((float)i / 200);
-            var col = Color.SlateBlue;
-            col.A = 0;
-            ParticleManager.Add(new Particle(Assets.Get(Sprite.Dot), timeLeft, position + normalVector*i, velocity * timeLeft, gunAngle.angle, 0, Color.Cyan, col));
-        }
-        position += normalVector * 200;
-        float c = 2f;
-        modules[ModuleType.Core].cooldown = c;
-        abilityMaxCooldown = c;
-    }
-    public void Torch()
-    {
-        if (!modules[ModuleType.Guns].IsCooldownReady())
-        {
-            return;
-        }
-        Vector2 offset = Util.ToUnitVector(gunAngle.angle + MathF.PI / 2) * Util.OneToNegOne() * 3;
-        Projectile shot = new FlameBolt(position - offset * 5, IdealSpeedWithVelocity(12) + offset, isFriendly, 1, 2, 0.1f);
-        Engine.EntityManager.Add(shot);
-        SoundManager.PlaySound(Assets.Get(Sound.LMGFire), position);
-        Engine.ShakeScreen(0.02f);
-        velocity -= targetVector / 6;
-        modules[ModuleType.Guns].cooldown = 0.1f;
-    }
-    public void SummonShield()
-    {
-        if (!modules[ModuleType.Core].IsCooldownReady() || !abilityEntity.isExpired)
-        {
-            return;
-        }
-        (abilityEntity as Enemy).health = 1;
-        abilityEntity.isExpired = false;
-        Engine.EntityManager.Add(abilityEntity);
-        float c = 5f;
-        modules[ModuleType.Core].cooldown = c;
-        abilityMaxCooldown = c;
-    }
-    public void SummonGrapplingHook()
-    {
-        if ((abilityEntity == null || abilityEntity.isExpired) && modules[ModuleType.Core].IsCooldownReady())
-        {
-            abilityEntity = new GrapplingHook(position, IdealSpeedWithVelocity(50), gunAngle.angle, this);
-            SoundManager.PlaySound(Assets.Get(Sound.Click), position);
-            Engine.ShakeScreen(0.3f);
-            velocity -= targetVector / 2;
-            Engine.EntityManager.Add(abilityEntity);
-            float c = 5f;
-            modules[ModuleType.Core].cooldown = c;
-            abilityMaxCooldown = c;
-        }
-        else if(abilityEntity != null && !abilityEntity.isExpired)
-        {
-            abilityEntity.isExpired = true;
-            modules[ModuleType.Core].cooldown /= 2;
-        }
-    }
-    public void Nanomachines()
-    {
-        if (!modules[ModuleType.Core].IsCooldownReady())
-        {
-            return;
-        }
-        foreach (var pickup in leashedMaterials)
-        {
-            if (pickup is not Module and not Construct)
-            {
-                pickup.isExpired = true;
-                StatusHolder.ApplyStatus(new Healing(4));
-                var c = 30;
-                modules[ModuleType.Core].cooldown = c;
-                abilityMaxCooldown = c;
-                return;
-            }
-        }
-    }
-    public void CreateFighter()
-    {
-        if (!modules[ModuleType.Core].IsCooldownReady())
-        {
-            return;
-        }
-        foreach (var pickup in leashedMaterials)
-        {
-            if (pickup is not Module and not Construct)
-            {
-                pickup.isExpired = true;
-                Engine.EntityManager.Add(Enemy.NewAdvancedFighter(position, velocity, angle, isFriendly));
-                var c = 60;
-                modules[ModuleType.Core].cooldown = c;
-                abilityMaxCooldown = c;
-                return;
-            }
-        }
-    }
-    public void Lidar()
-    {
-        if (!modules[ModuleType.Sensors].IsCooldownReady())
-        {
-            return;
-        }
-        Vector2 dir = targetVector + new Vector2(Util.OneToNegOne(), Util.OneToNegOne()) / 5;
-        Engine.EntityManager.Hitscan(position, dir, 1000, false, out Vector2 end);
-        ParticleManager.Add(new Particle(Assets.Get(Sprite.Dot), 1f, end, Vector2.Zero, 0, 0, Color.White, Color.Transparent));
-    }
-    public void Radar()
-    {
-        if (modules[ModuleType.Sensors].IsCooldownReady())
-        {
-            int fuses = CountFuses(ModuleType.Sensors);
-            Vector2 dir = Util.ToUnitVector(time * (float)(fuses) / 3);
-            List<Entity> revealedEntities = Engine.EntityManager.Hitscan(position, dir, 2000, true, out Vector2 end);
-            foreach (var entity in revealedEntities)
-            {
-                entity.Reveal(2f);
-            }
-            if (revealedEntities.Count > 0)
-            {
-                SoundManager.PlaySound(Assets.Get(Sound.Beep), position);
-            }
-            for (int i = 0; i < 10; i++)
-            {
-                ParticleManager.Add(new Particle(Assets.Get(Sprite.Dot), position + dir * 10 * i, 0, Color.Green * (1 - (float)(i) / 10)));
-            }
-            ParticleManager.Add(new Particle(Assets.Get(Sprite.Dot), end, 0, Color.White));
-        }
-    }
-    public void PulseEmitter()
-    {
-        if (modules[ModuleType.Sensors].IsCooldownReady())
-        {
-            Engine.EntityManager.NearestEnemy(this)?.Reveal(1);
-            Engine.EntityManager.NearestProjectile(this, isFriendly)?.Reveal(1);
-            modules[ModuleType.Sensors].cooldown = 2;
-            SoundManager.PlayGlobalSound(Assets.Get(Sound.Beep));
-        }
+        //Idea: 
+        //_reduction is a flat subtraction from all damage
+        //Makes lots of hits much weaker, but not great for heavy hits
+        //_resistance is a multiplier toward the amount of damage taken
+        //Makes heavy hits weaker, but is outcompeted by reduction for lots of weak hits
+        //_reactivity will be some third thing that will potentially make weak hits hit harder, but strong hits will be significantly reduced
+        float reactivity = 200 / (_damage * _damage + 200 * _reactivity) - 1 / (2 * _reactivity) + 1;
+        return (int)Math.Max(Math.Floor((_damage - _reduction) * _resistance * _reactivity), 0);
     }
     public override void Draw(SpriteBatch _spriteBatch)
     {
@@ -1206,7 +743,7 @@ public class Player : Entity
 
         if (modules[ModuleType.Hull].ID == 1)
         {
-            Engine.DrawFilledLine(_spriteBatch, linePosition, sourceRectangle, (1 - modules[0].cooldown / 8), Color.DarkGray, Color.Yellow);
+            //Engine.DrawFilledLine(_spriteBatch, linePosition, sourceRectangle, (1 - modules[0].cooldown / 8), Color.DarkGray, Color.Yellow);
         }
     }
     public Player(string _serialization, LoadLogger _logger)
@@ -1230,10 +767,8 @@ public class Player : Entity
         _logger.Try(delegate { modules[ModuleType.Sensors] = (Module)(ItemFactory.TryDeserialize(disassembly[6], _logger)); }, 6);
         _logger.Try(delegate { modules[ModuleType.Core] = (Module)(ItemFactory.TryDeserialize(disassembly[7], _logger)); }, 7);
 
-        gunAngle = Enemy.NewDummyEnemy(position, true);
         color = new Color(0, 255, 0);
         smokeParticles.isEmitterActive = false;
-        engineParticles.isEmitterActive = false;
         engineSounds = Assets.Get(Sound.FireEngines).CreateInstance();
         engineSounds.IsLooped = true;
         var textures = new Texture2D[modules.Count];
