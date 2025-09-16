@@ -340,15 +340,15 @@ public static class EventHandler
         string filePath = Path.Combine(Directory.GetCurrentDirectory(), $"Content\\Saves\\Save_{Engine.SaveSlot}.txt");
         File.Delete(filePath);
     }
-    public static void UpgradeSensors(Modules _module)
+    public static void UpgradeSensors(Module _module)
     {
         if (Engine.SaveGame.Scrap > 0)
         {
             Engine.SaveGame.Scrap--;
-            Engine.SaveGame.Player.modules[ModuleType.Sensors] = new Module(_module);
+            Engine.SaveGame.Player.modules[ModuleType.Sensors] = _module;
         }
     }
-    public static void UpgradeModule(ModuleType _slot, Modules _moduleType)
+    public static void UpgradeModule(ModuleType _slot, Module _moduleType)
     {
         ItemSlot<Pickup> firstScrap = null;
         int count = 0;
@@ -375,21 +375,21 @@ public static class EventHandler
             UI.UpgradeText.text = "Get specialized parts to upgrade.";
             return;
         }
-        var upgrades = new Dictionary<Modules, Modules>
+        var upgrades = new Dictionary<Modules, Module>
             {
-                { Modules.Flamethrower, Modules.PrismArray },
-                { Modules.Fireball, Modules.MatrixLauncher },
-                { Modules.Sniper, Modules.Antimaterial },
-                { Modules.LMG, Modules.Torch },
+                { Modules.Flamethrower, new PrismArray() },
+                { Modules.Fireball, new MatrixLauncher() },
+                { Modules.Sniper, new Antimaterial() },
+                { Modules.LMG, new Torch() },
             };
-        if (!upgrades.TryGetValue(_moduleType, out Modules value))
+        if (!upgrades.TryGetValue(_moduleType.Type, out Module value))
         {
             UI.UpgradeText.text = "Selected module cannot be upgraded.";
             return;
         }
-        text = $"{new Module(_moduleType).Name} has been upgraded to {new Module(value).Name}.";
+        text = $"{_moduleType.Name} has been upgraded to {value.Name}.";
         UI.UpgradeText.text = text;
-        Engine.SaveGame.Player.modules[_slot] = new Module(_moduleType);
+        Engine.SaveGame.Player.modules[_slot] = value;
         firstScrap.daughterItem = null;
     }
 }

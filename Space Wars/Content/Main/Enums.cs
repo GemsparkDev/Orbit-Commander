@@ -15,6 +15,8 @@ public enum Modules
     Shield,
     Stealth,
     Reflective,
+    Turtle,
+    Ablative,
     //Engines
     Engines,
     Plasma,

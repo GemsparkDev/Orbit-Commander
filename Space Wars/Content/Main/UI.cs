@@ -101,6 +101,7 @@ public static class UI
     public static Button GlobalSidePanelOpen { get; } = new Button(Vector2.Zero, Assets.Get(Sprite.ToggleButton));
     public static Decal Timer { get; } = new Decal(new Vector2(-50, 0), Assets.TextFont, $"{Engine.IngameTime.DrawText}", Color.White, 10);
     public static Slider PlayerHealth { get; } = new Slider(Line, new Vector2(5, 5), new Vector2(150, 15), true, Color.Red, Color.DarkGray);
+    public static Slider PlayerSpecialHealth { get; } = new Slider(Line, new Vector2(5, 5), new Vector2(150, 15), true, Color.Transparent, Color.Transparent);
     public static Slider PlayerAbility { get; } = new Slider(Line, new Vector2(5, 15), new Vector2(100, 10), true, Color.Cyan, Color.DarkGray);
 
     //Upgrade Menu
@@ -239,27 +240,27 @@ public static class UI
         SaveBack.AddBehaviour(delegate { MissionSelect.enabled = true; SaveMenu.enabled = false; });
         LoadBack.AddBehaviour(delegate { MainMenu.enabled = true; LoadMenu.enabled = false; });
 
-        LidarUpgrade.AddBehaviour(delegate { EventHandler.UpgradeSensors(Modules.Lidar); });
-        RadarUpgrade.AddBehaviour(delegate { EventHandler.UpgradeSensors(Modules.Radar); });
-        PulseEmitterUpgrade.AddBehaviour(delegate { EventHandler.UpgradeSensors(Modules.PulseEmitter); });
+        LidarUpgrade.AddBehaviour(delegate { EventHandler.UpgradeSensors(new Lidar()); });
+        RadarUpgrade.AddBehaviour(delegate { EventHandler.UpgradeSensors(new Radar()); });
+        PulseEmitterUpgrade.AddBehaviour(delegate { EventHandler.UpgradeSensors(new PulseEmitter()); });
         tooltip = new Window(Vector2.Zero, wideButton);
         tooltip.AddWidget(new Decal(new Vector2(0, -3), Assets.TextFont, "Drag module over button to queue repair.\nRequired time: 20 waves. Requires no metal to repair.", Color.White, 3f));
         UpgradeHull.AddTooltip(tooltip);
         UpgradeHull.AddBehaviour(delegate 
         {
-            EventHandler.UpgradeModule(ModuleType.Hull, Engine.SaveGame.Player.modules[ModuleType.Hull].Type);
+            EventHandler.UpgradeModule(ModuleType.Hull, Engine.SaveGame.Player.modules[ModuleType.Hull]);
         });
         UpgradeGuns.AddBehaviour(delegate
         {
-            EventHandler.UpgradeModule(ModuleType.Guns, Engine.SaveGame.Player.modules[ModuleType.Guns].Type);
+            EventHandler.UpgradeModule(ModuleType.Guns, Engine.SaveGame.Player.modules[ModuleType.Guns]);
         });
         UpgradeEngine.AddBehaviour(delegate
         {
-            EventHandler.UpgradeModule(ModuleType.Engines, Engine.SaveGame.Player.modules[ModuleType.Engines].Type);
+            EventHandler.UpgradeModule(ModuleType.Engines, Engine.SaveGame.Player.modules[ModuleType.Engines]);
         });
         UpgradeCore.AddBehaviour(delegate
         {
-            EventHandler.UpgradeModule(ModuleType.Core, Engine.SaveGame.Player.modules[ModuleType.Core].Type);
+            EventHandler.UpgradeModule(ModuleType.Core, Engine.SaveGame.Player.modules[ModuleType.Core]);
         });
 
 
@@ -366,9 +367,11 @@ public static class UI
         UpgradeMenu.AddWidget(UpgradeEngine as IFunctional, 2);
         UpgradeMenu.AddWidget(UpgradeCore as IFunctional, 2);
 
+        PlayerSpecialHealth.SetInterval(1, 1);
         Engine.UIManager.ScreenWindow.AddWidget(GlobalSidePanelOpen as IFunctional, (int)Alignment.Left);
         Engine.UIManager.ScreenWindow.AddWidget(Timer, (int)Alignment.TopRight);
         Engine.UIManager.ScreenWindow.AddWidget(PlayerHealth as IFunctional, (int)Alignment.TopLeft);
+        Engine.UIManager.ScreenWindow.AddWidget(PlayerSpecialHealth as IFunctional, (int)Alignment.TopLeft);
         Engine.UIManager.ScreenWindow.AddWidget(PlayerAbility as IFunctional, (int)Alignment.TopLeft);
 
         for (int x = 0; x < ModuleSlots.GetLength(0); x++)

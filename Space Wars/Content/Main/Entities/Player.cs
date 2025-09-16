@@ -27,28 +27,28 @@ public class Player : Entity
     };
     public Dictionary<ModuleType, Module> modules = new()
     {
-        { ModuleType.Hull, new Shield() },
+        { ModuleType.Hull, new Turtle() },
         { ModuleType.Guns, new Torch() },
         { ModuleType.Engines, new PlasmaEngine() },
         { ModuleType.Sensors, new Sensors() },
         { ModuleType.Core, new Dash() }
     };
 
+    public Vector2 Direction => targetVector;
     public DockableComponent dockedEntity;
     public List<Pickup> leashedMaterials = [];
     private ParticleEmitter smokeParticles = new(Assets.Get(Sprite.Circle), 1f, Vector2.Zero, 0, MathF.PI/4, 1, 0.5f, Color.Gray, EmitterType.EmissionOverTime) { isEmitterActive = false, particleFadeToColor = new Color(169, 169, 169, 0) };
-    private ParticleEmitter shieldEffect;
     private SoundEffectInstance engineSounds;
     public float invincibilityCooldown = 0;
     public float cachedDamage = 0;
     private float restartCooldown = 0;
-    private float abilityMaxCooldown = 1f;
     private bool isRestarting = false;
     public bool isEngineActive = false;
     public bool canGatherResources = false;
     private Vector2 targetVector;
     public Vector2 direction;
     private float time = 0;
+    private float cachedDamageCooldown = 0;
     public int Progression { get; set; } = 3;
     public override int SensingAbility
     {
@@ -108,11 +108,12 @@ public class Player : Entity
         }
         EventHandler.SetFuseModuleDecals(textures);
         EventHandler.UpdateFuseUI(moduleFuses, spareFuses);
-        shieldEffect = new(Assets.Get(Sprite.Dot), position, 10, Color.Violet) { particleAngularVelocity = 0.1f };
         StatusHolder.ApplyStatus(new Berserk());
     }
     public override void Update()
     {
+        UI.PlayerSpecialHealth.enabledColor = Color.Transparent;
+        UI.PlayerSpecialHealth.disabledColor = Color.Transparent;
         time += Engine.DeltaSeconds;
         if (Progression > 0 && Input.OldState.IsKeyUp(Keys.F) && Input.NewState.IsKeyDown(Keys.F))
         {
@@ -125,8 +126,6 @@ public class Player : Entity
             isExpired = true;
             engineSounds.Stop();
             Assets.Get(Sound.Death).Play();
-            SoundManager.SFXVolume = UI.SFXSlider.sliderInterval;
-            SoundManager.MusicVolume = UI.MusicSlider.sliderInterval;
             return;
         }
         smokeParticles.position = position;
@@ -168,11 +167,6 @@ public class Player : Entity
                     module.Health = Math.Min(module.MaxHealth, module.Health + Util.Random.Next(1, 4));
                     restartedModules = true;
                     EventHandler.UpdateModulesStatus();
-                    if (modules[ModuleType.Core] == module)
-                    {
-                        SoundManager.SFXVolume = UI.SFXSlider.sliderInterval;
-                        SoundManager.MusicVolume = UI.MusicSlider.sliderInterval;
-                    }
                 }
             }
             if (restartedModules)
@@ -192,9 +186,9 @@ public class Player : Entity
             invincibilityCooldown -= Engine.DeltaSeconds;
             color = invincibilityCooldown > 0 ? new Color(0, 255, 0) * (MathF.Cos(invincibilityCooldown * 30) / 2 + 0.5f) : new Color(0, 255, 0);
         }
-        if (cachedDamage > 0)
+        if (cachedDamageCooldown <= 0)
         {
-            for (int i = 0; i < cachedDamage; i++)
+            if (cachedDamage > 0)
             {
                 int randomNumber = Util.Random.Next(1, 4);
                 if (modules[ModuleType.Hull].Health > 0)
@@ -209,32 +203,22 @@ public class Player : Entity
                 {
                     modules[ModuleType.Core].Health--;
                 }
-            }
-            cachedDamage = 0;
-        }
-        float currentHealth = modules[ModuleType.Hull].Health + modules[ModuleType.Guns].Health + modules[ModuleType.Engines].Health + modules[ModuleType.Sensors].Health + modules[ModuleType.Core].Health;
-        float maxHealth = modules[ModuleType.Hull].MaxHealth + modules[ModuleType.Guns].MaxHealth + modules[ModuleType.Engines].MaxHealth + modules[ModuleType.Sensors].MaxHealth + modules[ModuleType.Core].MaxHealth;
-
-        UI.PlayerHealth.SetInterval(currentHealth, maxHealth);
-        Vector3 colorVec;
-        float val = (MathF.Sin(time) + 1f) / 2;
-        shieldEffect.position = position;
-        //if (modules[ModuleType.Hull].Type == Modules.Shield && modules[ModuleType.Hull].cooldown <= 0)
-        if(false)
-        {
-            throw new NotImplementedException();
-            UI.PlayerHealth.enabledColor = Color.Violet;
-            if (dockedEntity == null) 
-            {
-                shieldEffect.offsetVelocity = velocity;
-                shieldEffect.Update();
+                cachedDamage--;
+                cachedDamageCooldown = 0.05f;
             }
         }
         else
         {
-            colorVec = new Vector3(1, 0, 0) * val + new Vector3(1, 0.2f, 0.2f) * (1f - val);
-            UI.PlayerHealth.enabledColor = new Color(colorVec.X, colorVec.Y, colorVec.Z);
+            cachedDamageCooldown -= Engine.DeltaSeconds;
         }
+        float currentHealth = modules[ModuleType.Hull].Health + modules[ModuleType.Guns].Health + modules[ModuleType.Engines].Health + modules[ModuleType.Sensors].Health + modules[ModuleType.Core].Health;
+        float maxHealth = modules[ModuleType.Hull].MaxHealth + modules[ModuleType.Guns].MaxHealth + modules[ModuleType.Engines].MaxHealth + modules[ModuleType.Sensors].MaxHealth + modules[ModuleType.Core].MaxHealth;
+
+        UI.PlayerHealth.SetInterval(currentHealth + cachedDamageCooldown / 0.05f, maxHealth);
+        Vector3 colorVec;
+        float val = (MathF.Sin(time) + 1f) / 2;
+        colorVec = new Vector3(1, 0, 0) * val + new Vector3(1, 0.2f, 0.2f) * (1f - val);
+        UI.PlayerHealth.enabledColor = new Color(colorVec.X, colorVec.Y, colorVec.Z);
 
         //Only displays if the player has abilities unlocked
         if (Progression > 1) 
@@ -285,6 +269,9 @@ public class Player : Entity
         {
             isEngineActive = false;
         }
+        //Ensures that target vector performs identically in all resolutions
+        Vector2 ratio = Engine.ScreenSize / Engine.BackBuffer;
+        targetVector = Vector2.Normalize(new Vector2(Input.NewMouseState.X * ratio.X, Input.NewMouseState.Y * ratio.Y) - Engine.ScreenSize / 2 - position + Engine.Camera.Position + Engine.MousePositionOffset);
     }
     public override void LowerCooldown()
     {
@@ -441,9 +428,6 @@ public class Player : Entity
                         }
                     }
                 }
-                //Ensures that target vector performs identically in all resolutions
-                Vector2 ratio = Engine.ScreenSize / Engine.BackBuffer;
-                targetVector = Vector2.Normalize(new Vector2(Input.NewMouseState.X * ratio.X, Input.NewMouseState.Y * ratio.Y) - Engine.ScreenSize / 2 - position + Engine.Camera.Position + Engine.MousePositionOffset);
                 if (!UIManager.LockMouseInput && Input.NewMouseState.RightButton == ButtonState.Pressed)
                 {
                     List<Entity> miningEnemies = Engine.EntityManager.Hitscan(position, targetVector, 120, false, out Vector2 _end);
@@ -476,7 +460,7 @@ public class Player : Entity
                 {
                     foreach (var module in modules)
                     {
-                        module.Value.OnAbility(targetVector);
+                        module.Value.OnAbility();
                     }
                 }
                 Keys[] pressedKey = Input.NewState.GetPressedKeys();
@@ -506,9 +490,12 @@ public class Player : Entity
                             break;
                     }
                 }
-                foreach (var module in modules)
+                if (isEngineActive)
                 {
-                    module.Value.OnEngine();
+                    foreach (var module in modules)
+                    {
+                        module.Value.OnEngine();
+                    }
                 }
                 angle = angle * 0.5f + MathF.Atan2(direction.X, -direction.Y) * 0.5f;
                 if (Input.NewMouseState.LeftButton == ButtonState.Pressed && !UIManager.LockMouseInput)
@@ -519,7 +506,7 @@ public class Player : Entity
                     }
                     foreach (var module in modules)
                     {
-                        module.Value.OnShoot(targetVector);
+                        module.Value.OnShoot();
                     }
                 }
             }
@@ -711,7 +698,7 @@ public class Player : Entity
         }
         return count;
     }
-    private int ReduceDamage(int _damage, int _reduction, float _resistance, float _reactivity)
+    private static int ReduceDamage(int _damage, int _reduction, float _resistance, float _reactivity)
     {
         //Idea: 
         //_reduction is a flat subtraction from all damage
@@ -720,7 +707,7 @@ public class Player : Entity
         //Makes heavy hits weaker, but is outcompeted by reduction for lots of weak hits
         //_reactivity will be some third thing that will potentially make weak hits hit harder, but strong hits will be significantly reduced
         float reactivity = 200 / (_damage * _damage + 200 * _reactivity) - 1 / (2 * _reactivity) + 1;
-        return (int)Math.Max(Math.Floor((_damage - _reduction) * _resistance * _reactivity), 0);
+        return (int)Math.Max(Math.Floor((_damage - _reduction) * _resistance * reactivity), 0);
     }
     public override void Draw(SpriteBatch _spriteBatch)
     {
@@ -738,13 +725,6 @@ public class Player : Entity
             return;
         }
         base.Draw(_spriteBatch);
-        Vector2 linePosition = position + new Vector2(-texture.Width * 2, texture.Height * 1.5f) / 2;
-        Rectangle sourceRectangle = new (0, 0, texture.Width * 2, 2);
-
-        if (modules[ModuleType.Hull].ID == 1)
-        {
-            //Engine.DrawFilledLine(_spriteBatch, linePosition, sourceRectangle, (1 - modules[0].cooldown / 8), Color.DarkGray, Color.Yellow);
-        }
     }
     public Player(string _serialization, LoadLogger _logger)
     : base(Assets.Get(Sprite.Player), Vector2.One, Vector2.One, 0, 0, 5, true)

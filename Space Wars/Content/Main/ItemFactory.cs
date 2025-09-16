@@ -8,7 +8,6 @@ using System.IO;
 namespace Space_Wars.Content.Main;
 public static class ItemFactory
 {
-    private static Player Player => Engine.SaveGame.Player;
     //Items
     public readonly static Dictionary<Items, ItemData> itemData = new()
     {
@@ -20,6 +19,8 @@ public static class ItemFactory
         { Modules.Shield, new ModuleData(Sprite.HullModule, Sprite.HullModule, "Shield", (int)ModuleType.Hull, 16) },
         { Modules.Stealth, new ModuleData(Sprite.HullModule, Sprite.HullModule, "Stealth", (int)ModuleType.Hull, 18) },
         { Modules.Reflective, new ModuleData(Sprite.HullModule, Sprite.HullModule, "Reflective", (int)ModuleType.Hull, 18) },
+        { Modules.Turtle, new ModuleData(Sprite.HullModule, Sprite.HullModule, "Turtle", (int)ModuleType.Hull, 22) },
+        { Modules.Ablative, new ModuleData(Sprite.HullModule, Sprite.HullModule, "Ablative", (int)ModuleType.Hull, 17) },
 
         { Modules.Basic, new ModuleData(Sprite.RealGunModule, Sprite.GunModule, "Basic", (int)ModuleType.Guns, 20) },
         { Modules.Spiral, new ModuleData(Sprite.RealSpiralModule,Sprite.SpiralModule, "Spiral", (int)ModuleType.Guns, 20) },
@@ -79,7 +80,7 @@ public static class ItemFactory
         if (Enum.TryParse<Modules>(disassembly[0], true, out Modules result2))
         {
             throw new NotImplementedException();
-            int x = 0;
+            return new Torch();
         }
         if (Enum.TryParse<Constructs>(disassembly[0], true, out Constructs result3))
         {
