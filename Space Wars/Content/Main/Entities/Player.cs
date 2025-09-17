@@ -82,10 +82,10 @@ public class Player : Entity
                     stealth -= 1;
                 }
             }
-            //if (modules[ModuleType.Guns].cooldown > 0)
-            //{
-            //    stealth -= 1;
-            //}
+            if (modules[ModuleType.Guns].Cooldown > 0)
+            {
+                stealth -= 1;
+            }
             if (modules[ModuleType.Hull].Type == Modules.Stealth)
             {
                 stealth += 1;
@@ -697,17 +697,6 @@ public class Player : Entity
             count--;
         }
         return count;
-    }
-    private static int ReduceDamage(int _damage, int _reduction, float _resistance, float _reactivity)
-    {
-        //Idea: 
-        //_reduction is a flat subtraction from all damage
-        //Makes lots of hits much weaker, but not great for heavy hits
-        //_resistance is a multiplier toward the amount of damage taken
-        //Makes heavy hits weaker, but is outcompeted by reduction for lots of weak hits
-        //_reactivity will be some third thing that will potentially make weak hits hit harder, but strong hits will be significantly reduced
-        float reactivity = 200 / (_damage * _damage + 200 * _reactivity) - 1 / (2 * _reactivity) + 1;
-        return (int)Math.Max(Math.Floor((_damage - _reduction) * _resistance * reactivity), 0);
     }
     public override void Draw(SpriteBatch _spriteBatch)
     {

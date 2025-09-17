@@ -24,19 +24,11 @@ public abstract class Module : Pickup, IData
     public override Color Color => isFailed ? Color.Red : Color.White;
     private Decal healthDecal;
     protected float cooldown = 0;
+    public float Cooldown => cooldown;
 
     public Module(Modules _type, Vector2 _position = default, Vector2 _velocity = default, float _angularVelocity = 0) : base(ItemFactory.moduleData[_type], _position, _velocity, _angularVelocity)
     {
         health = MaxHealth;
-        Type = _type;
-        healthDecal = new Decal(new Vector2(0, 5), Assets.TextFont, $"{Health} / {MaxHealth}", Color.Pink, 5f);
-        Tooltip.AddWidget(healthDecal);
-    }
-    public Module(Modules _type, List<string> _disassembly, LoadLogger _logger) : base(ItemFactory.moduleData[_type], _disassembly, _logger)
-    {
-        throw new NotImplementedException();
-        _logger.Try(delegate { health = Int32.Parse(_disassembly[2]); }, 2);
-        _logger.Try(delegate { isFailed = bool.Parse(_disassembly[3]); }, 3);
         Type = _type;
         healthDecal = new Decal(new Vector2(0, 5), Assets.TextFont, $"{Health} / {MaxHealth}", Color.Pink, 5f);
         Tooltip.AddWidget(healthDecal);
@@ -86,16 +78,28 @@ public abstract class Module : Pickup, IData
         }
         return true;
     }
-    public new string Serialize()
+    //Override to provide custom serialization for modules
+    public virtual void Parse(Modules _type, List<string> _disassembly, LoadLogger _logger)
     {
-        throw new NotImplementedException();
+        _logger.Try(delegate { health = Int32.Parse(_disassembly[2]); }, 2);
+        _logger.Try(delegate { isFailed = bool.Parse(_disassembly[3]); }, 3);
+        UpdateHealth();
+        base.Parse(_disassembly, _logger);
+    }
+    public override string Serialize()
+    {
         return $"{{{Type},{SerializeAttributes()},{health},{isFailed}}}";
     }
 }
-public class ModuleData(Sprite _realSprite, Sprite _virtualSprite, String _name, int _id, int _health)
+public class ModuleData(Sprite _realSprite, Sprite _virtualSprite, String _name, int _id, int _health, Type _type)
     : ItemData(_realSprite, _virtualSprite, _name, _id, Color.White)
 {
     public int MaxHealth { get; } = _health;
+    public Type ModuleType { get; } = _type;
+    public Module Retrieve()
+    {
+        return (Module)Activator.CreateInstance(ModuleType);
+    }
 }
 public class Hull() : Module(Modules.Hull)
 {

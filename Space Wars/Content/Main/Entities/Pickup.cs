@@ -40,6 +40,10 @@ public class Pickup : Entity, IData
         Tooltip.AddWidget(textbox);
         _logger.Try(delegate { hitsLeft = Int32.Parse(_disassembly[1]);}, 1);
     }
+    public void Parse(List<string> _disassembly, LoadLogger _logger)
+    {
+        _logger.Try(delegate { hitsLeft = Int32.Parse(_disassembly[1]); }, 1);
+    }
     public override void Update()
     {
         if (!Player.leashedMaterials.Contains(this))
@@ -120,11 +124,11 @@ public class Pickup : Entity, IData
         ParticleManager.Add(new Particle(null, 1, position + new Vector2(0, -1), new Vector2(0, -1.5f), 0, 0, Color.Orange, new Color(255, 0, 0, 0)) { drawText = $"Integrity: {hitsLeft}" });
         return true;
     }
-    public string SerializeAttributes()
+    public virtual string SerializeAttributes()
     {
         return $"{hitsLeft}";
     }
-    public string Serialize()
+    public virtual string Serialize()
     {
         return $"{{{Type},{hitsLeft}}}";
     }
