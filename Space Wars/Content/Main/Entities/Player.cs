@@ -27,7 +27,7 @@ public class Player : Entity
     };
     public Dictionary<ModuleType, Module> modules = new()
     {
-        { ModuleType.Hull, new Turtle() },
+        { ModuleType.Hull, new Adaptive() },
         { ModuleType.Guns, new Torch() },
         { ModuleType.Engines, new PlasmaEngine() },
         { ModuleType.Sensors, new Sensors() },
@@ -108,7 +108,6 @@ public class Player : Entity
         }
         EventHandler.SetFuseModuleDecals(textures);
         EventHandler.UpdateFuseUI(moduleFuses, spareFuses);
-        StatusHolder.ApplyStatus(new Berserk());
     }
     public override void Update()
     {
@@ -223,8 +222,6 @@ public class Player : Entity
         //Only displays if the player has abilities unlocked
         if (Progression > 1) 
         {
-            //UI.PlayerAbility.SetInterval(1 - (modules[ModuleType.Core].cooldown / abilityMaxCooldown), 1);
-            //TODO: Fix me
             colorVec = new Vector3(0, 1, 1) * val + new Vector3(0.2f, 1, 0.8f) * (1f - val);
             UI.PlayerAbility.enabledColor = new Color(colorVec.X, colorVec.Y, colorVec.Z);
             UI.PlayerAbility.disabledColor = Color.DarkGray;
@@ -385,7 +382,7 @@ public class Player : Entity
                         {
                             Vector2 dir = Util.ToUnitVector(angle);
                             Vector2 mouseDir = targetVector;
-                            if (dir.X * mouseDir.X + dir.Y * mouseDir.Y > (0.2f * types.Count) && dist > 500)
+                            if (dir.X * mouseDir.X + dir.Y * mouseDir.Y > (0.2f * types.Count) && dist > 500 && firstScrap != null)
                             {
                                 switch (types[i])
                                 {
@@ -419,7 +416,7 @@ public class Player : Entity
                                         }
                                         break;
                                     case "Resonator":
-                                        //firstScrap.isExpired = true;
+                                        firstScrap.isExpired = true;
                                         Engine.EntityManager.Add(Enemy.NewQuantumResonator(position));
                                         break;
                                 }

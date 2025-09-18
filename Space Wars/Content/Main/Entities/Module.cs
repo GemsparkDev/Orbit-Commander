@@ -26,7 +26,8 @@ public abstract class Module : Pickup, IData
     protected float cooldown = 0;
     public float Cooldown => cooldown;
 
-    public Module(Modules _type, Vector2 _position = default, Vector2 _velocity = default, float _angularVelocity = 0) : base(ItemFactory.moduleData[_type], _position, _velocity, _angularVelocity)
+    public Module(Modules _type, Vector2 _position = default, Vector2 _velocity = default, float _angularVelocity = 0) 
+        : base(ItemFactory.moduleData[_type], _position, _velocity, _angularVelocity)
     {
         health = MaxHealth;
         Type = _type;
@@ -198,8 +199,19 @@ public class Ablative() : Module(Modules.Ablative)
         base.OnUpdate();
     }
 }
-//Turtle : On shooting, full damage. Once 3 seconds have passed, 1/3 damage
-//Ablative : Damage buffer, on hit cooldown starts and buffer reduces, once cooldown is over buffer regenerates
+public class Adaptive() : Module(Modules.Adaptive)
+{
+    public override int OnCollide(int _damage)
+    {
+        if (Health > 0)
+        {
+            Player.StatusHolder.ApplyStatus(new Berserk(_damage));
+            return _damage * 2 / 3;
+        }
+        return _damage / 2;
+    }
+
+}
 public class StandardEngine() : Module(Modules.Engines)
 {
     float engineTime = 0;
@@ -578,6 +590,7 @@ public class Torch() : Module(Modules.Torch)
 }
 public class Dash() : Module(Modules.Dash)
 {
+    const float MaxCooldown = 2;
     public override void OnAbility()
     {
         if (cooldown > 0)
@@ -593,12 +606,18 @@ public class Dash() : Module(Modules.Dash)
             ParticleManager.Add(new Particle(Assets.Get(Sprite.Dot), timeLeft, Player.position + Player.Direction * i, Player.velocity * timeLeft, Util.ToAngle(Player.Direction), 0, Color.Cyan, col));
         }
         Player.position += Player.Direction * 200;
-        cooldown = 2f;
+        cooldown = MaxCooldown;
+    }
+    public override void OnUpdate()
+    {
+        UI.PlayerAbility.SetInterval(1 - cooldown / MaxCooldown, 1);
+        base.OnUpdate();
     }
 }
 public class SummonShield() : Module(Modules.SummonShield)
 {
     Enemy shield;
+    const float MaxCooldown = 5;
     public override void OnAbility()
     {
         if (cooldown > 0 || shield != null)
@@ -607,7 +626,7 @@ public class SummonShield() : Module(Modules.SummonShield)
         }
         shield = Enemy.NewShield(Player, 5, 1, 0, 1);
         Engine.EntityManager.Add(shield);
-        cooldown = 5;
+        cooldown = MaxCooldown;
     }
     public override void OnUpdate()
     {
@@ -615,11 +634,13 @@ public class SummonShield() : Module(Modules.SummonShield)
         {
             shield = null;
         }
+        UI.PlayerAbility.SetInterval(1 - cooldown / MaxCooldown, 1);
         base.OnUpdate();
     }
 }
 public class SummonGrapplingHook() : Module(Modules.GrapplingHook)
 {
+    const float MaxCooldown = 5;
     Projectile hook;
     public override void OnAbility()
     {
@@ -637,7 +658,7 @@ public class SummonGrapplingHook() : Module(Modules.GrapplingHook)
         Engine.ShakeScreen(0.3f);
         Player.velocity -= Player.Direction / 2;
         Engine.EntityManager.Add(hook);
-        cooldown = 5;
+        cooldown = MaxCooldown;
     }
     public override void OnUpdate()
     {
@@ -645,11 +666,13 @@ public class SummonGrapplingHook() : Module(Modules.GrapplingHook)
         {
             hook = null;
         }
+        UI.PlayerAbility.SetInterval(1 - cooldown / MaxCooldown, 1);
         base.OnUpdate();
     }
 }
 public class Nanomachines() : Module(Modules.Nanomachines)
 {
+    const float MaxCooldown = 30;
     public override void OnAbility()
     {
         if (cooldown > 0)
@@ -662,14 +685,20 @@ public class Nanomachines() : Module(Modules.Nanomachines)
             {
                 pickup.isExpired = true;
                 StatusHolder.ApplyStatus(new Healing(4));
-                cooldown = 30;
+                cooldown = MaxCooldown;
                 return;
             }
         }
     }
+    public override void OnUpdate()
+    {
+        UI.PlayerAbility.SetInterval(1 - cooldown / MaxCooldown, 1);
+        base.OnUpdate();
+    }
 }
 public class CreateFighter() : Module(Modules.CreateFighter)
 {
+    const float MaxCooldown = 60;
     public override void OnAbility()
     {
         if (cooldown > 0)
@@ -682,10 +711,15 @@ public class CreateFighter() : Module(Modules.CreateFighter)
             {
                 pickup.isExpired = true;
                 Engine.EntityManager.Add(Enemy.NewAdvancedFighter(Player.position, Player.velocity, angle, isFriendly));
-                cooldown = 60;
+                cooldown = MaxCooldown;
                 return;
             }
         }
+    }
+    public override void OnUpdate()
+    {
+        UI.PlayerAbility.SetInterval(1 - cooldown / MaxCooldown, 1);
+        base.Update();
     }
 }
 public class Sensors() : Module(Modules.Sensors)

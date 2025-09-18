@@ -17,6 +17,7 @@ public enum Modules
     Reflective,
     Turtle,
     Ablative,
+    Adaptive,
     //Engines
     Engines,
     Plasma,

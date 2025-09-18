@@ -1689,10 +1689,10 @@ public class Enemy : Entity
 
                 engineParticles.isEmitterActive = true;
             }
-            engineParticles.sprayAngle = (angle + MathF.PI) * 180 / MathF.PI;
+            engineParticles.sprayAngle = angle + MathF.PI;
             engineParticles.offsetVelocity = velocity;
             engineParticles.Update();
-            engineParticles.position = position + new Vector2(-MathF.Sin(angle), MathF.Cos(angle)) * 7;
+            engineParticles.position = position - Util.ToUnitVector(angle) * 7;
             if (EntityManager.DistanceSqr(this, nearestEnemy) < 10 * 10)
             {
                 Explode(8, 12);
@@ -2185,13 +2185,15 @@ public class Enemy : Entity
             yield return 0;
         }
     }
-    //Note: Add stealth behavior
     IEnumerable<int> Engineer()
     {
         StealthAbility = 1;
         enemyRange.particleVelocity = 500;
-        cd = [0];
-        float constructCooldown = 10;
+        cd = 
+        [
+            0, //Default
+            10, //Construct cooldown
+        ];
         float constructionTime = 0;
         Vector2 constructLocation = Vector2.Zero;
         bool constructing = false;
@@ -2220,7 +2222,7 @@ public class Enemy : Entity
                 trackedEnemy = null;
             }
             velocity *= 0.9f;
-            if (constructCooldown <= 0)
+            if (cd[1] <= 0)
             {
                 if (!constructing)
                 {
@@ -2232,7 +2234,6 @@ public class Enemy : Entity
             }
             else
             {
-                constructCooldown -= Engine.DeltaSeconds;
                 if (trackedEnemy != null)
                 {
                     GoToPosition(trackedEnemy.position, 3);
@@ -2253,7 +2254,7 @@ public class Enemy : Entity
                 {
                     Engine.EntityManager.Add(new Construct(Constructs.Trap, position, Vector2.Zero, 0, 0, 1));
                     constructing = false;
-                    constructCooldown = 15;
+                    cd[1] = 15;
                 }
                 else
                 {
@@ -2270,6 +2271,7 @@ public class Enemy : Entity
                 targetAngle = 0;
             }
             RotateTowards(targetAngle);
+            LowerCooldown();
             yield return 0;
         }
     }

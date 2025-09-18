@@ -172,10 +172,10 @@ public class Healing(float _duration) : Status
         duration += initialDuration;
     }
 }
-public class Berserk : Status
+public class Berserk(float _timeLeft) : Status
 {
     private bool bonus = false;
-    float timeLeft = 30;
+    float timeLeft = _timeLeft;
     private ParticleEmitter effect = new ParticleEmitter(Assets.Get(Sprite.Circle), Vector2.Zero, 28.3f, Color.Red * 0.5f) 
     { particleFadeToColor = Color.Transparent, particleTimeAlive = 0.5f, speedOfEmission = 0.25f };
 
