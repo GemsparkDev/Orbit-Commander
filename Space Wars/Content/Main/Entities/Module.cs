@@ -4,11 +4,8 @@ using Space_Wars.Content.Main;
 using Space_Wars.Content.Main.Particles;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Net.Http.Headers;
-using System.Reflection.Metadata;
-using System.Text.Json.Serialization;
 using UILib.Content.Main;
+using System.Linq;
 
 namespace Space_Wars.Content.Main.Entities;
 
@@ -699,9 +696,10 @@ public class Nanomachines() : Module(Modules.Nanomachines)
 public class CreateFighter() : Module(Modules.CreateFighter)
 {
     const float MaxCooldown = 60;
+    private List<Enemy> allies = [];
     public override void OnAbility()
     {
-        if (cooldown > 0)
+        if (cooldown > 0 || allies.Count >= 10)
         {
             return;
         }
@@ -710,7 +708,13 @@ public class CreateFighter() : Module(Modules.CreateFighter)
             if (pickup is not Module and not Construct)
             {
                 pickup.isExpired = true;
-                Engine.EntityManager.Add(Enemy.NewAdvancedFighter(Player.position, Player.velocity, angle, isFriendly));
+                for(int i = 0; i < 10; i++)
+                {
+                    var enemy = Enemy.NewSurgeChild(Player.position + new Vector2(Util.OneToNegOne(), Util.OneToNegOne()), Player.velocity, Player.angle, Player, allies);
+                    enemy.isFriendly = true;
+                    Engine.EntityManager.Add(enemy);
+                    allies.Add(enemy);
+                }
                 cooldown = MaxCooldown;
                 return;
             }
@@ -719,6 +723,7 @@ public class CreateFighter() : Module(Modules.CreateFighter)
     public override void OnUpdate()
     {
         UI.PlayerAbility.SetInterval(1 - cooldown / MaxCooldown, 1);
+        allies = allies.Where(x => !x.isExpired).ToList();
         base.Update();
     }
 }

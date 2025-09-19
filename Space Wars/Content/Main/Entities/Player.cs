@@ -31,7 +31,7 @@ public class Player : Entity
         { ModuleType.Guns, new Torch() },
         { ModuleType.Engines, new PlasmaEngine() },
         { ModuleType.Sensors, new Sensors() },
-        { ModuleType.Core, new Dash() }
+        { ModuleType.Core, new CreateFighter() }
     };
 
     public Vector2 Direction => targetVector;
@@ -365,11 +365,11 @@ public class Player : Entity
                         }
                         float angle = 0;
                         var types = new List<string>
-                    {
-                        "Barricade",
-                        "Trap",
-                        "Bomb"
-                    };
+                        {
+                            "Barricade",
+                            "Trap",
+                            "Bomb"
+                        };
                         if (Progression > 3)
                         {
                             types.Add("Mothership");
@@ -463,28 +463,19 @@ public class Player : Entity
                 Keys[] pressedKey = Input.NewState.GetPressedKeys();
                 direction = Vector2.Zero;
                 isEngineActive = false;
-                for (int i = 0; i < pressedKey.Length; i++)
+                var directions = new Dictionary<Keys, Vector2>
                 {
-                    switch (pressedKey[i])
+                    { Keys.W, new Vector2(0, -1) },
+                    { Keys.A, new Vector2(-1, 0) },
+                    { Keys.S, new Vector2(0, 1) },
+                    { Keys.D, new Vector2(1, 0) }
+                };
+                foreach (var key in pressedKey)
+                {
+                    if (directions.TryGetValue(key, out Vector2 value))
                     {
-                        case Keys.W:
-                            direction += new Vector2(0, -1);
-                            isEngineActive = true;
-                            break;
-                        case Keys.A:
-                            direction += new Vector2(-1, 0);
-                            isEngineActive = true;
-                            break;
-                        case Keys.S:
-                            direction += new Vector2(0, 1);
-                            isEngineActive = true;
-                            break;
-                        case Keys.D:
-                            direction += new Vector2(1, 0);
-                            isEngineActive = true;
-                            break;
-                        default:
-                            break;
+                        direction += value;
+                        isEngineActive = true;
                     }
                 }
                 if (isEngineActive)
@@ -611,7 +602,7 @@ public class Player : Entity
                 //If a module is failed, further collisions damage fuses
                 var targetFuse = new Vector2(Util.Random.Next(0, moduleFuses.GetLength(0)), Util.Random.Next(0, moduleFuses.GetLength(1)));
                 var failedPart = (ModuleType)Util.Random.Next(0, 4);
-                float threshold = 1 - 1 / (_damage - 1);
+                float threshold = 1 - 1 / (_damage);
                 if (Util.Random.NextSingle() < threshold && modules[(ModuleType)targetFuse.X].isFailed && moduleFuses[(int)targetFuse.X, (int)targetFuse.Y])
                 {
                     moduleFuses[(int)targetFuse.X, (int)targetFuse.Y] = false;
