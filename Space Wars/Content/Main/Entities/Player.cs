@@ -27,7 +27,7 @@ public class Player : Entity
     };
     public Dictionary<ModuleType, Module> modules = new()
     {
-        { ModuleType.Hull, new Adaptive() },
+        { ModuleType.Hull, new Turtle() },
         { ModuleType.Guns, new Torch() },
         { ModuleType.Engines, new PlasmaEngine() },
         { ModuleType.Sensors, new Sensors() },

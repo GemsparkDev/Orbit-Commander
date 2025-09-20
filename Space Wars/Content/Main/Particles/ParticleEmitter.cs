@@ -132,6 +132,10 @@ namespace Space_Wars.Content.Main.Particles
             Vector2 normalVector;
             float increment = MathF.Tau / particleVelocity / speedOfEmission;
             int count = (int)Math.Truncate(sprayCone / increment);
+            if (count == 0)
+            {
+                return;
+            }
             if(count % 2 == 0 && count != 0)
             {
                 for (float angle = increment/2; angle < sprayCone / 2; angle += increment)

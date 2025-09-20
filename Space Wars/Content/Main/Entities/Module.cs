@@ -155,6 +155,9 @@ public class Reflective() : Module(Modules.Reflective)
 }
 public class Turtle() : Module(Modules.Turtle)
 {
+    float time = 0;
+    int flipped = 1;
+    ParticleEmitter effect = new ParticleEmitter(Assets.Get(Sprite.Dot), Vector2.Zero, 10, Color.Orange) { sprayAngle = MathF.PI / 2};
     public override int OnCollide(int _damage)
     {
         return (int)(_damage * (1 - (1 - cooldown) * (1 - cooldown)));
@@ -167,6 +170,28 @@ public class Turtle() : Module(Modules.Turtle)
     {
         UI.PlayerSpecialHealth.enabledColor = Color.Orange;
         UI.PlayerSpecialHealth.SetInterval((1 - cooldown) * (1 - cooldown), 1);
+        time += Engine.DeltaSeconds;
+        if (time > 1)
+        {
+            time = 0;
+            flipped *= -1;
+            effect.sprayAngle += MathF.PI;
+            if (effect.sprayAngle > MathF.Tau)
+            {
+                effect.sprayAngle -= MathF.Tau;
+            }
+        }
+        effect.position = Player.position;
+        if (flipped == 1)
+        {
+            effect.sprayCone = MathF.Tau * time;
+        }
+        else
+        {
+            effect.sprayCone = MathF.Tau * (1 - time);
+        }
+        effect.particleColor = Color.Orange * (1 - cooldown) * (1 - cooldown);
+        effect.Update();
         base.OnUpdate();
     }
 }
