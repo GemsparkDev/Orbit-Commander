@@ -4,11 +4,13 @@ using System;
 using Microsoft.Xna.Framework;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace Space_Wars.Content.Main;
-public abstract class Status
+public abstract class Status(Sprite _icon)
 {
     public bool IsExpired { get; protected set; } = false;
+    public Sprite Icon { get; } = _icon;
     public abstract StatusType Type { get; }
     public abstract void Update(Entity _parent);
     public abstract void Reset();
@@ -55,8 +57,17 @@ public class StatusHolder
         }
         effects.Add(_status);
     }
+    public void Draw(SpriteBatch _spriteBatch, Entity _parent)
+    {
+        float maxOffset = (float)(effects.Count - 1) / 2;
+        foreach (var effect in effects)
+        {
+            _spriteBatch.Draw(Assets.Get(effect.Icon), _parent.position + new Vector2(maxOffset * 20, 20), null, Color.White, 0, Assets.DimsOf(effect.Icon) / 2, 1, 0, 0);
+            maxOffset -= 1;
+        }
+    }
 }
-public class Bomb : Status
+public class Bomb() : Status(Sprite.Knob)
 {
     float time = 0;
     public override StatusType Type { get; } = StatusType.Bomb;
@@ -82,7 +93,7 @@ public class Bomb : Status
         time = 0;
     }
 }
-public class Fire(float _duration) : Status
+public class Fire(float _duration) : Status(Sprite.Knob)
 {
     float initialDuration = _duration;
     float duration = _duration;
@@ -129,7 +140,7 @@ public class Fire(float _duration) : Status
         duration = initialDuration;
     }
 }
-public class Healing(float _duration) : Status
+public class Healing(float _duration) : Status(Sprite.Knob)
 {
     float initialDuration = _duration;
     float duration = _duration;
@@ -172,7 +183,7 @@ public class Healing(float _duration) : Status
         duration += initialDuration;
     }
 }
-public class Berserk(float _timeLeft) : Status
+public class Berserk(float _timeLeft) : Status(Sprite.Knob)
 {
     private bool bonus = false;
     float timeLeft = _timeLeft;

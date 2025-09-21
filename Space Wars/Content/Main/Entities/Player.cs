@@ -27,7 +27,7 @@ public class Player : Entity
     };
     public Dictionary<ModuleType, Module> modules = new()
     {
-        { ModuleType.Hull, new Turtle() },
+        { ModuleType.Hull, new Adaptive() },
         { ModuleType.Guns, new Torch() },
         { ModuleType.Engines, new PlasmaEngine() },
         { ModuleType.Sensors, new Sensors() },
@@ -701,6 +701,7 @@ public class Player : Entity
         {
             return;
         }
+        StatusHolder.Draw(_spriteBatch, this);
         base.Draw(_spriteBatch);
     }
     public Player(string _serialization, LoadLogger _logger)
