@@ -93,12 +93,13 @@ public class Bomb() : Status(Sprite.Knob)
         time = 0;
     }
 }
-public class Fire(float _duration) : Status(Sprite.Knob)
+public class Fire(float _duration, Color _color) : Status(Sprite.Knob)
 {
     float initialDuration = _duration;
     float duration = _duration;
     float fireCooldown = 0.05f;
     float attackCooldown = 0.5f;
+
     public override StatusType Type { get; } = StatusType.Fire;
 
     public override void Update(Entity _parent)
@@ -111,7 +112,7 @@ public class Fire(float _duration) : Status(Sprite.Knob)
         {
             fireCooldown = 0.05f;
             ParticleManager.Add(new Particle(Assets.Get(Sprite.Circle), 0.5f + Util.Random.NextSingle() / 10, _parent.position - _parent.velocity, 
-                _parent.velocity + new Vector2(Util.OneToNegOne() / 3, -Util.Random.NextSingle() - 0.5f), 0, Util.OneToNegOne() / 5, Color.Orange, Color.Transparent));
+                _parent.velocity + new Vector2(Util.OneToNegOne() / 3, -Util.Random.NextSingle() - 0.5f), 0, Util.OneToNegOne() / 5, _color, Color.Transparent));
         }
         if (attackCooldown > 0)
         {

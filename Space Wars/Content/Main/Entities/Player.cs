@@ -28,8 +28,8 @@ public class Player : Entity
     public Dictionary<ModuleType, Module> modules = new()
     {
         { ModuleType.Hull, new Adaptive() },
-        { ModuleType.Guns, new Torch() },
-        { ModuleType.Engines, new PlasmaEngine() },
+        { ModuleType.Guns, new Poison() },
+        { ModuleType.Engines, new OrionEngine() },
         { ModuleType.Sensors, new Sensors() },
         { ModuleType.Core, new CreateFighter() }
     };

@@ -318,6 +318,24 @@ public class WorkEngine() : Module(Modules.Work)
         }
     }
 }
+public class OrionEngine() : Module(Modules.Orion)
+{
+    public override void OnEngine()
+    {
+        if (cooldown > 0)
+        {
+            return;
+        }
+        cooldown = 0.5f;
+        var dir = Vector2.Normalize(Player.direction);
+        if (Player.direction != Vector2.Zero)
+        {
+            Player.velocity += dir * 4 / (Player.leashedMaterials.Count + 1);
+            Util.Explode(Player.position - dir * 30, Player.velocity, 10, 28);
+            SoundManager.PlaySound(Assets.Get(Sound.ShieldHit), Player.position);
+        }
+    }
+}
 public class Basic() : Module(Modules.Basic)
 {
     public override void OnShoot()
@@ -608,6 +626,25 @@ public class Torch() : Module(Modules.Torch)
         Engine.ShakeScreen(0.02f);
         Player.velocity -= Player.Direction / 6;
         cooldown = 0.1f;
+    }
+}
+public class Poison() : Module(Modules.Poison)
+{
+    public override void OnShoot() 
+    {
+        if (cooldown > 0)
+        {
+            return;
+        }
+        Vector2 vel = Player.Direction;
+        Projectile shot = new FlameBolt(Player.position, vel, isFriendly, 0, 
+        new ParticleEmitter(Assets.Get(Sprite.Circle), 10, Player.position, 0, MathF.Tau, 1.5f, 2000, Color.Green, EmitterType.EmissionOverTime) 
+        { particleFadeToColor = Color.Transparent, offsetVelocity = vel, particlesExperienceGravity = true}, 20, 1);
+        Engine.EntityManager.Add(shot);
+        SoundManager.PlaySound(Assets.Get(Sound.LMGFire), Player.position);
+        Engine.ShakeScreen(0.02f);
+        Player.velocity -= Player.Direction / 6;
+        cooldown = 1.5f;
     }
 }
 public class Dash() : Module(Modules.Dash)

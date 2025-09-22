@@ -39,10 +39,12 @@ public static class ItemFactory
         { Modules.PrismArray, new ModuleData(Sprite.RealCrossbowModule,Sprite.CrossbowModule, "Prism Array", (int)ModuleType.Guns, 15, typeof(PrismArray))},
         { Modules.MatrixLauncher, new ModuleData(Sprite.RealCrossbowModule,Sprite.CrossbowModule, "Matrix Launcher", (int)ModuleType.Guns, 15, typeof(MatrixLauncher))},
         { Modules.Torch, new ModuleData(Sprite.TorchReal,Sprite.Torch, "Torch", (int)ModuleType.Guns, 15, typeof(Torch))},
+        { Modules.Poison, new ModuleData(Sprite.TorchReal,Sprite.Torch, "Torch", (int)ModuleType.Guns, 20, typeof(Poison))},
 
         { Modules.Engines, new ModuleData(Sprite.EngineModule, Sprite.EngineModule, "Engines", (int)ModuleType.Engines, 20, typeof(Engine)) },
         { Modules.Plasma, new ModuleData(Sprite.EngineModule, Sprite.EngineModule, "Plasma", (int)ModuleType.Engines, 15, typeof(PlasmaEngine)) },
         { Modules.Work, new ModuleData(Sprite.EngineModule, Sprite.EngineModule, "Work", (int)ModuleType.Engines, 25, typeof(WorkEngine)) },
+        { Modules.Orion, new ModuleData(Sprite.EngineModule, Sprite.EngineModule, "Orion", (int)ModuleType.Engines, 20, typeof(OrionEngine)) },
 
         { Modules.Sensors, new ModuleData(Sprite.SensorModule,Sprite.SensorModule, "Sensors", (int)ModuleType.Sensors, 20, typeof(Sensors)) },
         { Modules.Lidar, new ModuleData(Sprite.SensorModule,Sprite.SensorModule, "Lidar", (int)ModuleType.Sensors, 20, typeof(Lidar)) },

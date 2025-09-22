@@ -286,11 +286,11 @@ public class FlameBolt : Projectile
     {
         collider.particleVelocity = ColliderRadius;
         emitter.position = position;
-        emitter.Update();
         emitter.offsetVelocity = velocity;
+        emitter.particleTimeAlive = Math.Min(1, MathF.Sqrt(timeLeft));
+        emitter.Update();
         position += velocity * Engine.DeltaSeconds * 60;
         angle += angularVelocity * Engine.DeltaSeconds * 60;
-        emitter.particleTimeAlive = Math.Min(1, MathF.Sqrt(timeLeft));
         if (emitter.EmitterType == EmitterType.Circle)
         {
             emitter.particleVelocity = Math.Min((maxTimeLeft - timeLeft), emitter.particleTimeAlive) * 60;
@@ -306,10 +306,9 @@ public class FlameBolt : Projectile
             if (piercingCooldown <= 0 && isFriendly != nearestEnemy.isFriendly && EntityManager.DistanceSqr(this, nearestEnemy) <= combinedRadius * combinedRadius)
             {
                 piercingCooldown = 0.05f;
-                if(nearestEnemy.Collide(damage))
-                {
-                    nearestEnemy.StatusHolder.ApplyStatus(new Fire(2));
-                }
+                nearestEnemy.Collide(damage);
+                //Always apply effect even if no damage hit
+                nearestEnemy.StatusHolder.ApplyStatus(new Fire(2, emitter.particleColor));
             }
         }
     }

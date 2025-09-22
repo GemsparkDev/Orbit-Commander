@@ -22,6 +22,7 @@ public enum Modules
     Engines,
     Plasma,
     Work,
+    Orion,
     //Sensors
     Sensors,
     Lidar,
@@ -44,6 +45,7 @@ public enum Modules
     PrismArray,
     MatrixLauncher,
     Torch,
+    Poison,
     //Cores
     Dash,
     GrapplingHook,

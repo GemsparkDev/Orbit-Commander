@@ -286,4 +286,23 @@ public static class Util
         float sin = MathF.Sin(a);
         return new Vector2(v.X * cos - v.Y * sin, v.X * sin + v.Y * cos);
     }
+    public static void Explode(Vector2 _position, Vector2 _velocity, int _damage, float _radius)
+    {
+        int particles = Random.Next(15, 25);
+        for (int i = 0; i < particles; i++)
+        {
+            float angle = Random.NextSingle() * MathF.PI * 2;
+            Vector2 particleVelocity = new Vector2(MathF.Cos(angle), MathF.Sin(angle)) * (Util.Random.NextSingle() * 2 + 2);
+            ParticleManager.Add(new Particle(Assets.Get(Sprite.Dot), 0.25f, _position - _velocity, particleVelocity + _velocity, angle, 0, Color.Yellow, new Color(255, 0, 0, 0)));
+        }
+        particles = Random.Next(8, 16);
+        for (int i = 0; i < particles; i++)
+        {
+            float angle = Random.NextSingle() * MathF.PI * 2;
+            Vector2 particleVelocity = new Vector2(MathF.Cos(angle), MathF.Sin(angle)) * (Util.Random.NextSingle() * 2 + 2);
+            ParticleManager.Add(new Particle(Assets.Get(Sprite.Circle), 0.25f, _position - _velocity, particleVelocity + _velocity, angle, 0, Color.DarkSlateGray, Color.Transparent));
+        }
+        Engine.EntityManager.Explode(_damage, _radius, _position);
+        Engine.ShakeScreen(150 / ((_position - Engine.Camera.Position).Length() + 300));
+    }
 }

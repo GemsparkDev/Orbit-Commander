@@ -161,22 +161,7 @@ public class Enemy : Entity
     }
     public void Explode(int _damage, float _radius)
     {
-        int particles = Util.Random.Next(15, 25);
-        for (int i = 0; i < particles; i++)
-        {
-            float angle = Util.Random.NextSingle() * MathF.PI * 2;
-            Vector2 particleVelocity = new Vector2(MathF.Cos(angle), MathF.Sin(angle)) * (Util.Random.NextSingle() * 2 + 2);
-            ParticleManager.Add(new Particle(Assets.Get(Sprite.Dot), 0.25f, position, particleVelocity + velocity, angle, 0, Color.Yellow, new Color(255, 0, 0, 0)));
-        }
-        particles = Util.Random.Next(8, 16);
-        for (int i = 0; i < particles; i++)
-        {
-            float angle = Util.Random.NextSingle() * MathF.PI * 2;
-            Vector2 particleVelocity = new Vector2(MathF.Cos(angle), MathF.Sin(angle)) * (Util.Random.NextSingle() * 2 + 2);
-            ParticleManager.Add(new Particle(Assets.Get(Sprite.Circle), 0.25f, position, particleVelocity + velocity, angle, 0, Color.DarkSlateGray, Color.Transparent));
-        }
-        Engine.EntityManager.Explode(_damage, _radius, position);
-        Engine.ShakeScreen(150 / ((position - Engine.Camera.Position).Length()+300));
+        Util.Explode(position, velocity, _damage, _radius);
     }
     public override void Draw(SpriteBatch _spriteBatch)
     {

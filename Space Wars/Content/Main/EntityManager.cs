@@ -238,6 +238,10 @@ public class EntityManager
         float dist;
         foreach (var entity in entities)
         {
+            if (entity is Projectile)
+            {
+                continue;
+            }
             dist = Vector2.Distance(_position, entity.position);
             if (dist < _radius + entity.ColliderRadius && dist > float.Epsilon)
             {
