@@ -52,6 +52,7 @@ public enum Modules
     SummonShield,
     Nanomachines,
     CreateFighter,
+    Assault,
 }
 public enum Sprite
 {

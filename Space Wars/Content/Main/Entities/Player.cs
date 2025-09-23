@@ -31,7 +31,7 @@ public class Player : Entity
         { ModuleType.Guns, new Poison() },
         { ModuleType.Engines, new OrionEngine() },
         { ModuleType.Sensors, new Sensors() },
-        { ModuleType.Core, new CreateFighter() }
+        { ModuleType.Core, new Assault() }
     };
 
     public Vector2 Direction => targetVector;

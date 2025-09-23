@@ -636,15 +636,14 @@ public class Poison() : Module(Modules.Poison)
         {
             return;
         }
-        Vector2 vel = Player.Direction;
-        Projectile shot = new FlameBolt(Player.position, vel, isFriendly, 0, 
-        new ParticleEmitter(Assets.Get(Sprite.Circle), 10, Player.position, 0, MathF.Tau, 1.5f, 2000, Color.Green, EmitterType.EmissionOverTime) 
-        { particleFadeToColor = Color.Transparent, offsetVelocity = vel, particlesExperienceGravity = true}, 20, 1);
+        Projectile shot = new FlameBolt(Player.position, Player.IdealSpeedWithVelocity(2), isFriendly, 0, 
+        new ParticleEmitter(Assets.Get(Sprite.Circle), 10, Player.position, 0, MathF.Tau, 1f, 800, Color.Green, EmitterType.EmissionOverTime) 
+        { particleFadeToColor = Color.Transparent, particlesExperienceGravity = true}, 10, 1);
         Engine.EntityManager.Add(shot);
         SoundManager.PlaySound(Assets.Get(Sound.LMGFire), Player.position);
         Engine.ShakeScreen(0.02f);
         Player.velocity -= Player.Direction / 6;
-        cooldown = 1.5f;
+        cooldown = 0.5f;
     }
 }
 public class Dash() : Module(Modules.Dash)
@@ -787,6 +786,44 @@ public class CreateFighter() : Module(Modules.CreateFighter)
         UI.PlayerAbility.SetInterval(1 - cooldown / MaxCooldown, 1);
         allies = allies.Where(x => !x.isExpired).ToList();
         base.Update();
+    }
+}
+public class Assault() : Module(Modules.Assault)
+{
+    bool isShooting = false;
+    const float MaxCooldown = 30;
+    float count;
+    public override void OnAbility() 
+    {
+        if (isShooting || cooldown > 0)
+        {
+            return;
+        }
+        count = 1;
+        for (float angle = 0; angle < MathF.Tau; angle += MathF.PI / 4)
+        {
+            Engine.EntityManager.Add(new PulseShot(Player.position, Util.ToUnitVector(angle) * 10, angle, 0, Player.isFriendly, 10, true, 1));
+        }
+        isShooting = true;
+        SoundManager.PlaySound(Assets.Get(Sound.PulseFire), Player.position);
+    }
+    public override void OnUpdate()
+    {
+        if (isShooting && cooldown <= 0)
+        {
+            Engine.EntityManager.Add(new PulseShot(Player.position, Util.ToUnitVector(count * 1.61803398875f) * 10, count * 1.61803398875f, 0, Player.isFriendly, 10, true, 1));
+            SoundManager.PlaySound(Assets.Get(Sound.PulseFire), Player.position);
+            cooldown = 0.1f;
+            count++;
+            if (count >= 11)
+            {
+                count = 0;
+                cooldown = 30;
+                isShooting = false;
+            }
+        }
+        UI.PlayerAbility.SetInterval(1 - cooldown / MaxCooldown, 1);
+        base.OnUpdate();
     }
 }
 public class Sensors() : Module(Modules.Sensors)

@@ -3,22 +3,25 @@
 Lagrange Commander is a game made using C# in monogame. It is a 2D top down wave based shooter where you must repair and upgrade your ship by salvaging from enemies you defeat. It features realistic N-Body gravitation, which affects all entities and projectiles.
   
 # Changelog  
+0.6.2.8 - 9/22/2025    
+ - The poison module now shoots faster but has smaller projectiles.    
+ - Added the assault module.    
 0.6.2.7 - 9/21/2025    
  - Added the poison and the orion modules.    
 0.6.2.6 - 9/20/2025    
  - Added a simple effect display system.    
-0.6.2.5 - 9/19/2025
+0.6.2.5 - 9/19/2025    
  - Added an effect to the turtle hull.    
-0.6.2.4 - 9/18/2025
+0.6.2.4 - 9/18/2025    
  - Fixed a divide by zero error.    
  - The CreateFighter module now creates a swarm of surge minions.    
-0.6.2.3 - 9/17/2025
+0.6.2.3 - 9/17/2025    
  - Added the Adaptive hull.   
  - All abilities now update the ability ui properly.    
-0.6.2.2 - 9/16/2025
+0.6.2.2 - 9/16/2025    
  - Fixed serialization of modules.    
  - Added ability for modules to insert custom serialization.       
-0.6.2.1 - 9/15/2025
+0.6.2.1 - 9/15/2025    
  - Damage now slowly ticks down.    
  - Seperated custom health ui and the main player ui.    
  - Added the turtle and ablative hulls.    
