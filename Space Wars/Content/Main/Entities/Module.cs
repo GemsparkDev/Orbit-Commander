@@ -705,6 +705,8 @@ public class SummonGrapplingHook() : Module(Modules.GrapplingHook)
         if (hook != null)
         {
             cooldown /= 2;
+            hook.isExpired = true;
+            hook = null;
             return;
         }
         if (cooldown > 0)

@@ -122,6 +122,7 @@ public class AssassinShot : Projectile
 }
 public class GrapplingHook : Projectile
 {
+    int prevScroll = Input.NewMouseState.ScrollWheelValue;
     internal interface ILatchable
     {
         public Vector2 Position { get; }
@@ -151,7 +152,8 @@ public class GrapplingHook : Projectile
     private ILatchable target;
     private float maxDistance = 800;
     public bool IsHooked => target != null;
-    public GrapplingHook(Vector2 _position, Vector2 _velocity, float _angle, Entity _parent, bool _isFriendly = true) : base(Assets.Get(Sprite.Microshot), _position, _velocity, _angle, 0, _isFriendly, 0, 0)
+    public GrapplingHook(Vector2 _position, Vector2 _velocity, float _angle, Entity _parent, bool _isFriendly = true) 
+        : base(Assets.Get(Sprite.Microshot), _position, _velocity, _angle, 0, _isFriendly, 0, 0)
     {
         parent = _parent;
         color = _isFriendly ? new Color(0, 255, 255) : Color.Red;
@@ -168,9 +170,13 @@ public class GrapplingHook : Projectile
             if (distance > maxDistance)
             {
                 var direction = Vector2.Normalize(position - parent.position);
-                var force = direction * (distance - maxDistance) * Engine.DeltaSeconds;
+                var force = direction * (distance - maxDistance) * Engine.DeltaSeconds / 2;
                 parent.velocity += force;
                 target.ApplyForce(force);
+            }
+            if (parent == Engine.SaveGame.Player && Input.NewMouseState.ScrollWheelValue != prevScroll)
+            {
+                maxDistance = Math.Max(0, maxDistance + (Input.NewMouseState.ScrollWheelValue - prevScroll) / 5);
             }
             if (target.IsExpired)
             {
@@ -219,6 +225,7 @@ public class GrapplingHook : Projectile
                 ParticleManager.Add(new Particle(this.texture, 1, position, velocity, this.angle, 0, color, Color.Transparent));
             }
         }
+        prevScroll = Input.NewMouseState.ScrollWheelValue;
     }
     public override void Draw(SpriteBatch _spriteBatch)
     {

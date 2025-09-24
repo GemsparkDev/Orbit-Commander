@@ -29,9 +29,9 @@ public class Player : Entity
     {
         { ModuleType.Hull, new Adaptive() },
         { ModuleType.Guns, new Poison() },
-        { ModuleType.Engines, new OrionEngine() },
+        { ModuleType.Engines, new PlasmaEngine() },
         { ModuleType.Sensors, new Sensors() },
-        { ModuleType.Core, new Assault() }
+        { ModuleType.Core, new SummonGrapplingHook() }
     };
 
     public Vector2 Direction => targetVector;
