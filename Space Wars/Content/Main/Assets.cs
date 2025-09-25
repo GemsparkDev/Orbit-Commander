@@ -94,6 +94,8 @@ public static class Assets
         Sprites.Add(Sprite.RealSpecializedParts, Content.Load<Texture2D>("Images/Item_7 Real"));
         Sprites.Add(Sprite.Torch, Content.Load<Texture2D>("Images/Item_8"));
         Sprites.Add(Sprite.TorchReal, Content.Load<Texture2D>("Images/UI_37"));
+        Sprites.Add(Sprite.AssaultReal, Content.Load<Texture2D>("Images/UI_38"));
+        Sprites.Add(Sprite.Assault, Content.Load<Texture2D>("Images/Item_9"));
 
         //Projectiles
         Sprites.Add(Sprite.SpiralShot, Content.Load<Texture2D>("Images/Projectile_0"));

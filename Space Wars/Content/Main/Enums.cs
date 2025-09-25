@@ -102,8 +102,6 @@ public enum Sprite
     SurgeChild,
     SurgeBoss,
     Engineer,
-    Torch,
-    TorchReal,
 
     MetalScrap,
     RealMetalScrap,
@@ -128,6 +126,10 @@ public enum Sprite
     RealFlamethrowerModule,
     SpecializedParts,
     RealSpecializedParts,
+    Torch,
+    TorchReal,
+    Assault,
+    AssaultReal,
 
     SpiralShot,
     PulseShot,
