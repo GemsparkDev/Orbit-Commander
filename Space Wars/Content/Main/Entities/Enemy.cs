@@ -270,6 +270,35 @@ public class Enemy : Entity
             yield return 0;
         }
     }
+    //Simulate worm based enemies
+    //Return tail when constructing worms
+    IEnumerable<int> FollowNextSegment(Enemy parent)
+    {
+        ChildEnemy = true;
+        Engine.EntityManager.Add(parent);
+        while (health > 0 && parent != null)
+        {
+            if (parent != null)
+            {
+                if (parent.health <= 0)
+                {
+                    parent = null;
+                    ChildEnemy = false;
+                }
+                else
+                {
+                    Vector2 p1 = parent.position - new Vector2(MathF.Sin(parent.angle), -MathF.Cos(parent.angle)) * parent.texture.Height / 2;
+                    Vector2 relativep1 = p1 - position;
+                    if (relativep1.LengthSquared() > float.Epsilon)
+                    {
+                        angle = Util.ToAngle(relativep1);
+                    }
+                    position = p1 - new Vector2(MathF.Sin(angle), -MathF.Cos(angle)) * texture.Height / 2;
+                }
+            }
+            yield return 0;
+        }
+    }
     #endregion
     #region Bosses
     IEnumerable<int> Symmetry()
@@ -2275,6 +2304,24 @@ public class Enemy : Entity
             yield return 0;
         }
     }
+    IEnumerable<int> Wyrm(Enemy _parent)
+    {
+        while (health > 0)
+        {
+            if (_parent == null || _parent.health <= 0)
+            {
+                Entity enemy = Engine.EntityManager.NearestEnemy(this);
+                velocity += (enemy.position - position) / 200;
+                velocity *= Util.FIED(0.5f);
+                if (Vector2.DistanceSquared(enemy.position, position) < (enemy.ColliderRadius + ColliderRadius) * (enemy.ColliderRadius + ColliderRadius))
+                {
+                    enemy.Collide(damage);
+                }
+                angle = Util.ToAngle(velocity);
+            }
+            yield return 0;
+        }
+    }
 #endregion
     #region Infrastructure
     IEnumerable<int> Mothership()
@@ -3305,6 +3352,23 @@ public class Enemy : Entity
         enemy.AddBehaviour(enemy.Engineer());
         enemy.AddBehaviour(enemy.EnemyDeath(1));
         enemy.AddBehaviour(enemy.AvoidProjectiles(1));
+        return enemy;
+    }
+    public static Enemy NewWyrm(Vector2 position, Vector2 velocity, float angle)
+    {
+        //Head
+        var enemy = new Enemy(position, velocity, angle, 3, 12, Assets.Get(Sprite.Engineer), false);
+        enemy.AddBehaviour(enemy.Wyrm(null));
+        enemy.AddBehaviour(enemy.EnemyDeath(1));
+        //Segments
+        for (int i = 0; i < 5; i++)
+        {
+            var _enemy = new Enemy(position, velocity, angle, 3, 12, Assets.Get(Sprite.Engineer), false);
+            _enemy.AddBehaviour(_enemy.Wyrm(enemy));
+            _enemy.AddBehaviour(_enemy.EnemyDeath(1));
+            _enemy.AddBehaviour(_enemy.FollowNextSegment(enemy));
+            enemy = _enemy;
+        }
         return enemy;
     }
 }

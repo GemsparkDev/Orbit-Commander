@@ -6,7 +6,6 @@ using System.Text;
 using Microsoft.Xna.Framework;
 using Space_Wars.Content.Main.Entities;
 using System.Diagnostics;
-using Microsoft.Xna.Framework.Media;
 
 namespace Space_Wars.Content.Main;
 public static class SoundManager
