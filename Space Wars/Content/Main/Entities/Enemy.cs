@@ -271,13 +271,13 @@ public class Enemy : Entity
         }
     }
     //Simulate worm based enemies
-    //Return tail when constructing worms
+    //Use the SpawnWorm behavior on the head for proper functioning
     IEnumerable<int> FollowNextSegment(Enemy parent)
     {
         ChildEnemy = true;
-        Engine.EntityManager.Add(parent);
         while (health > 0 && parent != null)
         {
+            velocity = Vector2.Zero;
             if (parent != null)
             {
                 if (parent.health <= 0)
@@ -298,6 +298,14 @@ public class Enemy : Entity
             }
             yield return 0;
         }
+    }
+    IEnumerable<int> SpawnWorm(List<Enemy> segments)
+    {
+        foreach (var enemy in segments)
+        {
+            Engine.EntityManager.Add(enemy);
+        }
+        yield return 0;
     }
     #endregion
     #region Bosses
@@ -2311,7 +2319,12 @@ public class Enemy : Entity
             if (_parent == null || _parent.health <= 0)
             {
                 Entity enemy = Engine.EntityManager.NearestEnemy(this);
-                velocity += (enemy.position - position) / 200;
+                Vector2 acceleration = (enemy.position - position) / 5;
+                if (acceleration.LengthSquared() > 300 * 300)
+                {
+                    acceleration = Vector2.Normalize(acceleration) * 300;
+                }
+                velocity += acceleration * Engine.DeltaSeconds;
                 velocity *= Util.FIED(0.5f);
                 if (Vector2.DistanceSquared(enemy.position, position) < (enemy.ColliderRadius + ColliderRadius) * (enemy.ColliderRadius + ColliderRadius))
                 {
@@ -3356,19 +3369,24 @@ public class Enemy : Entity
     }
     public static Enemy NewWyrm(Vector2 position, Vector2 velocity, float angle)
     {
+        List<Enemy> segments = [];
         //Head
-        var enemy = new Enemy(position, velocity, angle, 3, 12, Assets.Get(Sprite.Engineer), false);
+        var enemy = new Enemy(position, velocity, angle, 8, 8, Assets.Get(Sprite.Wyrm), false);
         enemy.AddBehaviour(enemy.Wyrm(null));
         enemy.AddBehaviour(enemy.EnemyDeath(1));
+        enemy.AddBehaviour(enemy.SpawnWorm(segments));
+        Enemy head = enemy;
+
         //Segments
         for (int i = 0; i < 5; i++)
         {
-            var _enemy = new Enemy(position, velocity, angle, 3, 12, Assets.Get(Sprite.Engineer), false);
+            var _enemy = new Enemy(position, velocity, angle, 8, 8, Assets.Get(Sprite.Wyrm), false);
             _enemy.AddBehaviour(_enemy.Wyrm(enemy));
             _enemy.AddBehaviour(_enemy.EnemyDeath(1));
             _enemy.AddBehaviour(_enemy.FollowNextSegment(enemy));
+            segments.Add(_enemy);
             enemy = _enemy;
         }
-        return enemy;
+        return head;
     }
 }

@@ -102,6 +102,7 @@ public enum Sprite
     SurgeChild,
     SurgeBoss,
     Engineer,
+    Wyrm,
 
     MetalScrap,
     RealMetalScrap,
