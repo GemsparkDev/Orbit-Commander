@@ -30,6 +30,10 @@ public abstract class Projectile : Entity
         base.Update();
     }
     public abstract void AI();
+    public override void UpdateColor()
+    {
+        color = isFriendly ? Engine.ColorScheme.FriendlyProjectile() : Engine.ColorScheme.HostileEnemy();
+    }
     public override bool Collide(int _damage, bool _ignoreImmunity = false)
     {
         int particles = random.Next(2, 4);
@@ -54,7 +58,7 @@ public class PulseShot : Projectile
     {
         entityType = EntityType.Projectile;
         isHoming = _isHoming;
-        color = _isFriendly ? Color.Orange : Color.Red;
+        UpdateColor();
     }
     public override void AI()
     {
@@ -81,7 +85,7 @@ public class SpiralShot : Projectile
         entityType = EntityType.Projectile;
         time = 0;
         offset = _isOffset ? 1 : -1;
-        color = _isFriendly ? Color.Orange : Color.Red;
+        UpdateColor();
     }
     public override void AI()
     {
@@ -100,7 +104,7 @@ public class AssassinShot : Projectile
         : base(Assets.Get(Sprite.Missile), _position, _velocity, _angle, _angularVelocity, _isFriendly, _damage, _stealth)
     {
         entityType = EntityType.Projectile;
-        color = _isFriendly ? Color.Orange : Color.Red;
+        UpdateColor();
         timeLeft = 3;
         var col = Color.Gold;
         col.A = 0;
@@ -335,7 +339,7 @@ public class Explosive : Projectile
         activationRadius = new ParticleEmitter(Assets.Get(Sprite.Dot), _position, _radius / 2, Color.Red * 0.25f);
         timeLeft = 4;
         col = _isFriendly ? new Vector3(1, 0.65f, 0) : new Vector3(1, 0, 0);
-        color = _isFriendly ? Color.Orange : Color.Red;
+        UpdateColor();
     }
     public override void AI()
     {
@@ -390,7 +394,7 @@ public class Spewer : Projectile
         : base(Assets.Get(Sprite.Explosive), _position, _velocity, _angle, _angularVelocity, _isFriendly, _damage, _stealth)
     {
         entityType = EntityType.Projectile;
-        color = _isFriendly ? Color.Orange : Color.Red;
+        UpdateColor();
     }
     public override void AI()
     {

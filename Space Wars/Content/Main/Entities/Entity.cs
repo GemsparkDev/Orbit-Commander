@@ -67,7 +67,10 @@ public abstract class Entity
     {
         StatusHolder = new();
     }
-
+    public virtual void UpdateColor()
+    {
+        color = Color.White;
+    }
     public void ClampVelocity(float speed)
     {
         Vector2 clampVelocity = Vector2.Normalize(velocity) * speed;

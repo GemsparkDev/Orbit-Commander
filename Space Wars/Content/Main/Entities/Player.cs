@@ -28,7 +28,7 @@ public class Player : Entity
     public Dictionary<ModuleType, Module> modules = new()
     {
         { ModuleType.Hull, new Adaptive() },
-        { ModuleType.Guns, new Spiral() },
+        { ModuleType.Guns, new Shotgun() },
         { ModuleType.Engines, new PlasmaEngine() },
         { ModuleType.Sensors, new Sensors() },
         { ModuleType.Core, new SummonGrapplingHook() }
@@ -97,7 +97,7 @@ public class Player : Entity
     public Player(Vector2 _position, Vector2 _velocity, float _angle, float _angularVelocity)
         : base(Assets.Get(Sprite.Player), _position, _velocity, _angle, _angularVelocity, 5, true)
     {
-        color = new Color(0, 255, 0);
+        UpdateColor();
         smokeParticles.isEmitterActive = false;
         engineSounds = Assets.Get(Sound.FireEngines).CreateInstance();
         engineSounds.IsLooped = true;
@@ -108,6 +108,10 @@ public class Player : Entity
         }
         EventHandler.SetFuseModuleDecals(textures);
         EventHandler.UpdateFuseUI(moduleFuses, spareFuses);
+    }
+    public override void UpdateColor()
+    {
+        color = Engine.ColorScheme.FriendlyEnemy();
     }
     public override void Update()
     {
@@ -183,7 +187,7 @@ public class Player : Entity
         if (invincibilityCooldown > 0)
         {
             invincibilityCooldown -= Engine.DeltaSeconds;
-            color = invincibilityCooldown > 0 ? new Color(0, 255, 0) * (MathF.Cos(invincibilityCooldown * 30) / 2 + 0.5f) : new Color(0, 255, 0);
+            color = Engine.ColorScheme.FriendlyEnemy() * (MathF.Cos(invincibilityCooldown * 30) / 2 + 0.5f);
         }
         if (cachedDamageCooldown <= 0)
         {
@@ -725,7 +729,7 @@ public class Player : Entity
         _logger.Try(delegate { modules[ModuleType.Sensors] = (Module)(ItemFactory.TryDeserialize(disassembly[6], _logger)); }, 6);
         _logger.Try(delegate { modules[ModuleType.Core] = (Module)(ItemFactory.TryDeserialize(disassembly[7], _logger)); }, 7);
 
-        color = new Color(0, 255, 0);
+        UpdateColor();
         smokeParticles.isEmitterActive = false;
         engineSounds = Assets.Get(Sound.FireEngines).CreateInstance();
         engineSounds.IsLooped = true;

@@ -38,6 +38,7 @@ public class Engine : Game
     public static bool UseShader { get; private set; } = true;
     public static float ScreenShakeFactor { get; private set; } = 0;
     public static int SaveSlot { get; private set; } = 0;
+    public static ColorScheme ColorScheme { get; set; } = new FinaleScheme();
 
     public Engine()
     {
@@ -204,7 +205,7 @@ public class Engine : Game
 
         //Render to renderTarget
         GraphicsDevice.SetRenderTarget(renderTarget);
-        GraphicsDevice.Clear(Color.Black);
+        GraphicsDevice.Clear(ColorScheme.Background());
         spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, null, null, null, transformMatrix: Camera.Transform);
         CurrentGameState.Draw(spriteBatch);
         spriteBatch.End();

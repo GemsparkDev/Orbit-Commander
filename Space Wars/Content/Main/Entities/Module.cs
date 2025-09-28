@@ -409,7 +409,7 @@ public class Shotgun() : Module(Modules.Shotgun)
 {
     public override void OnShoot()
     {
-        if (cooldown < 0)
+        if (cooldown > 0)
         {
             return;
         }
@@ -420,7 +420,7 @@ public class Shotgun() : Module(Modules.Shotgun)
             float offsetAngle = angleDegrees * MathF.PI / 180;
             Vector2 targetVector = Player.IdealSpeedWithVelocity(8) + new Vector2(Util.OneToNegOne(), Util.OneToNegOne());
             Vector2 positionOffset = new Vector2(Player.Direction.Y, -Player.Direction.X) * offsetAngle * 100;
-            Engine.EntityManager.Add(new PulseShot(Player.position + positionOffset, targetVector, Util.ToAngle(Player.Direction) + offsetAngle, 0, true, 2));
+            Engine.EntityManager.Add(new PulseShot(Player.position + positionOffset, targetVector * (1 + Util.OneToNegOne() / 10), Util.ToAngle(Player.Direction) + offsetAngle, 0, true, 2));
         }
         SoundManager.PlaySound(Assets.Get(Sound.ShotgunFire), Player.position);
         Player.velocity -= Player.Direction / 2;

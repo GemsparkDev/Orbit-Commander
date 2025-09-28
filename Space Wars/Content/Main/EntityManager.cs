@@ -121,6 +121,8 @@ public class EntityManager
         [new WaveGoal(1000)],
         "Last Stand", "Survive", 0.25f, new Vector2(0, -8*50), Mission.All())
         { isAggressive = true, playerProgression = 4, tip = "You can now construct the makeshift mothership in the construct menu.\n Requires 3 scrap.", relaunchable = true },
+
+        new Mission([], [], "Penultimate", "", 1, Vector2.Zero, []),
     ];
     public Mission GetMission(int _index)
     {
@@ -129,6 +131,13 @@ public class EntityManager
     public int Missions()
     {
         return missions.Count;
+    }
+    public void UpdateColor()
+    {
+        foreach (var entity in entities)
+        {
+            entity.UpdateColor();
+        }
     }
     public void Add(Entity entity)
     {

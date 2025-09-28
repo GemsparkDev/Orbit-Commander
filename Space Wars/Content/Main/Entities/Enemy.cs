@@ -41,11 +41,11 @@ public class Enemy : Entity
         : base(_texture, _position, _velocity, _angle, 0, _damage, _isFriendly)
     {
         entityType = EntityType.Enemy;
-        color = _isFriendly ? new Color(0, 255, 0) : Color.Red;
         health = _health;
         maxHealth = health;
         enemyRange.position = position;
         hitSound = Assets.Get(Sound.Hit);
+        UpdateColor();
     }
     public override void Update()
     {
@@ -71,6 +71,10 @@ public class Enemy : Entity
             health = maxHealth;
         }
         base.Update();
+    }
+    public override void UpdateColor()
+    {
+        color = isFriendly ? Engine.ColorScheme.FriendlyEnemy() : Engine.ColorScheme.HostileEnemy();
     }
     public override void LowerCooldown()
     {
@@ -2319,16 +2323,25 @@ public class Enemy : Entity
             if (_parent == null || _parent.health <= 0)
             {
                 Entity enemy = Engine.EntityManager.NearestEnemy(this);
-                Vector2 acceleration = (enemy.position - position) / 5;
-                if (acceleration.LengthSquared() > 300 * 300)
+                Vector2 relPos = (enemy.position - position);
+                float distance = relPos.Length();
+                Vector2 acceleration = (enemy.velocity - velocity) + (relPos) / distance * (distance + 15) / 10;
+                if (acceleration.LengthSquared() > 20 * 20)
                 {
-                    acceleration = Vector2.Normalize(acceleration) * 300;
+                    acceleration = Vector2.Normalize(acceleration) * 20;
                 }
                 velocity += acceleration * Engine.DeltaSeconds;
                 velocity *= Util.FIED(0.5f);
-                if (Vector2.DistanceSquared(enemy.position, position) < (enemy.ColliderRadius + ColliderRadius) * (enemy.ColliderRadius + ColliderRadius))
+                if (Vector2.DistanceSquared(enemy.position, position) < (enemy.ColliderRadius + ColliderRadius + 25) * (enemy.ColliderRadius + ColliderRadius + 10))
                 {
-                    enemy.Collide(damage);
+                    if(enemy.Collide(damage))
+                    {
+                        for (float angle = MathF.PI / 30; angle < MathF.Tau; angle += MathF.PI / 30)
+                        {
+                            Vector2 dir = Util.ToUnitVector(angle);
+                            ParticleManager.Add(new Particle(Assets.Get(Sprite.Dot), 0.5f, position, velocity + dir * 3, angle, 0, Color.Red, Color.Transparent));
+                        }
+                    }
                 }
                 angle = Util.ToAngle(velocity);
             }
