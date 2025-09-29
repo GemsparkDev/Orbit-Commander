@@ -38,7 +38,7 @@ public class Engine : Game
     public static bool UseShader { get; private set; } = true;
     public static float ScreenShakeFactor { get; private set; } = 0;
     public static int SaveSlot { get; private set; } = 0;
-    public static ColorScheme ColorScheme { get; set; } = new FinaleScheme();
+    public static ColorScheme ColorScheme { get; set; } = new StandardScheme();
 
     public Engine()
     {

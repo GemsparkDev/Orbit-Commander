@@ -100,31 +100,33 @@ public abstract class Entity
         {
             return;
         }
-        var stealthColor = new Vector4(color.R, color.G, color.B, color.A);
-        stealthColor /= 255;
-        var revealLerp = (float)Math.Clamp(revealDuration, 0f, 1f);
+        float stealth = Convert.ToSingle(color.A) / 255;
         var maxDistance = EntityManager.StealthRange * (float)Engine.SaveGame.Player.CountFuses(ModuleType.Sensors) / 4;
         //Player has superior sensing to stealth -> full detection
         //Player has equal sensing to stealth -> partial detection when nearby
         //Player has inferior sensing to stealth -> no detection
-        if (Engine.SaveGame.Player.SensingAbility == StealthAbility)
+        if (Engine.SaveGame.Player.SensingAbility == stealthAbility)
         {
             float distanceSqr = EntityManager.DistanceSqr(Engine.SaveGame.Player, this);
-            if ((distanceSqr > maxDistance * maxDistance))
+            if (distanceSqr > maxDistance * maxDistance)
             {
-                stealthColor.W = 0;
+                stealth = 0;
             }
             else
             {
-                stealthColor.W = MathF.Sqrt(maxDistance - MathF.Sqrt(distanceSqr)) / MathF.Sqrt(maxDistance);
+                stealth = MathF.Sqrt(maxDistance - MathF.Sqrt(distanceSqr)) / MathF.Sqrt(maxDistance);
             }
         }
-        else if (Engine.SaveGame.Player.SensingAbility < StealthAbility)
+        else if (Engine.SaveGame.Player.SensingAbility < stealthAbility)
         {
-            stealthColor.W = 0;
+            stealth  = 0;
         }
-        stealthColor.W = MathF.Max(stealthColor.W, revealLerp);
-        _spriteBatch.Draw(texture, position, null, new Color(stealthColor.X, stealthColor.Y, stealthColor.Z) * stealthColor.W, angle, Size / 2, 1, 0, 0);
+        if (revealDuration > 0)
+        {
+            Engine.WriteLine(stealth);
+        }
+        stealth = MathF.Max(stealth, (float)Math.Clamp(revealDuration, 0f, 1f));
+        _spriteBatch.Draw(texture, position, null, color * stealth, angle, Size / 2, 1, 0, 0);
 
         if (Engine.DebugMode)
         {

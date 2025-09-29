@@ -26,7 +26,7 @@ public class Enemy : Entity
     private bool wasHit = false;
     public override int StealthAbility 
     {
-        get => (base.StealthAbility + (((revealDuration > 0) ? -5 : 0) + StatusHolder.StealthChange)); 
+        get => (base.StealthAbility + (((revealDuration > 0 || health <= 0) ? -5 : 0) + StatusHolder.StealthChange)); 
         protected set => base.StealthAbility = value; 
     }
     public override int SensingAbility 
@@ -2318,31 +2318,51 @@ public class Enemy : Entity
     }
     IEnumerable<int> Wyrm(Enemy _parent)
     {
+        cd = [0];
+        StealthAbility = 2;
+        Vector2 randomLocation = Util.ToUnitVector(Util.Random.NextSingle() * MathF.Tau) * Engine.SaveGame.CurrentMission.Planet.radius * 1.5f;
         while (health > 0)
         {
+            if (cd[0] <= 0)
+            {
+                cd[0] = Util.Random.NextSingle() * 3 + 1;
+                revealDuration += 0.5f;
+            }
+            LowerCooldown();
             if (_parent == null || _parent.health <= 0)
             {
                 Entity enemy = Engine.EntityManager.NearestEnemy(this);
-                Vector2 relPos = (enemy.position - position);
-                float distance = relPos.Length();
-                Vector2 acceleration = (enemy.velocity - velocity) + (relPos) / distance * (distance + 15) / 10;
-                if (acceleration.LengthSquared() > 20 * 20)
+                if (enemy as Enemy != null)
                 {
-                    acceleration = Vector2.Normalize(acceleration) * 20;
-                }
-                velocity += acceleration * Engine.DeltaSeconds;
-                velocity *= Util.FIED(0.5f);
-                if (Vector2.DistanceSquared(enemy.position, position) < (enemy.ColliderRadius + ColliderRadius + 25) * (enemy.ColliderRadius + ColliderRadius + 10))
-                {
-                    if(enemy.Collide(damage))
+                    Vector2 relPos = (enemy.position - position);
+                    float distance = relPos.Length();
+                    Vector2 acceleration = (enemy.velocity - velocity) + (relPos) / distance * (distance + 15) / 10;
+                    if (acceleration.LengthSquared() > 20 * 20)
                     {
-                        for (float angle = MathF.PI / 30; angle < MathF.Tau; angle += MathF.PI / 30)
+                        acceleration = Vector2.Normalize(acceleration) * 20;
+                    }
+                    velocity += acceleration * Engine.DeltaSeconds;
+                    if (Vector2.DistanceSquared(enemy.position, position) < (enemy.ColliderRadius + ColliderRadius + 25) * (enemy.ColliderRadius + ColliderRadius + 10))
+                    {
+                        if (enemy.Collide(damage))
                         {
-                            Vector2 dir = Util.ToUnitVector(angle);
-                            ParticleManager.Add(new Particle(Assets.Get(Sprite.Dot), 0.5f, position, velocity + dir * 3, angle, 0, Color.Red, Color.Transparent));
+                            for (float angle = MathF.PI / 30; angle < MathF.Tau; angle += MathF.PI / 30)
+                            {
+                                Vector2 dir = Util.ToUnitVector(angle);
+                                ParticleManager.Add(new Particle(Assets.Get(Sprite.Dot), 0.5f, position, velocity + dir * 3, angle, 0, Color.Red, Color.Transparent));
+                            }
                         }
                     }
                 }
+                else
+                {
+                    GoToPosition(randomLocation, 1);
+                    if (Vector2.DistanceSquared(randomLocation, position) < 100)
+                    {
+                        randomLocation = Util.ToUnitVector(Util.Random.NextSingle() * MathF.Tau) * Engine.SaveGame.CurrentMission.Planet.radius * 1.5f;
+                    }
+                }
+                velocity *= Util.FIED(0.1f);
                 angle = Util.ToAngle(velocity);
             }
             yield return 0;
