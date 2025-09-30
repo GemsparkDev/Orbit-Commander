@@ -1534,6 +1534,75 @@ public class Enemy : Entity
             yield return 0;
         }
     }
+    IEnumerable<int> Bloom(List<Enemy> segments)
+    {
+        cd =
+        [
+            0, //Default
+            0, //Tail destruction
+        ];
+        hitSound = Assets.Get(Sound.ShieldHit);
+        ChildEnemy = true;
+        Enemy tail = segments[^1];
+        bool hasSet = false;
+        foreach (var enemy in segments)
+        {
+            Engine.EntityManager.Add(enemy);
+        }
+        while(true)
+        {
+            if(tail.health > 0)
+            {
+                health = maxHealth;
+                tail.ChildEnemy = false;
+            }
+            else
+            {
+                if (!hasSet)
+                {
+                    hasSet = true;
+                    ChildEnemy = false;
+                    hitSound = Assets.Get(Sound.Hit);
+                }
+                if (segments.Count > 0 && cd[1] <= 0)
+                {
+                    cd[1] = 0.33f;
+                    var seg = segments[^1];
+                    seg.isExpired = true;
+                    seg.Explode(0, 0);
+                    SoundManager.PlaySound(Assets.Get(Sound.Explosion), seg.position);
+                    segments.RemoveAt(segments.Count - 1);
+                }
+            }
+            if (health <= 0)
+            {
+                Explode(5, ColliderRadius);
+                SoundManager.PlaySound(Assets.Get(Sound.Explosion), position);
+                isExpired = true;
+                if (Engine.SaveGame.GiveWeapon)
+                {
+                    //Weapon drop
+                }
+                else
+                {
+                    //Item drop
+                }
+            }
+            velocity = Vector2.Normalize(Engine.SaveGame.Player.position - position) * 2;
+            LowerCooldown();
+            targetAngle = Util.ToAngle(velocity);
+            RotateTowards(targetAngle);
+            yield return 0;
+        }
+    }
+    IEnumerable<int> Rope()
+    {
+        while(true)
+        {
+            health = maxHealth;
+            yield return 0;
+        }
+    }
 #endregion
     #region Enemies
     IEnumerable<int> Fighter()
@@ -3420,6 +3489,29 @@ public class Enemy : Entity
             segments.Add(_enemy);
             enemy = _enemy;
         }
+        return head;
+    }
+    public static Enemy NewBloomBoss(Vector2 position, Vector2 velocity, float angle)
+    {
+        List<Enemy> segments = [];
+        //Head
+        var enemy = new Enemy(position, velocity, angle, 8, 50, Assets.Get(Sprite.Engineer), false);
+        enemy.AddBehaviour(enemy.Bloom(segments));
+        Enemy head = enemy;
+
+        //Segments
+        for (int i = 0; i < 8; i++)
+        {
+            var _enemy = new Enemy(position, velocity, angle, 0, 100, Assets.Get(Sprite.Wyrm), false);
+            _enemy.AddBehaviour(_enemy.Rope());
+            _enemy.AddBehaviour(_enemy.FollowNextSegment(enemy));
+            segments.Add(_enemy);
+            enemy = _enemy;
+        }
+        var _tail = new Enemy(position, velocity, angle, 8, 7, Assets.Get(Sprite.Circle), false);
+        _tail.AddBehaviour(_tail.FollowNextSegment(enemy));
+        segments.Add(_tail);
+
         return head;
     }
 }
