@@ -103,6 +103,9 @@ public enum Sprite
     SurgeBoss,
     Engineer,
     Wyrm,
+    BloomHead,
+    BloomBody,
+    BloomTail,
 
     MetalScrap,
     RealMetalScrap,

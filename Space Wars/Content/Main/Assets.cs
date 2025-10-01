@@ -67,6 +67,10 @@ public static class Assets
         Sprites.Add(Sprite.SurgeBoss, Content.Load<Texture2D>("Images/Entity_37"));
         Sprites.Add(Sprite.Engineer, Content.Load<Texture2D>("Images/Entity_38"));
         Sprites.Add(Sprite.Wyrm, Content.Load<Texture2D>("Images/Entity_39"));
+        Sprites.Add(Sprite.BloomHead, Content.Load<Texture2D>("Images/Entity_40-1"));
+        Sprites.Add(Sprite.BloomBody, Content.Load<Texture2D>("Images/Entity_40-2"));
+        Sprites.Add(Sprite.BloomTail, Content.Load<Texture2D>("Images/Entity_40-3"));
+
 
         //Items
         Sprites.Add(Sprite.MetalScrap, Content.Load<Texture2D>("Images/Item_0"));

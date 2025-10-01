@@ -1566,7 +1566,7 @@ public class Enemy : Entity
                 }
                 if (segments.Count > 0 && cd[1] <= 0)
                 {
-                    cd[1] = 0.33f;
+                    cd[1] = 0.2f;
                     var seg = segments[^1];
                     seg.isExpired = true;
                     seg.Explode(0, 0);
@@ -3495,20 +3495,20 @@ public class Enemy : Entity
     {
         List<Enemy> segments = [];
         //Head
-        var enemy = new Enemy(position, velocity, angle, 8, 50, Assets.Get(Sprite.Engineer), false);
+        var enemy = new Enemy(position, velocity, angle, 8, 50, Assets.Get(Sprite.BloomHead), false);
         enemy.AddBehaviour(enemy.Bloom(segments));
         Enemy head = enemy;
 
         //Segments
         for (int i = 0; i < 8; i++)
         {
-            var _enemy = new Enemy(position, velocity, angle, 0, 100, Assets.Get(Sprite.Wyrm), false);
+            var _enemy = new Enemy(position, velocity, angle, 0, 100, Assets.Get(Sprite.BloomBody), false);
             _enemy.AddBehaviour(_enemy.Rope());
             _enemy.AddBehaviour(_enemy.FollowNextSegment(enemy));
             segments.Add(_enemy);
             enemy = _enemy;
         }
-        var _tail = new Enemy(position, velocity, angle, 8, 7, Assets.Get(Sprite.Circle), false);
+        var _tail = new Enemy(position, velocity, angle, 8, 7, Assets.Get(Sprite.BloomTail), false);
         _tail.AddBehaviour(_tail.FollowNextSegment(enemy));
         segments.Add(_tail);
 
