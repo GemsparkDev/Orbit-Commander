@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using UILib.Content.Main;
+using static Assimp.Metadata;
 
 namespace Space_Wars.Content.Main.Entities;
 
@@ -125,6 +126,15 @@ public class Enemy : Entity
             {
                 behaviours.RemoveAt(i--);
             }
+        }
+    }
+    private void DrawLine(float _angle, float _cooldown, float _maxCooldown)
+    {
+        Vector2 dir = Util.ToUnitVector(_angle);
+        float cd = (1 - _cooldown / _maxCooldown) * (1 - _cooldown / _maxCooldown);
+        for (int i = 0; i < 500; i++)
+        {
+            ParticleManager.Add(new Particle(Assets.Get(Sprite.Dot), position + dir * (i * 2 + 8), _angle, Color.Red * (1 - (float)(i) / 500f) * cd));
         }
     }
     public override bool Collide(int damage, bool _ignoreImmunity = false)
@@ -1358,15 +1368,6 @@ public class Enemy : Entity
                 SoundManager.PlaySound(Assets.Get(Sound.Death), position);
                 Engine.EntityManager.Add(new Fireball() { position = this.position, velocity = GetNormalizedAcceleration() * 10, angularVelocity = this.angularVelocity });
             }
-            void DrawLine(float _angle, float _cooldown, float _maxCooldown)
-            {
-                Vector2 dir = Util.ToUnitVector(_angle);
-                float cd = (1 - _cooldown / _maxCooldown) * (1 - _cooldown / _maxCooldown);
-                for (int i = 0; i < 500; i++)
-                {
-                    ParticleManager.Add(new Particle(Assets.Get(Sprite.Dot), position + dir * (i * 2 + 8), _angle, Color.Red * (1 - (float)(i) / 500f) * cd));
-                }
-            }
             yield return 0;
         }
     }
@@ -1540,29 +1541,64 @@ public class Enemy : Entity
         [
             0, //Default
             0, //Tail destruction
+            10, //Charge cooldown
         ];
         hitSound = Assets.Get(Sound.ShieldHit);
         ChildEnemy = true;
         Enemy tail = segments[^1];
         bool hasSet = false;
+        int moveTowards = 1;
         foreach (var enemy in segments)
         {
             Engine.EntityManager.Add(enemy);
         }
         while(true)
         {
-            if(tail.health > 0)
+            Vector2 relativePosition = Engine.SaveGame.Player.position - position;
+            float distSqr = relativePosition.LengthSquared();
+            float speed = 2;
+            if (distSqr > 500 * 500)
+            {
+                speed = (Engine.SaveGame.Player.velocity - velocity).Length() / 60 + 2;
+            }
+            if (tail.health > 0)
             {
                 health = maxHealth;
                 tail.ChildEnemy = false;
+                GoToPosition(Engine.SaveGame.Player.position + new Vector2(relativePosition.Y, -relativePosition.X), speed);
             }
             else
             {
+                if (moveTowards == 1)
+                {
+                    velocity += Vector2.Normalize(relativePosition) * 30 * Engine.DeltaSeconds * moveTowards;
+                }
+                else
+                {
+                    velocity += (targetVector - velocity) * 15 * Engine.DeltaSeconds;
+                }
+                if (distSqr < 4000)
+                {
+                    targetVector = velocity;
+                    moveTowards = -1;
+                }
+                if (distSqr > 500 * 500)
+                {
+                    moveTowards = 1;
+                }
+                if (cd[0] <= 0)
+                {
+                    cd[0] = 12;
+                    Engine.EntityManager.Add(new Spewer(position, velocity, 0, 0, isFriendly, damage));
+                    SoundManager.PlaySound(Assets.Get(Sound.LMGFire), position);
+                }
+
                 if (!hasSet)
                 {
                     hasSet = true;
                     ChildEnemy = false;
                     hitSound = Assets.Get(Sound.Hit);
+                    cd[2] = 2;
                 }
                 if (segments.Count > 0 && cd[1] <= 0)
                 {
@@ -1581,25 +1617,76 @@ public class Enemy : Entity
                 isExpired = true;
                 if (Engine.SaveGame.GiveWeapon)
                 {
-                    //Weapon drop
+                    Engine.EntityManager.Add(new SpewerModule() { position = this.position, velocity = GetNormalizedAcceleration() * 10, angularVelocity = this.angularVelocity });
                 }
                 else
                 {
-                    //Item drop
+                    Engine.EntityManager.Add(new Reflective() { position = this.position, velocity = GetNormalizedAcceleration() * 10, angularVelocity = this.angularVelocity });
                 }
             }
-            velocity = Vector2.Normalize(Engine.SaveGame.Player.position - position) * 2;
+            velocity *= Util.FIED(0.1f);
+            if (cd[2] is > 0 and < 2)
+            {
+                DrawLine(Util.ToAngle(relativePosition), cd[2], 2);
+            }
+            if (cd[2] <= 0)
+            {
+                velocity = Engine.SaveGame.Player.velocity + Vector2.Normalize(relativePosition) * 25;
+                cd[2] = 10;
+                if (tail.health <= 0)
+                {
+                    cd[2] = 3;
+                }
+            }
+            if (distSqr < (Engine.SaveGame.Player.ColliderRadius + ColliderRadius + 25) * (Engine.SaveGame.Player.ColliderRadius + ColliderRadius + 10))
+            {
+                if (Engine.SaveGame.Player.Collide(damage))
+                {
+                    for (float angle = MathF.PI / 30; angle < MathF.Tau; angle += MathF.PI / 30)
+                    {
+                        Vector2 dir = Util.ToUnitVector(angle);
+                        ParticleManager.Add(new Particle(Assets.Get(Sprite.Dot), 0.5f, position, velocity + dir * 3, angle, 0, Color.Red, Color.Transparent));
+                    }
+                }
+            }
             LowerCooldown();
             targetAngle = Util.ToAngle(velocity);
-            RotateTowards(targetAngle);
+            RotateTowards(targetAngle, 0.2f);
             yield return 0;
         }
     }
     IEnumerable<int> Rope()
     {
+        cd = [Util.Random.NextSingle() * 5 + 1];
         while(true)
         {
-            health = maxHealth;
+            if (health != maxHealth)
+            {
+                bool reflect = false;
+                for (int i = 0; i < (maxHealth - health); i++)
+                {
+                    if (Util.Random.Next(0, 8) == 0)
+                    {
+                        reflect = true;
+                    }
+                }
+                if (reflect)
+                {
+                    for (float angle = 0; angle < MathF.Tau; angle += MathF.PI / 3)
+                    {
+                        Engine.EntityManager.Add(new AssassinShot(position, Util.ToUnitVector(angle) * 8, angle, 0, isFriendly, damage, 1));
+                    }
+                }
+                health = maxHealth;
+            }
+            if (cd[0] <= 0)
+            {
+                Vector2 dir = Vector2.Normalize(Engine.SaveGame.Player.position - position) * 10;
+                Engine.EntityManager.Add(new PulseShot(position, dir, Util.ToAngle(dir), 0, isFriendly, damage));
+                SoundManager.PlaySound(Assets.Get(Sound.PulseFire), position);
+                cd[0] = Util.Random.NextSingle() * 5 + 5;
+            }
+            LowerCooldown();
             yield return 0;
         }
     }
@@ -3495,20 +3582,20 @@ public class Enemy : Entity
     {
         List<Enemy> segments = [];
         //Head
-        var enemy = new Enemy(position, velocity, angle, 8, 50, Assets.Get(Sprite.BloomHead), false);
+        var enemy = new Enemy(position, velocity, angle, 10, 75, Assets.Get(Sprite.BloomHead), false);
         enemy.AddBehaviour(enemy.Bloom(segments));
         Enemy head = enemy;
 
         //Segments
         for (int i = 0; i < 8; i++)
         {
-            var _enemy = new Enemy(position, velocity, angle, 0, 100, Assets.Get(Sprite.BloomBody), false);
+            var _enemy = new Enemy(position, velocity, angle, 7, 100, Assets.Get(Sprite.BloomBody), false);
             _enemy.AddBehaviour(_enemy.Rope());
             _enemy.AddBehaviour(_enemy.FollowNextSegment(enemy));
             segments.Add(_enemy);
             enemy = _enemy;
         }
-        var _tail = new Enemy(position, velocity, angle, 8, 7, Assets.Get(Sprite.BloomTail), false);
+        var _tail = new Enemy(position, velocity, angle, 8, 50, Assets.Get(Sprite.BloomTail), false);
         _tail.AddBehaviour(_tail.FollowNextSegment(enemy));
         segments.Add(_tail);
 
