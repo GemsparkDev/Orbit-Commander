@@ -1548,6 +1548,7 @@ public class Enemy : Entity
         Enemy tail = segments[^1];
         bool hasSet = false;
         int moveTowards = 1;
+        int segmentKillCount = 0;
         foreach (var enemy in segments)
         {
             Engine.EntityManager.Add(enemy);
@@ -1600,14 +1601,15 @@ public class Enemy : Entity
                     hitSound = Assets.Get(Sound.Hit);
                     cd[2] = 2;
                 }
-                if (segments.Count > 0 && cd[1] <= 0)
+                if (segments.Count > 0 && cd[1] <= 0 && (maxHealth - health) / 6 >= segmentKillCount)
                 {
-                    cd[1] = 0.2f;
+                    cd[1] = 1f + Util.Random.NextSingle();
                     var seg = segments[^1];
                     seg.isExpired = true;
                     seg.Explode(0, 0);
                     SoundManager.PlaySound(Assets.Get(Sound.Explosion), seg.position);
                     segments.RemoveAt(segments.Count - 1);
+                    segmentKillCount++;
                 }
             }
             if (health <= 0)
@@ -1635,7 +1637,7 @@ public class Enemy : Entity
                 cd[2] = 10;
                 if (tail.health <= 0)
                 {
-                    cd[2] = 3;
+                    cd[2] = 3 + 0.5f * segments.Count;
                 }
             }
             if (distSqr < (Engine.SaveGame.Player.ColliderRadius + ColliderRadius + 25) * (Engine.SaveGame.Player.ColliderRadius + ColliderRadius + 10))
@@ -1672,9 +1674,10 @@ public class Enemy : Entity
                 }
                 if (reflect)
                 {
+                    float offset = Util.Random.NextSingle() * MathF.Tau;
                     for (float angle = 0; angle < MathF.Tau; angle += MathF.PI / 3)
                     {
-                        Engine.EntityManager.Add(new AssassinShot(position, Util.ToUnitVector(angle) * 8, angle, 0, isFriendly, damage, 1));
+                        Engine.EntityManager.Add(new AssassinShot(position, Util.ToUnitVector(angle + offset) * 8, angle + offset, 0, isFriendly, damage, 1));
                     }
                 }
                 health = maxHealth;
@@ -3595,7 +3598,7 @@ public class Enemy : Entity
             segments.Add(_enemy);
             enemy = _enemy;
         }
-        var _tail = new Enemy(position, velocity, angle, 8, 50, Assets.Get(Sprite.BloomTail), false);
+        var _tail = new Enemy(position, velocity, angle, 8, 20, Assets.Get(Sprite.BloomTail), false);
         _tail.AddBehaviour(_tail.FollowNextSegment(enemy));
         segments.Add(_tail);
 

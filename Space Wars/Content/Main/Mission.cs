@@ -24,7 +24,7 @@ public class Mission
     public string tip = null;
 
     private EntityConstructor escapeVehicle = null;
-    private Planet[] planets; 
+    private Planet[] planets;
     //Save original entity parameters to allow cloning
     private List<ICondition> CopyObjectives { get; }
     private List<ICondition> MissionObjectives { get; } = [];
@@ -39,7 +39,7 @@ public class Mission
     private float maxWaveTimer = 5;
     private bool currentWaveActive = false;
 
-    public Mission(Planet[] _planets, List<ICondition> _missionObjectives, string _name, string _description, float _timerModifier, Vector2 _playerPosition, List<(int, DelegateEnemy)> _enemies, Func<Cutscene> _cutscene = null, bool _escapeVehicle = false)
+    public Mission(Planet[] _planets, List<ICondition> _missionObjectives, string _name, string _description, float _timerModifier, Vector2 _playerPosition, List<(int, DelegateEnemy)> _enemies, List<DelegateEnemy> _bosses, Func<Cutscene> _cutscene = null, bool _escapeVehicle = false)
     {
         Name = _name;
         Description = _description;
@@ -52,14 +52,8 @@ public class Mission
         }
         timerModifier = _timerModifier;
         enemyCreditValues = _enemies;
-        bosses = 
-        [
-            Enemy.NewSymmetryBoss,
-            Enemy.NewOverloadBoss,
-            Enemy.NewExcursionBoss,
-            Enemy.NewWyvernBoss,
-            Enemy.NewSurgeBoss,
-        ];
+        bosses = _bosses;
+
         currentBoss = Util.Random.Next(bosses.Count);
         cutscene = _cutscene;
         if (_escapeVehicle)
@@ -158,7 +152,7 @@ public class Mission
                 waveTimer -= Engine.DeltaSeconds;
                 foreach (var enemy in enemiesSpawned)
                 {
-                    ParticleManager.Add(new Particle(enemy.texture, enemy.position, enemy.angle, new Color(255,127, 0) * (Util.Random.NextSingle() / 2 + 0.25f)));
+                    ParticleManager.Add(new Particle(enemy.texture, enemy.position, enemy.angle, new Color(255, 127, 0) * (Util.Random.NextSingle() / 2 + 0.25f)));
                 }
             }
         }
@@ -183,7 +177,7 @@ public class Mission
             Wave++;
             Engine.EntityManager.DecayPickups();
 
-            if(playerProgression > 1 && (Wave % 20 == 0))
+            if (playerProgression > 1 && (Wave % 20 == 0))
             {
                 var pos = NewSpawnLocation();
                 Enemy boss = bosses[currentBoss](pos, Vector2.Zero, MathF.Atan2(-pos.X, pos.Y));
@@ -287,7 +281,7 @@ public class Mission
     }
     public Planet IsColliding(Vector2 _position)
     {
-        foreach(var planet in planets)
+        foreach (var planet in planets)
         {
             if (planet.IsColliding(_position))
             {
@@ -323,9 +317,9 @@ public class Mission
         }
         restartTimer = 2;
     }
-    public void CompleteCustomRule(Entity _target) 
+    public void CompleteCustomRule(Entity _target)
     {
-        foreach(var objective in MissionObjectives)
+        foreach (var objective in MissionObjectives)
         {
             if (objective is EntityCondition)
             {
@@ -381,7 +375,7 @@ public class Mission
             if (Engine.PatchedConics)
             {
                 hasChanged = false;
-                for(int i = futurePlanetPositions.Length - 1; i >= 0; i--)
+                for (int i = futurePlanetPositions.Length - 1; i >= 0; i--)
                 {
                     float sphereOfInfluence = (i == 0) ? 9999 : (Vector2.Distance(futurePlanetPositions[i], futurePlanetPositions[0]) * (float)Math.Pow(planets[i].mass / planets[0].mass, 2 / 5) / 3);
                     if (Vector2.Distance(futurePosition, futurePlanetPositions[i]) < sphereOfInfluence)
@@ -425,11 +419,11 @@ public class Mission
     public Mission Clone()
     {
         var _planets = new Planet[planets.Length];
-        for(int i = 0; i < planets.Length; i++)
+        for (int i = 0; i < planets.Length; i++)
         {
             _planets[i] = planets[i].Copy();
         }
-        return new Mission(_planets, CopyObjectives, Name, Description, timerModifier, playerPosition, enemyCreditValues, cutscene, escapeVehicle != null)
+        return new Mission(_planets, CopyObjectives, Name, Description, timerModifier, playerPosition, enemyCreditValues, bosses, cutscene, escapeVehicle != null)
         { playerProgression = this.playerProgression, playerDocked = this.playerDocked, isAggressive = this.isAggressive, music = this.music, tip = this.tip, relaunchable = this.relaunchable };
     }
     private Vector2 NewSpawnLocation()
@@ -474,7 +468,7 @@ public class Mission
         {
             if (escapeVehicle != null)
             {
-                var objective = new EntityCondition(escapeVehicle, [ Condition.Protect, Condition.CustomIncomplete ]);
+                var objective = new EntityCondition(escapeVehicle, [Condition.Protect, Condition.CustomIncomplete]);
                 MissionObjectives.Add(objective);
                 objective.Initialize();
                 escapeVehicle = null;
@@ -495,6 +489,16 @@ public class Mission
             (4, Enemy.NewCarrier),
         ];
     }
+    public static List<DelegateEnemy> TierOneBosses()
+    {
+        return
+        [
+            Enemy.NewSymmetryBoss,
+            Enemy.NewExcursionBoss,
+            Enemy.NewWyvernBoss,
+            Enemy.NewSurgeBoss,
+        ];
+    }
     public static List<(int, DelegateEnemy)> TierTwo()
     {
         return
@@ -504,6 +508,13 @@ public class Mission
             (2, Enemy.NewHealer),
         ];
     }
+    public static List<DelegateEnemy> TierTwoBosses()
+    {
+        return
+        [
+            Enemy.NewOverloadBoss,
+        ];
+    }
     public static List<(int, DelegateEnemy)> TierThree()
     {
         return
@@ -511,6 +522,13 @@ public class Mission
             (1, Enemy.NewStealthFighter),
             (2, Enemy.NewHunter),
             (3, Enemy.NewEngineer),
+        ];
+    }
+    public static List<DelegateEnemy> TierThreeBosses()
+    {
+        return
+        [
+
         ];
     }
     public static List<(int, DelegateEnemy)> All()
@@ -527,6 +545,13 @@ public class Mission
             (1, Enemy.NewStealthFighter),
             (2, Enemy.NewHunter),
             (3, Enemy.NewEngineer)
+        ];
+    }
+    public static List<DelegateEnemy> AllBosses()
+    {
+        return
+        [
+
         ];
     }
 }
