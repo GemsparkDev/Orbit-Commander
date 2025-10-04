@@ -496,7 +496,6 @@ public class Mission
             Enemy.NewSymmetryBoss,
             Enemy.NewExcursionBoss,
             Enemy.NewWyvernBoss,
-            Enemy.NewSurgeBoss,
         ];
     }
     public static List<(int, DelegateEnemy)> TierTwo()
@@ -513,6 +512,7 @@ public class Mission
         return
         [
             Enemy.NewOverloadBoss,
+            Enemy.NewSurgeBoss,
         ];
     }
     public static List<(int, DelegateEnemy)> TierThree()
@@ -528,31 +528,16 @@ public class Mission
     {
         return
         [
-
+            Enemy.NewPursuer
         ];
     }
     public static List<(int, DelegateEnemy)> All()
     {
-        return
-        [
-            (1, Enemy.NewFighter),
-            (3, Enemy.NewSniper),
-            (4, Enemy.NewShotgunner),
-            (4, Enemy.NewCarrier),
-            (1, Enemy.NewAdvancedFighter),
-            (2, Enemy.NewHovercraft),
-            (2, Enemy.NewHealer),
-            (1, Enemy.NewStealthFighter),
-            (2, Enemy.NewHunter),
-            (3, Enemy.NewEngineer)
-        ];
+        return [.. TierOne(), .. TierTwo(), .. TierThree()];
     }
     public static List<DelegateEnemy> AllBosses()
     {
-        return
-        [
-
-        ];
+        return [.. TierOneBosses(), .. TierTwoBosses(), .. TierThreeBosses()];
     }
 }
 public class EntityConstructor(Func<Vector2, Vector2, float, Entity> _constructor, Vector2 _position, Vector2 _velocity, float _angle) : IConstructor

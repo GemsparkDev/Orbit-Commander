@@ -9,7 +9,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using UILib.Content.Main;
-using static Assimp.Metadata;
 
 namespace Space_Wars.Content.Main.Entities;
 
@@ -1690,6 +1689,101 @@ public class Enemy : Entity
                 cd[0] = Util.Random.NextSingle() * 5 + 5;
             }
             LowerCooldown();
+            yield return 0;
+        }
+    }
+    IEnumerable<int> Pursuer()
+    {
+        Enemy holo = null;
+        Entity nearestEnemy = null;
+        Vector2 randomPosition = Vector2.Zero;
+        int mode = 0;
+        int shotCount = 0;
+        //holo = new hologram enemy
+        cd = 
+        [
+            0, //Default
+            0, //Enemy tracking
+            0, //Mines
+        ];
+        while(true)
+        {
+            var enemy = Engine.EntityManager.NearestEnemy(this);
+            if (enemy == nearestEnemy)
+            {
+                cd[1] = 10;
+            }
+            else
+            {
+                if (enemy == null && cd[1] <= 0)
+                {
+                    nearestEnemy = null;
+                }
+            }
+            if (holo != null && holo.isExpired)
+            {
+                holo = null;
+                Engine.SaveGame.Player.Reveal(5);
+            }
+            //Note: possibly change to integrate with other modules
+            if (cd[0] <= 0 && holo == null)
+            {
+                //Spawn new holo
+                cd[0] = 25;
+            }
+            if (nearestEnemy != null)
+            {
+                if (mode == 0) //Hunting
+                {
+                    randomPosition = nearestEnemy.position + Vector2.Normalize(nearestEnemy.velocity) * 100;
+                    GoToPosition(randomPosition, 5);
+                    if (cd[2] <= 0)
+                    {
+                        Engine.EntityManager.Add(new Explosive(position, Vector2.Zero, 0, 0, isFriendly, damage, 25));
+                        cd[2] = 5;
+                        shotCount++;
+                        if (shotCount >= 5)
+                        {
+                            shotCount = 0;
+                            mode = 1;
+                        }
+                    }
+                }
+                else
+                {
+                    GoToPosition(enemy.position, 5);
+                    if (cd[2] <= 0)
+                    {
+                        Vector2 relativePosition = enemy.position - position;
+                        Engine.EntityManager.Add(new PulseShot(position, Vector2.Normalize(relativePosition) * 10 + velocity, Util.ToAngle(relativePosition), 0, isFriendly, damage, true));
+                        cd[2] = 1;
+                        shotCount++;
+                        if (shotCount >= 25)
+                        {
+                            shotCount = 0;
+                            mode = 0;
+                        }
+                    }
+                }
+            }
+            else
+            {
+                if (Vector2.DistanceSquared(position, randomPosition) < 1000)
+                {
+                    randomPosition = Util.ToUnitVector(Util.Random.NextSingle() * MathF.Tau) * (Engine.SaveGame.CurrentMission.Planet.radius) * (1 + Util.Random.NextSingle() / 2); 
+                }
+                GoToPosition(randomPosition, 1);
+            }
+            velocity *= Util.FIED(0.1f);
+            LowerCooldown();
+            RotateTowards(Util.ToAngle(velocity));
+            yield return 0;
+        }
+    }
+    IEnumerable<int> Hologram()
+    {
+        while(true)
+        {
             yield return 0;
         }
     }
@@ -3603,5 +3697,13 @@ public class Enemy : Entity
         segments.Add(_tail);
 
         return head;
+    }
+    public static Enemy NewPursuer(Vector2 position, Vector2 velocity, float angle, bool isFriendly)
+    {
+        Enemy enemy = new(position, velocity, angle, 8, 100, Assets.Get(Sprite.Engineer), isFriendly);
+        enemy.AddBehaviour(enemy.Pursuer());
+        enemy.AddBehaviour(enemy.EnemyDeath(1));
+        enemy.AddBehaviour(enemy.AvoidProjectiles(1));
+        return enemy;
     }
 }
