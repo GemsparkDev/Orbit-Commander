@@ -628,24 +628,6 @@ public class Torch() : Module(Modules.Torch)
         cooldown = 0.1f;
     }
 }
-public class Poison() : Module(Modules.Poison)
-{
-    public override void OnShoot() 
-    {
-        if (cooldown > 0)
-        {
-            return;
-        }
-        Projectile shot = new FlameBolt(Player.position, Player.IdealSpeedWithVelocity(2), isFriendly, 0, 
-        new ParticleEmitter(Assets.Get(Sprite.Circle), 10, Player.position, 0, MathF.Tau, 1f, 800, Color.Green, EmitterType.EmissionOverTime) 
-        { particleFadeToColor = Color.Transparent, particlesExperienceGravity = true}, 10, 1);
-        Engine.EntityManager.Add(shot);
-        SoundManager.PlaySound(Assets.Get(Sound.LMGFire), Player.position);
-        Engine.ShakeScreen(0.02f);
-        Player.velocity -= Player.Direction / 6;
-        cooldown = 0.5f;
-    }
-}
 public class Dash() : Module(Modules.Dash)
 {
     const float MaxCooldown = 2;
@@ -826,6 +808,18 @@ public class Assault() : Module(Modules.Assault)
         }
         UI.PlayerAbility.SetInterval(1 - cooldown / MaxCooldown, 1);
         base.OnUpdate();
+    }
+}
+public class Decoy() : Module(Modules.Decoy)
+{
+    public override void OnAbility()
+    {
+        if (cooldown <= 0)
+        {
+            return;
+        }
+        Engine.EntityManager.Add(Enemy.NewDecoy(Engine.SaveGame.Player.position, Vector2.Zero, Engine.SaveGame.Player.angle, Sprite.Player, Engine.SaveGame.Player.isFriendly));
+        cooldown = 15f;
     }
 }
 public class Sensors() : Module(Modules.Sensors)

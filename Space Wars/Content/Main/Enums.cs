@@ -45,7 +45,7 @@ public enum Modules
     PrismArray,
     MatrixLauncher,
     Torch,
-    Poison,
+    Decoy,
     //Cores
     Dash,
     GrapplingHook,
