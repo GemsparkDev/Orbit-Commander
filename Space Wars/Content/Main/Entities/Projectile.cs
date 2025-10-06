@@ -4,6 +4,7 @@ using Space_Wars.Content.Main.Particles;
 using System;
 using Microsoft.Xna.Framework.Graphics;
 using System.Diagnostics;
+using System.Collections.Generic;
 
 namespace Space_Wars.Content.Main.Entities;
 
@@ -411,6 +412,55 @@ public class Spewer : Projectile
             Engine.EntityManager.Add(new PulseShot(position, velocity + dir * 6, angle, 0, isFriendly, damage, true));
             cooldown = 0.1f;
             SoundManager.PlaySound(Assets.Get(Sound.LMGFire), position);
+        }
+    }
+}
+public class Splitter : Projectile
+{
+    float cooldown;
+    List<Entity> splits;
+    public Splitter(Vector2 _position, Vector2 _velocity, float _angle, bool _isFriendly, int _damage, List<Entity> _splits, float _cooldown = 1, int _stealth = 0)
+        : base(Assets.Get(Sprite.PulseShot), _position, _velocity, _angle, 0, _isFriendly, _damage, _stealth)
+    {
+        cooldown = _cooldown;
+        splits = _splits;
+        entityType = EntityType.Projectile;
+        UpdateColor();
+    }
+    public override void AI()
+    {
+        position += velocity * Engine.DeltaSeconds * 60;
+        angle += angularVelocity * Engine.DeltaSeconds * 60;
+        Entity nearestEnemy = Engine.EntityManager.NearestEnemy(this);
+        EntityManager.Collide(this, nearestEnemy);
+        if (isExpired)
+        {
+            for (int i = 0; i < splits.Count; i++)
+            {
+                float a = angle + MathF.Tau / splits.Count * (float)(i);
+                Vector2 vel = Util.ToUnitVector(a);
+                splits[i].position = position + vel * 5;
+                splits[i].velocity = vel * 8 + velocity;
+                splits[i].angle = a;
+                Engine.EntityManager.Add(splits[i]);
+            }
+        }
+        if (cooldown < 0)
+        {
+            for (int i = 0; i < splits.Count; i++)
+            {
+                float a = angle - MathF.PI / 4 + MathF.PI / splits.Count * (float)(i) / 2;
+                Vector2 vel = Util.ToUnitVector(a);
+                splits[i].position = position;
+                splits[i].velocity = vel * 8 + velocity;
+                splits[i].angle = a;
+                Engine.EntityManager.Add(splits[i]);
+            }
+            isExpired = true;
+        }
+        else
+        {
+            cooldown -= Engine.DeltaSeconds;
         }
     }
 }

@@ -628,6 +628,26 @@ public class Torch() : Module(Modules.Torch)
         cooldown = 0.1f;
     }
 }
+public class SplitterModule() : Module(Modules.SplitterModule)
+{
+    public override void OnShoot()
+    {
+        if (cooldown > 0)
+        {
+            return;
+        }
+        List<Entity> missiles = [];
+        for (int i = 0; i < 3; i++)
+        {
+            missiles.Add(Enemy.NewMissile(position, velocity, 0, true, 1));
+        }
+        Engine.EntityManager.Add(new Splitter(Player.position, Player.IdealSpeedWithVelocity(8), Util.ToAngle(Player.Direction), Player.isFriendly, 8, missiles, 1.5f));
+        SoundManager.PlaySound(Assets.Get(Sound.LMGFire), Player.position);
+        Engine.ShakeScreen(0.2f);
+        Player.velocity -= Player.Direction / 2;
+        cooldown = 1.5f;
+    }
+}
 public class Dash() : Module(Modules.Dash)
 {
     const float MaxCooldown = 2;

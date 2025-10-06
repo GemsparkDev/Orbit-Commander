@@ -46,6 +46,7 @@ public enum Modules
     MatrixLauncher,
     Torch,
     Decoy,
+    SplitterModule,
     //Cores
     Dash,
     GrapplingHook,

@@ -1969,7 +1969,7 @@ public class Enemy : Entity
         deleteOnCollide = true;
         var col = Color.DarkRed;
         col.A = 0;
-        ParticleEmitter engineParticles = new(Assets.Get(Sprite.Circle), 0.1f, Vector2.Zero, 0, MathF.PI/4, 2, 
+        ParticleEmitter engineParticles = new(Assets.Get(Sprite.Circle), 0.1f, position, 0, MathF.PI/4, 2, 
             200f, Color.Yellow, EmitterType.EmissionOverTime) { isEmitterActive = false, particleFadeToColor = col };
         while (true)
         {
@@ -1990,8 +1990,10 @@ public class Enemy : Entity
                 isExpired = true;
                 SoundManager.PlaySound(Assets.Get(Sound.Death), position);
             }
-            Entity nearestEnemy = Engine.EntityManager.NearestEnemy(this);
-            nearestEnemy ??= NewDummyEnemy(position + 100 * new Vector2(MathF.Cos(angle- MathF.PI / 2), MathF.Sin(angle - MathF.PI/2)));
+            if (Engine.EntityManager.NearestEnemy(this) is not Enemy nearestEnemy || nearestEnemy.health <= 0)
+            {
+                nearestEnemy = NewDummyEnemy(position + 100 * new Vector2(MathF.Cos(angle - MathF.PI / 2), MathF.Sin(angle - MathF.PI / 2)));
+            }
 
             targetVector = Vector2.Normalize(nearestEnemy.position - position);
             targetAngle = MathF.Atan2(targetVector.X, -targetVector.Y);
@@ -3460,9 +3462,9 @@ public class Enemy : Entity
         enemy.AddBehaviour(enemy.EnemyDeath(1));
         return enemy;
     }
-    public static Enemy NewMissile(Vector2 position, Vector2 velocity, float angle, bool _isFriendly = false)
+    public static Enemy NewMissile(Vector2 position, Vector2 velocity, float angle, bool _isFriendly = false, int _sensingAbility = 0)
     {
-        Enemy enemy = new(position, velocity, angle, 8, 10, Assets.Get(Sprite.Missile), _isFriendly);
+        Enemy enemy = new(position, velocity, angle, 8, 10, Assets.Get(Sprite.Missile), _isFriendly) { SensingAbility = _sensingAbility };
         enemy.AddBehaviour(enemy.Missile());
         enemy.AddBehaviour(enemy.AvoidNearbyAllies());
         return enemy;
