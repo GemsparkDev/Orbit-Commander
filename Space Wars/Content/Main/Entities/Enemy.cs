@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework;
+﻿using Microsoft.Toolkit.HighPerformance.Buffers;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content.Pipeline;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -1821,21 +1822,98 @@ public class Enemy : Entity
             yield return 0;
         }
     }
-    IEnumerable<int> Decoy()
+    IEnumerable<int> Streamline(Enemy _leftWing, Enemy _rightWing)
     {
-        while(true)
+        cd = [0];
+        Engine.EntityManager.Add(_leftWing);
+        Engine.EntityManager.Add(_rightWing);
+        while (true)
         {
-            velocity = Vector2.Zero;
+            if (_leftWing.isExpired && _rightWing.isExpired)
+            {
+                //Aggressive behavior
+            }
+            else
+            {
+                //Standard behavior
+            }
             if (health <= 0)
             {
-                Explode(damage, 200);
                 isExpired = true;
+                Explode(10, ColliderRadius);
                 SoundManager.PlaySound(Assets.Get(Sound.Explosion), position);
+                if (Engine.SaveGame.GiveWeapon)
+                {
+                    Engine.EntityManager.Add(new SplitterModule() { position = this.position, velocity = GetNormalizedAcceleration() * 10, angularVelocity = this.angularVelocity });
+                }
+                else
+                {
+                    Engine.EntityManager.Add(new Ablative() { position = this.position, velocity = GetNormalizedAcceleration() * 10, angularVelocity = this.angularVelocity });
+                }
             }
+            LowerCooldown();
             yield return 0;
         }
     }
-#endregion
+    IEnumerable<int> Wing(Entity _parent, float _offset)
+    {
+        cd = 
+        [
+            0, //Weapon
+            0, //Ablative shield
+        ];
+        float buffer = 10;
+        int newMax = maxHealth;
+        while (true)
+        {
+            Vector2 relPos = _parent.position = position;
+            position = _parent.position + Vector2.Normalize(new Vector2(relPos.Y, -relPos.X)) * _offset;
+            velocity = _parent.velocity;
+            angle = _parent.angle;
+            if (Engine.EntityManager.NearestEnemy(this) is Enemy nearestEnemy)
+            {
+                Vector2 relativePosition = nearestEnemy.position - position;
+                Vector2 dir = Util.ToUnitVector(angle);
+                if (cd[0] <= 0 && Vector2.Dot(relativePosition, dir) > relativePosition.Length() * 0.8f)
+                {
+                    List<Entity> bullets = [];
+                    for (int i = 0; i < 3; i++)
+                    {
+                        bullets.Add(new PulseShot(Vector2.Zero, Vector2.Zero, 0, 0, isFriendly, damage, true, 0));
+                    }
+                    Engine.EntityManager.Add(new Splitter(position, velocity + dir * 10, angle, isFriendly, damage, bullets));
+                }
+            }
+            if (health <= 0)
+            {
+                isExpired = true;
+                Explode(0, 0);
+                SoundManager.PlaySound(Assets.Get(Sound.Explosion), position);
+            }
+            if (health < maxHealth)
+            {
+                int diff = Math.Min(newMax - health, (int)buffer);
+                buffer -= diff;
+                cd[1] = 1;
+                if (diff < (newMax - health))
+                {
+                    newMax = health;
+                }
+                health = newMax;
+            }
+            if (cd[1] <= 0 && buffer < 10)
+            {
+                buffer += Engine.DeltaSeconds;
+            }
+            if (_parent.isExpired)
+            {
+                isExpired = true;
+            }
+            LowerCooldown();
+            yield return 0;
+        }
+    }
+    #endregion
     #region Enemies
     IEnumerable<int> Fighter()
     {
@@ -2671,7 +2749,21 @@ public class Enemy : Entity
             yield return 0;
         }
     }
-#endregion
+    IEnumerable<int> Decoy()
+    {
+        while (true)
+        {
+            velocity = Vector2.Zero;
+            if (health <= 0)
+            {
+                Explode(damage, 200);
+                isExpired = true;
+                SoundManager.PlaySound(Assets.Get(Sound.Explosion), position);
+            }
+            yield return 0;
+        }
+    }
+    #endregion
     #region Infrastructure
     IEnumerable<int> Mothership()
     {
@@ -3761,5 +3853,16 @@ public class Enemy : Entity
         Enemy enemy = new(position, velocity, angle, 20, 20, Assets.Get(_sprite), _isFriendly);
         enemy.AddBehaviour(enemy.Decoy());
         return enemy;
+    }
+    public static Enemy NewStreamLineBoss(Vector2 position, Vector2 velocity, float angle, bool _isFriendly = false)
+    {
+        Enemy boss = new(position, velocity, angle, 12, 50, Assets.Get(Sprite.Engineer), _isFriendly);
+        Enemy leftWing = new(position, velocity, angle, 8, 30, Assets.Get(Sprite.Engineer), _isFriendly);
+        leftWing.AddBehaviour(leftWing.Wing(boss, 5));
+        Enemy rightWing = new(position, velocity, angle, 8, 30, Assets.Get(Sprite.Engineer), _isFriendly);
+        rightWing.AddBehaviour(rightWing.Wing(boss, 5));
+        boss.AddBehaviour(boss.Streamline(leftWing, rightWing));
+        boss.AddBehaviour(boss.AvoidProjectiles(1));
+        return boss;
     }
 }

@@ -494,7 +494,6 @@ public class Mission
         return
         [
             Enemy.NewSymmetryBoss,
-            Enemy.NewExcursionBoss,
             Enemy.NewWyvernBoss,
         ];
     }
@@ -513,6 +512,7 @@ public class Mission
         [
             Enemy.NewOverloadBoss,
             Enemy.NewSurgeBoss,
+            Enemy.NewStreamLineBoss
         ];
     }
     public static List<(int, DelegateEnemy)> TierThree()
