@@ -512,7 +512,7 @@ public class Mission
         [
             Enemy.NewOverloadBoss,
             Enemy.NewSurgeBoss,
-            Enemy.NewStreamLineBoss
+            Enemy.NewStreamlineBoss
         ];
     }
     public static List<(int, DelegateEnemy)> TierThree()

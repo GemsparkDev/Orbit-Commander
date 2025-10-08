@@ -70,6 +70,9 @@ public static class Assets
         Sprites.Add(Sprite.BloomHead, Content.Load<Texture2D>("Images/Entity_40-1"));
         Sprites.Add(Sprite.BloomBody, Content.Load<Texture2D>("Images/Entity_40-2"));
         Sprites.Add(Sprite.BloomTail, Content.Load<Texture2D>("Images/Entity_40-3"));
+        Sprites.Add(Sprite.StreamlineBoss, Content.Load<Texture2D>("Images/Entity_41"));
+        Sprites.Add(Sprite.StreamlineLeftWing, Content.Load<Texture2D>("Images/Entity_41-1"));
+        Sprites.Add(Sprite.StreamlineRightWing, Content.Load<Texture2D>("Images/Entity_41-2"));
 
 
         //Items

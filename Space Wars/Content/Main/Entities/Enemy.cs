@@ -1827,16 +1827,52 @@ public class Enemy : Entity
         cd = [0];
         Engine.EntityManager.Add(_leftWing);
         Engine.EntityManager.Add(_rightWing);
+        float offset = 1;
         while (true)
         {
+            var nearestEnemy = Engine.EntityManager.NearestEnemy(this);
+            if (nearestEnemy != null && 
+                Vector2.DistanceSquared(nearestEnemy.position, position) < (nearestEnemy.ColliderRadius + ColliderRadius) * (nearestEnemy.ColliderRadius + ColliderRadius))
+            {
+                nearestEnemy.Collide(damage);
+            }
+            var tangent = new Vector2(velocity.Y, -velocity.X);
+            Vector2 relPos = Engine.SaveGame.Player.position - position;
+            float cross = Math.Sign(relPos.X * velocity.Y - relPos.Y * velocity.X);
             if (_leftWing.isExpired && _rightWing.isExpired)
             {
-                //Aggressive behavior
+                if (relPos.Length() > 75)
+                {
+                    velocity += tangent * Engine.DeltaSeconds * cross * 5;
+                }
+                if (cd[0] <= 0)
+                {
+                    Engine.EntityManager.Add(new PulseShot(position, velocity + Vector2.Normalize(Engine.SaveGame.Player.position - position) * 10, angle, 0, isFriendly, damage, true, 1));
+                    cd[0] = 1;
+                    offset *= -1;
+                }
             }
             else
             {
-                //Standard behavior
+                if (relPos.Length() > 200)
+                {
+                    velocity += tangent * Engine.DeltaSeconds * cross * 3;
+                }
             }
+            if (velocity.Length() < float.Epsilon)
+            {
+                velocity = Vector2.One;
+            }
+            if (relPos.Length() > 500)
+            {
+                velocity += Vector2.Normalize(relPos) * 10 * Engine.DeltaSeconds;
+            }
+            float dv = Util.FIED(0.15f);
+            if ((Engine.SaveGame.Player.velocity - velocity).Length() < 10)
+            {
+                velocity += Vector2.Normalize(velocity) * Engine.DeltaSeconds * 20;
+            }
+            velocity = velocity * dv + Engine.SaveGame.Player.velocity * (1-dv);
             if (health <= 0)
             {
                 isExpired = true;
@@ -1851,37 +1887,46 @@ public class Enemy : Entity
                     Engine.EntityManager.Add(new Ablative() { position = this.position, velocity = GetNormalizedAcceleration() * 10, angularVelocity = this.angularVelocity });
                 }
             }
+            targetAngle = Util.ToAngle(velocity);
+            RotateTowards(targetAngle, 0.1f);
             LowerCooldown();
             yield return 0;
         }
     }
     IEnumerable<int> Wing(Entity _parent, float _offset)
     {
+        ChildEnemy = true;
         cd = 
         [
-            0, //Weapon
+            (_offset > 0) ? 0 : 0.2f, //Weapon
             0, //Ablative shield
         ];
         float buffer = 10;
         int newMax = maxHealth;
         while (true)
         {
-            Vector2 relPos = _parent.position = position;
-            position = _parent.position + Vector2.Normalize(new Vector2(relPos.Y, -relPos.X)) * _offset;
+            position = _parent.position + Util.ToUnitVector(_parent.angle + MathF.PI / 2) * _offset;
             velocity = _parent.velocity;
             angle = _parent.angle;
-            if (Engine.EntityManager.NearestEnemy(this) is Enemy nearestEnemy)
+            var nearestEnemy = Engine.EntityManager.NearestEnemy(this);
+            if (nearestEnemy != null)
             {
                 Vector2 relativePosition = nearestEnemy.position - position;
                 Vector2 dir = Util.ToUnitVector(angle);
-                if (cd[0] <= 0 && Vector2.Dot(relativePosition, dir) > relativePosition.Length() * 0.8f)
+                if (Vector2.Dot(dir, relativePosition) > relativePosition.Length() * 0.85f)
                 {
-                    List<Entity> bullets = [];
-                    for (int i = 0; i < 3; i++)
+                    LowerCooldown();
+                    if (cd[0] <= 0)
                     {
-                        bullets.Add(new PulseShot(Vector2.Zero, Vector2.Zero, 0, 0, isFriendly, damage, true, 0));
+                        List<Entity> bullets = [];
+                        for (int i = 0; i < 3; i++)
+                        {
+                            bullets.Add(new PulseShot(Vector2.Zero, Vector2.Zero, 0, 0, isFriendly, damage, true, 0));
+                        }
+                        Engine.EntityManager.Add(new Splitter(position, velocity + dir * 10 + new Vector2(Util.OneToNegOne(), Util.OneToNegOne()) * 2, angle, isFriendly, damage, bullets, 0.25f));
+                        SoundManager.PlaySound(Assets.Get(Sound.PulseFire), position);
+                        cd[0] = 0.4f;
                     }
-                    Engine.EntityManager.Add(new Splitter(position, velocity + dir * 10, angle, isFriendly, damage, bullets));
                 }
             }
             if (health <= 0)
@@ -1909,7 +1954,6 @@ public class Enemy : Entity
             {
                 isExpired = true;
             }
-            LowerCooldown();
             yield return 0;
         }
     }
@@ -3854,12 +3898,12 @@ public class Enemy : Entity
         enemy.AddBehaviour(enemy.Decoy());
         return enemy;
     }
-    public static Enemy NewStreamLineBoss(Vector2 position, Vector2 velocity, float angle, bool _isFriendly = false)
+    public static Enemy NewStreamlineBoss(Vector2 position, Vector2 velocity, float angle, bool _isFriendly = false)
     {
-        Enemy boss = new(position, velocity, angle, 12, 50, Assets.Get(Sprite.Engineer), _isFriendly);
-        Enemy leftWing = new(position, velocity, angle, 8, 30, Assets.Get(Sprite.Engineer), _isFriendly);
-        leftWing.AddBehaviour(leftWing.Wing(boss, 5));
-        Enemy rightWing = new(position, velocity, angle, 8, 30, Assets.Get(Sprite.Engineer), _isFriendly);
+        Enemy boss = new(position, velocity, angle, 12, 50, Assets.Get(Sprite.StreamlineBoss), _isFriendly);
+        Enemy leftWing = new(position, velocity, angle, 8, 30, Assets.Get(Sprite.StreamlineLeftWing), _isFriendly);
+        leftWing.AddBehaviour(leftWing.Wing(boss, -5));
+        Enemy rightWing = new(position, velocity, angle, 8, 30, Assets.Get(Sprite.StreamlineRightWing), _isFriendly);
         rightWing.AddBehaviour(rightWing.Wing(boss, 5));
         boss.AddBehaviour(boss.Streamline(leftWing, rightWing));
         boss.AddBehaviour(boss.AvoidProjectiles(1));

@@ -107,6 +107,9 @@ public enum Sprite
     BloomHead,
     BloomBody,
     BloomTail,
+    StreamlineBoss,
+    StreamlineLeftWing,
+    StreamlineRightWing,
 
     MetalScrap,
     RealMetalScrap,
