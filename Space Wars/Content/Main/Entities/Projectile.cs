@@ -440,7 +440,7 @@ public class Splitter : Projectile
                 float a = angle + MathF.Tau / splits.Count * (float)(i);
                 Vector2 vel = Util.ToUnitVector(a);
                 splits[i].position = position + vel * 5;
-                splits[i].velocity = vel * 8 + velocity;
+                splits[i].velocity = vel * 2 + velocity;
                 splits[i].angle = a;
                 Engine.EntityManager.Add(splits[i]);
             }
@@ -452,7 +452,7 @@ public class Splitter : Projectile
                 float a = angle - MathF.PI / 4 + MathF.PI / splits.Count * (float)(i) / 2;
                 Vector2 vel = Util.ToUnitVector(a);
                 splits[i].position = position;
-                splits[i].velocity = vel * 8 + velocity;
+                splits[i].velocity = vel * 2 + velocity;
                 splits[i].angle = a;
                 Engine.EntityManager.Add(splits[i]);
             }

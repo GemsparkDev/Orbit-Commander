@@ -648,6 +648,31 @@ public class SplitterModule() : Module(Modules.SplitterModule)
         cooldown = 1.5f;
     }
 }
+public class Fractal() : Module(Modules.Fractal)
+{
+    public override void OnShoot()
+    {
+        if (cooldown > 0)
+        {
+            return;
+        }
+        List<Entity> splitters = [];
+        for (int i = 0; i < 3; i++)
+        {
+            List<Entity> finalBullets = [];
+            for (int j = 0; j < 3; j++)
+            {
+                finalBullets.Add(new PulseShot(position, velocity, 0, 0, Player.isFriendly, 3, false, 1));
+            }
+            splitters.Add(new Splitter(position, velocity, 0, Player.isFriendly, 5, finalBullets, 0.2f, 1));
+        }
+        Engine.EntityManager.Add(new Splitter(Player.position, Player.IdealSpeedWithVelocity(8), Util.ToAngle(Player.Direction), Player.isFriendly, 8, splitters, 0.2f));
+        SoundManager.PlaySound(Assets.Get(Sound.LMGFire), Player.position);
+        Engine.ShakeScreen(0.1f);
+        Player.velocity -= Player.Direction / 2;
+        cooldown = 0.5f;
+    }
+}
 public class Dash() : Module(Modules.Dash)
 {
     const float MaxCooldown = 2;

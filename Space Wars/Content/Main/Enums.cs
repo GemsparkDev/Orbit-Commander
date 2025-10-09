@@ -47,6 +47,7 @@ public enum Modules
     Torch,
     Decoy,
     SplitterModule,
+    Fractal,
     //Cores
     Dash,
     GrapplingHook,

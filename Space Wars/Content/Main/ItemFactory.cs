@@ -39,8 +39,9 @@ public static class ItemFactory
         { Modules.PrismArray, new ModuleData(Sprite.RealCrossbowModule,Sprite.CrossbowModule, "Prism Array", (int)ModuleType.Guns, 15, typeof(PrismArray))},
         { Modules.MatrixLauncher, new ModuleData(Sprite.RealCrossbowModule,Sprite.CrossbowModule, "Matrix Launcher", (int)ModuleType.Guns, 15, typeof(MatrixLauncher))},
         { Modules.Torch, new ModuleData(Sprite.TorchReal,Sprite.Torch, "Torch", (int)ModuleType.Guns, 15, typeof(Torch))},
-        { Modules.Decoy, new ModuleData(Sprite.TorchReal,Sprite.Torch, "Torch", (int)ModuleType.Guns, 20, typeof(Decoy))},
-        { Modules.SplitterModule, new ModuleData(Sprite.TorchReal,Sprite.Torch, "Torch", (int)ModuleType.Guns, 20, typeof(SplitterModule))},
+        { Modules.Decoy, new ModuleData(Sprite.TorchReal,Sprite.Torch, "Decoy", (int)ModuleType.Guns, 20, typeof(Decoy))},
+        { Modules.SplitterModule, new ModuleData(Sprite.TorchReal,Sprite.Torch, "Splitter", (int)ModuleType.Guns, 20, typeof(SplitterModule))},
+        { Modules.Fractal, new ModuleData(Sprite.TorchReal,Sprite.Torch, "Fractal", (int)ModuleType.Guns, 20, typeof(Fractal))},
 
         { Modules.Engines, new ModuleData(Sprite.EngineModule, Sprite.EngineModule, "Engines", (int)ModuleType.Engines, 20, typeof(Engine)) },
         { Modules.Plasma, new ModuleData(Sprite.EngineModule, Sprite.EngineModule, "Plasma", (int)ModuleType.Engines, 15, typeof(PlasmaEngine)) },
