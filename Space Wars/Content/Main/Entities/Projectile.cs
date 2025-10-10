@@ -107,12 +107,17 @@ public class AssassinShot : Projectile
         entityType = EntityType.Projectile;
         UpdateColor();
         timeLeft = 3;
-        var col = Color.Gold;
-        col.A = 0;
-        beam = new(Assets.Get(Sprite.Dot), 0.5f, position, angle, 0, 0, 50f, color, EmitterType.EmissionOverDistance) { particleFadeToColor = col };
     }
     public override void AI()
     {
+        //Fixes edge cases with position editing
+        //Change position to getter setter for a better solution
+        if (beam == null)
+        {
+            var col = Color.Gold;
+            col.A = 0;
+            beam = new(Assets.Get(Sprite.Dot), 0.5f, position, angle, 0, 0, 50f, color, EmitterType.EmissionOverDistance) { particleFadeToColor = col };
+        }
         var nearestEnemy = Engine.EntityManager.Hitscan(position, velocity, velocity.Length() * Engine.DeltaSeconds * 60, false, out Vector2 end, (isFriendly ? -1 : 1));
         position = end;
         angle += angularVelocity * Engine.DeltaSeconds * 60;
@@ -419,11 +424,13 @@ public class Splitter : Projectile
 {
     float cooldown;
     List<Entity> splits;
-    public Splitter(Vector2 _position, Vector2 _velocity, float _angle, bool _isFriendly, int _damage, List<Entity> _splits, float _cooldown = 1, int _stealth = 0)
+    bool targetting;
+    public Splitter(Vector2 _position, Vector2 _velocity, float _angle, bool _isFriendly, int _damage, List<Entity> _splits, float _cooldown = 1, int _stealth = 0, bool _targetting = false)
         : base(Assets.Get(Sprite.PulseShot), _position, _velocity, _angle, 0, _isFriendly, _damage, _stealth)
     {
         cooldown = _cooldown;
         splits = _splits;
+        targetting = _targetting;
         entityType = EntityType.Projectile;
         UpdateColor();
     }
@@ -450,9 +457,25 @@ public class Splitter : Projectile
             for (int i = 0; i < splits.Count; i++)
             {
                 float a = angle - MathF.PI / 4 + MathF.PI / splits.Count * (float)(i) / 2;
+                if (splits.Count == 1)
+                {
+                    a = angle;
+                }
+                if (targetting && nearestEnemy != null)
+                {
+                    float enemyAngle = Util.ToAngle(nearestEnemy.position - position + (nearestEnemy.velocity - velocity) * (nearestEnemy.position - position).Length() / 12);
+                    a = a - angle + enemyAngle;
+                }
                 Vector2 vel = Util.ToUnitVector(a);
                 splits[i].position = position;
-                splits[i].velocity = vel * 2 + velocity;
+                if (targetting && nearestEnemy != null)
+                {
+                    splits[i].velocity = vel * 12 + velocity;
+                }
+                else
+                {
+                    splits[i].velocity = vel * 2 + velocity;
+                }
                 splits[i].angle = a;
                 Engine.EntityManager.Add(splits[i]);
             }

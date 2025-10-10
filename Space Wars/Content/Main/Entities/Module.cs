@@ -673,6 +673,21 @@ public class Fractal() : Module(Modules.Fractal)
         cooldown = 0.5f;
     }
 }
+public class CrackShot() : Module(Modules.CrackShot)
+{
+    public override void OnShoot()
+    {
+        if (cooldown > 0)
+        {
+            return;
+        }
+        Engine.EntityManager.Add(new Splitter(Player.position, Player.IdealSpeedWithVelocity(10), Util.ToAngle(Player.Direction), Player.isFriendly, 12, [new AssassinShot(position, default, 0, 0, Player.isFriendly, 8, 1)], 0.2f, 0, true));
+        SoundManager.PlaySound(Assets.Get(Sound.PulseFire), Player.position);
+        Engine.ShakeScreen(0.1f);
+        Player.velocity -= Player.Direction / 2;
+        cooldown = 0.25f;
+    }
+}
 public class Dash() : Module(Modules.Dash)
 {
     const float MaxCooldown = 2;

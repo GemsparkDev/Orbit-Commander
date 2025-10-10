@@ -48,6 +48,7 @@ public enum Modules
     Decoy,
     SplitterModule,
     Fractal,
+    CrackShot,
     //Cores
     Dash,
     GrapplingHook,
