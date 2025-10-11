@@ -495,6 +495,7 @@ public class Mission
         [
             Enemy.NewSymmetryBoss,
             Enemy.NewWyvernBoss,
+            Enemy.NewDeadeyeBoss,
         ];
     }
     public static List<(int, DelegateEnemy)> TierTwo()

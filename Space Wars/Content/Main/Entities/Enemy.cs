@@ -1957,6 +1957,74 @@ public class Enemy : Entity
             yield return 0;
         }
     }
+    IEnumerable<int> Deadeye()
+    {
+        cd = 
+        [
+            0, //Gun 
+            10 //Ability
+        ];
+        float bullets = 0;
+        while(true)
+        {
+            var nearestEnemy = Engine.EntityManager.NearestEnemy(this);
+            if (nearestEnemy != null)
+            {
+                Vector2 relativeVelocity = nearestEnemy.velocity - velocity;
+                velocity += relativeVelocity * Engine.DeltaSeconds * 2;
+                targetVector = nearestEnemy.position - position;
+                Vector2 relativePosition = nearestEnemy.position - position;
+                float distance = relativePosition.Length();
+                Vector2 velocityOffset = relativePosition * (distance - 150) / distance;
+                velocity += velocityOffset * Engine.DeltaSeconds;
+                if (cd[0] <= 0)
+                {
+                    Engine.EntityManager.Add(new Splitter(position, velocity + Util.ToUnitVector(angle) * 8, angle, isFriendly, 6, 
+                        [new AssassinShot(default, default, 0, 0, isFriendly, damage)], 0.5f, 0, true));
+                    SoundManager.PlaySound(Assets.Get(Sound.PulseFire), position);
+                    cd[0] = 1;
+                }
+                if (cd[1] <= 0 && bullets < 5)
+                {
+                    float cooldown = 1.5f - 0.25f * bullets;
+                    Engine.EntityManager.Add(new Splitter(position, velocity + Util.ToUnitVector(angle + 0.1f * bullets) * 8, angle + 0.1f * bullets, isFriendly, 6,
+                        [new AssassinShot(default, default, 0, 0, isFriendly, damage)], cooldown, 0, true));
+                    Engine.EntityManager.Add(new Splitter(position, velocity + Util.ToUnitVector(angle - 0.1f * bullets) * 8, angle - 0.1f * bullets, isFriendly, 6,
+                        [new AssassinShot(default, default, 0, 0, isFriendly, damage)], cooldown, 0, true));
+                    SoundManager.PlaySound(Assets.Get(Sound.PulseFire), position);
+                    cd[1] = 0.25f;
+                    cd[0] = 1;
+                    bullets++;
+                    if (bullets >= 5)
+                    {
+                        bullets = 0;
+                        cd[1] =  5f * (health / maxHealth + 1);
+                    }
+                }
+            }
+            else
+            {
+                targetVector = velocity;
+            }
+            if (health <= 0)
+            {
+                isExpired = true;
+                Explode(10, ColliderRadius);
+                if (Engine.SaveGame.GiveWeapon)
+                {
+                    Engine.EntityManager.Add(new CrackShot() { position = this.position, velocity = GetNormalizedAcceleration() * 10, angularVelocity = this.angularVelocity });
+                }
+                else
+                {
+                    Engine.EntityManager.Add(new Assault() { position = this.position, velocity = GetNormalizedAcceleration() * 10, angularVelocity = this.angularVelocity });
+                }
+            }
+            targetAngle = Util.ToAngle(targetVector);
+            RotateTowards(targetAngle);
+            LowerCooldown();
+            yield return 0;
+        }
+    }
     #endregion
     #region Enemies
     IEnumerable<int> Fighter()
@@ -3907,6 +3975,12 @@ public class Enemy : Entity
         rightWing.AddBehaviour(rightWing.Wing(boss, 5));
         boss.AddBehaviour(boss.Streamline(leftWing, rightWing));
         boss.AddBehaviour(boss.AvoidProjectiles(1));
+        return boss;
+    }
+    public static Enemy NewDeadeyeBoss(Vector2 position, Vector2 velocity, float angle, bool _isFriendly = false)
+    {
+        Enemy boss = new(position, velocity, angle, 8, 80, Assets.Get(Sprite.Engineer), _isFriendly);
+        boss.AddBehaviour(boss.Deadeye());
         return boss;
     }
 }
