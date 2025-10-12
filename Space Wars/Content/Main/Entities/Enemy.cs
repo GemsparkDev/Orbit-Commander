@@ -25,15 +25,15 @@ public class Enemy : Entity
     private bool deleteOnCollide = false;
     public bool ChildEnemy { get; private set; }
     private bool wasHit = false;
-    public override int StealthAbility 
+    public override int StealthAbility
     {
-        get => (base.StealthAbility + (((revealDuration > 0 || health <= 0) ? -5 : 0) + StatusHolder.StealthChange)); 
-        protected set => base.StealthAbility = value; 
+        get => (base.StealthAbility + (((revealDuration > 0 || health <= 0) ? -5 : 0) + StatusHolder.StealthChange));
+        protected set => base.StealthAbility = value;
     }
-    public override int SensingAbility 
-    { 
-        get => (base.SensingAbility + StatusHolder.SensingChange); 
-        protected set => base.SensingAbility = value; 
+    public override int SensingAbility
+    {
+        get => (base.SensingAbility + StatusHolder.SensingChange);
+        protected set => base.SensingAbility = value;
     }
     public override float ColliderRadius => ((texture != null) ? Engine.EnemyHitboxModifier * ((texture.Height + texture.Width) / 4 + 1) : 0);
     private Vector2 targetVector;
@@ -152,7 +152,7 @@ public class Enemy : Entity
             SoundManager.PlaySound(hitSound, position);
             health -= damage;
             Engine.ShakeScreen(10 / ((position - Engine.Camera.Position).Length() + 200) * damage);
-            ParticleManager.Add(new Particle(null, 1, position + new Vector2(0,-1), new Vector2(0,-1.5f), 0, 0, Color.Orange, new Color(255, 0, 0, 0)) { drawText = $"{damage}" });
+            ParticleManager.Add(new Particle(null, 1, position + new Vector2(0, -1), new Vector2(0, -1.5f), 0, 0, Color.Orange, new Color(255, 0, 0, 0)) { drawText = $"{damage}" });
             revealDuration = Math.Max(revealDuration, 0.3f * MathF.Sqrt(damage));
             return true;
         }
@@ -179,7 +179,7 @@ public class Enemy : Entity
     }
     public override void Draw(SpriteBatch _spriteBatch)
     {
-        if(!ChildEnemy)
+        if (!ChildEnemy)
         {
             float val = (Engine.SaveGame.Player.SensingAbility > base.StealthAbility ? 1 : 0);
             if (Engine.SaveGame.Player.SensingAbility <= base.StealthAbility)
@@ -197,7 +197,7 @@ public class Enemy : Entity
         Vector2 halfSize = Engine.BackBuffer / 2;
         if (!ChildEnemy && !deleteOnCollide && isFriendly &&
            (position.X - Engine.Camera.Position.X + Size.X / 2 < -halfSize.X || position.Y - Engine.Camera.Position.Y + Size.Y / 2 < -halfSize.Y
-         || position.X - Engine.Camera.Position.X - Size.X / 2 >  halfSize.X || position.Y - Engine.Camera.Position.Y - Size.Y / 2 >  halfSize.Y))
+         || position.X - Engine.Camera.Position.X - Size.X / 2 > halfSize.X || position.Y - Engine.Camera.Position.Y - Size.Y / 2 > halfSize.Y))
         {
             var pos = position - Engine.SaveGame.Player.position;
             ParticleManager.Add(new Particle(Assets.Get(Sprite.Dot), pos / 50 + Engine.SaveGame.Player.position, 0, color * 0.75f));
@@ -230,7 +230,7 @@ public class Enemy : Entity
                 }
                 velocity *= 0.5f;
             }
-            if (mineTime > MathF.Sqrt((float)(maxHealth) / 8)) 
+            if (mineTime > MathF.Sqrt((float)(maxHealth) / 8))
             {
                 isExpired = true;
                 for (float angle = 0; angle < MathF.Tau; angle += MathF.PI / 4)
@@ -588,7 +588,7 @@ public class Enemy : Entity
                 SoundManager.PlaySound(Assets.Get(Sound.Death), position);
                 if (Engine.SaveGame.GiveWeapon)
                 {
-                    Engine.EntityManager.Add(new Shotgun() { position = this.position, velocity = GetNormalizedAcceleration() * 10, angularVelocity = this.angularVelocity});
+                    Engine.EntityManager.Add(new Shotgun() { position = this.position, velocity = GetNormalizedAcceleration() * 10, angularVelocity = this.angularVelocity });
                 }
                 else
                 {
@@ -643,7 +643,7 @@ public class Enemy : Entity
                         position = new Vector2(10000, 10000);
                         if (Engine.SaveGame.GiveWeapon)
                         {
-                            Engine.EntityManager.Add(new LMG() {position = this.position, velocity = normalizedAcceleration * 10, angularVelocity = this.angularVelocity});
+                            Engine.EntityManager.Add(new LMG() { position = this.position, velocity = normalizedAcceleration * 10, angularVelocity = this.angularVelocity });
                         }
                         else
                         {
@@ -913,7 +913,7 @@ public class Enemy : Entity
         float missileGap = 0;
         var col = Color.DarkRed;
         col.A = 0;
-        var engineParticles = new ParticleEmitter(Assets.Get(Sprite.Circle), 0.1f, Vector2.Zero, 0, MathF.PI/2, 2, 
+        var engineParticles = new ParticleEmitter(Assets.Get(Sprite.Circle), 0.1f, Vector2.Zero, 0, MathF.PI / 2, 2,
             200f, Color.Yellow, EmitterType.EmissionOverTime) { particleFadeToColor = col };
         while (true)
         {
@@ -986,7 +986,7 @@ public class Enemy : Entity
             }
             float angleRateOfChange = (targetAngle - MathF.Atan2(futureTargetVector.X, -futureTargetVector.Y)) / Engine.DeltaSeconds;
             //Note: Add bonus to speed if moving very fast toward planet
-            Vector2 accelerationVector = (normalAcceleration * closingVelocity * angleRateOfChange * 2 ) * Engine.DeltaSeconds + GetNormalizedAcceleration() * (2);
+            Vector2 accelerationVector = (normalAcceleration * closingVelocity * angleRateOfChange * 2) * Engine.DeltaSeconds + GetNormalizedAcceleration() * (2);
             if (accelerationVector.LengthSquared() > 1f)
             {
                 accelerationVector = Vector2.Normalize(accelerationVector);
@@ -1044,7 +1044,7 @@ public class Enemy : Entity
                 }
                 else
                 {
-                    Engine.EntityManager.Add(new PlasmaEngine() { position = this.position, velocity = GetNormalizedAcceleration() * 10, angularVelocity = this.angularVelocity});
+                    Engine.EntityManager.Add(new PlasmaEngine() { position = this.position, velocity = GetNormalizedAcceleration() * 10, angularVelocity = this.angularVelocity });
                 }
             }
             engineParticles.sprayAngle = (angle + MathF.PI) * 180 / MathF.PI;
@@ -1158,7 +1158,7 @@ public class Enemy : Entity
                 SoundManager.PlaySound(Assets.Get(Sound.Death), position);
                 if (Engine.SaveGame.GiveWeapon)
                 {
-                    Engine.EntityManager.Add(new GrenadeLauncher(){ position = this.position, velocity = GetNormalizedAcceleration() * 10, angularVelocity = this.angularVelocity});
+                    Engine.EntityManager.Add(new GrenadeLauncher() { position = this.position, velocity = GetNormalizedAcceleration() * 10, angularVelocity = this.angularVelocity });
                 }
                 else
                 {
@@ -1254,7 +1254,7 @@ public class Enemy : Entity
                 }
                 isExpired = true;
                 SoundManager.PlaySound(Assets.Get(Sound.Death), position);
-                Engine.EntityManager.Add(new GrenadeLauncher() { position = this.position, velocity = GetNormalizedAcceleration() * 10, angularVelocity = this.angularVelocity});
+                Engine.EntityManager.Add(new GrenadeLauncher() { position = this.position, velocity = GetNormalizedAcceleration() * 10, angularVelocity = this.angularVelocity });
             }
             yield return 0;
         }
@@ -1553,7 +1553,7 @@ public class Enemy : Entity
         {
             Engine.EntityManager.Add(enemy);
         }
-        while(true)
+        while (true)
         {
             Vector2 relativePosition = Engine.SaveGame.Player.position - position;
             float distSqr = relativePosition.LengthSquared();
@@ -1660,7 +1660,7 @@ public class Enemy : Entity
     IEnumerable<int> Rope()
     {
         cd = [Util.Random.NextSingle() * 5 + 1];
-        while(true)
+        while (true)
         {
             if (health != maxHealth)
             {
@@ -1703,13 +1703,13 @@ public class Enemy : Entity
         StealthAbility = 2;
         SensingAbility = 1;
         //holo = new hologram enemy
-        cd = 
+        cd =
         [
             0, //Default
             0, //Enemy tracking
             0, //Weapons
         ];
-        while(true)
+        while (true)
         {
             var enemy = Engine.EntityManager.NearestEnemy(this);
             if (enemy == nearestEnemy)
@@ -1797,7 +1797,7 @@ public class Enemy : Entity
             {
                 if (Vector2.DistanceSquared(position, randomPosition) < 1000)
                 {
-                    randomPosition = Util.ToUnitVector(Util.Random.NextSingle() * MathF.Tau) * (Engine.SaveGame.CurrentMission.Planet.radius) * (1 + Util.Random.NextSingle() / 2); 
+                    randomPosition = Util.ToUnitVector(Util.Random.NextSingle() * MathF.Tau) * (Engine.SaveGame.CurrentMission.Planet.radius) * (1 + Util.Random.NextSingle() / 2);
                 }
                 GoToPosition(randomPosition, 1);
             }
@@ -1831,7 +1831,7 @@ public class Enemy : Entity
         while (true)
         {
             var nearestEnemy = Engine.EntityManager.NearestEnemy(this);
-            if (nearestEnemy != null && 
+            if (nearestEnemy != null &&
                 Vector2.DistanceSquared(nearestEnemy.position, position) < (nearestEnemy.ColliderRadius + ColliderRadius) * (nearestEnemy.ColliderRadius + ColliderRadius))
             {
                 nearestEnemy.Collide(damage);
@@ -1872,7 +1872,7 @@ public class Enemy : Entity
             {
                 velocity += Vector2.Normalize(velocity) * Engine.DeltaSeconds * 20;
             }
-            velocity = velocity * dv + Engine.SaveGame.Player.velocity * (1-dv);
+            velocity = velocity * dv + Engine.SaveGame.Player.velocity * (1 - dv);
             if (health <= 0)
             {
                 isExpired = true;
@@ -1896,7 +1896,7 @@ public class Enemy : Entity
     IEnumerable<int> Wing(Entity _parent, float _offset)
     {
         ChildEnemy = true;
-        cd = 
+        cd =
         [
             (_offset > 0) ? 0 : 0.2f, //Weapon
             0, //Ablative shield
@@ -1959,13 +1959,13 @@ public class Enemy : Entity
     }
     IEnumerable<int> Deadeye()
     {
-        cd = 
+        cd =
         [
             0, //Gun 
             10 //Ability
         ];
         float bullets = 0;
-        while(true)
+        while (true)
         {
             var nearestEnemy = Engine.EntityManager.NearestEnemy(this);
             if (nearestEnemy != null)
@@ -1976,10 +1976,10 @@ public class Enemy : Entity
                 Vector2 relativePosition = nearestEnemy.position - position;
                 float distance = relativePosition.Length();
                 Vector2 velocityOffset = relativePosition * (distance - 150) / distance;
-                velocity += velocityOffset * Engine.DeltaSeconds;
+                velocity += velocityOffset * Engine.DeltaSeconds + GetNormalizedAcceleration() * 2;
                 if (cd[0] <= 0)
                 {
-                    Engine.EntityManager.Add(new Splitter(position, velocity + Util.ToUnitVector(angle) * 8, angle, isFriendly, 6, 
+                    Engine.EntityManager.Add(new Splitter(position, velocity + Util.ToUnitVector(angle) * 8, angle, isFriendly, 6,
                         [new AssassinShot(default, default, 0, 0, isFriendly, damage)], 0.5f, 0, true));
                     SoundManager.PlaySound(Assets.Get(Sound.PulseFire), position);
                     cd[0] = 1;
@@ -1998,7 +1998,7 @@ public class Enemy : Entity
                     if (bullets >= 5)
                     {
                         bullets = 0;
-                        cd[1] =  5f * (health / maxHealth + 1);
+                        cd[1] = 5f * (health / maxHealth + 1);
                     }
                 }
             }
@@ -2018,6 +2018,104 @@ public class Enemy : Entity
                 {
                     Engine.EntityManager.Add(new Assault() { position = this.position, velocity = GetNormalizedAcceleration() * 10, angularVelocity = this.angularVelocity });
                 }
+            }
+            targetAngle = Util.ToAngle(targetVector);
+            RotateTowards(targetAngle);
+            LowerCooldown();
+            yield return 0;
+        }
+    }
+    IEnumerable<int> Continuum()
+    {
+        cd = 
+        [
+            0, //Weapon
+            0, //Enemy loss timer
+            1, //Direction change timer
+        ];
+        float direction = 1;
+        Entity nearestEnemy = null;
+        StealthAbility = 2;
+        SensingAbility = 1;
+        while(true)
+        {
+            var enemy = Engine.EntityManager.NearestEnemy(this);
+            if (enemy == nearestEnemy)
+            {
+                cd[1] = 10;
+            }
+            else
+            {
+                if (enemy == null)
+                {
+                    if (cd[1] <= 0)
+                    {
+                        nearestEnemy = null;
+                    }
+                }
+                else
+                {
+                    nearestEnemy = enemy;
+                    cd[1] = 10;
+                }
+            }
+            if (nearestEnemy != null)
+            {
+                Vector2 relativeVelocity = nearestEnemy.velocity - velocity;
+                velocity += relativeVelocity * Engine.DeltaSeconds * 5;
+                targetVector = nearestEnemy.position - position;
+                Vector2 relativePosition = nearestEnemy.position - position;
+                float distance = relativePosition.Length();
+                Vector2 velocityOffset = relativePosition * (distance - 150) / distance;
+                velocity += (velocityOffset + GetNormalizedAcceleration() * 60 + Vector2.Normalize(new Vector2(relativePosition.Y, -relativePosition.X)) * 25 * direction) * Engine.DeltaSeconds;
+                if (cd[0] <= 0)
+                {
+                    List<Entity> splitters = [];
+                    for (int i = 0; i < 3; i++)
+                    {
+                        List<Entity> finalBullets = [];
+                        for (int j = 0; j < 3; j++)
+                        {
+                            finalBullets.Add(new PulseShot(position, velocity, 0, 0, isFriendly, 3, false, 1));
+                        }
+                        splitters.Add(new Splitter(position, velocity, 0, Player.isFriendly, 5, finalBullets, 0.05f, 1));
+                    }
+                    var dir = Vector2.Normalize(relativePosition);
+                    Engine.EntityManager.Add(new Splitter(position, nearestEnemy.velocity + dir * 8, Util.ToAngle(dir), isFriendly, 8, splitters, 0.05f));
+                    SoundManager.PlaySound(Assets.Get(Sound.LMGFire), position);
+                    revealDuration += 0.5f;
+                    cd[0] = 1;
+                }
+                //Ability
+            }
+            else
+            {
+                targetVector = velocity;
+                Vector2 relativePosition = Engine.SaveGame.CurrentMission.Planet.position - position;
+                float distance = relativePosition.Length();
+                Vector2 velocityOffset = relativePosition * (distance - Engine.SaveGame.CurrentMission.Planet.radius) / distance;
+                velocity += (velocityOffset + Vector2.Normalize(new Vector2(relativePosition.Y, -relativePosition.X)) * 25 * direction) * Engine.DeltaSeconds;
+            }
+            if (health <= 0)
+            {
+                isExpired = true;
+                Explode(10, ColliderRadius);
+                if (Engine.SaveGame.GiveWeapon)
+                {
+
+                }
+                else
+                {
+
+                }
+            }
+            if (cd[2] <= 0)
+            {
+                if (Util.Random.Next(0, 5) == 0)
+                {
+                    direction *= -1;
+                }
+                cd[2] = 1;
             }
             targetAngle = Util.ToAngle(targetVector);
             RotateTowards(targetAngle);
@@ -3981,6 +4079,12 @@ public class Enemy : Entity
     {
         Enemy boss = new(position, velocity, angle, 8, 80, Assets.Get(Sprite.Engineer), _isFriendly);
         boss.AddBehaviour(boss.Deadeye());
+        return boss;
+    }
+    public static Enemy NewContinuumBoss(Vector2 position, Vector2 velocity, float angle, bool _isFriendly = false)
+    {
+        Enemy boss = new(position, velocity, angle, 6, 120, Assets.Get(Sprite.Engineer), _isFriendly);
+        boss.AddBehaviour(boss.Continuum());
         return boss;
     }
 }

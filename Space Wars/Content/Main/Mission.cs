@@ -529,7 +529,8 @@ public class Mission
     {
         return
         [
-            Enemy.NewPursuer
+            Enemy.NewPursuer,
+            Enemy.NewContinuumBoss,
         ];
     }
     public static List<(int, DelegateEnemy)> All()
