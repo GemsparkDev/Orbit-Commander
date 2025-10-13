@@ -2032,13 +2032,35 @@ public class Enemy : Entity
             0, //Weapon
             0, //Enemy loss timer
             1, //Direction change timer
+            5, //Ability timer
+            0, //Ability offset timer
+            0, //Burnout timer
         ];
+        int prevHealth = health;
         float direction = 1;
+        int abilityShots = 0;
         Entity nearestEnemy = null;
         StealthAbility = 2;
         SensingAbility = 1;
         while(true)
         {
+            if (health <= 0)
+            {
+                isExpired = true;
+                Explode(10, ColliderRadius);
+                if (Engine.SaveGame.GiveWeapon)
+                {
+                    Engine.EntityManager.Add(new Fractal() { position = this.position, velocity = GetNormalizedAcceleration() * 10, angularVelocity = this.angularVelocity });
+                }
+                else
+                {
+                    Engine.EntityManager.Add(new Turtle() { position = this.position, velocity = GetNormalizedAcceleration() * 10, angularVelocity = this.angularVelocity });
+                }
+            }
+            if (prevHealth != health && revealDuration <= 0)
+            {
+                health = prevHealth;
+            }
             var enemy = Engine.EntityManager.NearestEnemy(this);
             if (enemy == nearestEnemy)
             {
@@ -2059,67 +2081,89 @@ public class Enemy : Entity
                     cd[1] = 10;
                 }
             }
-            if (nearestEnemy != null)
+            if (cd[5] <= 0)
             {
-                Vector2 relativeVelocity = nearestEnemy.velocity - velocity;
-                velocity += relativeVelocity * Engine.DeltaSeconds * 5;
-                targetVector = nearestEnemy.position - position;
-                Vector2 relativePosition = nearestEnemy.position - position;
-                float distance = relativePosition.Length();
-                Vector2 velocityOffset = relativePosition * (distance - 150) / distance;
-                velocity += (velocityOffset + GetNormalizedAcceleration() * 60 + Vector2.Normalize(new Vector2(relativePosition.Y, -relativePosition.X)) * 25 * direction) * Engine.DeltaSeconds;
-                if (cd[0] <= 0)
+                if (nearestEnemy != null)
                 {
-                    List<Entity> splitters = [];
-                    for (int i = 0; i < 3; i++)
+                    Vector2 relativeVelocity = nearestEnemy.velocity - velocity;
+                    velocity += relativeVelocity * Engine.DeltaSeconds * 5;
+                    targetVector = nearestEnemy.position - position;
+                    Vector2 relativePosition = nearestEnemy.position - position;
+                    float distance = relativePosition.Length();
+                    Vector2 velocityOffset = relativePosition * (distance - 150) / distance;
+                    velocity += (velocityOffset + GetNormalizedAcceleration() * 60 + Vector2.Normalize(new Vector2(relativePosition.Y, -relativePosition.X)) * 25 * direction) * Engine.DeltaSeconds;
+                    if (cd[0] <= 0)
                     {
-                        List<Entity> finalBullets = [];
-                        for (int j = 0; j < 3; j++)
+                        List<Entity> splitters = [];
+                        for (int i = 0; i < 3; i++)
                         {
-                            finalBullets.Add(new PulseShot(position, velocity, 0, 0, isFriendly, 3, false, 1));
+                            List<Entity> finalBullets = [];
+                            for (int j = 0; j < 3; j++)
+                            {
+                                finalBullets.Add(new PulseShot(position, velocity, 0, 0, isFriendly, damage, false, 1));
+                            }
+                            splitters.Add(new Splitter(position, velocity, 0, Player.isFriendly, (int)(damage * 1.5f), finalBullets, 0.05f, 1));
                         }
-                        splitters.Add(new Splitter(position, velocity, 0, Player.isFriendly, 5, finalBullets, 0.05f, 1));
+                        var dir = Vector2.Normalize(relativePosition);
+                        Engine.EntityManager.Add(new Splitter(position, nearestEnemy.velocity + dir * 8, Util.ToAngle(dir), isFriendly, damage * 2, splitters, 0.05f));
+                        SoundManager.PlaySound(Assets.Get(Sound.LMGFire), position);
+                        revealDuration += 1.5f;
+                        cd[0] = 1.5f;
                     }
-                    var dir = Vector2.Normalize(relativePosition);
-                    Engine.EntityManager.Add(new Splitter(position, nearestEnemy.velocity + dir * 8, Util.ToAngle(dir), isFriendly, 8, splitters, 0.05f));
-                    SoundManager.PlaySound(Assets.Get(Sound.LMGFire), position);
-                    revealDuration += 0.5f;
-                    cd[0] = 1;
-                }
-                //Ability
-            }
-            else
-            {
-                targetVector = velocity;
-                Vector2 relativePosition = Engine.SaveGame.CurrentMission.Planet.position - position;
-                float distance = relativePosition.Length();
-                Vector2 velocityOffset = relativePosition * (distance - Engine.SaveGame.CurrentMission.Planet.radius) / distance;
-                velocity += (velocityOffset + Vector2.Normalize(new Vector2(relativePosition.Y, -relativePosition.X)) * 25 * direction) * Engine.DeltaSeconds;
-            }
-            if (health <= 0)
-            {
-                isExpired = true;
-                Explode(10, ColliderRadius);
-                if (Engine.SaveGame.GiveWeapon)
-                {
-
+                    if (cd[3] <= 0 && cd[4] <= 0f)
+                    {
+                        List<Entity> splitters = [];
+                        for (int i = 0; i < 3; i++)
+                        {
+                            List<Entity> finalBullets = [];
+                            for (int j = 0; j < 3; j++)
+                            {
+                                finalBullets.Add(new AssassinShot(position, velocity, 0, 0, isFriendly, damage));
+                            }
+                            splitters.Add(new Splitter(position, velocity, 0, Player.isFriendly, (int)(damage * 1.5f), finalBullets, 0.2f, 1, true));
+                        }
+                        var dir = Vector2.Normalize(relativePosition);
+                        Engine.EntityManager.Add(new Splitter(position, nearestEnemy.velocity + dir * 8, Util.ToAngle(dir), isFriendly, damage * 2, splitters, 0.2f, 0, true));
+                        SoundManager.PlaySound(Assets.Get(Sound.LMGFire), position);
+                        revealDuration += 1.5f;
+                        abilityShots++;
+                        cd[0] = 1.5f;
+                        cd[4] = 0.5f;
+                        if (abilityShots >= 3)
+                        {
+                            cd[3] = 20;
+                            abilityShots = 0;
+                            cd[5] = 2;
+                            revealDuration = 4f;
+                        }
+                    }
                 }
                 else
                 {
-
+                    targetVector = velocity;
+                    Vector2 relativePosition = Engine.SaveGame.CurrentMission.Planet.position - position;
+                    float distance = relativePosition.Length();
+                    Vector2 velocityOffset = relativePosition * (distance - Engine.SaveGame.CurrentMission.Planet.radius) / distance;
+                    velocity += (velocityOffset + Vector2.Normalize(new Vector2(relativePosition.Y, -relativePosition.X)) * 25 * direction) * Engine.DeltaSeconds;
                 }
-            }
-            if (cd[2] <= 0)
-            {
-                if (Util.Random.Next(0, 5) == 0)
+                if (cd[2] <= 0)
                 {
-                    direction *= -1;
+                    if (Util.Random.Next(0, 5) == 0)
+                    {
+                        direction *= -1;
+                    }
+                    cd[2] = 1;
                 }
-                cd[2] = 1;
+                targetAngle = Util.ToAngle(targetVector);
+                RotateTowards(targetAngle);
             }
-            targetAngle = Util.ToAngle(targetVector);
-            RotateTowards(targetAngle);
+            else
+            {
+                velocity *= Util.FIED(0.1f);
+                yield return 0;
+            }
             LowerCooldown();
+            prevHealth = health;
             yield return 0;
         }
     }

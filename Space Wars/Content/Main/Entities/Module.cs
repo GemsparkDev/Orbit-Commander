@@ -165,6 +165,7 @@ public class Turtle() : Module(Modules.Turtle)
     public override void OnShoot()
     {
         cooldown = 1;
+        Engine.SaveGame.Player.Reveal(1);
     }
     public override void OnUpdate()
     {

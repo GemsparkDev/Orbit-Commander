@@ -86,7 +86,7 @@ public class Player : Entity
             {
                 stealth -= 1;
             }
-            if (modules[ModuleType.Hull].Type == Modules.Stealth)
+            if (modules[ModuleType.Hull].Type is Modules.Stealth or Modules.Turtle)
             {
                 stealth += 1;
             }

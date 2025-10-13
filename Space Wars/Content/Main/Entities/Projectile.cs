@@ -456,27 +456,33 @@ public class Splitter : Projectile
         {
             for (int i = 0; i < splits.Count; i++)
             {
-                float a = angle - MathF.PI / 4 + MathF.PI / splits.Count * (float)(i) / 2;
-                if (splits.Count == 1)
-                {
-                    a = angle;
-                }
-                if (targetting && nearestEnemy != null)
-                {
-                    float enemyAngle = Util.ToAngle(nearestEnemy.position - position + (nearestEnemy.velocity - velocity) * (nearestEnemy.position - position).Length() / 12);
-                    a = a - angle + enemyAngle;
-                }
-                Vector2 vel = Util.ToUnitVector(a);
                 splits[i].position = position;
                 if (targetting && nearestEnemy != null)
                 {
-                    splits[i].velocity = vel * 12 + velocity;
+
+                    float a = 0;
+                    if (splits.Count != 1)
+                    {
+                        a = -MathF.PI / 4 + MathF.PI / splits.Count * (float)(i) / 2;
+                    }
+                    Vector2 d = nearestEnemy.position - position;
+                    Vector2 v = nearestEnemy.velocity - velocity;
+                    float cross = (d.X * v.Y - d.Y * v.X);
+                    float sinTheta = cross / (d.Length() * 12);
+                    Vector2 vel = Util.ToUnitVector(a + Util.ToAngle(d));
+                    splits[i].velocity = vel * 12;
                 }
                 else
                 {
+                    float a = angle;
+                    if (splits.Count != 1)
+                    {
+                        a = angle - MathF.PI / 4 + MathF.PI / splits.Count * (float)(i) / 2;
+                    }
+                    Vector2 vel = Util.ToUnitVector(a);
                     splits[i].velocity = vel * 2 + velocity;
                 }
-                splits[i].angle = a;
+                splits[i].angle = Util.ToAngle(splits[i].velocity);
                 Engine.EntityManager.Add(splits[i]);
             }
             isExpired = true;
