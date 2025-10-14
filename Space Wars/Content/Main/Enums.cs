@@ -112,6 +112,8 @@ public enum Sprite
     StreamlineBoss,
     StreamlineLeftWing,
     StreamlineRightWing,
+    Clockwork,
+    Cog,
 
     MetalScrap,
     RealMetalScrap,

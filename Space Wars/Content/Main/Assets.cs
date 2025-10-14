@@ -73,7 +73,8 @@ public static class Assets
         Sprites.Add(Sprite.StreamlineBoss, Content.Load<Texture2D>("Images/Entity_41"));
         Sprites.Add(Sprite.StreamlineLeftWing, Content.Load<Texture2D>("Images/Entity_41-1"));
         Sprites.Add(Sprite.StreamlineRightWing, Content.Load<Texture2D>("Images/Entity_41-2"));
-
+        Sprites.Add(Sprite.Clockwork, Content.Load<Texture2D>("Images/Entity_42"));
+        Sprites.Add(Sprite.Cog, Content.Load<Texture2D>("Images/Entity_42-1"));
 
         //Items
         Sprites.Add(Sprite.MetalScrap, Content.Load<Texture2D>("Images/Item_0"));

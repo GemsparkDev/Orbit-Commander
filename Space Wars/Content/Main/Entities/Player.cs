@@ -31,7 +31,7 @@ public class Player : Entity
         { ModuleType.Guns, new CrackShot() },
         { ModuleType.Engines, new PlasmaEngine() },
         { ModuleType.Sensors, new Sensors() },
-        { ModuleType.Core, new SummonGrapplingHook() }
+        { ModuleType.Core, new Dash() }
     };
 
     public Vector2 Direction => targetVector;

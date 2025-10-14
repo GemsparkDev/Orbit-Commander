@@ -682,7 +682,7 @@ public class CrackShot() : Module(Modules.CrackShot)
         {
             return;
         }
-        Engine.EntityManager.Add(new Splitter(Player.position, Player.IdealSpeedWithVelocity(10), Util.ToAngle(Player.Direction), Player.isFriendly, 12, [new AssassinShot(position, default, 0, 0, Player.isFriendly, 8, 0)], 0.2f, 0, true));
+        Engine.EntityManager.Add(new Splitter(Player.position, Player.IdealSpeedWithVelocity(8), Util.ToAngle(Player.Direction), Player.isFriendly, 12, [new AssassinShot(position, default, 0, 0, Player.isFriendly, 8, 0)], 0.2f, 0, true));
         SoundManager.PlaySound(Assets.Get(Sound.PulseFire), Player.position);
         Engine.ShakeScreen(0.1f);
         Player.velocity -= Player.Direction / 2;

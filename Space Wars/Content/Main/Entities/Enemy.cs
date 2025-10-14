@@ -1254,7 +1254,7 @@ public class Enemy : Entity
                 }
                 isExpired = true;
                 SoundManager.PlaySound(Assets.Get(Sound.Death), position);
-                Engine.EntityManager.Add(new GrenadeLauncher() { position = this.position, velocity = GetNormalizedAcceleration() * 10, angularVelocity = this.angularVelocity });
+                Engine.EntityManager.Add(new Flamethrower() { position = this.position, velocity = GetNormalizedAcceleration() * 10, angularVelocity = this.angularVelocity });
             }
             yield return 0;
         }
@@ -2123,7 +2123,7 @@ public class Enemy : Entity
                             splitters.Add(new Splitter(position, velocity, 0, Player.isFriendly, (int)(damage * 1.5f), finalBullets, 0.2f, 1, true));
                         }
                         var dir = Vector2.Normalize(relativePosition);
-                        Engine.EntityManager.Add(new Splitter(position, nearestEnemy.velocity + dir * 8, Util.ToAngle(dir), isFriendly, damage * 2, splitters, 0.2f, 0, true));
+                        Engine.EntityManager.Add(new Splitter(position, nearestEnemy.velocity + dir * 4, Util.ToAngle(dir), isFriendly, damage * 2, splitters, 0.2f));
                         SoundManager.PlaySound(Assets.Get(Sound.LMGFire), position);
                         revealDuration += 1.5f;
                         abilityShots++;
@@ -2133,8 +2133,8 @@ public class Enemy : Entity
                         {
                             cd[3] = 20;
                             abilityShots = 0;
-                            cd[5] = 2;
-                            revealDuration = 4f;
+                            cd[5] = 0.5f;
+                            revealDuration = 1f;
                         }
                     }
                 }
@@ -2164,6 +2164,42 @@ public class Enemy : Entity
             }
             LowerCooldown();
             prevHealth = health;
+            yield return 0;
+        }
+    }
+    IEnumerable<int> Clockwork(Enemy _cog)
+    {
+        Engine.EntityManager.Add(_cog);
+        hitSound = Assets.Get(Sound.ShieldHit);
+        cd = [0];
+        while (true)
+        {
+            health = _cog.health;
+            if (cd[0] <= 0)
+            {
+                cd[0] = 1;
+                //Actions go here
+            }
+            float val = (1 - cd[0]);
+            _cog.angle = angle + val * val * MathF.PI / 2;
+            if (health <= 0)
+            {
+                Explode(10, ColliderRadius);
+                _cog.isExpired = true;
+                isExpired = true;
+                Engine.EntityManager.Add(new Construct(Constructs.SpecializedParts, position, GetNormalizedAcceleration() * 10, angle, 0.1f));
+                Engine.EntityManager.Add(new OrionEngine() { position = this.position, velocity = GetNormalizedAcceleration() * 10, angularVelocity = this.angularVelocity });
+            }
+            LowerCooldown();
+            yield return 0;
+        }
+    }
+    IEnumerable<int> Cog(Entity _parent)
+    {
+        ChildEnemy = true;
+        while(true)
+        {
+            position = _parent.position + Util.ToUnitVector(_parent.angle) * _parent.texture.Height / 2;
             yield return 0;
         }
     }
@@ -4129,6 +4165,14 @@ public class Enemy : Entity
     {
         Enemy boss = new(position, velocity, angle, 6, 120, Assets.Get(Sprite.Engineer), _isFriendly);
         boss.AddBehaviour(boss.Continuum());
+        return boss;
+    }
+    public static Enemy NewClockworkBoss(Vector2 position, Vector2 velocity, float angle, bool _isFriendly = false)
+    {
+        Enemy boss = new(position, velocity, angle, 6, 120, Assets.Get(Sprite.Clockwork), _isFriendly);
+        Enemy cog = new(position, velocity, angle, 6, 120, Assets.Get(Sprite.Cog), _isFriendly);
+        boss.AddBehaviour(boss.Clockwork(cog));
+        cog.AddBehaviour(cog.Cog(boss));
         return boss;
     }
 }
