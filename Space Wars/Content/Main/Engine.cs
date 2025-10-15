@@ -306,4 +306,13 @@ public static class Util
         Engine.EntityManager.Explode(_damage, _radius, _position);
         Engine.ShakeScreen(150 / ((_position - Engine.Camera.Position).Length() + 300));
     }
+    public static Vector2 PredictEnemy(Entity nearestEnemy, Entity shooter, float speed, float offset = 0)
+    {
+        Vector2 d = nearestEnemy.position - shooter.position;
+        Vector2 v = nearestEnemy.velocity - shooter.velocity;
+        float cross = d.X * v.Y - d.Y * v.X;
+        float sinTheta = Math.Clamp(cross / (d.Length() * speed), -1, 1);
+        Vector2 vel = Util.ToUnitVector(offset + ToAngle(d) + MathF.Asin(sinTheta));
+        return shooter.velocity + vel * 12;
+    }
 }

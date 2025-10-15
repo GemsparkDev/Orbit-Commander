@@ -465,12 +465,7 @@ public class Splitter : Projectile
                     {
                         a = -MathF.PI / 4 + MathF.PI / splits.Count * (float)(i) / 2;
                     }
-                    Vector2 d = nearestEnemy.position - position;
-                    Vector2 v = nearestEnemy.velocity - velocity;
-                    float cross = (d.X * v.Y - d.Y * v.X);
-                    float sinTheta = Math.Clamp(cross / (d.Length() * 12), -1, 1);
-                    Vector2 vel = Util.ToUnitVector(a + Util.ToAngle(d) + MathF.Asin(sinTheta));
-                    splits[i].velocity = velocity + vel * 12;
+                    splits[i].velocity = Util.PredictEnemy(nearestEnemy, this, 12, a);
                 }
                 else
                 {

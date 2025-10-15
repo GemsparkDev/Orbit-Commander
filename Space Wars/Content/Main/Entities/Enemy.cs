@@ -1,4 +1,5 @@
-﻿using Microsoft.Toolkit.HighPerformance.Buffers;
+﻿using Assimp;
+using Microsoft.Toolkit.HighPerformance.Buffers;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content.Pipeline;
 using Microsoft.Xna.Framework.Graphics;
@@ -2172,13 +2173,30 @@ public class Enemy : Entity
         Engine.EntityManager.Add(_cog);
         hitSound = Assets.Get(Sound.ShieldHit);
         cd = [0];
+        int unitsPerShot = 0;
         while (true)
         {
             health = _cog.health;
             if (cd[0] <= 0)
             {
                 cd[0] = 1;
-                //Actions go here
+                var nearestEnemy = Engine.EntityManager.NearestEnemy(this);
+                Vector2 relativePos = Vector2.Normalize(nearestEnemy.position - position);
+                Util.Explode(position - relativePos * 25, velocity, 25, 10);
+                velocity += relativePos * 10;
+                
+
+                unitsPerShot++;
+                if (nearestEnemy != null)
+                {
+                    if (unitsPerShot >= 3)
+                    {
+                        unitsPerShot = 0;
+                        Vector2 vel = Util.PredictEnemy(nearestEnemy, this, 9);
+                        Engine.EntityManager.Add(new PulseShot(position, vel, Util.ToAngle(vel), 0, isFriendly, damage, true, 1));
+                        SoundManager.PlaySound(Assets.Get(Sound.LMGFire), position);
+                    }
+                }
             }
             float val = (1 - cd[0]);
             _cog.angle = angle + val * val * MathF.PI / 2;
@@ -2187,9 +2205,13 @@ public class Enemy : Entity
                 Explode(10, ColliderRadius);
                 _cog.isExpired = true;
                 isExpired = true;
+                Engine.EntityManager.Add(new Construct(Constructs.SpecializedParts, position, GetNormalizedAcceleration() * 15, angle, 0.1f));
                 Engine.EntityManager.Add(new Construct(Constructs.SpecializedParts, position, GetNormalizedAcceleration() * 10, angle, 0.1f));
-                Engine.EntityManager.Add(new OrionEngine() { position = this.position, velocity = GetNormalizedAcceleration() * 10, angularVelocity = this.angularVelocity });
+                Engine.EntityManager.Add(new OrionEngine() { position = this.position, velocity = GetNormalizedAcceleration() * 5, angularVelocity = this.angularVelocity });
             }
+            targetVector = velocity;
+            targetAngle = Util.ToAngle(targetVector);
+            RotateTowards(targetAngle);
             LowerCooldown();
             yield return 0;
         }
@@ -2199,7 +2221,7 @@ public class Enemy : Entity
         ChildEnemy = true;
         while(true)
         {
-            position = _parent.position + Util.ToUnitVector(_parent.angle) * _parent.texture.Height / 2;
+            position = _parent.position - Util.ToUnitVector(_parent.angle) * _parent.texture.Height / 2;
             yield return 0;
         }
     }
