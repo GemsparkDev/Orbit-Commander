@@ -2172,21 +2172,32 @@ public class Enemy : Entity
     {
         Engine.EntityManager.Add(_cog);
         hitSound = Assets.Get(Sound.ShieldHit);
-        cd = [0];
+        cd = 
+        [
+            0, //Cog timer
+            0, //Ability timer
+        ];
         int unitsPerShot = 0;
+        int unitsPerAbility = 0;
         while (true)
         {
             health = _cog.health;
+            float frac = Math.Max((float)(health) / (float)(maxHealth), 0.25f);
+            var nearestEnemy = Engine.EntityManager.NearestEnemy(this);
             if (cd[0] <= 0)
             {
-                cd[0] = 1;
-                var nearestEnemy = Engine.EntityManager.NearestEnemy(this);
-                Vector2 relativePos = Vector2.Normalize(nearestEnemy.position - position);
-                Util.Explode(position - relativePos * 25, velocity, 25, 10);
-                velocity += relativePos * 10;
-                
+                cd[0] = frac;
+                var relativeVel = nearestEnemy.velocity - velocity + (nearestEnemy.position - position) / 100;
+                float relativeSpeed = relativeVel.Length();
+                if (relativeSpeed > 0.5f)
+                {
+                    Util.Explode(position - relativeVel / relativeSpeed * 25, velocity, 0, 8);
+                    SoundManager.PlaySound(Assets.Get(Sound.Explosion), position);
+                    velocity += relativeVel / relativeSpeed * Math.Min(10, relativeSpeed);
+                }
 
                 unitsPerShot++;
+                unitsPerAbility++;
                 if (nearestEnemy != null)
                 {
                     if (unitsPerShot >= 3)
@@ -2198,7 +2209,29 @@ public class Enemy : Entity
                     }
                 }
             }
-            float val = (1 - cd[0]);
+            if (nearestEnemy != null)
+            {
+                if (unitsPerAbility >= 10)
+                {
+                    if (cd[1] <= 0)
+                    {
+                        for (float angle = 0; angle < MathF.Tau; angle += MathF.PI / 2)
+                        {
+                            Vector2 dir = Util.ToUnitVector(angle + MathF.PI / 4 * (unitsPerAbility % 2));
+                            Engine.EntityManager.Add(new PulseShot(position, velocity + dir * 8, angle + MathF.PI / 4 * (unitsPerAbility % 2), 0, isFriendly, damage, true, 1));
+                        }
+                        cd[1] = 0.5f * frac;
+                        SoundManager.PlaySound(Assets.Get(Sound.PulseFire), position);
+                    }
+                    if (unitsPerAbility >= 15)
+                    {
+                        Vector2 relPos = nearestEnemy.position - position;
+                        Engine.EntityManager.Add(new Explosive(position, velocity + Vector2.Normalize(relPos) * 12, 0, 0, isFriendly, damage, 20));
+                        unitsPerAbility = 0;
+                    }
+                }
+            }
+            float val = (frac - cd[0]);
             _cog.angle = angle + val * val * MathF.PI / 2;
             if (health <= 0)
             {
@@ -4191,8 +4224,8 @@ public class Enemy : Entity
     }
     public static Enemy NewClockworkBoss(Vector2 position, Vector2 velocity, float angle, bool _isFriendly = false)
     {
-        Enemy boss = new(position, velocity, angle, 6, 120, Assets.Get(Sprite.Clockwork), _isFriendly);
-        Enemy cog = new(position, velocity, angle, 6, 120, Assets.Get(Sprite.Cog), _isFriendly);
+        Enemy boss = new(position, velocity, angle, 8, 180, Assets.Get(Sprite.Clockwork), _isFriendly);
+        Enemy cog = new(position, velocity, angle, 6, 180, Assets.Get(Sprite.Cog), _isFriendly);
         boss.AddBehaviour(boss.Clockwork(cog));
         cog.AddBehaviour(cog.Cog(boss));
         return boss;
