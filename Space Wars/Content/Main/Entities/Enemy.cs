@@ -2177,12 +2177,29 @@ public class Enemy : Entity
             0, //Cog timer
             0, //Ability timer
         ];
+        ChildEnemy = true;
         int unitsPerShot = 0;
         int unitsPerAbility = 0;
+        bool isFirst = true;
         while (true)
         {
-            health = _cog.health;
-            float frac = Math.Max((float)(health) / (float)(maxHealth), 0.25f);
+            float frac;
+            bool isPhase1 = _cog.health > 0;
+            if (isPhase1)
+            {
+                health = maxHealth;
+                frac = 0.5f + (float)(_cog.health) / (float)(_cog.maxHealth) / 2;
+            }
+            else
+            {
+                if (isFirst)
+                {
+                    ChildEnemy = false;
+                    hitSound = Assets.Get(Sound.Hit);
+                    isFirst = false;
+                }
+                frac = 0.25f;
+            }
             var nearestEnemy = Engine.EntityManager.NearestEnemy(this);
             if (cd[0] <= 0)
             {
@@ -2225,14 +2242,20 @@ public class Enemy : Entity
                     }
                     if (unitsPerAbility >= 15)
                     {
-                        Vector2 relPos = nearestEnemy.position - position;
-                        Engine.EntityManager.Add(new Explosive(position, velocity + Vector2.Normalize(relPos) * 12, 0, 0, isFriendly, damage, 20));
+                        if (!isPhase1)
+                        {
+                            Vector2 relPos = nearestEnemy.position - position;
+                            Engine.EntityManager.Add(new Explosive(position, velocity + Vector2.Normalize(relPos) * 12, 0, 0, isFriendly, damage, 20));
+                        }
                         unitsPerAbility = 0;
                     }
                 }
             }
-            float val = (frac - cd[0]);
-            _cog.angle = angle + val * val * MathF.PI / 2;
+            if (_cog != null)
+            {
+                float val = (frac - cd[0]);
+                _cog.angle = angle + val * val * MathF.PI / 2;
+            }
             if (health <= 0)
             {
                 Explode(10, ColliderRadius);
@@ -2251,10 +2274,15 @@ public class Enemy : Entity
     }
     IEnumerable<int> Cog(Entity _parent)
     {
-        ChildEnemy = true;
         while(true)
         {
             position = _parent.position - Util.ToUnitVector(_parent.angle) * _parent.texture.Height / 2;
+            if (health <= 0)
+            {
+                isExpired = true;
+                Explode(0, 0);
+                SoundManager.PlaySound(Assets.Get(Sound.Explosion), position);
+            }
             yield return 0;
         }
     }

@@ -113,6 +113,12 @@ public class EntityManager
         "Trader", "This friendly trader invites us to upgrade our modules in exchange for resources", -1, Vector2.One,
         Mission.TierOne(), Mission.TierOneBosses(), null, true) { relaunchable = true },
 
+        new Mission([new Planet(Vector2.Zero, Vector2.Zero, 4000, 3, true, Color.Wheat),
+            new Planet(new Vector2(500, 0), Planet.GetOrbitalVelocity(new Vector2(500, 0), Vector2.Zero, 4000), 300, 1f, false, Color.Wheat)],
+        [new EntityCondition(new AdvancedConstructor(Enemy.NewClockworkBoss, new Vector2(0, -6*50), Vector2.Zero, 0, false), [ Condition.Kill ])],
+        "Clockwork creation", "Defeat the clockwork construct. It may drop specialized parts", 1f, new Vector2(0, 1), Mission.TierTwo(), Mission.TierTwoBosses(), null, true)
+        { isAggressive = true },
+
         new Mission([new(new Vector2(500, 0), new Vector2(0, 1.05f), 10000, 7, false, Color.Cyan),
         new(new Vector2(-1000, 0), new Vector2(0, -2.1f), 5000, 4f, false, Color.Cyan)],
         [new EntityCondition(new EntityConstructor(Enemy.MassRelay, Vector2.Zero, Vector2.Zero, 0), [ Condition.Protect, Condition.CustomIncomplete ])],
