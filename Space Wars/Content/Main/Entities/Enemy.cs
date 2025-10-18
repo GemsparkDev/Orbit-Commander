@@ -4240,13 +4240,13 @@ public class Enemy : Entity
     }
     public static Enemy NewDeadeyeBoss(Vector2 position, Vector2 velocity, float angle, bool _isFriendly = false)
     {
-        Enemy boss = new(position, velocity, angle, 8, 80, Assets.Get(Sprite.Engineer), _isFriendly);
+        Enemy boss = new(position, velocity, angle, 8, 80, Assets.Get(Sprite.Deadeye), _isFriendly);
         boss.AddBehaviour(boss.Deadeye());
         return boss;
     }
     public static Enemy NewContinuumBoss(Vector2 position, Vector2 velocity, float angle, bool _isFriendly = false)
     {
-        Enemy boss = new(position, velocity, angle, 6, 120, Assets.Get(Sprite.Engineer), _isFriendly);
+        Enemy boss = new(position, velocity, angle, 6, 120, Assets.Get(Sprite.Continuum), _isFriendly);
         boss.AddBehaviour(boss.Continuum());
         return boss;
     }

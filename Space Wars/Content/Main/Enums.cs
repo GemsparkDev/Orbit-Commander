@@ -114,6 +114,8 @@ public enum Sprite
     StreamlineRightWing,
     Clockwork,
     Cog,
+    Deadeye,
+    Continuum,
 
     MetalScrap,
     RealMetalScrap,
