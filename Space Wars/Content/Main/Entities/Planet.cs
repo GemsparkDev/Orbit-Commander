@@ -18,7 +18,8 @@ public class Planet
     public bool EasterEgg { get; set; } = false;
     private Color color;
     private float time = 0;
-    public Planet(Vector2 _position, Vector2 _velocity, float _mass, float _radius, bool _isImmovable, Color _color, bool _hasRing = false)
+    private float atmosphereStrength = 0;
+    public Planet(Vector2 _position, Vector2 _velocity, float _mass, float _radius, bool _isImmovable, Color _color, bool _hasRing = false, float _atmosphereStrength = 0)
     {
         position = _position;
         velocity = _velocity;
@@ -27,8 +28,9 @@ public class Planet
         isImmovable = _isImmovable;
         color = _color;
         surface = new ParticleEmitter(Assets.Get(Sprite.Dot), position, radius, _color);
-        trajectory = new ParticleEmitter(Assets.Get(Sprite.Dot), 10, position, 0, 0, 0, 10f, _color * 0.5f, EmitterType.EmissionOverDistance) { particleFadeToColor = Color.Transparent};
+        trajectory = new ParticleEmitter(Assets.Get(Sprite.Dot), 10, position, 0, 0, 0, 10f, _color * 0.5f, EmitterType.EmissionOverDistance) { particleFadeToColor = Color.Transparent };
         hasRing = _hasRing;
+        atmosphereStrength = _atmosphereStrength;
     }
     public Vector2 GetAcceleration(Vector2 _position)
     {
@@ -184,10 +186,19 @@ public class Planet
             _spriteBatch.Draw(Engine.Line, position, new Rectangle((int)position.X, (int)position.Y, 10, 1), Color.White,
                 MathF.Atan2(velocity.Y, 0), Vector2.Zero, new Vector2(MathF.Abs(velocity.Y), 1), SpriteEffects.None, 0.4f);
         }
+        for (float r = radius; r < radius + 0.01 * atmosphereStrength; r += 16)
+        {
+            for (float t = 0; t < MathF.Tau; t += 16 / (MathF.PI * r))
+            {
+                _spriteBatch.Draw(Assets.Get(Sprite.Circle), position + Util.ToUnitVector(t) * r, null, Color.White, t, Assets.DimsOf(Sprite.Circle), 1, 0, 0);
+            }
+        }
+        _spriteBatch.Draw(Engine.Line, position, new Rectangle((int)position.X, (int)position.Y, 10, 1), Color.White,
+                0, Vector2.Zero, new Vector2(10, 1), SpriteEffects.None, 0.4f);
     }
     public Planet Copy()
     {
-        Planet planet = new(position, velocity, mass, radius/50, isImmovable, color, hasRing);
+        Planet planet = new(position, velocity, mass, radius/50, isImmovable, color, hasRing, atmosphereStrength);
         return planet;
     }
 }
