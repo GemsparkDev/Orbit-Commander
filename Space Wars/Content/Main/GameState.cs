@@ -37,6 +37,7 @@ public abstract class GameState
     //Useful if several game states want to render the same game space
     protected static void RenderGamespace(SpriteBatch _spriteBatch)
     {
+        Engine.SaveGame.CurrentMission.Draw(_spriteBatch);
         Engine.EntityManager.Draw(_spriteBatch);
         ParticleManager.Draw(_spriteBatch);
         if (Engine.DebugMode)

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using System.Linq;
 using Space_Wars.Content.Main.Particles;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace Space_Wars.Content.Main;
 public class Mission
@@ -477,6 +478,13 @@ public class Mission
             {
                 restartTimer = 2;
             }
+        }
+    }
+    public void Draw(SpriteBatch _spriteBatch)
+    {
+        foreach (var planet in planets)
+        {
+            planet.Draw(_spriteBatch);
         }
     }
     public static List<(int, DelegateEnemy)> TierOne()

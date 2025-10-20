@@ -61,10 +61,17 @@ public class Planet
             _entity.isExpired = true;
             return Vector2.Zero;
         }
-        if (relativePosition.Length() >= radius + _entity.ColliderRadius)
+        float distance = relativePosition.Length();
+        if (distance >= radius + _entity.ColliderRadius)
         {
-            Vector2 acceleration = Vector2.Normalize(-relativePosition) * mass / relativePosition.LengthSquared() * Engine.DeltaSeconds * 60;
-            _entity.velocity += acceleration;
+            Vector2 acceleration = Vector2.Normalize(-relativePosition) * mass / relativePosition.LengthSquared();
+            float gravityForce = radius * radius / mass;
+            if (distance < radius + atmosphereStrength * 3f / gravityForce)
+            {
+                float strength = atmosphereStrength / 10000 * MathF.Pow(3, -gravityForce * (distance - radius) / atmosphereStrength);
+                acceleration += (velocity - _entity.velocity) * strength;
+            }
+            _entity.velocity += acceleration * Engine.DeltaSeconds * 60;
             return acceleration;
         }
         else
@@ -148,24 +155,6 @@ public class Planet
             surface.particleColor = color;
             trajectory.particleColor = color;
         }
-        if (hasRing)
-        {
-            int randomAngle = 3;
-            for (float i = 0; i < 2 * radius; i++)
-            {
-                float j = i - radius;
-                float distance = radius * 1.25f + j*j*j/(radius*radius * 2) + radius / 2 + i/2;
-                float speed = MathF.Sqrt(mass / distance) * 60;
-                randomAngle = (randomAngle * 65535 + 997) % 628;
-                //Golden Ratio
-                float particleAngle = (i + (float)(randomAngle)/628 + time * speed / distance) % MathF.Tau;
-                Vector2 particlePosition = new Vector2(MathF.Cos(particleAngle), MathF.Sin(particleAngle) * 0.25f) * distance;
-                if (particlePosition.LengthSquared() > radius * radius || particlePosition.Y > 0)
-                {
-                    ParticleManager.Add(new Particle(Assets.Get(Sprite.Dot), position + particlePosition, particleAngle, color * 0.75f));
-                }
-            }
-        }
         surface.position = position;
         surface.Update();
         trajectory.position = position;
@@ -186,15 +175,36 @@ public class Planet
             _spriteBatch.Draw(Engine.Line, position, new Rectangle((int)position.X, (int)position.Y, 10, 1), Color.White,
                 MathF.Atan2(velocity.Y, 0), Vector2.Zero, new Vector2(MathF.Abs(velocity.Y), 1), SpriteEffects.None, 0.4f);
         }
-        for (float r = radius; r < radius + 0.01 * atmosphereStrength; r += 16)
+        if (atmosphereStrength > 0)
         {
-            for (float t = 0; t < MathF.Tau; t += 16 / (MathF.PI * r))
+            float gravityForce = radius * radius / mass;
+            for (float r = radius; r < radius + atmosphereStrength * 3f / gravityForce; r += 6)
             {
-                _spriteBatch.Draw(Assets.Get(Sprite.Circle), position + Util.ToUnitVector(t) * r, null, Color.White, t, Assets.DimsOf(Sprite.Circle), 1, 0, 0);
+                float strength = MathF.Pow(3, -gravityForce * (r - radius) / atmosphereStrength) / 5;
+                for (float t = 9 / (MathF.PI * r); t < MathF.Tau; t += 18 / (MathF.PI * r))
+                {
+                    _spriteBatch.Draw(Assets.Get(Sprite.Circle), position + Util.ToUnitVector(t) * r, null, color * strength, t, Assets.DimsOf(Sprite.Circle), 1, 0, 0);
+                }
             }
         }
-        _spriteBatch.Draw(Engine.Line, position, new Rectangle((int)position.X, (int)position.Y, 10, 1), Color.White,
-                0, Vector2.Zero, new Vector2(10, 1), SpriteEffects.None, 0.4f);
+        if (hasRing)
+        {
+            int randomAngle = 3;
+            for (float i = 0; i < 2 * radius; i++)
+            {
+                float j = i - radius;
+                float distance = radius * 1.25f + j * j * j / (radius * radius * 2) + radius / 2 + i / 2;
+                float speed = MathF.Sqrt(mass / distance) * 60;
+                randomAngle = (randomAngle * 65535 + 997) % 628;
+                //Golden Ratio
+                float particleAngle = (i + (float)(randomAngle) / 628 + time * speed / distance) % MathF.Tau;
+                Vector2 particlePosition = new Vector2(MathF.Cos(particleAngle), MathF.Sin(particleAngle) * 0.25f) * distance;
+                if (particlePosition.LengthSquared() > radius * radius || particlePosition.Y > 0)
+                {
+                    _spriteBatch.Draw(Assets.Get(Sprite.Dot), position + particlePosition, null, color * 0.75f, particleAngle, Assets.DimsOf(Sprite.Dot), 1, 0, 0);
+                }
+            }
+        }
     }
     public Planet Copy()
     {
