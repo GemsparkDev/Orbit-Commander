@@ -103,11 +103,6 @@ public class EntityManager
         "Warp Gate", "Warp to the next mission once you are done here", -1, new Vector2(0, 500), Mission.TierOne(), Mission.TierOneBosses()) 
         { music = false, tip = "Press left shift to return to the previous system. Press right shift to enter the next system.", relaunchable = true },
 
-        new Mission([new(Vector2.Zero, Vector2.Zero, 4000, 4.5f, true, new Color(0.03f, 0.05f, 0.08f)),
-        new(new Vector2(600, 0), Planet.GetOrbitalVelocity(new Vector2(600, 0), Vector2.Zero, 4000) * 1.05f, 500, 1.5f, false, new Color(0.06f, 0.08f, 0.12f)), ],
-        [new EntityCondition(new EntityConstructor(Enemy.NewVeilBoss, new Vector2(0, -6*50), Vector2.Zero, 0), [ Condition.Kill ])],
-        "Showdown Pt. 3", "Defeat the advanced drone prototype, Veil. Be warned: It may call for reinforcements.", 1.1f, new Vector2(0, 1), Mission.TierThree(), Mission.TierThreeBosses(), null, true),
-
         new Mission([new Planet(Vector2.Zero, Vector2.Zero, 6000, 6, true, Color.Cyan, true, 500)],
         [new EntityCondition(new EntityConstructor(Enemy.NewTrader, new Vector2(0, 500), Planet.GetOrbitalVelocity(new Vector2(0, 500), Vector2.Zero, 6000), 0), [ Condition.Protect ])],
         "Trader", "This friendly trader invites us to upgrade our modules in exchange for resources", -1, Vector2.One,
@@ -119,10 +114,20 @@ public class EntityManager
         "Clockwork creation", "Defeat the clockwork construct. It may drop specialized parts", 1f, new Vector2(0, 1), Mission.TierTwo(), Mission.TierTwoBosses(), null, true)
         { isAggressive = true },
 
+        new Mission([new Planet(Vector2.Zero, Vector2.Zero, 20000, 2, true, Color.Wheat, false, 1000),
+            new Planet(new Vector2(500, 0), Planet.GetOrbitalVelocity(new Vector2(500, 0), Vector2.Zero, 4000), 300, 1f, false, Color.Wheat)],
+        [],
+        "Gas giant", "beeg", 1f, new Vector2(0, 1), Mission.TierTwo(), Mission.TierTwoBosses(), null, true),
+
         new Mission([new(new Vector2(500, 0), new Vector2(0, 1.05f), 10000, 7, false, Color.Cyan),
         new(new Vector2(-1000, 0), new Vector2(0, -2.1f), 5000, 4f, false, Color.Cyan)],
         [new EntityCondition(new EntityConstructor(Enemy.MassRelay, Vector2.Zero, Vector2.Zero, 0), [ Condition.Protect, Condition.CustomIncomplete ])],
         "Binary system", "Construct the Mass Relay.", -1f, new Vector2(0, 400), Mission.TierThree(), Mission.TierThreeBosses(), null, true) { isAggressive = true },
+
+        new Mission([new(Vector2.Zero, Vector2.Zero, 4000, 4.5f, true, new Color(0.03f, 0.05f, 0.08f)),
+        new(new Vector2(600, 0), Planet.GetOrbitalVelocity(new Vector2(600, 0), Vector2.Zero, 4000) * 1.05f, 500, 1.5f, false, new Color(0.06f, 0.08f, 0.12f)), ],
+        [new EntityCondition(new EntityConstructor(Enemy.NewVeilBoss, new Vector2(0, -6*50), Vector2.Zero, 0), [ Condition.Kill ])],
+        "Showdown Pt. 3", "Defeat the advanced drone prototype, Veil. Be warned: It may call for reinforcements.", 1.1f, new Vector2(0, 1), Mission.TierThree(), Mission.TierThreeBosses(), null, true),
 
         new Mission([ new(Vector2.Zero, Vector2.Zero, 20000, 9, true, Color.OrangeRed, true, 500),
         new(new Vector2(1200, 0), Planet.GetOrbitalVelocity(new Vector2(1200, 0), Vector2.Zero, 20000), 750, 2f, false, Color.Red) ],

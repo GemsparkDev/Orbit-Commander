@@ -88,6 +88,8 @@ public class MainMenu : GameState
     {
         _spriteBatch.Draw(Assets.Get(Sprite.Mothership), new Vector2(-Assets.DimsOf(Sprite.Mothership).X / 2, 300 - Assets.DimsOf(Sprite.Mothership).Y), new Color(0, 255, 0));
         ParticleManager.Draw(_spriteBatch);
+        menuPlanet.Draw(_spriteBatch);
+        moonPlanet.Draw(_spriteBatch);
     }
 }
 public class PlayingGame : GameState

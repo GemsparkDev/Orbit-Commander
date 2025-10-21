@@ -11,7 +11,6 @@ public class Planet
     public Vector2 velocity;
     public float mass;
     public float radius;
-    private ParticleEmitter surface;
     private ParticleEmitter trajectory;
     public bool isImmovable;
     private bool hasRing;
@@ -27,7 +26,6 @@ public class Planet
         radius = _radius * 50;
         isImmovable = _isImmovable;
         color = _color;
-        surface = new ParticleEmitter(Assets.Get(Sprite.Dot), position, radius, _color);
         trajectory = new ParticleEmitter(Assets.Get(Sprite.Dot), 10, position, 0, 0, 0, 10f, _color * 0.5f, EmitterType.EmissionOverDistance) { particleFadeToColor = Color.Transparent };
         hasRing = _hasRing;
         atmosphereStrength = _atmosphereStrength;
@@ -65,11 +63,14 @@ public class Planet
         if (distance >= radius + _entity.ColliderRadius)
         {
             Vector2 acceleration = Vector2.Normalize(-relativePosition) * mass / relativePosition.LengthSquared();
-            float gravityForce = radius * radius / mass;
-            if (distance < radius + atmosphereStrength * 3f / gravityForce)
+            float gravityForce = mass / radius / radius;
+            if (distance < radius + atmosphereStrength * 3f * gravityForce)
             {
                 float strength = atmosphereStrength / 10000 * MathF.Pow(3, -gravityForce * (distance - radius) / atmosphereStrength);
+                //Drag
                 acceleration += (velocity - _entity.velocity) * strength;
+                //Buoyancy
+                acceleration += relativePosition / distance * strength * (_entity.ColliderRadius * _entity.ColliderRadius) * mass / distance / distance / 10;
             }
             _entity.velocity += acceleration * Engine.DeltaSeconds * 60;
             return acceleration;
@@ -152,13 +153,10 @@ public class Planet
         if (EasterEgg)
         {
             color = new Color((MathF.Cos(time) + 1) / 2, (MathF.Cos(time + MathF.PI * 2 / 3) + 1) / 2, (MathF.Cos(time - MathF.PI * 2 / 3) + 1) / 2);
-            surface.particleColor = color;
             trajectory.particleColor = color;
         }
-        surface.position = position;
-        surface.Update();
-        trajectory.position = position;
         trajectory.Update();
+        trajectory.position = position;
     }
     public bool IsColliding(Vector2 _position)
     {
@@ -175,13 +173,23 @@ public class Planet
             _spriteBatch.Draw(Engine.Line, position, new Rectangle((int)position.X, (int)position.Y, 10, 1), Color.White,
                 MathF.Atan2(velocity.Y, 0), Vector2.Zero, new Vector2(MathF.Abs(velocity.Y), 1), SpriteEffects.None, 0.4f);
         }
+        float increment = MathF.Tau / radius;
+        int count = (int)Math.Truncate(radius);
+        if (count == 0)
+        {
+            return;
+        }
+        for (float angle = increment / 2; angle < MathF.Tau; angle += increment)
+        {
+            _spriteBatch.Draw(Assets.Get(Sprite.Dot), position + Util.ToUnitVector(angle) * radius, null, color, angle, Assets.DimsOf(Sprite.Dot), 1, 0, 0);
+        }
         if (atmosphereStrength > 0)
         {
-            float gravityForce = radius * radius / mass;
-            for (float r = radius; r < radius + atmosphereStrength * 3f / gravityForce; r += 6)
+            float gravityForce = mass / radius / radius;
+            for (float r = radius; r < radius + atmosphereStrength * 3f / gravityForce; r += 12)
             {
                 float strength = MathF.Pow(3, -gravityForce * (r - radius) / atmosphereStrength) / 5;
-                for (float t = 9 / (MathF.PI * r); t < MathF.Tau; t += 18 / (MathF.PI * r))
+                for (float t = 9 / (MathF.PI * r); t < MathF.Tau; t += 24 / (MathF.PI * r))
                 {
                     _spriteBatch.Draw(Assets.Get(Sprite.Circle), position + Util.ToUnitVector(t) * r, null, color * strength, t, Assets.DimsOf(Sprite.Circle), 1, 0, 0);
                 }
@@ -195,8 +203,8 @@ public class Planet
                 float j = i - radius;
                 float distance = radius * 1.25f + j * j * j / (radius * radius * 2) + radius / 2 + i / 2;
                 float speed = MathF.Sqrt(mass / distance) * 60;
+                //Simple deterministic random number generator
                 randomAngle = (randomAngle * 65535 + 997) % 628;
-                //Golden Ratio
                 float particleAngle = (i + (float)(randomAngle) / 628 + time * speed / distance) % MathF.Tau;
                 Vector2 particlePosition = new Vector2(MathF.Cos(particleAngle), MathF.Sin(particleAngle) * 0.25f) * distance;
                 if (particlePosition.LengthSquared() > radius * radius || particlePosition.Y > 0)
