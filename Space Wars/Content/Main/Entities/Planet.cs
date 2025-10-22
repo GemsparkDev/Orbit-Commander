@@ -2,6 +2,7 @@
 using Microsoft.Xna.Framework.Graphics;
 using Space_Wars.Content.Main.Particles;
 using System;
+using System.Linq;
 
 namespace Space_Wars.Content.Main.Entities;
 
@@ -54,7 +55,7 @@ public class Planet
     public Vector2 AttractObject(Entity _entity)
     {
         Vector2 relativePosition = _entity.position - position;
-        if(relativePosition == Vector2.Zero)
+        if (relativePosition == Vector2.Zero)
         {
             _entity.isExpired = true;
             return Vector2.Zero;
@@ -63,14 +64,13 @@ public class Planet
         if (distance >= radius + _entity.ColliderRadius)
         {
             Vector2 acceleration = Vector2.Normalize(-relativePosition) * mass / relativePosition.LengthSquared();
-            float gravityForce = mass / radius / radius;
-            if (distance < radius + atmosphereStrength * 3f * gravityForce)
+            if (distance < AtmosphereRadius())
             {
-                float strength = atmosphereStrength / 10000 * MathF.Pow(3, -gravityForce * (distance - radius) / atmosphereStrength);
+                float strength = GetAtmosphereDensity(distance);
                 //Drag
-                acceleration += (velocity - _entity.velocity) * strength;
+                acceleration += (velocity - _entity.velocity) * strength / 40;
                 //Buoyancy
-                acceleration += relativePosition / distance * strength * (_entity.ColliderRadius * _entity.ColliderRadius) * mass / distance / distance / 10;
+                acceleration += relativePosition / distance * strength * mass / distance / distance / 5;
             }
             _entity.velocity += acceleration * Engine.DeltaSeconds * 60;
             return acceleration;
@@ -89,7 +89,7 @@ public class Planet
             _entity.velocity += normalVector * verticalVelocity + frictionVector * Vector2.Dot(relativeVelocity, frictionVector) * 0.1f;
             _entity.position += normalVector * (radius + _entity.ColliderRadius - Vector2.Distance(position, _entity.position));
             float val = (int)MathF.Sqrt(collisionForce);
-            if (verticalVelocity > 1) 
+            if (verticalVelocity > 1)
             {
                 for (int i = 0; i < val * 1.5f; i++)
                 {
@@ -164,7 +164,7 @@ public class Planet
     }
     public void Draw(SpriteBatch _spriteBatch)
     {
-        if(Engine.DebugMode)
+        if (Engine.DebugMode)
         {
             //Draws a line in the direction of motion for X
             _spriteBatch.Draw(Engine.Line, position, new Rectangle((int)position.X, (int)position.Y, 10, 1), Color.White,
@@ -185,13 +185,18 @@ public class Planet
         }
         if (atmosphereStrength > 0)
         {
-            float gravityForce = mass / radius / radius;
-            for (float r = radius; r < radius + atmosphereStrength * 3f / gravityForce; r += 12)
+            float atmR = AtmosphereRadius();
+            for (float r = radius; r < atmR; r += MathF.Sqrt(36 + 36 / MathF.Pow(GetAtmosphereDensity(r), 2)))
             {
-                float strength = MathF.Pow(3, -gravityForce * (r - radius) / atmosphereStrength) / 5;
-                for (float t = 9 / (MathF.PI * r); t < MathF.Tau; t += 24 / (MathF.PI * r))
+                float iterations = MathF.PI * MathF.PI * r / 9;
+                float offset = 1;
+                if (atmosphereStrength > 5)
                 {
-                    _spriteBatch.Draw(Assets.Get(Sprite.Circle), position + Util.ToUnitVector(t) * r, null, color * strength, t, Assets.DimsOf(Sprite.Circle), 1, 0, 0);
+                    offset = MathF.Sin(r) / 4 + 1;
+                }
+                for (float t = MathF.Tau / MathF.Ceiling(iterations) / 2; t < MathF.Tau; t += MathF.Tau / MathF.Ceiling(iterations))
+                {
+                    _spriteBatch.Draw(Assets.Get(Sprite.Circle), position + Util.ToUnitVector(t) * r, null, color * MathF.Tanh(GetAtmosphereDensity(r) / 4f) * offset, t, Assets.DimsOf(Sprite.Circle), 1, 0, 0);
                 }
             }
         }
@@ -213,6 +218,16 @@ public class Planet
                 }
             }
         }
+    }
+    private float GetAtmosphereDensity(float r)
+    {
+        float gravityForce = mass / radius / radius;
+        return atmosphereStrength * MathF.Pow(2, -gravityForce * (r - radius) / atmosphereStrength / 4);
+    }
+    private float AtmosphereRadius()
+    {
+        float gravityForce = mass / radius / radius;
+        return MathF.Log2(0.1f/atmosphereStrength) * 4 * atmosphereStrength / (-gravityForce) + radius;
     }
     public Planet Copy()
     {

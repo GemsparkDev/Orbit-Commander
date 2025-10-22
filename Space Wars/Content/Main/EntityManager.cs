@@ -29,7 +29,7 @@ public class EntityManager
     public int MissionLength => missions.Count;
     private readonly List<Mission> missions =
 [
-    new Mission([new Planet(Vector2.Zero, Vector2.Zero, 10000, 8, true, Color.Cyan),
+    new Mission([new Planet(Vector2.Zero, Vector2.Zero, 10000, 8, true, Color.Cyan, false),
         new Planet(new Vector2(1000, 0), Planet.GetOrbitalVelocity(new Vector2(1000, 0), Vector2.Zero, 10000), 250, 1.5f, false, Color.Cyan) ],
         [ new EntityCondition(new EntityConstructor(Enemy.NewMothership, new Vector2(0, -8*50 - Assets.DimsOf(Sprite.Mothership).Y / 2), Vector2.Zero, 0f), [ Condition.Protect, Condition.CustomIncomplete ]),
         new EntityCondition(new PickupConstructor(ItemFactory.NewScrap, new Vector2(0, -8*50), new Vector2(10, -10), 0.07f),[]),
@@ -62,7 +62,7 @@ public class EntityManager
         "Warp Gate", "Warp to the next mission once you are done here", -1, new Vector2(0, 500), Mission.TierOne(), Mission.TierOneBosses()) { music = false },
 
         //Note: The player construct menu and the Quantum Resonator both use the name of this mission for their special behavior. When changing, make sure their name is updated as well.
-        new Mission([new Planet(Vector2.Zero, Vector2.Zero, 50000, 12, true, new Color(255, 219, 0), true, 800) ],
+        new Mission([new Planet(Vector2.Zero, Vector2.Zero, 50000, 12, true, new Color(255, 219, 0), true, 1.5f) ],
         [],
         "???", "", -1, new Vector2(-2000, -2000), Mission.TierOne(), Mission.TierOneBosses(), null, true) { playerDocked = true, music = false, relaunchable = true },
 
@@ -73,7 +73,7 @@ public class EntityManager
         ],
         "cool planet", "Super earth", 0, new Vector2(0, 1), Mission.TierTwo(), Mission.TierTwoBosses(), null, true),
 
-        new Mission([new Planet(Vector2.Zero, Vector2.Zero, 20000, 9f, true, Color.Cyan, false, 750),
+        new Mission([new Planet(Vector2.Zero, Vector2.Zero, 20000, 9f, true, Color.Cyan, false, 1.8f),
         new(new Vector2(0, 1800), Planet.GetOrbitalVelocity(new Vector2(0, 1800), Vector2.Zero, 20000), 1500, 2f, false, Color.Cyan) ],
         [
             new EntityCondition(new AdvancedConstructor(Enemy.NewTurret, new Vector2(MathF.Sin(5.5f), -MathF.Cos(5.5f)) * 9 * 50, Vector2.Zero, 5.5f, false), [ Condition.Kill ]),
@@ -103,19 +103,18 @@ public class EntityManager
         "Warp Gate", "Warp to the next mission once you are done here", -1, new Vector2(0, 500), Mission.TierOne(), Mission.TierOneBosses()) 
         { music = false, tip = "Press left shift to return to the previous system. Press right shift to enter the next system.", relaunchable = true },
 
-        new Mission([new Planet(Vector2.Zero, Vector2.Zero, 6000, 6, true, Color.Cyan, true, 500)],
+        new Mission([new Planet(Vector2.Zero, Vector2.Zero, 6000, 6, true, Color.Cyan, true, 0.8f)],
         [new EntityCondition(new EntityConstructor(Enemy.NewTrader, new Vector2(0, 500), Planet.GetOrbitalVelocity(new Vector2(0, 500), Vector2.Zero, 6000), 0), [ Condition.Protect ])],
         "Trader", "This friendly trader invites us to upgrade our modules in exchange for resources", -1, Vector2.One,
         Mission.TierOne(), Mission.TierOneBosses(), null, true) { relaunchable = true },
 
-        new Mission([new Planet(Vector2.Zero, Vector2.Zero, 4000, 3, true, Color.Wheat, false, 200),
+        new Mission([new Planet(Vector2.Zero, Vector2.Zero, 4000, 3, true, Color.Wheat, false, 1.5f),
             new Planet(new Vector2(500, 0), Planet.GetOrbitalVelocity(new Vector2(500, 0), Vector2.Zero, 4000), 300, 1f, false, Color.Wheat)],
         [new EntityCondition(new AdvancedConstructor(Enemy.NewClockworkBoss, new Vector2(0, -6*50), Vector2.Zero, 0, false), [ Condition.Kill ])],
         "Clockwork creation", "Defeat the clockwork construct. It may drop specialized parts", 1f, new Vector2(0, 1), Mission.TierTwo(), Mission.TierTwoBosses(), null, true)
         { isAggressive = true },
 
-        new Mission([new Planet(Vector2.Zero, Vector2.Zero, 20000, 2, true, Color.Wheat, false, 1000),
-            new Planet(new Vector2(500, 0), Planet.GetOrbitalVelocity(new Vector2(500, 0), Vector2.Zero, 4000), 300, 1f, false, Color.Wheat)],
+        new Mission([new Planet(Vector2.Zero, Vector2.Zero, 10000, 3, true, new Color(100, 60, 60), false, 15f)],
         [],
         "Gas giant", "beeg", 1f, new Vector2(0, 1), Mission.TierTwo(), Mission.TierTwoBosses(), null, true),
 
@@ -129,7 +128,7 @@ public class EntityManager
         [new EntityCondition(new EntityConstructor(Enemy.NewVeilBoss, new Vector2(0, -6*50), Vector2.Zero, 0), [ Condition.Kill ])],
         "Showdown Pt. 3", "Defeat the advanced drone prototype, Veil. Be warned: It may call for reinforcements.", 1.1f, new Vector2(0, 1), Mission.TierThree(), Mission.TierThreeBosses(), null, true),
 
-        new Mission([ new(Vector2.Zero, Vector2.Zero, 20000, 9, true, Color.OrangeRed, true, 500),
+        new Mission([ new(Vector2.Zero, Vector2.Zero, 20000, 9, true, Color.OrangeRed, true, 1.5f),
         new(new Vector2(1200, 0), Planet.GetOrbitalVelocity(new Vector2(1200, 0), Vector2.Zero, 20000), 750, 2f, false, Color.Red) ],
         [new WaveGoal(1000)],
         "Last Stand", "Survive", 0.25f, new Vector2(0, -8*50), Mission.All(), Mission.AllBosses())
