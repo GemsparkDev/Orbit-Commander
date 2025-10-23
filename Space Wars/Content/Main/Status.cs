@@ -70,6 +70,7 @@ public class StatusHolder
 public class Bomb() : Status(Sprite.Knob)
 {
     float time = 0;
+    float maxTime = 150;
     public override StatusType Type { get; } = StatusType.Bomb;
     public override void Update(Entity _parent)
     {
@@ -80,8 +81,8 @@ public class Bomb() : Status(Sprite.Knob)
         {
             SoundManager.PlayGlobalSound(Assets.Get(Sound.Beep));
         }
-        ParticleManager.Add(new Particle(null, _parent.position + new Vector2(0, -15), 0, Color.Red) { drawText = (Math.Truncate((60 - time) * 100) / 100).ToString()});
-        if (time > 60)
+        ParticleManager.Add(new Particle(null, _parent.position + new Vector2(0, -15), 0, Color.Red) { drawText = (Math.Truncate((maxTime - time) * 100) / 100).ToString()});
+        if (time > maxTime)
         {
             _parent.Collide(999);
             _parent.isExpired = true;
@@ -90,7 +91,7 @@ public class Bomb() : Status(Sprite.Knob)
     }
     public override void Reset()
     {
-        time = 0;
+        IsExpired = true;
     }
 }
 public class Fire(float _duration, Color _color) : Status(Sprite.Knob)

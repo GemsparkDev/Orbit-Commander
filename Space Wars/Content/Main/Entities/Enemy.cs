@@ -2286,6 +2286,83 @@ public class Enemy : Entity
             yield return 0;
         }
     }
+    IEnumerable<int> Epitome()
+    {
+        //Starts timer
+        Engine.SaveGame.Player.StatusHolder.ApplyStatus(new Bomb());
+        List<Enemy> wave = [];
+        cd = 
+        [
+            0,
+            0,
+        ];
+        int phase = 0;
+        while(true)
+        {
+            int newPhase = 3 - (int)MathF.Ceiling(health / maxHealth) * 3;
+            if (newPhase != phase)
+            {
+                phase = newPhase;
+                switch (phase)
+                {
+                    case 0:
+
+                        break;
+                    case 1:
+
+                        break;
+                    case 2:
+
+                        break;
+                    default:
+                        break;
+                }
+                foreach (var enemy in wave)
+                {
+                    Engine.EntityManager.Add(enemy);
+                }
+            }
+            if (wave.Count > 0)
+            {
+
+            }
+            else if (phase == 0)
+            {
+                if (cd[0] <= 0 && Vector2.Dot(Vector2.Normalize(Engine.SaveGame.Player.position - position), Util.ToUnitVector(angle)) > 0.8f)
+                {
+                    cd[0] = Math.Max(0.05f, 0.55f - cd[1] / 2);
+                    cd[1] = 1f;
+                    SoundManager.PlaySound(Assets.Get(Sound.PulseFire), position);
+                    Engine.EntityManager.Add(new PulseShot(position, Util.ToUnitVector(angle) * 10 + velocity, angle, 0, isFriendly, damage, true, 1));
+                }
+                targetAngle = Util.ToAngle(Engine.SaveGame.Player.position - position);
+                RotateTowards(targetAngle);
+                if (Vector2.Distance(position, Engine.SaveGame.Player.position) > 200)
+                {
+                    GoToPosition(Engine.SaveGame.Player.position, 2);
+                }
+                velocity *= Util.FIED(0.1f);
+            }
+            else if(phase == 1)
+            {
+
+            }
+            else
+            {
+
+            }
+            if (health <= 0)
+            {
+                //Stops timer
+                Engine.SaveGame.Player.StatusHolder.ApplyStatus(new Bomb());
+                isExpired = true;
+                Explode(10, 10);
+            }
+            wave = wave.Where(x => x.health > 0).ToList();
+            LowerCooldown();
+            yield return 0;
+        }
+    }
     #endregion
     #region Enemies
     IEnumerable<int> Fighter()
@@ -4256,6 +4333,12 @@ public class Enemy : Entity
         Enemy cog = new(position, velocity, angle, 6, 180, Assets.Get(Sprite.Cog), _isFriendly);
         boss.AddBehaviour(boss.Clockwork(cog));
         cog.AddBehaviour(cog.Cog(boss));
+        return boss;
+    }
+    public static Enemy NewEpitomeBoss(Vector2 position, Vector2 velocity, float angle, bool _isFriendly = false)
+    {
+        Enemy boss = new(position, velocity, angle, 15, 500, Assets.Get(Sprite.Clockwork), _isFriendly);
+        boss.AddBehaviour(boss.Epitome());
         return boss;
     }
 }
