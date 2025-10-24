@@ -905,7 +905,7 @@ public class Enemy : Entity
             yield return 0;
         }
     }
-    IEnumerable<int> Exodus()
+    IEnumerable<int> Exodus(bool isWeak = false)
     {
         cd = [0];
         enemyRange.particleVelocity = 250;
@@ -1039,13 +1039,16 @@ public class Enemy : Entity
                 }
                 isExpired = true;
                 SoundManager.PlaySound(Assets.Get(Sound.Death), position);
-                if (Engine.SaveGame.GiveWeapon)
+                if (!isWeak)
                 {
-                    Engine.EntityManager.Add(new Crossbow() { position = this.position, velocity = GetNormalizedAcceleration() * 10, angularVelocity = this.angularVelocity });
-                }
-                else
-                {
-                    Engine.EntityManager.Add(new PlasmaEngine() { position = this.position, velocity = GetNormalizedAcceleration() * 10, angularVelocity = this.angularVelocity });
+                    if (Engine.SaveGame.GiveWeapon)
+                    {
+                        Engine.EntityManager.Add(new Crossbow() { position = this.position, velocity = GetNormalizedAcceleration() * 10, angularVelocity = this.angularVelocity });
+                    }
+                    else
+                    {
+                        Engine.EntityManager.Add(new PlasmaEngine() { position = this.position, velocity = GetNormalizedAcceleration() * 10, angularVelocity = this.angularVelocity });
+                    }
                 }
             }
             engineParticles.sprayAngle = (angle + MathF.PI) * 180 / MathF.PI;
@@ -1740,7 +1743,7 @@ public class Enemy : Entity
             //Note: possibly change to integrate with other modules
             if (cd[0] <= 0)
             {
-                Engine.EntityManager.Add(Enemy.NewDecoy(position, Vector2.Zero, angle, Sprite.Engineer, isFriendly)); //Make sure the sprite matches the bosses sprite
+                Engine.EntityManager.Add(NewDecoy(position, Vector2.Zero, angle, Sprite.Engineer, isFriendly)); //Make sure the sprite matches the bosses sprite
                 cd[0] = 25;
                 if (holo != null)
                 {
@@ -2026,7 +2029,7 @@ public class Enemy : Entity
             yield return 0;
         }
     }
-    IEnumerable<int> Continuum()
+    IEnumerable<int> Continuum(bool isWeak = false)
     {
         cd = 
         [
@@ -2049,13 +2052,16 @@ public class Enemy : Entity
             {
                 isExpired = true;
                 Explode(10, ColliderRadius);
-                if (Engine.SaveGame.GiveWeapon)
+                if(!isWeak)
                 {
-                    Engine.EntityManager.Add(new Fractal() { position = this.position, velocity = GetNormalizedAcceleration() * 10, angularVelocity = this.angularVelocity });
-                }
-                else
-                {
-                    Engine.EntityManager.Add(new Turtle() { position = this.position, velocity = GetNormalizedAcceleration() * 10, angularVelocity = this.angularVelocity });
+                    if (Engine.SaveGame.GiveWeapon)
+                    {
+                        Engine.EntityManager.Add(new Fractal() { position = this.position, velocity = GetNormalizedAcceleration() * 10, angularVelocity = this.angularVelocity });
+                    }
+                    else
+                    {
+                        Engine.EntityManager.Add(new Turtle() { position = this.position, velocity = GetNormalizedAcceleration() * 10, angularVelocity = this.angularVelocity });
+                    }
                 }
             }
             if (prevHealth != health && revealDuration <= 0)
@@ -2299,20 +2305,30 @@ public class Enemy : Entity
         int phase = 0;
         while(true)
         {
-            int newPhase = 3 - (int)MathF.Ceiling(health / maxHealth) * 3;
-            if (newPhase != phase)
+            int newPhase = 3 - (int)MathF.Ceiling((float)health * 3 / (float)maxHealth);
+            if (newPhase > phase)
             {
                 phase = newPhase;
                 switch (phase)
                 {
-                    case 0:
-
-                        break;
                     case 1:
-
+                        wave.Add(NewAdvancedFighter(position + new Vector2(25, 0), default, angle, isFriendly));
+                        wave.Add(NewHovercraft(position + new Vector2(0, 25), default, angle, isFriendly));
+                        wave.Add(NewAdvancedFighter(position + new Vector2(-25, 0), default, angle, isFriendly));
+                        wave.Add(NewHealer(position + new Vector2(0, -25), default, angle, isFriendly));
+                        Enemy enemy = new(position + new Vector2(0, -125), velocity, angle, 10, 45, Assets.Get(Sprite.ExodusBoss), isFriendly);
+                        enemy.AddBehaviour(enemy.Exodus(true));
+                        wave.Add(enemy);
+                        wave.Add(NewShield(this, 10, 100, 0, 1, isFriendly));
                         break;
                     case 2:
-
+                        wave.Add(NewStealthFighter(position + new Vector2(25, 0), default, angle, isFriendly));
+                        wave.Add(NewHunter(position + new Vector2(0, 25), default, angle, isFriendly));
+                        wave.Add(NewStealthFighter(position + new Vector2(-25, 0), default, angle, isFriendly));
+                        wave.Add(NewEngineer(position + new Vector2(0, -25), default, angle, isFriendly));
+                        Enemy boss = new(position, velocity, angle, 8, 60, Assets.Get(Sprite.Continuum), isFriendly);
+                        boss.AddBehaviour(boss.Continuum(true));
+                        wave.Add(boss);
                         break;
                     default:
                         break;
@@ -2322,11 +2338,7 @@ public class Enemy : Entity
                     Engine.EntityManager.Add(enemy);
                 }
             }
-            if (wave.Count > 0)
-            {
-
-            }
-            else if (phase == 0)
+            if (phase == 0)
             {
                 if (cd[0] <= 0 && Vector2.Dot(Vector2.Normalize(Engine.SaveGame.Player.position - position), Util.ToUnitVector(angle)) > 0.8f)
                 {
@@ -2345,7 +2357,36 @@ public class Enemy : Entity
             }
             else if(phase == 1)
             {
-
+                Entity nearestProjectile = Engine.EntityManager.NearestProjectile(NewDummyEnemy(position + Vector2.Normalize(Player.position - position) * 30, isFriendly), isFriendly);
+                if (nearestProjectile != null)
+                {
+                    var pos = Vector2.Normalize(position - nearestProjectile.position);
+                    var vel = Vector2.Normalize(velocity - nearestProjectile.velocity);
+                    if ((pos.X * vel.X + pos.Y * vel.Y) < -0.5f)
+                    {
+                        int sign = Math.Sign(pos.X * vel.Y - vel.X * pos.Y);
+                        if (sign == 0)
+                        {
+                            sign = 1;
+                        }
+                        velocity += new Vector2(-pos.Y, pos.X) * sign * 2;
+                    }
+                }
+                if (cd[0] <= 0)
+                {
+                    if (cd[1] <= 0)
+                    {
+                        cd[0] = 0.5f;
+                    }
+                    else
+                    {
+                        cd[1] = 1.75f;
+                        cd[0] = 1f;
+                    }
+                    Engine.EntityManager.Add(NewMissile(position, Util.ToUnitVector(angle) * 10 + velocity, angle, isFriendly, 1));
+                    SoundManager.PlaySound(Assets.Get(Sound.MissileFire), position);
+                }
+                velocity *= Util.FIED(0.2f);
             }
             else
             {
