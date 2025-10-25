@@ -8,6 +8,7 @@ using Space_Wars.Content.Main.Components;
 using Space_Wars.Content.Main.Particles;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Linq;
 using UILib.Content.Main;
@@ -2302,7 +2303,9 @@ public class Enemy : Entity
             0,
             0,
         ];
-        int phase = 0;
+        int phase = 2;
+        Enemy shield = null;
+        Vector2 randomPos = Vector2.One;
         while(true)
         {
             int newPhase = 3 - (int)MathF.Ceiling((float)health * 3 / (float)maxHealth);
@@ -2319,9 +2322,14 @@ public class Enemy : Entity
                         Enemy enemy = new(position + new Vector2(0, -125), velocity, angle, 10, 45, Assets.Get(Sprite.ExodusBoss), isFriendly);
                         enemy.AddBehaviour(enemy.Exodus(true));
                         wave.Add(enemy);
-                        wave.Add(NewShield(this, 10, 100, 0, 1, isFriendly));
+                        shield = NewShield(this, 10, 100, 0, 1, isFriendly);
+                        wave.Add(shield);
                         break;
                     case 2:
+                        if (shield != null)
+                        {
+                            shield.isExpired = true;
+                        }
                         wave.Add(NewStealthFighter(position + new Vector2(25, 0), default, angle, isFriendly));
                         wave.Add(NewHunter(position + new Vector2(0, 25), default, angle, isFriendly));
                         wave.Add(NewStealthFighter(position + new Vector2(-25, 0), default, angle, isFriendly));
@@ -2329,6 +2337,7 @@ public class Enemy : Entity
                         Enemy boss = new(position, velocity, angle, 8, 60, Assets.Get(Sprite.Continuum), isFriendly);
                         boss.AddBehaviour(boss.Continuum(true));
                         wave.Add(boss);
+                        StealthAbility = 2;
                         break;
                     default:
                         break;
@@ -2369,28 +2378,58 @@ public class Enemy : Entity
                         {
                             sign = 1;
                         }
-                        velocity += new Vector2(-pos.Y, pos.X) * sign * 2;
+                        velocity += new Vector2(-pos.Y, pos.X) * sign * Engine.DeltaSeconds * 45;
                     }
                 }
-                if (cd[0] <= 0)
+                if (Vector2.Distance(randomPos, position - Engine.SaveGame.Player.position) < 50)
                 {
-                    if (cd[1] <= 0)
+                    targetAngle = Util.ToAngle(Engine.SaveGame.Player.position - position);
+                    RotateTowards(targetAngle, 0.1f);
+                    if (cd[0] <= 0 && Vector2.Dot(Vector2.Normalize(Engine.SaveGame.Player.position - position), Util.ToUnitVector(angle)) > 0.8f)
                     {
-                        cd[0] = 0.5f;
+                        if (cd[1] <= 0)
+                        {
+                            cd[1] = 1.25f;
+                            cd[0] = 1f;
+                            randomPos = Util.ToUnitVector(Util.Random.NextSingle() * MathF.Tau) * 250;
+                        }
+                        else
+                        {
+                            cd[0] = 0.5f;
+                        }
+                        Engine.EntityManager.Add(NewMissile(position, Util.ToUnitVector(angle) * 10 + velocity, angle, isFriendly, 1));
+                        SoundManager.PlaySound(Assets.Get(Sound.MissileFire), position);
                     }
-                    else
-                    {
-                        cd[1] = 1.75f;
-                        cd[0] = 1f;
-                    }
-                    Engine.EntityManager.Add(NewMissile(position, Util.ToUnitVector(angle) * 10 + velocity, angle, isFriendly, 1));
-                    SoundManager.PlaySound(Assets.Get(Sound.MissileFire), position);
                 }
+                else
+                {
+                    targetAngle = Util.ToAngle(velocity);
+                    RotateTowards(targetAngle, 0.1f);
+                }
+                GoToPosition(Engine.SaveGame.Player.position + randomPos, 5);
                 velocity *= Util.FIED(0.2f);
             }
             else
             {
-
+                randomPos = Vector2.Normalize(GetNormalizedAcceleration()) * 500;
+                DrawLine(angle, cd[0] / 2 + 0.75f, 1.5f);
+                if (cd[0] <= 0)
+                {
+                    var enemies = Engine.EntityManager.Hitscan(position, Util.ToUnitVector(angle), 10000, false, out Vector2 _end);
+                    if (enemies.Count > 0 && enemies[0].isFriendly != isFriendly)
+                    {
+                        enemies[0].Collide(20);
+                    }
+                    var emitter = new ParticleEmitter(Assets.Get(Sprite.Dot), 0.5f, position, 0, 0, 0, 50, Color.Red, EmitterType.EmissionOverDistance) { particleFadeToColor = Color.Transparent};
+                    emitter.Update();
+                    emitter.position = _end;
+                    emitter.Update();
+                    cd[0] = 1.5f;
+                }
+                targetAngle = Util.ToAngle(Engine.SaveGame.Player.position - position);
+                RotateTowards(targetAngle, 0.1f);
+                GoToPosition(Engine.SaveGame.Player.position + randomPos, 3);
+                velocity *= Util.FIED(0.2f);
             }
             if (health <= 0)
             {
