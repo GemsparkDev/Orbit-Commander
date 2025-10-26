@@ -116,6 +116,7 @@ public enum Sprite
     Cog,
     Deadeye,
     Continuum,
+    EpitomeOne,
 
     MetalScrap,
     RealMetalScrap,

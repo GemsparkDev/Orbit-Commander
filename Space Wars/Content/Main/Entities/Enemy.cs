@@ -4417,7 +4417,7 @@ public class Enemy : Entity
     }
     public static Enemy NewEpitomeBoss(Vector2 position, Vector2 velocity, float angle, bool _isFriendly = false)
     {
-        Enemy boss = new(position, velocity, angle, 15, 500, Assets.Get(Sprite.Clockwork), _isFriendly);
+        Enemy boss = new(position, velocity, angle, 15, 500, Assets.Get(Sprite.EpitomeOne), _isFriendly);
         boss.AddBehaviour(boss.Epitome());
         return boss;
     }

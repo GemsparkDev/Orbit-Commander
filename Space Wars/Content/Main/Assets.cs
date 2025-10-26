@@ -77,6 +77,7 @@ public static class Assets
         Sprites.Add(Sprite.Cog, Content.Load<Texture2D>("Images/Entity_42-1"));
         Sprites.Add(Sprite.Continuum, Content.Load<Texture2D>("Images/Entity_43"));
         Sprites.Add(Sprite.Deadeye, Content.Load<Texture2D>("Images/Entity_44"));
+        Sprites.Add(Sprite.EpitomeOne, Content.Load<Texture2D>("Images/Entity_45"));
 
         //Items
         Sprites.Add(Sprite.MetalScrap, Content.Load<Texture2D>("Images/Item_0"));
