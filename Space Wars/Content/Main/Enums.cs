@@ -117,6 +117,8 @@ public enum Sprite
     Deadeye,
     Continuum,
     EpitomeOne,
+    EpitomeTwo,
+    EpitomeThree,
 
     MetalScrap,
     RealMetalScrap,

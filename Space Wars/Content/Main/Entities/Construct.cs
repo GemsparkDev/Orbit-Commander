@@ -58,27 +58,42 @@ public class Construct : Pickup
             cooldown -= Engine.DeltaSeconds;
         }
         attackRadius.position = position;
+        Entity nearestEnemy;
         switch (Type)
         {
             case Constructs.Barricade:
                 velocity = Vector2.Zero;
                 angle = MathF.Atan2(position.X, -position.Y);
-                break;
-            case Constructs.Trap:
-                velocity = Vector2.Zero;
-                var nearestEnemy = Engine.EntityManager.NearestEnemy(new Enemy(position, Vector2.Zero, 0, 0, 0, null, true));
+                nearestEnemy = Engine.EntityManager.NearestEnemy(new Enemy(position, Vector2.Zero, 0, 0, 0, null, true));
                 if (cooldown <= 0 && nearestEnemy != null && Vector2.Distance(nearestEnemy.position, position) < 300)
                 {
                     var dir = Vector2.Normalize(nearestEnemy.position - position);
-                    float rot = MathF.PI * 2 / 9;
-                    for (float i = 0; i < 9; i++)
-                    {
-                        float angle = MathF.Atan2(dir.X, -dir.Y);
-                        Engine.EntityManager.Add(new PulseShot(position, dir * 10, angle, 0, true, 5, true));
-                        dir = new Vector2(dir.X * MathF.Cos(rot) - dir.Y * MathF.Sin(rot), dir.X * MathF.Sin(rot) + dir.Y * MathF.Cos(rot));
-                    }
+                    Engine.EntityManager.Add(new PulseShot(position, dir * 10, MathF.Atan2(dir.X, -dir.Y), 0, true, 5, true)); 
                     SoundManager.PlaySound(Assets.Get(Sound.PulseFire), position);
                     cooldown = 1.5f;
+                }
+                if (Engine.DebugMode)
+                {
+                    attackRadius.Update();
+                }
+                break;
+            case Constructs.Trap:
+                velocity = Vector2.Zero;
+                nearestEnemy = Engine.EntityManager.NearestEnemy(new Enemy(position, Vector2.Zero, 0, 0, 0, null, true));
+                if (cooldown <= 0 && nearestEnemy != null && Vector2.Distance(nearestEnemy.position, position) < 800)
+                {
+                    var dir = Vector2.Normalize(nearestEnemy.position - position);
+                    var enemies = Engine.EntityManager.Hitscan(position, dir, 800, true, out Vector2 _end, (isFriendly ? -1 : 1));
+                    foreach (var enemy in enemies)
+                    {
+                        enemy.Collide(10);
+                    }
+                    for (int i = 0; i < (_end - position).Length() / 4; i++)
+                    {
+                        ParticleManager.Add(new Particle(Assets.Get(Sprite.Dot), 1, position + dir * 4 * i, Vector2.Zero, Util.ToAngle(dir), 0, Color.Red, Color.Transparent));
+                    }
+                    SoundManager.PlaySound(Assets.Get(Sound.LMGFire), position);
+                    cooldown = 0.75f;
                 }
                 if (Engine.DebugMode)
                 {

@@ -2303,7 +2303,7 @@ public class Enemy : Entity
             0,
             0,
         ];
-        int phase = 2;
+        int phase = 0;
         Enemy shield = null;
         Vector2 randomPos = Vector2.One;
         while(true)
@@ -2324,6 +2324,7 @@ public class Enemy : Entity
                         wave.Add(enemy);
                         shield = NewShield(this, 10, 100, 0, 1, isFriendly);
                         wave.Add(shield);
+                        texture = Assets.Get(Sprite.EpitomeTwo);
                         break;
                     case 2:
                         if (shield != null)
@@ -2338,6 +2339,7 @@ public class Enemy : Entity
                         boss.AddBehaviour(boss.Continuum(true));
                         wave.Add(boss);
                         StealthAbility = 2;
+                        texture = Assets.Get(Sprite.EpitomeThree);
                         break;
                     default:
                         break;
@@ -2362,7 +2364,7 @@ public class Enemy : Entity
                 {
                     GoToPosition(Engine.SaveGame.Player.position, 2);
                 }
-                velocity *= Util.FIED(0.1f);
+                velocity *= Util.FIED(0.06f);
             }
             else if(phase == 1)
             {
@@ -2407,7 +2409,7 @@ public class Enemy : Entity
                     RotateTowards(targetAngle, 0.1f);
                 }
                 GoToPosition(Engine.SaveGame.Player.position + randomPos, 5);
-                velocity *= Util.FIED(0.2f);
+                velocity *= Util.FIED(0.1f);
             }
             else
             {
@@ -2429,7 +2431,7 @@ public class Enemy : Entity
                 targetAngle = Util.ToAngle(Engine.SaveGame.Player.position - position);
                 RotateTowards(targetAngle, 0.1f);
                 GoToPosition(Engine.SaveGame.Player.position + randomPos, 3);
-                velocity *= Util.FIED(0.2f);
+                velocity *= Util.FIED(0.15f);
             }
             if (health <= 0)
             {
@@ -2598,7 +2600,8 @@ public class Enemy : Entity
                 isExpired = true;
                 SoundManager.PlaySound(Assets.Get(Sound.Death), position);
             }
-            if (Engine.EntityManager.NearestEnemy(this) is not Enemy nearestEnemy || nearestEnemy.health <= 0)
+            var nearestEnemy = Engine.EntityManager.NearestEnemy(this) as Enemy;
+            if (nearestEnemy == null || nearestEnemy.health <= 0)
             {
                 nearestEnemy = NewDummyEnemy(position + 100 * new Vector2(MathF.Cos(angle - MathF.PI / 2), MathF.Sin(angle - MathF.PI / 2)));
             }
