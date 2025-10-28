@@ -2302,8 +2302,11 @@ public class Enemy : Entity
         [
             0,
             0,
+            0,
         ];
         int phase = 0;
+        float a = 0;
+        int bullets = 0;
         Enemy shield = null;
         Vector2 randomPos = Vector2.One;
         while(true)
@@ -2341,12 +2344,16 @@ public class Enemy : Entity
                         StealthAbility = 2;
                         texture = Assets.Get(Sprite.EpitomeThree);
                         break;
+                    case 3:
+                        cd[0] = 10;
+                        cd[1] = 1;
+                        break;
                     default:
                         break;
                 }
                 foreach (var enemy in wave)
                 {
-                    Engine.EntityManager.Add(enemy);
+                    //Engine.EntityManager.Add(enemy);
                 }
             }
             if (phase == 0)
@@ -2366,7 +2373,7 @@ public class Enemy : Entity
                 }
                 velocity *= Util.FIED(0.06f);
             }
-            else if(phase == 1)
+            else if (phase == 1)
             {
                 Entity nearestProjectile = Engine.EntityManager.NearestProjectile(NewDummyEnemy(position + Vector2.Normalize(Player.position - position) * 30, isFriendly), isFriendly);
                 if (nearestProjectile != null)
@@ -2411,7 +2418,7 @@ public class Enemy : Entity
                 GoToPosition(Engine.SaveGame.Player.position + randomPos, 5);
                 velocity *= Util.FIED(0.1f);
             }
-            else
+            else if (phase == 2)
             {
                 randomPos = Vector2.Normalize(GetNormalizedAcceleration()) * 500;
                 DrawLine(angle, cd[0] / 2 + 0.75f, 1.5f);
@@ -2422,7 +2429,7 @@ public class Enemy : Entity
                     {
                         enemies[0].Collide(20);
                     }
-                    var emitter = new ParticleEmitter(Assets.Get(Sprite.Dot), 0.5f, position, 0, 0, 0, 50, Color.Red, EmitterType.EmissionOverDistance) { particleFadeToColor = Color.Transparent};
+                    var emitter = new ParticleEmitter(Assets.Get(Sprite.Dot), 0.5f, position, 0, 0, 0, 50, Color.Red, EmitterType.EmissionOverDistance) { particleFadeToColor = Color.Transparent };
                     emitter.Update();
                     emitter.position = _end;
                     emitter.Update();
@@ -2433,12 +2440,58 @@ public class Enemy : Entity
                 GoToPosition(Engine.SaveGame.Player.position + randomPos, 3);
                 velocity *= Util.FIED(0.15f);
             }
-            if (health <= 0)
+            else
             {
-                //Stops timer
-                Engine.SaveGame.Player.StatusHolder.ApplyStatus(new Bomb());
-                isExpired = true;
-                Explode(10, 10);
+                velocity += (Engine.SaveGame.Player.position + Vector2.Normalize(GetNormalizedAcceleration()) * 200 - position) / 100;
+                velocity *= Util.FIED(0.15f);
+                angle = Util.ToAngle(Engine.SaveGame.Player.position - position);
+                if (cd[1] <= 0)
+                {
+                    Util.Explode(position + Util.ToUnitVector(Util.Random.NextSingle() * MathF.Tau) * 32 * Util.Random.NextSingle(), velocity, 10, 5);
+                    SoundManager.PlaySound(Assets.Get(Sound.Explosion), position);
+                    cd[1] = cd[0] / 10 + 0.1f;
+                }
+                if (cd[2] <= 0)
+                {
+                    a += MathF.Tau / 20;
+                    if (bullets < 20)
+                    {
+                        Engine.EntityManager.Add(new PulseShot(position, Util.ToUnitVector(a) * 10, a, 0, isFriendly, 10, true, 1));
+                        SoundManager.PlaySound(Assets.Get(Sound.LMGFire), position);
+                        bullets++;
+                        cd[2] = 0.05f;
+                    }
+                    else
+                    {
+                        a = Util.Random.NextSingle() * MathF.Tau;
+                        Engine.EntityManager.Add(new FlameBolt(position, Util.ToUnitVector(a) * 10 * Util.Random.NextSingle(), isFriendly, 10));
+                        bullets++;
+                        if (bullets >= 23)
+                        {
+                            bullets = 0;
+                        }
+                        cd[2] = 0.5f;
+                    }
+                }
+                if (cd[0] <= 0)
+                {
+                    for (int i = 0; i < 8; i++)
+                    {
+                        float angle = Util.Random.NextSingle() * MathF.Tau;
+                        Vector2 particleVelocity = new Vector2(MathF.Cos(angle), MathF.Sin(angle)) * (Util.Random.NextSingle() * 3 + 3);
+                        ParticleManager.Add(new Particle(Assets.Get(Sprite.Circle), 0.5f, position, particleVelocity + velocity, angle, 0, Color.Yellow, new Color(255, 0, 0, 0)));
+                    }
+                    for (int i = 0; i < 5; i++)
+                    {
+                        float angle = Util.Random.NextSingle() * MathF.Tau;
+                        Vector2 particleVelocity = new Vector2(MathF.Cos(angle), MathF.Sin(angle)) * (Util.Random.NextSingle() * 3 + 3);
+                        ParticleManager.Add(new Particle(Assets.Get(Sprite.Circle), 0.5f, position, particleVelocity + velocity, angle, 0, Color.DarkSlateGray, Color.Transparent));
+                    }
+                    Engine.SaveGame.Player.StatusHolder.ApplyStatus(new Bomb());
+                    isExpired = true;
+                    Explode(10, 10);
+                    SoundManager.PlaySound(Assets.Get(Sound.Explosion), position);
+                }
             }
             wave = wave.Where(x => x.health > 0).ToList();
             LowerCooldown();
