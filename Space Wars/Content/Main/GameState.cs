@@ -173,7 +173,7 @@ public class MissionSelect : GameState
     [
         (200, [], 0), (160, [0], 0), (140, [0], 0), (100, [1, 2], 0), (400, [3], 0), (50, [3], 0),
         (210, [], 1), (170, [6], 1), (145, [7], 1), (130, [8], 1), (150, [9], 1),
-        (200, [], 2), (150, [11], 2), (100, [12], 2), (80, [13], 2), (60, [14], 2)
+        (200, [], 2), (150, [11], 2), (100, [12], 2), (80, [13], 2), (60, [14], 2), (0, [15], 2)
     ];
     private Vector2 playerPosition;
     private List<(int system, ParticleEmitter orbit)> missionOrbits = [];
@@ -262,6 +262,10 @@ public class MissionSelect : GameState
     public override void Draw(SpriteBatch _spriteBatch) 
     {
         ParticleManager.Draw(_spriteBatch);
+        if (Engine.SaveGame.CurrentMissionIndex >= missions.Count)
+        {
+            Engine.SaveGame.CurrentMissionIndex = missions.Count - 1;
+        }
         if (Engine.SaveGame.System == missions[Engine.SaveGame.CurrentMissionIndex].system)
         {
             _spriteBatch.Draw(Assets.Get(Sprite.Miniplayer), playerPosition, null, new Color(0, 255, 0), 0, Vector2.Zero, 1, 0, 0);

@@ -4471,9 +4471,9 @@ public class Enemy : Entity
         cog.AddBehaviour(cog.Cog(boss));
         return boss;
     }
-    public static Enemy NewEpitomeBoss(Vector2 position, Vector2 velocity, float angle, bool _isFriendly = false)
+    public static Enemy NewEpitomeBoss(Vector2 position, Vector2 velocity, float angle)
     {
-        Enemy boss = new(position, velocity, angle, 15, 500, Assets.Get(Sprite.EpitomeOne), _isFriendly);
+        Enemy boss = new(position, velocity, angle, 15, 500, Assets.Get(Sprite.EpitomeOne), false);
         boss.AddBehaviour(boss.Epitome());
         return boss;
     }

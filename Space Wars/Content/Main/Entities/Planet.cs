@@ -15,6 +15,7 @@ public class Planet
     private ParticleEmitter trajectory;
     public bool isImmovable;
     private bool hasRing;
+    public bool isSun = false;
     public bool EasterEgg { get; set; } = false;
     private Color color;
     private float time = 0;
@@ -71,6 +72,10 @@ public class Planet
                 acceleration += (velocity - _entity.velocity) * strength / 40;
                 //Buoyancy
                 acceleration += relativePosition / distance * strength * mass / distance / distance / 5;
+                if (isSun && strength > 2)
+                {
+                    _entity.StatusHolder.ApplyStatus(new Fire(2f, Color.White));
+                }
             }
             _entity.velocity += acceleration * Engine.DeltaSeconds * 60;
             return acceleration;
@@ -186,9 +191,14 @@ public class Planet
         if (atmosphereStrength > 0)
         {
             float atmR = AtmosphereRadius();
-            for (float r = radius; r < atmR; r += MathF.Sqrt(36 + 36 / MathF.Pow(GetAtmosphereDensity(r), 2)))
+            float start = radius;
+            if (isSun)
             {
-                float iterations = MathF.PI * MathF.PI * r / 9;
+                start = 0;
+            }
+            for (float r = start; r < atmR; r += MathF.Sqrt(36 + 36 / MathF.Pow(GetAtmosphereDensity(r), 2)))
+            {
+                float iterations = MathF.PI * MathF.PI * r / 9 + 4;
                 float offset = 1;
                 if (atmosphereStrength > 5)
                 {
@@ -231,7 +241,7 @@ public class Planet
     }
     public Planet Copy()
     {
-        Planet planet = new(position, velocity, mass, radius/50, isImmovable, color, hasRing, atmosphereStrength);
+        Planet planet = new(position, velocity, mass, radius / 50, isImmovable, color, hasRing, atmosphereStrength) { isSun = this.isSun};
         return planet;
     }
 }

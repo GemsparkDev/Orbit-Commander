@@ -54,7 +54,7 @@ public class EntityManager
         new Mission([new Planet(Vector2.Zero, Vector2.Zero, 5000, 3, true, Color.Cyan),
             new Planet(new Vector2(400, 0), Planet.GetOrbitalVelocity(new Vector2(400, 0), Vector2.Zero, 5000), 240, 1f, false, Color.Cyan),
             new Planet(new Vector2(-600, 0), -Planet.GetOrbitalVelocity(new Vector2(-600, 0), Vector2.Zero, 5000) * 1.2f, 120, 0.6f, false, Color.Yellow), ],
-        [new EntityCondition(new AdvancedConstructor(Enemy.NewEpitomeBoss, new Vector2(0, -6*50), Vector2.Zero, 0, false), [ Condition.Kill ])],
+        [new EntityCondition(new AdvancedConstructor(Enemy.NewExcursionBoss, new Vector2(0, -6*50), Vector2.Zero, 0, false), [ Condition.Kill ])],
         "Showdown", "Defeat the advanced drone prototype, Excursion. Be warned: It may call for reinforcements.", 1f, new Vector2(0, 1), Mission.TierOne(), Mission.TierOneBosses(), null, true) 
         { playerProgression = 2, isAggressive = true },
 
@@ -127,6 +127,11 @@ public class EntityManager
         new(new Vector2(600, 0), Planet.GetOrbitalVelocity(new Vector2(600, 0), Vector2.Zero, 4000) * 1.05f, 500, 1.5f, false, new Color(0.06f, 0.08f, 0.12f)), ],
         [new EntityCondition(new EntityConstructor(Enemy.NewVeilBoss, new Vector2(0, -6*50), Vector2.Zero, 0), [ Condition.Kill ])],
         "Showdown Pt. 3", "Defeat the advanced drone prototype, Veil. Be warned: It may call for reinforcements.", 1.1f, new Vector2(0, 1), Mission.TierThree(), Mission.TierThreeBosses(), null, true),
+
+        new Mission([new Planet(Vector2.Zero, Vector2.Zero, 160000, 6, true, new Color(0.9f, 1f, 0.75f), false, 50f) { isSun = true },
+        new Planet(new Vector2(0, 2000), Planet.GetOrbitalVelocity(new Vector2(0, 2000) * 0.99f, Vector2.Zero, 160000), 8000, 4, false, new Color(0.95f, 0.2f, 0.1f))],
+        [new EntityCondition(new EntityConstructor(Enemy.NewEpitomeBoss, new Vector2(0, -10*50), Vector2.Zero, 0), [ Condition.Kill ])],
+        "Inferno", "The final boss", 1.1f, new Vector2(0, 1), Mission.TierThree(), Mission.TierThreeBosses(), null, true),
 
         new Mission([ new(Vector2.Zero, Vector2.Zero, 20000, 9, true, Color.OrangeRed, true, 1.5f),
         new(new Vector2(1200, 0), Planet.GetOrbitalVelocity(new Vector2(1200, 0), Vector2.Zero, 20000), 750, 2f, false, Color.Red) ],
