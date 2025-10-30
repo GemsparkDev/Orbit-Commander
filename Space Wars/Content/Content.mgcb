@@ -1454,6 +1454,18 @@
 /processorParam:Quality=Best
 /build:Sounds/Dock.wav
 
+#begin Sounds/finalBoss.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Sounds/finalBoss.wav
+
+#begin Sounds/finalBoss.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Sounds/finalBoss.wav
+
 #begin Sounds/Fire_0.wav
 /importer:WavImporter
 /processor:SoundEffectProcessor

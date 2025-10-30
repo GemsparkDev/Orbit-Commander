@@ -70,7 +70,7 @@ public class StatusHolder
 public class Bomb() : Status(Sprite.Knob)
 {
     float time = 0;
-    float maxTime = 150;
+    float maxTime = 300;
     public override StatusType Type { get; } = StatusType.Bomb;
     public override void Update(Entity _parent)
     {
@@ -226,5 +226,54 @@ public class Berserk(float _timeLeft) : Status(Sprite.Knob)
     public override int StealthChange()
     {
         return -1;
+    }
+}
+public class Pressure(Color _color) : Status(Sprite.Knob)
+{
+    float duration = Engine.DeltaSeconds * 2;
+    float fireCooldown = 0.05f;
+    float attackCooldown = 0.1f;
+
+    public override StatusType Type { get; } = StatusType.Fire;
+
+    public override void Update(Entity _parent)
+    {
+        if (fireCooldown > 0)
+        {
+            fireCooldown -= Engine.DeltaSeconds;
+        }
+        else
+        {
+            fireCooldown = 0.05f;
+            ParticleManager.Add(new Particle(_parent.texture, 1f, _parent.position - _parent.velocity,
+                _parent.velocity + new Vector2(Util.OneToNegOne() / 3, Util.OneToNegOne() / 3), Util.OneToNegOne() / 10, Util.OneToNegOne() / 5, _color * (duration / 10), Color.Transparent));
+        }
+        if (attackCooldown > 0)
+        {
+            attackCooldown -= Engine.DeltaSeconds;
+        }
+        else
+        {
+            if (duration > 1)
+            {
+                attackCooldown = 0.1f;
+                _parent.Collide(3, true);
+            }
+        }
+        if (duration > 0)
+        {
+            duration -= Engine.DeltaSeconds;
+        }
+        else
+        {
+            IsExpired = true;
+        }
+    }
+    public override void Reset()
+    {
+        if (duration < 10)
+        {
+            duration += Engine.DeltaSeconds * 2;
+        }
     }
 }

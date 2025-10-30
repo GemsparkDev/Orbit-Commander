@@ -2309,6 +2309,7 @@ public class Enemy : Entity
         int bullets = 0;
         Enemy shield = null;
         Vector2 randomPos = Vector2.One;
+        SoundManager.ChangeTrack(Assets.Get(Sound.finalBoss));
         while(true)
         {
             int newPhase = 3 - (int)MathF.Ceiling((float)health * 3 / (float)maxHealth);
@@ -2325,7 +2326,7 @@ public class Enemy : Entity
                         Enemy enemy = new(position + new Vector2(0, -125), velocity, angle, 10, 45, Assets.Get(Sprite.ExodusBoss), isFriendly);
                         enemy.AddBehaviour(enemy.Exodus(true));
                         wave.Add(enemy);
-                        shield = NewShield(this, 10, 100, 0, 1, isFriendly);
+                        shield = NewShield(this, 20, 100, 0, 1, isFriendly);
                         wave.Add(shield);
                         texture = Assets.Get(Sprite.EpitomeTwo);
                         break;
@@ -2353,19 +2354,20 @@ public class Enemy : Entity
                 }
                 foreach (var enemy in wave)
                 {
-                    //Engine.EntityManager.Add(enemy);
+                    Engine.EntityManager.Add(enemy);
                 }
             }
             if (phase == 0)
             {
-                if (cd[0] <= 0 && Vector2.Dot(Vector2.Normalize(Engine.SaveGame.Player.position - position), Util.ToUnitVector(angle)) > 0.8f)
+                if (cd[0] <= 0 && angle - targetAngle < 0.1f)
                 {
                     cd[0] = Math.Max(0.05f, 0.55f - cd[1] / 2);
                     cd[1] = 1f;
                     SoundManager.PlaySound(Assets.Get(Sound.PulseFire), position);
                     Engine.EntityManager.Add(new PulseShot(position, Util.ToUnitVector(angle) * 10 + velocity, angle, 0, isFriendly, damage, true, 1));
                 }
-                targetAngle = Util.ToAngle(Engine.SaveGame.Player.position - position);
+                targetVector = Util.PredictEnemy(Engine.SaveGame.Player, this, 10);
+                targetAngle = Util.ToAngle(targetVector);
                 RotateTowards(targetAngle);
                 if (Vector2.Distance(position, Engine.SaveGame.Player.position) > 200)
                 {
@@ -2387,7 +2389,7 @@ public class Enemy : Entity
                         {
                             sign = 1;
                         }
-                        velocity += new Vector2(-pos.Y, pos.X) * sign * Engine.DeltaSeconds * 45;
+                        velocity += new Vector2(-pos.Y, pos.X) * sign * Engine.DeltaSeconds * 15;
                     }
                 }
                 if (Vector2.Distance(randomPos, position - Engine.SaveGame.Player.position) < 50)
@@ -2489,6 +2491,7 @@ public class Enemy : Entity
                     }
                     Engine.SaveGame.Player.StatusHolder.ApplyStatus(new Bomb());
                     isExpired = true;
+                    SoundManager.ChangeTrack(null);
                     Explode(10, 10);
                     SoundManager.PlaySound(Assets.Get(Sound.Explosion), position);
                 }
@@ -4473,7 +4476,7 @@ public class Enemy : Entity
     }
     public static Enemy NewEpitomeBoss(Vector2 position, Vector2 velocity, float angle)
     {
-        Enemy boss = new(position, velocity, angle, 15, 500, Assets.Get(Sprite.EpitomeOne), false);
+        Enemy boss = new(position, velocity, angle, 8, 1000, Assets.Get(Sprite.EpitomeOne), false);
         boss.AddBehaviour(boss.Epitome());
         return boss;
     }

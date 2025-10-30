@@ -212,6 +212,7 @@ public enum Sound
     boss,
     menu,
     secretBoss,
+    finalBoss,
 }
 public enum ComponentType
 {

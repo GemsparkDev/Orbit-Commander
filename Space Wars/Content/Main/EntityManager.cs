@@ -131,7 +131,7 @@ public class EntityManager
         new Mission([new Planet(Vector2.Zero, Vector2.Zero, 160000, 6, true, new Color(0.9f, 1f, 0.75f), false, 50f) { isSun = true },
         new Planet(new Vector2(0, 2000), Planet.GetOrbitalVelocity(new Vector2(0, 2000) * 0.99f, Vector2.Zero, 160000), 8000, 4, false, new Color(0.95f, 0.2f, 0.1f))],
         [new EntityCondition(new EntityConstructor(Enemy.NewEpitomeBoss, new Vector2(0, -10*50), Vector2.Zero, 0), [ Condition.Kill ])],
-        "Inferno", "The final boss", 1.1f, new Vector2(0, 1), Mission.TierThree(), Mission.TierThreeBosses(), null, true),
+        "Inferno", "The final boss", 1.1f, new Vector2(0, 1), Mission.TierThree(), Mission.TierThreeBosses(), null, true) { music = false },
 
         new Mission([ new(Vector2.Zero, Vector2.Zero, 20000, 9, true, Color.OrangeRed, true, 1.5f),
         new(new Vector2(1200, 0), Planet.GetOrbitalVelocity(new Vector2(1200, 0), Vector2.Zero, 20000), 750, 2f, false, Color.Red) ],

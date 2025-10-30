@@ -184,6 +184,7 @@ public static class Assets
         SoundFX.Add(Sound.menu, Content.Load<SoundEffect>("Sounds/menu"));
         SoundFX.Add(Sound.boss, Content.Load<SoundEffect>("Sounds/boss"));
         SoundFX.Add(Sound.secretBoss, Content.Load<SoundEffect>("Sounds/secretBoss"));
+        SoundFX.Add(Sound.finalBoss, Content.Load<SoundEffect>("Sounds/finalBoss"));
 
         TextFont = Content.Load<SpriteFont>("Fonts/RobotoMono");
 
