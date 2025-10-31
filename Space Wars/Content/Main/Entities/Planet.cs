@@ -72,9 +72,9 @@ public class Planet
                 acceleration += (velocity - _entity.velocity) * strength / 40;
                 //Buoyancy
                 acceleration += relativePosition / distance * strength * mass / distance / distance / 5;
-                if (isSun && strength > 2)
+                if (strength > 2)
                 {
-                    _entity.StatusHolder.ApplyStatus(new Pressure(Color.Red));
+                    _entity.StatusHolder.ApplyStatus(new Pressure(Color.Red, isSun));
                 }
             }
             _entity.velocity += acceleration * Engine.DeltaSeconds * 60;

@@ -2765,6 +2765,11 @@ public class Enemy : Entity
         hitSound = Assets.Get(Sound.ShieldHit);
         while (true)
         {
+            if (parent == null)
+            {
+                isExpired = true;
+                yield return 0;
+            }
             angle = parent.angle + theta;
             position = parent.position + new Vector2(MathF.Sin(angle), -MathF.Cos(angle)) * distance;
             velocity = parent.velocity;
@@ -3587,6 +3592,22 @@ public class Enemy : Entity
             {
                 velocity = Vector2.Zero;
                 position = position * (1f - Engine.DeltaSeconds) - new Vector2(0, Engine.SaveGame.CurrentMission.Planet.radius * 1.5f) * Engine.DeltaSeconds;
+            }
+            yield return 0;
+        }
+    }
+    IEnumerable<int> DropPod(float _distance)
+    {
+        _distance = _distance + texture.Height / 2 + 1;
+        while (true)
+        {
+            velocity = new Vector2(0, 15);
+            if (position.Y > -_distance)
+            {
+                isExpired = true;
+                Engine.SaveGame.Player.velocity = new Vector2(0, -1f);
+                Engine.SaveGame.Player.Dock();
+                SoundManager.PlaySound(Assets.Get(Sound.Explosion), position);
             }
             yield return 0;
         }
@@ -4479,5 +4500,12 @@ public class Enemy : Entity
         Enemy boss = new(position, velocity, angle, 8, 1000, Assets.Get(Sprite.EpitomeOne), false);
         boss.AddBehaviour(boss.Epitome());
         return boss;
+    }
+    public static Enemy NewDropPod(Vector2 position, float _distance)
+    {
+        Enemy enemy = new(position, Vector2.Zero, 0, 8, 500, Assets.Get(Sprite.Mothership), true);
+        enemy.AddBehaviour(enemy.DropPod(_distance));
+        enemy.Components.Add(new DockableComponent(enemy, UI.PickupDroneMenu));
+        return enemy;
     }
 }

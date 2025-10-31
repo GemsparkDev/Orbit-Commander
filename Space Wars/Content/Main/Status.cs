@@ -228,7 +228,7 @@ public class Berserk(float _timeLeft) : Status(Sprite.Knob)
         return -1;
     }
 }
-public class Pressure(Color _color) : Status(Sprite.Knob)
+public class Pressure(Color _color, bool _isFatal) : Status(Sprite.Knob)
 {
     float duration = Engine.DeltaSeconds * 2;
     float fireCooldown = 0.05f;
@@ -254,7 +254,13 @@ public class Pressure(Color _color) : Status(Sprite.Knob)
         }
         else
         {
-            if (duration > 1)
+            //Only inflicts fatal damage on player (prevents cheese)
+            if (_isFatal && _parent.isFriendly)
+            {
+                attackCooldown = 0.1f;
+                _parent.Collide((int)MathF.Pow(3, Math.Min(duration * 10, 5)), true);
+            }
+            else if (duration > 1)
             {
                 attackCooldown = 0.1f;
                 _parent.Collide(3, true);

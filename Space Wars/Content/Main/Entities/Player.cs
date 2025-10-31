@@ -208,6 +208,11 @@ public class Player : Entity
                 }
                 cachedDamage--;
                 cachedDamageCooldown = 0.05f;
+                //Guaranteed death sped along
+                if (cachedDamage > 100)
+                {
+                    cachedDamageCooldown = 0;
+                }
             }
         }
         else

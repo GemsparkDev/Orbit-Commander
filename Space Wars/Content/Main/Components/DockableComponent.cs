@@ -1,7 +1,6 @@
 ﻿using UILib.Content.Main;
 using Microsoft.Xna.Framework;
 using Space_Wars.Content.Main.Entities;
-using Assimp;
 
 namespace Space_Wars.Content.Main.Components;
 
