@@ -522,7 +522,10 @@ public class Player : Entity
         {
             if (dockedEntity != null)
             {
-                dockedEntity.Menu.enabled = !dockedEntity.Menu.enabled;
+                if(dockedEntity.Menu != null)
+                {
+                    dockedEntity.Menu.enabled = !dockedEntity.Menu.enabled;
+                }
             }
             else
             {

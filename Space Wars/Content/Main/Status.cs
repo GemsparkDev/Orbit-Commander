@@ -81,7 +81,7 @@ public class Bomb() : Status(Sprite.Knob)
         {
             SoundManager.PlayGlobalSound(Assets.Get(Sound.Beep));
         }
-        ParticleManager.Add(new Particle(null, _parent.position + new Vector2(0, -15), 0, Color.Red) { drawText = (Math.Truncate((maxTime - time) * 100) / 100).ToString()});
+        ParticleManager.Add(new Particle(null, _parent.position + _parent.velocity + new Vector2(0, -15), 0, Color.Red) { drawText = (Math.Truncate((maxTime - time) * 100) / 100).ToString()});
         if (time > maxTime)
         {
             _parent.Collide(999);

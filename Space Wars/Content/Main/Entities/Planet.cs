@@ -192,7 +192,7 @@ public class Planet
         {
             float atmR = AtmosphereRadius();
             float start = radius;
-            if (isSun)
+            if (atmosphereStrength > 5)
             {
                 start = 0;
             }

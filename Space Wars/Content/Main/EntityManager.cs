@@ -42,7 +42,7 @@ public class EntityManager
         [
             new EntityCondition(new EntityConstructor(Enemy.NewTurret, new Vector2(0, -200 - Assets.DimsOf(Sprite.TurretBase).Y / 2), Vector2.Zero, 0), [ Condition.Protect ]),
             new EntityCondition(new EntityConstructor(Enemy.NewOrbiter, new Vector2(400, 0), Planet.GetOrbitalVelocity(new Vector2(400, 0), Vector2.Zero, 3500), 0), [ Condition.Protect ]),
-            new EntityCondition(new DropPod(new Vector2(0, -1500), 200),[ ]),
+            new EntityCondition(new LaunchConstructor(Enemy.NewDropPod, new Vector2(0, -1500), 200),[ ]),
             new WaveGoal(30) ],
         "Sentry Defense", "A small outpost is located orbiting this rogue planet. Defend it.", 0.75f, new Vector2(0, -1500), Mission.TierOne(), Mission.TierOneBosses())
         { playerProgression = 1, isAggressive = true, tip = "Open the side panel to restart failed modules. \nPress F to open the fuse menu and switch around your setup.\nFuses power your modules, keep them safe.", playerDocked = true },
@@ -51,16 +51,18 @@ public class EntityManager
         new Planet(new Vector2(0, 800), Planet.GetOrbitalVelocity(new Vector2(0, 800), Vector2.Zero, 15000) * 0.85f, 1000, 1f, false, Color.Cyan), ],
         [
             new EntityCondition(new EntityConstructor(Enemy.NewLargeMiner, new Vector2(0, -6*50 - Assets.Get(Sprite.LargeMiner).Height/2), Vector2.Zero, 0), [ Condition.Kill ]),
-            new EntityCondition(new DropPod(new Vector2(0, -1500), 300),[ ])],
+            new EntityCondition(new LaunchConstructor(Enemy.NewDropPod,new Vector2(0, -1500), 300),[ ])],
         "Assault prequel", "Defeat the mega miner", 0.75f, new Vector2(0, -1500), Mission.TierOne(), Mission.TierOneBosses(), null, true) 
         { playerProgression = 2, isAggressive = true, tip = "Press Q to use your special ability.\nCtrl to toggle aim assist.", playerDocked = true },
 
         new Mission([new Planet(Vector2.Zero, Vector2.Zero, 5000, 3, true, Color.Cyan),
             new Planet(new Vector2(400, 0), Planet.GetOrbitalVelocity(new Vector2(400, 0), Vector2.Zero, 5000), 240, 1f, false, Color.Cyan),
             new Planet(new Vector2(-600, 0), -Planet.GetOrbitalVelocity(new Vector2(-600, 0), Vector2.Zero, 5000) * 1.2f, 120, 0.6f, false, Color.Yellow), ],
-        [new EntityCondition(new AdvancedConstructor(Enemy.NewExcursionBoss, new Vector2(0, -6*50), Vector2.Zero, 0, false), [ Condition.Kill ])],
-        "Showdown", "Defeat the advanced drone prototype, Excursion. Be warned: It may call for reinforcements.", 1f, new Vector2(0, 1), Mission.TierOne(), Mission.TierOneBosses(), null, true)
-        { playerProgression = 2, isAggressive = true },
+        [
+            new EntityCondition(new AdvancedConstructor(Enemy.NewExcursionBoss, new Vector2(0, -6*50), Vector2.Zero, 0, false), [ Condition.Kill ]),
+            new EntityCondition(new LaunchConstructor(Enemy.NewDropPod,new Vector2(0, -1500), 150),[ ])],
+        "Showdown", "Defeat the advanced drone prototype, Excursion. Be warned: It may call for reinforcements.", 1f, new Vector2(0, -1500), Mission.TierOne(), Mission.TierOneBosses(), null, true)
+        { playerProgression = 2, isAggressive = true, playerDocked = true },
 
         new Mission([], [new EntityCondition(new EntityConstructor(Enemy.NewWarpGate, Vector2.Zero, Vector2.Zero, 0), [ Condition.CustomIncomplete ])],
         "Warp Gate", "Warp to the next mission once you are done here", -1, new Vector2(0, 500), Mission.TierOne(), Mission.TierOneBosses()) { music = false },
@@ -74,7 +76,7 @@ public class EntityManager
         [new EntityCondition(new AdvancedConstructor(Enemy.NewCommunicator, new Vector2(MathF.Sin(1.02f), -MathF.Cos(1.02f)), Vector2.Zero, 1.02f, true), [Condition.Protect]),
             new EntityCondition(new AdvancedConstructor(Enemy.NewCommunicator, new Vector2(MathF.Sin(2.7f), -MathF.Cos(2.7f)), Vector2.Zero, 2.7f, true), [Condition.Protect]),
             new EntityCondition(new AdvancedConstructor(Enemy.NewCommunicator, new Vector2(MathF.Sin(5.33f), -MathF.Cos(5.33f)), Vector2.Zero, 5.33f, true), [Condition.Protect]),
-            new EntityCondition(new DropPod(new Vector2(0, -1500), 500),[ ]),
+            new EntityCondition(new LaunchConstructor(Enemy.NewDropPod,new Vector2(0, -1500), 500),[ ]),
             new WaveGoal(30),
         ],
         "cool planet", "Super earth", 0, new Vector2(0, -1500), Mission.TierTwo(), Mission.TierTwoBosses(), null, true) { playerDocked = true },
@@ -96,15 +98,18 @@ public class EntityManager
         new Mission( [new Planet(Vector2.Zero, Vector2.Zero, 25000, 7f, true, Color.Cyan), new(new Vector2(800, 0), Planet.GetOrbitalVelocity(new Vector2(800, 0), Vector2.Zero, 25000), 150, 0.5f, false, Color.Cyan), ],
         [
             new EntityCondition(new EntityConstructor(Enemy.NewMiner, new Vector2(0, -7*50), Vector2.Zero, 0), [ Condition.Protect ]),
-            new EntityCondition(new DropPod(new Vector2(0, -1500), 350),[ ]),
+            new EntityCondition(new LaunchConstructor(Enemy.NewDropPod,new Vector2(0, -1500), 350),[ ]),
             new WaveGoal(30)],
         "Extraction", "This deceptively dense planet is rich with materials that our deployed miner will extract.", 1, new Vector2(0, -1500), Mission.TierTwo(), Mission.TierTwoBosses()) { playerDocked = true},
 
         new Mission([new Planet(Vector2.Zero, Vector2.Zero, 5000, 4.5f, true, Color.Cyan),
         new(new Vector2(600, 0), Planet.GetOrbitalVelocity(new Vector2(600, 0), Vector2.Zero, 5000), 240, 1f, false, Color.Cyan),
         new(new Vector2(-600, 0), Planet.GetOrbitalVelocity(new Vector2(-600, 0), Vector2.Zero, 5000), 240, 1f, false, Color.Cyan), ],
-        [new EntityCondition(new AdvancedConstructor(Enemy.NewExodus, new Vector2(0, -6*50), Vector2.Zero, 0, false), [ Condition.Kill ])],
-        "Showdown Pt. 2", "Defeat the advanced drone prototype, Exodus. Be warned: It may call for reinforcements.", 1.1f, new Vector2(0, 1), Mission.TierTwo(), Mission.TierTwoBosses(), null, true),
+        [
+            new EntityCondition(new AdvancedConstructor(Enemy.NewExodus, new Vector2(0, -6*50), Vector2.Zero, 0, false), [ Condition.Kill ]),
+            new EntityCondition(new LaunchConstructor(Enemy.NewDropPod,new Vector2(0, -1500), 225),[ ])],
+        "Showdown Pt. 2", "Defeat the advanced drone prototype, Exodus. Be warned: It may call for reinforcements.", 1.1f, new Vector2(0, -1500), Mission.TierTwo(), Mission.TierTwoBosses(), null, true)
+        { playerDocked = true },
 
         new([new Planet(Vector2.Zero, Vector2.Zero, 150, 3, true, Color.OldLace)],
         [new EntityCondition(new EntityConstructor(Enemy.NewWarpGate, new Vector2(0, 450), -Planet.GetOrbitalVelocity(new Vector2(0, 450), Vector2.Zero, 150), 0), [ Condition.CustomIncomplete ])],
@@ -113,40 +118,48 @@ public class EntityManager
 
         new Mission([new Planet(Vector2.Zero, Vector2.Zero, 6000, 6, true, Color.Cyan, true, 0.8f)],
         [
-            new EntityCondition(new EntityConstructor(Enemy.NewTrader, new Vector2(0, 500), Planet.GetOrbitalVelocity(new Vector2(0, 500), Vector2.Zero, 6000), 0), [ Condition.Protect ]),
-            new EntityCondition(new DropPod(new Vector2(0, -1500), 300),[ ])],
-        "Trader", "This friendly trader invites us to upgrade our modules in exchange for resources", -1, new Vector2(0, -1500),
+            new EntityCondition(new EntityConstructor(Enemy.NewTrader, new Vector2(0, 500), Planet.GetOrbitalVelocity(new Vector2(0, 500), Vector2.Zero, 6000), 0), [ Condition.Protect ])],
+        "Trader", "This friendly trader invites us to upgrade our modules in exchange for resources", -1, new Vector2(-2000, -2000),
         Mission.TierOne(), Mission.TierOneBosses(), null, true) { relaunchable = true, playerDocked = true },
 
         new Mission([new Planet(Vector2.Zero, Vector2.Zero, 4000, 3, true, Color.Wheat, false, 1.5f),
             new Planet(new Vector2(500, 0), Planet.GetOrbitalVelocity(new Vector2(500, 0), Vector2.Zero, 4000), 300, 1f, false, Color.Wheat)],
         [
             new EntityCondition(new AdvancedConstructor(Enemy.NewClockworkBoss, new Vector2(0, -6*50), Vector2.Zero, 0, false), [ Condition.Kill ]),
-            new EntityCondition(new DropPod(new Vector2(0, -1500), 150),[ ])],
+            new EntityCondition(new LaunchConstructor(Enemy.NewDropPod,new Vector2(0, -1500), 150),[ ])],
         "Clockwork creation", "Defeat the clockwork construct. It may drop specialized parts", 1f, new Vector2(0, -1500), Mission.TierTwo(), Mission.TierTwoBosses(), null, true)
         { isAggressive = true, playerDocked = true },
 
         new Mission([new Planet(Vector2.Zero, Vector2.Zero, 10000, 3, true, new Color(100, 60, 60), false, 15f)],
-        [new WaveGoal(30)],
-        "Gas giant", "beeg", 1f, new Vector2(0, 1), Mission.TierTwo(), Mission.TierTwoBosses(), null, true),
+        [
+            new EntityCondition(new LaunchConstructor(Enemy.NewGlider,new Vector2(-1500, -1800), 0),[ ]),
+            new WaveGoal(30)],
+        "Gas giant", "beeg", 1f, new Vector2(-1500, -1800), Mission.TierTwo(), Mission.TierTwoBosses(), null, true)
+        { playerDocked = true },
 
         new Mission([new(new Vector2(500, 0), new Vector2(0, 1.05f), 10000, 7, false, Color.Cyan),
         new(new Vector2(-1000, 0), new Vector2(0, -2.1f), 5000, 4f, false, Color.Cyan)],
         [
             new EntityCondition(new EntityConstructor(Enemy.MassRelay, Vector2.Zero, Vector2.Zero, 0), [ Condition.Protect, Condition.CustomIncomplete ]),
-            new EntityCondition(new DropPod(new Vector2(0, -1500), 500),[ ])],
+            new EntityCondition(new LaunchConstructor(Enemy.NewDropPod,new Vector2(0, -1500), 0),[ ])],
         "Binary system", "Construct the Mass Relay.", -1f, new Vector2(0, -1500), Mission.TierThree(), Mission.TierThreeBosses(), null, true) 
         { isAggressive = true, playerDocked = true },
 
         new Mission([new(Vector2.Zero, Vector2.Zero, 4000, 4.5f, true, new Color(0.03f, 0.05f, 0.08f)),
         new(new Vector2(600, 0), Planet.GetOrbitalVelocity(new Vector2(600, 0), Vector2.Zero, 4000) * 1.05f, 500, 1.5f, false, new Color(0.06f, 0.08f, 0.12f)), ],
-        [new EntityCondition(new EntityConstructor(Enemy.NewVeilBoss, new Vector2(0, -6*50), Vector2.Zero, 0), [ Condition.Kill ])],
-        "Showdown Pt. 3", "Defeat the advanced drone prototype, Veil. Be warned: It may call for reinforcements.", 1.1f, new Vector2(0, 1), Mission.TierThree(), Mission.TierThreeBosses(), null, true),
+        [
+            new EntityCondition(new EntityConstructor(Enemy.NewVeilBoss, new Vector2(0, -6*50), Vector2.Zero, 0), [ Condition.Kill ]),
+            new EntityCondition(new LaunchConstructor(Enemy.NewDropPod,new Vector2(0, -1500), 150),[ ])],
+        "Showdown Pt. 3", "Defeat the advanced drone prototype, Veil. Be warned: It may call for reinforcements.", 1.1f, new Vector2(0, -1500), Mission.TierThree(), Mission.TierThreeBosses(), null, true) 
+        { playerDocked = true},
 
         new Mission([new Planet(Vector2.Zero, Vector2.Zero, 160000, 6, true, new Color(0.9f, 1f, 0.75f), false, 50f) { isSun = true },
         new Planet(new Vector2(0, 2000), Planet.GetOrbitalVelocity(new Vector2(0, 2000) * 0.99f, Vector2.Zero, 160000), 8000, 4, false, new Color(0.95f, 0.2f, 0.1f))],
-        [new EntityCondition(new EntityConstructor(Enemy.NewEpitomeBoss, new Vector2(0, -10*50), Vector2.Zero, 0), [ Condition.Kill ])],
-        "Inferno", "The final boss", 1.1f, new Vector2(0, 1), Mission.TierThree(), Mission.TierThreeBosses(), null, true) { music = false },
+        [
+            new EntityCondition(new EntityConstructor(Enemy.NewEpitomeBoss, new Vector2(0, -10*50), Vector2.Zero, 0), [ Condition.Kill ]),
+            new EntityCondition(new LaunchConstructor(Enemy.NewGlider,new Vector2(-1500, -2500), 0),[ ])],
+        "Inferno", "The final boss", 1.1f, new Vector2(-1500, -2500), Mission.TierThree(), Mission.TierThreeBosses(), null, true) 
+        { music = false, playerDocked = true },
 
         new Mission([ new(Vector2.Zero, Vector2.Zero, 20000, 9, true, Color.OrangeRed, true, 1.5f),
         new(new Vector2(1200, 0), Planet.GetOrbitalVelocity(new Vector2(1200, 0), Vector2.Zero, 20000), 750, 2f, false, Color.Red) ],

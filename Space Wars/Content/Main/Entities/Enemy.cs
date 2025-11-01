@@ -3612,6 +3612,24 @@ public class Enemy : Entity
             yield return 0;
         }
     }
+    IEnumerable<int> Glider()
+    {
+        bool isDocked = true;
+        while (true)
+        {
+            velocity = new Vector2(8, -position.X / 100);
+            if (position.X > 0 && isDocked)
+            {
+                Engine.SaveGame.Player.Dock();
+                isDocked = false;
+            }
+            if (position.X > 1000)
+            {
+                isExpired = true;
+            }
+            yield return 0;
+        }
+    }
     IEnumerable<int> Miner()
     {
         ParticleEmitter miningDebris = new(Assets.Get(Sprite.Circle), 0.1f, position, angle, MathF.PI/2, 2, 500, Color.Cyan, EmitterType.EmissionOverTime) 
@@ -4505,7 +4523,14 @@ public class Enemy : Entity
     {
         Enemy enemy = new(position, Vector2.Zero, 0, 8, 500, Assets.Get(Sprite.Mothership), true);
         enemy.AddBehaviour(enemy.DropPod(_distance));
-        enemy.Components.Add(new DockableComponent(enemy, UI.PickupDroneMenu));
+        enemy.Components.Add(new DockableComponent(enemy, null));
+        return enemy;
+    }
+    public static Enemy NewGlider(Vector2 position, float _distance)
+    {
+        Enemy enemy = new(position, Vector2.Zero, 0, 8, 500, Assets.Get(Sprite.Mothership), true);
+        enemy.AddBehaviour(enemy.Glider());
+        enemy.Components.Add(new DockableComponent(enemy, null));
         return enemy;
     }
 }

@@ -564,11 +564,11 @@ public class AdvancedConstructor(Func<Vector2, Vector2, float, bool, Entity> _co
         return _constructor(_position, _velocity, _angle, _isFriendly);
     }
 }
-public class DropPod(Vector2 _position, float _distance) : IConstructor
+public class LaunchConstructor(Func<Vector2, float, Entity> _constructor,Vector2 _position, float _distance) : IConstructor
 {
     public Entity Construct()
     {
-        return Enemy.NewDropPod(_position, _distance);
+        return _constructor(_position, _distance);
     }
 }
 public class PickupConstructor(Func<Vector2, Vector2, float, Entity> _constructor, Vector2 _position, Vector2 _velocity, float _angularVelocity) : IConstructor
