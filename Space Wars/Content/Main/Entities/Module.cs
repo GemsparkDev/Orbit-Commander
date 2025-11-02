@@ -124,7 +124,6 @@ public class Shield() : Module(Modules.Shield)
         if (cooldown <= 0)
         {
             shieldEffect.position = Player.position;
-            shieldEffect.offsetVelocity = Player.velocity;
             shieldEffect.Update();
             UI.PlayerSpecialHealth.enabledColor = Color.Yellow;
         }
@@ -381,7 +380,7 @@ public class Antimaterial() : Module(Modules.Antimaterial)
             entity.Collide(30);
         }
         SoundManager.PlaySound(Assets.Get(Sound.SniperFire), Player.position);
-        cooldown = 4f;
+        cooldown = 3f;
         Engine.ShakeScreen(0.5f);
         Player.velocity -= Player.Direction * 3;
         for (int i = 0; i < 300; i++)
@@ -587,7 +586,10 @@ public class PrismArray() : Module(Modules.PrismArray)
         SoundManager.PlaySound(Assets.Get(Sound.LMGFire), Player.position);
         foreach (var enemy in enemies)
         {
-            enemy.Collide(1);
+            if (enemy is Enemy)
+            {
+                enemy.Collide(1);
+            }
         }
     }
     public override void OnUpdate()
@@ -604,7 +606,7 @@ public class MatrixLauncher() : Module(Modules.MatrixLauncher)
         {
             return;
         }
-        Vector2 vel = Player.IdealSpeedWithVelocity(15);
+        Vector2 vel = Player.IdealSpeedWithVelocity(12);
         Engine.EntityManager.Add(new FlameBolt(Player.position, vel + new Vector2(Util.OneToNegOne(), Util.OneToNegOne()) / 2, true, 10,
             new ParticleEmitter(Assets.Get(Sprite.Circle), Player.position, 0, Color.Cyan) { sprayCone = MathF.PI * 2 / 3, sprayAngle = Util.ToAngle(vel - Player.velocity), speedOfEmission = 0.5f }, 4));
         SoundManager.PlaySound(Assets.Get(Sound.SniperFire), Player.position);
@@ -642,11 +644,11 @@ public class SplitterModule() : Module(Modules.SplitterModule)
         {
             missiles.Add(Enemy.NewMissile(position, velocity, 0, true, 1));
         }
-        Engine.EntityManager.Add(new Splitter(Player.position, Player.IdealSpeedWithVelocity(8), Util.ToAngle(Player.Direction), Player.isFriendly, 8, missiles, 1.5f));
+        Engine.EntityManager.Add(new Splitter(Player.position, Player.IdealSpeedWithVelocity(8), Util.ToAngle(Player.Direction), Player.isFriendly, 8, missiles, 0.5f));
         SoundManager.PlaySound(Assets.Get(Sound.LMGFire), Player.position);
         Engine.ShakeScreen(0.2f);
         Player.velocity -= Player.Direction / 2;
-        cooldown = 1.5f;
+        cooldown = 2f;
     }
 }
 public class Fractal() : Module(Modules.Fractal)
@@ -665,9 +667,9 @@ public class Fractal() : Module(Modules.Fractal)
             {
                 finalBullets.Add(new PulseShot(position, velocity, 0, 0, Player.isFriendly, 3, false, 1));
             }
-            splitters.Add(new Splitter(position, velocity, 0, Player.isFriendly, 5, finalBullets, 0.2f, 1));
+            splitters.Add(new Splitter(position, velocity, 0, Player.isFriendly, 5, finalBullets, 0.1f, 1));
         }
-        Engine.EntityManager.Add(new Splitter(Player.position, Player.IdealSpeedWithVelocity(8), Util.ToAngle(Player.Direction), Player.isFriendly, 8, splitters, 0.2f));
+        Engine.EntityManager.Add(new Splitter(Player.position, Player.IdealSpeedWithVelocity(8), Util.ToAngle(Player.Direction), Player.isFriendly, 8, splitters, 0.1f));
         SoundManager.PlaySound(Assets.Get(Sound.LMGFire), Player.position);
         Engine.ShakeScreen(0.1f);
         Player.velocity -= Player.Direction / 2;
@@ -682,7 +684,7 @@ public class CrackShot() : Module(Modules.CrackShot)
         {
             return;
         }
-        Engine.EntityManager.Add(new Splitter(Player.position, Player.IdealSpeedWithVelocity(8), Util.ToAngle(Player.Direction), Player.isFriendly, 12, [new AssassinShot(position, default, 0, 0, Player.isFriendly, 8, 0)], 0.2f, 0, true));
+        Engine.EntityManager.Add(new Splitter(Player.position, Player.IdealSpeedWithVelocity(8), Util.ToAngle(Player.Direction), Player.isFriendly, 3, [new AssassinShot(position, default, 0, 0, Player.isFriendly, 3, 0)], 0.2f, 0, true));
         SoundManager.PlaySound(Assets.Get(Sound.PulseFire), Player.position);
         Engine.ShakeScreen(0.1f);
         Player.velocity -= Player.Direction / 2;
@@ -717,23 +719,30 @@ public class Dash() : Module(Modules.Dash)
 }
 public class SummonShield() : Module(Modules.SummonShield)
 {
-    Enemy shield;
+    Enemy shield1;
+    Enemy shield2;
     const float MaxCooldown = 5;
     public override void OnAbility()
     {
-        if (cooldown > 0 || shield != null)
+        if (cooldown > 0 || (shield1 != null && shield2 != null))
         {
             return;
         }
-        shield = Enemy.NewShield(Player, 5, 1, 0, 1);
-        Engine.EntityManager.Add(shield);
+        shield1 = Enemy.NewShield(Player, 12, 20, MathF.PI / 4, 1, true);
+        Engine.EntityManager.Add(shield1);
+        shield2 = Enemy.NewShield(Player, 12, 20, -MathF.PI / 4, 1, true);
+        Engine.EntityManager.Add(shield2);
         cooldown = MaxCooldown;
     }
     public override void OnUpdate()
     {
-        if (shield != null && shield.isExpired)
+        if (shield1 != null && shield1.isExpired)
         {
-            shield = null;
+            shield1 = null;
+        }
+        if (shield2 != null && shield2.isExpired)
+        {
+            shield2 = null;
         }
         UI.PlayerAbility.SetInterval(1 - cooldown / MaxCooldown, 1);
         base.OnUpdate();
@@ -917,10 +926,6 @@ public class Radar() : Module(Modules.Radar)
         foreach (var entity in revealedEntities)
         {
             entity.Reveal(2f);
-        }
-        if (revealedEntities.Count > 0)
-        {
-            SoundManager.PlaySound(Assets.Get(Sound.Beep), Player.position);
         }
         for (int i = 0; i < 10; i++)
         {

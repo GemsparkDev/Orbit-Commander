@@ -96,7 +96,7 @@ public class Mission
     {
         if (tip != null)
         {
-            ParticleManager.Add(new Particle(null, tip.Length, Engine.SaveGame.Player.position + new Vector2(0, -50), Vector2.Zero, 0, 0, Color.White, Color.Transparent) { drawText = tip });
+            ParticleManager.Add(new Particle(null, tip.Length, new Vector2(0, -1.5f * Planet.radius) + new Vector2(0, -50), Vector2.Zero, 0, 0, Color.White, Color.Transparent) { drawText = tip });
             tip = null;
         }
         PlanetUpdate();

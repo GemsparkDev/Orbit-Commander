@@ -3,6 +3,18 @@
 Lagrange Commander is a game made using C# in monogame. It is a 2D top down wave based shooter where you must repair and upgrade your ship by salvaging from enemies you defeat. It features realistic N-Body gravitation, which affects all entities and projectiles.
   
 # Changelog  
+0.6.7.7 - 11/1/2025
+ - Fixed an issue where autosaving would quit to the menu.
+ - Fixed an issue with the summon shield module not working.
+ - Fixed an issue with the prism array breaking projectiles.
+ - The summon shield module now summons two shields with 20 hp each.
+ - Tweaked the ai of the Epitome boss slightly.
+ - Tips now display at a set radius above a planet instead of above the player.
+ - Added code to handle missions with a radius of zero.
+ - Tweaked the initial spawn of the gliders in the gas giant and sun missions.
+ - Circle emitters now always have at least one particle.
+ - The player always points toward the cursor.
+ - 
 0.6.7.6 - 10/31/2025
  - More missions now start the player in a launch dockable.
  - Added the Glider launch dockable.

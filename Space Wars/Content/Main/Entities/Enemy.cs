@@ -99,13 +99,14 @@ public class Enemy : Entity
     }
     public void RotateTowards(float _angle, float _maxSpeed = 0.05f)
     {
+        float angleDiff = Math.Abs(_angle - angle);
         if (angle > _angle && angularVelocity > -_maxSpeed)
         {
-            angle -= _maxSpeed;
+            angle -= _maxSpeed * (angleDiff + 0.25f);
         }
         if (angle < _angle && angularVelocity < _maxSpeed)
         {
-            angle += _maxSpeed;
+            angle += _maxSpeed * (angleDiff + 0.25f);
         }
     }
     public void GoToPosition(Vector2 _position, float speed)
@@ -2417,13 +2418,13 @@ public class Enemy : Entity
                     targetAngle = Util.ToAngle(velocity);
                     RotateTowards(targetAngle, 0.1f);
                 }
-                GoToPosition(Engine.SaveGame.Player.position + randomPos, 5);
+                GoToPosition(Engine.SaveGame.Player.position + randomPos, 3 + (Engine.SaveGame.Player.position + randomPos - position).Length() / 100);
                 velocity *= Util.FIED(0.1f);
             }
             else if (phase == 2)
             {
                 randomPos = Vector2.Normalize(GetNormalizedAcceleration()) * 500;
-                DrawLine(angle, cd[0] / 2 + 0.75f, 1.5f);
+                DrawLine(angle, cd[0], 1.5f);
                 if (cd[0] <= 0)
                 {
                     var enemies = Engine.EntityManager.Hitscan(position, Util.ToUnitVector(angle), 10000, false, out Vector2 _end);
@@ -3253,7 +3254,7 @@ public class Enemy : Entity
                 if (trackedEnemy != null)
                 {
                     GoToPosition(trackedEnemy.position, 3);
-                    if (Vector2.Distance(trackedEnemy.position, position) < 500)
+                    if (Vector2.Distance(trackedEnemy.position, position) < 500 && cd[0] <= 0)
                     {
                         cd[0] = 1.5f;
                         Engine.EntityManager.Add(new SpiralShot(position, velocity + Util.ToUnitVector(angle) * 8, angle, 0, isFriendly, damage, false));
@@ -4515,7 +4516,7 @@ public class Enemy : Entity
     }
     public static Enemy NewEpitomeBoss(Vector2 position, Vector2 velocity, float angle)
     {
-        Enemy boss = new(position, velocity, angle, 8, 1000, Assets.Get(Sprite.EpitomeOne), false);
+        Enemy boss = new(position, velocity, angle, 8, 500, Assets.Get(Sprite.EpitomeOne), false);
         boss.AddBehaviour(boss.Epitome());
         return boss;
     }

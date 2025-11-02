@@ -132,13 +132,15 @@ public class Engine : Game
         spriteBatch = new SpriteBatch(GraphicsDevice);
         Assets.LoadAssets(Content);
     }
-    public static void Save()
+    public static void Autosave()
     {
         string filePath = Path.Combine(Directory.GetCurrentDirectory(), $"Content\\Saves\\Save_{SaveSlot}.txt");
-        using (var outputFile = new StreamWriter(filePath))
-        {
-            outputFile.WriteLine(SaveGame.Serialize());
-        }
+        using var outputFile = new StreamWriter(filePath);
+        outputFile.WriteLine(SaveGame.Serialize());
+    }
+    public static void Save()
+    {
+        Autosave();
         EventHandler.QuitToMenu();
     }
     public static void Load()

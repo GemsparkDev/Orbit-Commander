@@ -28,10 +28,10 @@ public class Player : Entity
     public Dictionary<ModuleType, Module> modules = new()
     {
         { ModuleType.Hull, new Hull() },
-        { ModuleType.Guns, new CrackShot() },
+        { ModuleType.Guns, new PrismArray() },
         { ModuleType.Engines, new PlasmaEngine() },
-        { ModuleType.Sensors, new Sensors() },
-        { ModuleType.Core, new Dash() }
+        { ModuleType.Sensors, new Lidar() },
+        { ModuleType.Core, new SummonShield() }
     };
 
     public Vector2 Direction => targetVector;
@@ -115,8 +115,6 @@ public class Player : Entity
     }
     public override void Update()
     {
-        UI.PlayerSpecialHealth.enabledColor = Color.Transparent;
-        UI.PlayerSpecialHealth.disabledColor = Color.Transparent;
         time += Engine.DeltaSeconds;
         if (Progression > 0 && Input.OldState.IsKeyUp(Keys.F) && Input.NewState.IsKeyDown(Keys.F))
         {
@@ -270,6 +268,8 @@ public class Player : Entity
                 dockedEntity = null;
             }
         }
+        UI.PlayerSpecialHealth.enabledColor = Color.Transparent;
+        UI.PlayerSpecialHealth.disabledColor = Color.Transparent;
         LowerCooldown();
         if (Progression < 0)
         {
@@ -494,13 +494,17 @@ public class Player : Entity
                         module.Value.OnEngine();
                     }
                 }
-                angle = angle * 0.5f + MathF.Atan2(direction.X, -direction.Y) * 0.5f;
+                if (isEngineActive)
+                {
+                    //angle = angle * 0.5f + MathF.Atan2(direction.X, -direction.Y) * 0.5f;
+                    angle = angle * 0.5f + Util.ToAngle(targetVector) * 0.5f; //Better shield aiming
+                }
+                else
+                {
+                    angle = angle * 0.5f + Util.ToAngle(targetVector) * 0.5f;
+                }
                 if (Input.NewMouseState.LeftButton == ButtonState.Pressed && !UIManager.LockMouseInput)
                 {
-                    if (!isEngineActive)
-                    {
-                        angle = angle * 0.5f + Util.ToAngle(targetVector) * 0.5f;
-                    }
                     foreach (var module in modules)
                     {
                         module.Value.OnShoot();
