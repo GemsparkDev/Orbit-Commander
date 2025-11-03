@@ -59,7 +59,6 @@ public abstract class Entity
         }
         StatusHolder.Update(this);
         collider.position = position;
-        collider.offsetVelocity = velocity;
         collider.Update();
     }
     public abstract bool Collide(int _damage, bool _ignoreImmunity = false);

@@ -109,6 +109,7 @@ public static class EventHandler
         {
             UI.ModuleSlots[x].daughterItem = player.modules.ElementAt(x).Value;
         }
+        UI.SecondarySlot.daughterItem = player.SecondaryWeapon;
     }
     public static void UpdateModules()
     {
@@ -135,6 +136,7 @@ public static class EventHandler
         {
             player.modules[(ModuleType)x] = UI.ModuleSlots[x].daughterItem;
         }
+        player.SecondaryWeapon = UI.SecondarySlot.daughterItem;
         return true;
     }
     public static void UpdateFurnaceUI(float _value, float _maxValue, Pickup furnaceItem)

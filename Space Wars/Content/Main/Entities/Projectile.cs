@@ -304,13 +304,16 @@ public class FlameBolt : Projectile
         collider.particleVelocity = ColliderRadius;
         emitter.position = position;
         emitter.offsetVelocity = velocity;
-        emitter.particleTimeAlive = Math.Min(1, MathF.Sqrt(timeLeft));
         emitter.Update();
         position += velocity * Engine.DeltaSeconds * 60;
         angle += angularVelocity * Engine.DeltaSeconds * 60;
         if (emitter.EmitterType == EmitterType.Circle)
         {
-            emitter.particleVelocity = Math.Min((maxTimeLeft - timeLeft), emitter.particleTimeAlive) * 60;
+            emitter.particleVelocity = Math.Min((maxTimeLeft - timeLeft), 1) * 60;
+        }
+        else
+        {
+            emitter.particleTimeAlive = Math.Min(1, MathF.Sqrt(timeLeft));
         }
         if (piercingCooldown > 0)
         {

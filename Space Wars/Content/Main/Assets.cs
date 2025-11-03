@@ -80,6 +80,7 @@ public static class Assets
         Sprites.Add(Sprite.EpitomeOne, Content.Load<Texture2D>("Images/Entity_45"));
         Sprites.Add(Sprite.EpitomeTwo, Content.Load<Texture2D>("Images/Entity_45-1"));
         Sprites.Add(Sprite.EpitomeThree, Content.Load<Texture2D>("Images/Entity_45-2"));
+        Sprites.Add(Sprite.DropPod, Content.Load<Texture2D>("Images/Entity_46"));
 
         //Items
         Sprites.Add(Sprite.MetalScrap, Content.Load<Texture2D>("Images/Item_0"));

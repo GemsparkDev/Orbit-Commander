@@ -26,7 +26,7 @@ public static class UI
     public static TabbedWindow UpgradeMenu { get; } = new TabbedWindow(center, Assets.Get(Sprite.GargantuanPanel),
         Assets.Get(Sprite.Tab), Assets.Get(Sprite.SelectedTab), Assets.Get(Sound.Interact), 2);
 
-    //Main Menu Widgets
+    //Main Menu
     public static Button PatchedConicsToggle { get; } = new Button(new Vector2(0, -MainMenu.Size.Y / 4), Assets.Get(Sprite.WideButton), Assets.TextFont, $"Patched Conics: {PatchedConics}", Color.White);
     public static Slider SFXSlider { get; } = new Slider(Engine.Line, Assets.Get(Sprite.Knob), new Vector2(25, 0), new Vector2(50, 2), false, Color.White, Color.Gray);
     public static Slider MusicSlider { get; } = new Slider(Engine.Line, Assets.Get(Sprite.Knob), new Vector2(25, -15), new Vector2(50, 2), false, Color.White, Color.Gray);
@@ -123,6 +123,7 @@ public static class UI
     public static ItemSlot<Pickup>[] InventorySlots { get; set; } = new ItemSlot<Pickup>[4];
     public static ItemSlot<Pickup>[] MissionSelectSlots { get; set; } = new ItemSlot<Pickup>[4];
     public static ItemSlot<Module>[] ModuleSlots { get; private set; } = new ItemSlot<Module>[5];
+    public static ItemSlot<Module> SecondarySlot { get; private set; } = new ItemSlot<Module>(new Vector2(-GarageMenu.Size.X / 4 - 25, 50), Assets.Get(Sprite.EmptySlot), Engine.UIManager, (int)ModuleType.Guns);
 
     public static void AddUIElements()
     {
@@ -403,6 +404,9 @@ public static class UI
             InventorySlots[i].AddBehaviour(EventHandler.UpdateInventory);
             MissionSelectSlots[i].AddBehaviour(EventHandler.UpdateInventory);
         }
+        GarageMenu.AddWidget(SecondarySlot as IFunctional);
+        MissionSelect.AddWidget(SecondarySlot as IFunctional, 1);
+
         Engine.UIManager.AddContainer(MainMenu);
         Engine.UIManager.AddContainer(PauseMenu);
         Engine.UIManager.AddContainer(PlayerMenu);

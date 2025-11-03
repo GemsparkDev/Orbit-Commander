@@ -668,6 +668,18 @@
 /processorParam:TextureFormat=Color
 /build:Images/Entity_45-2.png
 
+#begin Images/Entity_46.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:Images/Entity_46.png
+
 #begin Images/Entity_5 Shield.png
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -1453,12 +1465,6 @@
 /processor:SoundEffectProcessor
 /processorParam:Quality=Best
 /build:Sounds/Dock.wav
-
-#begin Sounds/finalBoss.wav
-/importer:WavImporter
-/processor:SoundEffectProcessor
-/processorParam:Quality=Best
-/build:Sounds/finalBoss.wav
 
 #begin Sounds/finalBoss.wav
 /importer:WavImporter

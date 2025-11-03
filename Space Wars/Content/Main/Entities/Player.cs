@@ -33,6 +33,7 @@ public class Player : Entity
         { ModuleType.Sensors, new Lidar() },
         { ModuleType.Core, new SummonShield() }
     };
+    public Module SecondaryWeapon { get; set; } = new MatrixLauncher(); //TODO: Serialize me!
 
     public Vector2 Direction => targetVector;
     public DockableComponent dockedEntity;
@@ -115,6 +116,7 @@ public class Player : Entity
     }
     public override void Update()
     {
+        collider.offsetVelocity = velocity;
         time += Engine.DeltaSeconds;
         if (Progression > 0 && Input.OldState.IsKeyUp(Keys.F) && Input.NewState.IsKeyDown(Keys.F))
         {
@@ -278,14 +280,26 @@ public class Player : Entity
         //Ensures that target vector performs identically in all resolutions
         Vector2 ratio = Engine.ScreenSize / Engine.BackBuffer;
         targetVector = Vector2.Normalize(new Vector2(Input.NewMouseState.X * ratio.X, Input.NewMouseState.Y * ratio.Y) - Engine.ScreenSize / 2 - position + Engine.Camera.Position + Engine.MousePositionOffset);
+        if (Input.NewState.IsKeyDown(Keys.E) && !Input.OldState.IsKeyDown(Keys.E)) 
+        {
+            if (SecondaryWeapon != null)
+            {
+                SoundManager.PlayGlobalSound(Assets.Get(Sound.Click));
+                (modules[ModuleType.Guns], SecondaryWeapon) = (SecondaryWeapon, modules[ModuleType.Guns]);
+                EventHandler.UpdateModulesUI();
+            }
+            else
+            {
+                SoundManager.PlayGlobalSound(Assets.Get(Sound.Fail));
+            }
+        }
     }
     public override void LowerCooldown()
     {
         for (int i = 0; i < modules.Count; i++)
         {
             var module = modules[(ModuleType)i];
-            //Square root of the ratio reduces balancing impact with an additional fuse (especially with the gun dps)
-            //Note: Do not have any active abilities that are based on the cooldown, as the player could remove all fuses and get infinite of the ability
+            //Square root of the ratio reduces impact with additional fuse (especially with weapon dps)
             float fuseRatio = MathF.Sqrt((float)CountFuses((ModuleType)i) / 3);
             if (fuseRatio - 1 > float.Epsilon)
             {
@@ -298,6 +312,10 @@ public class Player : Entity
             {
                 module.OnUpdate();
             }
+        }
+        if (SecondaryWeapon != null && Util.Random.NextSingle() < 0.25f)
+        {
+            SecondaryWeapon.OnUpdate();
         }
     }
     public void RestrictedActions()

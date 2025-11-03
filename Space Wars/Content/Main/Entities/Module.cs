@@ -508,7 +508,7 @@ public class Fireball() : Module(Modules.Fireball)
         {
             return;
         }
-        Engine.EntityManager.Add(new FlameBolt(Player.position, Player.IdealSpeedWithVelocity(8) + new Vector2(Util.OneToNegOne(), Util.OneToNegOne()) / 2, true, 8, 4, 0.5f));
+        Engine.EntityManager.Add(new FlameBolt(Player.position, Player.IdealSpeedWithVelocity(8) + new Vector2(Util.OneToNegOne(), Util.OneToNegOne()) / 2, true, 4, 4, 0.5f));
         SoundManager.PlaySound(Assets.Get(Sound.LMGFire), Player.position);
         cooldown = 0.8f;
         Engine.ShakeScreen(0.1f);
@@ -589,6 +589,7 @@ public class PrismArray() : Module(Modules.PrismArray)
             if (enemy is Enemy)
             {
                 enemy.Collide(1);
+                enemy.StatusHolder.ApplyStatus(new Fire(0.5f, Color.Cyan));
             }
         }
     }
@@ -607,7 +608,7 @@ public class MatrixLauncher() : Module(Modules.MatrixLauncher)
             return;
         }
         Vector2 vel = Player.IdealSpeedWithVelocity(12);
-        Engine.EntityManager.Add(new FlameBolt(Player.position, vel + new Vector2(Util.OneToNegOne(), Util.OneToNegOne()) / 2, true, 10,
+        Engine.EntityManager.Add(new FlameBolt(Player.position, vel + new Vector2(Util.OneToNegOne(), Util.OneToNegOne()) / 2, true, 6,
             new ParticleEmitter(Assets.Get(Sprite.Circle), Player.position, 0, Color.Cyan) { sprayCone = MathF.PI * 2 / 3, sprayAngle = Util.ToAngle(vel - Player.velocity), speedOfEmission = 0.5f }, 4));
         SoundManager.PlaySound(Assets.Get(Sound.SniperFire), Player.position);
         cooldown = 1.5f;
@@ -721,7 +722,7 @@ public class SummonShield() : Module(Modules.SummonShield)
 {
     Enemy shield1;
     Enemy shield2;
-    const float MaxCooldown = 5;
+    const float MaxCooldown = 15;
     public override void OnAbility()
     {
         if (cooldown > 0 || (shield1 != null && shield2 != null))

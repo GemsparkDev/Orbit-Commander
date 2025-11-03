@@ -3,6 +3,19 @@
 Lagrange Commander is a game made using C# in monogame. It is a 2D top down wave based shooter where you must repair and upgrade your ship by salvaging from enemies you defeat. It features realistic N-Body gravitation, which affects all entities and projectiles.
   
 # Changelog  
+0.6.7.8 - 11/2/2025
+ - Epitome now summons the Pursuer boss and no longer spawns standard enemies.
+ - The bosses spawned by Epitome now drop scrap.
+ - Epitome's phase 3 laser is now slightly delayed on firing.
+ - Reduced the damage of the fireball to 4 from 8.
+ - Reduced the damage of the matrix launcher to 6 from 10.
+ - The prism array now inflicts burn.
+ - Increased the cooldown on the summon shield module to 15 seconds, from 5.
+ - Added a secondary weapon, which can be switched to using E. 
+ - Secondary weapons lower their cooldown at a constant rate of 1/4 as much as normal.
+ - Fixed some issues with hitbox misalignment.
+ - Fixed an issue where flamebolts put a nonzero particleTimeAlive for circle emitters.
+ - Added the DropPod sprite.
 0.6.7.7 - 11/1/2025
  - Fixed an issue where autosaving would quit to the menu.
  - Fixed an issue with the summon shield module not working.
@@ -14,7 +27,6 @@ Lagrange Commander is a game made using C# in monogame. It is a 2D top down wave
  - Tweaked the initial spawn of the gliders in the gas giant and sun missions.
  - Circle emitters now always have at least one particle.
  - The player always points toward the cursor.
- - 
 0.6.7.6 - 10/31/2025
  - More missions now start the player in a launch dockable.
  - Added the Glider launch dockable.
