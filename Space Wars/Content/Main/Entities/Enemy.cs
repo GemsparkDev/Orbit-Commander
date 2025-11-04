@@ -326,7 +326,7 @@ public class Enemy : Entity
     }
     #endregion
     #region Bosses
-    IEnumerable<int> Symmetry()
+    IEnumerable<int> SymmetryBoss()
     {
         enemyRange.particleVelocity = 500;
         cd =
@@ -439,7 +439,7 @@ public class Enemy : Entity
             yield return 0;
         }
     }
-    IEnumerable<int> Overload()
+    IEnumerable<int> OverloadBoss()
     {
         enemyRange.particleVelocity = 10;
         float octoshotCooldown = 10;
@@ -601,7 +601,7 @@ public class Enemy : Entity
             yield return 0;
         }
     }
-    IEnumerable<int> Wyvern(Enemy _parent)
+    IEnumerable<int> WyvernBoss(Enemy _parent)
     {
         enemyRange.particleVelocity = 500;
         Enemy parent = _parent;
@@ -612,8 +612,8 @@ public class Enemy : Entity
         {
             tail1 = new(position, velocity, angle, 15, 50, Assets.Get(Sprite.WyvernBoss), false);
             tail2 = new(position, velocity, angle, 4, 75, Assets.Get(Sprite.WyvernBoss), false);
-            tail1.AddBehaviour(tail1.Wyvern(this));
-            tail2.AddBehaviour(tail2.Wyvern(tail1));
+            tail1.AddBehaviour(tail1.WyvernBoss(this));
+            tail2.AddBehaviour(tail2.WyvernBoss(tail1));
             Engine.EntityManager.Add(tail1);
             Engine.EntityManager.Add(tail2);
         }
@@ -732,7 +732,7 @@ public class Enemy : Entity
             yield return 0;
         }
     }
-    IEnumerable<int> Excursion()
+    IEnumerable<int> ExcursionBoss()
     {
         cd =
         [
@@ -907,7 +907,7 @@ public class Enemy : Entity
             yield return 0;
         }
     }
-    IEnumerable<int> Exodus(bool isWeak = false)
+    IEnumerable<int> ExodusBoss(bool isWeak = false)
     {
         cd = [0];
         enemyRange.particleVelocity = 250;
@@ -1045,6 +1045,7 @@ public class Enemy : Entity
                 {
                     if (Engine.SaveGame.GiveWeapon)
                     {
+                        //TODO: Move crossbow drop to better fitting boss 
                         Engine.EntityManager.Add(new Crossbow() { position = this.position, velocity = GetNormalizedAcceleration() * 10, angularVelocity = this.angularVelocity });
                     }
                     else
@@ -1179,7 +1180,7 @@ public class Enemy : Entity
             yield return 0;
         }
     }
-    IEnumerable<int> Inferno()
+    IEnumerable<int> InfernoBoss()
     {
         Enemy flare = NewFlareBoss(position - new Vector2(2000, 0), velocity, 0, this);
         Engine.EntityManager.Add(flare);
@@ -1269,7 +1270,7 @@ public class Enemy : Entity
             yield return 0;
         }
     }
-    IEnumerable<int> Flare(Enemy _inferno)
+    IEnumerable<int> FlareBoss(Enemy _inferno)
     {
         enemyRange.particleVelocity = 1000;
         cd = [1.5f];
@@ -1381,7 +1382,7 @@ public class Enemy : Entity
             yield return 0;
         }
     }
-    IEnumerable<int> Surge()
+    IEnumerable<int> SurgeBoss()
     {
         cd = [0];
         List<Enemy> children = [];
@@ -1545,7 +1546,7 @@ public class Enemy : Entity
             yield return 0;
         }
     }
-    IEnumerable<int> Bloom(List<Enemy> segments)
+    IEnumerable<int> BloomBoss(List<Enemy> segments)
     {
         cd =
         [
@@ -1703,7 +1704,7 @@ public class Enemy : Entity
             yield return 0;
         }
     }
-    IEnumerable<int> Pursuer(bool isWeak)
+    IEnumerable<int> PursuerBoss(bool isWeak)
     {
         Enemy holo = null;
         Entity nearestEnemy = null;
@@ -1837,7 +1838,7 @@ public class Enemy : Entity
             yield return 0;
         }
     }
-    IEnumerable<int> Streamline(Enemy _leftWing, Enemy _rightWing)
+    IEnumerable<int> StreamlineBoss(Enemy _leftWing, Enemy _rightWing)
     {
         cd = [0];
         Engine.EntityManager.Add(_leftWing);
@@ -1972,7 +1973,7 @@ public class Enemy : Entity
             yield return 0;
         }
     }
-    IEnumerable<int> Deadeye()
+    IEnumerable<int> DeadeyeBoss()
     {
         cd =
         [
@@ -2040,7 +2041,7 @@ public class Enemy : Entity
             yield return 0;
         }
     }
-    IEnumerable<int> Continuum(bool isWeak = false)
+    IEnumerable<int> ContinuumBoss(bool isWeak = false)
     {
         cd = 
         [
@@ -2185,7 +2186,7 @@ public class Enemy : Entity
             yield return 0;
         }
     }
-    IEnumerable<int> Clockwork(Enemy _cog)
+    IEnumerable<int> ClockworkBoss(Enemy _cog)
     {
         Engine.EntityManager.Add(_cog);
         hitSound = Assets.Get(Sound.ShieldHit);
@@ -2278,7 +2279,6 @@ public class Enemy : Entity
                 Explode(10, ColliderRadius);
                 _cog.isExpired = true;
                 isExpired = true;
-                Engine.EntityManager.Add(new Construct(Constructs.SpecializedParts, position, GetNormalizedAcceleration() * 15, angle, 0.1f));
                 Engine.EntityManager.Add(new Construct(Constructs.SpecializedParts, position, GetNormalizedAcceleration() * 10, angle, 0.1f));
                 Engine.EntityManager.Add(new OrionEngine() { position = this.position, velocity = GetNormalizedAcceleration() * 5, angularVelocity = this.angularVelocity });
             }
@@ -2303,7 +2303,7 @@ public class Enemy : Entity
             yield return 0;
         }
     }
-    IEnumerable<int> Epitome()
+    IEnumerable<int> EpitomeBoss()
     {
         //Starts timer
         Engine.SaveGame.Player.StatusHolder.ApplyStatus(new Bomb());
@@ -2330,7 +2330,7 @@ public class Enemy : Entity
                 {
                     case 1:
                         Enemy enemy = new(position + new Vector2(0, -125), velocity, angle, 10, 45, Assets.Get(Sprite.ExodusBoss), isFriendly);
-                        enemy.AddBehaviour(enemy.Exodus(true));
+                        enemy.AddBehaviour(enemy.ExodusBoss(true));
                         wave.Add(enemy);
                         shield = NewShield(this, 20, 100, 0, 1, isFriendly);
                         wave.Add(shield);
@@ -2344,7 +2344,7 @@ public class Enemy : Entity
                             shield.isExpired = true;
                         }
                         Enemy boss = new(position, velocity, angle, 8, 50, Assets.Get(Sprite.Engineer), isFriendly);
-                        boss.AddBehaviour(boss.Pursuer(true));
+                        boss.AddBehaviour(boss.PursuerBoss(true));
                         boss.AddBehaviour(boss.AvoidProjectiles(1));
                         wave.Add(boss);
                         StealthAbility = 2;
@@ -2415,7 +2415,7 @@ public class Enemy : Entity
                         {
                             cd[0] = 0.5f;
                         }
-                        Engine.EntityManager.Add(NewMissile(position, Util.ToUnitVector(angle) * 10 + velocity, angle, isFriendly, 1));
+                        Engine.EntityManager.Add(NewMissile(position, Util.ToUnitVector(angle) * 10 + velocity, angle, isFriendly, 2));
                         SoundManager.PlaySound(Assets.Get(Sound.MissileFire), position);
                     }
                 }
@@ -4192,7 +4192,7 @@ public class Enemy : Entity
         enemy.AddBehaviour(enemy.EnemyDeath(1));
         return enemy;
     }
-    public static Enemy NewMissile(Vector2 position, Vector2 velocity, float angle, bool _isFriendly = false, int _sensingAbility = 0)
+    public static Enemy NewMissile(Vector2 position, Vector2 velocity, float angle, bool _isFriendly = false, int _sensingAbility = 1)
     {
         Enemy enemy = new(position, velocity, angle, 8, 10, Assets.Get(Sprite.Missile), _isFriendly) { SensingAbility = _sensingAbility };
         enemy.AddBehaviour(enemy.Missile());
@@ -4225,13 +4225,13 @@ public class Enemy : Entity
     public static Enemy NewSymmetryBoss(Vector2 position, Vector2 velocity, float angle, bool _isFriendly = false)
     {
         Enemy enemy = new(position, velocity, angle, 6, 100, Assets.Get(Sprite.SymmetryBoss), _isFriendly);
-        enemy.AddBehaviour(enemy.Symmetry());
+        enemy.AddBehaviour(enemy.SymmetryBoss());
         return enemy;
     }
     public static Enemy NewOverloadBoss(Vector2 position, Vector2 velocity, float angle, bool _isFriendly = false)
     {
         Enemy enemy = new(position, velocity, angle, 10, 120, Assets.Get(Sprite.OverloadBoss), _isFriendly);
-        enemy.AddBehaviour(enemy.Overload());
+        enemy.AddBehaviour(enemy.OverloadBoss());
         return enemy;
     }
     public static Enemy NewMothership(Vector2 position, Vector2 velocity, float angle)
@@ -4277,7 +4277,7 @@ public class Enemy : Entity
     public static Enemy NewExcursionBoss(Vector2 position, Vector2 velocity, float angle, bool isFriendly = false)
     {
         Enemy enemy = new(position, velocity, angle, 10, 200, Assets.Get(Sprite.ExcursionBoss), isFriendly);
-        enemy.AddBehaviour(enemy.Excursion());
+        enemy.AddBehaviour(enemy.ExcursionBoss());
         return enemy;
     }
     public static Enemy NewExcursionBoss(Vector2 position, Vector2 velocity, float angle)
@@ -4287,7 +4287,7 @@ public class Enemy : Entity
     public static Enemy NewWyvernBoss(Vector2 position, Vector2 velocity, float angle, bool isFriendly = false)
     {
         Enemy enemy = new(position, velocity, angle, 8, 100, Assets.Get(Sprite.WyvernBoss), isFriendly);
-        enemy.AddBehaviour(enemy.Wyvern(null));
+        enemy.AddBehaviour(enemy.WyvernBoss(null));
         return enemy;
     }
     public static Enemy NewAdvancedFighter(Vector2 position, Vector2 velocity, float angle, bool _isFriendly = false)
@@ -4338,10 +4338,10 @@ public class Enemy : Entity
         enemy.Components.Add(new DockableComponent(enemy, UI.MothershipMenu));
         return enemy;
     }
-    public static Enemy NewExodus(Vector2 position, Vector2 velocity, float angle, bool _isFriendly = false)
+    public static Enemy NewExodusBoss(Vector2 position, Vector2 velocity, float angle, bool _isFriendly = false)
     {
         Enemy enemy = new(position, velocity, angle, 8, 80, Assets.Get(Sprite.ExodusBoss), _isFriendly);
-        enemy.AddBehaviour(enemy.Exodus());
+        enemy.AddBehaviour(enemy.ExodusBoss());
         return enemy;
     }
     public static Enemy NewHealer(Vector2 position, Vector2 velocity, float angle, bool _isFriendly = false)
@@ -4383,13 +4383,13 @@ public class Enemy : Entity
     public static Enemy NewInfernoBoss(Vector2 _position, Vector2 _velocity, float _angle)
     {
         var enemy = new Enemy(_position, _velocity, _angle, 3, 175, Assets.Get(Sprite.InfernoBoss));
-        enemy.AddBehaviour(enemy.Inferno());
+        enemy.AddBehaviour(enemy.InfernoBoss());
         return enemy;
     }
     public static Enemy NewFlareBoss(Vector2 _position, Vector2 _velocity, float _angle, Enemy _inferno)
     {
         var enemy = new Enemy(_position, _velocity, _angle, 7, 125, Assets.Get(Sprite.FlareBoss));
-        enemy.AddBehaviour(enemy.Flare(_inferno));
+        enemy.AddBehaviour(enemy.FlareBoss(_inferno));
         return enemy;
     }
     public static Enemy NewCommunicator(Vector2 _position, Vector2 _velocity, float _angle, bool _isFriendly = true) 
@@ -4415,7 +4415,7 @@ public class Enemy : Entity
     public static Enemy NewSurgeBoss(Vector2 position, Vector2 velocity, float angle, bool isFriendly = false)
     {
         Enemy enemy = new(position, velocity, angle, 6, 50, Assets.Get(Sprite.SurgeBoss), isFriendly);
-        enemy.AddBehaviour(enemy.Surge());
+        enemy.AddBehaviour(enemy.SurgeBoss());
         return enemy;
     }
     public static Enemy NewSurgeChild(Vector2 position, Vector2 velocity, float angle, Entity _parent, List<Enemy> _allies)
@@ -4460,7 +4460,7 @@ public class Enemy : Entity
         List<Enemy> segments = [];
         //Head
         var enemy = new Enemy(position, velocity, angle, 10, 75, Assets.Get(Sprite.BloomHead), false);
-        enemy.AddBehaviour(enemy.Bloom(segments));
+        enemy.AddBehaviour(enemy.BloomBoss(segments));
         Enemy head = enemy;
 
         //Segments
@@ -4479,10 +4479,10 @@ public class Enemy : Entity
         return head;
     }
     //Boss
-    public static Enemy NewPursuer(Vector2 position, Vector2 velocity, float angle, bool _isFriendly = false)
+    public static Enemy NewPursuerBoss(Vector2 position, Vector2 velocity, float angle, bool _isFriendly = false)
     {
         Enemy enemy = new(position, velocity, angle, 8, 100, Assets.Get(Sprite.Engineer), _isFriendly);
-        enemy.AddBehaviour(enemy.Pursuer(false));
+        enemy.AddBehaviour(enemy.PursuerBoss(false));
         enemy.AddBehaviour(enemy.AvoidProjectiles(1));
         return enemy;
     }
@@ -4499,34 +4499,34 @@ public class Enemy : Entity
         leftWing.AddBehaviour(leftWing.Wing(boss, -5));
         Enemy rightWing = new(position, velocity, angle, 8, 30, Assets.Get(Sprite.StreamlineRightWing), _isFriendly);
         rightWing.AddBehaviour(rightWing.Wing(boss, 5));
-        boss.AddBehaviour(boss.Streamline(leftWing, rightWing));
+        boss.AddBehaviour(boss.StreamlineBoss(leftWing, rightWing));
         boss.AddBehaviour(boss.AvoidProjectiles(1));
         return boss;
     }
     public static Enemy NewDeadeyeBoss(Vector2 position, Vector2 velocity, float angle, bool _isFriendly = false)
     {
-        Enemy boss = new(position, velocity, angle, 8, 80, Assets.Get(Sprite.Deadeye), _isFriendly);
-        boss.AddBehaviour(boss.Deadeye());
+        Enemy boss = new(position, velocity, angle, 8, 80, Assets.Get(Sprite.DeadeyeBoss), _isFriendly);
+        boss.AddBehaviour(boss.DeadeyeBoss());
         return boss;
     }
     public static Enemy NewContinuumBoss(Vector2 position, Vector2 velocity, float angle, bool _isFriendly = false)
     {
-        Enemy boss = new(position, velocity, angle, 6, 120, Assets.Get(Sprite.Continuum), _isFriendly);
-        boss.AddBehaviour(boss.Continuum());
+        Enemy boss = new(position, velocity, angle, 6, 120, Assets.Get(Sprite.ContinuumBoss), _isFriendly);
+        boss.AddBehaviour(boss.ContinuumBoss());
         return boss;
     }
     public static Enemy NewClockworkBoss(Vector2 position, Vector2 velocity, float angle, bool _isFriendly = false)
     {
-        Enemy boss = new(position, velocity, angle, 8, 180, Assets.Get(Sprite.Clockwork), _isFriendly);
+        Enemy boss = new(position, velocity, angle, 8, 180, Assets.Get(Sprite.ClockworkBoss), _isFriendly);
         Enemy cog = new(position, velocity, angle, 6, 180, Assets.Get(Sprite.Cog), _isFriendly);
-        boss.AddBehaviour(boss.Clockwork(cog));
+        boss.AddBehaviour(boss.ClockworkBoss(cog));
         cog.AddBehaviour(cog.Cog(boss));
         return boss;
     }
     public static Enemy NewEpitomeBoss(Vector2 position, Vector2 velocity, float angle)
     {
         Enemy boss = new(position, velocity, angle, 8, 500, Assets.Get(Sprite.EpitomeOne), false);
-        boss.AddBehaviour(boss.Epitome());
+        boss.AddBehaviour(boss.EpitomeBoss());
         return boss;
     }
     public static Enemy NewDropPod(Vector2 position, float _distance)

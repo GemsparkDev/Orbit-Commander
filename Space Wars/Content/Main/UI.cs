@@ -107,8 +107,8 @@ public static class UI
     //Upgrade Menu
     public static Decal TraderChat { get; } = new Decal(Vector2.Zero, Assets.TextFont, 
         "Hey there!" +
-        "\nI can upgrade your sensors for a scrap." +
-        "\nIf you bring me rare materials, I can upgrade some of your other modules as well", Color.White, 8);
+        "\nIf you get me some rare materials, I can improve your sensors." +
+        "\nI'm also willing to upgrade some of your other modules for 5 scrap and retool upgraded sensors for 1.", Color.White, 8);
     public static Button LidarUpgrade { get; } = new Button(new Vector2(75, 0), Assets.Get(Sprite.Button), Assets.TextFont, "Lidar", Color.Green);
     public static Button RadarUpgrade { get; } = new Button(new Vector2(0, 0), Assets.Get(Sprite.Button), Assets.TextFont, "Radar", Color.Green);
     public static Button PulseEmitterUpgrade { get; } = new Button(new Vector2(-75, 0), Assets.Get(Sprite.Button), Assets.TextFont, "Pulse", Color.Green);
@@ -147,7 +147,7 @@ public static class UI
             MusicVolume.text = $"Music: {Math.Round(i * 100)}%";
         });
         SFXSlider.SetInterval(1, 1);
-        MusicSlider.SetInterval(1, 1);
+        MusicSlider.SetInterval(0, 1);
         UIScaleSlider.SetInterval(1, 1);
 
         SFXSlider.ApplyBehaviours();
@@ -169,8 +169,8 @@ public static class UI
         RestartButton.AddBehaviour(delegate () { EventHandler.SendMessage(Message.RestartModules); });
         GlobalSidePanelOpen.AddBehaviour(EventHandler.ToggleDockingMenus);
         SidePanelClose.AddBehaviour(EventHandler.ToggleDockingMenus);
-        PrevMission.AddBehaviour(delegate () { Engine.SaveGame.PrevMission(); });
-        NextMission.AddBehaviour(delegate () { Engine.SaveGame.NextMission(); });
+        PrevMission.AddBehaviour(Engine.SaveGame.PrevMission);
+        NextMission.AddBehaviour(Engine.SaveGame.NextMission);
         SelectMission.AddBehaviour(delegate () { if ((Engine.SaveGame.CurrentMission.relaunchable || !Engine.SaveGame.CurrentMissionCompleted) && EventHandler.SyncModules()) { Startgame(); } });
         LaunchButton.AddBehaviour(delegate () { EventHandler.SendMessage(Message.EscapeDroneLeave); });
         CreateFuse.AddBehaviour(delegate ()

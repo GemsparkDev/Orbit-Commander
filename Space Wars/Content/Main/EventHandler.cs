@@ -344,37 +344,55 @@ public static class EventHandler
     }
     public static void UpgradeSensors(Module _module)
     {
-        if (Engine.SaveGame.Scrap > 0)
+        //Only need one specialized parts
+        if (Engine.SaveGame.Player.modules[ModuleType.Sensors] is not Sensors)
         {
-            Engine.SaveGame.Scrap--;
+            if (Engine.SaveGame.Scrap > 1)
+            {
+                Engine.SaveGame.Scrap--;
+                Engine.SaveGame.Player.modules[ModuleType.Sensors] = _module;
+            }
+            else
+            {
+                return;
+            }
+        }
+        Construct firstScrap = null;
+        ItemSlot<Pickup> slot = null;
+        foreach (var item in UI.MissionSelectSlots)
+        {
+            if (item.daughterItem is Construct && (item.daughterItem as Construct).Type == Constructs.SpecializedParts)
+            {
+                firstScrap = (Construct)item.daughterItem;
+                slot = item;
+                break;
+            }
+        }
+        if (firstScrap != null)
+        {
+            foreach (var item in UI.InventorySlots)
+            {
+                if (item.daughterItem is Construct && (item.daughterItem as Construct).Type == Constructs.SpecializedParts)
+                {
+                    firstScrap = (Construct)item.daughterItem;
+                    slot = item;
+                    break;
+                }
+            }
+        }
+        if (firstScrap != null)
+        {
+            slot.daughterItem = null;
+            firstScrap.isExpired = true;
             Engine.SaveGame.Player.modules[ModuleType.Sensors] = _module;
         }
     }
     public static void UpgradeModule(ModuleType _slot, Module _moduleType)
     {
-        ItemSlot<Pickup> firstScrap = null;
-        int count = 0;
-        foreach (var item in UI.InventorySlots)
-        {
-            if (item.daughterItem is Construct selectedItem && selectedItem.Type == Constructs.SpecializedParts)
-            {
-                firstScrap ??= item;
-                count++;
-            }
-        }
-        foreach (var item in UI.MissionSelectSlots)
-        {
-            if (item.daughterItem is Construct selectedItem && selectedItem.Type == Constructs.SpecializedParts)
-            {
-                firstScrap ??= item;
-                count++;
-            }
-        }
-
         string text;
-        if (count < 1)
+        if (Engine.SaveGame.Scrap < 5)
         {
-            UI.UpgradeText.text = "Get specialized parts to upgrade.";
+            UI.UpgradeText.text = "Smelt 5 scrap to upgrade.";
             return;
         }
         var upgrades = new Dictionary<Modules, Module>
@@ -392,6 +410,6 @@ public static class EventHandler
         text = $"{_moduleType.Name} has been upgraded to {value.Name}.";
         UI.UpgradeText.text = text;
         Engine.SaveGame.Player.modules[_slot] = value;
-        firstScrap.daughterItem = null;
+        Engine.SaveGame.Scrap -= 5;
     }
 }

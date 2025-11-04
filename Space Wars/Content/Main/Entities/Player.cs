@@ -349,6 +349,7 @@ public class Player : Entity
                         ("Req. 1 scrap, blocks enemy fire. 20 integrity.", Assets.Get(Sprite.Barricade)),
                         ("Req. 1 scrap, attacks enemies. 8 integrity.", Assets.Get(Sprite.Trap)),
                         ("Req. 1 scrap, 100 dmg to all in radius when destroyed. 3 integrity.", Assets.Get(Sprite.Bomb)),
+                        ("Req. 1 scrap, smelts all scrap within it", Assets.Get(Sprite.Mothership))                    
                     };
                         if (Progression > 3)
                         {
@@ -395,7 +396,8 @@ public class Player : Entity
                         {
                             "Barricade",
                             "Trap",
-                            "Bomb"
+                            "Bomb",
+                            "Furnace"
                         };
                         if (Progression > 3)
                         {
@@ -430,6 +432,12 @@ public class Player : Entity
                                         var bomb = new Construct(Constructs.Bomb, firstScrap.position, firstScrap.velocity, 0, 0);
                                         leashedMaterials.Add(bomb);
                                         Engine.EntityManager.Add(bomb);
+                                        break;
+                                    case "Furnace":
+                                        firstScrap.isExpired = true;
+                                        var furnace = new Construct(Constructs.Furnace, firstScrap.position, firstScrap.velocity, 0, 0);
+                                        leashedMaterials.Add(furnace);
+                                        Engine.EntityManager.Add(furnace);
                                         break;
                                     case "Mothership":
                                         if (scrapCount >= 3)

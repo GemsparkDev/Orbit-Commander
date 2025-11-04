@@ -537,7 +537,7 @@ public class Mission
     {
         return
         [
-            Enemy.NewPursuer,
+            Enemy.NewPursuerBoss,
             Enemy.NewContinuumBoss,
         ];
     }

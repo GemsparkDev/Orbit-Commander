@@ -2,7 +2,13 @@
   
 Lagrange Commander is a game made using C# in monogame. It is a 2D top down wave based shooter where you must repair and upgrade your ship by salvaging from enemies you defeat. It features realistic N-Body gravitation, which affects all entities and projectiles.
   
-# Changelog  
+# Changelog
+0.6.7.9 - 11/3/2025
+ - Minor backend boss name organization.
+ - Modules can now be upgraded with 5 scrap.
+ - The sensors are now upgraded using 1 specialized parts.
+ - Upgraded sensors can be retooled using 1 scrap.
+ - The player can now construct the furnace.  
 0.6.7.8 - 11/2/2025
  - Epitome now summons the Pursuer boss and no longer spawns standard enemies.
  - The bosses spawned by Epitome now drop scrap.
