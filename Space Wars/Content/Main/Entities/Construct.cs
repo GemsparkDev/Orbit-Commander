@@ -110,15 +110,16 @@ public class Construct : Pickup
                 attackRadius.Update();
                 break;
             case Constructs.Furnace:
+                velocity *= Util.FIED(0.2f);    
                 Vector2 offset = Util.RotateVector2(new Vector2(Util.OneToNegOne(), Util.OneToNegOne()) * 5, angle);
                 ParticleManager.Add(new Particle(Assets.Get(Sprite.Dot), 1, position + offset, velocity, angle, 0, Color.Orange, Color.Transparent));
-                var nearestPickup = Engine.EntityManager.NearestItem(this, true);
+                var nearestPickup = Engine.EntityManager.NearestItem(this, false);
                 if (nearestPickup == null)
                 {
-                    return;
+                    break;
                 }
                 Vector2 relativePosition = nearestPickup.position - position;
-                if (relativePosition.X < 5 && relativePosition.X > -5 && relativePosition.Y < 5 && relativePosition.Y > -5)
+                if (relativePosition.X < 7 && relativePosition.X > -7 && relativePosition.Y < 7 && relativePosition.Y > -7)
                 {
                     nearestPickup.isExpired = true;
                     if (nearestPickup is Module)
@@ -129,7 +130,10 @@ public class Construct : Pickup
                     {
                         Engine.SaveGame.Scrap++;
                     }
+                    SoundManager.PlaySound(Assets.Get(Sound.Full), position);
                 }
+                break;
+            default:
                 break;
         }
         base.Update();

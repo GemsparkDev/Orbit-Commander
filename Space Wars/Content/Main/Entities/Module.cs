@@ -204,7 +204,6 @@ public class Ablative() : Module(Modules.Ablative)
         if (buffer >= _damage)
         {
             buffer -= (float)(_damage);
-            Engine.WriteLine(buffer);
             return 0;
         }
         buffer = 0;

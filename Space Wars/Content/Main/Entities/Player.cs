@@ -349,7 +349,7 @@ public class Player : Entity
                         ("Req. 1 scrap, blocks enemy fire. 20 integrity.", Assets.Get(Sprite.Barricade)),
                         ("Req. 1 scrap, attacks enemies. 8 integrity.", Assets.Get(Sprite.Trap)),
                         ("Req. 1 scrap, 100 dmg to all in radius when destroyed. 3 integrity.", Assets.Get(Sprite.Bomb)),
-                        ("Req. 1 scrap, smelts all scrap within it", Assets.Get(Sprite.Mothership))                    
+                        ("Req. 1 scrap, smelts all scrap within it", Assets.Get(Sprite.Furnace))                    
                     };
                         if (Progression > 3)
                         {

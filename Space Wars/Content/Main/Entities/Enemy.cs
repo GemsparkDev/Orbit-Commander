@@ -400,7 +400,7 @@ public class Enemy : Entity
                         missileCooldown = 10;
                     }
                     Vector2 direction = Util.ToUnitVector(angle + MathF.PI / 2 + MathF.PI * missileCount);
-                    Engine.EntityManager.Add(NewMissile(position, direction * 5 + velocity, angle, isFriendly));
+                    Engine.EntityManager.Add(NewMissile(position, direction * 2 + velocity, angle, isFriendly));
                     SoundManager.PlaySound(Assets.Get(Sound.MissileFire), position);
                 }
             }
@@ -1176,7 +1176,6 @@ public class Enemy : Entity
                     Engine.EntityManager.Add(new Stealth() { position = this.position, velocity = GetNormalizedAcceleration() * 10, angularVelocity = this.angularVelocity });
                 }
             }
-            Engine.WriteLine(position);
             yield return 0;
         }
     }
@@ -2666,8 +2665,8 @@ public class Enemy : Entity
                 isExpired = true;
                 SoundManager.PlaySound(Assets.Get(Sound.Death), position);
             }
-            var nearestEnemy = Engine.EntityManager.NearestEnemy(this) as Enemy;
-            if (nearestEnemy == null || nearestEnemy.health <= 0)
+            var nearestEnemy = Engine.EntityManager.NearestEnemy(this);
+            if (nearestEnemy == null || (nearestEnemy as Enemy != null && (nearestEnemy as Enemy).health <= 0))
             {
                 nearestEnemy = NewDummyEnemy(position + 100 * new Vector2(MathF.Cos(angle - MathF.PI / 2), MathF.Sin(angle - MathF.PI / 2)));
             }

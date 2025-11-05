@@ -148,6 +148,8 @@ public enum Sprite
     TorchReal,
     Assault,
     AssaultReal,
+    Furnace,
+    FurnaceReal,
 
     SpiralShot,
     PulseShot,

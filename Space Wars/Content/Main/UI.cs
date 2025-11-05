@@ -169,8 +169,8 @@ public static class UI
         RestartButton.AddBehaviour(delegate () { EventHandler.SendMessage(Message.RestartModules); });
         GlobalSidePanelOpen.AddBehaviour(EventHandler.ToggleDockingMenus);
         SidePanelClose.AddBehaviour(EventHandler.ToggleDockingMenus);
-        PrevMission.AddBehaviour(Engine.SaveGame.PrevMission);
-        NextMission.AddBehaviour(Engine.SaveGame.NextMission);
+        PrevMission.AddBehaviour(delegate () { Engine.SaveGame.PrevMission(); }); //Do not remove outer delegate
+        NextMission.AddBehaviour(delegate() { Engine.SaveGame.NextMission(); }); //Doing so causes exception due to null savegame
         SelectMission.AddBehaviour(delegate () { if ((Engine.SaveGame.CurrentMission.relaunchable || !Engine.SaveGame.CurrentMissionCompleted) && EventHandler.SyncModules()) { Startgame(); } });
         LaunchButton.AddBehaviour(delegate () { EventHandler.SendMessage(Message.EscapeDroneLeave); });
         CreateFuse.AddBehaviour(delegate ()

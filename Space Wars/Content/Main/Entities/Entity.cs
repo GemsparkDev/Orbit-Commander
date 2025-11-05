@@ -120,10 +120,6 @@ public abstract class Entity
         {
             stealth  = 0;
         }
-        if (revealDuration > 0)
-        {
-            Engine.WriteLine(stealth);
-        }
         stealth = MathF.Max(stealth, (float)Math.Clamp(revealDuration, 0f, 1f));
         _spriteBatch.Draw(texture, position, null, color * stealth, angle, Size / 2, 1, 0, 0);
 
