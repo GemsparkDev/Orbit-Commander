@@ -71,7 +71,8 @@ public class PulseShot : Projectile
             var relativePosition = Vector2.Normalize(nearestEnemy.position - position);
             var normalDirection = Vector2.Normalize(new Vector2(velocity.Y, -velocity.X));
             float dot = relativePosition.X * normalDirection.X + relativePosition.Y * normalDirection.Y;
-            velocity += normalDirection * MathF.Sqrt(MathF.Abs(dot)) * MathF.Sign(dot) / 10;
+            velocity += normalDirection * MathF.Sqrt(MathF.Abs(dot)) * MathF.Sign(dot) / 8;
+            angle = Util.ToAngle(velocity - nearestEnemy.velocity);
         }
         EntityManager.Collide(this, nearestEnemy);
     }
@@ -215,6 +216,16 @@ public class GrapplingHook : Projectile
                     target = new LatchedEntity(entity);
                     SoundManager.PlaySound(Assets.Get(Sound.ShieldHit), position);
                     maxDistance = distance;
+                }
+                else
+                {
+                    Entity item = Engine.EntityManager.NearestItem(this, true);
+                    if (item != null && Vector2.Distance(position, item.position) < (item.ColliderRadius + ColliderRadius) * 2)
+                    {
+                        target = new LatchedEntity(item);
+                        SoundManager.PlaySound(Assets.Get(Sound.ShieldHit), position);
+                        maxDistance = distance;
+                    }
                 }
             }
         }

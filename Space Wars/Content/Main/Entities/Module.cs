@@ -240,16 +240,16 @@ public class StandardEngine() : Module(Modules.Engines)
     { particleFadeToColor = new Color(72, 61, 139, 0) };
     public override void OnEngine()
     {
-        engineParticles.position = Player.position - new Vector2(MathF.Sin(Player.angle), -MathF.Cos(Player.angle)) * 8;
         engineParticles.offsetVelocity = Player.velocity;
         engineTime = Math.Clamp(engineTime + Engine.DeltaSeconds, 0, 1);
         float engineTimeModifier = 1 - (1 - engineTime) * (1 - engineTime);
-        engineParticles.sprayAngle = Player.angle + MathF.PI;
         float fuseRatio = (float)(Player.CountFuses(ModuleType.Engines)) / 3;
         engineParticles.speedOfEmission = 450f * fuseRatio * engineTimeModifier;
         if (Player.direction != Vector2.Zero)
         {
             Player.velocity += Vector2.Normalize(Player.direction) * 24 * Engine.DeltaSeconds * engineTimeModifier * fuseRatio / (Player.leashedMaterials.Count + 2);
+            engineParticles.position = Player.position - Vector2.Normalize(Player.direction) * 8 - Player.velocity;
+            engineParticles.sprayAngle = Util.ToAngle(Player.direction) + MathF.PI;
         }
         engineParticles.Update();
     }
@@ -296,16 +296,16 @@ public class WorkEngine() : Module(Modules.Work)
     { particleFadeToColor = new Color(1f, 0.1f, 0, 0) };
     public override void OnEngine()
     {
-        engineParticles.position = Player.position - new Vector2(MathF.Sin(Player.angle), -MathF.Cos(Player.angle)) * 8;
         engineParticles.offsetVelocity = Player.velocity;
         engineTime = Math.Clamp(engineTime + Engine.DeltaSeconds / 3, 0, 1);
         float engineTimeModifier = 1 - (1 - engineTime) * (1 - engineTime);
-        engineParticles.sprayAngle = Player.angle + MathF.PI;
         float fuseRatio = (float)(Player.CountFuses(ModuleType.Engines)) / 3;
         engineParticles.speedOfEmission = 450f * fuseRatio * engineTimeModifier;
         if (Player.direction != Vector2.Zero)
         {
-            Player.velocity += Vector2.Normalize(Player.direction) * 14 * Engine.DeltaSeconds * engineTimeModifier * fuseRatio;
+            Player.velocity += Vector2.Normalize(Player.direction) * 14 * Engine.DeltaSeconds * engineTimeModifier * fuseRatio; 
+            engineParticles.position = Player.position - Vector2.Normalize(Player.direction) * 8 - Player.velocity;
+            engineParticles.sprayAngle = Util.ToAngle(Player.direction) + MathF.PI;
         }
         engineParticles.Update();
     }
@@ -343,7 +343,7 @@ public class Basic() : Module(Modules.Basic)
         {
             return;
         }
-        Engine.EntityManager.Add(new PulseShot(Player.position, Player.IdealSpeedWithVelocity(9), Util.ToAngle(Player.Direction), 0, true, 3, true));
+        Engine.EntityManager.Add(new PulseShot(Player.position, Player.IdealSpeedWithVelocity(9), Util.ToAngle(Player.Direction), 0, true, 3, false));
         SoundManager.PlaySound(Assets.Get(Sound.PulseFire), Player.position);
         cooldown = 0.25f;
         Engine.ShakeScreen(0.2f);
@@ -474,7 +474,7 @@ public class Crossbow() : Module(Modules.Crossbow)
         }
         Vector2 offset = new Vector2(Player.Direction.Y, -Player.Direction.X) * Util.Random.Next(-2, 3);
         Texture2D dot = Assets.Get(Sprite.CrossbowShot);
-        Projectile shot = new PulseShot(Player.position + offset, Player.Player.IdealSpeedWithVelocity(8) + offset / 4, Util.ToAngle(Player.Direction), 0, true, 8, false, 1)
+        Projectile shot = new PulseShot(Player.position + offset, Player.Player.IdealSpeedWithVelocity(8) + offset / 4, Util.ToAngle(Player.Direction), 0, true, 8, true, 1)
         {
             texture = dot,
         };

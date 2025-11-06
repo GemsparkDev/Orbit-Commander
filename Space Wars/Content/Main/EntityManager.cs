@@ -430,7 +430,7 @@ public class EntityManager
         Entity returnItem = null;
         foreach (Entity targetEntity in entities)
         {
-            if (targetEntity is not Pickup)
+            if (targetEntity is not Pickup || targetEntity == entity)
             {
                 continue;
             }

@@ -113,7 +113,7 @@ public class Construct : Pickup
                 velocity *= Util.FIED(0.2f);    
                 Vector2 offset = Util.RotateVector2(new Vector2(Util.OneToNegOne(), Util.OneToNegOne()) * 5, angle);
                 ParticleManager.Add(new Particle(Assets.Get(Sprite.Dot), 1, position + offset, velocity, angle, 0, Color.Orange, Color.Transparent));
-                var nearestPickup = Engine.EntityManager.NearestItem(this, false);
+                var nearestPickup = Engine.EntityManager.NearestItem(this, true);
                 if (nearestPickup == null)
                 {
                     break;
@@ -121,16 +121,28 @@ public class Construct : Pickup
                 Vector2 relativePosition = nearestPickup.position - position;
                 if (relativePosition.X < 7 && relativePosition.X > -7 && relativePosition.Y < 7 && relativePosition.Y > -7)
                 {
-                    nearestPickup.isExpired = true;
-                    if (nearestPickup is Module)
+                    nearestPickup.position = position;
+                    if (Player.leashedMaterials.Contains(nearestPickup as Pickup))
                     {
-                        Engine.SaveGame.Scrap += 3;
+                        Player.leashedMaterials.Remove(nearestPickup as Pickup);
                     }
-                    else
+                    cooldown += Engine.DeltaSeconds * 2;
+                    ParticleManager.Add(new Particle(Assets.Get(Sprite.Dot), 1, position + Util.RotateVector2(new Vector2(Util.OneToNegOne(), Util.OneToNegOne()) * 5, angle), 
+                        velocity, angle, 0, Color.Orange, Color.Transparent));
+                    if (cooldown > 15)
                     {
-                        Engine.SaveGame.Scrap++;
+                        nearestPickup.isExpired = true;
+                        cooldown = 0;
+                        if (nearestPickup is Module)
+                        {
+                            Engine.SaveGame.Scrap += 3;
+                        }
+                        else
+                        {
+                            Engine.SaveGame.Scrap++;
+                        }
+                        SoundManager.PlaySound(Assets.Get(Sound.Full), position);
                     }
-                    SoundManager.PlaySound(Assets.Get(Sound.Full), position);
                 }
                 break;
             default:

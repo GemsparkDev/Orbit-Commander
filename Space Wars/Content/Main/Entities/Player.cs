@@ -28,12 +28,12 @@ public class Player : Entity
     public Dictionary<ModuleType, Module> modules = new()
     {
         { ModuleType.Hull, new Hull() },
-        { ModuleType.Guns, new PrismArray() },
-        { ModuleType.Engines, new PlasmaEngine() },
-        { ModuleType.Sensors, new Lidar() },
-        { ModuleType.Core, new SummonShield() }
+        { ModuleType.Guns, new Crossbow() },
+        { ModuleType.Engines, new StandardEngine() },
+        { ModuleType.Sensors, new Sensors() },
+        { ModuleType.Core, new SummonGrapplingHook() }
     };
-    public Module SecondaryWeapon { get; set; } = new MatrixLauncher(); //TODO: Serialize me!
+    public Module SecondaryWeapon { get; set; } = null;
 
     public Vector2 Direction => targetVector;
     public DockableComponent dockedEntity;
@@ -766,6 +766,17 @@ public class Player : Entity
         _logger.Try(delegate { modules[ModuleType.Engines] = (Module)(ItemFactory.TryDeserialize(disassembly[5], _logger)); }, 5);
         _logger.Try(delegate { modules[ModuleType.Sensors] = (Module)(ItemFactory.TryDeserialize(disassembly[6], _logger)); }, 6);
         _logger.Try(delegate { modules[ModuleType.Core] = (Module)(ItemFactory.TryDeserialize(disassembly[7], _logger)); }, 7);
+        _logger.Try(delegate 
+        {
+            if (disassembly[8] != "null")
+            {
+                SecondaryWeapon = (Module)(ItemFactory.TryDeserialize(disassembly[8], _logger));
+            }
+            else
+            {
+                SecondaryWeapon = null;
+            }
+        }, 8);
 
         UpdateColor();
         smokeParticles.isEmitterActive = false;
@@ -792,7 +803,14 @@ public class Player : Entity
         {
             modules.Append($"{module.Value.Serialize()},");
         }
-        modules.Remove(modules.Length - 1, 1);
+        if (SecondaryWeapon != null)
+        {
+            modules.Append($"{SecondaryWeapon.Serialize()}");
+        }
+        else
+        {
+            modules.Append("null");
+        }
         return $"{{{spareFuses},{aimAssist},{{{fuses}}},{modules}}}";
     }
 }
