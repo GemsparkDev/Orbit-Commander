@@ -69,13 +69,15 @@ public class Pickup : Entity, IData
             float distance = EntityManager.DistanceSqr(position, leashPosition);
             if (distance > 16)
             {
-                velocity += Vector2.Normalize(leashPosition - position) * Engine.DeltaSeconds * distance;
+                velocity += Vector2.Normalize(leashPosition - position) * Engine.DeltaSeconds * distance / 10;
+                velocity += (playerVelocity - velocity) * Engine.DeltaSeconds / Math.Max(MathF.Sqrt(distance) / 50, 0.0333f);
             }
-            else
+            Vector2 relativeVelocity = velocity - Player.velocity;
+            float relativeSpeed = relativeVelocity.Length();
+            if (relativeSpeed > 3)
             {
-                velocity += (playerVelocity - velocity) / 2;
+                velocity = velocity - relativeVelocity + relativeVelocity * 3 / relativeSpeed;
             }
-            ClampVelocity(MathF.Sqrt(playerVelocity.X * playerVelocity.X + playerVelocity.Y * playerVelocity.Y) + 1);
         }
         position += velocity * Engine.DeltaSeconds * 60;
         angle += angularVelocity * Engine.DeltaSeconds * 60;

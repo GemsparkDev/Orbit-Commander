@@ -510,9 +510,9 @@ public class Player : Entity
                     if (directions.TryGetValue(key, out Vector2 value))
                     {
                         direction += value;
-                        isEngineActive = true;
                     }
                 }
+                isEngineActive = (direction.X != 0 || direction.Y != 0);
                 if (isEngineActive)
                 {
                     foreach (var module in modules)
