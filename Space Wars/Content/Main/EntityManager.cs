@@ -266,9 +266,9 @@ public class EntityManager
                 projectiles[i].isExpired = true;
             }
         }
-        entities = entities.Where(x => !x.isExpired).ToList();
-        projectiles = projectiles.Where(x => !x.isExpired).ToList();
-        enemies = enemies.Where(x => !x.isExpired).ToList();
+        entities = [.. entities.Where(x => !x.isExpired)];
+        projectiles = [.. projectiles.Where(x => !x.isExpired)];
+        enemies = [.. enemies.Where(x => !x.isExpired)];
 
         isUpdating = false;
 

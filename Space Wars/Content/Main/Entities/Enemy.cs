@@ -1449,7 +1449,7 @@ public class Enemy : Entity
                     angle = Util.ToAngle(velocity);
                 }
             }
-            children = children.Where(child => !child.isExpired).ToList();
+            children = [.. children.Where(child => !child.isExpired)];
 
             yield return 0;
         }
@@ -2502,7 +2502,7 @@ public class Enemy : Entity
                     SoundManager.PlaySound(Assets.Get(Sound.Explosion), position);
                 }
             }
-            wave = wave.Where(x => x.health > 0).ToList();
+            wave = [.. wave.Where(x => x.health > 0)];
             LowerCooldown();
             yield return 0;
         }
@@ -4312,7 +4312,7 @@ public class Enemy : Entity
     }
     public static Enemy NewStealthFighter(Vector2 position, Vector2 velocity, float angle, bool _isFriendly = false)
     {
-        Enemy enemy = new(position, velocity, angle, 10, 8, Assets.Get(Sprite.Fighter), _isFriendly);
+        Enemy enemy = new(position, velocity, angle, 10, 8, Assets.Get(Sprite.StealthFighter), _isFriendly);
         enemy.AddBehaviour(enemy.StealthFighter());
         enemy.AddBehaviour(enemy.AvoidNearbyAllies());
         enemy.AddBehaviour(enemy.EnemyDeath(2));
