@@ -271,7 +271,8 @@ public class Enemy : Entity
             {
                 var pos = Vector2.Normalize(position - nearestProjectile.position);
                 var vel = Vector2.Normalize(velocity - nearestProjectile.velocity);
-                if ((pos.X * vel.X + pos.Y * vel.Y) < -0.5f)
+                //Enemies can only see projectiles 180 degrees ahead of them
+                if ((pos.X * vel.X + pos.Y * vel.Y) < -0.5f && Vector2.Dot(-pos, Util.ToUnitVector(angle)) > 0)
                 {
                     int sign = Math.Sign(pos.X * vel.Y - vel.X * pos.Y);
                     if (sign == 0)
@@ -313,7 +314,7 @@ public class Enemy : Entity
             yield return 0;
         }
     }
-    IEnumerable<int> SpawnWorm(List<Enemy> segments)
+    static IEnumerable<int> SpawnWorm(List<Enemy> segments)
     {
         foreach (var enemy in segments)
         {
@@ -2802,7 +2803,7 @@ public class Enemy : Entity
         enemyRange.particleVelocity = 250;
         var col = Color.DarkRed;
         col.A = 0;
-        ParticleEmitter engineParticles = new(Assets.Get(Sprite.Circle), 0.15f, Vector2.Zero, 0, MathF.PI/4, 2, 200f, Color.Yellow, EmitterType.EmissionOverTime) { particleFadeToColor = col };
+        ParticleEmitter engineParticles = new(Assets.Get(Sprite.Circle), 0.15f, Vector2.Zero, 0, MathF.PI/4, 2, 150f, Color.Yellow, EmitterType.EmissionOverTime) { particleFadeToColor = col };
         while (health > 0)
         {
             Entity nearestEnemy = Engine.EntityManager.NearestEnemy(this);
@@ -2828,6 +2829,7 @@ public class Enemy : Entity
             {
                 targetAcceleration = velocity - nearestEnemy.velocity + targetLocation * Engine.DeltaSeconds - normalizedAcceleration * normalizedAcceleration.Length() * targetLocation.Length() / 10;
             }
+            targetAcceleration -= (nearestEnemy.velocity - velocity) / 10;
             targetAngle = MathF.Atan2(targetAcceleration.Y, targetAcceleration.X) - MathF.PI / 2;
             thrust = MathF.Min(3 + normalizedAcceleration.Length() * 10, (1 - MathF.Abs(targetAngle - angle) / MathF.PI) * (targetAcceleration.Length()));
             Entity nearestProjectile = Engine.EntityManager.NearestProjectile(this, isFriendly);
@@ -2869,11 +2871,11 @@ public class Enemy : Entity
                     
                 }
             }
-            RotateTowards(targetAngle, 0.1f);
+            RotateTowards(targetAngle, 0.05f);
             LowerCooldown();
             velocity += (new Vector2(MathF.Sin(angle), -MathF.Cos(angle)) * thrust) * Engine.DeltaSeconds;
             engineParticles.offsetVelocity = velocity;
-            engineParticles.sprayAngle = angle * 180 / MathF.PI + 180;
+            engineParticles.sprayAngle = angle + MathF.PI;
             engineParticles.speedOfEmission = thrust * 75;
             engineParticles.particleVelocity = 3 - 3 / (thrust + 1);
             engineParticles.Update();
@@ -2887,73 +2889,92 @@ public class Enemy : Entity
         enemyRange.particleVelocity = 500;
         float tripleCooldown = 0;
         int shotCount = 0;
+        Entity target = null;
+        float trackTime = 0;
+        Vector2 rand = Vector2.Zero;
         while (health > 0)
         {
-            velocity *= 0.8f;
-            Vector2 normalizedAcceleration = GetNormalizedAcceleration();
-            float speed = 8 + Math.Max((Player.position - position).Length() - 500, 0) / 500;
-
             Entity nearestEnemy = Engine.EntityManager.NearestEnemy(this);
-            float playerDist = Vector2.Distance(Player.position, position);
-            if ((nearestEnemy == null || Vector2.Distance(nearestEnemy.position, position) > playerDist))
+            if (nearestEnemy != null || target != null)
             {
-                if (playerDist > 200)
+                if (nearestEnemy != null || target == null)
                 {
-                    GoToPosition(Player.position, (speed + playerDist / 100));
+                    target = nearestEnemy;
                 }
-                if (nearestEnemy == null)
+                if (nearestEnemy != null)
                 {
-                    targetVector = (position - Player.position);
+                    trackTime = 3;
+                }
+                nearestEnemy = target;
+
+                float dist = Vector2.Distance(nearestEnemy.position, position);
+                if (dist > 500)
+                {
+                    GoToPosition(nearestEnemy.position, (2 + Math.Max(dist - 500, 0) / 500));
+                    targetAngle = Util.ToAngle(velocity);
                 }
                 else
                 {
-                    targetVector = position - nearestEnemy.position;
+                    targetVector = Util.PredictEnemy(nearestEnemy, this, 8);
+                    targetAngle = Util.ToAngle(targetVector);
+                    if (cd[0] <= 0 && MathF.Abs(targetAngle - angle) < 0.05f)
+                    {
+                        if (tripleCooldown <= 0)
+                        {
+                            Texture2D tex = Assets.Get(Sprite.SpiralShot);
+                            if (shotCount == 0)
+                            {
+                                SoundManager.PlaySound(Assets.Get(Sound.LMGFire), position);
+                                Engine.EntityManager.Add(new PulseShot(position, Util.ToUnitVector(angle) * 8, angle, 0, isFriendly, damage, false) { texture = tex, timeLeft = 3 });
+                            }
+                            else
+                            {
+                                Engine.EntityManager.Add(new SpiralShot(position, Util.ToUnitVector(angle) * 8, angle, 0, isFriendly, damage, false) { texture = tex, timeLeft = 3 });
+                                Engine.EntityManager.Add(new SpiralShot(position, Util.ToUnitVector(angle) * 8, angle, 0, isFriendly, damage, true) { texture = tex, timeLeft = 3 });
+                            }
+                            if (shotCount < 1)
+                            {
+                                shotCount++;
+                                tripleCooldown = 0.02f;
+                            }
+                            else
+                            {
+                                shotCount = 0;
+                                cd[0] = 1.5f;
+                            }
+                        }
+                    }
                 }
-                targetAngle = MathF.Atan2(targetVector.X, -targetVector.Y);
-                yield return 0;
-            }
-
-            float timeToHit;
-            Vector2 playerIterativePosition = nearestEnemy.position;
-            timeToHit = MathF.Sqrt(EntityManager.DistanceSqr(position, playerIterativePosition)) / 8;
-            playerIterativePosition += Player.velocity * timeToHit;
-            targetVector = (playerIterativePosition - position);
-            targetAngle = MathF.Atan2(targetVector.X, -targetVector.Y);
-            RotateTowards(targetAngle, 0.1f);
-            LowerCooldown();
-            if (EntityManager.DistanceSqr(this, nearestEnemy) > 500 * 500)
-            {
-                GoToPosition(nearestEnemy.position, speed);
             }
             else
             {
-                velocity += normalizedAcceleration * Engine.DeltaSeconds * 60;
-                if (cd[0] <= 0)
+                if (Vector2.Distance(rand, position) < 500)
                 {
-                    if (tripleCooldown <= 0)
+                    float radius = Engine.SaveGame.CurrentMission.Planet.radius;
+                    do
                     {
-                        Texture2D tex = Assets.Get(Sprite.SpiralShot);
-                        if (shotCount == 0)
-                        {
-                            SoundManager.PlaySound(Assets.Get(Sound.LMGFire), position);
-                            Engine.EntityManager.Add(new PulseShot(position, Util.ToUnitVector(angle) * 8, angle, 0, isFriendly, damage, false) { texture = tex, timeLeft = 3 } );
-                        }
-                        else
-                        {
-                            Engine.EntityManager.Add(new SpiralShot(position, Util.ToUnitVector(angle) * 8, angle, 0, isFriendly, damage, false) { texture = tex, timeLeft = 3 });
-                            Engine.EntityManager.Add(new SpiralShot(position, Util.ToUnitVector(angle) * 8, angle, 0, isFriendly, damage, true) { texture = tex, timeLeft = 3 });
-                        }
-                        if (shotCount < 1)
-                        {
-                            shotCount++;
-                            tripleCooldown = 0.02f;
-                        }
-                        else
-                        {
-                            shotCount = 0;
-                            cd[0] = 1.5f;
-                        }
+                        rand = new Vector2((Util.Random.NextSingle() * 2 - 1) * radius * 3, (Util.Random.NextSingle() * 2 - 1) * radius * 3);
                     }
+                    while (rand.Length() < radius);
+                }
+                GoToPosition(rand, 5);
+                targetVector = velocity;
+                targetAngle = Util.ToAngle(targetVector);
+            }
+            RotateTowards(targetAngle, 0.1f);
+            LowerCooldown();
+            velocity += GetNormalizedAcceleration() * Engine.DeltaSeconds * 60;
+            velocity *= Util.FIED(0.05f);
+
+            if (nearestEnemy == null)
+            {
+                if (trackTime > 0)
+                {
+                    trackTime -= Engine.DeltaSeconds;
+                }
+                else
+                {
+                    target = null;
                 }
             }
             if (tripleCooldown > 0)
@@ -3618,15 +3639,16 @@ public class Enemy : Entity
             yield return 0;
         }
     }
-    IEnumerable<int> Glider()
+    IEnumerable<int> Glider(float _distance)
     {
         bool isDocked = true;
+        float xSpeed = Planet.GetOrbitalVelocity(new Vector2(0, _distance), Engine.SaveGame.CurrentMission.Planet.position, Engine.SaveGame.CurrentMission.Planet.mass).X;
         while (true)
         {
-            velocity = new Vector2(8, -position.X / 100);
+            velocity = new Vector2(xSpeed, xSpeed * 2 * (position.Y - _distance) / position.X);
             if (position.X > 0 && isDocked)
             {
-                Engine.SaveGame.Player.Dock();
+                Engine.SaveGame.Player.Dock(false);
                 isDocked = false;
             }
             if (position.X > 1000)
@@ -4292,7 +4314,7 @@ public class Enemy : Entity
         enemy.AddBehaviour(enemy.AdvancedFighter());
         enemy.AddBehaviour(enemy.AvoidNearbyAllies());
         enemy.AddBehaviour(enemy.EnemyDeath(1.5f));
-        enemy.AddBehaviour(enemy.AvoidProjectiles(1));
+        enemy.AddBehaviour(enemy.AvoidProjectiles(0.5f));
         return enemy;
     }
     public static Enemy NewOrbiter(Vector2 position, Vector2 velocity, float angle)
@@ -4436,7 +4458,7 @@ public class Enemy : Entity
         var enemy = new Enemy(position, velocity, angle, 8, 8, Assets.Get(Sprite.Wyrm), false);
         enemy.AddBehaviour(enemy.Wyrm(null));
         enemy.AddBehaviour(enemy.EnemyDeath(1));
-        enemy.AddBehaviour(enemy.SpawnWorm(segments));
+        enemy.AddBehaviour(Enemy.SpawnWorm(segments));
         Enemy head = enemy;
 
         //Segments
@@ -4535,7 +4557,7 @@ public class Enemy : Entity
     public static Enemy NewGlider(Vector2 position, float _distance)
     {
         Enemy enemy = new(position, Vector2.Zero, 0, 8, 500, Assets.Get(Sprite.PickupDrone), true);
-        enemy.AddBehaviour(enemy.Glider());
+        enemy.AddBehaviour(enemy.Glider(_distance));
         enemy.Components.Add(new DockableComponent(enemy, null));
         return enemy;
     }

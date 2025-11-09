@@ -132,9 +132,9 @@ public class EntityManager
 
         new Mission([new Planet(Vector2.Zero, Vector2.Zero, 10000, 3, true, new Color(100, 60, 60), false, 15f)],
         [
-            new EntityCondition(new LaunchConstructor(Enemy.NewGlider,new Vector2(-1500, -2500), 0),[ ]),
+            new EntityCondition(new LaunchConstructor(Enemy.NewGlider,new Vector2(-800, -1300), -1150),[ ]),
             new WaveGoal(30)],
-        "Gas giant", "beeg", 1f, new Vector2(-1500, -2500), Mission.TierTwo(), Mission.TierTwoBosses(), null, true)
+        "Gas giant", "beeg", 1f, new Vector2(-800, -1300), Mission.TierTwo(), Mission.TierTwoBosses(), null, true)
         { playerDocked = true },
 
         new Mission([new(new Vector2(500, 0), new Vector2(0, 1.05f), 10000, 7, false, Color.Cyan),
@@ -157,8 +157,8 @@ public class EntityManager
         new Planet(new Vector2(0, 2000), Planet.GetOrbitalVelocity(new Vector2(0, 2000) * 0.99f, Vector2.Zero, 160000), 8000, 4, false, new Color(0.95f, 0.2f, 0.1f))],
         [
             new EntityCondition(new EntityConstructor(Enemy.NewEpitomeBoss, new Vector2(0, 2800), Vector2.Zero, 0), [ Condition.Kill ]),
-            new EntityCondition(new LaunchConstructor(Enemy.NewGlider,new Vector2(-1500, -2800), 0),[ ])],
-        "Inferno", "The final boss", -1, new Vector2(-1500, -2800), Mission.TierThree(), Mission.TierThreeBosses(), null, true) 
+            new EntityCondition(new LaunchConstructor(Enemy.NewGlider,new Vector2(-1500, -2000), -1500),[ ])],
+        "Inferno", "The final boss", -1, new Vector2(-1500, -2000), Mission.TierThree(), Mission.TierThreeBosses(), null, true) 
         { music = false, playerDocked = true },
 
         new Mission([ new(Vector2.Zero, Vector2.Zero, 20000, 9, true, Color.OrangeRed, true, 1.5f),

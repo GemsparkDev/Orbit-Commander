@@ -3,6 +3,12 @@
 Lagrange Commander is a game made using C# in monogame. It is a 2D top down wave based shooter where you must repair and upgrade your ship by salvaging from enemies you defeat. It features realistic N-Body gravitation, which affects all entities and projectiles.
   
 # Changelog
+0.6.8.4 - 11/8/2025
+ - Fixed an issue where the hovercraft's engine particles would spin rapidly.
+ - The glider now drops the player off at orbital velocity at a specified distance.
+ - Enemies that use the avoid projectiles behavior can only see projectiles in front of them.
+ - Reduced the strength of the advanced fighter avoid projectile behavior from 1 to 0.5.
+ - The stealth module now increases the stealth ability to 2, from 1.
 0.6.8.3 - 11/7/2025
  - Added a sprite to the stealth fighter enemy.
 0.6.8.2 - 11/6/2025

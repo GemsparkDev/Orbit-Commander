@@ -25,7 +25,7 @@ public class DockableComponent(Entity _parentEntity, Container _menu, bool hasIn
             return;
         }
     }
-    public bool Dock(Player _player)
+    public bool Dock(Player _player, bool _withVelocity)
     {
         EventHandler.DisableDockingMenus();
         if (EntityManager.DistanceSqr(_player, _parentEntity) > 1250)
@@ -34,7 +34,10 @@ public class DockableComponent(Entity _parentEntity, Container _menu, bool hasIn
         }
         if (IsDocked)
         {
-            _player.velocity += new Vector2(0, -2);
+            if (_withVelocity)
+            {
+                _player.velocity += new Vector2(0, -2);
+            }
             SoundManager.PlayGlobalSound(Assets.Get(Sound.Undock));
             Pickup pickup = Engine.MoveSelectedPickup();
             if (pickup != null)

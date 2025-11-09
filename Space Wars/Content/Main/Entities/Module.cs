@@ -838,7 +838,7 @@ public class CreateFighter() : Module(Modules.CreateFighter)
     public override void OnUpdate()
     {
         UI.PlayerAbility.SetInterval(1 - cooldown / MaxCooldown, 1);
-        allies = allies.Where(x => !x.isExpired).ToList();
+        allies = [.. allies.Where(x => !x.isExpired)];
         base.Update();
     }
 }

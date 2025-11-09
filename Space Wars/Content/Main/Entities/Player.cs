@@ -27,8 +27,8 @@ public class Player : Entity
     };
     public Dictionary<ModuleType, Module> modules = new()
     {
-        { ModuleType.Hull, new Hull() },
-        { ModuleType.Guns, new Crossbow() },
+        { ModuleType.Hull, new Stealth() },
+        { ModuleType.Guns, new Basic() },
         { ModuleType.Engines, new StandardEngine() },
         { ModuleType.Sensors, new Sensors() },
         { ModuleType.Core, new SummonGrapplingHook() }
@@ -87,7 +87,11 @@ public class Player : Entity
             {
                 stealth -= 1;
             }
-            if (modules[ModuleType.Hull].Type is Modules.Stealth or Modules.Turtle)
+            if (modules[ModuleType.Hull].Type is Modules.Stealth)
+            {
+                stealth += 2;
+            }
+            if (modules[ModuleType.Hull].Type is Modules.Turtle)
             {
                 stealth += 1;
             }
@@ -132,7 +136,7 @@ public class Player : Entity
             return;
         }
         smokeParticles.position = position;
-        leashedMaterials = leashedMaterials.Where(x => !x.isExpired).ToList();
+        leashedMaterials = [.. leashedMaterials.Where(x => !x.isExpired)];
         float restart = 1.5f;
         if (EventHandler.AcknowledgeMessage(Message.RestartModules))
         {
@@ -594,21 +598,21 @@ public class Player : Entity
         }
         return targetVector * _speed + velocity;
     }
-    public void Dock()
+    public void Dock(bool _withVelocity = true)
     {
         if (dockedEntity == null)
         {
             DockableComponent dockableEntity = Engine.EntityManager.NearestDockableEntity(this);
             if (dockableEntity != null)
             {
-                if (dockableEntity.Dock(this))
+                if (dockableEntity.Dock(this, _withVelocity))
                 {
                     dockedEntity = dockableEntity;
                     isEngineActive = false;
                 }
             }
         }
-        else if (dockedEntity.Dock(this))
+        else if (dockedEntity.Dock(this, _withVelocity))
         {
             dockedEntity = null;
             isEngineActive = false;
