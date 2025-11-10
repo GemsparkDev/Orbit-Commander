@@ -121,6 +121,14 @@ public abstract class Entity
             stealth  = 0;
         }
         stealth = MathF.Max(stealth, (float)Math.Clamp(revealDuration, 0f, 1f));
+        //Outline in atmosphere looks better
+        if (Engine.SaveGame.CurrentMission.GetAtmospherePressure(this) > 0)
+        {
+            _spriteBatch.Draw(texture, position + new Vector2(0, 1), null, Color.Black, angle, Size / 2, 1, 0, 0);
+            _spriteBatch.Draw(texture, position + new Vector2(0, -1), null, Color.Black, angle, Size / 2, 1, 0, 0);
+            _spriteBatch.Draw(texture, position + new Vector2(1, 0), null, Color.Black, angle, Size / 2, 1, 0, 0);
+            _spriteBatch.Draw(texture, position + new Vector2(-1, 0), null, Color.Black, angle, Size / 2, 1, 0, 0);
+        }
         _spriteBatch.Draw(texture, position, null, color * stealth, angle, Size / 2, 1, 0, 0);
 
         if (Engine.DebugMode)

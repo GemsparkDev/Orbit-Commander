@@ -229,6 +229,15 @@ public class Planet
             }
         }
     }
+    public float GetAtmosphereDensity(Entity _entity)
+    {
+        float distance = Vector2.Distance(_entity.position, position);
+        if(distance > AtmosphereRadius())
+        {
+            return 0;
+        }
+        return GetAtmosphereDensity(distance);
+    }
     private float GetAtmosphereDensity(float r)
     {
         float gravityForce = mass / radius / radius;

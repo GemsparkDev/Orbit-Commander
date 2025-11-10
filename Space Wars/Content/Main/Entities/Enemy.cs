@@ -2216,33 +2216,33 @@ public class Enemy : Entity
                 frac = 0.25f;
             }
             var nearestEnemy = Engine.EntityManager.NearestEnemy(this);
-            if (cd[0] <= 0)
-            {
-                cd[0] = frac;
-                var relativeVel = nearestEnemy.velocity - velocity + (nearestEnemy.position - position) / 100;
-                float relativeSpeed = relativeVel.Length();
-                if (relativeSpeed > 0.5f)
-                {
-                    Util.Explode(position - relativeVel / relativeSpeed * 25, velocity, 0, 8);
-                    SoundManager.PlaySound(Assets.Get(Sound.Explosion), position);
-                    velocity += relativeVel / relativeSpeed * Math.Min(10, relativeSpeed);
-                }
-
-                unitsPerShot++;
-                unitsPerAbility++;
-                if (nearestEnemy != null)
-                {
-                    if (unitsPerShot >= 3)
-                    {
-                        unitsPerShot = 0;
-                        Vector2 vel = Util.PredictEnemy(nearestEnemy, this, 9);
-                        Engine.EntityManager.Add(new PulseShot(position, vel, Util.ToAngle(vel), 0, isFriendly, damage, true, 1));
-                        SoundManager.PlaySound(Assets.Get(Sound.LMGFire), position);
-                    }
-                }
-            }
             if (nearestEnemy != null)
             {
+                if (cd[0] <= 0)
+                {
+                    cd[0] = frac;
+                    var relativeVel = nearestEnemy.velocity - velocity + (nearestEnemy.position - position) / 100;
+                    float relativeSpeed = relativeVel.Length();
+                    if (relativeSpeed > 0.5f)
+                    {
+                        Util.Explode(position - relativeVel / relativeSpeed * 25, velocity, 0, 8);
+                        SoundManager.PlaySound(Assets.Get(Sound.Explosion), position);
+                        velocity += relativeVel / relativeSpeed * Math.Min(10, relativeSpeed);
+                    }
+
+                    unitsPerShot++;
+                    unitsPerAbility++;
+                    if (nearestEnemy != null)
+                    {
+                        if (unitsPerShot >= 3)
+                        {
+                            unitsPerShot = 0;
+                            Vector2 vel = Util.PredictEnemy(nearestEnemy, this, 9);
+                            Engine.EntityManager.Add(new PulseShot(position, vel, Util.ToAngle(vel), 0, isFriendly, damage, true, 1));
+                            SoundManager.PlaySound(Assets.Get(Sound.LMGFire), position);
+                        }
+                    }
+                }
                 if (unitsPerAbility >= 10)
                 {
                     if (cd[1] <= 0)

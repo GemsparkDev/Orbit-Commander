@@ -302,6 +302,15 @@ public class Mission
             CurrentGameState.SwitchState(new PlayingGame());
         }
     }
+    public float GetAtmospherePressure(Entity _entity)
+    {
+        float sum = 0;
+        foreach (var planet in planets) 
+        { 
+            sum += planet.GetAtmosphereDensity(_entity); 
+        }
+        return sum;
+    }
     public void AttractObject(Entity _entity)
     {
         foreach (var planet in planets) { planet.AttractObject(_entity); }
@@ -332,8 +341,8 @@ public class Mission
     {
         Vector2 futurePosition = _startPosition;
         Vector2 futureVelocity = _startVelocity;
-        Vector2[] futurePlanetPositions = planets.Select(planet => planet.position).ToArray();
-        Vector2[] futurePlanetVelocities = planets.Select(planet => planet.velocity).ToArray();
+        Vector2[] futurePlanetPositions = [.. planets.Select(planet => planet.position)];
+        Vector2[] futurePlanetVelocities = [.. planets.Select(planet => planet.velocity)];
         int currentPlanet = 0;
         bool hasChanged = false;
         var emitter = new ParticleEmitter(Assets.Get(Sprite.Dot), Engine.DeltaSeconds, _startPosition, 0, 0, 0, 5f, Color.Cyan, EmitterType.EmissionOverDistance);
