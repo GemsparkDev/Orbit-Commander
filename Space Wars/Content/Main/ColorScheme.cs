@@ -13,6 +13,7 @@ public abstract class ColorScheme
     public abstract Color FriendlyProjectile();
     public abstract Color HostileEnemy();
     public abstract Color Environment();
+    public abstract bool IsOutlined();
 }
 public class StandardScheme : ColorScheme
 {
@@ -21,6 +22,8 @@ public class StandardScheme : ColorScheme
     public override Color FriendlyProjectile() { return Color.Orange; }
     public override Color HostileEnemy() { return Color.Red; }
     public override Color Environment() { return Color.Cyan; }
+    public override bool IsOutlined() { return false; }
+
 }
 public class FinaleScheme : ColorScheme
 {
@@ -29,4 +32,5 @@ public class FinaleScheme : ColorScheme
     public override Color FriendlyProjectile() { return Color.Black; }
     public override Color HostileEnemy() { return Color.Red; }
     public override Color Environment() { return Color.Gray; }
+    public override bool IsOutlined() { return true; }
 }

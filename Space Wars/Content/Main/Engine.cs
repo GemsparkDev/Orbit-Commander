@@ -61,7 +61,7 @@ public class Engine : Game
         BackBuffer = new Vector2(graphics.PreferredBackBufferWidth, graphics.PreferredBackBufferHeight);
         DebugMode = false;
         Line = new Texture2D(graphics.GraphicsDevice, 1, 1, false, SurfaceFormat.Color);
-        Line.SetData(new[] { Color.White });
+        Line.SetData([ Color.White ]);
 
         Camera = new Camera(Vector2.Zero, ScreenSize / 2, 1f, 0);
 

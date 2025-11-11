@@ -33,7 +33,7 @@ public class StatusHolder
     {
         StealthChange = 0;
         SensingChange = 0;
-        effects = effects.Where(x => !x.IsExpired).ToList();
+        effects = [.. effects.Where(x => !x.IsExpired)];
         foreach (var effect in effects)
         {
             effect.Update(_parent);
@@ -244,9 +244,9 @@ public class Pressure(Color _color, bool _isFatal) : Status(Sprite.Knob)
         }
         else
         {
-            fireCooldown = 0.05f;
+            fireCooldown = 0.1f;
             ParticleManager.Add(new Particle(_parent.texture, 1f, _parent.position - _parent.velocity,
-                _parent.velocity + new Vector2(Util.OneToNegOne() / 3, Util.OneToNegOne() / 3), Util.OneToNegOne() / 10, Util.OneToNegOne() / 5, _color * (duration / 10), Color.Transparent));
+                _parent.velocity + new Vector2(Util.OneToNegOne() / 5, Util.OneToNegOne() / 5), Util.OneToNegOne() / 10, Util.OneToNegOne() / 50, _color * MathF.Sqrt(duration / 10), Color.Transparent));
         }
         if (attackCooldown > 0)
         {

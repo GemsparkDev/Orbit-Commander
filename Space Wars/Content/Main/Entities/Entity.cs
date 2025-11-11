@@ -122,7 +122,7 @@ public abstract class Entity
         }
         stealth = MathF.Max(stealth, (float)Math.Clamp(revealDuration, 0f, 1f));
         //Outline in atmosphere looks better
-        if (Engine.SaveGame.CurrentMission.GetAtmospherePressure(this) > 0)
+        if (Engine.SaveGame.CurrentMission.GetAtmospherePressure(this) > 0 || Engine.ColorScheme.IsOutlined())
         {
             _spriteBatch.Draw(texture, position + new Vector2(0, 1), null, Color.Black, angle, Size / 2, 1, 0, 0);
             _spriteBatch.Draw(texture, position + new Vector2(0, -1), null, Color.Black, angle, Size / 2, 1, 0, 0);
