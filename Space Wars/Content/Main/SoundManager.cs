@@ -108,9 +108,9 @@ public static class SoundManager
     public static void Update()
     {
         //Clears out completed sounds
-        sounds = sounds.Where(sound => !(sound.State == SoundState.Stopped)).ToList();
-        loopedSounds = loopedSounds.Where(sound => !(sound.State == SoundState.Stopped)).ToList();
-        loopsToStop = loopsToStop.Where(sound => !(sound.State == SoundState.Stopped)).ToList();
+        sounds = [.. sounds.Where(sound => !(sound.State == SoundState.Stopped))];
+        loopedSounds = [.. loopedSounds.Where(sound => !(sound.State == SoundState.Stopped))];
+        loopsToStop = [.. loopsToStop.Where(sound => !(sound.State == SoundState.Stopped))];
         foreach (var sound in loopsToStop)
         {
             sound.Pause();

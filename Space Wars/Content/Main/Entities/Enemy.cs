@@ -3672,20 +3672,23 @@ public class Enemy : Entity
                 isExpired = true;
                 SoundManager.PlaySound(Assets.Get(Sound.Death), position);
             }
-            if (health < maxHealth)
+            if (healTimer > 0)
             {
-                if (healTimer > 0)
-                {
-                    healTimer -= Engine.DeltaSeconds;
-                }
-                else
-                {
-                    healTimer = 30;
-                    Collide(-15);
-                }
+                healTimer -= Engine.DeltaSeconds;
             }
             else
             {
+                if (health < maxHealth - 15)
+                {
+                    Collide(-15);
+                }
+                else
+                {
+                    if(isFriendly)
+                    {
+                        Engine.EntityManager.Add(ItemFactory.NewScrap(position + Util.ToUnitVector(angle) * 20, GetNormalizedAcceleration() * 15 + new Vector2(Util.OneToNegOne(), -Util.Random.NextSingle()) * 5, angularVelocity));
+                    }
+                }
                 healTimer = 30;
             }
             Entity nearestPickup = Engine.EntityManager.NearestItem(this, false);

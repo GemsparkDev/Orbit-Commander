@@ -100,7 +100,8 @@ public class EntityManager
             new EntityCondition(new EntityConstructor(Enemy.NewMiner, new Vector2(0, -7*50), Vector2.Zero, 0), [ Condition.Protect ]),
             new EntityCondition(new LaunchConstructor(Enemy.NewDropPod,new Vector2(0, -1500), 350),[ ]),
             new WaveGoal(30)],
-        "Extraction", "This deceptively dense planet is rich with materials that our deployed miner will extract.", 1, new Vector2(0, -1500), Mission.TierTwo(), Mission.TierTwoBosses()) { playerDocked = true},
+        "Extraction", "This deceptively dense planet is rich with materials that our deployed miner will extract.", 1, new Vector2(0, -1500), Mission.TierTwo(), Mission.TierTwoBosses()) 
+        { playerDocked = true, isAggressive = true},
 
         new Mission([new Planet(Vector2.Zero, Vector2.Zero, 5000, 4.5f, true, Color.Cyan),
         new(new Vector2(600, 0), Planet.GetOrbitalVelocity(new Vector2(600, 0), Vector2.Zero, 5000), 240, 1f, false, Color.Cyan),
