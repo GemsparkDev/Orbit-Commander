@@ -2,13 +2,13 @@
 using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using Space_Wars.Content.Main.Entities;
+using Space_Wars.Content.Main.Particles;
+using Space_Wars.Content.Main.Story;
 using System;
 using System.Collections.Generic;
-using UILib.Content.Main;
-using Space_Wars.Content.Main.Particles;
-using Space_Wars.Content.Main.Entities;
 using System.IO;
-using Space_Wars.Content.Main.Story;
+using UILib.Content.Main;
 
 namespace Space_Wars.Content.Main;
 
@@ -196,6 +196,34 @@ public class Engine : Game
     {
         ScreenShakeFactor = Math.Min(ScreenShakeFactor + _val * _val / (ScreenShakeFactor + _val), 1);
     }
+    public Texture2D RenderAtmosphere(float _atmosphereRadius, float _atmosphereStrength, float _planetRadius, Color _color, Planet _planet)
+    {
+        var renderTarget = new RenderTarget2D(GraphicsDevice, (int)(_atmosphereRadius * 2), (int)(_atmosphereRadius * 2));
+        GraphicsDevice.SetRenderTarget(renderTarget);
+        GraphicsDevice.Clear(Color.Transparent);
+        spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, null, null);
+        float start = _planetRadius;
+        if (_atmosphereStrength > 5)
+        {
+            start = 0;
+        }
+        for (float r = start; r < _atmosphereRadius; r += MathF.Sqrt(36 + 36 / MathF.Pow(_planet.GetAtmosphereDensity(r), 2)))
+        {
+            float iterations = MathF.PI * MathF.PI * r / 6 + 4;
+            float offset = 1;
+            if (_atmosphereStrength > 5)
+            {
+                offset = MathF.Sin(r) / 4 + 1;
+            }
+            for (float t = MathF.Tau / MathF.Ceiling(iterations) / 2; t < MathF.Tau; t += MathF.Tau / MathF.Ceiling(iterations))
+            {
+                spriteBatch.Draw(Assets.Get(Sprite.Circle), new Vector2(_atmosphereRadius, _atmosphereRadius) + Util.ToUnitVector(t) * r, null, _color * MathF.Tanh(_planet.GetAtmosphereDensity(r) / 4f) * offset, t, Assets.DimsOf(Sprite.Circle), 1, 0, 0);
+            }
+        }
+        spriteBatch.End();
+        GraphicsDevice.SetRenderTarget(null);
+        return renderTarget;
+    }
     public static void DrawFilledLine(SpriteBatch _spriteBatch, Vector2 _position, Rectangle _sourceRectangle, float _percentFilled, Color _lowerColor, Color _higherColor)
     {
         _spriteBatch.Draw(Line,_position,_sourceRectangle,_lowerColor);
@@ -314,7 +342,7 @@ public static class Util
         Vector2 v = nearestEnemy.velocity - shooter.velocity;
         float cross = d.X * v.Y - d.Y * v.X;
         float sinTheta = Math.Clamp(cross / (d.Length() * speed), -1, 1);
-        Vector2 vel = Util.ToUnitVector(offset + ToAngle(d) + MathF.Asin(sinTheta));
+        Vector2 vel = ToUnitVector(offset + ToAngle(d) + MathF.Asin(sinTheta));
         return shooter.velocity + vel * 12;
     }
 }

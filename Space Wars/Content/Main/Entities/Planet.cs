@@ -13,6 +13,7 @@ public class Planet
     public float mass;
     public float radius;
     private ParticleEmitter trajectory;
+    private Texture2D atmosphere;
     public bool isImmovable;
     private bool hasRing;
     public bool isSun = false;
@@ -31,6 +32,10 @@ public class Planet
         trajectory = new ParticleEmitter(Assets.Get(Sprite.Dot), 10, position, 0, 0, 0, 10f, _color * 0.5f, EmitterType.EmissionOverDistance) { particleFadeToColor = Color.Transparent };
         hasRing = _hasRing;
         atmosphereStrength = _atmosphereStrength;
+        if(_atmosphereStrength > 0)
+        {
+            atmosphere = Engine.Self.RenderAtmosphere(AtmosphereRadius(), _atmosphereStrength, radius, color, this);
+        }
     }
     public Vector2 GetAcceleration(Vector2 _position)
     {
@@ -188,27 +193,9 @@ public class Planet
         {
             _spriteBatch.Draw(Assets.Get(Sprite.Dot), position + Util.ToUnitVector(angle) * radius, null, color, angle, Assets.DimsOf(Sprite.Dot), 1, 0, 0);
         }
-        if (atmosphereStrength > 0)
+        if(atmosphereStrength > 0)
         {
-            float atmR = AtmosphereRadius();
-            float start = radius;
-            if (atmosphereStrength > 5)
-            {
-                start = 0;
-            }
-            for (float r = start; r < atmR; r += MathF.Sqrt(36 + 36 / MathF.Pow(GetAtmosphereDensity(r), 2)))
-            {
-                float iterations = MathF.PI * MathF.PI * r / 9 + 4;
-                float offset = 1;
-                if (atmosphereStrength > 5)
-                {
-                    offset = MathF.Sin(r) / 4 + 1;
-                }
-                for (float t = MathF.Tau / MathF.Ceiling(iterations) / 2; t < MathF.Tau; t += MathF.Tau / MathF.Ceiling(iterations))
-                {
-                    _spriteBatch.Draw(Assets.Get(Sprite.Circle), position + Util.ToUnitVector(t) * r, null, color * MathF.Tanh(GetAtmosphereDensity(r) / 4f) * offset, t, Assets.DimsOf(Sprite.Circle), 1, 0, 0);
-                }
-            }
+            _spriteBatch.Draw(atmosphere, position, null, Color.White, 0, new Vector2(atmosphere.Width / 2, atmosphere.Height / 2), 1, 0, 0);
         }
         if (hasRing)
         {
@@ -238,7 +225,7 @@ public class Planet
         }
         return GetAtmosphereDensity(distance);
     }
-    private float GetAtmosphereDensity(float r)
+    public float GetAtmosphereDensity(float r)
     {
         float gravityForce = mass / radius / radius;
         return atmosphereStrength * MathF.Pow(2, -gravityForce * (r - radius) / atmosphereStrength / 4);

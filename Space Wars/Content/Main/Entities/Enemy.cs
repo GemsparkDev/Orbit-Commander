@@ -61,6 +61,11 @@ public class Enemy : Entity
         {
             angle += MathF.PI * 2;
         }
+        if(float.IsNaN(velocity.X + velocity.Y))
+        {
+            velocity = Vector2.Zero;
+            Engine.WriteLine("Velocity was NaN");
+        }
         position += velocity * Engine.DeltaSeconds * 60;
         angle += angularVelocity * Engine.DeltaSeconds * 60;
 

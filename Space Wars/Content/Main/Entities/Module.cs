@@ -1,6 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Space_Wars.Content.Main;
+using System.Diagnostics;
 using Space_Wars.Content.Main.Particles;
 using System;
 using System.Collections.Generic;
@@ -244,7 +245,7 @@ public class StandardEngine() : Module(Modules.Engines)
         engineTime = Math.Clamp(engineTime + Engine.DeltaSeconds, 0, 1);
         float engineTimeModifier = 1 - (1 - engineTime) * (1 - engineTime);
         float fuseRatio = (float)(Player.CountFuses(ModuleType.Engines)) / 3;
-        engineParticles.speedOfEmission = 450f * fuseRatio * engineTimeModifier;
+        engineParticles.speedOfEmission = Math.Max(450f * fuseRatio * engineTimeModifier, 10);
         if (Player.direction != Vector2.Zero)
         {
             Player.velocity += Vector2.Normalize(Player.direction) * 24 * Engine.DeltaSeconds * engineTimeModifier * fuseRatio / (Player.leashedMaterials.Count + 2);
@@ -300,7 +301,7 @@ public class WorkEngine() : Module(Modules.Work)
         engineTime = Math.Clamp(engineTime + Engine.DeltaSeconds / 3, 0, 1);
         float engineTimeModifier = 1 - (1 - engineTime) * (1 - engineTime);
         float fuseRatio = (float)(Player.CountFuses(ModuleType.Engines)) / 3;
-        engineParticles.speedOfEmission = 450f * fuseRatio * engineTimeModifier;
+        engineParticles.speedOfEmission = Math.Max(450f * fuseRatio * engineTimeModifier, 10);
         if (Player.direction != Vector2.Zero)
         {
             Player.velocity += Vector2.Normalize(Player.direction) * 14 * Engine.DeltaSeconds * engineTimeModifier * fuseRatio; 
