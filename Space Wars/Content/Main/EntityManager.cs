@@ -44,7 +44,7 @@ public class EntityManager
             new EntityCondition(new EntityConstructor(Enemy.NewOrbiter, new Vector2(400, 0), Planet.GetOrbitalVelocity(new Vector2(400, 0), Vector2.Zero, 3500), 0), [ Condition.Protect ]),
             new EntityCondition(new LaunchConstructor(Enemy.NewDropPod, new Vector2(0, -1500), 200),[ ]),
             new WaveGoal(30) ],
-        "Sentry Defense", "A small outpost is located orbiting this rogue planet. Defend it.", 0.75f, new Vector2(0, -1500), Mission.TierOne(), Mission.TierOneBosses())
+        "Sentry Defense", "A small sentry has been deployed on this abandoned planet. \nDefense of this location will be essential for further development.", 0.75f, new Vector2(0, -1500), Mission.TierOne(), Mission.TierOneBosses())
         { playerProgression = 1, isAggressive = true, tip = "Open the side panel to restart failed modules. \nPress F to open the fuse menu and switch around your setup.\nFuses power your modules, keep them safe.", playerDocked = true },
 
         new Mission( [new Planet(Vector2.Zero, Vector2.Zero, 15000, 6f, true, Color.Cyan),
@@ -52,7 +52,7 @@ public class EntityManager
         [
             new EntityCondition(new EntityConstructor(Enemy.NewLargeMiner, new Vector2(0, -6*50 - Assets.Get(Sprite.LargeMiner).Height/2), Vector2.Zero, 0), [ Condition.Kill ]),
             new EntityCondition(new LaunchConstructor(Enemy.NewDropPod,new Vector2(0, -1500), 300),[ ])],
-        "Assault prequel", "Defeat the mega miner", 0.75f, new Vector2(0, -1500), Mission.TierOne(), Mission.TierOneBosses(), null, true) 
+        "Meet the locals", "Local scans indicate a nearby mineral rich planet occupied by enemy forces. \nCapturing this site will aid in future resource gathering.", 0.75f, new Vector2(0, -1500), Mission.TierOne(), Mission.TierOneBosses(), null, true) 
         { playerProgression = 2, isAggressive = true, tip = "Press Q to use your special ability.\nCtrl to toggle aim assist.", playerDocked = true },
 
         new Mission([new Planet(Vector2.Zero, Vector2.Zero, 5000, 3, true, Color.Cyan),
@@ -61,16 +61,16 @@ public class EntityManager
         [
             new EntityCondition(new AdvancedConstructor(Enemy.NewExcursionBoss, new Vector2(0, -6*50), Vector2.Zero, 0, false), [ Condition.Kill ]),
             new EntityCondition(new LaunchConstructor(Enemy.NewDropPod,new Vector2(0, -1500), 150),[ ])],
-        "Showdown", "Defeat the advanced drone prototype, Excursion. Be warned: It may call for reinforcements.", 1f, new Vector2(0, -1500), Mission.TierOne(), Mission.TierOneBosses(), null, true)
+        "Showdown", "Our activities appear to have gathered the attention of an advanced drone.\nAttacking now will suprise the enemy before it can develop any reinforcements.", 1f, new Vector2(0, -1500), Mission.TierOne(), Mission.TierOneBosses(), null, true)
         { playerProgression = 2, isAggressive = true, playerDocked = true },
 
         new Mission([], [new EntityCondition(new EntityConstructor(Enemy.NewWarpGate, Vector2.Zero, Vector2.Zero, 0), [ Condition.CustomIncomplete ])],
-        "Warp Gate", "Warp to the next mission once you are done here", -1, new Vector2(0, 500), Mission.TierOne(), Mission.TierOneBosses()) { music = false },
+        "Warp Gate", "Scans indicate that a large enemy fleet is coming our way after the loss of their prototype.\nRecommended action: Leave the system immediately.", -1, new Vector2(0, 500), Mission.TierOne(), Mission.TierOneBosses()) { music = false },
 
         //Note: The player construct menu and the Quantum Resonator both use the name of this mission for their special behavior. When changing, make sure their name is updated as well.
         new Mission([new Planet(Vector2.Zero, Vector2.Zero, 50000, 12, true, new Color(255, 219, 0), true, 1.5f) ],
         [],
-        "???", "", -1, new Vector2(-2000, -2000), Mission.TierOne(), Mission.TierOneBosses(), null, true) { playerDocked = true, music = false, relaunchable = true },
+        "???", "Sensor data shows that this site has an unusually high temperature.\nInvestigate possible enemy interferance.", -1, new Vector2(-2000, -2000), Mission.TierOne(), Mission.TierOneBosses(), null, true) { playerDocked = true, music = false, relaunchable = true },
 
         new Mission([new Planet(Vector2.Zero, Vector2.Zero, 30000, 10f, true, Color.HotPink, true) ],
         [new EntityCondition(new AdvancedConstructor(Enemy.NewCommunicator, new Vector2(MathF.Sin(1.02f), -MathF.Cos(1.02f)), Vector2.Zero, 1.02f, true), [Condition.Protect]),
@@ -79,7 +79,7 @@ public class EntityManager
             new EntityCondition(new LaunchConstructor(Enemy.NewDropPod,new Vector2(0, -1500), 500),[ ]),
             new WaveGoal(30),
         ],
-        "cool planet", "Super earth", 0, new Vector2(0, -1500), Mission.TierTwo(), Mission.TierTwoBosses(), null, true) { playerDocked = true },
+        "Base of Operations", "This site is a promising location for a temporary base.\nDestroy the enemy base located here.", 0, new Vector2(0, -1500), Mission.TierTwo(), Mission.TierTwoBosses(), null, true) { playerDocked = true },
 
         new Mission([new Planet(Vector2.Zero, Vector2.Zero, 20000, 9f, true, Color.Cyan, false, 1.8f),
         new(new Vector2(0, 1800), Planet.GetOrbitalVelocity(new Vector2(0, 1800), Vector2.Zero, 20000), 1500, 2f, false, Color.Cyan) ],
@@ -92,7 +92,7 @@ public class EntityManager
             new EntityCondition(new AdvancedConstructor(Enemy.NewMiner, new Vector2(MathF.Sin(5.2f), -MathF.Cos(5.2f)) * 9 * 50, Vector2.Zero, 5.2f, false), [ Condition.Kill ]),
             new EntityCondition(new EntityConstructor(Enemy.NewOrbiter, new Vector2(0, 1650), Planet.GetOrbitalVelocity(new Vector2(0, 1650), new Vector2(0, 1800), 1500)
                 + Planet.GetOrbitalVelocity(new Vector2(0, 1800), Vector2.Zero, 20000), 0), [ Condition.Protect ])],
-        "Assault", "You have been placed in high orbit. Destroy the enemy base on the surface planet, and all reinforcements that arrive.", 0.75f, new Vector2(0, 1650), Mission.TierTwo(), Mission.TierTwoBosses(), null, false)
+        "Assault", "It appears the enemy has improved their fleet, and has pushed the mothership to a non-ideal location.\nDefend the mothership and defeat the fortified miner base on this planet.", 0.75f, new Vector2(0, 1650), Mission.TierTwo(), Mission.TierTwoBosses(), null, false)
         { playerDocked = true, isAggressive = true, tip = "Press C to open the construct menu.\nEach construct requires one scrap to craft." },
 
         new Mission( [new Planet(Vector2.Zero, Vector2.Zero, 25000, 7f, true, Color.Cyan), new(new Vector2(800, 0), Planet.GetOrbitalVelocity(new Vector2(800, 0), Vector2.Zero, 25000), 150, 0.5f, false, Color.Cyan), ],
@@ -100,7 +100,7 @@ public class EntityManager
             new EntityCondition(new EntityConstructor(Enemy.NewMiner, new Vector2(0, -7*50), Vector2.Zero, 0), [ Condition.Protect ]),
             new EntityCondition(new LaunchConstructor(Enemy.NewDropPod,new Vector2(0, -1500), 350),[ ]),
             new WaveGoal(30)],
-        "Extraction", "This deceptively dense planet is rich with materials that our deployed miner will extract.", 1, new Vector2(0, -1500), Mission.TierTwo(), Mission.TierTwoBosses()) 
+        "Extraction", "Our success has led us to deploying a miner on this deceptively dense planet.\nDefend it from the incoming enemy forces.", 1, new Vector2(0, -1500), Mission.TierTwo(), Mission.TierTwoBosses()) 
         { playerDocked = true, isAggressive = true},
 
         new Mission([new Planet(Vector2.Zero, Vector2.Zero, 5000, 4.5f, true, Color.Cyan),
@@ -109,12 +109,12 @@ public class EntityManager
         [
             new EntityCondition(new AdvancedConstructor(Enemy.NewExodusBoss, new Vector2(0, -6*50), Vector2.Zero, 0, false), [ Condition.Kill ]),
             new EntityCondition(new LaunchConstructor(Enemy.NewDropPod,new Vector2(0, -1500), 225),[ ])],
-        "Showdown Pt. 2", "Defeat the advanced drone prototype, Exodus. Be warned: It may call for reinforcements.", 1.1f, new Vector2(0, -1500), Mission.TierTwo(), Mission.TierTwoBosses(), null, true)
+        "", "The enemy fleet's fastest fighter appears to have arrived to this planet and is blocking our path.\nDefeating it appears to be the only way forward.", 1.1f, new Vector2(0, -1500), Mission.TierTwo(), Mission.TierTwoBosses(), null, true)
         { playerDocked = true },
 
         new([new Planet(Vector2.Zero, Vector2.Zero, 150, 3, true, Color.OldLace)],
         [new EntityCondition(new EntityConstructor(Enemy.NewWarpGate, new Vector2(0, 450), -Planet.GetOrbitalVelocity(new Vector2(0, 450), Vector2.Zero, 150), 0), [ Condition.CustomIncomplete ])],
-        "Warp Gate", "Warp to the next mission once you are done here", -1, new Vector2(0, 500), Mission.TierOne(), Mission.TierOneBosses())
+        "Warp Gate", "The enemy fleet is still hot on our tail.", -1, new Vector2(0, 500), Mission.TierOne(), Mission.TierOneBosses())
         { music = false, tip = "Press left shift to return to the previous system. Press right shift to enter the next system.", relaunchable = true },
 
         new Mission([new Planet(Vector2.Zero, Vector2.Zero, 6000, 6, true, Color.Cyan, true, 0.8f)],
@@ -128,14 +128,14 @@ public class EntityManager
         [
             new EntityCondition(new AdvancedConstructor(Enemy.NewClockworkBoss, new Vector2(0, -6*50), Vector2.Zero, 0, false), [ Condition.Kill ]),
             new EntityCondition(new LaunchConstructor(Enemy.NewDropPod,new Vector2(0, -1500), 150),[ ])],
-        "Clockwork creation", "Defeat the clockwork construct. It may drop specialized parts", 1f, new Vector2(0, -1500), Mission.TierTwo(), Mission.TierTwoBosses(), null, true)
+        "Clockwork creation", "A strange sentinal appears to be housed on this ancient planet.\nDismantling it may yield unusual resources.", 1f, new Vector2(0, -1500), Mission.TierTwo(), Mission.TierTwoBosses(), null, true)
         { isAggressive = true, playerDocked = true },
 
         new Mission([new Planet(Vector2.Zero, Vector2.Zero, 10000, 3, true, new Color(100, 60, 60), false, 15f)],
         [
             new EntityCondition(new LaunchConstructor(Enemy.NewGlider,new Vector2(-800, -1300), -1150),[ ]),
             new WaveGoal(30)],
-        "Gas giant", "beeg", 1f, new Vector2(-800, -1300), Mission.TierTwo(), Mission.TierTwoBosses(), null, true)
+        "Gas giant", "The unusual conditions in this system have resulted in unique developments in the enemies technology./nBe prepared for advanced enemy cloaking.", 1f, new Vector2(-800, -1300), Mission.TierTwo(), Mission.TierTwoBosses(), null, true)
         { playerDocked = true },
 
         new Mission([new(new Vector2(500, 0), new Vector2(0, 1.05f), 10000, 7, false, Color.Cyan),
@@ -143,7 +143,7 @@ public class EntityManager
         [
             new EntityCondition(new EntityConstructor(Enemy.MassRelay, Vector2.Zero, Vector2.Zero, 0), [ Condition.Protect, Condition.CustomIncomplete ]),
             new EntityCondition(new LaunchConstructor(Enemy.NewDropPod,new Vector2(0, -1500), 0),[ ])],
-        "Binary system", "Construct the Mass Relay.", -1f, new Vector2(0, -1500), Mission.TierThree(), Mission.TierThreeBosses(), null, true) 
+        "Binary system", "It seems plans for a mass relay have been abandoned here.\nFinishing the construction may be the only way to escape fully.", -1f, new Vector2(0, -1500), Mission.TierThree(), Mission.TierThreeBosses(), null, true) 
         { isAggressive = true, playerDocked = true },
 
         new Mission([new(Vector2.Zero, Vector2.Zero, 4000, 4.5f, true, new Color(0.03f, 0.05f, 0.08f)),
@@ -151,7 +151,7 @@ public class EntityManager
         [
             new EntityCondition(new EntityConstructor(Enemy.NewVeilBoss, new Vector2(0, -6*50), Vector2.Zero, 0), [ Condition.Kill ]),
             new EntityCondition(new LaunchConstructor(Enemy.NewDropPod,new Vector2(0, -1500), 225),[ ])],
-        "Showdown Pt. 3", "Defeat the advanced drone prototype, Veil. Be warned: It may call for reinforcements.", 1.1f, new Vector2(0, -1500), Mission.TierThree(), Mission.TierThreeBosses(), null, true) 
+        "Veiled", "Sensors indicate that our actions have been spied on by the enemy.\nDestroy it.", 1.1f, new Vector2(0, -1500), Mission.TierThree(), Mission.TierThreeBosses(), null, true) 
         { playerDocked = true},
 
         new Mission([new Planet(Vector2.Zero, Vector2.Zero, 160000, 6, true, new Color(0.9f, 1f, 0.75f), false, 50f) { isSun = true },
