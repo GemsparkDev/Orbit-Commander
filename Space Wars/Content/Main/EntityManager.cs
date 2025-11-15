@@ -315,7 +315,7 @@ public class EntityManager
     {
         foreach (var pickup in entities)
         {
-            if (pickup is Pickup && Util.Random.NextSingle() < 0.6f)
+            if (pickup is Pickup && Util.Random.NextSingle() > (0.4f + Engine.SaveGame.CurrentMission.GetAtmospherePressure(pickup))) //Update changelog when available
             {
                 pickup.Collide(1);
             }
