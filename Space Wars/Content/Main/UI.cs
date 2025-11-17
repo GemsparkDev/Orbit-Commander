@@ -25,6 +25,7 @@ public static class UI
     public static Window LoadMenu { get; } = new Window(center, Assets.Get(Sprite.GargantuanPanel));
     public static TabbedWindow UpgradeMenu { get; } = new TabbedWindow(center, Assets.Get(Sprite.GargantuanPanel),
         Assets.Get(Sprite.Tab), Assets.Get(Sprite.SelectedTab), Assets.Get(Sound.Interact), 2);
+    public static Window SettingsMenu { get; } = new Window(center, Assets.Get(Sprite.GargantuanPanel));
 
     //Main Menu
     public static Button PatchedConicsToggle { get; } = new Button(new Vector2(0, -MainMenu.Size.Y / 4), Assets.Get(Sprite.WideButton), Assets.TextFont, $"Patched Conics: {PatchedConics}", Color.White);
@@ -37,9 +38,15 @@ public static class UI
     public static Button ShaderToggle { get; } = new Button(new Vector2(0, MainMenu.Size.Y / 4), Assets.Get(Sprite.WideButton), Assets.TextFont, $"Shader: {UseShader}", Color.White);
     public static Button SingleplayerButton { get; } = new Button(new Vector2(0, -MainMenu.Size.Y / 4), Assets.Get(Sprite.WideButton), Assets.TextFont, "Singleplayer", Color.White);
     public static Button ExitButton { get; } = new Button(new Vector2(0, MainMenu.Size.Y / 4), Assets.Get(Sprite.WideButton), Assets.TextFont, "Exit", Color.White);
-    public static Button QuitToMissionButton { get; } = new Button(new Vector2(0, -20), Assets.Get(Sprite.WideButton), Assets.TextFont, "Return", Color.White);
     public static Decal TitleName { get; } = new Decal(new Vector2(0, -MainMenu.Size.Y), Assets.Get(Sprite.Title));
     public static Button LoadButton { get; } = new Button(new Vector2(0, 0), Assets.Get(Sprite.WideButton), Assets.TextFont, "Load", Color.White);
+
+    //Pause Menu
+    public static Button QuitToMissionButton { get; } = new Button(new Vector2(0, -20), Assets.Get(Sprite.WideButton), Assets.TextFont, "Return", Color.White);
+    public static Button SettingsButton { get; } = new Button(new Vector2(0, 20), Assets.Get(Sprite.WideButton), Assets.TextFont, "Options", Color.White);
+
+    //Settings Menu
+    public static Button PauseMenuButton { get; } = new Button(new Vector2(80, 45), Assets.Get(Sprite.WideButton), Assets.TextFont, "Back", Color.White);
 
     //Mothership Menu
     public static ItemSlot<Pickup> FurnaceSlot { get; } = new ItemSlot<Pickup>(new Vector2(-20, 0), Assets.Get(Sprite.EmptySlot), Engine.UIManager, -1);
@@ -173,6 +180,8 @@ public static class UI
         NextMission.AddBehaviour(delegate() { Engine.SaveGame.NextMission(); }); //Doing so causes exception due to null savegame
         SelectMission.AddBehaviour(delegate () { if ((Engine.SaveGame.CurrentMission.relaunchable || !Engine.SaveGame.CurrentMissionCompleted) && EventHandler.SyncModules()) { Startgame(); } });
         LaunchButton.AddBehaviour(delegate () { EventHandler.SendMessage(Message.EscapeDroneLeave); });
+        SettingsButton.AddBehaviour(delegate() { PauseMenu.enabled = false; SettingsMenu.enabled = true; });
+        PauseMenuButton.AddBehaviour(delegate () { PauseMenu.enabled = true; SettingsMenu.enabled = false; });
         CreateFuse.AddBehaviour(delegate ()
         {
             if (Engine.SaveGame.QueuedItems.Count < 10)
@@ -280,6 +289,17 @@ public static class UI
         MainMenu.AddWidget(LoadButton as IFunctional, 0);
 
         PauseMenu.AddWidget(QuitToMissionButton as IFunctional);
+        PauseMenu.AddWidget(SettingsButton as IFunctional);
+
+        SettingsMenu.AddWidget(PauseMenuButton as IFunctional);
+        SettingsMenu.AddWidget(PatchedConicsToggle as IFunctional);
+        SettingsMenu.AddWidget(SFXSlider as IFunctional);
+        SettingsMenu.AddWidget(MusicSlider as IFunctional);
+        SettingsMenu.AddWidget(UIScaleSlider as IFunctional);
+        SettingsMenu.AddWidget(SFXVolume);
+        SettingsMenu.AddWidget(MusicVolume);
+        SettingsMenu.AddWidget(UIScale);
+        SettingsMenu.AddWidget(ShaderToggle as IFunctional);
 
         GarageMenu.AddWidget(MothershipScrap);
         GarageMenu.AddWidget(RepairButton as IFunctional);
@@ -418,5 +438,6 @@ public static class UI
         Engine.UIManager.AddContainer(SaveMenu);
         Engine.UIManager.AddContainer(LoadMenu);
         Engine.UIManager.AddContainer(UpgradeMenu);
+        Engine.UIManager.AddContainer(SettingsMenu);
     }
 }
