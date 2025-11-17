@@ -848,12 +848,14 @@ public class Assault() : Module(Modules.Assault)
     bool isShooting = false;
     const float MaxCooldown = 30;
     float count;
+    float resistanceCooldown = 0;
     public override void OnAbility() 
     {
         if (isShooting || cooldown > 0)
         {
             return;
         }
+        resistanceCooldown = 3;
         count = 1;
         for (float angle = 0; angle < MathF.Tau; angle += MathF.PI / 4)
         {
@@ -862,8 +864,20 @@ public class Assault() : Module(Modules.Assault)
         isShooting = true;
         SoundManager.PlaySound(Assets.Get(Sound.PulseFire), Player.position);
     }
+    public override int OnCollide(int _damage)
+    {
+        if(resistanceCooldown > 0)
+        {
+            return damage * 4 / 5;
+        }
+        return damage;
+    }
     public override void OnUpdate()
     {
+        if(resistanceCooldown > 0)
+        {
+            resistanceCooldown -= Engine.DeltaSeconds;
+        }
         if (isShooting && cooldown <= 0)
         {
             Engine.EntityManager.Add(new PulseShot(Player.position, Util.ToUnitVector(count * 1.61803398875f) * 10, count * 1.61803398875f, 0, Player.isFriendly, 10, true, 1));
