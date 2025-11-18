@@ -2668,7 +2668,7 @@ public class Enemy : Entity
                 isExpired = true;
                 SoundManager.PlaySound(Assets.Get(Sound.Death), position);
             }
-            var nearestEnemy = Engine.EntityManager.NearestEnemy(this);
+            var nearestEnemy = Engine.EntityManager.NearestEnemy(this, false);
             if (nearestEnemy == null || (nearestEnemy as Enemy != null && (nearestEnemy as Enemy).health <= 0))
             {
                 nearestEnemy = NewDummyEnemy(position + 100 * new Vector2(MathF.Cos(angle - MathF.PI / 2), MathF.Sin(angle - MathF.PI / 2)));
@@ -3400,6 +3400,7 @@ public class Enemy : Entity
         int requiredCraftsLeft = 20;
         Pickup furnaceItem = null;
         bool currentlyCrafting = false;
+        bool alert = false;
         while (true)
         {
             velocity = Vector2.Zero;
@@ -3473,6 +3474,13 @@ public class Enemy : Entity
             {
                 Engine.SaveGame.CurrentMission.CompleteCustomRule(this);
             }
+            if(!alert && requiredCraftsLeft == 19)
+            {
+                SoundManager.PlaySound(Assets.Get(Sound.Beep), position);
+                ParticleManager.Add(new Particle(null, 5, position + new Vector2(0, -30), velocity, angle, 0, Color.Red, Color.Transparent) { drawText = "Alert: Enemies detected.\nDefend the mothership." });
+                Engine.SaveGame.CurrentMission.TimerModifier = 1;
+                alert = true;
+            }
             yield return 0;
         }
     }
@@ -3521,7 +3529,7 @@ public class Enemy : Entity
             var dir = new Vector2(-MathF.Sin(_angle), MathF.Cos(_angle));
             var gunDir = new Vector2(-MathF.Sin(angle), MathF.Cos(angle));
             Vector2 offset = dir * (Size.Y / 2 + 150);
-            Entity nearestEnemy = Engine.EntityManager.NearestEnemy(NewDummyEnemy(position + offset, isFriendly));
+            Entity nearestEnemy = Engine.EntityManager.NearestEnemy(NewDummyEnemy(position + offset, isFriendly), false);
             enemyRange.position = position + offset;
             if (nearestEnemy != null)
             {

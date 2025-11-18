@@ -17,7 +17,8 @@ public class Mission
     public int playerProgression = 3;
     public int Wave { get; private set; } = 0;
     public int EnemiesSpawned { get; private set; } = 0;
-    public float restartTimer = -1;
+    public float RestartTimer { get; set; } = -1;
+    public float TimerModifier { get; set; }
     public bool playerDocked = false;
     public bool isAggressive = false;
     public bool music = true;
@@ -35,7 +36,6 @@ public class Mission
     private Vector2 playerPosition;
     private Func<Cutscene> cutscene;
     private int currentBoss;
-    private float timerModifier;
     private float waveTimer = 5;
     private float maxWaveTimer = 5;
     private bool currentWaveActive = false;
@@ -51,7 +51,7 @@ public class Mission
         {
             MissionObjectives.Add(condition.Clone());
         }
-        timerModifier = _timerModifier;
+        TimerModifier = _timerModifier;
         enemyCreditValues = _enemies;
         bosses = _bosses;
 
@@ -101,18 +101,18 @@ public class Mission
         }
         PlanetUpdate();
         TestCompletion();
-        if (restartTimer != -1)
+        if (RestartTimer != -1)
         {
-            if (restartTimer > 0)
+            if (RestartTimer > 0)
             {
-                restartTimer -= Engine.DeltaSeconds;
+                RestartTimer -= Engine.DeltaSeconds;
                 return;
             }
             EventHandler.MissionSelectTrigger();
             Engine.SaveGame.CompleteMission(Wave);
         }
         //Natural enemy spawning toggle
-        if (timerModifier == -1)
+        if (TimerModifier == -1)
         {
             return;
         }
@@ -142,7 +142,7 @@ public class Mission
                     }
                     if (isAggressive)
                     {
-                        waveTimer = (enemiesSpawned.Count * 4f + 5f) * timerModifier;
+                        waveTimer = (enemiesSpawned.Count * 4f + 5f) * TimerModifier;
                         maxWaveTimer = waveTimer;
                     }
                 }
@@ -173,7 +173,7 @@ public class Mission
             currentWaveActive = false;
             enemiesSpawned.Clear();
             EnemiesSpawned = 0;
-            waveTimer = 10f * timerModifier;
+            waveTimer = 10f * TimerModifier;
             maxWaveTimer = waveTimer;
             Wave++;
             Engine.EntityManager.DecayPickups();
@@ -321,11 +321,11 @@ public class Mission
     }
     public void FailMission()
     {
-        if (restartTimer != -1)
+        if (RestartTimer != -1)
         {
             return;
         }
-        restartTimer = 2;
+        RestartTimer = 2;
     }
     public void CompleteCustomRule(Entity _target)
     {
@@ -433,7 +433,7 @@ public class Mission
         {
             _planets[i] = planets[i].Copy();
         }
-        return new Mission(_planets, CopyObjectives, Name, Description, timerModifier, playerPosition, enemyCreditValues, bosses, cutscene, escapeVehicle != null)
+        return new Mission(_planets, CopyObjectives, Name, Description, TimerModifier, playerPosition, enemyCreditValues, bosses, cutscene, escapeVehicle != null)
         { playerProgression = this.playerProgression, playerDocked = this.playerDocked, isAggressive = this.isAggressive, music = this.music, tip = this.tip, relaunchable = this.relaunchable };
     }
     private Vector2 NewSpawnLocation()
@@ -474,7 +474,7 @@ public class Mission
         {
             allCompleted &= objective.IsComplete();
         }
-        if (allCompleted && restartTimer == -1)
+        if (allCompleted && RestartTimer == -1)
         {
             if (escapeVehicle != null)
             {
@@ -485,7 +485,7 @@ public class Mission
             }
             else
             {
-                restartTimer = 2;
+                RestartTimer = 2;
             }
         }
     }

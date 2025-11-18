@@ -36,7 +36,7 @@ public class EntityManager
         new EntityCondition(new PickupConstructor(ItemFactory.NewScrap, new Vector2(0, -8*50), new Vector2(-8, -4), -0.03f),[])],
         "Crash Landing",
         "A simple system with a large planet and one closely orbiting moon. Drone activity detected, but minimal.",
-        1, new Vector2(0, -8*50 - Assets.DimsOf(Sprite.Mothership).Y / 2), Mission.TierOne(), Mission.TierOneBosses(), IntroCutscene) { playerProgression = 0, playerDocked = true, tip = "WASD to move, Space to dock and undock.\nRmb to collect scrap, Lmb to shoot." },
+        -1, new Vector2(0, -8*50 - Assets.DimsOf(Sprite.Mothership).Y / 2), Mission.TierOne(), Mission.TierOneBosses(), IntroCutscene) { playerProgression = 0, playerDocked = true, tip = "WASD to move, Space to dock and undock.\nRmb to collect scrap, Lmb to shoot." },
 
         new Mission( [new Planet(Vector2.Zero, Vector2.Zero, 3500, 4, true, Color.Cyan, true) ],
         [
@@ -357,7 +357,7 @@ public class EntityManager
         }
         return returnEntity;
     }
-    public Entity NearestEnemy(Entity entity)
+    public Entity NearestEnemy(Entity entity, bool _getDeadEnemies = true)
     {
         float maxDistSqr = StealthRange * StealthRange * StealthThreshold * StealthThreshold;
         float nearestDistance = float.MaxValue;
@@ -365,6 +365,10 @@ public class EntityManager
         foreach (Entity targetEnemy in enemies)
         {
             if (targetEnemy.StealthAbility > entity.SensingAbility || targetEnemy.isFriendly == entity.isFriendly)
+            {
+                continue;
+            }
+            if(!_getDeadEnemies && (targetEnemy as Enemy).health <= 0)
             {
                 continue;
             }
