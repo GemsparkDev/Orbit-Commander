@@ -40,6 +40,9 @@ public class Engine : Game
     public static int SaveSlot { get; private set; } = 0;
     public static ColorScheme ColorScheme { get; set; } = new StandardScheme();
 
+    private float offset = 0;
+    private bool isFlipped = false;
+
     public Engine()
     {
         graphics = new GraphicsDeviceManager(this);
@@ -181,6 +184,12 @@ public class Engine : Game
             ScreenShakeFactor = 0;
         }
         UI.Timer.text = $"{IngameTime.DrawText}";
+        if (Input.OldState.IsKeyUp(Keys.Z) && Input.NewState.IsKeyDown(Keys.Z))
+        {
+            isFlipped = !isFlipped;
+        }
+        float d = isFlipped ? Engine.DeltaSeconds : -Engine.DeltaSeconds;
+        offset = Math.Clamp(offset + d * 2, 0, 1);
         base.Update(gameTime);
     }
     public static Pickup MoveSelectedPickup()
@@ -242,9 +251,12 @@ public class Engine : Game
 
         //Render renderTarget with custom bloom shader
         GraphicsDevice.SetRenderTarget(null);
-        GraphicsDevice.Clear(Color.Black);
+        GraphicsDevice.Clear(Color.White);
         spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, null, null, Assets.GlobalShader);
-        spriteBatch.Draw(renderTarget, new Rectangle(0, 0, (int)BackBuffer.X, (int)BackBuffer.Y), Color.White);
+        float lerp = offset * offset * (3 - 2 * offset);
+        int y = (int)(50 * lerp);
+        float scale = (1-lerp) + lerp * 0.75f;
+        spriteBatch.Draw(renderTarget, new Rectangle((int)(BackBuffer.X / 2 * (1-scale)), (int)(BackBuffer.Y / 2 * (1 - scale)) + y, (int)(BackBuffer.X * scale), (int)(BackBuffer.Y * scale)), Color.White);
         spriteBatch.End();
 
         spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, null, null, null);
