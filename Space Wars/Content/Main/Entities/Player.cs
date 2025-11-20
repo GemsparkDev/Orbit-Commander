@@ -127,6 +127,11 @@ public class Player : Entity
             SoundManager.SetAllSounds(false);
             CurrentGameState.SwitchState(new InShip());
             UI.FuseMenu.enabled = true;
+            Engine.Self.Rotate();
+        }
+        if(Progression > 0 && Input.OldState.IsKeyUp(Keys.Z) && Input.NewState.IsKeyDown(Keys.Z))
+        {
+            Engine.Self.Flip();
         }
         if (modules[ModuleType.Core].Health <= 0)
         {

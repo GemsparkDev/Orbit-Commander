@@ -40,8 +40,9 @@ public class Engine : Game
     public static int SaveSlot { get; private set; } = 0;
     public static ColorScheme ColorScheme { get; set; } = new StandardScheme();
 
-    private float offset = 0;
+    private Vector2 offset = Vector2.Zero;
     private bool isFlipped = false;
+    private bool isRotated = false;
 
     public Engine()
     {
@@ -184,13 +185,21 @@ public class Engine : Game
             ScreenShakeFactor = 0;
         }
         UI.Timer.text = $"{IngameTime.DrawText}";
-        if (Input.OldState.IsKeyUp(Keys.Z) && Input.NewState.IsKeyDown(Keys.Z))
-        {
-            isFlipped = !isFlipped;
-        }
-        float d = isFlipped ? Engine.DeltaSeconds : -Engine.DeltaSeconds;
-        offset = Math.Clamp(offset + d * 2, 0, 1);
+        float y = isFlipped ? Engine.DeltaSeconds : -Engine.DeltaSeconds;
+        float x = isRotated ? Engine.DeltaSeconds : -Engine.DeltaSeconds;
+        offset = new Vector2(Math.Clamp(offset.X + x * 2, 0, 1), Math.Clamp(offset.Y + y * 2, 0, 1));
         base.Update(gameTime);
+    }
+    public void Flip()
+    {
+        isFlipped = !isFlipped;
+    }
+    public void Rotate()
+    {
+        if(isFlipped)
+        {
+            isRotated = !isRotated;
+        }
     }
     public static Pickup MoveSelectedPickup()
     {
@@ -253,10 +262,12 @@ public class Engine : Game
         GraphicsDevice.SetRenderTarget(null);
         GraphicsDevice.Clear(Color.White);
         spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, null, null, Assets.GlobalShader);
-        float lerp = offset * offset * (3 - 2 * offset);
+        float lerp = offset.Y * offset.Y * (3 - 2 * offset.Y);
+        float lerpX = offset.X * offset.X * (3 - 2 * offset.X);
         int y = (int)(50 * lerp);
+        int x = (int)(2000 * lerpX);
         float scale = (1-lerp) + lerp * 0.75f;
-        spriteBatch.Draw(renderTarget, new Rectangle((int)(BackBuffer.X / 2 * (1-scale)), (int)(BackBuffer.Y / 2 * (1 - scale)) + y, (int)(BackBuffer.X * scale), (int)(BackBuffer.Y * scale)), Color.White);
+        spriteBatch.Draw(renderTarget, new Rectangle((int)(BackBuffer.X / 2 * (1-scale)) + x, (int)(BackBuffer.Y / 2 * (1 - scale)) + y, (int)(BackBuffer.X * scale), (int)(BackBuffer.Y * scale)), Color.White);
         spriteBatch.End();
 
         spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, null, null, null);
