@@ -40,9 +40,8 @@ public class Engine : Game
     public static int SaveSlot { get; private set; } = 0;
     public static ColorScheme ColorScheme { get; set; } = new StandardScheme();
 
+    private int dir = 0;
     private Vector2 offset = Vector2.Zero;
-    private bool isFlipped = false;
-    private bool isRotated = false;
 
     public Engine()
     {
@@ -185,21 +184,15 @@ public class Engine : Game
             ScreenShakeFactor = 0;
         }
         UI.Timer.text = $"{IngameTime.DrawText}";
-        float y = isFlipped ? Engine.DeltaSeconds : -Engine.DeltaSeconds;
-        float x = isRotated ? Engine.DeltaSeconds : -Engine.DeltaSeconds;
-        offset = new Vector2(Math.Clamp(offset.X + x * 2, 0, 1), Math.Clamp(offset.Y + y * 2, 0, 1));
+        float speed = Util.FIED(0.01f);
+        offset = new Vector2((offset.X * (speed) + dir * BackBuffer.X * (1-speed)), 0);
         base.Update(gameTime);
     }
-    public void Flip()
+    public void Rotate(int _dir)
     {
-        isFlipped = !isFlipped;
-    }
-    public void Rotate()
-    {
-        if(isFlipped)
-        {
-            isRotated = !isRotated;
-        }
+        dir = Math.Clamp(dir + _dir, -1, 1);
+        UI.FuseMenu.enabled = dir == 1;
+        UI.PlayerMenu.enabled = dir == -1;
     }
     public static Pickup MoveSelectedPickup()
     {
@@ -260,14 +253,13 @@ public class Engine : Game
 
         //Render renderTarget with custom bloom shader
         GraphicsDevice.SetRenderTarget(null);
-        GraphicsDevice.Clear(Color.White);
+        GraphicsDevice.Clear(new Color(50, 50, 50));
+        spriteBatch.Begin();
+        spriteBatch.Draw(Assets.Get(Sprite.Underlay), BackBuffer / 2 + offset, null, Color.White, 0, Assets.DimsOf(Sprite.Underlay) / 2, 1.18f, 0, 0);
+        spriteBatch.End();
         spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, null, null, Assets.GlobalShader);
-        float lerp = offset.Y * offset.Y * (3 - 2 * offset.Y);
-        float lerpX = offset.X * offset.X * (3 - 2 * offset.X);
-        int y = (int)(50 * lerp);
-        int x = (int)(2000 * lerpX);
-        float scale = (1-lerp) + lerp * 0.75f;
-        spriteBatch.Draw(renderTarget, new Rectangle((int)(BackBuffer.X / 2 * (1-scale)) + x, (int)(BackBuffer.Y / 2 * (1 - scale)) + y, (int)(BackBuffer.X * scale), (int)(BackBuffer.Y * scale)), Color.White);
+        float scale = 0.95f;
+        spriteBatch.Draw(renderTarget, new Rectangle((int)(BackBuffer.X / 2 * (1-scale) + offset.X), (int)(BackBuffer.Y / 2 * (1 - scale)), (int)(BackBuffer.X * scale), (int)(BackBuffer.Y * scale)), Color.White);
         spriteBatch.End();
 
         spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, null, null, null);

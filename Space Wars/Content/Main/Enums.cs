@@ -176,6 +176,7 @@ public enum Sprite
     Terminal,
     Miniplayer,
     Textbox,
+    Underlay,
 
     SmeltIcon,
     RepairIcon,

@@ -141,6 +141,7 @@ public static class Assets
         Sprites.Add(Sprite.ToggleButton, Content.Load<Texture2D>("Images/UI_25"));
         Sprites.Add(Sprite.Terminal, Content.Load<Texture2D>("Images/UI_26"));
         Sprites.Add(Sprite.Miniplayer, Content.Load<Texture2D>("Images/miniship"));
+        Sprites.Add(Sprite.Underlay, Content.Load<Texture2D>("Images/underlay")); ;
 
         Sprites.Add(Sprite.SmeltIcon, Content.Load<Texture2D>("Images/UI_19"));
         Sprites.Add(Sprite.RepairIcon, Content.Load<Texture2D>("Images/UI_20"));

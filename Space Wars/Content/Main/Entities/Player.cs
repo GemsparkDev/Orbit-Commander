@@ -122,16 +122,18 @@ public class Player : Entity
     {
         collider.offsetVelocity = velocity;
         time += Engine.DeltaSeconds;
-        if (Progression > 0 && Input.OldState.IsKeyUp(Keys.F) && Input.NewState.IsKeyDown(Keys.F))
+        if (Progression > 0)
         {
-            SoundManager.SetAllSounds(false);
-            CurrentGameState.SwitchState(new InShip());
-            UI.FuseMenu.enabled = true;
-            Engine.Self.Rotate();
-        }
-        if(Progression > 0 && Input.OldState.IsKeyUp(Keys.Z) && Input.NewState.IsKeyDown(Keys.Z))
-        {
-            Engine.Self.Flip();
+            int dir = 0;
+            if(Input.OldState.IsKeyUp(Keys.Z) && Input.NewState.IsKeyDown(Keys.Z))
+            {
+                dir = 1;
+            }
+            else if(Input.OldState.IsKeyUp(Keys.X) && Input.NewState.IsKeyDown(Keys.X))
+            {
+                dir = -1;
+            }
+            Engine.Self.Rotate(dir);
         }
         if (modules[ModuleType.Core].Health <= 0)
         {
