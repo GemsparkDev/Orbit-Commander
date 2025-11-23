@@ -11,12 +11,12 @@ public static class UI
 {
     private static Vector2 center = Engine.BackBuffer / 2;
     public static Window PauseMenu { get; } = new Window(center, Assets.Get(Sprite.LargePanel));
-    public static Window PlayerMenu { get; } = new Window(new Vector2(0, center.Y), Assets.Get(Sprite.Terminal)) { alignment = Alignment.Left };
+    public static Window PlayerMenu { get; } = new Window(new Vector2(center.X, 0), Assets.Get(Sprite.Terminal)) { alignment = Alignment.Top };
     public static Window GarageMenu { get; } = new Window(center, Assets.Get(Sprite.GargantuanPanel));
     public static TabbedWindow MainMenu { get; } = new TabbedWindow(center, Assets.Get(Sprite.GargantuanPanel), Assets.Get(Sprite.Tab), Assets.Get(Sprite.SelectedTab), Assets.Get(Sound.Interact), 2)
     { enabled = true, icons = [Assets.Get(Sprite.PlayIcon), Assets.Get(Sprite.SettingsIcon)] };
-    public static TabbedWindow MothershipMenu { get; } = new TabbedWindow(new Vector2(0, center.Y), Assets.Get(Sprite.Terminal), Assets.Get(Sprite.Tab), Assets.Get(Sprite.SelectedTab), Assets.Get(Sound.Interact), 3)
-    { icons = [Assets.Get(Sprite.SmeltIcon), Assets.Get(Sprite.RepairIcon), Assets.Get(Sprite.VictoryIcon)], alignment = Alignment.Left };
+    public static TabbedWindow MothershipMenu { get; } = new TabbedWindow(new Vector2(center.X, 0), Assets.Get(Sprite.Terminal), Assets.Get(Sprite.Tab), Assets.Get(Sprite.SelectedTab), Assets.Get(Sound.Interact), 3)
+    { icons = [Assets.Get(Sprite.SmeltIcon), Assets.Get(Sprite.RepairIcon), Assets.Get(Sprite.VictoryIcon)], alignment = Alignment.Top };
     public static TabbedWindow MissionSelect { get; } = new TabbedWindow(new Vector2(0, center.Y), Assets.Get(Sprite.GargantuanPanel), Assets.Get(Sprite.Tab), Assets.Get(Sprite.SelectedTab), Assets.Get(Sound.Interact), 2)
     { icons = [Assets.Get(Sprite.PlanetIcon), Assets.Get(Sprite.RepairIcon)], alignment = Alignment.Left };
     public static Window PickupDroneMenu { get; } = new Window(center, Assets.Get(Sprite.LargePanel));
@@ -126,7 +126,7 @@ public static class UI
     public static Decal UpgradeText { get; } = new Decal(new Vector2(-30, -20), Assets.TextFont, "", Color.White, 10);
 
     //Misc
-    public static Button SidePanelClose { get; } = new Button(new Vector2(-Assets.Get(Sprite.ToggleButton).Width / 2 + Assets.Get(Sprite.Terminal).Width / 2, 0), Assets.Get(Sprite.ToggleButton));
+    public static Button SidePanelClose { get; } = new Button(new Vector2(0, -Assets.Get(Sprite.ToggleButton).Height / 2 + Assets.Get(Sprite.Terminal).Height / 2), Assets.Get(Sprite.ToggleButton));
     public static ItemSlot<Pickup>[] InventorySlots { get; set; } = new ItemSlot<Pickup>[4];
     public static ItemSlot<Pickup>[] MissionSelectSlots { get; set; } = new ItemSlot<Pickup>[4];
     public static ItemSlot<Module>[] ModuleSlots { get; private set; } = new ItemSlot<Module>[5];
@@ -389,7 +389,7 @@ public static class UI
         UpgradeMenu.AddWidget(UpgradeCore as IFunctional, 2);
 
         PlayerSpecialHealth.SetInterval(1, 1);
-        Engine.UIManager.ScreenWindow.AddWidget(GlobalSidePanelOpen as IFunctional, (int)Alignment.Left);
+        Engine.UIManager.ScreenWindow.AddWidget(GlobalSidePanelOpen as IFunctional, (int)Alignment.Top);
         Engine.UIManager.ScreenWindow.AddWidget(Timer, (int)Alignment.TopRight);
         Engine.UIManager.ScreenWindow.AddWidget(PlayerHealth as IFunctional, (int)Alignment.TopLeft);
         Engine.UIManager.ScreenWindow.AddWidget(PlayerSpecialHealth as IFunctional, (int)Alignment.TopLeft);
