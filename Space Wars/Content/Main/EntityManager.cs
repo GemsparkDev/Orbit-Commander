@@ -45,7 +45,7 @@ public class EntityManager
             new EntityCondition(new LaunchConstructor(Enemy.NewDropPod, new Vector2(0, -1500), 200),[ ]),
             new WaveGoal(30) ],
         "Sentry Defense", "A small sentry has been deployed on this abandoned planet. \nDefense of this location will be essential for further development.", 0.75f, new Vector2(0, -1500), Mission.TierOne(), Mission.TierOneBosses())
-        { playerProgression = 1, isAggressive = true, tip = "Open the side panel to restart failed modules. \nPress F to open the fuse menu and switch around your setup.\nFuses power your modules, keep them safe.", playerDocked = true },
+        { playerProgression = 1, isAggressive = true, tip = "Press Z and X to rotate in your ship. \nThe left panel contains your fuses, which power modules. \nUse the right panel to restart your modules.", playerDocked = true },
 
         new Mission( [new Planet(Vector2.Zero, Vector2.Zero, 15000, 6f, true, Color.Cyan),
         new Planet(new Vector2(0, 800), Planet.GetOrbitalVelocity(new Vector2(0, 800), Vector2.Zero, 15000) * 0.85f, 1000, 1f, false, Color.Cyan), ],

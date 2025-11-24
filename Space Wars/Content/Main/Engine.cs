@@ -190,7 +190,11 @@ public class Engine : Game
     }
     public void Rotate(int _dir)
     {
-        dir = Math.Clamp(dir + _dir, (Engine.SaveGame.Player.progression > 0) ? -1 : 0), (Engine.SaveGame.Player.progression > 1) ? 1 : 0);
+        if(SaveGame.Player.Progression <= 0)
+        {
+            return;
+        }
+        dir = Math.Clamp(dir + _dir, -1, 1);
         UI.FuseMenu.enabled = dir == 1;
         UI.PlayerMenu.enabled = dir == -1;
     }
