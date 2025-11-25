@@ -26,6 +26,7 @@ public static class UI
     public static TabbedWindow UpgradeMenu { get; } = new TabbedWindow(center, Assets.Get(Sprite.GargantuanPanel),
         Assets.Get(Sprite.Tab), Assets.Get(Sprite.SelectedTab), Assets.Get(Sound.Interact), 2);
     public static Window SettingsMenu { get; } = new Window(center, Assets.Get(Sprite.GargantuanPanel));
+    public static Window RepairMenu { get; } = new Window(center, Assets.Get(Sprite.GargantuanPanel));
 
     //Main Menu
     public static Button PatchedConicsToggle { get; } = new Button(new Vector2(0, -MainMenu.Size.Y / 4), Assets.Get(Sprite.WideButton), Assets.TextFont, $"Patched Conics: {PatchedConics}", Color.White);
@@ -67,9 +68,6 @@ public static class UI
     //Player Menu
     public static Slider EnemySlider { get; } = new Slider(Engine.Line, new Vector2(0, -PlayerMenu.Size.Y / 3), new Vector2(50, 2), true, Color.White, Color.Gray);
     public static Decal WaveText { get; } = new Decal(new Vector2(-5, 0), Assets.TextFont, "0", Color.White, 10);
-    public static Decal PartStatus { get; } = new Decal(new Vector2(0, 20), Assets.TextFont, "All systems go", Color.Green, 10);
-    public static Button RestartButton { get; } = new Button(new Vector2(0, 50), Assets.Get(Sprite.Button), Assets.TextFont, "Restart", Color.LightBlue);
-    public static Slider RestartSlider { get; } = new Slider(Engine.Line, new Vector2(0, 63), new Vector2(50, 2), true, Color.Cyan, Color.Black);
 
     //Mission Select Menu
     public static Decal MissionName { get; } = new Decal(new Vector2(0, -30), Assets.TextFont, "Name", Color.White, 10);
@@ -124,6 +122,12 @@ public static class UI
     public static Button UpgradeEngine { get; } = new Button(new Vector2(0, 0), Assets.Get(Sprite.Button), Assets.TextFont, "Upgrade Engines", Color.Green);
     public static Button UpgradeCore { get; } = new Button(new Vector2(0, 0), Assets.Get(Sprite.Button), Assets.TextFont, "Upgrade Core", Color.Green);
     public static Decal UpgradeText { get; } = new Decal(new Vector2(-30, -20), Assets.TextFont, "", Color.White, 10);
+
+    //Repair Menu
+    public static Decal PartStatus { get; } = new Decal(new Vector2(0, 20), Assets.TextFont, "All systems go", Color.Green, 10);
+    public static Button RestartButton { get; } = new Button(new Vector2(0, 50), Assets.Get(Sprite.Button), Assets.TextFont, "Restart", Color.LightBlue);
+    public static Slider RestartSlider { get; } = new Slider(Engine.Line, new Vector2(0, 63), new Vector2(50, 2), true, Color.Cyan, Color.Black);
+    public static Decal[] StatusLights { get; } = new Decal[5];
 
     //Misc
     public static Button SidePanelClose { get; } = new Button(new Vector2(0, -Assets.Get(Sprite.ToggleButton).Height / 2 + Assets.Get(Sprite.Terminal).Height / 2), Assets.Get(Sprite.ToggleButton));
@@ -321,9 +325,6 @@ public static class UI
 
         PlayerMenu.AddWidget(EnemySlider as IFunctional);
         PlayerMenu.AddWidget(WaveText);
-        PlayerMenu.AddWidget(PartStatus);
-        PlayerMenu.AddWidget(RestartButton as IFunctional);
-        PlayerMenu.AddWidget(RestartSlider as IFunctional);
         PlayerMenu.AddWidget(SidePanelClose as IFunctional);
 
         MissionSelect.AddWidget(MissionName, 0);
@@ -427,6 +428,16 @@ public static class UI
         GarageMenu.AddWidget(SecondarySlot as IFunctional);
         MissionSelect.AddWidget(SecondarySlot as IFunctional, 1);
 
+        RepairMenu.AddWidget(PartStatus);
+        RepairMenu.AddWidget(RestartButton as IFunctional);
+        RepairMenu.AddWidget(RestartSlider as IFunctional);
+        for (int i = 0; i < ModuleIcons.Count; i++)
+        {
+            StatusLights[i] = new Decal(ModuleIcons[i].Offset - new Vector2(25, 0), Assets.Get(Sprite.Circle));
+            RepairMenu.AddWidget(ModuleIcons[i]);
+            RepairMenu.AddWidget(StatusLights[i]);
+        }
+
         Engine.UIManager.AddContainer(MainMenu);
         Engine.UIManager.AddContainer(PauseMenu);
         Engine.UIManager.AddContainer(PlayerMenu);
@@ -439,5 +450,6 @@ public static class UI
         Engine.UIManager.AddContainer(LoadMenu);
         Engine.UIManager.AddContainer(UpgradeMenu);
         Engine.UIManager.AddContainer(SettingsMenu);
+        Engine.UIManager.AddContainer(RepairMenu);
     }
 }

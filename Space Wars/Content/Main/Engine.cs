@@ -196,7 +196,7 @@ public class Engine : Game
         }
         dir = Math.Clamp(dir + _dir, -1, 1);
         UI.FuseMenu.enabled = dir == 1;
-        UI.PlayerMenu.enabled = dir == -1;
+        UI.RepairMenu.enabled = dir == -1;
     }
     public static Pickup MoveSelectedPickup()
     {
