@@ -241,6 +241,7 @@ public static class EventHandler
             UI.PartStatus.text = text;
             UI.PartStatus.textColor = Color.Red;
         }
+        UpdateStatusLights();
     }
     public static void DisableDockingMenus()
     {
@@ -319,7 +320,7 @@ public static class EventHandler
     {
         for (int i = 0; i < 5; i++)
         {
-            UI.ModuleIcons[i].texture = moduleTextures[i];
+            UI.ModuleIcons[i].SetTexture(moduleTextures[i]);
         }
     }
     public static void GetSave()
@@ -411,5 +412,12 @@ public static class EventHandler
         UI.UpgradeText.text = text;
         Engine.SaveGame.Player.modules[_slot] = value;
         Engine.SaveGame.Scrap -= 5;
+    }
+    public static void UpdateStatusLights()
+    {
+        for(int i = 0; i < UI.StatusLights.Length; i++)
+        {
+            UI.StatusLights[i].color = (Engine.SaveGame.Player.modules[(ModuleType)i].isFailed ? Color.Red : Color.Green);
+        }
     }
 }

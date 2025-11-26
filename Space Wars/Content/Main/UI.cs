@@ -433,7 +433,7 @@ public static class UI
         RepairMenu.AddWidget(RestartSlider as IFunctional);
         for (int i = 0; i < ModuleIcons.Count; i++)
         {
-            StatusLights[i] = new Decal(ModuleIcons[i].Offset - new Vector2(25, 0), Assets.Get(Sprite.Circle));
+            StatusLights[i] = new Decal(new Vector2(25, (i - 2) * 20 - 8), Assets.Get(Sprite.Circle));
             RepairMenu.AddWidget(ModuleIcons[i]);
             RepairMenu.AddWidget(StatusLights[i]);
         }
