@@ -221,27 +221,10 @@ public static class EventHandler
     }
     public static void UpdateModulesStatus()
     {
-        string text = "";
-        foreach (var module in player.modules)
+        for (int i = 0; i < UI.StatusLights.Length; i++)
         {
-            if (module.Value.isFailed)
-            {
-                text = text + module.Key + ", ";
-            }
+            UI.StatusLights[i].color = (Engine.SaveGame.Player.modules[(ModuleType)i].isFailed ? Color.Red : Color.Green);
         }
-        if (text == "")
-        {
-            UI.PartStatus.text = "All systems go!";
-            UI.PartStatus.textColor = Color.Green;
-        }
-        else
-        {
-            text = text.Remove(text.Length - 2, 1);
-            text += "has failed!";
-            UI.PartStatus.text = text;
-            UI.PartStatus.textColor = Color.Red;
-        }
-        UpdateStatusLights();
     }
     public static void DisableDockingMenus()
     {
@@ -412,12 +395,5 @@ public static class EventHandler
         UI.UpgradeText.text = text;
         Engine.SaveGame.Player.modules[_slot] = value;
         Engine.SaveGame.Scrap -= 5;
-    }
-    public static void UpdateStatusLights()
-    {
-        for(int i = 0; i < UI.StatusLights.Length; i++)
-        {
-            UI.StatusLights[i].color = (Engine.SaveGame.Player.modules[(ModuleType)i].isFailed ? Color.Red : Color.Green);
-        }
     }
 }

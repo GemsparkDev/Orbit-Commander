@@ -177,6 +177,11 @@ public enum Sprite
     Miniplayer,
     Textbox,
     Underlay,
+    SwitchOne,
+    SwitchTwo,
+    SwitchThree,
+    SwitchFour,
+    SwitchFive,
 
     SmeltIcon,
     RepairIcon,

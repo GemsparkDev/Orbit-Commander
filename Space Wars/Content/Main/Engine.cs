@@ -197,7 +197,7 @@ public class Engine : Game
         dir = Math.Clamp(dir + _dir, -1, 1);
         if(dir == 1)
         {
-            EventHandler.UpdateStatusLights();
+            EventHandler.UpdateModulesStatus();
         }
         UI.FuseMenu.enabled = dir == 1;
         UI.RepairMenu.enabled = dir == -1;

@@ -124,10 +124,10 @@ public static class UI
     public static Decal UpgradeText { get; } = new Decal(new Vector2(-30, -20), Assets.TextFont, "", Color.White, 10);
 
     //Repair Menu
-    public static Decal PartStatus { get; } = new Decal(new Vector2(0, 20), Assets.TextFont, "All systems go", Color.Green, 10);
-    public static Button RestartButton { get; } = new Button(new Vector2(0, 50), Assets.Get(Sprite.Button), Assets.TextFont, "Restart", Color.LightBlue);
     public static Slider RestartSlider { get; } = new Slider(Engine.Line, new Vector2(0, 63), new Vector2(50, 2), true, Color.Cyan, Color.Black);
     public static Decal[] StatusLights { get; } = new Decal[5];
+    public static Slider RestartSwitch { get; } = new Slider(Engine.Line, new Vector2(0, 50), Assets.DimsOf(Sprite.SwitchOne) + new Vector2(2, 4), false, Color.Transparent, Color.Transparent);
+    public static Decal Switch { get; } = new Decal(new Vector2(0, 50), Assets.Get(Sprite.SwitchOne));
 
     //Misc
     public static Button SidePanelClose { get; } = new Button(new Vector2(0, -Assets.Get(Sprite.ToggleButton).Height / 2 + Assets.Get(Sprite.Terminal).Height / 2), Assets.Get(Sprite.ToggleButton));
@@ -177,7 +177,31 @@ public static class UI
         CraftButton.AddTooltip(tooltip);
         RepairSlot.AddBehaviour(EventHandler.UpdateRepairText);
         FurnaceSlot.AddBehaviour(EventHandler.UpdateFurnace);
-        RestartButton.AddBehaviour(delegate () { EventHandler.SendMessage(Message.RestartModules); });
+        RestartSwitch.AddBehaviour(
+            delegate () 
+            {
+                if(RestartSwitch.sliderInterval < 0.05f)
+                {
+                    EventHandler.SendMessage(Message.RestartModules);
+                    Switch.SetTexture(Assets.Get(Sprite.SwitchOne));
+                }
+                if(RestartSwitch.sliderInterval > 0.05f && RestartSwitch.sliderInterval < 0.3f)
+                {
+                    Switch.SetTexture(Assets.Get(Sprite.SwitchTwo));
+                }
+                if (RestartSwitch.sliderInterval > 0.3f && RestartSwitch.sliderInterval < 0.7f)
+                {
+                    Switch.SetTexture(Assets.Get(Sprite.SwitchThree));
+                }
+                if (RestartSwitch.sliderInterval > 0.7f && RestartSwitch.sliderInterval < 0.95f)
+                {
+                    Switch.SetTexture(Assets.Get(Sprite.SwitchFour));
+                }
+                if (RestartSwitch.sliderInterval > 0.95f)
+                {
+                    Switch.SetTexture(Assets.Get(Sprite.SwitchFive));
+                }
+            });
         GlobalSidePanelOpen.AddBehaviour(EventHandler.ToggleDockingMenus);
         SidePanelClose.AddBehaviour(EventHandler.ToggleDockingMenus);
         PrevMission.AddBehaviour(delegate () { Engine.SaveGame.PrevMission(); }); //Do not remove outer delegate
@@ -428,9 +452,9 @@ public static class UI
         GarageMenu.AddWidget(SecondarySlot as IFunctional);
         MissionSelect.AddWidget(SecondarySlot as IFunctional, 1);
 
-        RepairMenu.AddWidget(PartStatus);
-        RepairMenu.AddWidget(RestartButton as IFunctional);
+        RepairMenu.AddWidget(RestartSwitch as IFunctional);
         RepairMenu.AddWidget(RestartSlider as IFunctional);
+        RepairMenu.AddWidget(Switch);
         for (int i = 0; i < ModuleIcons.Count; i++)
         {
             StatusLights[i] = new Decal(new Vector2(25, (i - 2) * 20 - 8), Assets.Get(Sprite.Circle));
