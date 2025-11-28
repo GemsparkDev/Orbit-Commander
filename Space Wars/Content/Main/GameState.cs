@@ -37,6 +37,11 @@ public abstract class GameState
     //Useful if several game states want to render the same game space
     protected static void RenderGamespace(SpriteBatch _spriteBatch)
     {
+        //Disables rendering when disabled
+        if(Engine.SaveGame != null && !Engine.SaveGame.Player.IsEnabled)
+        {
+            return;
+        }
         Engine.SaveGame.CurrentMission.Draw(_spriteBatch);
         Engine.EntityManager.Draw(_spriteBatch);
         ParticleManager.Draw(_spriteBatch);

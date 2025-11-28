@@ -223,6 +223,11 @@ public static class EventHandler
     {
         for (int i = 0; i < UI.StatusLights.Length; i++)
         {
+            if(!Engine.SaveGame.Player.IsEnabled)
+            {
+                UI.StatusLights[i].color = new Color(50, 50, 50);
+                continue;
+            }
             UI.StatusLights[i].color = (Engine.SaveGame.Player.modules[(ModuleType)i].isFailed ? Color.Red : Color.Green);
         }
     }

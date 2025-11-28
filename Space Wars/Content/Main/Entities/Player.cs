@@ -43,7 +43,7 @@ public class Player : Entity
     public float invincibilityCooldown = 0;
     public float cachedDamage = 0;
     private float restartCooldown = 0;
-    private bool isRestarting = false;
+    public bool IsRestarting { get; private set; } = false;
     public bool isEngineActive = false;
     public bool canGatherResources = false;
     private Vector2 targetVector;
@@ -51,6 +51,7 @@ public class Player : Entity
     private float time = 0;
     private float cachedDamageCooldown = 0;
     public int Progression { get; set; } = 3;
+    public bool IsEnabled { get; set; } = true;
     public override int SensingAbility
     {
         get
@@ -110,6 +111,7 @@ public class Player : Entity
         for(int i = 0; i < modules.Count; i++)
         {
             textures[i] = modules[(ModuleType)i].Texture;
+            modules[(ModuleType)i].isFailed = true;
         }
         EventHandler.SetFuseModuleDecals(textures);
         EventHandler.UpdateFuseUI(moduleFuses, spareFuses);
@@ -157,11 +159,11 @@ public class Player : Entity
             }
             if (restartCooldown > 0)
             {
-                isRestarting = true;
+                IsRestarting = true;
                 SoundManager.PlaySound(Assets.Get(Sound.Interact), position);
             }
         }
-        if (isRestarting && restartCooldown <= 0)
+        if (IsRestarting && restartCooldown <= 0)
         {
             bool restartedModules = false;
             //Reverse order prioritizes most important modules first
@@ -180,17 +182,15 @@ public class Player : Entity
                     //Small bonus to module health to keep players alive in firefights
                     module.Health = Math.Min(module.MaxHealth, module.Health + Util.Random.Next(1, 4));
                     restartedModules = true;
-                    EventHandler.UpdateModulesStatus();
                 }
             }
             if (restartedModules)
             {
-                isRestarting = false;
+                IsRestarting = false;
                 SoundManager.PlaySound(Assets.Get(Sound.Full), position);
-                EventHandler.UpdateModulesStatus();
             }
         }
-        else if (isRestarting)
+        else if (IsRestarting)
         {
             restartCooldown -= Engine.DeltaSeconds;
             EventHandler.UpdateRestartSlider(restart - restartCooldown, restart);
@@ -332,7 +332,7 @@ public class Player : Entity
     public void RestrictedActions()
     {
         //Prevents undocking when in the garage menu
-        if (Progression > -1)
+        if (Progression > -1 && IsEnabled)
         {
             if (Input.OldState.IsKeyUp(Keys.I) && Input.NewState.IsKeyDown(Keys.I))
             {

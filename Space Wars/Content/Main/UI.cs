@@ -5,6 +5,7 @@ using Microsoft.Xna.Framework;
 using Space_Wars.Content.Main.Entities;
 using static Space_Wars.Content.Main.Engine;
 using System.Collections.Generic;
+using Microsoft.Xna.Framework.Input;
 
 namespace Space_Wars.Content.Main;
 public static class UI
@@ -127,7 +128,7 @@ public static class UI
     public static Slider RestartSlider { get; } = new Slider(Engine.Line, new Vector2(0, 63), new Vector2(50, 2), true, Color.Cyan, Color.Black);
     public static Decal[] StatusLights { get; } = new Decal[5];
     public static Slider RestartSwitch { get; } = new Slider(Engine.Line, new Vector2(0, 50), Assets.DimsOf(Sprite.SwitchOne) + new Vector2(2, 4), false, Color.Transparent, Color.Transparent);
-    public static Decal Switch { get; } = new Decal(new Vector2(0, 50), Assets.Get(Sprite.SwitchOne));
+    public static Decal Switch { get; } = new Decal(new Vector2(0, 50), Assets.Get(Sprite.SwitchFive));
 
     //Misc
     public static Button SidePanelClose { get; } = new Button(new Vector2(0, -Assets.Get(Sprite.ToggleButton).Height / 2 + Assets.Get(Sprite.Terminal).Height / 2), Assets.Get(Sprite.ToggleButton));
@@ -180,9 +181,23 @@ public static class UI
         RestartSwitch.AddBehaviour(
             delegate () 
             {
+                if(Engine.SaveGame.Player.IsRestarting)
+                {
+                    if (Input.OldMouseState.LeftButton == ButtonState.Released)
+                    {
+                        SoundManager.PlayGlobalSound(Assets.Get(Sound.Fail));
+                    }
+                    return;
+                }
                 if(RestartSwitch.sliderInterval < 0.05f)
                 {
-                    EventHandler.SendMessage(Message.RestartModules);
+                    if(Engine.SaveGame.Player.IsEnabled)
+                    {
+                        EventHandler.SendMessage(Message.RestartModules);
+                        SoundManager.PlayGlobalSound(Assets.Get(Sound.Undock));
+                        Engine.SaveGame.Player.IsEnabled = false;
+                        EventHandler.UpdateModulesStatus();
+                    }
                     Switch.SetTexture(Assets.Get(Sprite.SwitchOne));
                 }
                 if(RestartSwitch.sliderInterval > 0.05f && RestartSwitch.sliderInterval < 0.3f)
@@ -200,8 +215,16 @@ public static class UI
                 if (RestartSwitch.sliderInterval > 0.95f)
                 {
                     Switch.SetTexture(Assets.Get(Sprite.SwitchFive));
+                    if (!Engine.SaveGame.Player.IsEnabled)
+                    {
+                        Engine.SaveGame.Player.IsEnabled = true;
+                        SoundManager.PlayGlobalSound(Assets.Get(Sound.Dock));
+                        EventHandler.UpdateModulesStatus();
+                    }
                 }
             });
+        RestartSwitch.SetInterval(1, 1);
+
         GlobalSidePanelOpen.AddBehaviour(EventHandler.ToggleDockingMenus);
         SidePanelClose.AddBehaviour(EventHandler.ToggleDockingMenus);
         PrevMission.AddBehaviour(delegate () { Engine.SaveGame.PrevMission(); }); //Do not remove outer delegate
