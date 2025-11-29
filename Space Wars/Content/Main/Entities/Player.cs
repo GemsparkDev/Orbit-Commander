@@ -111,7 +111,6 @@ public class Player : Entity
         for(int i = 0; i < modules.Count; i++)
         {
             textures[i] = modules[(ModuleType)i].Texture;
-            modules[(ModuleType)i].isFailed = true;
         }
         EventHandler.SetFuseModuleDecals(textures);
         EventHandler.UpdateFuseUI(moduleFuses, spareFuses);

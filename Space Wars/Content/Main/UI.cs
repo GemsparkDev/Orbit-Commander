@@ -68,7 +68,8 @@ public static class UI
 
     //Player Menu
     public static Slider EnemySlider { get; } = new Slider(Engine.Line, new Vector2(0, -PlayerMenu.Size.Y / 3), new Vector2(50, 2), true, Color.White, Color.Gray);
-    public static Decal WaveText { get; } = new Decal(new Vector2(-5, 0), Assets.TextFont, "0", Color.White, 10);
+    public static Decal WaveText { get; } = new Decal(new Vector2(-20, 0), Assets.TextFont, "0", Color.White, 10);
+    public static Decal EnemiesLeft { get; } = new Decal(new Vector2(0, 0), Assets.TextFont, "0", Color.Red, 10);
 
     //Mission Select Menu
     public static Decal MissionName { get; } = new Decal(new Vector2(0, -30), Assets.TextFont, "Name", Color.White, 10);
@@ -373,6 +374,7 @@ public static class UI
         PlayerMenu.AddWidget(EnemySlider as IFunctional);
         PlayerMenu.AddWidget(WaveText);
         PlayerMenu.AddWidget(SidePanelClose as IFunctional);
+        PlayerMenu.AddWidget(EnemiesLeft);
 
         MissionSelect.AddWidget(MissionName, 0);
         MissionSelect.AddWidget(MissionDescription, 0);

@@ -61,6 +61,9 @@ public class Mission
         {
             escapeVehicle = new EntityConstructor(Enemy.NewPickupDrone, new Vector2(-2000, -2000), Vector2.Zero, 0);
         }
+
+        UI.WaveText.text = "0";
+        UI.EnemiesLeft.text = "0";
     }
     public void Initialize()
     {
@@ -260,6 +263,7 @@ public class Mission
                 }
             }
         }
+        UI.EnemiesLeft.text = (currentWaveActive ? enemiesSpawned.Where(x => x.health > 0).Count() : 0).ToString();
         EventHandler.UpdateEnemyCountdownUI(waveTimer, maxWaveTimer, Wave);
     }
     public void PlanetUpdate()
