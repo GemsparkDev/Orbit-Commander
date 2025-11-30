@@ -192,6 +192,7 @@ public enum Sprite
     Fuse,
 
     Cursor,
+    ClickedCursor,
 }
 public enum Sound
 {

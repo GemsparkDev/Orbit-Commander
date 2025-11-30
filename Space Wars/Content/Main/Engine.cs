@@ -273,9 +273,13 @@ public class Engine : Game
         spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, null, null, null);
         DialogueManager.Draw(spriteBatch);
         UIManager.Draw(spriteBatch);
-        if (!UIManager.LockMouseInput)
+        if ((Input.NewMouseState.LeftButton == ButtonState.Released))
         {
             spriteBatch.Draw(Assets.Get(Sprite.Cursor), new Vector2(Mouse.GetState().X, Mouse.GetState().Y), null, Color.White, 0, Vector2.Zero, UIManager.UIScale / 2, 0, 0.5f);
+        }
+        else
+        {
+            spriteBatch.Draw(Assets.Get(Sprite.ClickedCursor), new Vector2(Mouse.GetState().X, Mouse.GetState().Y), null, Color.White, 0, Vector2.Zero, UIManager.UIScale / 2, 0, 0.5f);
         }
         if (DebugMode)
         {

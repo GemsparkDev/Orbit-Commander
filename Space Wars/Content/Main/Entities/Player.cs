@@ -532,7 +532,6 @@ public class Player : Entity
                 }
                 if (isEngineActive)
                 {
-                    //angle = angle * 0.5f + MathF.Atan2(direction.X, -direction.Y) * 0.5f;
                     angle = angle * 0.5f + Util.ToAngle(targetVector) * 0.5f; //Better shield aiming
                 }
                 else

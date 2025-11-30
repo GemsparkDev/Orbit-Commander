@@ -157,7 +157,8 @@ public static class Assets
         Sprites.Add(Sprite.Fuse, Content.Load<Texture2D>("Images/UI_29"));
 
         //Misc
-        Sprites.Add(Sprite.Cursor, Content.Load<Texture2D>("Images/Cursor"));
+        Sprites.Add(Sprite.Cursor, Content.Load<Texture2D>("Images/Cursor_1"));
+        Sprites.Add(Sprite.ClickedCursor, Content.Load<Texture2D>("Images/Cursor_2"));
 
         //
         //Sound FX
