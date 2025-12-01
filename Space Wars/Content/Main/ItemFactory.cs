@@ -16,7 +16,7 @@ public static class ItemFactory
     public readonly static Dictionary<Modules, ModuleData> moduleData = new()
     {
         { Modules.Hull, new ModuleData(Sprite.HullModule, Sprite.HullModule, "Hull", (int)ModuleType.Hull, 20, typeof(Hull)) },
-        { Modules.Shield, new ModuleData(Sprite.HullModule, Sprite.HullModule, "Shield", (int)ModuleType.Hull, 16, typeof(Shield)) },
+        { Modules.Shield, new ModuleData(Sprite.ShieldReal, Sprite.Shield, "Shield", (int)ModuleType.Hull, 16, typeof(Shield)) },
         { Modules.Stealth, new ModuleData(Sprite.HullModule, Sprite.HullModule, "Stealth", (int)ModuleType.Hull, 18, typeof(Stealth)) },
         { Modules.Reflective, new ModuleData(Sprite.HullModule, Sprite.HullModule, "Reflective", (int)ModuleType.Hull, 18, typeof(Reflective)) },
         { Modules.Turtle, new ModuleData(Sprite.HullModule, Sprite.HullModule, "Turtle", (int)ModuleType.Hull, 22, typeof(Turtle)) },

@@ -114,6 +114,8 @@ public static class Assets
         Sprites.Add(Sprite.Assault, Content.Load<Texture2D>("Images/Item_9"));
         Sprites.Add(Sprite.Furnace, Content.Load<Texture2D>("Images/Entity_47"));
         Sprites.Add(Sprite.FurnaceReal, Content.Load<Texture2D>("Images/UI_39"));
+        Sprites.Add(Sprite.ShieldReal, Content.Load<Texture2D>("Images/UI_41"));
+        Sprites.Add(Sprite.Shield, Content.Load<Texture2D>("Images/Item_10"));
 
         //Projectiles
         Sprites.Add(Sprite.SpiralShot, Content.Load<Texture2D>("Images/Projectile_0"));

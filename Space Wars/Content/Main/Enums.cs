@@ -151,6 +151,8 @@ public enum Sprite
     AssaultReal,
     Furnace,
     FurnaceReal,
+    Shield,
+    ShieldReal,
 
     SpiralShot,
     PulseShot,
