@@ -367,23 +367,4 @@ public class Cutscene(List<IEvent> _events, List<Actor> _actors, GameState _next
         _spriteBatch.DrawString(Assets.TextFont, "esc to skip", Engine.Camera.Position + Engine.ScreenSize / 2 - Assets.TextFont.MeasureString("esc to skip") / 2 - new Vector2(100, 100), Color.White * (0.5f + escapeTime * 0.5f));
     }
 }
-public class InShip : GameState
-{
-    public override void Initialize()
-    {
-        Engine.UIManager.ScreenWindow.enabled = false;
-        EventHandler.DisableDockingMenus();
-    }
-    public override void Update() 
-    {
-        Engine.EntityManager.IngameUpdate();
-        ParticleManager.Update();
-        if (Input.OldState.IsKeyUp(Keys.F) && Input.NewState.IsKeyDown(Keys.F))
-        {
-            CurrentGameState.SwitchState(new PlayingGame());
-            UI.FuseMenu.enabled = false;
-        }
-    }
-    public override void Draw(SpriteBatch _spriteBatch) { }
-}
 

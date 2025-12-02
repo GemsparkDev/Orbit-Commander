@@ -21,7 +21,6 @@ public static class UI
     public static TabbedWindow MissionSelect { get; } = new TabbedWindow(new Vector2(0, center.Y), Assets.Get(Sprite.GargantuanPanel), Assets.Get(Sprite.Tab), Assets.Get(Sprite.SelectedTab), Assets.Get(Sound.Interact), 2)
     { icons = [Assets.Get(Sprite.PlanetIcon), Assets.Get(Sprite.RepairIcon)], alignment = Alignment.Left };
     public static Window PickupDroneMenu { get; } = new Window(center, Assets.Get(Sprite.LargePanel));
-    public static Window FuseMenu { get; } = new Window(center, Assets.Get(Sprite.LargePanel));
     public static Window SaveMenu { get; } = new Window(center, Assets.Get(Sprite.GargantuanPanel));
     public static Window LoadMenu { get; } = new Window(center, Assets.Get(Sprite.GargantuanPanel));
     public static TabbedWindow UpgradeMenu { get; } = new TabbedWindow(center, Assets.Get(Sprite.GargantuanPanel),
@@ -84,12 +83,6 @@ public static class UI
     public static Button CancelQueue { get; } = new Button(new Vector2(-85, 45), Assets.Get(Sprite.Button), Assets.TextFont, "Cancel Latest", Color.Red);
     public static Button SaveButton { get; } = new Button(new Vector2(0, -60), Assets.Get(Sprite.WideButton), Assets.TextFont, "Save & Exit", Color.LightBlue);
 
-    //Fuse Menu
-    public static Decal FuseCounter { get; } = new Decal(new Vector2(-20, -25), Assets.TextFont, "0", Color.Yellow, 10);
-    public static Button[,] Fuses { get; } = new Button[4, 5];
-    public static List<Decal> ModuleIcons { get; } = [];
-    public static Decal FragilityTextbox { get; } = new Decal(new Vector2(0, -55), Assets.TextFont, "Fuse Fragility: Med", Color.Yellow, 6);
-
     //Pickup Drone Menu
     public static Button LaunchButton { get; } = new Button(new Vector2(-20, 0), Assets.Get(Sprite.Button), Assets.TextFont, "Leave", Color.LightBlue);
 
@@ -126,10 +119,14 @@ public static class UI
     public static Decal UpgradeText { get; } = new Decal(new Vector2(-30, -20), Assets.TextFont, "", Color.White, 10);
 
     //Repair Menu
-    public static Slider RestartSlider { get; } = new Slider(Engine.Line, new Vector2(0, 63), new Vector2(50, 2), true, Color.Cyan, Color.Black);
+    public static Slider RestartSlider { get; } = new Slider(Engine.Line, new Vector2(-100, 50), new Vector2(50, 2), true, Color.Cyan, Color.Black);
     public static Decal[] StatusLights { get; } = new Decal[5];
-    public static Slider RestartSwitch { get; } = new Slider(Engine.Line, new Vector2(0, 50), Assets.DimsOf(Sprite.SwitchOne) + new Vector2(2, 4), false, Color.Transparent, Color.Transparent);
-    public static Decal Switch { get; } = new Decal(new Vector2(0, 50), Assets.Get(Sprite.SwitchFive));
+    public static Slider RestartSwitch { get; } = new Slider(Engine.Line, new Vector2(-100, 0), Assets.DimsOf(Sprite.SwitchOne) + new Vector2(2, 4), false, Color.Transparent, Color.Transparent);
+    public static Decal Switch { get; } = new Decal(RestartSwitch.Offset + new Vector2(RestartSwitch.Size.X, 0), Assets.Get(Sprite.SwitchFive));
+    public static Decal FuseCounter { get; } = new Decal(new Vector2(-60, -55), Assets.TextFont, "0", Color.Yellow, 10);
+    public static Button[,] Fuses { get; } = new Button[4, 5];
+    public static Decal[] ModuleIcons { get; } = new Decal[5];
+    public static Decal FragilityTextbox { get; } = new Decal(new Vector2(0, -55), Assets.TextFont, "Fuse Fragility: Med", Color.Yellow, 6);
 
     //Misc
     public static Button SidePanelClose { get; } = new Button(new Vector2(0, -Assets.Get(Sprite.ToggleButton).Height / 2 + Assets.Get(Sprite.Terminal).Height / 2), Assets.Get(Sprite.ToggleButton));
@@ -406,28 +403,6 @@ public static class UI
         LoadMenu.AddWidget(LoadedName);
         LoadMenu.AddWidget(LoadBack as IFunctional);
 
-        FuseMenu.AddWidget(FuseCounter);
-        for (int i = 0; i < 4; i++)
-        {
-            for (int j = -2; j < 3; j++)
-            {
-                var fuse = new Button(new Vector2(i * 10, j * 20), Assets.Get(Sprite.Fuse));
-                //Performs a shallow copy of the instance variable
-                int x = j + 2;
-                int y = i;
-                fuse.AddBehaviour(delegate () { Engine.SaveGame.Player.ToggleFuse(x, y); });
-                Fuses[i, j + 2] = fuse;
-                FuseMenu.AddWidget(fuse as IFunctional);
-            }
-        }
-        for (int i = 0; i < 5; i++)
-        {
-            var decal = new Decal(new Vector2(40, (i - 2) * 20 - 8), null);
-            ModuleIcons.Add(decal);
-            FuseMenu.AddWidget(decal);
-        }
-        FuseMenu.AddWidget(FragilityTextbox);
-
         UpgradeMenu.AddWidget(TraderChat, 0);
         UpgradeMenu.AddWidget(LidarUpgrade as IFunctional, 1);
         UpgradeMenu.AddWidget(RadarUpgrade as IFunctional, 1);
@@ -480,11 +455,26 @@ public static class UI
         RepairMenu.AddWidget(RestartSwitch as IFunctional);
         RepairMenu.AddWidget(RestartSlider as IFunctional);
         RepairMenu.AddWidget(Switch);
-        for (int i = 0; i < ModuleIcons.Count; i++)
+        RepairMenu.AddWidget(FuseCounter);
+        for (int i = 0; i < 4; i++)
         {
-            StatusLights[i] = new Decal(new Vector2(25, (i - 2) * 20 - 8), Assets.Get(Sprite.Circle));
-            RepairMenu.AddWidget(ModuleIcons[i]);
-            RepairMenu.AddWidget(StatusLights[i]);
+            for (int j = -2; j < 3; j++)
+            {
+                var fuse = new Button(new Vector2(i * 10, j * 20), Assets.Get(Sprite.Fuse));
+                //Not sure why this works, don't touch
+                int x = j + 2;
+                int y = i;
+                fuse.AddBehaviour(delegate () { Engine.SaveGame.Player.ToggleFuse(x, y); });
+                Fuses[i, j + 2] = fuse;
+                RepairMenu.AddWidget(fuse as IFunctional);
+            }
+        }
+        RepairMenu.AddWidget(FragilityTextbox);
+        for (int i = 0; i < 5; i++)
+        {
+            float y = (i - 2) * 20;
+            RepairMenu.AddWidget(ModuleIcons[i] = new Decal(new Vector2(-15, y), null));
+            RepairMenu.AddWidget(StatusLights[i] = new Decal(new Vector2(-30, y), Assets.Get(Sprite.Circle)));
         }
 
         Engine.UIManager.AddContainer(MainMenu);
@@ -494,7 +484,6 @@ public static class UI
         Engine.UIManager.AddContainer(GarageMenu);
         Engine.UIManager.AddContainer(MissionSelect);
         Engine.UIManager.AddContainer(PickupDroneMenu);
-        Engine.UIManager.AddContainer(FuseMenu);
         Engine.UIManager.AddContainer(SaveMenu);
         Engine.UIManager.AddContainer(LoadMenu);
         Engine.UIManager.AddContainer(UpgradeMenu);
