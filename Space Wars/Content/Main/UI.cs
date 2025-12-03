@@ -26,7 +26,8 @@ public static class UI
     public static TabbedWindow UpgradeMenu { get; } = new TabbedWindow(center, Assets.Get(Sprite.GargantuanPanel),
         Assets.Get(Sprite.Tab), Assets.Get(Sprite.SelectedTab), Assets.Get(Sound.Interact), 2);
     public static Window SettingsMenu { get; } = new Window(center, Assets.Get(Sprite.GargantuanPanel));
-    public static Window RepairMenu { get; } = new Window(center, Assets.Get(Sprite.GargantuanPanel));
+    public static Screen RepairMenu { get; } = new Screen() { enabled = true };
+    public static Screen GlobalMenu { get; } = new Screen() { enabled = true };
 
     //Main Menu
     public static Button PatchedConicsToggle { get; } = new Button(new Vector2(0, -MainMenu.Size.Y / 4), Assets.Get(Sprite.WideButton), Assets.TextFont, $"Patched Conics: {PatchedConics}", Color.White);
@@ -413,12 +414,12 @@ public static class UI
         UpgradeMenu.AddWidget(UpgradeEngine as IFunctional, 2);
         UpgradeMenu.AddWidget(UpgradeCore as IFunctional, 2);
 
+        GlobalMenu.AddWidget(GlobalSidePanelOpen as IFunctional, (int)Alignment.Top);
+        GlobalMenu.AddWidget(Timer, (int)Alignment.TopRight);
+        GlobalMenu.AddWidget(PlayerHealth as IFunctional, (int)Alignment.TopLeft);
+        GlobalMenu.AddWidget(PlayerSpecialHealth as IFunctional, (int)Alignment.TopLeft);
+        GlobalMenu.AddWidget(PlayerAbility as IFunctional, (int)Alignment.TopLeft);
         PlayerSpecialHealth.SetInterval(1, 1);
-        Engine.UIManager.ScreenWindow.AddWidget(GlobalSidePanelOpen as IFunctional, (int)Alignment.Top);
-        Engine.UIManager.ScreenWindow.AddWidget(Timer, (int)Alignment.TopRight);
-        Engine.UIManager.ScreenWindow.AddWidget(PlayerHealth as IFunctional, (int)Alignment.TopLeft);
-        Engine.UIManager.ScreenWindow.AddWidget(PlayerSpecialHealth as IFunctional, (int)Alignment.TopLeft);
-        Engine.UIManager.ScreenWindow.AddWidget(PlayerAbility as IFunctional, (int)Alignment.TopLeft);
 
         for (int x = 0; x < ModuleSlots.GetLength(0); x++)
         {
@@ -452,10 +453,10 @@ public static class UI
         GarageMenu.AddWidget(SecondarySlot as IFunctional);
         MissionSelect.AddWidget(SecondarySlot as IFunctional, 1);
 
-        RepairMenu.AddWidget(RestartSwitch as IFunctional);
-        RepairMenu.AddWidget(RestartSlider as IFunctional);
-        RepairMenu.AddWidget(Switch);
-        RepairMenu.AddWidget(FuseCounter);
+        RepairMenu.AddWidget(RestartSwitch as IFunctional, (int)Alignment.Center);
+        RepairMenu.AddWidget(RestartSlider as IFunctional, (int)Alignment.Center);
+        RepairMenu.AddWidget(Switch, (int)Alignment.Center);
+        RepairMenu.AddWidget(FuseCounter, (int)Alignment.Center);
         for (int i = 0; i < 4; i++)
         {
             for (int j = -2; j < 3; j++)
@@ -466,15 +467,15 @@ public static class UI
                 int y = i;
                 fuse.AddBehaviour(delegate () { Engine.SaveGame.Player.ToggleFuse(x, y); });
                 Fuses[i, j + 2] = fuse;
-                RepairMenu.AddWidget(fuse as IFunctional);
+                RepairMenu.AddWidget(fuse as IFunctional, (int)Alignment.Center);
             }
         }
-        RepairMenu.AddWidget(FragilityTextbox);
+        RepairMenu.AddWidget(FragilityTextbox, (int)Alignment.Center);
         for (int i = 0; i < 5; i++)
         {
             float y = (i - 2) * 20;
-            RepairMenu.AddWidget(ModuleIcons[i] = new Decal(new Vector2(-15, y), null));
-            RepairMenu.AddWidget(StatusLights[i] = new Decal(new Vector2(-30, y), Assets.Get(Sprite.Circle)));
+            RepairMenu.AddWidget(ModuleIcons[i] = new Decal(new Vector2(-15, y), null), (int)Alignment.Center);
+            RepairMenu.AddWidget(StatusLights[i] = new Decal(new Vector2(-30, y), Assets.Get(Sprite.Circle)), (int)Alignment.Center);
         }
 
         Engine.UIManager.AddContainer(MainMenu);
@@ -488,6 +489,7 @@ public static class UI
         Engine.UIManager.AddContainer(LoadMenu);
         Engine.UIManager.AddContainer(UpgradeMenu);
         Engine.UIManager.AddContainer(SettingsMenu);
-        Engine.UIManager.AddContainer(RepairMenu);
+
+        Engine.UIManager.ScreenWindow = GlobalMenu;
     }
 }

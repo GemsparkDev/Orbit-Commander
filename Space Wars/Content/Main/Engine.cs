@@ -197,9 +197,13 @@ public class Engine : Game
         dir = Math.Clamp(dir + _dir, -1, 0);
         if(dir == -1)
         {
+            UIManager.ScreenWindow = UI.RepairMenu;
             EventHandler.UpdateModulesStatus();
         }
-        UI.RepairMenu.enabled = dir == -1;
+        else
+        {
+            UIManager.ScreenWindow = UI.GlobalMenu;
+        }
     }
     public static Pickup MoveSelectedPickup()
     {
