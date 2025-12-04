@@ -135,7 +135,11 @@ public class PausedGame : GameState
     {
         if (Input.OldState.IsKeyUp(Keys.Escape) && Input.NewState.IsKeyDown(Keys.Escape))
         {
-            if (Engine.UIManager.ToggleToMenu(UI.PauseMenu))
+            if(UI.SettingsMenu.enabled)
+            {
+                UI.PauseMenuButton.ApplyBehaviours();
+            }
+            else if (Engine.UIManager.ToggleToMenu(UI.PauseMenu))
             {
                 CurrentGameState.SwitchState(new PlayingGame());
             }

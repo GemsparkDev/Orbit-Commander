@@ -6,11 +6,12 @@ using Space_Wars.Content.Main.Entities;
 using static Space_Wars.Content.Main.Engine;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework.Input;
+using System.Diagnostics;
 
 namespace Space_Wars.Content.Main;
 public static class UI
 {
-    private static Vector2 center = Engine.BackBuffer / 2;
+    private static Vector2 center = BackBuffer / 2;
     public static Window PauseMenu { get; } = new Window(center, Assets.Get(Sprite.LargePanel));
     public static Window PlayerMenu { get; } = new Window(new Vector2(center.X, 0), Assets.Get(Sprite.Terminal)) { alignment = Alignment.Top };
     public static Window GarageMenu { get; } = new Window(center, Assets.Get(Sprite.GargantuanPanel));
@@ -199,15 +200,15 @@ public static class UI
                     }
                     Switch.SetTexture(Assets.Get(Sprite.SwitchOne));
                 }
-                if(RestartSwitch.sliderInterval > 0.05f && RestartSwitch.sliderInterval < 0.3f)
+                if (RestartSwitch.sliderInterval is > 0.05f and < 0.3f)
                 {
                     Switch.SetTexture(Assets.Get(Sprite.SwitchTwo));
                 }
-                if (RestartSwitch.sliderInterval > 0.3f && RestartSwitch.sliderInterval < 0.7f)
+                if (RestartSwitch.sliderInterval is > 0.3f and < 0.7f)
                 {
                     Switch.SetTexture(Assets.Get(Sprite.SwitchThree));
                 }
-                if (RestartSwitch.sliderInterval > 0.7f && RestartSwitch.sliderInterval < 0.95f)
+                if (RestartSwitch.sliderInterval is > 0.7f and < 0.95f)
                 {
                     Switch.SetTexture(Assets.Get(Sprite.SwitchFour));
                 }
@@ -465,7 +466,10 @@ public static class UI
                 //Not sure why this works, don't touch
                 int x = j + 2;
                 int y = i;
-                fuse.AddBehaviour(delegate () { Engine.SaveGame.Player.ToggleFuse(x, y); });
+                fuse.AddBehaviour(delegate () 
+                { 
+                    Engine.SaveGame.Player.ToggleFuse(x, y);
+                });
                 Fuses[i, j + 2] = fuse;
                 RepairMenu.AddWidget(fuse as IFunctional, (int)Alignment.Center);
             }
