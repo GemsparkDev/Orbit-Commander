@@ -61,7 +61,14 @@ public class Mission
         {
             escapeVehicle = new EntityConstructor(Enemy.NewPickupDrone, new Vector2(-2000, -2000), Vector2.Zero, 0);
         }
-
+        if (Engine.SaveGame.FleetSystem > Engine.EntityManager.Systems[Engine.SaveGame.CurrentMissionIndex].system)
+        {
+            isAggressive = true;
+            if (TimerModifier != -1)
+            {
+                TimerModifier /= 2;
+            }
+        }
         UI.WaveText.text = "0";
         UI.EnemiesLeft.text = "0";
     }

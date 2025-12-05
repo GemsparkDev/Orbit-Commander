@@ -12,7 +12,19 @@ public class SaveGame
 {
     public string Name { get; set; } = "0";
     public int Scrap { get; set; }
-    public int System { get; set; } = 0;
+    private int system = 0;
+    public int System 
+    { 
+        get 
+        { 
+            return system; 
+        } 
+        set 
+        { 
+            system = value; 
+            FleetSystem = Math.Max(FleetSystem, system); 
+        } 
+    }
     public int CurrentMissionIndex { get; set; } = 0;
     private bool giveWeapon = true;
     public bool[] CompletedMissions { get; } = new bool[Engine.EntityManager.MissionLength];
@@ -20,6 +32,8 @@ public class SaveGame
     public Pickup[] Inventory { get; } = new Pickup[4];
     public Pickup[] MissionSelectInventory { get; } = new Pickup[4];
     public List<Queueable> QueuedItems { get; private set; } = [];
+
+    public int FleetSystem { get; private set; } = 0; //Serialize me!
 
     private Mission currentMission;
     public Mission CurrentMission 

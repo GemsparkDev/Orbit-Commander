@@ -178,24 +178,18 @@ public class Garage : GameState
 public class MissionSelect : GameState
 {
     private float time = Util.Random.NextSingle() * 1000f;
-    private List<(float distance, List<int> prerequisites, int system)> missions =
-    [
-        (200, [], 0), (160, [0], 0), (140, [0], 0), (100, [1, 2], 0), (400, [3], 0), (50, [3], 0),
-        (210, [], 1), (170, [6], 1), (145, [7], 1), (130, [8], 1), (150, [9], 1),
-        (200, [], 2), (150, [11], 2), (100, [12], 2), (80, [13], 2), (60, [14], 2), (0, [15], 2)
-    ];
     private Vector2 playerPosition;
     private List<(int system, ParticleEmitter orbit)> missionOrbits = [];
     private ParticleEmitter sun = new (Assets.Get(Sprite.Dot), new Vector2(Engine.ScreenSize.X / 6, 0), 20, new Color(255, 255, 0));
     public MissionSelect()
     {
         var center = new Vector2(Engine.ScreenSize.X/6, 0);
-        foreach (var (distance, _, system) in missions)
+        foreach (var (distance, _, system) in Engine.EntityManager.Systems)
         {
             var orbit = (system, new ParticleEmitter(Assets.Get(Sprite.Dot), center, distance, new Color(0, 255, 255)));
             missionOrbits.Add(orbit);
         }
-        var playerMission = missions[Engine.SaveGame.CurrentMissionIndex];
+        var playerMission = Engine.EntityManager.Systems[Engine.SaveGame.CurrentMissionIndex];
         if (playerMission.distance > 0)
         {
             float freq = MathF.Sqrt(playerMission.distance * playerMission.distance * playerMission.distance) / 100;
@@ -229,9 +223,9 @@ public class MissionSelect : GameState
         ParticleManager.Update();
         var pos = new Vector2(Input.NewMouseState.Position.X, Input.NewMouseState.Position.Y);
         float distance = Vector2.Distance(pos, new Vector2(Engine.ScreenSize.X * 2 / 3, Engine.ScreenSize.Y/2));
-        for(int i = 0; i < missions.Count; i++)
+        for(int i = 0; i < Engine.EntityManager.Systems.Count; i++)
         {
-            var mission = missions[i];
+            var mission = Engine.EntityManager.Systems[i];
             if (mission.distance > 0)
             {
                 float freq = MathF.Sqrt(mission.distance * mission.distance * mission.distance) / 100;
@@ -285,11 +279,11 @@ public class MissionSelect : GameState
     public override void Draw(SpriteBatch _spriteBatch) 
     {
         ParticleManager.Draw(_spriteBatch);
-        if (Engine.SaveGame.CurrentMissionIndex >= missions.Count)
+        if (Engine.SaveGame.CurrentMissionIndex >= Engine.EntityManager.Systems.Count)
         {
             Engine.SaveGame.PrevMission();
         }
-        if (Engine.SaveGame.System == missions[Engine.SaveGame.CurrentMissionIndex].system)
+        if (Engine.SaveGame.System == Engine.EntityManager.Systems[Engine.SaveGame.CurrentMissionIndex].system)
         {
             _spriteBatch.Draw(Assets.Get(Sprite.Miniplayer), playerPosition, null, new Color(0, 255, 0), 0, Vector2.Zero, 1, 0, 0);
         }

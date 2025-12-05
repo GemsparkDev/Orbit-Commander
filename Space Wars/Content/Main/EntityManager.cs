@@ -79,7 +79,7 @@ public class EntityManager
             new EntityCondition(new LaunchConstructor(Enemy.NewDropPod,new Vector2(0, -1500), 500),[ ]),
             new WaveGoal(30),
         ],
-        "Base of Operations", "This site is a promising location for a temporary base.\nDestroy the enemy base located here.", 0, new Vector2(0, -1500), Mission.TierTwo(), Mission.TierTwoBosses(), null, true) { playerDocked = true },
+        "Base of Operations", "We have deployed several communication stations to this site.\nProtect the location for future development.", 0, new Vector2(0, -1500), Mission.TierTwo(), Mission.TierTwoBosses(), null, true) { playerDocked = true },
 
         new Mission([new Planet(Vector2.Zero, Vector2.Zero, 20000, 9f, true, Color.Cyan, false, 1.8f),
         new(new Vector2(0, 1800), Planet.GetOrbitalVelocity(new Vector2(0, 1800), Vector2.Zero, 20000), 1500, 2f, false, Color.Cyan) ],
@@ -109,7 +109,7 @@ public class EntityManager
         [
             new EntityCondition(new AdvancedConstructor(Enemy.NewExodusBoss, new Vector2(0, -6*50), Vector2.Zero, 0, false), [ Condition.Kill ]),
             new EntityCondition(new LaunchConstructor(Enemy.NewDropPod,new Vector2(0, -1500), 225),[ ])],
-        "", "The enemy fleet's fastest fighter appears to have arrived to this planet and is blocking our path.\nDefeating it appears to be the only way forward.", 1.1f, new Vector2(0, -1500), Mission.TierTwo(), Mission.TierTwoBosses(), null, true)
+        "Flight of the bumblebee.", "The enemy fleet's fastest fighter appears to have arrived to this planet and is blocking our path.\nDefeating it appears to be the only way forward.", 1.1f, new Vector2(0, -1500), Mission.TierTwo(), Mission.TierTwoBosses(), null, true)
         { playerDocked = true },
 
         new([new Planet(Vector2.Zero, Vector2.Zero, 150, 3, true, Color.OldLace)],
@@ -171,6 +171,12 @@ public class EntityManager
         { isAggressive = true, playerProgression = 4, tip = "You can now construct the makeshift mothership in the construct menu.\n Requires 3 scrap.", relaunchable = true },
 
         new Mission([], [], "Penultimate", "", 1, Vector2.Zero, [], []),
+    ];
+    public List<(float distance, List<int> prerequisites, int system)> Systems { get; } =
+    [
+        (200, [], 0), (160, [0], 0), (140, [0], 0), (100, [1, 2], 0), (400, [3], 0), (50, [3], 0),
+        (210, [], 1), (170, [6], 1), (145, [7], 1), (130, [8], 1), (150, [9], 1),
+        (200, [], 2), (150, [11], 2), (100, [12], 2), (80, [13], 2), (60, [14], 2), (0, [15], 2)
     ];
     public Mission GetMission(int _index)
     {
