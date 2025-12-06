@@ -209,11 +209,13 @@ public static class EventHandler
     {
         Mission mission = Engine.SaveGame.CurrentMission;
         bool completed = Engine.SaveGame.CurrentMissionCompleted;
+        bool isDangerous = Engine.SaveGame.FleetSystem > Engine.EntityManager.Systems[Engine.SaveGame.CurrentMissionIndex].system;
         UI.MissionName.text = mission.Name;
         UI.MissionDescription.text = mission.Description;
         UI.IsComplete.text = completed ? "Completed" : "Not Completed";
         UI.IsComplete.textColor = completed ? Color.Green : Color.Red;
         UI.SelectMission.textColor = completed && mission.relaunchable ? Color.Gray : Color.Yellow;
+        UI.AlertText.text = isDangerous ? "Danger: Fleet Detected" : "";
     }
     public static void UpdateScrapText()
     {

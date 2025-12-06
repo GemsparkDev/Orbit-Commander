@@ -40,7 +40,7 @@ public class Mission
     private float maxWaveTimer = 5;
     private bool currentWaveActive = false;
 
-    public Mission(Planet[] _planets, List<ICondition> _missionObjectives, string _name, string _description, float _timerModifier, Vector2 _playerPosition, List<(int, DelegateEnemy)> _enemies, List<DelegateEnemy> _bosses, Func<Cutscene> _cutscene = null, bool _escapeVehicle = false)
+    public Mission(Planet[] _planets, List<ICondition> _missionObjectives, string _name, string _description, float _timerModifier, Vector2 _playerPosition, List<(int, DelegateEnemy)> _enemies, List<DelegateEnemy> _bosses, Func<Cutscene> _cutscene = null, bool _escapeVehicle = false, bool _isInFleet = false)
     {
         Name = _name;
         Description = _description;
@@ -61,7 +61,7 @@ public class Mission
         {
             escapeVehicle = new EntityConstructor(Enemy.NewPickupDrone, new Vector2(-2000, -2000), Vector2.Zero, 0);
         }
-        if (Engine.SaveGame.FleetSystem > Engine.EntityManager.Systems[Engine.SaveGame.CurrentMissionIndex].system)
+        if (_isInFleet)
         {
             isAggressive = true;
             if (TimerModifier != -1)
@@ -444,7 +444,7 @@ public class Mission
         {
             _planets[i] = planets[i].Copy();
         }
-        return new Mission(_planets, CopyObjectives, Name, Description, TimerModifier, playerPosition, enemyCreditValues, bosses, cutscene, escapeVehicle != null)
+        return new Mission(_planets, CopyObjectives, Name, Description, TimerModifier, playerPosition, enemyCreditValues, bosses, cutscene, escapeVehicle != null, Engine.SaveGame.FleetSystem > Engine.EntityManager.Systems[Engine.SaveGame.CurrentMissionIndex].system)
         { playerProgression = this.playerProgression, playerDocked = this.playerDocked, isAggressive = this.isAggressive, music = this.music, tip = this.tip, relaunchable = this.relaunchable };
     }
     private Vector2 NewSpawnLocation()

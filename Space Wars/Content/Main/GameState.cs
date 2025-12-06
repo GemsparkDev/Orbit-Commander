@@ -244,10 +244,21 @@ public class MissionSelect : GameState
                 continue;
             }
             var color = new Color(0, 255, 255);
+            if (Engine.SaveGame.FleetSystem > mission.system)
+            {
+                color = new Color(255, 127, 0);
+            }
             bool canSelect = true;
             if (Engine.SaveGame.CompletedMissions[i])
             {
-                color = new Color(255, 255, 0);
+                if(Engine.SaveGame.FleetSystem > mission.system)
+                {
+                    color = new Color(255, 255, 0);
+                }
+                else
+                {
+                    color = new Color(0, 255, 0);
+                }
             }
             foreach (var prerequisite in mission.prerequisites)
             {

@@ -84,6 +84,7 @@ public static class UI
     public static Button RepairModule { get; } = new Button(new Vector2(-85, 15), Assets.Get(Sprite.Button), Assets.TextFont, "Queue Module", Color.Yellow);
     public static Button CancelQueue { get; } = new Button(new Vector2(-85, 45), Assets.Get(Sprite.Button), Assets.TextFont, "Cancel Latest", Color.Red);
     public static Button SaveButton { get; } = new Button(new Vector2(0, -60), Assets.Get(Sprite.WideButton), Assets.TextFont, "Save & Exit", Color.LightBlue);
+    public static Decal AlertText { get; } = new Decal(new Vector2(0, 60), Assets.TextFont, "", Color.Yellow, 10);
 
     //Pickup Drone Menu
     public static Button LaunchButton { get; } = new Button(new Vector2(-20, 0), Assets.Get(Sprite.Button), Assets.TextFont, "Leave", Color.LightBlue);
@@ -387,6 +388,7 @@ public static class UI
         MissionSelect.AddWidget(RepairModule as IFunctional, 1);
         MissionSelect.AddWidget(CancelQueue as IFunctional, 1);
         MissionSelect.AddWidget(SaveButton as IFunctional, 0);
+        MissionSelect.AddWidget(AlertText, 0);
 
         PickupDroneMenu.AddWidget(LaunchButton as IFunctional);
 
