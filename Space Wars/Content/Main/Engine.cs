@@ -55,6 +55,7 @@ public class Engine : Game
         Window.Title = ("Orbit Commander");
         graphics.PreferredBackBufferWidth = GraphicsDevice.Adapter.CurrentDisplayMode.Width;
         graphics.PreferredBackBufferHeight = GraphicsDevice.Adapter.CurrentDisplayMode.Height;
+        Window.IsBorderless = true;
         //graphics.IsFullScreen = true;
         graphics.ApplyChanges();
 
@@ -115,6 +116,12 @@ public class Engine : Game
             float i = UI.UIScaleSlider.sliderInterval;
             UIManager.UIScale = (i + 1f) * BackBuffer.X / ScreenSize.X;
             UI.UIScale.text = $"UI Scale: {Math.Truncate((i + 1) * 10) / 10}";
+        });
+        UI.ApplyChanges.AddBehaviour(delegate()
+        {
+            Self.Window.IsBorderless = UI.type == 1;
+            Self.graphics.IsFullScreen = UI.type == 2;
+            Self.graphics.ApplyChanges();
         });
         UI.AddUIElements();
     }
