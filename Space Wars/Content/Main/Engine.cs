@@ -121,6 +121,9 @@ public class Engine : Game
         {
             Self.Window.IsBorderless = UI.type == 1;
             Self.graphics.IsFullScreen = UI.type == 2;
+            Self.graphics.PreferredBackBufferWidth = (int)UI.resolutions[UI.selectedResolution].X;
+            Self.graphics.PreferredBackBufferHeight = (int)UI.resolutions[UI.selectedResolution].Y;
+            BackBuffer = UI.resolutions[UI.selectedResolution];
             Self.graphics.ApplyChanges();
         });
         UI.AddUIElements();

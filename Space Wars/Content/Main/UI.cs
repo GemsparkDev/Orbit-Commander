@@ -45,6 +45,8 @@ public static class UI
     public static Button LoadButton { get; } = new Button(new Vector2(0, 0), Assets.Get(Sprite.WideButton), Assets.TextFont, "Load", Color.White);
     public static Decal WindowType { get; } = new Decal(new Vector2(-80, -15), null, Assets.TextFont, "Borderless Window", Color.White, 10);
     public static Button NextWindowType { get; } = new Button(new Vector2(-150, 10), Assets.Get(Sprite.Button), Assets.TextFont, "Next", Color.White );
+    public static Decal Resolution { get; } = new Decal(new Vector2(-50, 45), null, Assets.TextFont, "1920 x 1080", Color.White, 10);
+    public static Button NextResolution { get; } = new Button(new Vector2(-150, 45), Assets.Get(Sprite.Button), Assets.TextFont, "Next Resolution", Color.White);
     public static Button ApplyChanges { get; } = new Button(new Vector2(-50, 10), Assets.Get(Sprite.Button), Assets.TextFont, "Apply changes", Color.White);
 
     //Pause Menu
@@ -142,6 +144,8 @@ public static class UI
     public static ItemSlot<Module> SecondarySlot { get; private set; } = new ItemSlot<Module>(new Vector2(-GarageMenu.Size.X / 4 - 25, 50), Assets.Get(Sprite.EmptySlot), Engine.UIManager, (int)ModuleType.Guns);
 
     public static int type = 1;
+    public static Vector2[] resolutions = new Vector2[2] { new Vector2(1920, 1080), new Vector2(640, 480)  };
+    public static int selectedResolution = 0;
 
     public static void AddUIElements()
     {
@@ -186,6 +190,15 @@ public static class UI
                     break;
             }
         }); //Write to config?
+        NextResolution.AddBehaviour(delegate () 
+        {
+            selectedResolution++;
+            if(selectedResolution >= resolutions.Length)
+            {
+                selectedResolution = 0;
+            }
+            Resolution.text = $"{resolutions[selectedResolution].X} x {resolutions[selectedResolution].Y}";
+        });
         SFXSlider.SetInterval(1, 1);
         MusicSlider.SetInterval(0, 1);
         UIScaleSlider.SetInterval(1, 1);
@@ -368,6 +381,8 @@ public static class UI
         MainMenu.AddWidget(LoadButton as IFunctional, 0);
         MainMenu.AddWidget(WindowType, 1);
         MainMenu.AddWidget(NextWindowType as IFunctional, 1);
+        MainMenu.AddWidget(Resolution, 1);
+        MainMenu.AddWidget(NextResolution as IFunctional, 1);
         MainMenu.AddWidget(ApplyChanges as IFunctional, 1);
 
         PauseMenu.AddWidget(QuitToMissionButton as IFunctional);
