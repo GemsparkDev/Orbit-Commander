@@ -124,6 +124,7 @@ public class Engine : Game
             Self.graphics.PreferredBackBufferWidth = (int)UI.resolutions[UI.selectedResolution].X;
             Self.graphics.PreferredBackBufferHeight = (int)UI.resolutions[UI.selectedResolution].Y;
             BackBuffer = UI.resolutions[UI.selectedResolution];
+            UIManager.BackBuffer = BackBuffer;
             Self.graphics.ApplyChanges();
         });
         UI.AddUIElements();

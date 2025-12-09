@@ -149,6 +149,7 @@ public static class Assets
         Sprites.Add(Sprite.SwitchThree, Content.Load<Texture2D>("Images/UI_40-3"));
         Sprites.Add(Sprite.SwitchFour, Content.Load<Texture2D>("Images/UI_40-4"));
         Sprites.Add(Sprite.SwitchFive, Content.Load<Texture2D>("Images/UI_40-5"));
+        Sprites.Add(Sprite.Overlay, Content.Load<Texture2D>("Images/UI_42"));
 
         Sprites.Add(Sprite.SmeltIcon, Content.Load<Texture2D>("Images/UI_19"));
         Sprites.Add(Sprite.RepairIcon, Content.Load<Texture2D>("Images/UI_20"));
