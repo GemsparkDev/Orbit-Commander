@@ -153,6 +153,8 @@ public enum Sprite
     FurnaceReal,
     Shield,
     ShieldReal,
+    Lidar,
+    LidarReal,
 
     SpiralShot,
     PulseShot,

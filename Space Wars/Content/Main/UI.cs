@@ -145,7 +145,7 @@ public static class UI
     public static ItemSlot<Module> SecondarySlot { get; private set; } = new ItemSlot<Module>(new Vector2(-GarageMenu.Size.X / 4 - 25, 50), Assets.Get(Sprite.EmptySlot), Engine.UIManager, (int)ModuleType.Guns);
 
     public static int type = 1;
-    public static Vector2[] resolutions = new Vector2[2] { new Vector2(1920, 1080), new Vector2(640, 480)  };
+    public static Vector2[] resolutions = [ new Vector2(1920, 1080), new Vector2(640, 480) ];
     public static int selectedResolution = 0;
 
     public static void AddUIElements()

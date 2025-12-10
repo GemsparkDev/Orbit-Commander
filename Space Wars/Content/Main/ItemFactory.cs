@@ -50,7 +50,7 @@ public static class ItemFactory
         { Modules.Orion, new ModuleData(Sprite.EngineModule, Sprite.EngineModule, "Orion", (int)ModuleType.Engines, 20, typeof(OrionEngine)) },
 
         { Modules.Sensors, new ModuleData(Sprite.SensorModule,Sprite.SensorModule, "Sensors", (int)ModuleType.Sensors, 20, typeof(Sensors)) },
-        { Modules.Lidar, new ModuleData(Sprite.SensorModule,Sprite.SensorModule, "Lidar", (int)ModuleType.Sensors, 20, typeof(Lidar)) },
+        { Modules.Lidar, new ModuleData(Sprite.LidarReal,Sprite.Lidar, "Lidar", (int)ModuleType.Sensors, 20, typeof(Lidar)) },
         { Modules.Radar, new ModuleData(Sprite.SensorModule,Sprite.SensorModule, "Radar", (int)ModuleType.Sensors, 20, typeof(Radar)) },
         { Modules.PulseEmitter, new ModuleData(Sprite.SensorModule,Sprite.SensorModule, "Pulse Emitter", (int)ModuleType.Sensors, 20, typeof(PulseEmitter)) },
 
