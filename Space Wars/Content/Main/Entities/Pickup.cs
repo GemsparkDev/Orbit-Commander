@@ -46,7 +46,8 @@ public class Pickup : Entity, IData
     }
     public override void Update()
     {
-        if (!Player.leashedMaterials.Contains(this))
+        int index = Player.leashedMaterials.IndexOf(this);
+        if (index == -1)
         {
             if (isFriendly == Player.isFriendly && EntityManager.DistanceSqr(Player, this) < 1375 && Player.leashedMaterials.Count < 3 && Player.canGatherResources)
             {
@@ -64,20 +65,19 @@ public class Pickup : Entity, IData
         }
         else
         {
-            Vector2 playerVelocity = Player.velocity;
-            Vector2 leashPosition = Player.position - Util.ToUnitVector(Player.angle) * 25;
-            float distance = EntityManager.DistanceSqr(position, leashPosition);
-            if (distance > 16)
+            Entity parent;
+            if(index == 0)
             {
-                velocity += Vector2.Normalize(leashPosition - position) * Engine.DeltaSeconds * distance / 10;
-                velocity += (playerVelocity - velocity) * Engine.DeltaSeconds / Math.Max(MathF.Sqrt(distance) / 50, 0.0333f);
+                parent = Player;
             }
-            Vector2 relativeVelocity = velocity - Player.velocity;
-            float relativeSpeed = relativeVelocity.Length();
-            if (relativeSpeed > 3)
+            else
             {
-                velocity = velocity - relativeVelocity + relativeVelocity * 3 / relativeSpeed;
+                parent = Player.leashedMaterials[index - 1];
             }
+            var relativePos = Vector2.Normalize(parent.position - position);
+            velocity += (parent.position - relativePos * 20 - position) * Engine.DeltaSeconds * 0.4f;
+            float offset = Util.FIED(0.05f);
+            velocity = parent.velocity * (1 - offset) + velocity * (offset);
         }
         position += velocity * Engine.DeltaSeconds * 60;
         angle += angularVelocity * Engine.DeltaSeconds * 60;

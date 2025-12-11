@@ -31,7 +31,7 @@ public class Player : Entity
         { ModuleType.Guns, new Basic() },
         { ModuleType.Engines, new StandardEngine() },
         { ModuleType.Sensors, new Sensors() },
-        { ModuleType.Core, new SummonGrapplingHook() }
+        { ModuleType.Core, new Dash() }
     };
     public Module SecondaryWeapon { get; set; } = null;
 
@@ -494,7 +494,7 @@ public class Player : Entity
                     SoundManager.PlayGlobalSound(Assets.Get(Sound.CloseMenu));
                     canGatherResources = false;
                 }
-                if (Input.OldState.IsKeyUp(Keys.Z) && Input.NewState.IsKeyDown(Keys.Z))
+                if (Input.OldState.IsKeyUp(Keys.F) && Input.NewState.IsKeyDown(Keys.F))
                 {
                     leashedMaterials = [];
                 }

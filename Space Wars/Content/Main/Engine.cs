@@ -197,6 +197,7 @@ public class Engine : Game
         UI.Timer.text = $"{IngameTime.DrawText}";
         float speed = Util.FIED(0.01f);
         offset = new Vector2((offset.X * (speed) + dir * BackBuffer.X * (1-speed)), 0);
+        UI.GlobalMenu.position = new Vector2(offset.X, 0);
         base.Update(gameTime);
     }
     public void Rotate(int _dir)
@@ -206,15 +207,7 @@ public class Engine : Game
             return;
         }
         dir = Math.Clamp(dir + _dir, -1, 0);
-        if(dir == -1)
-        {
-            UIManager.ScreenWindow = UI.RepairMenu;
-            EventHandler.UpdateModulesStatus();
-        }
-        else
-        {
-            UIManager.ScreenWindow = UI.GlobalMenu;
-        }
+        EventHandler.UpdateModulesStatus();
     }
     public static Pickup MoveSelectedPickup()
     {

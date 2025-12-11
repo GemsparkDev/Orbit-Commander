@@ -27,7 +27,6 @@ public static class UI
     public static TabbedWindow UpgradeMenu { get; } = new TabbedWindow(center, Assets.Get(Sprite.GargantuanPanel),
         Assets.Get(Sprite.Tab), Assets.Get(Sprite.SelectedTab), Assets.Get(Sound.Interact), 2);
     public static Window SettingsMenu { get; } = new Window(center, Assets.Get(Sprite.GargantuanPanel));
-    public static Screen RepairMenu { get; } = new Screen() { enabled = true };
     public static Screen GlobalMenu { get; } = new Screen() { enabled = true };
 
     //Main Menu
@@ -128,14 +127,14 @@ public static class UI
     public static Decal UpgradeText { get; } = new Decal(new Vector2(-30, -20), Assets.TextFont, "", Color.White, 10);
 
     //Repair Menu
-    public static Slider RestartSlider { get; } = new Slider(Engine.Line, new Vector2(-100, 50), new Vector2(50, 2), true, Color.Cyan, Color.Black);
+    public static Slider RestartSlider { get; } = new Slider(Engine.Line, new Vector2(-100 + Engine.BackBuffer.X / 2, 50), new Vector2(50, 2), true, Color.Cyan, Color.Black);
     public static Decal[] StatusLights { get; } = new Decal[5];
-    public static Slider RestartSwitch { get; } = new Slider(Engine.Line, new Vector2(-100, 0), Assets.DimsOf(Sprite.SwitchOne) + new Vector2(2, 4), false, Color.Transparent, Color.Transparent);
-    public static Decal Switch { get; } = new Decal(RestartSwitch.Offset + new Vector2(RestartSwitch.Size.X, 0), Assets.Get(Sprite.SwitchFive));
-    public static Decal FuseCounter { get; } = new Decal(new Vector2(-60, -55), Assets.TextFont, "0", Color.Yellow, 10);
+    public static Slider RestartSwitch { get; } = new Slider(Engine.Line, new Vector2(-100 + Engine.BackBuffer.X / 2, 0), Assets.DimsOf(Sprite.SwitchOne) + new Vector2(2, 4), false, Color.Transparent, Color.Transparent);
+    public static Decal Switch { get; } = new Decal(RestartSwitch.Offset + new Vector2(RestartSwitch.Size.X - Engine.BackBuffer.X / 2, 0), Assets.Get(Sprite.SwitchFive));
+    public static Decal FuseCounter { get; } = new Decal(new Vector2(-60 + Engine.BackBuffer.X / 2, -55), Assets.TextFont, "0", Color.Yellow, 10);
     public static Button[,] Fuses { get; } = new Button[4, 5];
     public static Decal[] ModuleIcons { get; } = new Decal[5];
-    public static Decal FragilityTextbox { get; } = new Decal(new Vector2(0, -55), Assets.TextFont, "Fuse Fragility: Med", Color.Yellow, 6);
+    public static Decal FragilityTextbox { get; } = new Decal(new Vector2(Engine.BackBuffer.X / 2, -55), Assets.TextFont, "Fuse Fragility: Med", Color.Yellow, 6);
 
     //Misc
     public static Button SidePanelClose { get; } = new Button(new Vector2(0, -Assets.Get(Sprite.ToggleButton).Height / 2 + Assets.Get(Sprite.Terminal).Height / 2), Assets.Get(Sprite.ToggleButton));
@@ -506,15 +505,15 @@ public static class UI
         GarageMenu.AddWidget(SecondarySlot as IFunctional);
         MissionSelect.AddWidget(SecondarySlot as IFunctional, 1);
 
-        RepairMenu.AddWidget(RestartSwitch as IFunctional, (int)Alignment.Center);
-        RepairMenu.AddWidget(RestartSlider as IFunctional, (int)Alignment.Center);
-        RepairMenu.AddWidget(Switch, (int)Alignment.Center);
-        RepairMenu.AddWidget(FuseCounter, (int)Alignment.Center);
+        GlobalMenu.AddWidget(RestartSwitch as IFunctional, (int)Alignment.Center);
+        GlobalMenu.AddWidget(RestartSlider as IFunctional, (int)Alignment.Center);
+        GlobalMenu.AddWidget(Switch, (int)Alignment.Center);
+        GlobalMenu.AddWidget(FuseCounter, (int)Alignment.Center);
         for (int i = 0; i < 4; i++)
         {
             for (int j = -2; j < 3; j++)
             {
-                var fuse = new Button(new Vector2(i * 10, j * 20), Assets.Get(Sprite.Fuse));
+                var fuse = new Button(new Vector2(i * 10 + Engine.BackBuffer.X / 2, j * 20), Assets.Get(Sprite.Fuse));
                 //Not sure why this works, don't touch
                 int x = j + 2;
                 int y = i;
@@ -523,15 +522,15 @@ public static class UI
                     Engine.SaveGame.Player.ToggleFuse(x, y);
                 });
                 Fuses[i, j + 2] = fuse;
-                RepairMenu.AddWidget(fuse as IFunctional, (int)Alignment.Center);
+                GlobalMenu.AddWidget(fuse as IFunctional, (int)Alignment.Center);
             }
         }
-        RepairMenu.AddWidget(FragilityTextbox, (int)Alignment.Center);
+        GlobalMenu.AddWidget(FragilityTextbox, (int)Alignment.Center);
         for (int i = 0; i < 5; i++)
         {
             float y = (i - 2) * 20;
-            RepairMenu.AddWidget(ModuleIcons[i] = new Decal(new Vector2(-15, y), null), (int)Alignment.Center);
-            RepairMenu.AddWidget(StatusLights[i] = new Decal(new Vector2(-30, y), Assets.Get(Sprite.Circle)), (int)Alignment.Center);
+            GlobalMenu.AddWidget(ModuleIcons[i] = new Decal(new Vector2(-15 + Engine.BackBuffer.X / 2, y), null), (int)Alignment.Center);
+            GlobalMenu.AddWidget(StatusLights[i] = new Decal(new Vector2(-30 + Engine.BackBuffer.X / 2, y), Assets.Get(Sprite.Circle)), (int)Alignment.Center);
         }
 
         Engine.UIManager.AddContainer(MainMenu);
