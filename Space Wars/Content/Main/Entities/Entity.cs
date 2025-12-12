@@ -37,6 +37,7 @@ public abstract class Entity
     {
         get { return texture == null ? Vector2.Zero : new Vector2(texture.Width, texture.Height); }
     }
+    public float Temperature { get; private set; } //-1: Freeze, 0: Neutral, 1: Burn
     public virtual void LowerCooldown() { }
     protected static Player Player => Engine.SaveGame.Player;
     public StatusHolder StatusHolder { get; private set; } = new();
@@ -60,6 +61,7 @@ public abstract class Entity
         StatusHolder.Update(this);
         collider.position = position;
         collider.Update();
+        Temperature *= Util.FIED(0.707f); //Radiative
     }
     public abstract bool Collide(int _damage, bool _ignoreImmunity = false);
     public void ClearAll()
@@ -89,6 +91,14 @@ public abstract class Entity
     public void Reveal(float _duration)
     {
         revealDuration = _duration;
+    }
+    public void ApplyWork(float _q)
+    {
+        Temperature += _q * Engine.DeltaSeconds;
+    }
+    public void ConductHeat(float _temp, float _rate)
+    {
+        Temperature += (_temp - Temperature) * _rate * Engine.DeltaSeconds;
     }
     public virtual void Draw(SpriteBatch _spriteBatch)
     {

@@ -9,7 +9,6 @@ using System.Collections.Generic;
 using System.Linq;
 using UILib.Content.Main;
 using Space_Wars.Content.Main.Story;
-using static Assimp.Metadata;
 
 namespace Space_Wars.Content.Main;
 
@@ -29,6 +28,7 @@ public class EntityManager
     public int MissionLength => missions.Count;
     private readonly List<Mission> missions =
 [
+    //Possibly add a few cold related missions?
     new Mission([new Planet(Vector2.Zero, Vector2.Zero, 10000, 8, true, Color.Cyan, false),
         new Planet(new Vector2(1000, 0), Planet.GetOrbitalVelocity(new Vector2(1000, 0), Vector2.Zero, 10000), 250, 1.5f, false, Color.Cyan) ],
         [ new EntityCondition(new EntityConstructor(Enemy.NewMothership, new Vector2(0, -8*50 - Assets.DimsOf(Sprite.Mothership).Y / 2), Vector2.Zero, 0f), [ Condition.Protect, Condition.CustomIncomplete ]),
@@ -68,7 +68,7 @@ public class EntityManager
         "Warp Gate", "Scans indicate that a large enemy fleet is coming our way after the loss of their prototype.\nRecommended action: Leave the system immediately.", -1, new Vector2(0, 500), Mission.TierOne(), Mission.TierOneBosses()) { music = false },
 
         //Note: The player construct menu and the Quantum Resonator both use the name of this mission for their special behavior. When changing, make sure their name is updated as well.
-        new Mission([new Planet(Vector2.Zero, Vector2.Zero, 50000, 12, true, new Color(255, 219, 0), true, 1.5f) ],
+        new Mission([new Planet(Vector2.Zero, Vector2.Zero, 50000, 12, true, new Color(255, 219, 0), true, 1.5f) { Temperature = 0.5f } ],
         [],
         "???", "Sensor data shows that this site has an unusually high temperature.\nInvestigate possible enemy interferance.", -1, new Vector2(-2000, -2000), Mission.TierOne(), Mission.TierOneBosses(), null, true) { playerDocked = true, music = false, relaunchable = true },
 
@@ -154,7 +154,7 @@ public class EntityManager
         "Veiled", "Sensors indicate that our actions have been spied on by the enemy.\nDestroy it.", 1.1f, new Vector2(0, -1500), Mission.TierThree(), Mission.TierThreeBosses(), null, true) 
         { playerDocked = true},
 
-        new Mission([new Planet(Vector2.Zero, Vector2.Zero, 160000, 6, true, new Color(0.9f, 1f, 0.75f), false, 50f) { isSun = true },
+        new Mission([new Planet(Vector2.Zero, Vector2.Zero, 160000, 6, true, new Color(0.9f, 1f, 0.75f), false, 50f) { isSun = true, Temperature = 5 },
         new Planet(new Vector2(0, 2000), Planet.GetOrbitalVelocity(new Vector2(0, 2000) * 0.99f, Vector2.Zero, 160000), 8000, 4, false, new Color(0.95f, 0.2f, 0.1f))],
         [
             new EntityCondition(new EntityConstructor(Enemy.NewEpitomeBoss, new Vector2(0, 2800), Vector2.Zero, 0), [ Condition.Kill ]),

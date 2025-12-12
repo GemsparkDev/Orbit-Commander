@@ -55,7 +55,7 @@ public class Engine : Game
         Window.Title = ("Orbit Commander");
         graphics.PreferredBackBufferWidth = GraphicsDevice.Adapter.CurrentDisplayMode.Width;
         graphics.PreferredBackBufferHeight = GraphicsDevice.Adapter.CurrentDisplayMode.Height;
-        Window.IsBorderless = true;
+        //Window.IsBorderless = true;
         //graphics.IsFullScreen = true;
         graphics.ApplyChanges();
 

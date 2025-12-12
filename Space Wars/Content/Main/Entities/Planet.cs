@@ -21,6 +21,8 @@ public class Planet
     private Color color;
     private float time = 0;
     private float atmosphereStrength = 0;
+    public float Temperature { get; set; } = 0;
+
     public Planet(Vector2 _position, Vector2 _velocity, float _mass, float _radius, bool _isImmovable, Color _color, bool _hasRing = false, float _atmosphereStrength = 0)
     {
         position = _position;
@@ -74,9 +76,20 @@ public class Planet
             {
                 float strength = GetAtmosphereDensity(distance);
                 //Drag
-                acceleration += (velocity - _entity.velocity) * strength / 40;
-                //Buoyancy
-                acceleration += relativePosition / distance * strength * mass / distance / distance / 5;
+                Vector2 relativeVelocity = (velocity - _entity.velocity);
+                Vector2 drag = relativeVelocity * strength / 40;
+                acceleration += drag;
+                _entity.ApplyWork((drag * relativeVelocity * relativeVelocity).Length() / 27);
+                if(isSun)
+                {
+                    _entity.ConductHeat(Temperature * strength, MathF.Tanh(strength));
+                }
+                else
+                {
+                    _entity.ConductHeat(Temperature, MathF.Tanh(strength));
+                }
+                    //Buoyancy
+                    acceleration += relativePosition / distance * strength * mass / distance / distance / 5;
                 if (strength > 2)
                 {
                     _entity.StatusHolder.ApplyStatus(new Pressure(Color.Red, isSun));
@@ -106,6 +119,7 @@ public class Planet
                     ParticleManager.Add(new Particle(Assets.Get(Sprite.Dot), 10, normalVector * (radius + 2) + position, normalVector * val + new Vector2(Util.OneToNegOne(), Util.OneToNegOne()) * val / 2, 0, 0, color * 0.75f, Color.Transparent) { experienceGravity = true });
                 }
             }
+            _entity.ConductHeat(Temperature, 5);
             return Vector2.Zero;
         }
     }
@@ -237,7 +251,7 @@ public class Planet
     }
     public Planet Copy()
     {
-        Planet planet = new(position, velocity, mass, radius / 50, isImmovable, color, hasRing, atmosphereStrength) { isSun = this.isSun};
-        return planet;
+        return new Planet(position, velocity, mass, radius / 50, isImmovable, color, hasRing, atmosphereStrength)
+        { isSun = this.isSun, Temperature = this.Temperature };
     }
 }

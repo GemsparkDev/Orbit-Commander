@@ -330,6 +330,7 @@ public class Player : Entity
     }
     public void RestrictedActions()
     {
+        Engine.WriteLine(Temperature);
         //Prevents undocking when in the garage menu
         if (Progression > -1 && IsEnabled)
         {
