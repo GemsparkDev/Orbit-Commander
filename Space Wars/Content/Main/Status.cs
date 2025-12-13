@@ -16,10 +16,12 @@ public abstract class Status(Sprite _icon)
     public abstract void Reset();
     public virtual int StealthChange() { return 0; }
     public virtual int SensingChange() { return 0; }
+    public virtual int ModifyDamage(int _damage) { return _damage; }
     public enum StatusType
     {
         Bomb,
         Fire,
+        Frost,
         Healing,
         Berserk,
     }
@@ -56,6 +58,15 @@ public class StatusHolder
             }
         }
         effects.Add(_status);
+    }
+    public virtual int ModifyDamage(int _damage)
+    {
+        int damage = _damage;
+        foreach(var status in effects)
+        {
+            damage = status.ModifyDamage(damage);
+        }
+        return damage;
     }
     public void Draw(SpriteBatch _spriteBatch, Entity _parent)
     {
@@ -142,6 +153,33 @@ public class Fire(float _duration, Color _color) : Status(Sprite.Knob)
         duration = initialDuration;
     }
 }
+public class Frost(float _duration) : Status(Sprite.Knob)
+{
+    float initialDuration = _duration;
+    float duration = _duration;
+
+    public override StatusType Type { get; } = StatusType.Frost;
+
+    public override void Update(Entity _parent)
+    {
+        if (duration > 0)
+        {
+            duration -= Engine.DeltaSeconds;
+        }
+        else
+        {
+            IsExpired = true;
+        }
+    }
+    public override int ModifyDamage(int _damage)
+    {
+        return _damage * 2;
+    }
+    public override void Reset()
+    {
+        duration = initialDuration;
+    }
+}
 public class Healing(float _duration) : Status(Sprite.Knob)
 {
     float initialDuration = _duration;
@@ -179,6 +217,10 @@ public class Healing(float _duration) : Status(Sprite.Knob)
         {
             IsExpired = true;
         }
+    }
+    public override int ModifyDamage(int _damage)
+    {
+        return (int)(_damage * 0.5f);
     }
     public override void Reset()
     {
@@ -226,6 +268,10 @@ public class Berserk(float _timeLeft) : Status(Sprite.Knob)
     public override int StealthChange()
     {
         return -1;
+    }
+    public override int ModifyDamage(int _damage)
+    {
+        return (int)(_damage * 1.5f);
     }
 }
 public class Pressure(Color _color, bool _isFatal) : Status(Sprite.Knob)

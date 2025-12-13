@@ -636,6 +636,7 @@ public class Player : Entity
         {
             _damage = module.Value.OnCollide(_damage);
         }
+        _damage = StatusHolder.ModifyDamage(_damage);
         if (_damage > 0 && (invincibilityCooldown <= 0 || _ignoreImmunity))
         {
             Engine.ShakeScreen(0.08f * _damage);

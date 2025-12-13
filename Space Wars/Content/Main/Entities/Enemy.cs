@@ -144,6 +144,7 @@ public class Enemy : Entity
     }
     public override bool Collide(int damage, bool _ignoreImmunity = false)
     {
+        damage = StatusHolder.ModifyDamage(damage);
         if (deleteOnCollide && damage >= 0)
         {
             wasHit = true;
@@ -154,6 +155,7 @@ public class Enemy : Entity
         if (damage > 0)
         {
             wasHit = true;
+            ApplyWork(damage);
             SoundManager.PlaySound(hitSound, position);
             health -= damage;
             Engine.ShakeScreen(10 / ((position - Engine.Camera.Position).Length() + 200) * damage);

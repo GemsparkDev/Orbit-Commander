@@ -589,6 +589,7 @@ public class PrismArray() : Module(Modules.PrismArray)
             if (enemy is Enemy)
             {
                 enemy.Collide(1);
+                enemy.ApplyWork(-10);
                 enemy.StatusHolder.ApplyStatus(new Fire(0.5f, Color.Cyan));
             }
         }
@@ -609,7 +610,7 @@ public class MatrixLauncher() : Module(Modules.MatrixLauncher)
         }
         Vector2 vel = Player.IdealSpeedWithVelocity(12);
         Engine.EntityManager.Add(new FlameBolt(Player.position, vel + new Vector2(Util.OneToNegOne(), Util.OneToNegOne()) / 2, true, 6,
-            new ParticleEmitter(Assets.Get(Sprite.Circle), Player.position, 0, Color.Cyan) { sprayCone = MathF.PI * 2 / 3, sprayAngle = Util.ToAngle(vel - Player.velocity), speedOfEmission = 0.5f }, 4));
+            new ParticleEmitter(Assets.Get(Sprite.Circle), Player.position, 0, Color.Cyan) { sprayCone = MathF.PI * 2 / 3, sprayAngle = Util.ToAngle(vel - Player.velocity), speedOfEmission = 0.5f }, 4, 0, -20));
         SoundManager.PlaySound(Assets.Get(Sound.SniperFire), Player.position);
         cooldown = 1.5f;
         Engine.ShakeScreen(0.5f);

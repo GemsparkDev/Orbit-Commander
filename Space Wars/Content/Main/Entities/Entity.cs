@@ -62,6 +62,14 @@ public abstract class Entity
         collider.position = position;
         collider.Update();
         Temperature *= Util.FIED(0.707f); //Radiative
+        if(Temperature > 1)
+        {
+            StatusHolder.ApplyStatus(new Fire(Temperature, Color.Orange));
+        }
+        if(Temperature < -1)
+        {
+            StatusHolder.ApplyStatus(new Frost(-Temperature));
+        }
     }
     public abstract bool Collide(int _damage, bool _ignoreImmunity = false);
     public void ClearAll()
