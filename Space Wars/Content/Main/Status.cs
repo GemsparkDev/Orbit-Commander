@@ -123,7 +123,7 @@ public class Fire(float _duration, Color _color) : Status(Sprite.Knob)
         else
         {
             fireCooldown = 0.05f;
-            ParticleManager.Add(new Particle(Assets.Get(Sprite.Circle), 0.5f + Util.Random.NextSingle() / 10, _parent.position - _parent.velocity, 
+            ParticleManager.Add(new Particle(Assets.Get(Sprite.Circle), 0.5f + Util.Random.NextSingle() / 10, _parent.position, 
                 _parent.velocity + new Vector2(Util.OneToNegOne() / 3, -Util.Random.NextSingle() - 0.5f), 0, Util.OneToNegOne() / 5, _color, Color.Transparent));
         }
         if (attackCooldown > 0)
@@ -157,11 +157,23 @@ public class Frost(float _duration) : Status(Sprite.Knob)
 {
     float initialDuration = _duration;
     float duration = _duration;
+    float fireCooldown = 0.25f;
 
     public override StatusType Type { get; } = StatusType.Frost;
 
     public override void Update(Entity _parent)
     {
+        if(fireCooldown > 0)
+        {
+            fireCooldown -= Engine.DeltaSeconds;
+        }
+        else
+        {
+            fireCooldown = 0.25f;
+            Vector2 pos = Util.ToUnitVector(Util.Random.NextSingle() * MathF.Tau) * Util.Random.NextSingle() * 8;
+            ParticleManager.Add(new Particle(Assets.Get(Sprite.Circle), 1.5f + Util.Random.NextSingle() / 5, _parent.position + pos,
+             _parent.velocity, 0, 0, Color.Cyan, Color.Transparent) { experienceGravity = true });
+        }
         if (duration > 0)
         {
             duration -= Engine.DeltaSeconds;

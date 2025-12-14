@@ -37,7 +37,7 @@ public abstract class Entity
     {
         get { return texture == null ? Vector2.Zero : new Vector2(texture.Width, texture.Height); }
     }
-    public float Temperature { get; private set; } //-1: Freeze, 0: Neutral, 1: Burn
+    public float Temperature { get; private set; } = 0; //-1: Freeze, 0: Neutral, 1: Burn
     public virtual void LowerCooldown() { }
     protected static Player Player => Engine.SaveGame.Player;
     public StatusHolder StatusHolder { get; private set; } = new();
@@ -64,11 +64,11 @@ public abstract class Entity
         Temperature *= Util.FIED(0.707f); //Radiative
         if(Temperature > 1)
         {
-            StatusHolder.ApplyStatus(new Fire(Temperature, Color.Orange));
+            StatusHolder.ApplyStatus(new Fire(1, Color.Orange));
         }
         if(Temperature < -1)
         {
-            StatusHolder.ApplyStatus(new Frost(-Temperature));
+            StatusHolder.ApplyStatus(new Frost(1));
         }
     }
     public abstract bool Collide(int _damage, bool _ignoreImmunity = false);

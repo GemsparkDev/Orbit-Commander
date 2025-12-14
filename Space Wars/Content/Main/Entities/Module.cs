@@ -142,7 +142,7 @@ public class Reflective() : Module(Modules.Reflective)
 {
     public override int OnCollide(int _damage)
     {
-        if (Util.Random.Next(0, 3) == 0)
+        if (Util.Random.Next(0, 2) == 0)
         {
             for (float angle = 0; angle < MathF.Tau; angle += MathF.PI / 3)
             {
@@ -590,7 +590,6 @@ public class PrismArray() : Module(Modules.PrismArray)
             {
                 enemy.Collide(1);
                 enemy.ApplyWork(-10);
-                enemy.StatusHolder.ApplyStatus(new Fire(0.5f, Color.Cyan));
             }
         }
     }

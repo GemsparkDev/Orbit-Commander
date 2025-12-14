@@ -288,7 +288,7 @@ public class FlameBolt : Projectile
             return Math.Min((maxTimeLeft - timeLeft) * emitter.particleVelocity, emitter.particleVelocity * emitter.particleTimeAlive) * 60;
         } 
     }
-    public FlameBolt(Vector2 _position, Vector2 _velocity, bool _isFriendly, int _damage, float _timeLeft = 0.7f, float _particleVelocity = 1, int _stealth = 0, float _temp = 1)
+    public FlameBolt(Vector2 _position, Vector2 _velocity, bool _isFriendly, int _damage, float _timeLeft = 0.7f, float _particleVelocity = 1, int _stealth = 0, float _temp = 10)
         : base(Assets.Get(Sprite.Circle), _position, _velocity, 0, 0, _isFriendly, _damage, _stealth)
     {
         emitter = new ParticleEmitter(Assets.Get(Sprite.Circle), 0.75f, Vector2.Zero, 0, MathF.Tau, _particleVelocity, 750 * _particleVelocity * _particleVelocity * Math.Min(1, MathF.Sqrt(timeLeft)), new Color(1f, 1f, 0.25f, 1f), EmitterType.EmissionOverTime)
@@ -323,7 +323,8 @@ public class FlameBolt : Projectile
         angle += angularVelocity * Engine.DeltaSeconds * 60;
         if (emitter.EmitterType == EmitterType.Circle)
         {
-            emitter.particleVelocity = Math.Min((maxTimeLeft - timeLeft), 1) * 60;
+            float val = (1 - maxTimeLeft + timeLeft);
+            emitter.particleVelocity = Math.Min(1 - val * val, 1) * 100;
         }
         else
         {
@@ -342,7 +343,6 @@ public class FlameBolt : Projectile
                 piercingCooldown = 0.05f;
                 nearestEnemy.Collide(damage);
                 //Always apply effect even if no damage hit
-                nearestEnemy.StatusHolder.ApplyStatus(new Fire(2, emitter.particleColor));
                 nearestEnemy.ApplyWork(temp);
             }
         }

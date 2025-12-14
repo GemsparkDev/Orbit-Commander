@@ -27,13 +27,13 @@ public class Player : Entity
     };
     public Dictionary<ModuleType, Module> modules = new()
     {
-        { ModuleType.Hull, new Stealth() },
-        { ModuleType.Guns, new Basic() },
-        { ModuleType.Engines, new StandardEngine() },
+        { ModuleType.Hull, new Reflective() },
+        { ModuleType.Guns, new MatrixLauncher() },
+        { ModuleType.Engines, new PlasmaEngine() },
         { ModuleType.Sensors, new Sensors() },
         { ModuleType.Core, new Dash() }
     };
-    public Module SecondaryWeapon { get; set; } = null;
+    public Module SecondaryWeapon { get; set; } = new PrismArray();
 
     public Vector2 Direction => targetVector;
     public DockableComponent dockedEntity;
@@ -263,8 +263,8 @@ public class Player : Entity
         var planet = Engine.SaveGame.CurrentMission.Planet;
         if (position.Length() >= 50 * 50 + planet.radius)
         {
-            velocity *= (1 - Engine.DeltaSeconds);
-            velocity += Vector2.Normalize(-position) * (position.Length() - (50 * 50 + planet.radius)) * Engine.DeltaSeconds / 10;
+            velocity *= Util.FIED(0.1f);
+            velocity += Vector2.Normalize(-position) * (position.Length() - (50 * 50 + planet.radius)) * Engine.DeltaSeconds / 30;
         }
         base.Update();
         position += velocity * Engine.DeltaSeconds * 60;
@@ -376,7 +376,7 @@ public class Player : Entity
                         {
                             Vector2 dir = Util.ToUnitVector(angle);
                             Vector2 mouseDir = targetVector;
-                            if (dir.X * mouseDir.X + dir.Y * mouseDir.Y > (0.2f * constructs.Count) && dist > 500)
+                            if (i == 4)
                             {
                                 color = Color.White;
                                 ParticleManager.Add(new Particle(null, new Vector2(0, -100) + position, 0, Color.White) { drawText = constructs[(int)i].description });
@@ -422,7 +422,8 @@ public class Player : Entity
                         {
                             Vector2 dir = Util.ToUnitVector(angle);
                             Vector2 mouseDir = targetVector;
-                            if (dir.X * mouseDir.X + dir.Y * mouseDir.Y > (0.2f * types.Count) && dist > 500 && firstScrap != null)
+                            //dir.X * mouseDir.X + dir.Y * mouseDir.Y > (0.2f * types.Count) && dist > 500 && firstScrap != null
+                            if (i == 4)
                             {
                                 switch (types[i])
                                 {
@@ -462,7 +463,7 @@ public class Player : Entity
                                         }
                                         break;
                                     case "Resonator":
-                                        firstScrap.isExpired = true;
+                                        //firstScrap.isExpired = true;
                                         Engine.EntityManager.Add(Enemy.NewQuantumResonator(position));
                                         break;
                                 }

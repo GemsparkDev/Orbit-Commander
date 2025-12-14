@@ -79,7 +79,17 @@ public class Planet
                 Vector2 relativeVelocity = (velocity - _entity.velocity);
                 Vector2 drag = relativeVelocity * strength / 40;
                 acceleration += drag;
-                _entity.ApplyWork((drag * relativeVelocity * relativeVelocity).Length() / 27);
+                float q = (drag * relativeVelocity * relativeVelocity).Length() / 15;
+                for(float i = 0; i < 5 * 60 * Engine.DeltaSeconds; i++)
+                {
+                    if (Util.Random.NextSingle() < q * q / 2)
+                    {
+                        Vector2 pos = Util.ToUnitVector(Util.Random.NextSingle() * MathF.Tau) * Util.Random.NextSingle() * 8;
+                        ParticleManager.Add(new Particle(Assets.Get(Sprite.Circle), 0.5f + Util.Random.NextSingle() / 5, _entity.position + pos,
+                            (_entity.velocity + velocity) / 2, 0, 0, Color.Yellow * 0.5f, new Color(1f, 0.5f, 0f, 0f)){ experienceGravity = true });
+                    }
+                }
+                _entity.ApplyWork(q);
                 if(isSun)
                 {
                     _entity.ConductHeat(Temperature * strength, MathF.Tanh(strength));
