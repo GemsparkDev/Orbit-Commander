@@ -3,6 +3,13 @@
 Lagrange Commander is a game made using C# in monogame. It is a 2D top down wave based shooter where you must repair and upgrade your ship by salvaging from enemies you defeat. It features realistic N-Body gravitation, which affects all entities and projectiles.
   
 # Changelog
+0.6.8.9 - 12/13/2025
+ - Added and tweaked particle effects for fire, frost, and reentry.
+ - Increased the size of the matrix launcher effect.
+ - Increased the heating effect of reentry heating.
+ - Increased the effect of the prism array freeze.
+ - The fireshot projectile type no longer inflicts fire.
+ - Increased the chance that the reflective type reflects to 1/2.
 0.6.8.8 - 12/12/2025
  - Damage now heats up enemies.
  - Statuses can now modify incoming damage.
