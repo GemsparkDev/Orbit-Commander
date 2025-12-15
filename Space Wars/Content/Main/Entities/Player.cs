@@ -633,9 +633,12 @@ public class Player : Entity
             dockedEntity.Collide(_damage);
             return false;
         }
-        foreach (var module in modules)
+        if(!_ignoreImmunity)
         {
-            _damage = module.Value.OnCollide(_damage);
+            foreach (var module in modules)
+            {
+                _damage = module.Value.OnCollide(_damage);
+            }
         }
         _damage = StatusHolder.ModifyDamage(_damage);
         if (_damage > 0 && (invincibilityCooldown <= 0 || _ignoreImmunity))

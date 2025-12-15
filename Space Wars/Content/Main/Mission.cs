@@ -5,6 +5,7 @@ using Microsoft.Xna.Framework;
 using System.Linq;
 using Space_Wars.Content.Main.Particles;
 using Microsoft.Xna.Framework.Graphics;
+using System.Diagnostics;
 
 namespace Space_Wars.Content.Main;
 public class Mission
@@ -126,7 +127,6 @@ public class Mission
         {
             return;
         }
-
         var isReady = true;
         foreach (var enemy in enemiesSpawned)
         {
@@ -187,6 +187,17 @@ public class Mission
             maxWaveTimer = waveTimer;
             Wave++;
             Engine.EntityManager.DecayPickups();
+            if (music)
+            {
+                if ((Wave - 1) % 20 == 0)
+                {
+                    SoundManager.ChangeTrack(Assets.Get(Sound.main));
+                }
+                if (Wave % 20 == 0)
+                {
+                    SoundManager.ChangeTrack(Assets.Get(Sound.boss));
+                }
+            }
 
             if (playerProgression > 1 && (Wave % 20 == 0))
             {
@@ -199,7 +210,6 @@ public class Mission
                 enemiesSpawned.Add(boss);
                 EnemiesSpawned = 1;
                 currentBoss = (currentBoss + 1) % bosses.Count;
-                return;
             }
             else
             {
@@ -254,20 +264,15 @@ public class Mission
                     }
                     if (enemyCredits < newCosts.Min(c => c))
                     {
-                        return;
+                        break;
                     }
                 }
             }
-            if (music)
+            //Mess with probability later
+            if (Util.Random.NextSingle() > 0.25f)
             {
-                if ((Wave - 1) % 20 == 0)
-                {
-                    SoundManager.ChangeTrack(Assets.Get(Sound.main));
-                }
-                if (Wave % 20 == 0)
-                {
-                    SoundManager.ChangeTrack(Assets.Get(Sound.boss));
-                }
+                Enemy enemy = enemiesSpawned[Util.Random.Next(0, enemiesSpawned.Count)];
+                enemy.AddBehaviour(enemy.DropItem(ItemFactory.NewScrap));
             }
         }
         UI.EnemiesLeft.text = (currentWaveActive ? enemiesSpawned.Where(x => x.health > 0).Count() : 0).ToString();

@@ -129,6 +129,10 @@ namespace Space_Wars.Content.Main.Particles
         }
         private void DrawCircle()
         {
+            if(particleVelocity == 0)
+            {
+                return;
+            }
             Vector2 normalVector;
             float increment = MathF.Tau / particleVelocity / speedOfEmission;
             int count = (int)Math.Ceiling(Math.Truncate(sprayCone / increment));

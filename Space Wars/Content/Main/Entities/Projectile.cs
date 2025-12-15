@@ -323,8 +323,7 @@ public class FlameBolt : Projectile
         angle += angularVelocity * Engine.DeltaSeconds * 60;
         if (emitter.EmitterType == EmitterType.Circle)
         {
-            float val = (1 - maxTimeLeft + timeLeft);
-            emitter.particleVelocity = Math.Min(1 - val * val, 1) * 100;
+            emitter.particleVelocity = MathF.Tanh(maxTimeLeft - timeLeft) * MathF.Tanh(timeLeft) * 100;
         }
         else
         {

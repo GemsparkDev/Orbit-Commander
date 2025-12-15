@@ -116,13 +116,11 @@ public class Enemy : Entity
         targetVector = Vector2.Normalize(Vector2.Normalize(_position - position) + GetNormalizedAcceleration() * 10f);
         velocity += targetVector * speed * Engine.DeltaSeconds * 10;
     }
-
-    private void AddBehaviour(IEnumerable<int> behaviour)
+    public void AddBehaviour(IEnumerable<int> behaviour)
     {
         copyBehaviors.Add(behaviour);
         behaviours.Add(behaviour.GetEnumerator());
     }
-
     private void ApplyBehaviours()
     {
         for (int i = 0; i < behaviours.Count; i++)
@@ -221,7 +219,7 @@ public class Enemy : Entity
         return enemy;
     }
     #region Useful Behaviors
-    IEnumerable<int> EnemyDeath(float _rarity)
+    IEnumerable<int> EnemyDeath()
     {
         bool hasExploded = false;
         while (true)
@@ -244,10 +242,17 @@ public class Enemy : Entity
                 {
                     ParticleManager.Add(new Particle(Assets.Get(Sprite.Dot), 0.5f, position, Util.ToUnitVector(angle) * 2, angle, 0, Color.Yellow, Color.Transparent));
                 }
-                if (EntityManager.RandomWithKarma(Engine.SaveGame.CurrentMission.EnemiesSpawned * _rarity))
-                {
-                    Engine.EntityManager.Add(ItemFactory.NewScrap(position, GetNormalizedAcceleration() * 10, angularVelocity));
-                }
+            }
+            yield return 0;
+        }
+    }
+    public IEnumerable<int> DropItem(Func<Vector2, Vector2, float, Pickup> _action)
+    {
+        while(true)
+        {
+            if (isExpired)
+            {
+                Engine.EntityManager.Add(_action(position, GetNormalizedAcceleration() * 10, angularVelocity));
             }
             yield return 0;
         }
@@ -4199,6 +4204,37 @@ public class Enemy : Entity
             yield return 0;
         }
     }
+    IEnumerable<int> MeshNetworkNode()
+    {
+        float hackCD = 0;
+        bool isDone = false;
+        float max = 60;
+        while(true)
+        {
+            if (EventHandler.AcknowledgeMessage(Message.Hack) && Vector2.Distance(Player.position, position) < 1000 && !isFriendly)
+            {
+                StealthAbility = -3;
+                isFriendly = true;
+                UpdateColor();
+                hackCD = max;
+            }
+            if(hackCD > 0)
+            {
+                hackCD -= Engine.DeltaSeconds;
+                UI.HackTimer.SetInterval(max - hackCD, max);
+            }
+            else
+            {
+                StealthAbility = 1;
+                if (isFriendly && !isDone)
+                {
+                    Engine.SaveGame.CurrentMission.CompleteCustomRule(this);
+                    isDone = true;
+                }
+            }
+            yield return 0;
+        }
+    }
     #endregion
     public static Enemy NewDummyEnemy(Vector2 _position, bool _isFriendly = false)
     {
@@ -4209,7 +4245,7 @@ public class Enemy : Entity
         Enemy enemy = new(position, velocity, angle, 5, 8, Assets.Get(Sprite.Fighter), _isFriendly);
         enemy.AddBehaviour(enemy.Fighter());
         enemy.AddBehaviour(enemy.AvoidNearbyAllies());
-        enemy.AddBehaviour(enemy.EnemyDeath(2));
+        enemy.AddBehaviour(enemy.EnemyDeath());
         return enemy;
     }
     public static Enemy NewCarrier(Vector2 position, Vector2 velocity, float angle, bool _isFriendly = false)
@@ -4217,7 +4253,7 @@ public class Enemy : Entity
         Enemy enemy = new(position, velocity, angle, 5, 15, Assets.Get(Sprite.Cruiser), _isFriendly);
         enemy.AddBehaviour(enemy.Carrier());
         enemy.AddBehaviour(enemy.AvoidNearbyAllies());
-        enemy.AddBehaviour(enemy.EnemyDeath(1));
+        enemy.AddBehaviour(enemy.EnemyDeath());
         return enemy;
     }
     public static Enemy NewSniper(Vector2 position, Vector2 velocity, float angle, bool _isFriendly = false)
@@ -4225,7 +4261,7 @@ public class Enemy : Entity
         Enemy enemy = new(position, velocity, angle, 8, 5, Assets.Get(Sprite.Sniper), _isFriendly);
         enemy.AddBehaviour(enemy.Sniper());
         enemy.AddBehaviour(enemy.AvoidNearbyAllies());
-        enemy.AddBehaviour(enemy.EnemyDeath(1));
+        enemy.AddBehaviour(enemy.EnemyDeath());
         return enemy;
     }
     public static Enemy NewMissile(Vector2 position, Vector2 velocity, float angle, bool _isFriendly = false, int _sensingAbility = 1)
@@ -4240,7 +4276,7 @@ public class Enemy : Entity
         Enemy enemy = new(position, velocity, angle, 5, 10, Assets.Get(Sprite.Shotgunner), _isFriendly);
         enemy.AddBehaviour(enemy.Shotgunner());
         enemy.AddBehaviour(enemy.AvoidNearbyAllies());
-        enemy.AddBehaviour(enemy.EnemyDeath(1));
+        enemy.AddBehaviour(enemy.EnemyDeath());
         return enemy;
     }
     public static Enemy NewShield(Entity parent, float distance, int health, float theta, int size, bool _isFriendly = false)
@@ -4307,7 +4343,7 @@ public class Enemy : Entity
     {
         Enemy enemy = new(position, velocity, angle, 2, 12, Assets.Get(Sprite.Hovercraft), isFriendly);
         enemy.AddBehaviour(enemy.Hovercraft());
-        enemy.AddBehaviour(enemy.EnemyDeath(1));
+        enemy.AddBehaviour(enemy.EnemyDeath());
         return enemy;
     }
     public static Enemy NewExcursionBoss(Vector2 position, Vector2 velocity, float angle, bool isFriendly = false)
@@ -4331,7 +4367,7 @@ public class Enemy : Entity
         Enemy enemy = new(position, velocity, angle, 3, 15, Assets.Get(Sprite.AdvancedFighter), _isFriendly);
         enemy.AddBehaviour(enemy.AdvancedFighter());
         enemy.AddBehaviour(enemy.AvoidNearbyAllies());
-        enemy.AddBehaviour(enemy.EnemyDeath(1.5f));
+        enemy.AddBehaviour(enemy.EnemyDeath());
         enemy.AddBehaviour(enemy.AvoidProjectiles(0.5f));
         return enemy;
     }
@@ -4355,7 +4391,7 @@ public class Enemy : Entity
         Enemy enemy = new(position, velocity, angle, 10, 8, Assets.Get(Sprite.StealthFighter), _isFriendly);
         enemy.AddBehaviour(enemy.StealthFighter());
         enemy.AddBehaviour(enemy.AvoidNearbyAllies());
-        enemy.AddBehaviour(enemy.EnemyDeath(2));
+        enemy.AddBehaviour(enemy.EnemyDeath());
         return enemy;
     }
     public static Enemy NewHunter(Vector2 position, Vector2 velocity, float angle, bool _isFriendly = false) 
@@ -4363,14 +4399,14 @@ public class Enemy : Entity
         Enemy enemy = new(position, velocity, angle, 8, 15, Assets.Get(Sprite.Fighter), _isFriendly);
         enemy.AddBehaviour(enemy.Hunter());
         enemy.AddBehaviour(enemy.AvoidNearbyAllies());
-        enemy.AddBehaviour(enemy.EnemyDeath(1));
+        enemy.AddBehaviour(enemy.EnemyDeath());
         return enemy;
     }
     public static Enemy NewMakeshiftMothership(Vector2 position, Vector2 velocity, float angle, bool _isFriendly = true)
     {
         Enemy enemy = new(position, velocity, angle, 8, 500, Assets.Get(Sprite.Mothership), _isFriendly);
         enemy.AddBehaviour(enemy.MakeshiftMothership());
-        enemy.AddBehaviour(enemy.EnemyDeath(0.01f));
+        enemy.AddBehaviour(enemy.EnemyDeath());
         enemy.Components.Add(new DockableComponent(enemy, UI.MothershipMenu));
         return enemy;
     }
@@ -4432,7 +4468,7 @@ public class Enemy : Entity
     {
         var enemy = new Enemy(_position, _velocity, _angle, 6, 400, Assets.Get(Sprite.Communicator), _isFriendly);
         enemy.AddBehaviour(enemy.Communicator());
-        enemy.AddBehaviour(enemy.EnemyDeath(1));
+        enemy.AddBehaviour(enemy.EnemyDeath());
         return enemy;
     }
     public static Enemy NewTrader(Vector2 _position, Vector2 _velocity, float _angle)
@@ -4465,7 +4501,7 @@ public class Enemy : Entity
     {
         Enemy enemy = new(position, velocity, angle, 3, 12, Assets.Get(Sprite.Engineer), isFriendly);
         enemy.AddBehaviour(enemy.Engineer());
-        enemy.AddBehaviour(enemy.EnemyDeath(1));
+        enemy.AddBehaviour(enemy.EnemyDeath());
         enemy.AddBehaviour(enemy.AvoidProjectiles(1));
         return enemy;
     }
@@ -4475,8 +4511,8 @@ public class Enemy : Entity
         //Head
         var enemy = new Enemy(position, velocity, angle, 8, 8, Assets.Get(Sprite.Wyrm), false);
         enemy.AddBehaviour(enemy.Wyrm(null));
-        enemy.AddBehaviour(enemy.EnemyDeath(1));
-        enemy.AddBehaviour(Enemy.SpawnWorm(segments));
+        enemy.AddBehaviour(enemy.EnemyDeath());
+        enemy.AddBehaviour(SpawnWorm(segments));
         Enemy head = enemy;
 
         //Segments
@@ -4484,7 +4520,7 @@ public class Enemy : Entity
         {
             var _enemy = new Enemy(position, velocity, angle, 8, 8, Assets.Get(Sprite.Wyrm), false);
             _enemy.AddBehaviour(_enemy.Wyrm(enemy));
-            _enemy.AddBehaviour(_enemy.EnemyDeath(1));
+            _enemy.AddBehaviour(_enemy.EnemyDeath());
             _enemy.AddBehaviour(_enemy.FollowNextSegment(enemy));
             segments.Add(_enemy);
             enemy = _enemy;
@@ -4579,4 +4615,12 @@ public class Enemy : Entity
         enemy.Components.Add(new DockableComponent(enemy, null));
         return enemy;
     }
+    public static Enemy NewMeshNetworkNode(Vector2 _position, Vector2 _velocity, float _angle)
+    {
+        var enemy = new Enemy(_position, _velocity, _angle, 10, 1000, Assets.Get(Sprite.Mothership), false);
+        enemy.AddBehaviour(enemy.MeshNetworkNode());
+        enemy.Components.Add(new DockableComponent(enemy, UI.HackMenu, false));
+        return enemy;
+    }
+
 }

@@ -12,7 +12,7 @@ public class DockableComponent(Entity _parentEntity, Container _menu, bool hasIn
     public ComponentType Type => ComponentType.DockableComponent;
     public bool IsValid => !_parentEntity.isExpired;
     public Container Menu { get; private set; } = _menu;
-    private void AddItem(Pickup _pickup)
+    private static void AddItem(Pickup _pickup)
     {
         for (int i = 0; i < Engine.SaveGame.Inventory.Length; i++)
         {

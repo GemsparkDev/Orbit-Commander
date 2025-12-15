@@ -242,6 +242,7 @@ public enum Message
     ToggleTerminal,
     RestartModules,
     EscapeDroneLeave,
+    Hack,
 }
 public enum Condition
 {

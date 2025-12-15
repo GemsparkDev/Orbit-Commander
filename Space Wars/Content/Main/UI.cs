@@ -28,6 +28,7 @@ public static class UI
         Assets.Get(Sprite.Tab), Assets.Get(Sprite.SelectedTab), Assets.Get(Sound.Interact), 2);
     public static Window SettingsMenu { get; } = new Window(center, Assets.Get(Sprite.GargantuanPanel));
     public static Screen GlobalMenu { get; } = new Screen() { enabled = true };
+    public static Window HackMenu { get; } = new Window(center, Assets.Get(Sprite.LargePanel));
 
     //Main Menu
     public static Button PatchedConicsToggle { get; } = new Button(new Vector2(0, -MainMenu.Size.Y / 4), Assets.Get(Sprite.WideButton), Assets.TextFont, $"Patched Conics: {PatchedConics}", Color.White);
@@ -147,6 +148,10 @@ public static class UI
     public static Vector2[] resolutions = [ new Vector2(1920, 1080), new Vector2(640, 480) ];
     public static int selectedResolution = 0;
 
+    //Hack menu
+    public static Button HackButton { get; } = new Button(Vector2.Zero, Assets.Get(Sprite.Button), Assets.TextFont, "Hack", Color.Yellow);
+    public static Slider HackTimer { get; } = new Slider(Engine.Line, new Vector2(0, 50), new Vector2(50, 2), true, Color.Yellow, new Color(0.1f, 0.1f, 0.1f));
+
     public static void AddUIElements()
     {
         Texture2D largePanel = Assets.Get(Sprite.LargePanel);
@@ -165,7 +170,7 @@ public static class UI
         MusicSlider.AddBehaviour(delegate ()
         {
             float i = MusicSlider.sliderInterval;
-            SoundManager.MusicVolume = i;
+            SoundManager.MusicVolume = Math.Clamp(MathF.Pow(10, i - 0.954242509439f) - 0.111111111111f, 0, 1);
             MusicVolume.text = $"Music: {Math.Round(i * 100)}%";
         });
         NextWindowType.AddBehaviour(delegate() 
@@ -365,6 +370,7 @@ public static class UI
             EventHandler.UpgradeModule(ModuleType.Core, Engine.SaveGame.Player.modules[ModuleType.Core]);
         });
 
+        HackButton.AddBehaviour(delegate { EventHandler.SendMessage(Message.Hack); });
 
         MainMenu.AddWidget(ExitButton as IFunctional, 0);
         MainMenu.AddWidget(SingleplayerButton as IFunctional, 0);
@@ -533,6 +539,9 @@ public static class UI
             GlobalMenu.AddWidget(StatusLights[i] = new Decal(new Vector2(-30 + Engine.BackBuffer.X / 2, y), Assets.Get(Sprite.Circle)), (int)Alignment.Center);
         }
 
+        HackMenu.AddWidget(HackButton as IFunctional);
+        HackMenu.AddWidget(HackTimer as IFunctional);
+
         Engine.UIManager.AddContainer(MainMenu);
         Engine.UIManager.AddContainer(PauseMenu);
         Engine.UIManager.AddContainer(PlayerMenu);
@@ -544,6 +553,7 @@ public static class UI
         Engine.UIManager.AddContainer(LoadMenu);
         Engine.UIManager.AddContainer(UpgradeMenu);
         Engine.UIManager.AddContainer(SettingsMenu);
+        Engine.UIManager.AddContainer(HackMenu);
 
         Engine.UIManager.ScreenWindow = GlobalMenu;
     }

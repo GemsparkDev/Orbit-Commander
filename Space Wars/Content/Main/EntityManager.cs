@@ -52,7 +52,7 @@ public class EntityManager
         [
             new EntityCondition(new EntityConstructor(Enemy.NewLargeMiner, new Vector2(0, -6*50 - Assets.Get(Sprite.LargeMiner).Height/2), Vector2.Zero, 0), [ Condition.Kill ]),
             new EntityCondition(new LaunchConstructor(Enemy.NewDropPod,new Vector2(0, -1500), 300),[ ])],
-        "Meet the locals", "Local scans indicate a nearby mineral rich planet occupied by enemy forces. \nCapturing this site will aid in future resource gathering.", 0.75f, new Vector2(0, -1500), Mission.TierOne(), Mission.TierOneBosses(), null, true) 
+        "Meet the locals", "Local scans indicate a nearby mineral rich planet occupied by enemy forces. \nCapturing this site will aid in future resource gathering.", 0.75f, new Vector2(0, -1500), Mission.TierOne(), Mission.TierOneBosses(), null, true)
         { playerProgression = 2, isAggressive = true, tip = "Press Q to use your special ability.\nCtrl to toggle aim assist.", playerDocked = true },
 
         new Mission([new Planet(Vector2.Zero, Vector2.Zero, 5000, 3, true, Color.Cyan),
@@ -100,7 +100,7 @@ public class EntityManager
             new EntityCondition(new EntityConstructor(Enemy.NewMiner, new Vector2(0, -7*50), Vector2.Zero, 0), [ Condition.Protect ]),
             new EntityCondition(new LaunchConstructor(Enemy.NewDropPod,new Vector2(0, -1500), 350),[ ]),
             new WaveGoal(30)],
-        "Extraction", "Our success has led us to deploying a miner on this deceptively dense planet.\nDefend it from the incoming enemy forces.", 1, new Vector2(0, -1500), Mission.TierTwo(), Mission.TierTwoBosses()) 
+        "Extraction", "Our success has led us to deploying a miner on this deceptively dense planet.\nDefend it from the incoming enemy forces.", 1, new Vector2(0, -1500), Mission.TierTwo(), Mission.TierTwoBosses())
         { playerDocked = true, isAggressive = true},
 
         new Mission([new Planet(Vector2.Zero, Vector2.Zero, 5000, 4.5f, true, Color.Cyan),
@@ -135,7 +135,7 @@ public class EntityManager
         [
             new EntityCondition(new LaunchConstructor(Enemy.NewGlider,new Vector2(-800, -1300), -1150),[ ]),
             new WaveGoal(30)],
-        "Gas giant", "The unusual conditions in this system have resulted in unique developments in the enemies technology./nBe prepared for advanced enemy cloaking.", 1f, new Vector2(-800, -1300), Mission.TierTwo(), Mission.TierTwoBosses(), null, true)
+        "Gas giant", "The unusual conditions in this system have resulted in unique developments in the enemies technology.\nBe prepared for advanced enemy cloaking.", 1f, new Vector2(-800, -1300), Mission.TierTwo(), Mission.TierTwoBosses(), null, true)
         { playerDocked = true },
 
         new Mission([new(new Vector2(500, 0), new Vector2(0, 1.05f), 10000, 7, false, Color.Cyan),
@@ -143,7 +143,7 @@ public class EntityManager
         [
             new EntityCondition(new EntityConstructor(Enemy.MassRelay, Vector2.Zero, Vector2.Zero, 0), [ Condition.Protect, Condition.CustomIncomplete ]),
             new EntityCondition(new LaunchConstructor(Enemy.NewDropPod,new Vector2(0, -1500), 0),[ ])],
-        "Binary system", "It seems plans for a mass relay have been abandoned here.\nFinishing the construction may be the only way to escape fully.", -1f, new Vector2(0, -1500), Mission.TierThree(), Mission.TierThreeBosses(), null, true) 
+        "Binary system", "It seems plans for a mass relay have been abandoned here.\nFinishing the construction may be the only way to escape fully.", -1f, new Vector2(0, -1500), Mission.TierThree(), Mission.TierThreeBosses(), null, true)
         { isAggressive = true, playerDocked = true },
 
         new Mission([new(Vector2.Zero, Vector2.Zero, 4000, 4.5f, true, new Color(0.03f, 0.05f, 0.08f)),
@@ -151,15 +151,22 @@ public class EntityManager
         [
             new EntityCondition(new EntityConstructor(Enemy.NewVeilBoss, new Vector2(0, -6*50), Vector2.Zero, 0), [ Condition.Kill ]),
             new EntityCondition(new LaunchConstructor(Enemy.NewDropPod,new Vector2(0, -1500), 225),[ ])],
-        "Veiled", "Sensors indicate that our actions have been spied on by the enemy.\nDestroy it.", 1.1f, new Vector2(0, -1500), Mission.TierThree(), Mission.TierThreeBosses(), null, true) 
+        "Veiled", "Sensors indicate that our actions have been spied on by the enemy.\nDestroy it.", 1.1f, new Vector2(0, -1500), Mission.TierThree(), Mission.TierThreeBosses(), null, true)
         { playerDocked = true},
+
+        new Mission([new(Vector2.Zero, Vector2.Zero, 3000, 3f, true, Color.Cyan, false, 1.5f) { Temperature = -2 }],
+        [
+            new EntityCondition(new EntityConstructor(Enemy.NewMeshNetworkNode, new Vector2(0, -1), Vector2.Zero, 0), [Condition.Protect, Condition.CustomIncomplete]),
+            new EntityCondition(new LaunchConstructor(Enemy.NewDropPod,new Vector2(0, -1500), 225),[ ])],
+        "Hack", "The enemy has set up a mesh node network for storing information.\nHack it to discover the location of the leader.", 0.8f, new Vector2(0, -1500), Mission.TierThree(), Mission.TierThreeBosses(), null, true)
+        { playerDocked = true, isAggressive = true },
 
         new Mission([new Planet(Vector2.Zero, Vector2.Zero, 160000, 6, true, new Color(0.9f, 1f, 0.75f), false, 50f) { isSun = true, Temperature = 5 },
         new Planet(new Vector2(0, 2000), Planet.GetOrbitalVelocity(new Vector2(0, 2000) * 0.99f, Vector2.Zero, 160000), 8000, 4, false, new Color(0.95f, 0.2f, 0.1f))],
         [
             new EntityCondition(new EntityConstructor(Enemy.NewEpitomeBoss, new Vector2(0, 2800), Vector2.Zero, 0), [ Condition.Kill ]),
             new EntityCondition(new LaunchConstructor(Enemy.NewGlider,new Vector2(-1500, -2000), -1500),[ ])],
-        "Inferno", "The final boss", -1, new Vector2(-1500, -2000), Mission.TierThree(), Mission.TierThreeBosses(), null, true) 
+        "Inferno", "Your intel has led you here. Finish this.", -1, new Vector2(-1500, -2000), Mission.TierThree(), Mission.TierThreeBosses(), null, true)
         { music = false, playerDocked = true },
 
         new Mission([ new(Vector2.Zero, Vector2.Zero, 20000, 9, true, Color.OrangeRed, true, 1.5f),
@@ -346,10 +353,6 @@ public class EntityManager
         DockableComponent returnEntity = null;
         foreach (Entity entity in entities)
         {
-            if (entity.isFriendly != _entity.isFriendly)
-            {
-                continue;
-            }
             var component = entity.Components.GetComponent(ComponentType.DockableComponent);
             if (component.IsValid)
             {
