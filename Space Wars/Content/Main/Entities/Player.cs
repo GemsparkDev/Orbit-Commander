@@ -330,7 +330,6 @@ public class Player : Entity
     }
     public void RestrictedActions()
     {
-        Engine.WriteLine(Temperature);
         //Prevents undocking when in the garage menu
         if (Progression > -1 && IsEnabled)
         {
@@ -376,7 +375,11 @@ public class Player : Entity
                         {
                             Vector2 dir = Util.ToUnitVector(angle);
                             Vector2 mouseDir = targetVector;
-                            if (i == 4)
+                            if(i == 0)
+                            {
+                                Engine.WriteLine($"Dir: {dir.X * mouseDir.X + dir.Y * mouseDir.Y}, Dist: {dist}");
+                            }
+                            if (dir.X * mouseDir.X + dir.Y * mouseDir.Y > (1f - 0.9f / constructs.Count) && dist > 300)
                             {
                                 color = Color.White;
                                 ParticleManager.Add(new Particle(null, new Vector2(0, -100) + position, 0, Color.White) { drawText = constructs[(int)i].description });
@@ -386,7 +389,7 @@ public class Player : Entity
                                 color = Color.Cyan;
                             }
                             ParticleManager.Add(new Particle(constructs[(int)i].sprite, dir * 45 + position, 0, color));
-                            angle += MathF.PI * 2 / constructs.Count;
+                            angle += MathF.Tau / constructs.Count;
                         }
                     }
                     else if (Input.OldState.IsKeyDown(Keys.C) && Input.NewState.IsKeyUp(Keys.C))
@@ -423,7 +426,7 @@ public class Player : Entity
                             Vector2 dir = Util.ToUnitVector(angle);
                             Vector2 mouseDir = targetVector;
                             //dir.X * mouseDir.X + dir.Y * mouseDir.Y > (0.2f * types.Count) && dist > 500 && firstScrap != null
-                            if (i == 4)
+                            if (dir.X * mouseDir.X + dir.Y * mouseDir.Y > (1f - 0.9f / types.Count) && dist > 300)
                             {
                                 switch (types[i])
                                 {
@@ -463,7 +466,7 @@ public class Player : Entity
                                         }
                                         break;
                                     case "Resonator":
-                                        //firstScrap.isExpired = true;
+                                        firstScrap.isExpired = true;
                                         Engine.EntityManager.Add(Enemy.NewQuantumResonator(position));
                                         break;
                                 }

@@ -3,6 +3,16 @@
 Lagrange Commander is a game made using C# in monogame. It is a 2D top down wave based shooter where you must repair and upgrade your ship by salvaging from enemies you defeat. It features realistic N-Body gravitation, which affects all entities and projectiles.
   
 # Changelog
+0.6.9.1 - 12/15/2025
+ - Fixed an issue where the craft menu was not properly selecting craftables.
+0.6.9.0 - 12/14/2025
+ - Added a new mission where you dock with and hack various mesh nodes.
+ - Re-enabled docking with hostile enemies.
+ - Dropping of some items is now managed by the enemy spawner.
+ - The burn effect now ignores immunity.
+ - Smoothed out the flamebolt sizing code.
+ - Fixed an issue where the stealth fighter used the wrong asset.
+ - Fixed an issue where the gas giant description had a faulty line break.
 0.6.8.9 - 12/13/2025
  - Added and tweaked particle effects for fire, frost, and reentry.
  - Increased the size of the matrix launcher effect.
