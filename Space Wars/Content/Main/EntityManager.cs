@@ -154,11 +154,15 @@ public class EntityManager
         "Veiled", "Sensors indicate that our actions have been spied on by the enemy.\nDestroy it.", 1.1f, new Vector2(0, -1500), Mission.TierThree(), Mission.TierThreeBosses(), null, true)
         { playerDocked = true},
 
-        new Mission([new(Vector2.Zero, Vector2.Zero, 3000, 3f, true, Color.Cyan, false, 1.5f) { Temperature = -2 }],
+        new Mission([new(Vector2.Zero, Vector2.Zero, 18000, 6f, true, Color.Cyan, false, 1.5f) { Temperature = -2 },
+        new(new Vector2(1100, 0), Planet.GetOrbitalVelocity(new Vector2(1100, 0), Vector2.Zero, 18000), 1500, 1.5f, false, Color.Cyan) { Temperature = -2 }],
         [
             new EntityCondition(new EntityConstructor(Enemy.NewMeshNetworkNode, new Vector2(0, -1), Vector2.Zero, 0), [Condition.Protect, Condition.CustomIncomplete]),
-            new EntityCondition(new LaunchConstructor(Enemy.NewDropPod,new Vector2(0, -1500), 225),[ ])],
-        "Hack", "The enemy has set up a mesh node network for storing information.\nHack it to discover the location of the leader.", 0.8f, new Vector2(0, -1500), Mission.TierThree(), Mission.TierThreeBosses(), null, true)
+            new EntityCondition(new EntityConstructor(Enemy.NewMeshNetworkNode, new Vector2(1250, 0),-Planet.GetOrbitalVelocity(new Vector2(150, 0), 
+                Vector2.Zero, 1500) + Planet.GetOrbitalVelocity(new Vector2(1100, 0), Vector2.Zero, 18000), 0), [Condition.Protect, Condition.CustomIncomplete]),
+            new EntityCondition(new EntityConstructor(Enemy.NewMeshNetworkNode, new Vector2(-500, 0), -Planet.GetOrbitalVelocity(new Vector2(-500, 0), Vector2.Zero, 18000), 0), [Condition.Protect, Condition.CustomIncomplete]),
+            new EntityCondition(new LaunchConstructor(Enemy.NewDropPod,new Vector2(0, -1500), 310),[ ])],
+        "Hack", "The enemy has set up a mesh node network for storing information.\nHack it to discover the location of their leader.", 0.8f, new Vector2(0, -1500), Mission.TierThree(), Mission.TierThreeBosses(), null, true)
         { playerDocked = true, isAggressive = true },
 
         new Mission([new Planet(Vector2.Zero, Vector2.Zero, 160000, 6, true, new Color(0.9f, 1f, 0.75f), false, 50f) { isSun = true, Temperature = 5 },
