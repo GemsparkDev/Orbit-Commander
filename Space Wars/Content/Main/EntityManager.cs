@@ -166,7 +166,7 @@ public class EntityManager
         { playerDocked = true, isAggressive = true },
 
         new Mission([new Planet(Vector2.Zero, Vector2.Zero, 160000, 6, true, new Color(0.9f, 1f, 0.75f), false, 50f) { isSun = true, Temperature = 5 },
-        new Planet(new Vector2(0, 2000), Planet.GetOrbitalVelocity(new Vector2(0, 2000) * 0.99f, Vector2.Zero, 160000), 8000, 4, false, new Color(0.95f, 0.2f, 0.1f))],
+        new Planet(new Vector2(0, 2000), Planet.GetOrbitalVelocity(new Vector2(0, 2000) * 0.99f, Vector2.Zero, 16-000), 8000, 4, false, new Color(0.95f, 0.2f, 0.1f))],
         [
             new EntityCondition(new EntityConstructor(Enemy.NewEpitomeBoss, new Vector2(0, 2800), Vector2.Zero, 0), [ Condition.Kill ]),
             new EntityCondition(new LaunchConstructor(Enemy.NewGlider,new Vector2(-1500, -2000), -1500),[ ])],
@@ -187,7 +187,7 @@ public class EntityManager
     [
         (200, [], 0), (160, [0], 0), (140, [0], 0), (100, [1, 2], 0), (400, [3], 0), (50, [3], 0),
         (210, [], 1), (170, [6], 1), (145, [7], 1), (130, [8], 1), (150, [9], 1),
-        (200, [], 2), (150, [11], 2), (100, [12], 2), (80, [13], 2), (60, [14], 2), (0, [15], 2)
+        (200, [], 2), (150, [11], 2), (100, [12], 2), (80, [13], 2), (60, [14], 2), (0, [15], 2), (0, [], 2), (0, [], 2)
     ];
     public Mission GetMission(int _index)
     {
@@ -521,7 +521,7 @@ public class EntityManager
         currentKarma += (1 / _rarity);
         return false;
     }
-    public List<Entity> Hitscan(Vector2 _pos, Vector2 _dir, float _maxLength, bool _getAll, out Vector2 _end, int _type = 0)
+    public List<Entity> Hitscan(Vector2 _pos, Vector2 _dir, float _maxLength, bool _getAll, out Vector2 _end, int _type = 0, bool _getProjectiles = false)
     {
         var dir = Vector2.Normalize(_dir);
         var list = new List<Entity>();
@@ -534,7 +534,10 @@ public class EntityManager
         }
         foreach (var entity in entities)
         {
-            CalculateIntersection(entity);
+            if(entity.entityType != EntityType.Projectile || _getProjectiles)
+            {
+                CalculateIntersection(entity);
+            }
         }
         CalculateIntersection(Engine.SaveGame.Player);
         if (maxDist > dist)

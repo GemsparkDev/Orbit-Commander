@@ -90,6 +90,46 @@ public abstract class Module : Pickup, IData
         return $"{{{Type},{SerializeAttributes()},{health},{isFailed}}}";
     }
 }
+public class ReloadSystem(int _magazineSize, float _reloadSpeed)
+{
+    private int rounds = _magazineSize;
+    private int magazineSize = _magazineSize;
+    float reloadCD = 0;
+    public void Update()
+    {
+        if(reloadCD > 0)
+        {
+            reloadCD -= Engine.DeltaSeconds;
+            if (reloadCD < 0)
+            {
+                rounds = magazineSize;
+            }
+        }
+        float val = rounds;
+        if(reloadCD > 0)
+        {
+            val = (1 - reloadCD / _reloadSpeed) * (float)(magazineSize);
+        }
+        UI.PlayerAmmo.SetInterval(val, magazineSize);
+    }
+    public bool Fire()
+    {
+        if(rounds > 0)
+        {
+            rounds--;
+            return true;
+        }
+        else
+        {
+            if (reloadCD <= 0)
+            {
+                reloadCD = _reloadSpeed;
+                SoundManager.PlayGlobalSound(Assets.Get(Sound.Dock));
+            }
+            return false;
+        }
+    }
+}
 public class ModuleData(Sprite _realSprite, Sprite _virtualSprite, String _name, int _id, int _health, Type _type)
     : ItemData(_realSprite, _virtualSprite, _name, _id, Color.White)
 {
@@ -338,17 +378,29 @@ public class OrionEngine() : Module(Modules.Orion)
 }
 public class Basic() : Module(Modules.Basic)
 {
+    private ReloadSystem ammo = new ReloadSystem(18, 2);
     public override void OnShoot()
     {
         if (cooldown > 0)
         {
             return;
         }
-        Engine.EntityManager.Add(new PulseShot(Player.position, Player.IdealSpeedWithVelocity(9), Util.ToAngle(Player.Direction), 0, true, 3, false));
-        SoundManager.PlaySound(Assets.Get(Sound.PulseFire), Player.position);
-        cooldown = 0.25f;
-        Engine.ShakeScreen(0.2f);
-        Player.velocity -= Player.Direction / 4;
+        if(ammo.Fire())
+        {
+            Engine.EntityManager.Add(new PulseShot(Player.position, Player.IdealSpeedWithVelocity(9), Util.ToAngle(Player.Direction), 0, true, 3));
+            SoundManager.PlaySound(Assets.Get(Sound.PulseFire), Player.position);
+            cooldown = 0.2f;
+            Engine.ShakeScreen(0.35f);
+            Engine.Camera.Position += Player.Direction * 8 + new Vector2(Util.OneToNegOne(), Util.OneToNegOne());
+            Player.velocity -= Player.Direction / 3;
+            ParticleManager.Add(new Particle(Assets.Get(Sprite.Dot), 60, Player.position - Player.velocity + Player.Direction * 5,Player.velocity + new Vector2(Player.Direction.Y + Util.OneToNegOne() / 2, 
+                -Player.Direction.X + Util.OneToNegOne() / 4), 0, Util.OneToNegOne() / 5, Color.Yellow, Color.Transparent) { experienceGravity = true });
+        }
+    }
+    public override void OnUpdate()
+    {
+        ammo.Update();
+        base.OnUpdate();
     }
 }
 public class Sniper() : Module(Modules.Sniper)
@@ -445,24 +497,57 @@ public class Missile() : Module(Modules.Missile)
 }
 public class LMG() : Module(Modules.LMG)
 {
+    private ReloadSystem ammo = new ReloadSystem(80, 5);
     public override void OnShoot()
     {
         if (cooldown > 0)
         {
             return;
         }
-        Vector2 offset = new Vector2(Player.Direction.Y, -Player.Direction.X) * Util.Random.Next(-2, 3);
-        Texture2D dot = Assets.Get(Sprite.Microshot);
-        Projectile shot = new PulseShot(Player.position + offset, Player.Player.IdealSpeedWithVelocity(8) + offset / 4, Util.ToAngle(Player.Direction), 0, true, 2)
+        if(ammo.Fire())
         {
-            texture = dot,
-            timeLeft = 3
-        };
-        Engine.EntityManager.Add(shot);
-        SoundManager.PlaySound(Assets.Get(Sound.LMGFire), Player.position);
-        Engine.ShakeScreen(0.01f);
-        Player.velocity -= Player.Direction / 8;
-        cooldown = 0.15f;
+            Vector2 offset = new Vector2(Player.Direction.Y, -Player.Direction.X) * Util.Random.Next(-2, 3);
+            Texture2D dot = Assets.Get(Sprite.Microshot);
+            Projectile shot = new PulseShot(Player.position + offset, Player.Player.IdealSpeedWithVelocity(8) + offset / 4, Util.ToAngle(Player.Direction), 0, true, 2)
+            {
+                texture = dot,
+                timeLeft = 3
+            };
+            Engine.EntityManager.Add(shot);
+            SoundManager.PlaySound(Assets.Get(Sound.PulseFire), Player.position);
+            Engine.ShakeScreen(0.05f);
+            Engine.Camera.Position += Player.Direction * 6 + new Vector2(Util.OneToNegOne(), Util.OneToNegOne());
+            Player.velocity -= Player.Direction / 6;
+            cooldown = 0.08f;
+            ParticleManager.Add(new Particle(Assets.Get(Sprite.Dot), 60, Player.position - Player.velocity + Player.Direction * 5, Player.velocity + new Vector2(Player.Direction.Y + Util.OneToNegOne() / 2,
+                -Player.Direction.X + Util.OneToNegOne() / 4), 0, Util.OneToNegOne() / 5, Color.Yellow, Color.Transparent)
+                { experienceGravity = true });
+            Color color;
+            switch(Util.Random.Next(0, 4))
+            {
+                case 0:
+                    color = Color.White;
+                    break;
+                case 1:
+                    color = Color.Yellow;
+                    break;
+                case 2:
+                    color = Color.Wheat;
+                    break;
+                case 3:
+                    color = Color.Orange;
+                    break;
+                default:
+                    color = Color.White;
+                    break;
+            }
+            ParticleManager.Add(new Particle(Assets.Get(Sprite.Circle), 0.25f, Player.position - Player.velocity + Player.Direction * 8, Player.velocity + Player.Direction * 2 + new Vector2(Util.OneToNegOne(), Util.OneToNegOne()), 0, 0, color, new Color(0.3f, 0.2f, 0.1f, 0f)));
+        }
+    }
+    public override void OnUpdate()
+    {
+        ammo.Update();
+        base.OnUpdate();
     }
 }
 public class Crossbow() : Module(Modules.Crossbow)

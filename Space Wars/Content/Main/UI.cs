@@ -111,6 +111,7 @@ public static class UI
     public static Decal Timer { get; } = new Decal(new Vector2(-50, 0), Assets.TextFont, $"{Engine.IngameTime.DrawText}", Color.White, 10);
     public static Slider PlayerHealth { get; } = new Slider(Line, new Vector2(5, 5), new Vector2(150, 15), true, Color.Red, Color.DarkGray);
     public static Slider PlayerSpecialHealth { get; } = new Slider(Line, new Vector2(5, 5), new Vector2(150, 15), true, Color.Transparent, Color.Transparent);
+    public static Slider PlayerAmmo { get; } = new Slider(Line, new Vector2(5, 15), new Vector2(100, 2), true, Color.Yellow, Color.DarkGray);
     public static Slider PlayerAbility { get; } = new Slider(Line, new Vector2(5, 15), new Vector2(100, 10), true, Color.Cyan, Color.DarkGray);
 
     //Upgrade Menu
@@ -477,6 +478,7 @@ public static class UI
         GlobalMenu.AddWidget(PlayerHealth as IFunctional, (int)Alignment.TopLeft);
         GlobalMenu.AddWidget(PlayerSpecialHealth as IFunctional, (int)Alignment.TopLeft);
         GlobalMenu.AddWidget(PlayerAbility as IFunctional, (int)Alignment.TopLeft);
+        GlobalMenu.AddWidget(PlayerAmmo as IFunctional, (int)Alignment.TopLeft);
         PlayerSpecialHealth.SetInterval(1, 1);
 
         for (int x = 0; x < ModuleSlots.GetLength(0); x++)
