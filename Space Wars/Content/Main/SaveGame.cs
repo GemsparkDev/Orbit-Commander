@@ -176,7 +176,7 @@ public class SaveGame
                 break;
             }
         }
-        QueuedItems = (from item in QueuedItems where !item.IsExpired select item).ToList();
+        QueuedItems = [.. from item in QueuedItems where !item.IsExpired select item];
         Engine.SaveGame.Player.ClearAll();
         Engine.Autosave();
     }

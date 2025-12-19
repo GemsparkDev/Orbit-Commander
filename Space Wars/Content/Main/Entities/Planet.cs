@@ -173,7 +173,10 @@ public class Planet
         }
         else
         {
-            _particle.isExpired = true;
+            if (Util.Random.NextSingle() > Util.FIED(0.0002f))
+            {
+                _particle.Velocity = velocity;
+            }
             return Vector2.Zero;
         }
     }

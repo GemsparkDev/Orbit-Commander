@@ -119,8 +119,11 @@ public class Mission
                 RestartTimer -= Engine.DeltaSeconds;
                 return;
             }
-            EventHandler.MissionSelectTrigger();
-            Engine.SaveGame.CompleteMission(Wave);
+            if(TestCompletion())
+            {
+                EventHandler.MissionSelectTrigger();
+                Engine.SaveGame.CompleteMission(Wave);
+            }
         }
         //Natural enemy spawning toggle
         if (TimerModifier == -1)
@@ -483,7 +486,7 @@ public class Mission
         }
         return distance;
     }
-    private void TestCompletion()
+    private bool TestCompletion()
     {
         bool allCompleted = true;
         foreach (var objective in MissionObjectives)
@@ -504,6 +507,7 @@ public class Mission
                 RestartTimer = 2;
             }
         }
+        return allCompleted;
     }
     public void Draw(SpriteBatch _spriteBatch)
     {

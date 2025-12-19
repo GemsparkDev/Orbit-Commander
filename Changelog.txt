@@ -3,6 +3,16 @@
 Lagrange Commander is a game made using C# in monogame. It is a 2D top down wave based shooter where you must repair and upgrade your ship by salvaging from enemies you defeat. It features realistic N-Body gravitation, which affects all entities and projectiles.
   
 # Changelog
+0.6.9.4 - 12/18/2025
+ - Player and enemy health bars now feature white sections to outline damage taken.
+ - Player mining now automatically locks on to nearest destroyed enemies.
+ - Players can pre-emptively reload by pressing R.
+ - Added random offset to the basic firing velocity.
+ - Increased the speed of the LMG weapon.
+ - Excursion enemies now have a 1/5 chance to drop scrap.
+ - Particles affected by gravity are no longer destroyed when touching a planet.
+ - Fixed an issue where the plasma engine pointed toward where you were aiming.
+ - Fixed an issue where failing a mission marked it as complete.
 0.6.9.3 - 12/17/2025
  - Added the ReloadSystem class, which enables reloading for weapon modules.
  - Replaced the pulse fire sound effect with an improved temporary one.

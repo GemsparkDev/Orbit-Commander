@@ -2,6 +2,7 @@
 using Microsoft.Xna.Framework.Graphics;
 using Space_Wars.Content.Main;
 using System.Diagnostics;
+using Microsoft.Xna.Framework.Input;
 using Space_Wars.Content.Main.Particles;
 using System;
 using System.Collections.Generic;
@@ -110,6 +111,12 @@ public class ReloadSystem(int _magazineSize, float _reloadSpeed)
         {
             val = (1 - reloadCD / _reloadSpeed) * (float)(magazineSize);
         }
+        if(rounds != magazineSize && reloadCD <= 0 && Input.NewState.IsKeyDown(Keys.R))
+        {
+            rounds = 0;
+            reloadCD = _reloadSpeed;
+            SoundManager.PlayGlobalSound(Assets.Get(Sound.Dock));
+        }
         UI.PlayerAmmo.SetInterval(val, magazineSize);
     }
     public bool Fire()
@@ -166,7 +173,7 @@ public class Shield() : Module(Modules.Shield)
         {
             shieldEffect.position = Player.position;
             shieldEffect.Update();
-            UI.PlayerSpecialHealth.enabledColor = Color.Yellow;
+            UI.PlayerSpecialHealth.Colors[0] = Color.Yellow;
         }
         base.OnUpdate();
     }
@@ -209,7 +216,7 @@ public class Turtle() : Module(Modules.Turtle)
     }
     public override void OnUpdate()
     {
-        UI.PlayerSpecialHealth.enabledColor = Color.Orange;
+        UI.PlayerSpecialHealth.Colors[0] = Color.Orange;
         UI.PlayerSpecialHealth.SetInterval((1 - cooldown) * (1 - cooldown), 1);
         time += Engine.DeltaSeconds;
         if (time > 1)
@@ -252,7 +259,7 @@ public class Ablative() : Module(Modules.Ablative)
     }
     public override void OnUpdate()
     {
-        UI.PlayerSpecialHealth.enabledColor = Color.White;
+        UI.PlayerSpecialHealth.Colors[0] = Color.White;
         UI.PlayerSpecialHealth.SetInterval(buffer, 25f);
         if (cooldown <= 0 && buffer < 25)
         {
@@ -310,7 +317,7 @@ public class PlasmaEngine() : Module(Modules.Plasma)
         engineTime = Math.Clamp(engineTime + Engine.DeltaSeconds * 2, 0, 1);
         float engineTimeModifier = 1 - (1 - engineTime) * (1 - engineTime);
         float fuseRatio = (float)(Player.CountFuses(ModuleType.Engines)) / 3;
-        Vector2 dir = -Util.ToUnitVector(Player.angle + Util.OneToNegOne() / 20);
+        var dir = Vector2.Normalize(-Player.direction + new Vector2(Util.OneToNegOne(), Util.OneToNegOne()) / 10);
         for (float i = 0; i < 5 * fuseRatio * engineTimeModifier; i++)
         {
             float lerp = i / (5 * fuseRatio * engineTimeModifier);
@@ -387,14 +394,13 @@ public class Basic() : Module(Modules.Basic)
         }
         if(ammo.Fire())
         {
-            Engine.EntityManager.Add(new PulseShot(Player.position, Player.IdealSpeedWithVelocity(9), Util.ToAngle(Player.Direction), 0, true, 3));
+            Engine.EntityManager.Add(new PulseShot(Player.position, Player.IdealSpeedWithVelocity(9) + new Vector2(Util.OneToNegOne(), Util.OneToNegOne()), Util.ToAngle(Player.Direction), 0, true, 3));
             SoundManager.PlaySound(Assets.Get(Sound.PulseFire), Player.position);
             cooldown = 0.2f;
-            Engine.ShakeScreen(0.35f);
+            Engine.ShakeScreen(0.3f);
             Engine.Camera.Position += Player.Direction * 8 + new Vector2(Util.OneToNegOne(), Util.OneToNegOne());
             Player.velocity -= Player.Direction / 3;
-            ParticleManager.Add(new Particle(Assets.Get(Sprite.Dot), 60, Player.position - Player.velocity + Player.Direction * 5,Player.velocity + new Vector2(Player.Direction.Y + Util.OneToNegOne() / 2, 
-                -Player.Direction.X + Util.OneToNegOne() / 4), 0, Util.OneToNegOne() / 5, Color.Yellow, Color.Transparent) { experienceGravity = true });
+            Util.FiringParticles(Player.position + Player.Direction * 8, Player.velocity, Player.Direction);
         }
     }
     public override void OnUpdate()
@@ -431,9 +437,10 @@ public class Antimaterial() : Module(Modules.Antimaterial)
         {
             entity.Collide(30);
         }
-        SoundManager.PlaySound(Assets.Get(Sound.SniperFire), Player.position);
+        SoundManager.PlaySound(Assets.Get(Sound.PulseFire), Player.position);
+        Engine.Camera.Position += Player.Direction * 18 + new Vector2(Util.OneToNegOne(), Util.OneToNegOne());
         cooldown = 3f;
-        Engine.ShakeScreen(0.5f);
+        Engine.ShakeScreen(0.8f);
         Player.velocity -= Player.Direction * 3;
         for (int i = 0; i < 300; i++)
         {
@@ -508,40 +515,19 @@ public class LMG() : Module(Modules.LMG)
         {
             Vector2 offset = new Vector2(Player.Direction.Y, -Player.Direction.X) * Util.Random.Next(-2, 3);
             Texture2D dot = Assets.Get(Sprite.Microshot);
-            Projectile shot = new PulseShot(Player.position + offset, Player.Player.IdealSpeedWithVelocity(8) + offset / 4, Util.ToAngle(Player.Direction), 0, true, 2)
+            Projectile shot = new PulseShot(Player.position + offset, Player.Player.IdealSpeedWithVelocity(12) + offset / 4, Util.ToAngle(Player.Direction), 0, true, 2)
             {
                 texture = dot,
                 timeLeft = 3
             };
             Engine.EntityManager.Add(shot);
             SoundManager.PlaySound(Assets.Get(Sound.PulseFire), Player.position);
-            Engine.ShakeScreen(0.05f);
+            Engine.ShakeScreen(0.1f);
             Engine.Camera.Position += Player.Direction * 6 + new Vector2(Util.OneToNegOne(), Util.OneToNegOne());
             Player.velocity -= Player.Direction / 6;
             cooldown = 0.08f;
-            ParticleManager.Add(new Particle(Assets.Get(Sprite.Dot), 60, Player.position - Player.velocity + Player.Direction * 5, Player.velocity + new Vector2(Player.Direction.Y + Util.OneToNegOne() / 2,
-                -Player.Direction.X + Util.OneToNegOne() / 4), 0, Util.OneToNegOne() / 5, Color.Yellow, Color.Transparent)
-                { experienceGravity = true });
-            Color color;
-            switch(Util.Random.Next(0, 4))
-            {
-                case 0:
-                    color = Color.White;
-                    break;
-                case 1:
-                    color = Color.Yellow;
-                    break;
-                case 2:
-                    color = Color.Wheat;
-                    break;
-                case 3:
-                    color = Color.Orange;
-                    break;
-                default:
-                    color = Color.White;
-                    break;
-            }
-            ParticleManager.Add(new Particle(Assets.Get(Sprite.Circle), 0.25f, Player.position - Player.velocity + Player.Direction * 8, Player.velocity + Player.Direction * 2 + new Vector2(Util.OneToNegOne(), Util.OneToNegOne()), 0, 0, color, new Color(0.3f, 0.2f, 0.1f, 0f)));
+            Util.FiringParticles(Player.position + Player.Direction * 8, Player.velocity, Player.Direction);
+            Player.Flash();
         }
     }
     public override void OnUpdate()

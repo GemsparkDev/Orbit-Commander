@@ -174,7 +174,7 @@ public static class EventHandler
     }
     public static void UpdateEnemyCountdownUI(float _value, float _maxValue, float _wave)
     {
-        UI.EnemySlider.sliderInterval = _value / _maxValue;
+        UI.EnemySlider.Intervals[0] = _value / _maxValue;
         UI.WaveText.text = $"{_wave}";
     }
     public static void GarageTrigger()

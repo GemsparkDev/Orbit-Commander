@@ -106,14 +106,14 @@ public class Engine : Game
         });
         UI.SFXSlider.AddBehaviour(delegate ()
         {
-            float i = UI.SFXSlider.sliderInterval;
+            float i = UI.SFXSlider.Intervals[0];
             SoundManager.SFXVolume = i;
             UIManager.SFXVolume = i;
             UI.SFXVolume.text = $"Sound: {Math.Round(i * 100)}%";
         });
         UI.UIScaleSlider.AddBehaviour(delegate ()
         {
-            float i = UI.UIScaleSlider.sliderInterval;
+            float i = UI.SFXSlider.Intervals[0];
             UIManager.UIScale = (i + 1f) * BackBuffer.X / ScreenSize.X;
             UI.UIScale.text = $"UI Scale: {Math.Truncate((i + 1) * 10) / 10}";
         });
@@ -350,6 +350,24 @@ public static class Util
         float cos = MathF.Cos(a);
         float sin = MathF.Sin(a);
         return new Vector2(v.X * cos - v.Y * sin, v.X * sin + v.Y * cos);
+    }
+    public static void FiringParticles(Vector2 _position, Vector2 _velocity, Vector2 _direction)
+    {
+        for(int i = 0; i < 5; i++)
+        {
+            var color = Random.Next(0, 4) switch
+            {
+                0 => Color.Yellow,
+                1 => new Color(0.2f, 0.2f, 0.2f),
+                2 => Color.Wheat,
+                3 => Color.Orange,
+                _ => Color.White,
+            };
+            ParticleManager.Add(new Particle(Assets.Get(Sprite.Circle), 0.25f, _position - _velocity, _velocity + _direction * 2
+                + new Vector2(OneToNegOne(), OneToNegOne()) / 2 + _direction * (OneToNegOne() - 0.25f) * 1.5f, 0, 0, color, new Color(0.3f, 0.2f, 0.1f, 0f)));
+        }
+        ParticleManager.Add(new Particle(Assets.Get(Sprite.Dot), 60, _position - _velocity, _velocity 
+            + new Vector2(_direction.Y + OneToNegOne() / 2, -_direction.X + OneToNegOne() / 4), 0, OneToNegOne() / 5, Color.Yellow, Color.Transparent) { experienceGravity = true });
     }
     public static void Explode(Vector2 _position, Vector2 _velocity, int _damage, float _radius)
     {

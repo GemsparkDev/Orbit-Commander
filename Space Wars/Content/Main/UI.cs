@@ -32,12 +32,12 @@ public static class UI
 
     //Main Menu
     public static Button PatchedConicsToggle { get; } = new Button(new Vector2(0, -MainMenu.Size.Y / 4), Assets.Get(Sprite.WideButton), Assets.TextFont, $"Patched Conics: {PatchedConics}", Color.White);
-    public static Slider SFXSlider { get; } = new Slider(Engine.Line, Assets.Get(Sprite.Knob), new Vector2(25, 0), new Vector2(50, 2), false, Color.White, Color.Gray);
-    public static Slider MusicSlider { get; } = new Slider(Engine.Line, Assets.Get(Sprite.Knob), new Vector2(25, -15), new Vector2(50, 2), false, Color.White, Color.Gray);
-    public static Slider UIScaleSlider { get; } = new Slider(Engine.Line, Assets.Get(Sprite.Knob), new Vector2(25, 15), new Vector2(50, 2), false, Color.White, Color.Gray);
+    public static Slider SFXSlider { get; } = new Slider(Engine.Line, Assets.Get(Sprite.Knob), new Vector2(25, 0), new Vector2(50, 2), false, [Color.White, Color.Gray]);
+    public static Slider MusicSlider { get; } = new Slider(Engine.Line, Assets.Get(Sprite.Knob), new Vector2(25, -15), new Vector2(50, 2), false, [Color.White, Color.Gray]);
+    public static Slider UIScaleSlider { get; } = new Slider(Engine.Line, Assets.Get(Sprite.Knob), new Vector2(25, 15), new Vector2(50, 2), false, [Color.White, Color.Gray]);
     public static Decal SFXVolume { get; } = new Decal(new Vector2(-35, 0), Assets.TextFont, "Sound: 100%", Color.White, 5);
     public static Decal MusicVolume { get; } = new Decal(new Vector2(-35, -15), Assets.TextFont, "Music: 100%", Color.White, 5);
-    public static Decal UIScale { get; } = new Decal(new Vector2(-35, 15), Assets.TextFont, $"UI Scale: {Math.Truncate((UIScaleSlider.sliderInterval + 1) * 10) / 10}", Color.White, 5);
+    public static Decal UIScale { get; } = new Decal(new Vector2(-35, 15), Assets.TextFont, $"UI Scale: {Math.Truncate((UIScaleSlider.Intervals[0] + 1) * 10) / 10}", Color.White, 5);
     public static Button ShaderToggle { get; } = new Button(new Vector2(0, MainMenu.Size.Y / 4), Assets.Get(Sprite.WideButton), Assets.TextFont, $"Shader: {UseShader}", Color.White);
     public static Button SingleplayerButton { get; } = new Button(new Vector2(0, -MainMenu.Size.Y / 4), Assets.Get(Sprite.WideButton), Assets.TextFont, "Singleplayer", Color.White);
     public static Button ExitButton { get; } = new Button(new Vector2(0, MainMenu.Size.Y / 4), Assets.Get(Sprite.WideButton), Assets.TextFont, "Exit", Color.White);
@@ -61,8 +61,8 @@ public static class UI
     public static Button GarageButton { get; } = new Button(new Vector2(0, -MainMenu.Size.Y / 4), Assets.Get(Sprite.WideButton), Assets.TextFont, "To Garage", Color.White);
     public static Button CraftButton { get; } = new Button(new Vector2(0, MainMenu.Size.Y / 4), Assets.Get(Sprite.Button), Assets.TextFont, "Repair", Color.LightBlue);
     public static Decal RequiredCraftsText { get; } = new Decal(new Vector2(0) + new Vector2(0, -6), Assets.TextFont, "25", Color.White, 10);
-    public static Slider FurnaceSlider { get; } = new Slider(Engine.Line, new Vector2(-20, -MainMenu.Size.Y / 6), new Vector2(60, 2), true, new Color(255, 239, 85), new Color(50, 51, 67));
-    public static Slider CraftingSlider { get; } = new Slider(Engine.Line, new Vector2(0, -MainMenu.Size.Y / 4), new Vector2(60, 2), true, Color.Cyan, Color.Gray);
+    public static Slider FurnaceSlider { get; } = new Slider(Engine.Line, new Vector2(-20, -MainMenu.Size.Y / 6), new Vector2(60, 2), true, [new Color(255, 239, 85), new Color(50, 51, 67)]);
+    public static Slider CraftingSlider { get; } = new Slider(Engine.Line, new Vector2(0, -MainMenu.Size.Y / 4), new Vector2(60, 2), true, [Color.Cyan, Color.Gray]);
 
     //Garage Menu
     public static Button RepairButton { get; } = new Button(new Vector2(-GarageMenu.Size.X / 4 - 25, -40), Assets.Get(Sprite.Button), Assets.TextFont, "Repair", Color.LightBlue);
@@ -73,7 +73,7 @@ public static class UI
     public static Decal ValidConfigText { get; } = new Decal(-GarageMenu.Size / 4 + new Vector2(20, GarageMenu.Size.Y / 1.5f), Assets.TextFont, "Ready for Combat", Color.Green, 10);
 
     //Player Menu
-    public static Slider EnemySlider { get; } = new Slider(Engine.Line, new Vector2(0, -PlayerMenu.Size.Y / 3), new Vector2(50, 2), true, Color.White, Color.Gray);
+    public static Slider EnemySlider { get; } = new Slider(Engine.Line, new Vector2(0, -PlayerMenu.Size.Y / 3), new Vector2(50, 2), true, [Color.White, Color.Gray]);
     public static Decal WaveText { get; } = new Decal(new Vector2(-20, 0), Assets.TextFont, "0", Color.White, 10);
     public static Decal EnemiesLeft { get; } = new Decal(new Vector2(0, 0), Assets.TextFont, "0", Color.Red, 10);
     public static Decal Overlay { get; } = new Decal(new Vector2(7.5f, 37.5f), Assets.Get(Sprite.Overlay)) { color = Color.White * 0.5f };
@@ -109,10 +109,10 @@ public static class UI
     //Global Menu
     public static Button GlobalSidePanelOpen { get; } = new Button(Vector2.Zero, Assets.Get(Sprite.ToggleButton));
     public static Decal Timer { get; } = new Decal(new Vector2(-50, 0), Assets.TextFont, $"{Engine.IngameTime.DrawText}", Color.White, 10);
-    public static Slider PlayerHealth { get; } = new Slider(Line, new Vector2(5, 5), new Vector2(150, 15), true, Color.Red, Color.DarkGray);
-    public static Slider PlayerSpecialHealth { get; } = new Slider(Line, new Vector2(5, 5), new Vector2(150, 15), true, Color.Transparent, Color.Transparent);
-    public static Slider PlayerAmmo { get; } = new Slider(Line, new Vector2(5, 15), new Vector2(100, 2), true, Color.Yellow, Color.DarkGray);
-    public static Slider PlayerAbility { get; } = new Slider(Line, new Vector2(5, 15), new Vector2(100, 10), true, Color.Cyan, Color.DarkGray);
+    public static Slider PlayerHealth { get; } = new Slider(Line, new Vector2(5, 5), new Vector2(150, 15), true, [Color.Red, Color.White, new Color(0.2f, 0.2f, 0.2f)]);
+    public static Slider PlayerSpecialHealth { get; } = new Slider(Line, new Vector2(5, 5), new Vector2(150, 15), true, [Color.Transparent, Color.Transparent]);
+    public static Slider PlayerAmmo { get; } = new Slider(Line, new Vector2(5, 15), new Vector2(100, 2), true, [Color.Yellow, Color.DarkGray]);
+    public static Slider PlayerAbility { get; } = new Slider(Line, new Vector2(5, 15), new Vector2(100, 10), true, [Color.Cyan, Color.DarkGray]);
 
     //Upgrade Menu
     public static Decal TraderChat { get; } = new Decal(Vector2.Zero, Assets.TextFont, 
@@ -129,9 +129,9 @@ public static class UI
     public static Decal UpgradeText { get; } = new Decal(new Vector2(-30, -20), Assets.TextFont, "", Color.White, 10);
 
     //Repair Menu
-    public static Slider RestartSlider { get; } = new Slider(Engine.Line, new Vector2(-100 + Engine.BackBuffer.X / 2, 50), new Vector2(50, 2), true, Color.Cyan, Color.Black);
+    public static Slider RestartSlider { get; } = new Slider(Engine.Line, new Vector2(-100 + Engine.BackBuffer.X / 2, 50), new Vector2(50, 2), true, [Color.Cyan, Color.Black]);
     public static Decal[] StatusLights { get; } = new Decal[5];
-    public static Slider RestartSwitch { get; } = new Slider(Engine.Line, new Vector2(-100 + Engine.BackBuffer.X / 2, 0), Assets.DimsOf(Sprite.SwitchOne) + new Vector2(2, 4), false, Color.Transparent, Color.Transparent);
+    public static Slider RestartSwitch { get; } = new Slider(Engine.Line, new Vector2(-100 + Engine.BackBuffer.X / 2, 0), Assets.DimsOf(Sprite.SwitchOne) + new Vector2(2, 4), false, [Color.Transparent, Color.Transparent]);
     public static Decal Switch { get; } = new Decal(RestartSwitch.Offset + new Vector2(RestartSwitch.Size.X - Engine.BackBuffer.X / 2, 0), Assets.Get(Sprite.SwitchFive));
     public static Decal FuseCounter { get; } = new Decal(new Vector2(-60 + Engine.BackBuffer.X / 2, -55), Assets.TextFont, "0", Color.Yellow, 10);
     public static Button[,] Fuses { get; } = new Button[4, 5];
@@ -151,7 +151,7 @@ public static class UI
 
     //Hack menu
     public static Button HackButton { get; } = new Button(Vector2.Zero, Assets.Get(Sprite.Button), Assets.TextFont, "Hack", Color.Yellow);
-    public static Slider HackTimer { get; } = new Slider(Engine.Line, new Vector2(0, 50), new Vector2(50, 2), true, Color.Yellow, new Color(0.1f, 0.1f, 0.1f));
+    public static Slider HackTimer { get; } = new Slider(Engine.Line, new Vector2(0, 50), new Vector2(50, 2), true, [Color.Yellow, new Color(0.1f, 0.1f, 0.1f)]);
 
     public static void AddUIElements()
     {
@@ -170,7 +170,7 @@ public static class UI
         });
         MusicSlider.AddBehaviour(delegate ()
         {
-            float i = MusicSlider.sliderInterval;
+            float i = MusicSlider.Intervals[0];
             SoundManager.MusicVolume = Math.Clamp(MathF.Pow(10, i - 0.954242509439f) - 0.111111111111f, 0, 1);
             MusicVolume.text = $"Music: {Math.Round(i * 100)}%";
         });
@@ -236,7 +236,7 @@ public static class UI
                     }
                     return;
                 }
-                if(RestartSwitch.sliderInterval < 0.05f)
+                if(RestartSwitch.Intervals[0] < 0.05f)
                 {
                     if(Engine.SaveGame.Player.IsEnabled)
                     {
@@ -247,19 +247,19 @@ public static class UI
                     }
                     Switch.SetTexture(Assets.Get(Sprite.SwitchOne));
                 }
-                if (RestartSwitch.sliderInterval is > 0.05f and < 0.3f)
+                if (RestartSwitch.Intervals[0] is > 0.05f and < 0.3f)
                 {
                     Switch.SetTexture(Assets.Get(Sprite.SwitchTwo));
                 }
-                if (RestartSwitch.sliderInterval is > 0.3f and < 0.7f)
+                if (RestartSwitch.Intervals[0] is > 0.3f and < 0.7f)
                 {
                     Switch.SetTexture(Assets.Get(Sprite.SwitchThree));
                 }
-                if (RestartSwitch.sliderInterval is > 0.7f and < 0.95f)
+                if (RestartSwitch.Intervals[0] is > 0.7f and < 0.95f)
                 {
                     Switch.SetTexture(Assets.Get(Sprite.SwitchFour));
                 }
-                if (RestartSwitch.sliderInterval > 0.95f)
+                if (RestartSwitch.Intervals[0] > 0.95f)
                 {
                     Switch.SetTexture(Assets.Get(Sprite.SwitchFive));
                     if (!Engine.SaveGame.Player.IsEnabled)
@@ -480,6 +480,7 @@ public static class UI
         GlobalMenu.AddWidget(PlayerAbility as IFunctional, (int)Alignment.TopLeft);
         GlobalMenu.AddWidget(PlayerAmmo as IFunctional, (int)Alignment.TopLeft);
         PlayerSpecialHealth.SetInterval(1, 1);
+        PlayerHealth.Intervals = [1, 1];
 
         for (int x = 0; x < ModuleSlots.GetLength(0); x++)
         {

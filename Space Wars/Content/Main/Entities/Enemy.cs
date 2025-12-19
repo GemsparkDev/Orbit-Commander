@@ -19,6 +19,8 @@ public class Enemy : Entity
     private float targetAngle = 0;
     private List<float> cd;
     public int health;
+    private int prevHealth;
+    private float healthCD = 0;
     private float mineTime = 0;
     private int maxHealth;
     private bool deleteOnCollide = false;
@@ -42,7 +44,8 @@ public class Enemy : Entity
     {
         entityType = EntityType.Enemy;
         health = _health;
-        maxHealth = health;
+        prevHealth = _health;
+        maxHealth = _health;
         enemyRange.position = position;
         hitSound = Assets.Get(Sound.Hit);
         UpdateColor();
@@ -74,6 +77,22 @@ public class Enemy : Entity
         if (health > maxHealth)
         {
             health = maxHealth;
+        }
+        if(healthCD <= 0)
+        {
+            if(prevHealth > health)
+            {
+                prevHealth -= 1 + maxHealth / 20;
+                healthCD = 0.05f;
+            }
+            else
+            {
+                prevHealth = health;
+            }
+        }
+        else
+        {
+            healthCD -= Engine.DeltaSeconds;
         }
         base.Update();
     }
@@ -152,6 +171,7 @@ public class Enemy : Entity
         }
         if (damage > 0)
         {
+            healthCD = 0.5f;
             wasHit = true;
             ApplyWork(damage);
             SoundManager.PlaySound(hitSound, position);
@@ -196,7 +216,9 @@ public class Enemy : Entity
                 //Health bar
                 Vector2 barPosition = position + new Vector2(-texture.Width * 2, texture.Height) / 2;
                 Rectangle sourceRectangle = new(0, 0, texture.Width * 2, 2);
-                Engine.DrawFilledLine(_spriteBatch, barPosition, sourceRectangle, (float)(health) / (float)(maxHealth), new Color(0, 50, 25) * val, Color.Green * val);
+                _spriteBatch.Draw(Engine.Line, barPosition, sourceRectangle, new Color(0, 50, 25) * val);
+                _spriteBatch.Draw(Engine.Line, barPosition, new Rectangle(sourceRectangle.Location, new Point((int)(sourceRectangle.Width * (float)(prevHealth) / (float)(maxHealth)), sourceRectangle.Height)), Color.White * val);
+                _spriteBatch.Draw(Engine.Line, barPosition, new Rectangle(sourceRectangle.Location, new Point((int)(sourceRectangle.Width * (float)(health) / (float)(maxHealth)), sourceRectangle.Height)), Color.Green * val);
             }
         }
         Vector2 halfSize = Engine.BackBuffer / 2;
@@ -878,7 +900,11 @@ public class Enemy : Entity
                     else
                     {
                         float spawnAngle = MathF.Tau * currentEnemy / wave.Length + angle;
-                        Entity enemy = wave[currentEnemy](position + new Vector2(MathF.Cos(spawnAngle), MathF.Sin(spawnAngle)) * 40, velocity, angle, isFriendly);
+                        var enemy = wave[currentEnemy](position + new Vector2(MathF.Cos(spawnAngle), MathF.Sin(spawnAngle)) * 40, velocity, angle, isFriendly) as Enemy;
+                        if(Util.Random.Next(0, 5) == 0)
+                        {
+                            enemy.AddBehaviour(enemy.DropItem(ItemFactory.NewScrap));
+                        }
                         Engine.EntityManager.Add(enemy);
                         waveTimer = 0.1f;
                         currentEnemy++;
@@ -4460,7 +4486,7 @@ public class Enemy : Entity
     }
     public static Enemy NewFlareBoss(Vector2 _position, Vector2 _velocity, float _angle, Enemy _inferno)
     {
-        var enemy = new Enemy(_position, _velocity, _angle, 7, 125, Assets.Get(Sprite.FlareBoss));
+        var enemy = new Enemy(_position, _velocity, _angle, 7, 100, Assets.Get(Sprite.FlareBoss));
         enemy.AddBehaviour(enemy.FlareBoss(_inferno));
         return enemy;
     }

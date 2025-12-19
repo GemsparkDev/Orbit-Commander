@@ -119,10 +119,17 @@ public class Player : Entity
     {
         color = Engine.ColorScheme.FriendlyEnemy();
     }
+    public void Flash()
+    {
+        color = Color.BurlyWood;
+    }
     public override void Update()
     {
         collider.offsetVelocity = velocity;
         time += Engine.DeltaSeconds;
+        Color c = Engine.ColorScheme.FriendlyEnemy();
+        float l = Util.FIED(0.025f);
+        color = new Color((byte)(color.R * l + c.R * (1f-l)), (byte)(color.G * l + c.G * (1f - l)), (byte)(color.B * l + c.B * (1f - l)));
         if (Progression > 0)
         {
             int dir = 0;
@@ -232,23 +239,24 @@ public class Player : Entity
         float currentHealth = modules[ModuleType.Hull].Health + modules[ModuleType.Guns].Health + modules[ModuleType.Engines].Health + modules[ModuleType.Sensors].Health + modules[ModuleType.Core].Health;
         float maxHealth = modules[ModuleType.Hull].MaxHealth + modules[ModuleType.Guns].MaxHealth + modules[ModuleType.Engines].MaxHealth + modules[ModuleType.Sensors].MaxHealth + modules[ModuleType.Core].MaxHealth;
 
-        UI.PlayerHealth.SetInterval(currentHealth + cachedDamageCooldown / 0.05f, maxHealth);
+        UI.PlayerHealth.SetInterval(currentHealth - cachedDamage, maxHealth, 0);
+        UI.PlayerHealth.SetInterval(currentHealth + cachedDamageCooldown / 0.05f, maxHealth, 1);
         Vector3 colorVec;
         float val = (MathF.Sin(time) + 1f) / 2;
         colorVec = new Vector3(1, 0, 0) * val + new Vector3(1, 0.2f, 0.2f) * (1f - val);
-        UI.PlayerHealth.enabledColor = new Color(colorVec.X, colorVec.Y, colorVec.Z);
+        UI.PlayerHealth.Colors[0] = new Color(colorVec.X, colorVec.Y, colorVec.Z);
 
         //Only displays if the player has abilities unlocked
         if (Progression > 1) 
         {
             colorVec = new Vector3(0, 1, 1) * val + new Vector3(0.2f, 1, 0.8f) * (1f - val);
-            UI.PlayerAbility.enabledColor = new Color(colorVec.X, colorVec.Y, colorVec.Z);
-            UI.PlayerAbility.disabledColor = Color.DarkGray;
+            UI.PlayerAbility.Colors[0] = new Color(colorVec.X, colorVec.Y, colorVec.Z);
+            UI.PlayerAbility.Colors[1] = Color.DarkGray;
         }
         else
         {
-            UI.PlayerAbility.enabledColor = Color.Transparent;
-            UI.PlayerAbility.disabledColor = Color.Transparent;
+            UI.PlayerAbility.Colors[0] = Color.Transparent;
+            UI.PlayerAbility.Colors[1] = Color.Transparent;
         }
 
         if (currentHealth > 50)
@@ -280,8 +288,8 @@ public class Player : Entity
                 dockedEntity = null;
             }
         }
-        UI.PlayerSpecialHealth.enabledColor = Color.Transparent;
-        UI.PlayerSpecialHealth.disabledColor = Color.Transparent;
+        UI.PlayerSpecialHealth.Colors[0] = Color.Transparent;
+        UI.PlayerSpecialHealth.Colors[1] = Color.Transparent;
         LowerCooldown();
         if (Progression < 0)
         {
@@ -466,7 +474,7 @@ public class Player : Entity
                                         }
                                         break;
                                     case "Resonator":
-                                        firstScrap.isExpired = true;
+                                        //firstScrap.isExpired = true;
                                         Engine.EntityManager.Add(Enemy.NewQuantumResonator(position));
                                         break;
                                 }
@@ -477,7 +485,20 @@ public class Player : Entity
                 }
                 if (!UIManager.LockMouseInput && Input.NewMouseState.RightButton == ButtonState.Pressed)
                 {
-                    List<Entity> miningEnemies = Engine.EntityManager.Hitscan(position, targetVector, 120, false, out Vector2 _end);
+                    Vector2 targetDir = targetVector;
+                    if(aimAssist)
+                    {
+                        Entity nearestEnemy = Engine.EntityManager.NearestEnemy(this, true);
+                        if(nearestEnemy != null && (nearestEnemy as Enemy).health <= 0)
+                        {
+                            var relativePos = Vector2.Normalize(nearestEnemy.position - position);
+                            if (Vector2.Dot(relativePos, targetVector) > 0.9f)
+                            {
+                                targetDir = relativePos;
+                            }
+                        }
+                    }
+                    List<Entity> miningEnemies = Engine.EntityManager.Hitscan(position, targetDir, 120, false, out Vector2 _end);
                     if (miningEnemies.Count > 0 && miningEnemies[0] as Enemy != null)
                     {
                         (miningEnemies[0] as Enemy).Mine();
@@ -486,7 +507,7 @@ public class Player : Entity
                     {
                         float lerp = i / 60;
                         Vector3 color = new Vector3(1, 1, 0) * (1 - lerp) + new Vector3(1, 0, 0) * (lerp);
-                        ParticleManager.Add(new Particle(Assets.Get(Sprite.Dot), targetVector * (i + 4f) * 2 + position + new Vector2(targetVector.Y, -targetVector.X) * MathF.Sin(i / 2 - time * 5) / 2, Util.ToAngle(targetVector), new Color(color.X, color.Y, color.Z) * (1 - (lerp))));
+                        ParticleManager.Add(new Particle(Assets.Get(Sprite.Dot), targetDir * (i + 4f) * 2 + position + new Vector2(targetDir.Y, -targetDir.X) * MathF.Sin(i / 2 - time * 5) / 2, Util.ToAngle(targetDir), new Color(color.X, color.Y, color.Z) * (1 - (lerp))));
                     }
                     if (Input.OldMouseState.RightButton == ButtonState.Released)
                     {
