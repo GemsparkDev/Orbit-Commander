@@ -80,6 +80,10 @@ public abstract class Entity
     {
         color = Color.White;
     }
+    public void Flash(Color _color)
+    {
+        color = _color;
+    }
     public void ClampVelocity(float speed)
     {
         Vector2 clampVelocity = Vector2.Normalize(velocity) * speed;

@@ -119,9 +119,9 @@ public class Mission
                 RestartTimer -= Engine.DeltaSeconds;
                 return;
             }
-            if(TestCompletion())
+            EventHandler.MissionSelectTrigger();
+            if (TestCompletion())
             {
-                EventHandler.MissionSelectTrigger();
                 Engine.SaveGame.CompleteMission(Wave);
             }
         }

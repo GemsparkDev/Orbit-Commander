@@ -28,12 +28,12 @@ public class Player : Entity
     public Dictionary<ModuleType, Module> modules = new()
     {
         { ModuleType.Hull, new Reflective() },
-        { ModuleType.Guns, new LMG() },
+        { ModuleType.Guns, new Antimaterial() },
         { ModuleType.Engines, new PlasmaEngine() },
         { ModuleType.Sensors, new Sensors() },
         { ModuleType.Core, new Dash() }
     };
-    public Module SecondaryWeapon { get; set; } = new PrismArray();
+    public Module SecondaryWeapon { get; set; } = new LMG();
 
     public Vector2 Direction => targetVector;
     public DockableComponent dockedEntity;
@@ -119,17 +119,16 @@ public class Player : Entity
     {
         color = Engine.ColorScheme.FriendlyEnemy();
     }
-    public void Flash()
-    {
-        color = Color.BurlyWood;
-    }
     public override void Update()
     {
         collider.offsetVelocity = velocity;
         time += Engine.DeltaSeconds;
         Color c = Engine.ColorScheme.FriendlyEnemy();
-        float l = Util.FIED(0.025f);
-        color = new Color((byte)(color.R * l + c.R * (1f-l)), (byte)(color.G * l + c.G * (1f - l)), (byte)(color.B * l + c.B * (1f - l)));
+        if(color != c)
+        {
+            float l = Util.FIED(0.025f);
+            color = new Color((byte)(color.R * l + c.R * (1f - l)), (byte)(color.G * l + c.G * (1f - l)), (byte)(color.B * l + c.B * (1f - l)));
+        }
         if (Progression > 0)
         {
             int dir = 0;
@@ -204,7 +203,6 @@ public class Player : Entity
         if (invincibilityCooldown > 0)
         {
             invincibilityCooldown -= Engine.DeltaSeconds;
-            color = Engine.ColorScheme.FriendlyEnemy() * (MathF.Cos(invincibilityCooldown * 30) / 2 + 0.5f);
         }
         if (cachedDamageCooldown <= 0)
         {
@@ -314,6 +312,10 @@ public class Player : Entity
     }
     public override void LowerCooldown()
     {
+        if (SecondaryWeapon != null && Util.Random.NextSingle() < 0.25f)
+        {
+            SecondaryWeapon.OnUpdate();
+        }
         for (int i = 0; i < modules.Count; i++)
         {
             var module = modules[(ModuleType)i];
@@ -330,10 +332,6 @@ public class Player : Entity
             {
                 module.OnUpdate();
             }
-        }
-        if (SecondaryWeapon != null && Util.Random.NextSingle() < 0.25f)
-        {
-            SecondaryWeapon.OnUpdate();
         }
     }
     public void RestrictedActions()
@@ -667,6 +665,7 @@ public class Player : Entity
         _damage = StatusHolder.ModifyDamage(_damage);
         if (_damage > 0 && (invincibilityCooldown <= 0 || _ignoreImmunity))
         {
+            Flash(Color.White);
             Engine.ShakeScreen(0.08f * _damage);
             //Helps to cushion huge hits
             //Player will never be one shot (unless they deserve it)

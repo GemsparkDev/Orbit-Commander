@@ -3,6 +3,13 @@
 Lagrange Commander is a game made using C# in monogame. It is a 2D top down wave based shooter where you must repair and upgrade your ship by salvaging from enemies you defeat. It features realistic N-Body gravitation, which affects all entities and projectiles.
   
 # Changelog
+0.6.9.5 - 12/19/2025
+ - Reduced the LMG reload time and firing time to 4 and 0.1, from 5 and 0.08 seconds.
+ - Decreased the Antimaterial rifle cooldown to 2, from 3 seconds.
+ - The antimaterial rifle now updates the ammo ui, and creates standard firing particles.
+ - Enemies and the player now flash white when hit.
+ - Dead enemies are now pushed when hit by projectiles.
+ - Fixed mission fail conditions not exiting the mission.
 0.6.9.4 - 12/18/2025
  - Player and enemy health bars now feature white sections to outline damage taken.
  - Player mining now automatically locks on to nearest destroyed enemies.

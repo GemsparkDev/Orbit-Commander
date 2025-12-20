@@ -353,7 +353,7 @@ public static class Util
     }
     public static void FiringParticles(Vector2 _position, Vector2 _velocity, Vector2 _direction)
     {
-        for(int i = 0; i < 5; i++)
+        for (int i = 0; i < 5; i++)
         {
             var color = Random.Next(0, 4) switch
             {

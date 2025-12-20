@@ -94,6 +94,14 @@ public class Enemy : Entity
         {
             healthCD -= Engine.DeltaSeconds;
         }
+        float d = (health <= 0 ? 0.75f : 1f);
+        Color c = (isFriendly ? Engine.ColorScheme.FriendlyEnemy() : Engine.ColorScheme.HostileEnemy()) * d;
+        if (color != c)
+        {
+            Engine.WriteLine(color.B);
+            float l = Util.FIED(0.025f);
+            color = new Color((byte)(color.R * l + c.R * (1f - l)), (byte)(color.G * l + c.G * (1f - l)), (byte)(color.B * l + c.B * (1f - l)), (byte)(c.A));
+        }
         base.Update();
     }
     public override void UpdateColor()
@@ -173,6 +181,15 @@ public class Enemy : Entity
         {
             healthCD = 0.5f;
             wasHit = true;
+            if(health > 0)
+            {
+                Flash(Color.White);
+            }
+            else
+            {
+                velocity += new Vector2(Util.OneToNegOne(), Util.OneToNegOne()) + Vector2.Normalize(position - Player.position) * 1.5f;
+                angularVelocity += Util.OneToNegOne() / 2;
+            }
             ApplyWork(damage);
             SoundManager.PlaySound(hitSound, position);
             health -= damage;
@@ -252,10 +269,10 @@ public class Enemy : Entity
                 {
                     Explode(4, ColliderRadius);
                     hasExploded = true;
-                    color *= 0.75f;
                     SoundManager.PlaySound(Assets.Get(Sound.Death), position);
                 }
-                velocity *= 0.5f;
+                velocity *= Util.FIED(0.1f);
+                angularVelocity *= Util.FIED(0.1f);
             }
             if (mineTime > MathF.Sqrt((float)(maxHealth) / 8))
             {

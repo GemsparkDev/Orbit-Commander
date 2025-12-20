@@ -394,7 +394,8 @@ public class Basic() : Module(Modules.Basic)
         }
         if(ammo.Fire())
         {
-            Engine.EntityManager.Add(new PulseShot(Player.position, Player.IdealSpeedWithVelocity(9) + new Vector2(Util.OneToNegOne(), Util.OneToNegOne()), Util.ToAngle(Player.Direction), 0, true, 3));
+            Vector2 vel = Player.IdealSpeedWithVelocity(9) + new Vector2(Util.OneToNegOne(), Util.OneToNegOne()) / 2;
+            Engine.EntityManager.Add(new PulseShot(Player.position, vel, Util.ToAngle(vel - Player.velocity), 0, true, 3));
             SoundManager.PlaySound(Assets.Get(Sound.PulseFire), Player.position);
             cooldown = 0.2f;
             Engine.ShakeScreen(0.3f);
@@ -426,26 +427,38 @@ public class Sniper() : Module(Modules.Sniper)
 }
 public class Antimaterial() : Module(Modules.Antimaterial)
 {
+    ReloadSystem ammo = new ReloadSystem(1, 1.5f);
     public override void OnShoot()
     {
         if (cooldown > 0)
         {
             return;
         }
-        List<Entity> entities = Engine.EntityManager.Hitscan(Player.position, Player.Direction, 3000, true, out Vector2 _);
-        foreach (var entity in entities)
+        if(ammo.Fire())
         {
-            entity.Collide(30);
+            List<Entity> entities = Engine.EntityManager.Hitscan(Player.position, Player.Direction, 3000, true, out Vector2 end);
+            foreach (var entity in entities)
+            {
+                entity.Collide(30);
+            }
+            SoundManager.PlaySound(Assets.Get(Sound.SniperFire), Player.position);
+            Engine.Camera.Position += Player.Direction * 30 + new Vector2(Util.OneToNegOne(), Util.OneToNegOne());
+            cooldown = 0.5f;
+            Engine.ShakeScreen(0.7f);
+            Player.velocity -= Player.Direction * 6;
+            float distance = (end - Player.position).Length() / 4;
+            for (int i = 0; i < distance; i++)
+            {
+                ParticleManager.Add(new Particle(Assets.Get(Sprite.Dot), 2, Player.position + Player.Direction * 4 * i, Vector2.Zero, Util.ToAngle(Player.Direction), 0, Color.Red, Color.Transparent));
+            }
+            Util.FiringParticles(Player.position, Player.velocity, Player.Direction);
+            Player.Flash(Color.BurlyWood);
         }
-        SoundManager.PlaySound(Assets.Get(Sound.PulseFire), Player.position);
-        Engine.Camera.Position += Player.Direction * 18 + new Vector2(Util.OneToNegOne(), Util.OneToNegOne());
-        cooldown = 3f;
-        Engine.ShakeScreen(0.8f);
-        Player.velocity -= Player.Direction * 3;
-        for (int i = 0; i < 300; i++)
-        {
-            ParticleManager.Add(new Particle(Assets.Get(Sprite.Dot), 2, Player.position + Player.Direction * 4 * i, Vector2.Zero, Util.ToAngle(Player.Direction), 0, Color.Red, Color.Transparent));
-        }
+    }
+    public override void OnUpdate()
+    {
+        ammo.Update();
+        base.OnUpdate();
     }
 }
 public class Spiral() : Module(Modules.Spiral)
@@ -504,7 +517,7 @@ public class Missile() : Module(Modules.Missile)
 }
 public class LMG() : Module(Modules.LMG)
 {
-    private ReloadSystem ammo = new ReloadSystem(80, 5);
+    private ReloadSystem ammo = new ReloadSystem(80, 4);
     public override void OnShoot()
     {
         if (cooldown > 0)
@@ -513,7 +526,7 @@ public class LMG() : Module(Modules.LMG)
         }
         if(ammo.Fire())
         {
-            Vector2 offset = new Vector2(Player.Direction.Y, -Player.Direction.X) * Util.Random.Next(-2, 3);
+            Vector2 offset = new Vector2(Player.Direction.Y, -Player.Direction.X) * Util.Random.Next(-2, 3) + Util.ToUnitVector(Player.angle) * 8;
             Texture2D dot = Assets.Get(Sprite.Microshot);
             Projectile shot = new PulseShot(Player.position + offset, Player.Player.IdealSpeedWithVelocity(12) + offset / 4, Util.ToAngle(Player.Direction), 0, true, 2)
             {
@@ -525,9 +538,9 @@ public class LMG() : Module(Modules.LMG)
             Engine.ShakeScreen(0.1f);
             Engine.Camera.Position += Player.Direction * 6 + new Vector2(Util.OneToNegOne(), Util.OneToNegOne());
             Player.velocity -= Player.Direction / 6;
-            cooldown = 0.08f;
+            cooldown = 0.1f;
             Util.FiringParticles(Player.position + Player.Direction * 8, Player.velocity, Player.Direction);
-            Player.Flash();
+            Player.Flash(Color.BurlyWood);
         }
     }
     public override void OnUpdate()
