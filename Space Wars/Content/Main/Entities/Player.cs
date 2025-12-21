@@ -28,12 +28,12 @@ public class Player : Entity
     public Dictionary<ModuleType, Module> modules = new()
     {
         { ModuleType.Hull, new Reflective() },
-        { ModuleType.Guns, new Antimaterial() },
+        { ModuleType.Guns, new LMG() },
         { ModuleType.Engines, new PlasmaEngine() },
         { ModuleType.Sensors, new Sensors() },
         { ModuleType.Core, new Dash() }
     };
-    public Module SecondaryWeapon { get; set; } = new LMG();
+    public Module SecondaryWeapon { get; set; } = new PrismArray();
 
     public Vector2 Direction => targetVector;
     public DockableComponent dockedEntity;

@@ -187,8 +187,8 @@ public class Enemy : Entity
             }
             else
             {
-                velocity += new Vector2(Util.OneToNegOne(), Util.OneToNegOne()) + Vector2.Normalize(position - Player.position) * 1.5f;
-                angularVelocity += Util.OneToNegOne() / 2;
+                velocity += new Vector2(Util.OneToNegOne(), Util.OneToNegOne()) + Vector2.Normalize(position - Player.position) * 0.15f * (float)damage;
+                angularVelocity += Util.OneToNegOne()*0.05f * (float)damage;
             }
             ApplyWork(damage);
             SoundManager.PlaySound(hitSound, position);

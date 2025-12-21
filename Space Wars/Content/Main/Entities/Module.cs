@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using UILib.Content.Main;
 using System.Linq;
+using Microsoft.Xna.Framework.Audio;
 
 namespace Space_Wars.Content.Main.Entities;
 
@@ -652,22 +653,37 @@ public class Triangle() : Module(Modules.Triangle)
 public class PrismArray() : Module(Modules.PrismArray)
 {
     float time = 0;
+    private bool isFiring = false;
+    private SoundEffectInstance beam = Assets.Get(Sound.LMGFire).CreateInstance();
+    private SoundEffectInstance beamBlend;
+    private float duration = (float)Assets.Get(Sound.LMGFire).Duration.TotalSeconds;
+    private float timeLeft = 0;
     public override void OnShoot()
     {
+        isFiring = true;
+        timeLeft += Engine.DeltaSeconds;
+        if(timeLeft > duration)
+        {
+            timeLeft = 0;
+        }
         Vector2 dir = Util.ToUnitVector(Util.ToAngle(Player.Direction));
         List<Entity> enemies = Engine.EntityManager.Hitscan(Player.position, dir, 250, true, out Vector2 _end);
-        for (float i = 0; i < (_end - Player.position - dir * 10).Length() / 5; i++)
+        float end = (_end - Player.position - dir * 10).Length() / 5;
+        for (float i = 0; i < end; i++)
         {
             float lerp = i / 50;
             Vector3 color = new Vector3(0, 1, 1) * (1 - lerp) + new Vector3(1, 1, 0) * (lerp);
             ParticleManager.Add(new Particle(Assets.Get(Sprite.Circle), dir * (i + 2f) * 5 + Player.position + new Vector2(dir.Y, -dir.X) * MathF.Sin(i / 2 - time * 5) / 2, Util.ToAngle(Player.Direction), new Color(color.X, color.Y, color.Z) * (1 - (lerp))));
+        }
+        if (1 - end / 40 > Util.Random.NextSingle() * 2f)
+        {
+            ParticleManager.Add(new Particle(Assets.Get(Sprite.Circle), 1, _end, Util.ToUnitVector(Util.Random.NextSingle() * MathF.Tau) * Util.Random.NextSingle() / 2 + Vector2.Normalize(Engine.SaveGame.CurrentMission.GetNormalizedAcceleration(_end)) / 1.5f, 0, 0, Color.DarkGray, Color.Transparent));
         }
         if (cooldown > 0)
         {
             return;
         }
         cooldown = 0.1f;
-        SoundManager.PlaySound(Assets.Get(Sound.LMGFire), Player.position);
         foreach (var enemy in enemies)
         {
             if (enemy is Enemy)
@@ -679,8 +695,40 @@ public class PrismArray() : Module(Modules.PrismArray)
     }
     public override void OnUpdate()
     {
+        if(isFiring)
+        {
+            //Interpolating looped sound effect with new sound prevents noticable sound jumping
+            float lerp = 1;
+            if(timeLeft < 1)
+            {
+                lerp = timeLeft;
+            }
+            else if(duration - timeLeft < 1)
+            {
+                lerp = duration - timeLeft;
+            }
+            if (lerp < 1)
+            {
+                beamBlend ??= Assets.Get(Sound.LMGFire).CreateInstance();
+                beamBlend.Volume = (1 - lerp);
+                beamBlend.Play();
+            }
+            else if(beamBlend != null)
+            {
+                beamBlend.Dispose();
+                beamBlend = null;
+            }
+            beam.Volume = lerp;
+            beam.Play();
+        }
+        else
+        {
+            beam.Pause();
+            beamBlend?.Pause();
+        }
         time += Engine.DeltaSeconds;
         base.OnUpdate();
+        isFiring = false;
     }
 }
 public class MatrixLauncher() : Module(Modules.MatrixLauncher)
