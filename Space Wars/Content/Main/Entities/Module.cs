@@ -884,14 +884,49 @@ public class SummonShield() : Module(Modules.SummonShield)
 public class SummonGrapplingHook() : Module(Modules.GrapplingHook)
 {
     const float MaxCooldown = 5;
-    Projectile hook;
+    GrapplingHook hook;
+    Planet p = null;
+    Vector2 offset = Vector2.Zero;
     public override void OnAbility()
     {
         if (hook != null)
         {
-            cooldown /= 2;
-            hook.isExpired = true;
-            hook = null;
+            bool hasHooked = false;
+            if (hook.Parent == Player)
+            {
+                var mousePos = new Vector2(Input.NewMouseState.X, Input.NewMouseState.Y) + Engine.Camera.Position - Engine.BackBuffer / 2;
+                foreach (var planet in Engine.SaveGame.CurrentMission.Planets)
+                {
+                    var planetDir = Vector2.Normalize(mousePos + planet.position);
+                    Engine.WriteLine(mousePos);
+                    Engine.WriteLine(planet.position + planetDir * planet.radius);
+                    if (Vector2.DistanceSquared(mousePos, planet.position + planetDir * planet.radius) < 10000)
+                    {
+                        hook.Parent = new Enemy(planet.position + planetDir * planet.radius, Vector2.Zero, 0, 0, 1, null, true);
+                        hasHooked = true;
+                        p = planet;
+                        offset = planetDir * planet.radius;
+                        Engine.WriteLine("Ahh");
+                        break;
+                    }
+                }
+                foreach (var entity in Engine.EntityManager.Entities)
+                {
+                    if(Vector2.DistanceSquared(mousePos, entity.position) < 10000)
+                    {
+                        hook.Parent = entity;
+                        hasHooked = true;
+                        break;
+                    }
+                }
+            }
+            if(!hasHooked)
+            {
+                cooldown /= 2;
+                hook.isExpired = true;
+                hook = null;
+                p = null;
+            }
             return;
         }
         if (cooldown > 0)
@@ -899,6 +934,7 @@ public class SummonGrapplingHook() : Module(Modules.GrapplingHook)
             return;
         }
         hook = new GrapplingHook(Player.position, Player.IdealSpeedWithVelocity(50), Util.ToAngle(Player.Direction), Player);
+        p = null;
         SoundManager.PlaySound(Assets.Get(Sound.Click), Player.position);
         Engine.ShakeScreen(0.3f);
         Player.velocity -= Player.Direction / 2;
@@ -910,6 +946,11 @@ public class SummonGrapplingHook() : Module(Modules.GrapplingHook)
         if (hook != null && hook.isExpired)
         {
             hook = null;
+            p = null;
+        }
+        if (p != null)
+        {
+            hook.Parent.position = p.position + offset;
         }
         UI.PlayerAbility.SetInterval(1 - cooldown / MaxCooldown, 1);
         base.OnUpdate();

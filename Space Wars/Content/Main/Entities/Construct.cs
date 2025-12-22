@@ -111,6 +111,13 @@ public class Construct : Pickup
                 break;
             case Constructs.Furnace:
                 velocity *= Util.FIED(0.2f);    
+                foreach(var enemy in Engine.EntityManager.Entities)
+                {
+                    if(Vector2.DistanceSquared(enemy.position, position) < 3600)
+                    {
+                        enemy.ApplyWork(5);
+                    }
+                }
                 Vector2 offset = Util.RotateVector2(new Vector2(Util.OneToNegOne(), Util.OneToNegOne()) * 5, angle);
                 ParticleManager.Add(new Particle(Assets.Get(Sprite.Dot), 1, position + offset, velocity, angle, 0, Color.Orange, Color.Transparent));
                 var nearestPickup = Engine.EntityManager.NearestItem(this, true);

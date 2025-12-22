@@ -28,6 +28,7 @@ public class Mission
 
     private EntityConstructor escapeVehicle = null;
     private Planet[] planets;
+    public Planet[] Planets { get { return planets; } }
     //Save original entity parameters to allow cloning
     private List<ICondition> CopyObjectives { get; }
     private List<ICondition> MissionObjectives { get; } = [];
@@ -444,6 +445,21 @@ public class Mission
             acceleration -= planet.GetAcceleration(_position);
         }
         return acceleration;
+    }
+    public Planet GetNearestPlanet(Vector2 _position)
+    {
+        float nearestDistance = float.MaxValue;
+        Planet nearestPlanet = null;
+        foreach(var planet in planets)
+        {
+            float distance = Vector2.Distance(_position, planet.position);
+            if(distance < nearestDistance)
+            {
+                nearestDistance = distance;
+                nearestPlanet = planet;
+            }
+        }
+        return nearestPlanet;
     }
     public Mission Clone()
     {

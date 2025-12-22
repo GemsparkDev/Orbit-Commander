@@ -31,7 +31,7 @@ public class Player : Entity
         { ModuleType.Guns, new LMG() },
         { ModuleType.Engines, new PlasmaEngine() },
         { ModuleType.Sensors, new Sensors() },
-        { ModuleType.Core, new Dash() }
+        { ModuleType.Core, new SummonGrapplingHook() }
     };
     public Module SecondaryWeapon { get; set; } = new PrismArray();
 

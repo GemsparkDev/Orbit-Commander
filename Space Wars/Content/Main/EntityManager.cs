@@ -16,6 +16,7 @@ public class EntityManager
 {
     private bool isUpdating = false;
     private List<Entity> entities = [];
+    public List<Entity> Entities { get { return entities; } }
     private List<Entity> addedEntities = [];
     private List<Entity> enemies = [];
     private List<Projectile> projectiles = [];
