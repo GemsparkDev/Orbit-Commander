@@ -503,17 +503,29 @@ public class Shotgun() : Module(Modules.Shotgun)
 }
 public class Missile() : Module(Modules.Missile)
 {
+    private ReloadSystem ammo = new ReloadSystem(8, 2f);
     public override void OnShoot()
     {
         if (cooldown > 0)
         {
             return;
         }
-        Engine.EntityManager.Add(Enemy.NewMissile(Player.position + new Vector2(Player.Direction.Y, -Player.Direction.X) * 6, Player.Player.IdealSpeedWithVelocity(9), Util.ToAngle(Player.Direction), true));
-        SoundManager.PlaySound(Assets.Get(Sound.MissileFire), Player.position);
-        cooldown = 1.5f;
-        Player.velocity -= Player.Direction / 4;
-        Engine.ShakeScreen(0.3f);
+        if(ammo.Fire())
+        {
+            Engine.EntityManager.Add(Enemy.NewMissile(Player.position + new Vector2(Player.Direction.Y, -Player.Direction.X) * 6, Player.IdealSpeedWithVelocity(9), Util.ToAngle(Player.Direction), true));
+            SoundManager.PlaySound(Assets.Get(Sound.MissileFire), Player.position);
+            cooldown = 0.5f;
+            Engine.ShakeScreen(0.5f);
+        }
+    }
+    public override void OnUpdate()
+    {
+        if (Util.Random.NextSingle() > 0.33f)
+        {
+            ParticleManager.Add(new Particle(Assets.Get(Sprite.Circle), cooldown, Player.position - Player.Direction * 8 - Player.velocity, Player.velocity - Player.Direction * cooldown * 2 + new Vector2(Util.OneToNegOne(), Util.OneToNegOne()) * cooldown / 2, 0, 0, Color.Gray * (1 - (1 - cooldown * 2) * (1 - cooldown * 2)), Color.Transparent));
+        }
+        ammo.Update();
+        base.OnUpdate();
     }
 }
 public class LMG() : Module(Modules.LMG)

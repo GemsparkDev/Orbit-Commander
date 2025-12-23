@@ -122,9 +122,9 @@ namespace Space_Wars.Content.Main.Particles
             float increment = 100 / (speedOfEmission);
             for (cachedDistance += positionDifference.Length(); cachedDistance > increment; cachedDistance -= increment)
             {
-                randomAngle = Util.Random.NextSingle() * sprayCone;
-                ParticleManager.Add(new Particle(particleTexture, particleTimeAlive, position - normalVector * (cachedDistance - increment), normalVector * particleVelocity + offsetVelocity,
-                    randomAngle - sprayCone / 2 + sprayAngle - Util.ToAngle(positionDifference), particleAngularVelocity, particleColor, particleFadeToColor) { experienceGravity = particlesExperienceGravity });
+                randomAngle = Util.Random.NextSingle() * sprayCone - sprayCone / 2 + sprayAngle - Util.ToAngle(positionDifference);
+                ParticleManager.Add(new Particle(particleTexture, particleTimeAlive, position - normalVector * (cachedDistance - increment), Util.ToUnitVector(randomAngle) * particleVelocity + offsetVelocity,
+                    randomAngle, particleAngularVelocity, particleColor, particleFadeToColor) { experienceGravity = particlesExperienceGravity });
             }
         }
         private void DrawCircle()

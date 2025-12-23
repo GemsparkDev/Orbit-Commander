@@ -2699,6 +2699,7 @@ public class Enemy : Entity
         col.A = 0;
         ParticleEmitter engineParticles = new(Assets.Get(Sprite.Circle), 0.1f, position, 0, MathF.PI/4, 2, 
             200f, Color.Yellow, EmitterType.EmissionOverTime) { isEmitterActive = false, particleFadeToColor = col };
+        ParticleEmitter smokeParticles = new(Assets.Get(Sprite.Circle), 1, position, 0, MathF.Tau, 0.25f, 10, new Color(0.33f, 0.33f, 0.33f), EmitterType.EmissionOverDistance) { particleFadeToColor = Color.Transparent };
         while (true)
         {
             if (fuel <= 0)
@@ -2765,7 +2766,11 @@ public class Enemy : Entity
             engineParticles.sprayAngle = angle + MathF.PI;
             engineParticles.offsetVelocity = velocity;
             engineParticles.Update();
-            engineParticles.position = position - Util.ToUnitVector(angle) * 7;
+            Vector2 offset = Util.ToUnitVector(angle) * 7;
+            engineParticles.position = position - offset;
+
+            smokeParticles.Update();
+            smokeParticles.position = position - offset;
             if (EntityManager.DistanceSqr(this, nearestEnemy) < 10 * 10)
             {
                 Explode(8, 12);

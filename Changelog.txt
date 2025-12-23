@@ -3,6 +3,11 @@
 Lagrange Commander is a game made using C# in monogame. It is a 2D top down wave based shooter where you must repair and upgrade your ship by salvaging from enemies you defeat. It features realistic N-Body gravitation, which affects all entities and projectiles.
   
 # Changelog
+0.6.9.8 - 12/22/2025
+ - Missiles now leave trails of smoke behind them.
+ - The Missile Launcher now has increased screen shake, and produces additional smoke particles.
+ - Fixed an issue where emission over distance emitters did not emit in random directions.
+ - The Missile Launcher now has 8 rounds and a 2 seconds reload time.
 0.6.9.7 - 12/21/2025
  - The Furnace construct now warms up nearby entities.
  - The grappling hook base can now be attached to other objects.
