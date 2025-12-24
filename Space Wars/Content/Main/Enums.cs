@@ -216,6 +216,7 @@ public enum Sound
     Undock,
     Full,
     FireEngines,
+    FireLaser,
     Beep,
 
     OpenMenu,

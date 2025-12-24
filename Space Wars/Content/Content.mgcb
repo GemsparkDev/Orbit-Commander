@@ -1730,6 +1730,12 @@
 /processorParam:Quality=Best
 /build:Sounds/Loop_0.wav
 
+#begin Sounds/Loop_1.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Sounds/Loop_1.wav
+
 #begin Sounds/main.wav
 /importer:WavImporter
 /processor:SoundEffectProcessor
