@@ -3,6 +3,17 @@
 Lagrange Commander is a game made using C# in monogame. It is a 2D top down wave based shooter where you must repair and upgrade your ship by salvaging from enemies you defeat. It features realistic N-Body gravitation, which affects all entities and projectiles.
   
 # Changelog
+0.7.0.0 - 12/24/2025
+ - Increased the damage of the Torch weapon to 2, from 1.
+ - The Torch now fires 3 burst shots at once.
+ - The Torch now has an ammo count of 8, with a 1 second reload time.
+ - The Spiral shot can now take a variable offset.
+ - The Spiral weapon now fires spiral shots of varying time offset.
+ - The Spiral weapon now has 10 rounds with a 2 second reload time, and a cooldown of 0.5 from 0.7.
+ - Several weapons now have additional particle effects when firing.
+ - The Crossbow weapon now has 1 shot with a reload of 1.5, and no longer uses cooldown.
+ - The Fireball weapon now has 3 shots with a reload speed of 2, and a cooldown of 0.5 from 0.8.
+ - The Sniper weapon now deals 16 damage, from 20.
 0.6.9.9 - 12/23/2025
  - Moved the laser sound into it's own file (loop 2)
  - The reload system can now call back on reload.

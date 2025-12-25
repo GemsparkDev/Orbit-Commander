@@ -1478,8 +1478,8 @@ public class Enemy : Entity
                     {
                         cd[0] = 0.8f;
                         Vector2 dir = Util.ToUnitVector(angle) * 12;
-                        Engine.EntityManager.Add(new SpiralShot(position, dir, angle, 0, isFriendly, damage, false));
-                        Engine.EntityManager.Add(new SpiralShot(position, dir, angle, 0, isFriendly, damage, true));
+                        Engine.EntityManager.Add(new SpiralShot(position, dir, angle, 0, isFriendly, damage, 0));
+                        Engine.EntityManager.Add(new SpiralShot(position, dir, angle, 0, isFriendly, damage, MathF.PI));
                     }
                     angle = Util.ToAngle(velocity);
                 }
@@ -1500,7 +1500,7 @@ public class Enemy : Entity
                     if (cd[0] <= 0 && Vector2.Distance(Engine.SaveGame.Player.position, position) < 300 && Vector2.Dot(velocity, (Engine.SaveGame.Player.position - position)) / (velocity.Length() * (Engine.SaveGame.Player.position - position).Length()) > 0.75f)
                     {
                         cd[0] = 1f;
-                        Engine.EntityManager.Add(new SpiralShot(position, Util.ToUnitVector(angle) * 8, angle, 0, isFriendly, damage, false));
+                        Engine.EntityManager.Add(new SpiralShot(position, Util.ToUnitVector(angle) * 8, angle, 0, isFriendly, damage, 0));
                     }
                     angle = Util.ToAngle(velocity);
                 }
@@ -2741,6 +2741,7 @@ public class Enemy : Entity
                 accelerationVector = Vector2.Normalize(accelerationVector) * 0.75f;
             }
             engineParticles.isEmitterActive = false;
+            smokeParticles.isEmitterActive = false;
             if (fuel > 0)
             {
                 velocity += accelerationVector;
@@ -2762,6 +2763,7 @@ public class Enemy : Entity
                 }
 
                 engineParticles.isEmitterActive = true;
+                smokeParticles.isEmitterActive = true;
             }
             engineParticles.sprayAngle = angle + MathF.PI;
             engineParticles.offsetVelocity = velocity;
@@ -2989,8 +2991,8 @@ public class Enemy : Entity
                             }
                             else
                             {
-                                Engine.EntityManager.Add(new SpiralShot(position, Util.ToUnitVector(angle) * 8, angle, 0, isFriendly, damage, false) { texture = tex, timeLeft = 3 });
-                                Engine.EntityManager.Add(new SpiralShot(position, Util.ToUnitVector(angle) * 8, angle, 0, isFriendly, damage, true) { texture = tex, timeLeft = 3 });
+                                Engine.EntityManager.Add(new SpiralShot(position, Util.ToUnitVector(angle) * 8, angle, 0, isFriendly, damage, 0) { texture = tex, timeLeft = 3 });
+                                Engine.EntityManager.Add(new SpiralShot(position, Util.ToUnitVector(angle) * 8, angle, 0, isFriendly, damage, MathF.PI) { texture = tex, timeLeft = 3 });
                             }
                             if (shotCount < 1)
                             {
@@ -3343,7 +3345,7 @@ public class Enemy : Entity
                     if (Vector2.Distance(trackedEnemy.position, position) < 500 && cd[0] <= 0)
                     {
                         cd[0] = 1.5f;
-                        Engine.EntityManager.Add(new SpiralShot(position, velocity + Util.ToUnitVector(angle) * 8, angle, 0, isFriendly, damage, false));
+                        Engine.EntityManager.Add(new SpiralShot(position, velocity + Util.ToUnitVector(angle) * 8, angle, 0, isFriendly, damage, 0));
                     }
                 }
                 else

@@ -97,7 +97,7 @@ public class ReloadSystem(int _magazineSize, float _reloadSpeed, Action _reloadC
     private int rounds = _magazineSize;
     private int magazineSize = _magazineSize;
     float reloadCD = 0;
-    public void Update()
+    public void Update(Module _module)
     {
         if(reloadCD > 0)
         {
@@ -118,7 +118,10 @@ public class ReloadSystem(int _magazineSize, float _reloadSpeed, Action _reloadC
             reloadCD = _reloadSpeed;
             SoundManager.PlayGlobalSound(Assets.Get(Sound.Dock));
         }
-        UI.PlayerAmmo.SetInterval(val, magazineSize);
+        if(Engine.SaveGame.Player.modules.ContainsValue(_module))
+        {
+            UI.PlayerAmmo.SetInterval(val, magazineSize);
+        }
     }
     public bool Fire()
     {
@@ -132,7 +135,6 @@ public class ReloadSystem(int _magazineSize, float _reloadSpeed, Action _reloadC
             if (reloadCD <= 0)
             {
                 reloadCD = _reloadSpeed;
-                SoundManager.PlayGlobalSound(Assets.Get(Sound.Dock));
                 _reloadCallback?.Invoke();
             }
             return false;
@@ -404,11 +406,12 @@ public class Basic() : Module(Modules.Basic)
             Engine.Camera.Position += Player.Direction * 8 + new Vector2(Util.OneToNegOne(), Util.OneToNegOne());
             Player.velocity -= Player.Direction / 3;
             Util.FiringParticles(Player.position + Player.Direction * 8, Player.velocity, Player.Direction);
+            Player.Flash(Color.BurlyWood);
         }
     }
     public override void OnUpdate()
     {
-        ammo.Update();
+        ammo.Update(this);
         base.OnUpdate();
     }
 }
@@ -423,18 +426,19 @@ public class Sniper() : Module(Modules.Sniper)
         }
         if(ammo.Fire())
         {
-            Engine.EntityManager.Add(new AssassinShot(Player.position, Player.IdealSpeedWithVelocity(20), Util.ToAngle(Player.Direction), 0, true, 20) { texture = Assets.Get(Sprite.Arrow) });
+            Engine.EntityManager.Add(new AssassinShot(Player.position, Player.IdealSpeedWithVelocity(20), Util.ToAngle(Player.Direction), 0, true, 16) { texture = Assets.Get(Sprite.Arrow) });
             SoundManager.PlaySound(Assets.Get(Sound.SniperFire), Player.position);
             cooldown = 0.75f;
             Engine.Camera.Position += Player.Direction * 12 + new Vector2(Util.OneToNegOne(), Util.OneToNegOne()) * 2;
             Engine.ShakeScreen(0.5f);
             Player.velocity -= Player.Direction / 2;
-            Util.FiringParticles(Player.position, Player.velocity, Player.Direction);
+            Util.FiringParticles(Player.position + Player.Direction * 8, Player.velocity, Player.Direction);
+            Player.Flash(Color.BurlyWood);
         }
     }
     public override void OnUpdate()
     {
-        ammo.Update();
+        ammo.Update(this);
         base.OnUpdate();
     }
 }
@@ -464,30 +468,50 @@ public class Antimaterial() : Module(Modules.Antimaterial)
             {
                 ParticleManager.Add(new Particle(Assets.Get(Sprite.Dot), 2, Player.position + Player.Direction * 4 * i, Vector2.Zero, Util.ToAngle(Player.Direction), 0, Color.Red, Color.Transparent));
             }
-            Util.FiringParticles(Player.position, Player.velocity, Player.Direction);
+            Util.FiringParticles(Player.position + Player.Direction * 8, Player.velocity, Player.Direction);
             Player.Flash(Color.BurlyWood);
         }
     }
     public override void OnUpdate()
     {
-        ammo.Update();
+        ammo.Update(this);
         base.OnUpdate();
     }
 }
 public class Spiral() : Module(Modules.Spiral)
 {
+    ReloadSystem ammo = new ReloadSystem(10, 2);
+    float offset = 0;
     public override void OnShoot()
     {
         if (cooldown > 0)
         {
             return;
         }
-        Vector2 speed = Player.IdealSpeedWithVelocity(12);
-        Engine.EntityManager.Add(new SpiralShot(Player.position, speed, Util.ToAngle(Player.Direction), 0, true, 5, false, 1));
-        Engine.EntityManager.Add(new SpiralShot(Player.position, speed, Util.ToAngle(Player.Direction), 0, true, 5, true, 1));
-        SoundManager.PlaySound(Assets.Get(Sound.PulseFire), Player.position);
-        cooldown = 0.7f;
-        Engine.ShakeScreen(0.2f);
+        if(ammo.Fire())
+        {
+            Vector2 speed = Player.IdealSpeedWithVelocity(12);
+            Engine.EntityManager.Add(new SpiralShot(Player.position, speed, Util.ToAngle(Player.Direction), 0, true, 5, offset, 1));
+            Engine.EntityManager.Add(new SpiralShot(Player.position, speed, Util.ToAngle(Player.Direction), 0, true, 5, MathF.PI + offset, 1));
+            SoundManager.PlaySound(Assets.Get(Sound.PulseFire), Player.position);
+            cooldown = 0.5f;
+            Engine.ShakeScreen(0.4f);
+            Player.Flash(Color.BurlyWood);
+            Player.velocity -= Player.Direction;
+            Util.FiringParticles(Player.position + Player.Direction * 8, Player.velocity, Player.Direction);
+            ParticleManager.Add(new Particle(Assets.Get(Sprite.Dot), 60, Player.position - Player.velocity, Player.velocity
+                + new Vector2(-Player.Direction.Y + Util.OneToNegOne() / 2, Player.Direction.X + Util.OneToNegOne() / 4), 0, Util.OneToNegOne() / 5, Color.Yellow, Color.Transparent) { experienceGravity = true });
+            offset += MathF.PI / 8;
+            if (offset > MathF.Tau)
+            {
+                offset -= MathF.Tau;
+            }
+        }
+    }
+    public override void OnUpdate()
+    {
+        ammo.Update(this);
+        base.OnUpdate();
     }
 }
 public class Shotgun() : Module(Modules.Shotgun)
@@ -515,12 +539,13 @@ public class Shotgun() : Module(Modules.Shotgun)
             cooldown = 0.5f;
             Engine.Camera.Position += Player.Direction * 10 + new Vector2(Util.OneToNegOne(), Util.OneToNegOne());
             Engine.ShakeScreen(0.5f);
-            Util.FiringParticles(Player.position, Player.velocity, Player.Direction);
+            Util.FiringParticles(Player.position + Player.Direction * 8, Player.velocity, Player.Direction);
+            Player.Flash(Color.BurlyWood);
         }
     }
     public override void OnUpdate()
     {
-        ammo.Update();
+        ammo.Update(this);
         base.OnUpdate();
     }
 }
@@ -547,7 +572,7 @@ public class Missile() : Module(Modules.Missile)
         {
             ParticleManager.Add(new Particle(Assets.Get(Sprite.Circle), cooldown, Player.position - Player.Direction * 8 - Player.velocity, Player.velocity - Player.Direction * cooldown * 2 + new Vector2(Util.OneToNegOne(), Util.OneToNegOne()) * cooldown / 2, 0, 0, Color.Gray * (1 - (1 - cooldown * 2) * (1 - cooldown * 2)), Color.Transparent));
         }
-        ammo.Update();
+        ammo.Update(this);
         base.OnUpdate();
     }
 }
@@ -581,29 +606,33 @@ public class LMG() : Module(Modules.LMG)
     }
     public override void OnUpdate()
     {
-        ammo.Update();
+        ammo.Update(this);
         base.OnUpdate();
     }
 }
 public class Crossbow() : Module(Modules.Crossbow)
 {
+    //Does not use cooldown, as that decreases player stealth
+    ReloadSystem ammo = new ReloadSystem(1, 1.5f);
     public override void OnShoot()
     {
-        if (cooldown > 0)
+        if (ammo.Fire())
         {
-            return;
+            Vector2 offset = new Vector2(Player.Direction.Y, -Player.Direction.X) * Util.Random.Next(-2, 3);
+            Projectile shot = new PulseShot(Player.position + offset, Player.IdealSpeedWithVelocity(15) + offset / 4, Util.ToAngle(Player.Direction), 0, true, 18, true, 1)
+            {
+                texture = Assets.Get(Sprite.CrossbowShot),
+            };
+            Engine.EntityManager.Add(shot);
+            Engine.Camera.Position += Player.Direction * 6;
+            Engine.ShakeScreen(0.2f);
+            Player.velocity -= Player.Direction / 4;
         }
-        Vector2 offset = new Vector2(Player.Direction.Y, -Player.Direction.X) * Util.Random.Next(-2, 3);
-        Texture2D dot = Assets.Get(Sprite.CrossbowShot);
-        Projectile shot = new PulseShot(Player.position + offset, Player.Player.IdealSpeedWithVelocity(8) + offset / 4, Util.ToAngle(Player.Direction), 0, true, 8, true, 1)
-        {
-            texture = dot,
-        };
-        Engine.EntityManager.Add(shot);
-        SoundManager.PlaySound(Assets.Get(Sound.LMGFire), Player.position);
-        Engine.ShakeScreen(0.2f);
-        Player.velocity -= Player.Direction / 4;
-        cooldown = 0.5f;
+    }
+    public override void OnUpdate()
+    {
+        ammo.Update(this);
+        base.OnUpdate();
     }
 }
 public class Flamethrower() : Module(Modules.Flamethrower)
@@ -623,26 +652,37 @@ public class Flamethrower() : Module(Modules.Flamethrower)
             Player.velocity -= Player.Direction / 10;
             cooldown = 0.08f;
             Engine.ShakeScreen(0.1f);
+            Player.Flash(Color.Orange);
         }
     }
     public override void OnUpdate()
     {
-        ammo.Update();
+        ammo.Update(this);
         base.OnUpdate();
     }
 }
 public class Fireball() : Module(Modules.Fireball)
 {
+    ReloadSystem ammo = new ReloadSystem(3, 2);
     public override void OnShoot()
     {
         if (cooldown > 0)
         {
             return;
         }
-        Engine.EntityManager.Add(new FlameBolt(Player.position, Player.IdealSpeedWithVelocity(8) + new Vector2(Util.OneToNegOne(), Util.OneToNegOne()) / 2, true, 4, 4, 0.5f));
-        SoundManager.PlaySound(Assets.Get(Sound.LMGFire), Player.position);
-        cooldown = 0.8f;
-        Engine.ShakeScreen(0.1f);
+        if(ammo.Fire())
+        {
+            Engine.EntityManager.Add(new FlameBolt(Player.position, Player.IdealSpeedWithVelocity(8) + new Vector2(Util.OneToNegOne(), Util.OneToNegOne()) / 2, true, 4, 4, 0.5f));
+            SoundManager.PlaySound(Assets.Get(Sound.LMGFire), Player.position);
+            cooldown = 0.5f;
+            Engine.ShakeScreen(0.3f);
+            Player.Flash(Color.Orange);
+        }
+    }
+    public override void OnUpdate()
+    {
+        ammo.Update(this);
+        base.OnUpdate();
     }
 }
 public class GrenadeLauncher() : Module(Modules.GrenadeLauncher)
@@ -795,19 +835,51 @@ public class MatrixLauncher() : Module(Modules.MatrixLauncher)
 }
 public class Torch() : Module(Modules.Torch)
 {
+    ReloadSystem ammo = new ReloadSystem(8, 1);
+    int count = 0;
+    float betweenShots = 0;
     public override void OnShoot()
     {
-        if (cooldown > 0)
+        if (cooldown > 0 || count > 0)
         {
             return;
         }
-        Vector2 offset = Util.ToUnitVector(Util.ToAngle(Player.Direction) + MathF.PI / 2) * Util.OneToNegOne() * 3;
-        Projectile shot = new FlameBolt(Player.position - offset * 5, Player.IdealSpeedWithVelocity(12) + offset, Player.isFriendly, 1, 2, 0.1f);
-        Engine.EntityManager.Add(shot);
-        SoundManager.PlaySound(Assets.Get(Sound.LMGFire), Player.position);
-        Engine.ShakeScreen(0.02f);
-        Player.velocity -= Player.Direction / 6;
-        cooldown = 0.1f;
+        if(ammo.Fire())
+        {
+            count++;
+        }
+    }
+    public override void OnUpdate()
+    {
+        if(count > 0)
+        {
+            if(betweenShots <= 0)
+            {
+                betweenShots = 0.05f;
+                Vector2 offset = new Vector2(Player.Direction.Y, -Player.Direction.X) * Util.OneToNegOne() * 3;
+                Projectile shot = new FlameBolt(Player.position - offset * 5, Player.IdealSpeedWithVelocity(12) + offset / 3, Player.isFriendly, 2, 2, 0.1f, 0, 20);
+                Engine.EntityManager.Add(shot);
+                SoundManager.PlaySound(Assets.Get(Sound.PulseFire), Player.position);
+                Engine.ShakeScreen(0.2f);
+                Util.FiringParticles(Player.position + Player.Direction * 8, Player.velocity, Player.Direction);
+                Engine.Camera.Position += Player.Direction * 6;
+                Player.velocity -= Player.Direction / 6;
+                Player.Flash(Color.Orange);
+                count++;
+            }
+            else
+            {
+                betweenShots -= Engine.DeltaSeconds;
+            }
+            if(count > 3)
+            {
+                count = 0;
+                betweenShots = 0;
+                cooldown = 0.25f;
+            }
+        }
+        ammo.Update(this);
+        base.OnUpdate();
     }
 }
 public class SplitterModule() : Module(Modules.SplitterModule)
