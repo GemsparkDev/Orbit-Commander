@@ -884,22 +884,34 @@ public class Torch() : Module(Modules.Torch)
 }
 public class SplitterModule() : Module(Modules.SplitterModule)
 {
+    ReloadSystem ammo = new ReloadSystem(6, 3);
     public override void OnShoot()
     {
         if (cooldown > 0)
         {
             return;
         }
-        List<Entity> missiles = [];
-        for (int i = 0; i < 3; i++)
+        if(ammo.Fire())
         {
-            missiles.Add(Enemy.NewMissile(position, velocity, 0, true, 1));
+            List<Entity> missiles = [];
+            for (int i = 0; i < 3; i++)
+            {
+                missiles.Add(Enemy.NewMissile(position, velocity, 0, true, 1));
+            }
+            Engine.EntityManager.Add(new Splitter(Player.position, Player.IdealSpeedWithVelocity(8), Util.ToAngle(Player.Direction), Player.isFriendly, 8, missiles, 0.5f));
+            SoundManager.PlaySound(Assets.Get(Sound.PulseFire), Player.position);
+            Engine.ShakeScreen(0.5f);
+            Player.velocity -= Player.Direction;
+            cooldown = 0.75f;
+            Engine.Camera.Position += Player.Direction * 12 + new Vector2(Util.OneToNegOne(), Util.OneToNegOne());
+            Util.FiringParticles(Player.position + Player.Direction * 8, Player.velocity, Player.Direction);
+            Player.Flash(Color.BurlyWood);
         }
-        Engine.EntityManager.Add(new Splitter(Player.position, Player.IdealSpeedWithVelocity(8), Util.ToAngle(Player.Direction), Player.isFriendly, 8, missiles, 0.5f));
-        SoundManager.PlaySound(Assets.Get(Sound.LMGFire), Player.position);
-        Engine.ShakeScreen(0.2f);
-        Player.velocity -= Player.Direction / 2;
-        cooldown = 2f;
+    }
+    public override void OnUpdate()
+    {
+        ammo.Update(this);
+        base.OnUpdate();
     }
 }
 public class Fractal() : Module(Modules.Fractal)
@@ -924,22 +936,34 @@ public class Fractal() : Module(Modules.Fractal)
         SoundManager.PlaySound(Assets.Get(Sound.LMGFire), Player.position);
         Engine.ShakeScreen(0.1f);
         Player.velocity -= Player.Direction / 2;
-        cooldown = 0.5f;
+        cooldown = 0.75f;
     }
 }
 public class CrackShot() : Module(Modules.CrackShot)
 {
+    ReloadSystem ammo = new ReloadSystem(6, 2.5f);
     public override void OnShoot()
     {
         if (cooldown > 0)
         {
             return;
         }
-        Engine.EntityManager.Add(new Splitter(Player.position, Player.IdealSpeedWithVelocity(8), Util.ToAngle(Player.Direction), Player.isFriendly, 3, [new AssassinShot(position, default, 0, 0, Player.isFriendly, 3, 0)], 0.2f, 0, true));
-        SoundManager.PlaySound(Assets.Get(Sound.PulseFire), Player.position);
-        Engine.ShakeScreen(0.1f);
-        Player.velocity -= Player.Direction / 2;
-        cooldown = 0.25f;
+        if(ammo.Fire())
+        {
+            Engine.EntityManager.Add(new Splitter(Player.position, Player.IdealSpeedWithVelocity(8), Util.ToAngle(Player.Direction), Player.isFriendly, 3, [new AssassinShot(position, default, 0, 0, Player.isFriendly, 3, 0)], 0.2f, 0, true));
+            SoundManager.PlaySound(Assets.Get(Sound.PulseFire), Player.position);
+            Engine.ShakeScreen(0.3f);
+            Player.velocity -= Player.Direction / 2;
+            cooldown = 0.2f;
+            Engine.Camera.Position += Player.Direction * 6;
+            Util.FiringParticles(Player.position + Player.Direction * 8, Player.velocity, Player.Direction);
+            Player.Flash(Color.BurlyWood);
+        }
+    }
+    public override void OnUpdate()
+    {
+        ammo.Update(this);
+        base.OnUpdate();
     }
 }
 public class Dash() : Module(Modules.Dash)
