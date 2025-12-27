@@ -41,7 +41,6 @@ public enum Modules
     GrenadeLauncher, 
     Spewer,
     Antimaterial,
-    Triangle,
     PrismArray,
     MatrixLauncher,
     Torch,

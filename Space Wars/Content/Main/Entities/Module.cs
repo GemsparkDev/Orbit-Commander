@@ -687,53 +687,56 @@ public class Fireball() : Module(Modules.Fireball)
 }
 public class GrenadeLauncher() : Module(Modules.GrenadeLauncher)
 {
+    ReloadSystem ammo = new ReloadSystem(8, 3);
     public override void OnShoot()
     {
         if (cooldown > 0)
         {
             return;
         }
-        Engine.EntityManager.Add(new Explosive(Player.position, Player.IdealSpeedWithVelocity(8) + new Vector2(Util.OneToNegOne(), Util.OneToNegOne()), Util.ToAngle(Player.Direction), Util.OneToNegOne() / 8, true, 16, 40, 1));
-        SoundManager.PlaySound(Assets.Get(Sound.PulseFire), Player.position);
-        cooldown = 1f;
-        Engine.ShakeScreen(0.3f);
-        Player.velocity -= Player.Direction / 2;
+        if(ammo.Fire())
+        {
+            Engine.EntityManager.Add(new Explosive(Player.position, Player.IdealSpeedWithVelocity(8) + new Vector2(Util.OneToNegOne(), Util.OneToNegOne()), Util.ToAngle(Player.Direction), Util.OneToNegOne() / 8, true, 16, 40, 1));
+            SoundManager.PlaySound(Assets.Get(Sound.PulseFire), Player.position);
+            cooldown = 0.8f;
+            Engine.ShakeScreen(0.4f);
+            Player.velocity -= Player.Direction / 2;
+            Engine.Camera.Position += Player.Direction * 8 + new Vector2(Util.OneToNegOne(), Util.OneToNegOne()) / 2;
+            Util.FiringParticles(Player.position + Player.Direction * 8, Player.velocity, Player.Direction);
+            Player.Flash(Color.BurlyWood);
+        }
+    }
+    public override void OnUpdate()
+    {
+        ammo.Update(this);
+        base.OnUpdate();
     }
 }
 public class SpewerModule() : Module(Modules.Spewer)
 {
+    ReloadSystem ammo = new ReloadSystem(3, 5);
     public override void OnShoot()
     {
         if (cooldown > 0)
         {
             return;
         }
-        Engine.EntityManager.Add(new Spewer(Player.position, Player.IdealSpeedWithVelocity(4) + new Vector2(Util.OneToNegOne(), Util.OneToNegOne()) / 2, Util.ToAngle(Player.Direction), Util.OneToNegOne() / 8, true, 2));
-        SoundManager.PlaySound(Assets.Get(Sound.PulseFire), Player.position);
-        cooldown = 1f;
-        Engine.ShakeScreen(0.3f);
-        Player.velocity -= Player.Direction / 2;
+        if (ammo.Fire())
+        {
+            Engine.EntityManager.Add(new Spewer(Player.position, Player.IdealSpeedWithVelocity(4) + new Vector2(Util.OneToNegOne(), Util.OneToNegOne()) / 2, Util.ToAngle(Player.Direction), Util.OneToNegOne() / 8, true, 2));
+            SoundManager.PlaySound(Assets.Get(Sound.PulseFire), Player.position);
+            cooldown = 1f;
+            Engine.ShakeScreen(0.6f);
+            Player.velocity -= Player.Direction;
+                Engine.Camera.Position += Player.Direction * 12 + new Vector2(Util.OneToNegOne(), Util.OneToNegOne());
+                Util.FiringParticles(Player.position + Player.Direction * 8, Player.velocity, Player.Direction);
+            Player.Flash(Color.BurlyWood);
+        }
     }
-}
-public class Triangle() : Module(Modules.Triangle)
-{
-    public override void OnShoot()
+    public override void OnUpdate()
     {
-        if (cooldown > 0)
-        {
-            return;
-        }
-        Vector2 vel = Player.IdealSpeedWithVelocity(8) - Player.velocity;
-        var dir = Vector2.Normalize(vel);
-        Player.velocity += dir;
-        var offset = new Vector2(dir.Y, -dir.X);
-        float angle = Util.ToAngle(Player.Direction);
-        Engine.EntityManager.Add(new PulseShot(Player.position, vel + Player.velocity, angle, 0, true, 6));
-        Engine.EntityManager.Add(new PulseShot(Player.position, -vel + offset * 5 + Player.velocity, angle, 0, true, 10) { texture = Assets.Get(Sprite.Explosive) });
-        Engine.EntityManager.Add(new PulseShot(Player.position, -vel - offset * 5 + Player.velocity, angle, 0, true, 10) { texture = Assets.Get(Sprite.Explosive) });
-        SoundManager.PlaySound(Assets.Get(Sound.PulseFire), Player.position);
-        cooldown = 0.5f;
-        Engine.ShakeScreen(0.3f);
+        ammo.Update(this);
+        base.OnUpdate();
     }
 }
 public class PrismArray() : Module(Modules.PrismArray)
@@ -819,18 +822,29 @@ public class PrismArray() : Module(Modules.PrismArray)
 }
 public class MatrixLauncher() : Module(Modules.MatrixLauncher)
 {
+    ReloadSystem ammo = new ReloadSystem(3, 2);
     public override void OnShoot()
     {
         if (cooldown > 0)
         {
             return;
         }
-        Vector2 vel = Player.IdealSpeedWithVelocity(12);
-        Engine.EntityManager.Add(new FlameBolt(Player.position, vel + new Vector2(Util.OneToNegOne(), Util.OneToNegOne()) / 2, true, 6,
-            new ParticleEmitter(Assets.Get(Sprite.Circle), Player.position, 0, Color.Cyan) { sprayCone = MathF.PI * 2 / 3, sprayAngle = Util.ToAngle(vel - Player.velocity), speedOfEmission = 0.5f }, 4, 0, -20));
-        SoundManager.PlaySound(Assets.Get(Sound.SniperFire), Player.position);
-        cooldown = 1.5f;
-        Engine.ShakeScreen(0.5f);
+        if(ammo.Fire())
+        {
+            Vector2 vel = Player.IdealSpeedWithVelocity(12);
+            Engine.EntityManager.Add(new FlameBolt(Player.position, vel + new Vector2(Util.OneToNegOne(), Util.OneToNegOne()) / 2, true, 6,
+                new ParticleEmitter(Assets.Get(Sprite.Circle), Player.position, 0, Color.Cyan) { sprayCone = MathF.PI * 2 / 3, sprayAngle = Util.ToAngle(vel - Player.velocity), speedOfEmission = 0.5f }, 4, 0, -20));
+            SoundManager.PlaySound(Assets.Get(Sound.SniperFire), Player.position);
+            cooldown = 1.5f;
+            Engine.Camera.Position += Player.Direction * 12 + new Vector2(Util.OneToNegOne(), Util.OneToNegOne());
+            Engine.ShakeScreen(0.5f);
+            Player.Flash(Color.Cyan);
+        }
+    }
+    public override void OnUpdate()
+    {
+        ammo.Update(this);
+        base.OnUpdate();
     }
 }
 public class Torch() : Module(Modules.Torch)
@@ -916,27 +930,39 @@ public class SplitterModule() : Module(Modules.SplitterModule)
 }
 public class Fractal() : Module(Modules.Fractal)
 {
+    ReloadSystem ammo = new ReloadSystem(10, 3);
     public override void OnShoot()
     {
         if (cooldown > 0)
         {
             return;
         }
-        List<Entity> splitters = [];
-        for (int i = 0; i < 3; i++)
+        if(ammo.Fire())
         {
-            List<Entity> finalBullets = [];
-            for (int j = 0; j < 3; j++)
+            List<Entity> splitters = [];
+            for (int i = 0; i < 3; i++)
             {
-                finalBullets.Add(new PulseShot(position, velocity, 0, 0, Player.isFriendly, 3, false, 1));
+                List<Entity> finalBullets = [];
+                for (int j = 0; j < 8; j++)
+                {
+                    finalBullets.Add(new PulseShot(position, velocity, 0, 0, Player.isFriendly, 3, false, 1));
+                }
+                splitters.Add(new Splitter(position, velocity, 0, Player.isFriendly, 5, finalBullets, 0.2f, 1));
             }
-            splitters.Add(new Splitter(position, velocity, 0, Player.isFriendly, 5, finalBullets, 0.1f, 1));
+            Engine.EntityManager.Add(new Splitter(Player.position, Player.IdealSpeedWithVelocity(6), Util.ToAngle(Player.Direction), Player.isFriendly, 8, splitters, 0.2f));
+            SoundManager.PlaySound(Assets.Get(Sound.PulseFire), Player.position);
+            Engine.ShakeScreen(0.3f);
+            Player.velocity -= Player.Direction / 2;
+            cooldown = 0.25f;
+            Engine.Camera.Position += Player.Direction * 8 + new Vector2(Util.OneToNegOne(), Util.OneToNegOne());
+            Util.FiringParticles(Player.position + Player.Direction * 8, Player.velocity, Player.Direction);
+            Player.Flash(Color.BurlyWood);
         }
-        Engine.EntityManager.Add(new Splitter(Player.position, Player.IdealSpeedWithVelocity(8), Util.ToAngle(Player.Direction), Player.isFriendly, 8, splitters, 0.1f));
-        SoundManager.PlaySound(Assets.Get(Sound.LMGFire), Player.position);
-        Engine.ShakeScreen(0.1f);
-        Player.velocity -= Player.Direction / 2;
-        cooldown = 0.75f;
+    }
+    public override void OnUpdate()
+    {
+        ammo.Update(this);
+        base.OnUpdate();
     }
 }
 public class CrackShot() : Module(Modules.CrackShot)

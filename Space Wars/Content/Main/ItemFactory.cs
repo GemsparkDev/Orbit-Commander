@@ -35,7 +35,6 @@ public static class ItemFactory
         { Modules.GrenadeLauncher, new ModuleData(Sprite.RealCrossbowModule,Sprite.CrossbowModule, "Grenade Launcher", (int)ModuleType.Guns, 20, typeof(GrenadeLauncher))},
         { Modules.Spewer, new ModuleData(Sprite.RealCrossbowModule,Sprite.CrossbowModule, "Spewer", (int)ModuleType.Guns, 15, typeof(Spewer))},
         { Modules.Antimaterial, new ModuleData(Sprite.RealCrossbowModule,Sprite.CrossbowModule, "Antimaterial Rifle", (int)ModuleType.Guns, 15, typeof(Antimaterial))},
-        { Modules.Triangle, new ModuleData(Sprite.RealCrossbowModule,Sprite.CrossbowModule, "Triangle", (int)ModuleType.Guns, 20, typeof(Triangle))},
         { Modules.PrismArray, new ModuleData(Sprite.RealCrossbowModule,Sprite.CrossbowModule, "Prism Array", (int)ModuleType.Guns, 15, typeof(PrismArray))},
         { Modules.MatrixLauncher, new ModuleData(Sprite.RealCrossbowModule,Sprite.CrossbowModule, "Matrix Launcher", (int)ModuleType.Guns, 15, typeof(MatrixLauncher))},
         { Modules.Torch, new ModuleData(Sprite.TorchReal,Sprite.Torch, "Torch", (int)ModuleType.Guns, 15, typeof(Torch))},

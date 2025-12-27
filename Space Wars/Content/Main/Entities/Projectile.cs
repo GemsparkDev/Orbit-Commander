@@ -375,9 +375,9 @@ public class Explosive : Projectile
         var nearestEnemy = Engine.EntityManager.NearestEnemy(this);
         if (nearestEnemy != null)
         {
-            float val = MathF.Cos(time * 100 / ((Math.Abs(Vector2.Distance(nearestEnemy.position, position) - explosionRadius / 2) + 1))) / 4 + 0.75f;
+            float val = MathF.Cos(time * 100 / ((Math.Abs(Vector2.Distance(nearestEnemy.position, position) - explosionRadius) + 1))) / 4 + 0.75f;
             color = new Color(col.X * val + (1 - val), col.Y * val + (1 - val), col.Z * val + (1 - val));
-            if (explosionRadius / 2 > Vector2.Distance(nearestEnemy.position, position))
+            if (explosionRadius > Vector2.Distance(nearestEnemy.position, position))
             {
                 isExpired = true;
             }
@@ -451,7 +451,34 @@ public class Splitter : Projectile
         angle += angularVelocity * Engine.DeltaSeconds * 60;
         Entity nearestEnemy = Engine.EntityManager.NearestEnemy(this);
         EntityManager.Collide(this, nearestEnemy);
-        if (isExpired)
+        if (cooldown < 0)
+        {
+            if (targetting && nearestEnemy != null)
+            {
+                for (int i = 0; i < splits.Count; i++)
+                {
+                    splits[i].position = position;
+                    float a = 0;
+                    if (splits.Count != 1)
+                    {
+                        a = (-MathF.PI / 4 + MathF.PI / splits.Count * (float)(i) / 2);
+                    }
+                    splits[i].angle = angle + a;
+                    splits[i].velocity = Util.PredictEnemy(nearestEnemy, this, 12, a);
+                    Engine.EntityManager.Add(splits[i]);
+                }
+            }
+            else
+            {
+                SpawnProjectiles();
+            }
+            isExpired = true;
+        }
+        else
+        {
+            cooldown -= Engine.DeltaSeconds;
+        }
+        void SpawnProjectiles()
         {
             for (int i = 0; i < splits.Count; i++)
             {
@@ -462,40 +489,6 @@ public class Splitter : Projectile
                 splits[i].angle = a;
                 Engine.EntityManager.Add(splits[i]);
             }
-        }
-        if (cooldown < 0)
-        {
-            for (int i = 0; i < splits.Count; i++)
-            {
-                splits[i].position = position;
-                if (targetting && nearestEnemy != null)
-                {
-
-                    float a = 0;
-                    if (splits.Count != 1)
-                    {
-                        a = -MathF.PI / 4 + MathF.PI / splits.Count * (float)(i) / 2;
-                    }
-                    splits[i].velocity = Util.PredictEnemy(nearestEnemy, this, 12, a);
-                }
-                else
-                {
-                    float a = angle;
-                    if (splits.Count != 1)
-                    {
-                        a = angle - MathF.PI / 4 + MathF.PI / splits.Count * (float)(i) / 2;
-                    }
-                    Vector2 vel = Util.ToUnitVector(a);
-                    splits[i].velocity = vel * 2 + velocity;
-                }
-                splits[i].angle = Util.ToAngle(splits[i].velocity);
-                Engine.EntityManager.Add(splits[i]);
-            }
-            isExpired = true;
-        }
-        else
-        {
-            cooldown -= Engine.DeltaSeconds;
         }
     }
 }

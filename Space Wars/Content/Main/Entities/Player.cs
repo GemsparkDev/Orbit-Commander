@@ -33,7 +33,7 @@ public class Player : Entity
         { ModuleType.Sensors, new Sensors() },
         { ModuleType.Core, new SummonGrapplingHook() }
     };
-    public Module SecondaryWeapon { get; set; } = new LMG();
+    public Module SecondaryWeapon { get; set; } = new Fractal();
 
     public Vector2 Direction => targetVector;
     public DockableComponent dockedEntity;

@@ -3,6 +3,15 @@
 Lagrange Commander is a game made using C# in monogame. It is a 2D top down wave based shooter where you must repair and upgrade your ship by salvaging from enemies you defeat. It features realistic N-Body gravitation, which affects all entities and projectiles.
   
 # Changelog
+0.7.0.2 - 12/26/2025
+ - The Splitter projectile now always splits in a radial pattern, and does not split when touching an enemy.
+ - The Explosive projectile type now explodes when an enemy is within the radius, from 1/2 the radius.
+ - Removed the Triangle weapon type.
+ - The following weapons have had the following changes
+GrenadeLauncher: 8 rounds, 3 sec reload, 0.8 sec cooldown,
+SpewerModule: 3 rounds, 5 sec reload, 0.6 sec cooldown,
+MatrixLauncher: 3 rounds, 2 sec reload, 
+Fractal:10 rounds, 3 sec reload
 0.7.0.1 - 12/25/2025
  - The CrackShot and SplitterModule weapons both have 6 rounds with a 2.5 and 3 second reload time.
  - Added standard firing particles to the CrackShot and SplitterModule weapons.

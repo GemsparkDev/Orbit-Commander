@@ -1871,7 +1871,7 @@ public class Enemy : Entity
                 {
                     if (Engine.SaveGame.GiveWeapon)
                     {
-                        Engine.EntityManager.Add(new Triangle() { position = this.position, velocity = GetNormalizedAcceleration() * 10, angularVelocity = this.angularVelocity });
+                        //Give weapon
                     }
                     else
                     {
