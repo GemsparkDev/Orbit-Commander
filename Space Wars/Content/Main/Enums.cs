@@ -48,6 +48,7 @@ public enum Modules
     SplitterModule,
     Fractal,
     CrackShot,
+    MicroRocketLauncher,
     //Cores
     Dash,
     GrapplingHook,

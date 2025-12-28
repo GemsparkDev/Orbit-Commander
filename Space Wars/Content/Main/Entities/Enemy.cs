@@ -2715,7 +2715,7 @@ public class Enemy : Entity
             }
             if (health <= 0)
             {
-                Explode(8, 12);
+                Explode(damage / 2, 12);
                 isExpired = true;
                 SoundManager.PlaySound(Assets.Get(Sound.Death), position);
             }
@@ -2775,7 +2775,7 @@ public class Enemy : Entity
             smokeParticles.position = position - offset;
             if (EntityManager.DistanceSqr(this, nearestEnemy) < 10 * 10)
             {
-                Explode(8, 12);
+                Explode(damage, 12);
                 SoundManager.PlaySound(Assets.Get(Sound.Explosion), position);
                 isExpired = true;
             }
@@ -4317,6 +4317,13 @@ public class Enemy : Entity
     public static Enemy NewMissile(Vector2 position, Vector2 velocity, float angle, bool _isFriendly = false, int _sensingAbility = 1)
     {
         Enemy enemy = new(position, velocity, angle, 8, 10, Assets.Get(Sprite.Missile), _isFriendly) { SensingAbility = _sensingAbility };
+        enemy.AddBehaviour(enemy.Missile());
+        enemy.AddBehaviour(enemy.AvoidNearbyAllies());
+        return enemy;
+    }
+    public static Enemy NewMissile(Vector2 position, Vector2 velocity, float angle, bool _isFriendly, int _sensingAbility, int _damage, int _health)
+    {
+        Enemy enemy = new(position, velocity, angle, _damage, _health, Assets.Get(Sprite.Missile), _isFriendly) { SensingAbility = _sensingAbility };
         enemy.AddBehaviour(enemy.Missile());
         enemy.AddBehaviour(enemy.AvoidNearbyAllies());
         return enemy;

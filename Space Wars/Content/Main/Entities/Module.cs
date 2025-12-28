@@ -992,6 +992,35 @@ public class CrackShot() : Module(Modules.CrackShot)
         base.OnUpdate();
     }
 }
+public class MicroRocketLauncher() : Module(Modules.MicroRocketLauncher)
+{
+    ReloadSystem ammo = new ReloadSystem(30, 4);
+    float offset = 2;
+    public override void OnShoot()
+    {
+        if (cooldown > 0)
+        {
+            return;
+        }
+        if (ammo.Fire())
+        {
+            Vector2 speed = Player.IdealSpeedWithVelocity(5);
+            var dir = Vector2.Normalize(speed - Player.velocity);
+            Vector2 finalSpeed = speed + new Vector2(dir.Y, -dir.X) * offset;
+            Engine.EntityManager.Add(Enemy.NewMissile(Player.position + Player.Direction * 6, finalSpeed, Util.ToAngle(finalSpeed), true, 3, 3, 5));
+            SoundManager.PlaySound(Assets.Get(Sound.MissileFire), Player.position);
+            cooldown = 0.25f;
+            Engine.ShakeScreen(0.2f);
+            offset *= -1;
+        }
+
+    }
+    public override void OnUpdate()
+    {
+        ammo.Update(this);
+        base.OnUpdate();
+    }
+}
 public class Dash() : Module(Modules.Dash)
 {
     const float MaxCooldown = 2;
