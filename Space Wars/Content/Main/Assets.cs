@@ -130,6 +130,7 @@ public static class Assets
         Sprites.Add(Sprite.Dot, Content.Load<Texture2D>("Images/Particle_0"));
         Sprites.Add(Sprite.Dollar, Content.Load<Texture2D>("Images/Particle_1"));
         Sprites.Add(Sprite.Circle, Content.Load<Texture2D>("Images/Particle_2"));
+        Sprites.Add(Sprite.Glow, Content.Load<Texture2D>("Images/Particle_3"));
 
         //UI Elements
         Sprites.Add(Sprite.PlayerUI, Content.Load<Texture2D>("Images/UI_1"));

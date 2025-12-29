@@ -403,4 +403,11 @@ public static class EventHandler
         Engine.SaveGame.Player.modules[_slot] = value;
         Engine.SaveGame.Scrap -= 5;
     }
+    public static void SetModules()
+    {
+        for(int i = 0; i < 5; i++)
+        {
+            UI.Module[i].text = ItemFactory.moduleData[UI.setModules[i]].Name;
+        }
+    }
 }

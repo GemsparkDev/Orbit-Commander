@@ -15,7 +15,7 @@ public static class UI
     public static Window PauseMenu { get; } = new Window(center, Assets.Get(Sprite.LargePanel));
     public static Window PlayerMenu { get; } = new Window(new Vector2(center.X, 0), Assets.Get(Sprite.Terminal)) { alignment = Alignment.Top };
     public static Window GarageMenu { get; } = new Window(center, Assets.Get(Sprite.GargantuanPanel));
-    public static TabbedWindow MainMenu { get; } = new TabbedWindow(center, Assets.Get(Sprite.GargantuanPanel), Assets.Get(Sprite.Tab), Assets.Get(Sprite.SelectedTab), Assets.Get(Sound.Interact), 2)
+    public static TabbedWindow MainMenu { get; } = new TabbedWindow(center, Assets.Get(Sprite.GargantuanPanel), Assets.Get(Sprite.Tab), Assets.Get(Sprite.SelectedTab), Assets.Get(Sound.Interact), 3)
     { enabled = true, icons = [Assets.Get(Sprite.PlayIcon), Assets.Get(Sprite.SettingsIcon)] };
     public static TabbedWindow MothershipMenu { get; } = new TabbedWindow(new Vector2(center.X, 0), Assets.Get(Sprite.Terminal), Assets.Get(Sprite.Tab), Assets.Get(Sprite.SelectedTab), Assets.Get(Sound.Interact), 3)
     { icons = [Assets.Get(Sprite.SmeltIcon), Assets.Get(Sprite.RepairIcon), Assets.Get(Sprite.VictoryIcon)], alignment = Alignment.Top };
@@ -48,6 +48,9 @@ public static class UI
     public static Decal Resolution { get; } = new Decal(new Vector2(-50, 45), null, Assets.TextFont, "1920 x 1080", Color.White, 10);
     public static Button NextResolution { get; } = new Button(new Vector2(-150, 45), Assets.Get(Sprite.Button), Assets.TextFont, "Next Resolution", Color.White);
     public static Button ApplyChanges { get; } = new Button(new Vector2(-50, 10), Assets.Get(Sprite.Button), Assets.TextFont, "Apply changes", Color.White);
+    public static Button[] NextModule { get; } = new Button[5];
+    public static Button[] PrevModule { get; } = new Button[5];
+    public static Decal[] Module { get; } = new Decal[5];
 
     //Pause Menu
     public static Button QuitToMissionButton { get; } = new Button(new Vector2(0, -20), Assets.Get(Sprite.WideButton), Assets.TextFont, "Return", Color.White);
@@ -148,6 +151,7 @@ public static class UI
     public static int type = 1;
     public static Vector2[] resolutions = [ new Vector2(1920, 1080), new Vector2(640, 480) ];
     public static int selectedResolution = 0;
+    public static Modules[] setModules = [ Modules.Hull, Modules.AdaptiveShotgun, Modules.Engines, Modules.Sensors, Modules.Dash ];
 
     //Hack menu
     public static Button HackButton { get; } = new Button(Vector2.Zero, Assets.Get(Sprite.Button), Assets.TextFont, "Hack", Color.Yellow);
@@ -391,6 +395,17 @@ public static class UI
         MainMenu.AddWidget(Resolution, 1);
         MainMenu.AddWidget(NextResolution as IFunctional, 1);
         MainMenu.AddWidget(ApplyChanges as IFunctional, 1);
+
+        for(int i = 0; i < NextModule.Length; i++)
+        {
+            int module = i;
+            MainMenu.AddWidget((NextModule[i] = new Button(new Vector2(60, 25 * i - 40), Assets.Get(Sprite.Button), Assets.TextFont, $"{i + 5}", Color.White)) as IFunctional, 2);
+            NextModule[i].AddBehaviour(delegate () { setModules[module] = (Modules)Math.Clamp((int)(setModules[module] + 1), 0, (int)(Modules.End - 1)); EventHandler.SetModules(); });
+            MainMenu.AddWidget((PrevModule[i] = new Button(new Vector2(-60, 25 * i - 40), Assets.Get(Sprite.Button), Assets.TextFont, $"{i}", Color.White)) as IFunctional, 2);
+            PrevModule[i].AddBehaviour(delegate () { setModules[module] = (Modules)Math.Clamp((int)(setModules[module] - 1), 0, (int)(Modules.End - 1)); EventHandler.SetModules(); });
+            MainMenu.AddWidget(Module[i] = new Decal(new Vector2(0, 25 * i - 40), Assets.TextFont, "", Color.White, 10), 2);
+        }
+        EventHandler.SetModules();
 
         PauseMenu.AddWidget(QuitToMissionButton as IFunctional);
         PauseMenu.AddWidget(SettingsButton as IFunctional);

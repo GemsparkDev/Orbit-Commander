@@ -42,9 +42,10 @@ public static class ItemFactory
         { Modules.SplitterModule, new ModuleData(Sprite.TorchReal,Sprite.Torch, "Splitter", (int)ModuleType.Guns, 20, typeof(SplitterModule))},
         { Modules.Fractal, new ModuleData(Sprite.TorchReal,Sprite.Torch, "Fractal", (int)ModuleType.Guns, 20, typeof(Fractal))},
         { Modules.CrackShot, new ModuleData(Sprite.TorchReal,Sprite.Torch, "Crackshot", (int)ModuleType.Guns, 20, typeof(CrackShot))},
-        { Modules.MicroRocketLauncher, new ModuleData(Sprite.TorchReal,Sprite.Torch, "Crackshot", (int)ModuleType.Guns, 18, typeof(MicroRocketLauncher)) },
+        { Modules.MicroRocketLauncher, new ModuleData(Sprite.TorchReal,Sprite.Torch, "Micro Rocket Launcher", (int)ModuleType.Guns, 18, typeof(MicroRocketLauncher)) },
+        { Modules.AdaptiveShotgun, new ModuleData(Sprite.TorchReal,Sprite.Torch, "Adaptive Shotgun", (int)ModuleType.Guns, 18, typeof(AdaptiveShotgun)) },
 
-        { Modules.Engines, new ModuleData(Sprite.EngineModule, Sprite.EngineModule, "Engines", (int)ModuleType.Engines, 20, typeof(Engine)) },
+        { Modules.Engines, new ModuleData(Sprite.EngineModule, Sprite.EngineModule, "Engines", (int)ModuleType.Engines, 20, typeof(StandardEngine)) },
         { Modules.Plasma, new ModuleData(Sprite.EngineModule, Sprite.EngineModule, "Plasma", (int)ModuleType.Engines, 15, typeof(PlasmaEngine)) },
         { Modules.Work, new ModuleData(Sprite.EngineModule, Sprite.EngineModule, "Work", (int)ModuleType.Engines, 25, typeof(WorkEngine)) },
         { Modules.Orion, new ModuleData(Sprite.EngineModule, Sprite.EngineModule, "Orion", (int)ModuleType.Engines, 20, typeof(OrionEngine)) },

@@ -49,6 +49,7 @@ public enum Modules
     Fractal,
     CrackShot,
     MicroRocketLauncher,
+    AdaptiveShotgun,
     //Cores
     Dash,
     GrapplingHook,
@@ -56,6 +57,8 @@ public enum Modules
     Nanomachines,
     CreateFighter,
     Assault,
+
+    End, //Used for enumeration
 }
 public enum Sprite
 {
@@ -165,6 +168,7 @@ public enum Sprite
     Dot,
     Dollar,
     Circle,
+    Glow,
 
     PlayerUI,
     Title,

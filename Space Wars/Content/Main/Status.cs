@@ -169,10 +169,10 @@ public class Frost(float _duration) : Status(Sprite.Knob)
         }
         else
         {
-            fireCooldown = 0.25f;
-            Vector2 pos = Util.ToUnitVector(Util.Random.NextSingle() * MathF.Tau) * Util.Random.NextSingle() * 8;
-            ParticleManager.Add(new Particle(Assets.Get(Sprite.Circle), 1.5f + Util.Random.NextSingle() / 5, _parent.position + pos,
-             _parent.velocity, 0, 0, Color.Cyan, Color.Transparent) { experienceGravity = true });
+            fireCooldown = 1024 / (_parent.Size.X * _parent.Size.Y + 1024);
+            Vector2 pos = Util.ToUnitVector(Util.Random.NextSingle() * MathF.Tau) * Util.Random.NextSingle() * _parent.Size / 1.5f;
+            ParticleManager.Add(new Particle(Assets.Get(Sprite.Glow), 1.5f + Util.Random.NextSingle() / 5, _parent.position + pos,
+             _parent.velocity, 0, 0, Color.Cyan, Color.Transparent));
         }
         if (duration > 0)
         {

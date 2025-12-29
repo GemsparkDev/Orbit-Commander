@@ -947,9 +947,9 @@ public class Fractal() : Module(Modules.Fractal)
                 {
                     finalBullets.Add(new PulseShot(position, velocity, 0, 0, Player.isFriendly, 3, false, 1));
                 }
-                splitters.Add(new Splitter(position, velocity, 0, Player.isFriendly, 5, finalBullets, 0.2f, 1));
+                splitters.Add(new Splitter(position, velocity, 0, Player.isFriendly, 5, finalBullets, 0.2f, 1) { texture = Assets.Get(Sprite.Glow)});
             }
-            Engine.EntityManager.Add(new Splitter(Player.position, Player.IdealSpeedWithVelocity(6), Util.ToAngle(Player.Direction), Player.isFriendly, 8, splitters, 0.2f));
+            Engine.EntityManager.Add(new Splitter(Player.position, Player.IdealSpeedWithVelocity(6), Util.ToAngle(Player.Direction), Player.isFriendly, 8, splitters, 0.2f) { texture = Assets.Get(Sprite.Glow) });
             SoundManager.PlaySound(Assets.Get(Sound.PulseFire), Player.position);
             Engine.ShakeScreen(0.3f);
             Player.velocity -= Player.Direction / 2;
@@ -1014,6 +1014,41 @@ public class MicroRocketLauncher() : Module(Modules.MicroRocketLauncher)
             offset *= -1;
         }
 
+    }
+    public override void OnUpdate()
+    {
+        ammo.Update(this);
+        base.OnUpdate();
+    }
+}
+public class AdaptiveShotgun() : Module(Modules.AdaptiveShotgun)
+{
+    ReloadSystem ammo = new ReloadSystem(2, 3);
+    public override void OnShoot()
+    {
+        if (cooldown > 0)
+        {
+            return;
+        }
+        if (ammo.Fire())
+        {
+            float distance = Vector2.Distance(new Vector2(Input.NewMouseState.X, Input.NewMouseState.Y), Engine.BackBuffer/2) + 1; //Plus one prevents division by zero
+            for (float i = -5; i <= 5; i++)
+            {
+                Vector2 speed = Player.IdealSpeedWithVelocity(18);
+                var dir = Vector2.Normalize(speed);
+                Vector2 offset = (dir * i / 5 + new Vector2(dir.Y, -dir.X)) * i * 100 / (distance);
+                Vector2 targetVector = speed + offset;
+                Engine.EntityManager.Add(new PulseShot(Player.position, targetVector, Util.ToAngle(targetVector - Player.velocity), 0, true, 6 - (int)MathF.Abs(i), true, 0) { texture = Assets.Get(Sprite.Microshot), timeLeft = 5 });
+            }
+            SoundManager.PlaySound(Assets.Get(Sound.PulseFire), Player.position);
+            Player.velocity -= Player.Direction * 2;
+            cooldown = 0.75f;
+            Engine.Camera.Position += Player.Direction * 12 + new Vector2(Util.OneToNegOne(), Util.OneToNegOne());
+            Engine.ShakeScreen(0.6f);
+            Util.FiringParticles(Player.position + Player.Direction * 8, Player.velocity, Player.Direction);
+            Player.Flash(Color.BurlyWood);
+        }
     }
     public override void OnUpdate()
     {
@@ -1229,8 +1264,9 @@ public class Assault() : Module(Modules.Assault)
         count = 1;
         for (float angle = 0; angle < MathF.Tau; angle += MathF.PI / 4)
         {
-            Engine.EntityManager.Add(new PulseShot(Player.position, Util.ToUnitVector(angle) * 10, angle, 0, Player.isFriendly, 10, true, 1));
+            Engine.EntityManager.Add(new PulseShot(Player.position, Util.ToUnitVector(angle) * 10, angle, 0, Player.isFriendly, 20, true, 1));
         }
+        cooldown = 0.1f;
         isShooting = true;
         SoundManager.PlaySound(Assets.Get(Sound.PulseFire), Player.position);
     }
@@ -1250,11 +1286,11 @@ public class Assault() : Module(Modules.Assault)
         }
         if (isShooting && cooldown <= 0)
         {
-            Engine.EntityManager.Add(new PulseShot(Player.position, Util.ToUnitVector(count * 1.61803398875f) * 10, count * 1.61803398875f, 0, Player.isFriendly, 10, true, 1));
-            SoundManager.PlaySound(Assets.Get(Sound.PulseFire), Player.position);
-            cooldown = 0.1f;
+            Engine.EntityManager.Add(Enemy.NewMissile(Player.position, Util.ToUnitVector(count * MathF.PI * 2/ 3) * 5, count * MathF.PI * 2 / 3, true));
+            SoundManager.PlaySound(Assets.Get(Sound.MissileFire), Player.position);
+            cooldown = 0.25f;
             count++;
-            if (count >= 11)
+            if (count > 6)
             {
                 count = 0;
                 cooldown = 30;

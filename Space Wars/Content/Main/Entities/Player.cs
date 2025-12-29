@@ -27,13 +27,13 @@ public class Player : Entity
     };
     public Dictionary<ModuleType, Module> modules = new()
     {
-        { ModuleType.Hull, new Reflective() },
-        { ModuleType.Guns, new MicroRocketLauncher() },
-        { ModuleType.Engines, new PlasmaEngine() },
-        { ModuleType.Sensors, new Sensors() },
-        { ModuleType.Core, new SummonGrapplingHook() }
+        { ModuleType.Hull, ItemFactory.moduleData[UI.setModules[0]].Retrieve()},
+        { ModuleType.Guns, ItemFactory.moduleData[UI.setModules[1]].Retrieve() },
+        { ModuleType.Engines, ItemFactory.moduleData[UI.setModules[2]].Retrieve() },
+        { ModuleType.Sensors, ItemFactory.moduleData[UI.setModules[3]].Retrieve() },
+        { ModuleType.Core, ItemFactory.moduleData[UI.setModules[4]].Retrieve() }
     };
-    public Module SecondaryWeapon { get; set; } = new Fractal();
+    public Module SecondaryWeapon { get; set; } = null;
 
     public Vector2 Direction => targetVector;
     public DockableComponent dockedEntity;
