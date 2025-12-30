@@ -3,6 +3,12 @@
 Lagrange Commander is a game made using C# in monogame. It is a 2D top down wave based shooter where you must repair and upgrade your ship by salvaging from enemies you defeat. It features realistic N-Body gravitation, which affects all entities and projectiles.
   
 # Changelog
+0.7.0.5 - 12/29/2025
+ - Renamed the Sniper to the Antimaterial.
+ - Renamed the Antimaterial to the Railgun.
+ - Added custom name colors to some modules.
+ - The Missile Launcher can now be upgraded to the Micro Rocket Launcher.
+ - The Shotgun can now be upgraded to the Adaptive Shotgun.
 0.7.0.4 - 12/28/2025
  - Added the AdaptiveShotgun weapon.
  - Added new sprites for the Fractal projectiles and Frost status.

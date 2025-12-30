@@ -949,7 +949,7 @@ public class Enemy : Entity
                 SoundManager.PlaySound(Assets.Get(Sound.Death), position);
                 if (Engine.SaveGame.GiveWeapon)
                 {
-                    Engine.EntityManager.Add(new Sniper() { position = this.position, velocity = normalizedAcceleration * 10, angularVelocity = this.angularVelocity });
+                    Engine.EntityManager.Add(new Antimaterial() { position = this.position, velocity = normalizedAcceleration * 10, angularVelocity = this.angularVelocity });
                 }
                 else
                 {

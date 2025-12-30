@@ -26,7 +26,7 @@ public class Pickup : Entity, IData
         itemData = _itemData;
         color = Color.Cyan;
         Tooltip.AddWidget(new Decal(new Vector2(-Tooltip.Size.X / 3, 0), _itemData.RealSprite));
-        textbox = new Decal(new Vector2(0, -5), Assets.TextFont, _itemData.Name, Color.White, 5f);
+        textbox = new Decal(new Vector2(0, -5), Assets.TextFont, _itemData.Name, _itemData.TextColor, 5f);
         Tooltip.AddWidget(textbox);
         hitsLeft = _integrity;
     }
@@ -36,7 +36,7 @@ public class Pickup : Entity, IData
         itemData = _itemData;
         color = Color.Cyan;
         Tooltip.AddWidget(new Decal(new Vector2(-Tooltip.Size.X / 3, 0), _itemData.RealSprite));
-        textbox = new Decal(new Vector2(0, -5), Assets.TextFont, _itemData.Name, Color.White, 5f);
+        textbox = new Decal(new Vector2(0, -5), Assets.TextFont, _itemData.Name, _itemData.TextColor, 5f);
         Tooltip.AddWidget(textbox);
         _logger.Try(delegate { hitsLeft = Int32.Parse(_disassembly[1]);}, 1);
     }
@@ -135,13 +135,14 @@ public class Pickup : Entity, IData
         return $"{{{Type},{hitsLeft}}}";
     }
 }
-public class ItemData(Sprite _realSprite, Sprite _virtualSprite, String _name, int _id, Color _color)
+public class ItemData(Sprite _realSprite, Sprite _virtualSprite, String _name, int _id, Color _color, Color? _textColor = null)
 {
     public Texture2D RealSprite { get; } = Assets.Get(_realSprite);
     public Texture2D VirtualSprite { get; } = Assets.Get(_virtualSprite);
     public string Name { get; } = _name;
     public int ID { get; } = _id;
     public Color Color { get; } = _color;
+    public Color TextColor { get; } = _textColor ?? Color.White;
 }
 public enum Items
 {

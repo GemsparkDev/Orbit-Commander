@@ -386,21 +386,25 @@ public static class EventHandler
             UI.UpgradeText.text = "Smelt 5 scrap to upgrade.";
             return;
         }
-        var upgrades = new Dictionary<Modules, Module>
+        var upgrades = new Dictionary<Modules, Modules>
             {
-                { Modules.Flamethrower, new PrismArray() },
-                { Modules.Fireball, new MatrixLauncher() },
-                { Modules.Sniper, new Antimaterial() },
-                { Modules.LMG, new Torch() },
+                { Modules.Flamethrower, Modules.PrismArray },
+                { Modules.Fireball, Modules.Flamethrower },
+                { Modules.Sniper, Modules.Antimaterial },
+                { Modules.LMG, Modules.Torch },
+                { Modules.Shotgun, Modules.AdaptiveShotgun },
+                { Modules.Missile, Modules.MicroRocketLauncher }
+
             };
-        if (!upgrades.TryGetValue(_moduleType.Type, out Module value))
+        if (!upgrades.TryGetValue(_moduleType.Type, out Modules value))
         {
             UI.UpgradeText.text = "Selected module cannot be upgraded.";
             return;
         }
-        text = $"{_moduleType.Name} has been upgraded to {value.Name}.";
+        Module mod = ItemFactory.moduleData[value].Retrieve();
+        text = $"{_moduleType.Name} has been upgraded to {mod.Name}.";
         UI.UpgradeText.text = text;
-        Engine.SaveGame.Player.modules[_slot] = value;
+        Engine.SaveGame.Player.modules[_slot] = mod;
         Engine.SaveGame.Scrap -= 5;
     }
     public static void SetModules()

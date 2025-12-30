@@ -141,8 +141,8 @@ public class ReloadSystem(int _magazineSize, float _reloadSpeed, Action _reloadC
         }
     }
 }
-public class ModuleData(Sprite _realSprite, Sprite _virtualSprite, String _name, int _id, int _health, Type _type)
-    : ItemData(_realSprite, _virtualSprite, _name, _id, Color.White)
+public class ModuleData(Sprite _realSprite, Sprite _virtualSprite, String _name, int _id, int _health, Type _type, Color? _textColor = null)
+    : ItemData(_realSprite, _virtualSprite, _name, _id, Color.White, _textColor)
 {
     public int MaxHealth { get; } = _health;
     public Type ModuleType { get; } = _type;
@@ -415,7 +415,7 @@ public class Basic() : Module(Modules.Basic)
         base.OnUpdate();
     }
 }
-public class Sniper() : Module(Modules.Sniper)
+public class Antimaterial() : Module(Modules.Sniper)
 {
     ReloadSystem ammo = new ReloadSystem(4, 2f);
     public override void OnShoot()
@@ -442,7 +442,7 @@ public class Sniper() : Module(Modules.Sniper)
         base.OnUpdate();
     }
 }
-public class Antimaterial() : Module(Modules.Antimaterial)
+public class Railgun() : Module(Modules.Antimaterial)
 {
     ReloadSystem ammo = new ReloadSystem(1, 1.5f);
     public override void OnShoot()
