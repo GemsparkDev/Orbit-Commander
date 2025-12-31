@@ -174,8 +174,8 @@ public class Construct : Pickup
         return $"{{{Type},{SerializeAttributes()}}}";
     }
 }
-public class ConstructData(Sprite _realSprite, Sprite _virtualSprite, String _name, int _id, int _integrity)
-    : ItemData(_realSprite, _virtualSprite, _name, _id, Color.White)
+public class ConstructData(Sprite _realSprite, Sprite _virtualSprite, String _name, int _id, int _integrity, Color? _textColor = null)
+    : ItemData(_realSprite, _virtualSprite, _name, _id, Color.White, _textColor)
 {
     public int Integrity { get; } = _integrity;
 }

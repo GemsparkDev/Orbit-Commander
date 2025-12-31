@@ -32,8 +32,7 @@ public class SaveGame
     public Pickup[] Inventory { get; } = new Pickup[4];
     public Pickup[] MissionSelectInventory { get; } = new Pickup[4];
     public List<Queueable> QueuedItems { get; private set; } = [];
-
-    public int FleetSystem { get; private set; } = 0; //Serialize me!
+    public int FleetSystem { get; private set; } = 0;
 
     private Mission currentMission;
     public Mission CurrentMission 
@@ -101,6 +100,7 @@ public class SaveGame
                 logger.Try(delegate { QueuedItems.Add(Queueable.Deserialize(array[j + 1], logger)); }, j+1);
             }
         }
+        FleetSystem = Int32.TryParse(disassembly[10], out int fleet) ? fleet : 0;
 
         logger.Log();
     }
@@ -216,7 +216,7 @@ public class SaveGame
         inv.Remove(inv.Length - 1, 1);
         globalInv.Remove(globalInv.Length - 1, 1);
         queueables.Remove(queueables.Length - 1, 1);
-        return $"{Name},{Scrap},{System},{CurrentMissionIndex},{giveWeapon},{{{string.Join(",", CompletedMissions)}}},{Player.Serialize()},{{{inv}}},{{{globalInv}}},{{{queueables}}}";
+        return $"{Name},{Scrap},{System},{CurrentMissionIndex},{giveWeapon},{{{string.Join(",", CompletedMissions)}}},{Player.Serialize()},{{{inv}}},{{{globalInv}}},{{{queueables}}},{FleetSystem}";
     }
 }
 public class LoadLogger

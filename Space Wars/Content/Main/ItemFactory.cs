@@ -69,7 +69,7 @@ public static class ItemFactory
         { Constructs.Trap, new ConstructData(Sprite.RealTrap, Sprite.Trap, "Trap", 1, 8) },
         { Constructs.Bomb, new ConstructData(Sprite.RealBomb, Sprite.Bomb, "Bomb", 1, 3) },
         { Constructs.Furnace, new ConstructData(Sprite.FurnaceReal, Sprite.Furnace, "Furnace", 1, 10) },
-        { Constructs.SpecializedParts, new ConstructData(Sprite.RealSpecializedParts, Sprite.SpecializedParts, "Specialized Parts", 1, 5) }
+        { Constructs.SpecializedParts, new ConstructData(Sprite.RealSpecializedParts, Sprite.SpecializedParts, "Specialized Parts", 1, 5, Color.CornflowerBlue) }
     };
     public static Pickup NewScrap(Vector2 _position = default, Vector2 _velocity = default, float _angularVelocity = 0)
     {
