@@ -1370,4 +1370,27 @@ public class PulseEmitter() : Module(Modules.PulseEmitter)
         SoundManager.PlayGlobalSound(Assets.Get(Sound.Beep));
     }
 }
+public class Expose() : Module(Modules.Expose)
+{
+    const float MaxCooldown = 15;
+    Projectile aura = null;
+    public override void OnAbility()
+    {
+        if (cooldown > 0)
+        {
+            return;
+        }
+        Engine.EntityManager.Add(aura = new FlameBolt(Player.position + new Vector2(Input.NewMouseState.X, Input.NewMouseState.Y) + Engine.MousePositionOffset - Engine.BackBuffer/2, Vector2.Zero, true, 0, new ParticleEmitter(Assets.Get(Sprite.Dot), Player.position, 0, Color.Cyan) { speedOfEmission = 0.5f }, 10, 2, -20));
+        cooldown = 15;
+    }
+    public override void OnUpdate()
+    {
+        if(aura != null)
+        {
+            aura.velocity = Vector2.Zero;
+        }
+        UI.PlayerAbility.SetInterval(1 - cooldown / MaxCooldown, 1);
+        base.OnUpdate();
+    }
+}
 

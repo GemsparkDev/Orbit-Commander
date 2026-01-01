@@ -57,6 +57,7 @@ public enum Modules
     Nanomachines,
     CreateFighter,
     Assault,
+    Expose,
 
     End, //Used for enumeration
 }
