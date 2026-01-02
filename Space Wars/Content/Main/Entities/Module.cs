@@ -1378,9 +1378,22 @@ public class Expose() : Module(Modules.Expose)
     {
         if (cooldown > 0)
         {
+            if(aura != null && !aura.isExpired)
+            {
+                aura.isExpired = true;
+                aura = null;
+                cooldown /= 2;
+            }
             return;
         }
-        Engine.EntityManager.Add(aura = new FlameBolt(Player.position + new Vector2(Input.NewMouseState.X, Input.NewMouseState.Y) + Engine.MousePositionOffset - Engine.BackBuffer/2, Vector2.Zero, true, 0, new ParticleEmitter(Assets.Get(Sprite.Dot), Player.position, 0, Color.Cyan) { speedOfEmission = 0.5f }, 10, 2, -20));
+        if(Input.NewState.IsKeyDown(Keys.Shift))
+        {
+            Engine.EntityManager.Add(aura = new FlameBolt(Player.position + new Vector2(Input.NewMouseState.X, Input.NewMouseState.Y) + Engine.MousePositionOffset - Engine.BackBuffer/2, Vector2.Zero, true, 0, new ParticleEmitter(Assets.Get(Sprite.Dot), Player.position, 0, Color.Orange * 0.75f) { speedOfEmission = 0.5f }, 10, 2, 20));
+        }
+        else
+        {
+            Engine.EntityManager.Add(aura = new FlameBolt(Player.position + new Vector2(Input.NewMouseState.X, Input.NewMouseState.Y) + Engine.MousePositionOffset - Engine.BackBuffer/2, Vector2.Zero, true, 0, new ParticleEmitter(Assets.Get(Sprite.Dot), Player.position, 0, Color.Cyan * 0.75f) { speedOfEmission = 0.5f }, 10, 2, -20));   
+        }
         cooldown = 15;
     }
     public override void OnUpdate()
