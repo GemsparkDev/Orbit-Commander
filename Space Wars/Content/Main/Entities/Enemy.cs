@@ -1760,6 +1760,7 @@ public class Enemy : Entity
     {
         Enemy holo = null;
         Entity nearestEnemy = null;
+        Projectile targettingBullet = null;
         Vector2 randomPosition = Vector2.Zero;
         int mode = 0;
         int shotCount = 0;
@@ -1799,7 +1800,6 @@ public class Enemy : Entity
                 holo = null;
                 Engine.SaveGame.Player.Reveal(5);
             }
-            //Note: possibly change to integrate with other modules
             if (cd[0] <= 0)
             {
                 Engine.EntityManager.Add(NewDecoy(position, Vector2.Zero, angle, Sprite.Engineer, isFriendly)); //Make sure the sprite matches the bosses sprite
@@ -1822,8 +1822,8 @@ public class Enemy : Entity
                         var vel = Vector2.Normalize(randomPosition - position);
                         float angle = Util.ToAngle(vel);
                         Engine.EntityManager.Add(new PulseShot(position, vel * 5 + Player.velocity, angle, 0, isFriendly, damage, true, 1));
-                        Engine.EntityManager.Add(new Explosive(position, -vel * 5 + new Vector2(vel.Y, -vel.X) * 5 + Player.velocity, angle, 0, isFriendly, 8, 25, 1));
-                        Engine.EntityManager.Add(new Explosive(position, -vel * 5 - new Vector2(vel.Y, -vel.X) * 5 + Player.velocity, angle, 0, isFriendly, 8, 25, 1));
+                        Engine.EntityManager.Add(new Explosive(position, vel * 5 + new Vector2(vel.Y, -vel.X) * 5 + Player.velocity, angle, 0, isFriendly, 8, 25, 1));
+                        Engine.EntityManager.Add(new Explosive(position, vel * 5 - new Vector2(vel.Y, -vel.X) * 5 + Player.velocity, angle, 0, isFriendly, 8, 25, 1));
                         cd[2] = 1;
                         shotCount++;
                         if (shotCount >= 10)
@@ -1837,6 +1837,15 @@ public class Enemy : Entity
                 else //Targetting
                 {
                     GoToPosition(nearestEnemy.position - Vector2.Normalize(nearestEnemy.position - position) * 200, 5);
+                    if(targettingProjectile == null || targettingProjectile.isExpired)
+                    {
+                        Engine.EntityManager.Add(targettingProjectile = new PulseShot(position, velocity, angle, 0, isFriendly, damage));
+                    }
+                    else
+                    {
+                        targettingProjectile.velocity += (Engine.SaveGame.Player.position - targettingProjectile.position) / 100 * Engine.DeltaSeconds;
+                        targettingProjectile.angle = Util.ToAngle(targettingProjectile.velocity - velocity);
+                    }
                     if (cd[2] <= 0)
                     {
                         Vector2 dir = Util.PredictEnemy(nearestEnemy, this, 12);
@@ -1871,7 +1880,7 @@ public class Enemy : Entity
                 {
                     if (Engine.SaveGame.GiveWeapon)
                     {
-                        //Give weapon
+                        //Give Magic Missile
                     }
                     else
                     {
