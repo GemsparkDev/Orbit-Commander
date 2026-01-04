@@ -1,14 +1,15 @@
 ﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Graphics;
-using Space_Wars.Content.Main;
-using System.Diagnostics;
 using Microsoft.Xna.Framework.Input;
+using Space_Wars.Content.Main;
 using Space_Wars.Content.Main.Particles;
 using System;
 using System.Collections.Generic;
-using UILib.Content.Main;
+using System.Diagnostics;
 using System.Linq;
-using Microsoft.Xna.Framework.Audio;
+using System.Text;
+using UILib.Content.Main;
 
 namespace Space_Wars.Content.Main.Entities;
 
@@ -1056,6 +1057,45 @@ public class AdaptiveShotgun() : Module(Modules.AdaptiveShotgun)
         base.OnUpdate();
     }
 }
+public class GuidedRound() : Module(Modules.GuidedRound)
+{
+    private ReloadSystem ammo = new ReloadSystem(3, 3);
+    private List<Projectile> rounds = [];
+    public override void OnShoot()
+    {
+        Vector2 mousePos = new Vector2(Input.NewMouseState.X, Input.NewMouseState.Y) - Engine.BackBuffer / 2 + Engine.MousePositionOffset * 1.5f;
+        foreach (Projectile round in rounds)
+        {
+            round.velocity += Vector2.Normalize(mousePos - (round.position - Player.position)) * Engine.DeltaSeconds * 60;
+            round.velocity *= Util.FIED(0.3f);
+            round.angle = Util.ToAngle(round.velocity - Player.velocity);
+        }
+        if (cooldown > 0)
+        {
+            return;
+        }
+        if (ammo.Fire())
+        {
+            Vector2 vel = Player.IdealSpeedWithVelocity(9) + new Vector2(Util.OneToNegOne(), Util.OneToNegOne()) / 2;
+            var round = new AssassinShot(Player.position, vel, Util.ToAngle(vel - Player.velocity), 0, true, 10) { timeLeft = 20, texture = Assets.Get(Sprite.Glow) };
+            rounds.Add(round);
+            Engine.EntityManager.Add(round);
+            SoundManager.PlaySound(Assets.Get(Sound.PulseFire), Player.position);
+            cooldown = 0.5f;
+            Engine.ShakeScreen(0.2f);
+            Engine.Camera.Position += Player.Direction * 8 + new Vector2(Util.OneToNegOne(), Util.OneToNegOne());
+            Player.velocity -= Player.Direction / 3;
+            Util.FiringParticles(Player.position + Player.Direction * 8, Player.velocity, Player.Direction);
+            Player.Flash(Color.BurlyWood);
+        }
+    }
+    public override void OnUpdate()
+    {
+        rounds = [.. rounds.Where(x => !x.isExpired)];
+        ammo.Update(this);
+        base.OnUpdate();
+    }
+}
 public class Dash() : Module(Modules.Dash)
 {
     const float MaxCooldown = 2;
@@ -1381,12 +1421,12 @@ public class Expose() : Module(Modules.Expose)
             if(aura != null && !aura.isExpired)
             {
                 aura.isExpired = true;
+                cooldown -= aura.timeLeft;
                 aura = null;
-                cooldown /= 2;
             }
             return;
         }
-        if(Input.NewState.IsKeyDown(Keys.Shift))
+        if(Input.NewState.IsKeyDown(Keys.LeftShift))
         {
             Engine.EntityManager.Add(aura = new FlameBolt(Player.position + new Vector2(Input.NewMouseState.X, Input.NewMouseState.Y) + Engine.MousePositionOffset - Engine.BackBuffer/2, Vector2.Zero, true, 0, new ParticleEmitter(Assets.Get(Sprite.Dot), Player.position, 0, Color.Orange * 0.75f) { speedOfEmission = 0.5f }, 10, 2, 20));
         }

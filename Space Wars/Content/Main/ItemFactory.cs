@@ -44,6 +44,7 @@ public static class ItemFactory
         { Modules.CrackShot, new ModuleData(Sprite.TorchReal,Sprite.Torch, "Crackshot", (int)ModuleType.Guns, 20, typeof(CrackShot))},
         { Modules.MicroRocketLauncher, new ModuleData(Sprite.TorchReal,Sprite.Torch, "Micro Rocket Launcher", (int)ModuleType.Guns, 18, typeof(MicroRocketLauncher), Color.Yellow) },
         { Modules.AdaptiveShotgun, new ModuleData(Sprite.TorchReal,Sprite.Torch, "Adaptive Shotgun", (int)ModuleType.Guns, 18, typeof(AdaptiveShotgun), Color.Yellow) },
+        { Modules.GuidedRound, new ModuleData(Sprite.TorchReal,Sprite.Torch, "Guided Round", (int)ModuleType.Guns, 20, typeof(GuidedRound), Color.White) },
 
         { Modules.Engines, new ModuleData(Sprite.EngineModule, Sprite.EngineModule, "Engines", (int)ModuleType.Engines, 20, typeof(StandardEngine)) },
         { Modules.Plasma, new ModuleData(Sprite.EngineModule, Sprite.EngineModule, "Plasma", (int)ModuleType.Engines, 15, typeof(PlasmaEngine)) },

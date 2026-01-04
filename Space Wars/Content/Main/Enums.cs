@@ -50,6 +50,7 @@ public enum Modules
     CrackShot,
     MicroRocketLauncher,
     AdaptiveShotgun,
+    GuidedRound,
     //Cores
     Dash,
     GrapplingHook,

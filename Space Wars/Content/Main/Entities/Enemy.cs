@@ -1760,7 +1760,7 @@ public class Enemy : Entity
     {
         Enemy holo = null;
         Entity nearestEnemy = null;
-        Projectile targettingBullet = null;
+        Projectile targettingProjectile = null;
         Vector2 randomPosition = Vector2.Zero;
         int mode = 0;
         int shotCount = 0;

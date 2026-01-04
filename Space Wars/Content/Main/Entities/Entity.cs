@@ -60,6 +60,7 @@ public abstract class Entity
         }
         StatusHolder.Update(this);
         collider.position = position;
+        collider.particleVelocity = ColliderRadius;
         collider.Update();
         Temperature *= Util.FIED(0.707f); //Radiative
         if(Temperature > 1)
