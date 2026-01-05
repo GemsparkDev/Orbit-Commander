@@ -1766,7 +1766,6 @@ public class Enemy : Entity
         int shotCount = 0;
         StealthAbility = 2;
         SensingAbility = 1;
-        //holo = new hologram enemy
         cd =
         [
             0, //Default
@@ -1839,12 +1838,13 @@ public class Enemy : Entity
                     GoToPosition(nearestEnemy.position - Vector2.Normalize(nearestEnemy.position - position) * 200, 5);
                     if(targettingProjectile == null || targettingProjectile.isExpired)
                     {
-                        Engine.EntityManager.Add(targettingProjectile = new PulseShot(position, velocity, angle, 0, isFriendly, damage));
+                        targettingProjectile = new PulseShot(position, velocity, angle, 0, isFriendly, damage) { texture = Assets.Get(Sprite.Glow) };
+                        Engine.EntityManager.Add(targettingProjectile);
                     }
                     else
                     {
-                        targettingProjectile.velocity += (Engine.SaveGame.Player.position - targettingProjectile.position) / 100 * Engine.DeltaSeconds;
-                        targettingProjectile.angle = Util.ToAngle(targettingProjectile.velocity - velocity);
+                        targettingProjectile.velocity += (Engine.SaveGame.Player.position - targettingProjectile.position) * Engine.DeltaSeconds / 10;
+                        targettingProjectile.angle = Util.ToAngle(targettingProjectile.velocity - Player.velocity);
                     }
                     if (cd[2] <= 0)
                     {
@@ -1880,7 +1880,7 @@ public class Enemy : Entity
                 {
                     if (Engine.SaveGame.GiveWeapon)
                     {
-                        //Give Magic Missile
+                        Engine.EntityManager.Add(new GuidedRound() { position = this.position, velocity = GetNormalizedAcceleration() * 10, angularVelocity = this.angularVelocity });
                     }
                     else
                     {
@@ -3445,7 +3445,15 @@ public class Enemy : Entity
     {
         while (true)
         {
-            velocity = Vector2.Zero;
+            Entity nearestEnemy = Engine.EntityManager.NearestEnemy(this, false);
+            if(nearestEnemy != null)
+            {
+                Vector2 relativePosition = nearestEnemy.position - position;
+                GoToPosition(nearestEnemy.position - Vector2.Normalize(relativePosition) * 100, 3f);
+                targetAngle = Util.ToAngle(relativePosition);
+                RotateTowards(targetAngle, 0.1f);
+            }
+            velocity *= Util.FIED(0.1f);
             if (health <= 0)
             {
                 Explode(damage, 200);

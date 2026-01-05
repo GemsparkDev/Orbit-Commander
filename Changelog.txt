@@ -3,6 +3,10 @@
 Lagrange Commander is a game made using C# in monogame. It is a 2D top down wave based shooter where you must repair and upgrade your ship by salvaging from enemies you defeat. It features realistic N-Body gravitation, which affects all entities and projectiles.
   
 # Changelog
+0.7.1.1 - 1/4/2025
+ - The Decoy enemy now tries to target nearby enemies.
+ - The Pursuer boss now drops the GuidedRound module.
+ - Tweaked the Pursuer boss tracking projectile speed and sprite.
 0.7.1.0 - 1/3/2025
  - Added the GuidedRound module.
 0.7.0.9 - 1/2/2025
