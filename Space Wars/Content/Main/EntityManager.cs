@@ -139,12 +139,12 @@ public class EntityManager
         "Gas giant", "The unusual conditions in this system have resulted in unique developments in the enemies technology.\nBe prepared for advanced enemy cloaking.", 1f, new Vector2(-800, -1300), Mission.TierTwo(), Mission.TierTwoBosses(), null, true)
         { playerDocked = true },
 
-        new Mission([new(new Vector2(500, 0), new Vector2(0, 1.05f), 10000, 7, false, Color.Cyan),
-        new(new Vector2(-1000, 0), new Vector2(0, -2.1f), 5000, 4f, false, Color.Cyan)],
+        new Mission([new(new Vector2(500, 0), new Vector2(0, 1.05f), 10000, 7, false, Color.Cyan) { Temperature = -5},
+        new(new Vector2(-1000, 0), new Vector2(0, -2.1f), 5000, 4f, false, Color.Orange) { Temperature = 5 }],
         [
             new EntityCondition(new EntityConstructor(Enemy.MassRelay, Vector2.Zero, Vector2.Zero, 0), [ Condition.Protect, Condition.CustomIncomplete ]),
             new EntityCondition(new LaunchConstructor(Enemy.NewDropPod,new Vector2(0, -1500), 0),[ ])],
-        "Binary system", "It seems plans for a mass relay have been abandoned here.\nFinishing the construction may be the only way to escape fully.", -1f, new Vector2(0, -1500), Mission.TierThree(), Mission.TierThreeBosses(), null, true)
+        "Binary system", "It seems plans for a mass relay have been abandoned here.\nConstruct it to recieve some advanced equipment from our previous stations.", -1f, new Vector2(0, -1500), Mission.TierThree(), Mission.TierThreeBosses(), null, true)
         { isAggressive = true, playerDocked = true },
 
         new Mission([new(Vector2.Zero, Vector2.Zero, 4000, 4.5f, true, new Color(0.03f, 0.05f, 0.08f)),
