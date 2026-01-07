@@ -5,6 +5,7 @@ using System;
 using Microsoft.Xna.Framework.Graphics;
 using System.Diagnostics;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Space_Wars.Content.Main.Entities;
 
@@ -262,10 +263,10 @@ public class GrapplingHook : Projectile
 }
 public class FlameBolt : Projectile
 {
-    float piercingCooldown = 0;
     float maxTimeLeft;
     float temp;
     private ParticleEmitter emitter;
+    private List<(Entity entity, float cd)> struckEntities = [];
     public override float ColliderRadius 
     { 
         get 
@@ -323,22 +324,38 @@ public class FlameBolt : Projectile
         {
             emitter.particleTimeAlive = Math.Min(1, MathF.Sqrt(timeLeft));
         }
-        if (piercingCooldown > 0)
+
+        for(int i = 0; i < struckEntities.Count; i++)
         {
-            piercingCooldown -= Engine.DeltaSeconds;
+            struckEntities[i] = (struckEntities[i].entity, struckEntities[i].cd - Engine.DeltaSeconds);
         }
-        Entity nearestEnemy = Engine.EntityManager.NearestEnemy(this);
-        if (nearestEnemy != null)
+        struckEntities = [.. struckEntities.Where(x => x.cd > 0)];
+        foreach (var nearestEnemy in Engine.EntityManager.Entities)
         {
-            float combinedRadius = ColliderRadius + nearestEnemy.ColliderRadius;
-            if (piercingCooldown <= 0 && isFriendly != nearestEnemy.isFriendly && EntityManager.DistanceSqr(this, nearestEnemy) <= combinedRadius * combinedRadius)
+            if (!(nearestEnemy is Enemy || nearestEnemy is Player) || isFriendly == nearestEnemy.isFriendly)
             {
-                piercingCooldown = 0.05f;
-                nearestEnemy.Collide(damage);
-                //Always apply effect even if no damage hit
-                nearestEnemy.ApplyWork(temp);
+                continue;
             }
+            float combinedRadius = ColliderRadius + nearestEnemy.ColliderRadius;
+            if (EntityManager.DistanceSqr(this, nearestEnemy) > combinedRadius * combinedRadius)
+            {
+                continue;
+            }
+            bool skip = false;
+            foreach (var (entity, cd) in struckEntities)
+            {
+                if (entity == nearestEnemy)
+                {
+                    skip = true;
+                }
+            }
+            if (skip) { continue; }
+            struckEntities.Add((nearestEnemy, 0.05f));
+            nearestEnemy.Collide(damage);
+            //Always apply effect even if no damage hit
+            nearestEnemy.ApplyWork(temp);
         }
+
     }
 }
 public class Explosive : Projectile

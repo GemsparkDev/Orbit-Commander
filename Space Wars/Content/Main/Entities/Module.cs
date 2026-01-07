@@ -169,8 +169,7 @@ public class Shield() : Module(Modules.Shield)
             cooldown = 8;
             return 0;
         }
-        Health = (int)MathF.Max(0, Health - _damage / 2);
-        return _damage;
+        return (int)(_damage * 1.5f);
     }
     public override void OnUpdate()
     {
@@ -187,7 +186,7 @@ public class Stealth() : Module(Modules.Stealth)
 {
     public override int OnCollide(int _damage)
     {
-        return _damage * 2 / 3;
+        return (int)(_damage / 1.75f);
     }
 }
 public class Reflective() : Module(Modules.Reflective)
@@ -212,12 +211,9 @@ public class Turtle() : Module(Modules.Turtle)
     ParticleEmitter effect = new ParticleEmitter(Assets.Get(Sprite.Dot), Vector2.Zero, 10, Color.Orange) { sprayAngle = MathF.PI / 2};
     public override int OnCollide(int _damage)
     {
-        return (int)(_damage * (1 - (1 - cooldown) * (1 - cooldown)));
-    }
-    public override void OnShoot()
-    {
         cooldown = 1;
         Engine.SaveGame.Player.Reveal(1);
+        return (int)(_damage * 2 * (1 - (1 - cooldown) * (1 - cooldown)));
     }
     public override void OnUpdate()
     {
@@ -285,6 +281,22 @@ public class Adaptive() : Module(Modules.Adaptive)
         return _damage / 2;
     }
 
+}
+public class ThermalShield() : Module(Modules.ThermalShield)
+{
+    public override int OnCollide(int _damage)
+    {
+        if(Player.Temperature is > 1 or < (-1))
+        {
+            return _damage * 2 / 3;
+        }
+        return _damage / 2;
+    }
+    public override void OnUpdate()
+    {
+        Player.ApplyWork(Math.Sign(-Player.Temperature));
+        base.OnUpdate();
+    }
 }
 public class StandardEngine() : Module(Modules.Engines)
 {

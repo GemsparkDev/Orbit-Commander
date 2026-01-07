@@ -153,6 +153,10 @@ namespace Space_Wars.Content.Main.Particles
                     DrawParticle(-angle);
                 }
             }
+            if(sprayCone >= MathF.Tau - float.Epsilon)
+            {
+                DrawParticle(MathF.PI);
+            }
             void DrawParticle(float angle)
             {
                 normalVector = Util.ToUnitVector(angle + sprayAngle) * particleVelocity;

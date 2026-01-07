@@ -18,6 +18,7 @@ public enum Modules
     Turtle,
     Ablative,
     Adaptive,
+    ThermalShield,
     //Engines
     Engines,
     Plasma,
