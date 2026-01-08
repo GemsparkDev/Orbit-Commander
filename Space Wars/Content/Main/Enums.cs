@@ -127,6 +127,7 @@ public enum Sprite
     EpitomeThree,
     DropPod,
     StealthFighter,
+    Hunter,
 
     MetalScrap,
     RealMetalScrap,

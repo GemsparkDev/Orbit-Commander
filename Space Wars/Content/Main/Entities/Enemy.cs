@@ -4470,7 +4470,7 @@ public class Enemy : Entity
     }
     public static Enemy NewHunter(Vector2 position, Vector2 velocity, float angle, bool _isFriendly = false) 
     {
-        Enemy enemy = new(position, velocity, angle, 8, 15, Assets.Get(Sprite.Fighter), _isFriendly);
+        Enemy enemy = new(position, velocity, angle, 8, 15, Assets.Get(Sprite.Hunter), _isFriendly);
         enemy.AddBehaviour(enemy.Hunter());
         enemy.AddBehaviour(enemy.AvoidNearbyAllies());
         enemy.AddBehaviour(enemy.EnemyDeath());
@@ -4624,7 +4624,6 @@ public class Enemy : Entity
 
         return head;
     }
-    //Boss
     public static Enemy NewPursuerBoss(Vector2 position, Vector2 velocity, float angle, bool _isFriendly = false)
     {
         Enemy enemy = new(position, velocity, angle, 8, 100, Assets.Get(Sprite.Engineer), _isFriendly);
@@ -4694,6 +4693,33 @@ public class Enemy : Entity
         var enemy = new Enemy(_position, _velocity, _angle, 10, 1000, Assets.Get(Sprite.Mothership), false);
         enemy.AddBehaviour(enemy.MeshNetworkNode());
         enemy.Components.Add(new DockableComponent(enemy, UI.HackMenu, false));
+        return enemy;
+    }
+    public static Enemy NewScrambled(Vector2 _position, Vector2 _velocity, float _angle) //Just for fun!
+    {
+        var enemy = new Enemy(_position, _velocity, _angle, Util.Random.Next(5,10), Util.Random.Next(20, 50), Assets.Get((Sprite)(Util.Random.Next((int)Sprite.Fighter, (int)Sprite.Hunter))));
+        for(int i = 0; i < Util.Random.Next(2, 4); i++)
+        {
+            switch(Util.Random.Next(0, 10))
+            {
+                case 0: enemy.AddBehaviour(enemy.Fighter()); break;
+                case 1: enemy.AddBehaviour(enemy.AdvancedFighter()); break;
+                case 2: enemy.AddBehaviour(enemy.StealthFighter()); break;
+                case 3: enemy.AddBehaviour(enemy.Sniper()); break;
+                case 4: enemy.AddBehaviour(enemy.Carrier()); break;
+                case 5: enemy.AddBehaviour(enemy.Shotgunner()); break;
+                case 6: enemy.AddBehaviour(enemy.Hovercraft()); break;
+                case 7: enemy.AddBehaviour(enemy.Hunter()); break;
+                case 8: enemy.AddBehaviour(enemy.Healer()); break;
+                case 9: enemy.AddBehaviour(enemy.Engineer()); break;
+                default: break;
+            }
+        }
+        if(Util.Random.Next(0, 2) == 0)
+        {
+            enemy.AddBehaviour(enemy.AvoidProjectiles(0.5f));
+        }
+        enemy.AddBehaviour(enemy.EnemyDeath());
         return enemy;
     }
 
