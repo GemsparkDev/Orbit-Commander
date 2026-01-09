@@ -22,8 +22,10 @@ public class Planet
     private float time = 0;
     private float atmosphereStrength = 0;
     public float Temperature { get; set; } = 0;
+    public float RingOffset { get; set; } = 0;
 
-    public Planet(Vector2 _position, Vector2 _velocity, float _mass, float _radius, bool _isImmovable, Color _color, bool _hasRing = false, float _atmosphereStrength = 0)
+    //Remember to update the clone function too!
+    public Planet(Vector2 _position, Vector2 _velocity, float _mass, float _radius, bool _isImmovable, Color _color, bool _hasRing = false, float _atmosphereStrength = 0, float _ringOffset = 0)
     {
         position = _position;
         velocity = _velocity;
@@ -38,6 +40,7 @@ public class Planet
         {
             atmosphere = Engine.Self.RenderAtmosphere(AtmosphereRadius(), _atmosphereStrength, radius, color, this);
         }
+        RingOffset = _ringOffset;
     }
     public Vector2 GetAcceleration(Vector2 _position)
     {
@@ -227,10 +230,11 @@ public class Planet
         if (hasRing)
         {
             int randomAngle = 3;
-            for (float i = 0; i < 2 * radius; i++)
+            float r = radius + RingOffset;
+            for (float i = 0; i < 2 * r; i++)
             {
-                float j = i - radius;
-                float distance = radius * 1.25f + j * j * j / (radius * radius * 2) + radius / 2 + i / 2;
+                float j = i - r;
+                float distance = r * 1.25f + j * j * j / (r * r * 2) + r / 2 + i / 2;
                 float speed = MathF.Sqrt(mass / distance) * 60;
                 //Simple deterministic random number generator
                 randomAngle = (randomAngle * 65535 + 997) % 628;
@@ -264,7 +268,7 @@ public class Planet
     }
     public Planet Copy()
     {
-        return new Planet(position, velocity, mass, radius / 50, isImmovable, color, hasRing, atmosphereStrength)
+        return new Planet(position, velocity, mass, radius / 50, isImmovable, color, hasRing, atmosphereStrength, RingOffset)
         { isSun = this.isSun, Temperature = this.Temperature };
     }
 }

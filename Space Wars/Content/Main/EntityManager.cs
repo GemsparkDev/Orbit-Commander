@@ -60,10 +60,17 @@ public class EntityManager
             new Planet(new Vector2(400, 0), Planet.GetOrbitalVelocity(new Vector2(400, 0), Vector2.Zero, 5000), 240, 1f, false, Color.Cyan),
             new Planet(new Vector2(-600, 0), -Planet.GetOrbitalVelocity(new Vector2(-600, 0), Vector2.Zero, 5000) * 1.2f, 120, 0.6f, false, Color.Yellow), ],
         [
-            new EntityCondition(new AdvancedConstructor(Enemy.NewExcursionBoss, new Vector2(0, -6*50), Vector2.Zero, 0, false), [ Condition.Kill ]),
+            new EntityCondition(new EntityConstructor(Enemy.NewScrambled, new Vector2(0, -6*50), Vector2.Zero, 0), [ Condition.Kill ]),
             new EntityCondition(new LaunchConstructor(Enemy.NewDropPod,new Vector2(0, -1500), 150),[ ])],
         "Showdown", "Our activities appear to have gathered the attention of an advanced drone.\nAttacking now will suprise the enemy before it can develop any reinforcements.", 1f, new Vector2(0, -1500), Mission.TierOne(), Mission.TierOneBosses(), null, true)
         { playerProgression = 2, isAggressive = true, playerDocked = true },
+
+        new Mission([new Planet(Vector2.Zero, Vector2.Zero, 10000, 4, true, new Color(167, 156, 134), true, 6, 500f)],
+        [
+            new EntityCondition(new LaunchConstructor(Enemy.NewGlider,new Vector2(-800, -1200), -1050),[ ]),
+            new WaveGoal(30)],
+        "Gas giant", "", 1f, new Vector2(-800, -1200), Mission.TierOne(), Mission.TierOneBosses(), null, true)
+        { playerDocked = true },
 
         new Mission([], [new EntityCondition(new EntityConstructor(Enemy.NewWarpGate, Vector2.Zero, Vector2.Zero, 0), [ Condition.CustomIncomplete ])],
         "Warp Gate", "Scans indicate that a large enemy fleet is coming our way after the loss of their prototype.\nRecommended action: Leave the system immediately.", -1, new Vector2(0, 500), Mission.TierOne(), Mission.TierOneBosses()) { music = false },
@@ -132,11 +139,11 @@ public class EntityManager
         "Clockwork creation", "A strange sentinal appears to be housed on this ancient planet.\nDismantling it may yield unusual resources.", 1f, new Vector2(0, -1500), Mission.TierTwo(), Mission.TierTwoBosses(), null, true)
         { isAggressive = true, playerDocked = true },
 
-        new Mission([new Planet(Vector2.Zero, Vector2.Zero, 10000, 3, true, new Color(100, 60, 60), false, 15f)],
+        new Mission([new Planet(Vector2.Zero, Vector2.Zero, 10000, 3, true, new Color(41, 144, 181), false, 15f) { Temperature = -20 }],
         [
             new EntityCondition(new LaunchConstructor(Enemy.NewGlider,new Vector2(-800, -1300), -1150),[ ]),
             new WaveGoal(30)],
-        "Gas giant", "The unusual conditions in this system have resulted in unique developments in the enemies technology.\nBe prepared for advanced enemy cloaking.", 1f, new Vector2(-800, -1300), Mission.TierTwo(), Mission.TierTwoBosses(), null, true)
+        "Ice giant", "The unusual conditions in this system have resulted in unique developments in the enemies technology.\nBe prepared for advanced enemy cloaking.", 1f, new Vector2(-800, -1300), Mission.TierTwo(), Mission.TierTwoBosses(), null, true)
         { playerDocked = true },
 
         new Mission([new(new Vector2(500, 0), new Vector2(0, 1.05f), 10000, 7, false, Color.Cyan) { Temperature = -5},

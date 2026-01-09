@@ -3366,7 +3366,7 @@ public class Enemy : Entity
             {
                 if (constructionTime <= 0)
                 {
-                    Engine.EntityManager.Add(new Construct(Constructs.Trap, position, Vector2.Zero, 0, 0, 1));
+                    Engine.EntityManager.Add(new Construct(Constructs.Trap, position, Vector2.Zero, 0, 0, 1, isFriendly));
                     constructing = false;
                     cd[1] = 15;
                 }

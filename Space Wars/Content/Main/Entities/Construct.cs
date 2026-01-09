@@ -64,11 +64,11 @@ public class Construct : Pickup
             case Constructs.Barricade:
                 velocity = Vector2.Zero;
                 angle = MathF.Atan2(position.X, -position.Y);
-                nearestEnemy = Engine.EntityManager.NearestEnemy(new Enemy(position, Vector2.Zero, 0, 0, 0, null, true));
+                nearestEnemy = Engine.EntityManager.NearestEnemy(new Enemy(position, Vector2.Zero, 0, 0, 0, null, isFriendly));
                 if (cooldown <= 0 && nearestEnemy != null && Vector2.Distance(nearestEnemy.position, position) < 300)
                 {
                     var dir = Vector2.Normalize(nearestEnemy.position - position);
-                    Engine.EntityManager.Add(new PulseShot(position, dir * 10, MathF.Atan2(dir.X, -dir.Y), 0, true, 5, true)); 
+                    Engine.EntityManager.Add(new PulseShot(position, dir * 10, MathF.Atan2(dir.X, -dir.Y), 0, isFriendly, 5, true)); 
                     SoundManager.PlaySound(Assets.Get(Sound.PulseFire), position);
                     cooldown = 1.5f;
                 }
@@ -79,7 +79,7 @@ public class Construct : Pickup
                 break;
             case Constructs.Trap:
                 velocity = Vector2.Zero;
-                nearestEnemy = Engine.EntityManager.NearestEnemy(new Enemy(position, Vector2.Zero, 0, 0, 0, null, true));
+                nearestEnemy = Engine.EntityManager.NearestEnemy(new Enemy(position, Vector2.Zero, 0, 0, 0, null, isFriendly));
                 if (cooldown <= 0 && nearestEnemy != null && Vector2.Distance(nearestEnemy.position, position) < 800)
                 {
                     var dir = Vector2.Normalize(nearestEnemy.position - position);

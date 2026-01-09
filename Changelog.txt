@@ -3,6 +3,13 @@
 Lagrange Commander is a game made using C# in monogame. It is a 2D top down wave based shooter where you must repair and upgrade your ship by salvaging from enemies you defeat. It features realistic N-Body gravitation, which affects all entities and projectiles.
   
 # Changelog
+0.7.1.5 - 1/8/2025
+ - Added another gas giant mission.
+ - The Gas Giant mission is now called the Ice Giant, and has a -20 temperature.
+ - Fixed an issue where the Engineer made friendly constructs when hostile.
+ - Fixed an issue where hostile constructs did not target the player.
+ - Added a RingOffset parameter to planets for rings.
+ - Increased the FlameBolt cooldown time to 0.1 seconds, from 0.05 seconds.
 0.7.1.4 - 1/7/2025
  - Added a sprite to the Hunter enemy.
 0.7.1.3 - 1/6/2025

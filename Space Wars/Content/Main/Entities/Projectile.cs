@@ -350,7 +350,7 @@ public class FlameBolt : Projectile
                 }
             }
             if (skip) { continue; }
-            struckEntities.Add((nearestEnemy, 0.05f));
+            struckEntities.Add((nearestEnemy, 0.1f));
             nearestEnemy.Collide(damage);
             //Always apply effect even if no damage hit
             nearestEnemy.ApplyWork(temp);
