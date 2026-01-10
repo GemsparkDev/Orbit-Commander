@@ -65,11 +65,13 @@ public class EntityManager
         "Showdown", "Our activities appear to have gathered the attention of an advanced drone.\nAttacking now will suprise the enemy before it can develop any reinforcements.", 1f, new Vector2(0, -1500), Mission.TierOne(), Mission.TierOneBosses(), null, true)
         { playerProgression = 2, isAggressive = true, playerDocked = true },
 
-        new Mission([new Planet(Vector2.Zero, Vector2.Zero, 10000, 4, true, new Color(167, 156, 134), true, 6, 500f)],
+        new Mission([new Planet(Vector2.Zero, Vector2.Zero, 16000, 4, true, new Color(167, 156, 134), true, 6, 500f),
+            new Planet(new Vector2(900, 0), Planet.GetOrbitalVelocity(new Vector2(900, 0), Vector2.Zero, 16000), 100, 0.5f, false, Color.OldLace),
+            new Planet(new Vector2(-1200, 0), Planet.GetOrbitalVelocity(new Vector2(-1200, 0), Vector2.Zero, 16000) * 1.05f, 100, 0.5f, false, Color.OldLace),],
         [
-            new EntityCondition(new LaunchConstructor(Enemy.NewGlider,new Vector2(-800, -1200), -1050),[ ]),
+            new EntityCondition(new LaunchConstructor(Enemy.NewGlider,new Vector2(-800, -1100), -900),[ ]),
             new WaveGoal(30)],
-        "Gas giant", "", 1f, new Vector2(-800, -1200), Mission.TierOne(), Mission.TierOneBosses(), null, true)
+        "Gas giant", "", 1f, new Vector2(-800, -1100), Mission.TierOne(), Mission.TierOneBosses(), null, true)
         { playerDocked = true },
 
         new Mission([], [new EntityCondition(new EntityConstructor(Enemy.NewWarpGate, Vector2.Zero, Vector2.Zero, 0), [ Condition.CustomIncomplete ])],
