@@ -324,7 +324,7 @@ public class Victory : GameState
         _spriteBatch.DrawString(Assets.TextFont, $"Your Time: {Engine.IngameTime.DrawText}", new Vector2(-12 * 12 / 2, (12 * 4 - 60)) * UIManager.UIScale + Engine.Camera.Position, Color.White, 0, Vector2.Zero, UIManager.UIScale /2, SpriteEffects.None, 0);
     }
 }
-public class Cutscene(List<IEvent> _events, List<Actor> _actors, GameState _nextGameState) : GameState 
+public class Cutscene(List<IEvent> _events, List<IActor> _actors, GameState _nextGameState) : GameState 
 {
     private float time = 0;
     private float escapeTime = 0;

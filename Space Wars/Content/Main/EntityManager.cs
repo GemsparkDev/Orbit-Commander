@@ -37,7 +37,7 @@ public class EntityManager
         new EntityCondition(new PickupConstructor(ItemFactory.NewScrap, new Vector2(0, -8*50), new Vector2(-8, -4), -0.03f),[])],
         "Crash Landing",
         "A simple system with a large planet and one closely orbiting moon. Drone activity detected, but minimal.",
-        -1, new Vector2(0, -8*50 - Assets.DimsOf(Sprite.Mothership).Y / 2), Mission.TierOne(), Mission.TierOneBosses(), IntroCutscene) { playerProgression = 0, playerDocked = true, tip = "WASD to move, Space to dock and undock.\nRmb to collect scrap, Lmb to shoot." },
+        -1, new Vector2(0, -8*50 - Assets.DimsOf(Sprite.Mothership).Y / 2), Mission.TierOne(), Mission.TierOneBosses(), RestartCutscene) { playerProgression = 0, playerDocked = true, tip = "WASD to move, Space to dock and undock.\nRmb to collect scrap, Lmb to shoot." },
 
         new Mission( [new Planet(Vector2.Zero, Vector2.Zero, 3500, 4, true, Color.Cyan, true) ],
         [
@@ -589,7 +589,7 @@ public class EntityManager
     }
     private static Cutscene IntroCutscene()
     {
-        List<Actor> actors = [];
+        List<IActor> actors = [];
         var mothership = new Actor(Assets.Get(Sprite.Mothership), new Vector2(1500, -2000), new Color(0, 255, 0), MathF.PI / 2);
         var bullet = new Actor(Assets.Get(Sprite.PulseShot), new Vector2(0, 0), new Color(255, 0, 0), MathF.PI / 3);
         var enemy = new Actor(Assets.Get(Sprite.PickupDrone), new Vector2(0, -1800), new Color(255, 0, 0), 0);
@@ -658,6 +658,22 @@ public class EntityManager
                 Assets.Get(Sound.Death).Play();
                 Engine.ShakeScreen(1f);
                 mothership.Position = new Vector2(0, -400 - Assets.DimsOf(Sprite.Mothership).Y / 2);
+            }),
+        ];
+        return new Cutscene(events, actors, new PlayingGame());
+    }
+    private static Cutscene RestartCutscene()
+    {
+        var t1 = new TextActor(Vector2.Zero, "Attempting restart...");
+        var t2 = new TextActor(Vector2.Zero, "HLEP");
+        var t3 = new TextActor(Vector2.Zero, "HLEP");
+        List<IActor> actors = [t1, t2, t3];
+        //Ensure planets still orbit and render
+        List<IEvent> events =
+        [
+            new Event(0, 10f, delegate (float time)
+            {
+                t1.Index = (int)(time*2);
             }),
         ];
         return new Cutscene(events, actors, new PlayingGame());
