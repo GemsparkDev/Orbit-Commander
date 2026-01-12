@@ -40,6 +40,8 @@ public class Engine : Game
     public static int SaveSlot { get; private set; } = 0;
     public static ColorScheme ColorScheme { get; set; } = new StandardScheme();
 
+    public static float Time { get; private set; } = 0;
+
     private int dir = 0;
     private Vector2 offset = Vector2.Zero;
 
@@ -198,6 +200,7 @@ public class Engine : Game
         float speed = Util.FIED(0.01f);
         offset = new Vector2((offset.X * (speed) + dir * BackBuffer.X * (1-speed)), 0);
         UI.GlobalMenu.position = new Vector2(offset.X, 0);
+        Time += DeltaSeconds;
         base.Update(gameTime);
     }
     public void Rotate(int _dir)

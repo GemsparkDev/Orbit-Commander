@@ -48,7 +48,6 @@ public class Player : Entity
     public bool canGatherResources = false;
     private Vector2 targetVector;
     public Vector2 direction;
-    private float time = 0;
     private float cachedDamageCooldown = 0;
     public int Progression { get; set; } = 3;
     public bool IsEnabled { get; set; } = true;
@@ -122,7 +121,6 @@ public class Player : Entity
     public override void Update()
     {
         collider.offsetVelocity = velocity;
-        time += Engine.DeltaSeconds;
         Color c = Engine.ColorScheme.FriendlyEnemy();
         if(color != c)
         {
@@ -240,7 +238,7 @@ public class Player : Entity
         UI.PlayerHealth.SetInterval(currentHealth - cachedDamage, maxHealth, 0);
         UI.PlayerHealth.SetInterval(currentHealth + cachedDamageCooldown / 0.05f, maxHealth, 1);
         Vector3 colorVec;
-        float val = (MathF.Sin(time) + 1f) / 2;
+        float val = (MathF.Sin(Engine.Time) + 1f) / 2;
         colorVec = new Vector3(1, 0, 0) * val + new Vector3(1, 0.2f, 0.2f) * (1f - val);
         UI.PlayerHealth.Colors[0] = new Color(colorVec.X, colorVec.Y, colorVec.Z);
 
@@ -505,7 +503,7 @@ public class Player : Entity
                     {
                         float lerp = i / 60;
                         Vector3 color = new Vector3(1, 1, 0) * (1 - lerp) + new Vector3(1, 0, 0) * (lerp);
-                        ParticleManager.Add(new Particle(Assets.Get(Sprite.Dot), targetDir * (i + 4f) * 2 + position + new Vector2(targetDir.Y, -targetDir.X) * MathF.Sin(i / 2 - time * 5) / 2, Util.ToAngle(targetDir), new Color(color.X, color.Y, color.Z) * (1 - (lerp))));
+                        ParticleManager.Add(new Particle(Assets.Get(Sprite.Dot), targetDir * (i + 4f) * 2 + position + new Vector2(targetDir.Y, -targetDir.X) * MathF.Sin(i / 2 - Engine.Time * 5) / 2, Util.ToAngle(targetDir), new Color(color.X, color.Y, color.Z) * (1 - (lerp))));
                     }
                     if (Input.OldMouseState.RightButton == ButtonState.Released)
                     {

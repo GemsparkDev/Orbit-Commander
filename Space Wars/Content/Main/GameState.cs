@@ -328,6 +328,7 @@ public class Cutscene(List<IEvent> _events, List<IActor> _actors, GameState _nex
 {
     private float time = 0;
     private float escapeTime = 0;
+    public bool IsPaused { get; set; } = false;
     public override void Initialize()
     {
         time = 0;
@@ -352,7 +353,10 @@ public class Cutscene(List<IEvent> _events, List<IActor> _actors, GameState _nex
         }
         ParticleManager.Update();
         Engine.DialogueManager.Update();
-        time += Engine.DeltaSeconds;
+        if(!IsPaused)
+        {
+            time += Engine.DeltaSeconds;
+        }
         bool isActive = false;
         foreach (var _event in _events)
         {

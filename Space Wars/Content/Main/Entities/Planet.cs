@@ -19,7 +19,6 @@ public class Planet
     public bool isSun = false;
     public bool EasterEgg { get; set; } = false;
     private Color color;
-    private float time = 0;
     private float atmosphereStrength = 0;
     public float Temperature { get; set; } = 0;
     public float RingOffset { get; set; } = 0;
@@ -189,14 +188,13 @@ public class Planet
     }
     public void Update()
     {
-        time += Engine.DeltaSeconds;
         if (!isImmovable)
         {
             position += velocity * Engine.DeltaSeconds * 60;
         }
         if (EasterEgg)
         {
-            color = new Color((MathF.Cos(time) + 1) / 2, (MathF.Cos(time + MathF.PI * 2 / 3) + 1) / 2, (MathF.Cos(time - MathF.PI * 2 / 3) + 1) / 2);
+            color = new Color((MathF.Cos(Engine.Time) + 1) / 2, (MathF.Cos(Engine.Time + MathF.PI * 2 / 3) + 1) / 2, (MathF.Cos(Engine.Time - MathF.PI * 2 / 3) + 1) / 2);
             trajectory.particleColor = color;
         }
         trajectory.Update();
@@ -242,7 +240,7 @@ public class Planet
                 float speed = MathF.Sqrt(mass / distance) * 60;
                 //Simple deterministic random number generator
                 randomAngle = (randomAngle * 65535 + 997) % 628;
-                float particleAngle = (i + (float)(randomAngle) / 628 + time * speed / distance) % MathF.Tau;
+                float particleAngle = (i + (float)(randomAngle) / 628 + Engine.Time * speed / distance) % MathF.Tau;
                 Vector2 particlePosition = new Vector2(MathF.Cos(particleAngle), MathF.Sin(particleAngle) * 0.25f) * distance;
                 if (particlePosition.LengthSquared() > radius * radius || particlePosition.Y > 0)
                 {

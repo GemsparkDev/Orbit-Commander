@@ -664,18 +664,68 @@ public class EntityManager
     }
     private static Cutscene RestartCutscene()
     {
-        var t1 = new TextActor(Vector2.Zero, "Attempting restart...");
-        var t2 = new TextActor(Vector2.Zero, "HLEP");
-        var t3 = new TextActor(Vector2.Zero, "HLEP");
-        List<IActor> actors = [t1, t2, t3];
+        Cutscene scene = null;
+        var t1 = new TextActor(Vector2.Zero, "Attempting restart...\nSystem corruption detected; Please insert recovery medium.");
+        var t3 = new TextActor(new Vector2(0, 36), "Recovery Medium Detected, initiating system check.");
+        var t4 = new TextActor(new Vector2(0, 54), "Hull:\nGuns:\nEngn:\nSnsr:\nCore:");
+        var t5 = new TextActor(new Vector2(50, 54), "Failed\nFailed\nFailed\nFailed\nFailed\n");
+        t5.TextColor = Color.Red;
+        var floppy = new Actor(Assets.Get(Sprite.SelectedTab), Engine.BackBuffer, Color.White, 0);
+        var inserter = new Actor(Assets.Get(Sprite.Terminal), Engine.BackBuffer, Color.White, 0);
+        List<IActor> actors = [t1, t3, t4, t5, inserter, floppy];
+        int textSpeed = 20;
         //Ensure planets still orbit and render
         List<IEvent> events =
         [
-            new Event(0, 10f, delegate (float time)
+            new Event(0, t1.Text.Length / textSpeed, delegate (float time)
             {
-                t1.Index = (int)(time*2);
+                t1.Index = (int)(time*textSpeed);
+                if(MathF.Cos(time * textSpeed * MathF.Tau) > 0.975f)
+                {
+                    SoundManager.PlayGlobalSound(Assets.Get(Sound.Interact));
+                }
             }),
+            new Event(t1.Text.Length / (textSpeed + 1), 0.01667f, delegate(float time)
+            {
+                scene.IsPaused = true;
+                Vector2 mousePos = new Vector2(Input.NewMouseState.X, Input.NewMouseState.Y) - Engine.BackBuffer / 2;
+                floppy.Position = mousePos;
+                inserter.Position = Vector2.Zero;
+                if(Vector2.Distance(mousePos, inserter.Position) < 100)
+                {
+                    if(Input.NewMouseState.LeftButton == ButtonState.Pressed)
+                    {
+                        scene.IsPaused = false;
+                        floppy.Position = Engine.BackBuffer;
+                        inserter.Position = Engine.BackBuffer;
+                    }
+                    floppy.Color = Color.White * (MathF.Sin(Engine.Time * 4) / 8 + 0.875f);
+                }
+                else
+                {
+                    floppy.Color = Color.Gray;
+                }
+            }),
+            new Event((t1.Text.Length) / textSpeed, t3.Text.Length / textSpeed, delegate(float time)
+            {
+                t3.Index = (int)(time*textSpeed);
+                if(MathF.Cos(time * textSpeed * MathF.Tau) > 0.975f)
+                {
+                    SoundManager.PlayGlobalSound(Assets.Get(Sound.Interact));
+                }
+            }),
+            new Event((t1.Text.Length + t3.Text.Length) / textSpeed, 5.1f, delegate(float time)
+            {
+                t4.Index = t4.Text.Length;
+                t5.Index = (int)(time) * 7;
+                if((time - Math.Truncate(time)) < 0.01666f && time > 0.5f)
+                {
+                    SoundManager.PlayGlobalSound(Assets.Get(Sound.Beep));
+                }
+            }),
+            new Event(0, 100, delegate(float time){ })
         ];
-        return new Cutscene(events, actors, new PlayingGame());
+        scene = new Cutscene(events, actors, new PlayingGame());
+        return scene;
     }
 }
