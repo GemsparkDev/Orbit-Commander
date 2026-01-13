@@ -664,28 +664,49 @@ public class EntityManager
     }
     private static Cutscene RestartCutscene()
     {
+        List<string> text =
+        [
+            "Kernel ver Ship-Master 3.1.1 - Copyright(C) In-Tech 2059",
+            "Kernel parameters -a -f",
+            "Attempting boot from CD-ROM",
+            "Error: Retrying",
+            "Error: Retrying",
+            "Error: Retrying",
+            "Error 2101 - Boot from CD-ROM Failed. Please insert recovery medium.",
+            "",
+            "Recovery Medium Detected.",
+            "Loading core.dll...",
+            "Loading ship-seeker.dll...",
+            "Loading navnet.dll...",
+            "Load complete, initiating system check.",
+            "Hull:\nGuns:\nEngn:\nSnsr:\nCore:",
+        ];
         Cutscene scene = null;
-        var t1 = new TextActor(Vector2.Zero, "Attempting restart...\nSystem corruption detected; Please insert recovery medium.");
-        var t3 = new TextActor(new Vector2(0, 36), "Recovery Medium Detected, initiating system check.");
-        var t4 = new TextActor(new Vector2(0, 54), "Hull:\nGuns:\nEngn:\nSnsr:\nCore:");
-        var t5 = new TextActor(new Vector2(50, 54), "Failed\nFailed\nFailed\nFailed\nFailed\n");
-        t5.TextColor = Color.Red;
+        Vector2 screen = Engine.ScreenSize / 2;
+        var t5 = new TextActor(new Vector2(50, 60) * 3 - screen, "Failed\nFailed\nFailed\nFailed\nFailed\n")
+        {
+            TextSize = 3,
+            TextColor = Color.Red
+        };
         var floppy = new Actor(Assets.Get(Sprite.SelectedTab), Engine.BackBuffer, Color.White, 0);
         var inserter = new Actor(Assets.Get(Sprite.Terminal), Engine.BackBuffer, Color.White, 0);
-        List<IActor> actors = [t1, t3, t4, t5, inserter, floppy];
-        int textSpeed = 20;
+        List<IActor> actors = [];
+        for (int i = 0; i < text.Count; i++)
+        {
+            actors.Add(new TextActor(new Vector2(0, 20 * 3 * i) - screen, text[i]) { TextSize = 3 });
+        }
+        actors.Add(t5);
+        actors.Add(inserter);
+        actors.Add(floppy);
         //Ensure planets still orbit and render
         List<IEvent> events =
         [
-            new Event(0, t1.Text.Length / textSpeed, delegate (float time)
+            new Event(0, 10, delegate (float time)
             {
-                t1.Index = (int)(time*textSpeed);
-                if(MathF.Cos(time * textSpeed * MathF.Tau) > 0.975f)
-                {
-                    SoundManager.PlayGlobalSound(Assets.Get(Sound.Interact));
-                }
+                var a = actors[(int)time] as TextActor;
+                (a).Index = a.Text.Length;
             }),
-            new Event(t1.Text.Length / (textSpeed + 1), 0.01667f, delegate(float time)
+            new Event(10, 0.01667f, delegate(float time)
             {
                 scene.IsPaused = true;
                 Vector2 mousePos = new Vector2(Input.NewMouseState.X, Input.NewMouseState.Y) - Engine.BackBuffer / 2;
@@ -706,17 +727,12 @@ public class EntityManager
                     floppy.Color = Color.Gray;
                 }
             }),
-            new Event((t1.Text.Length) / textSpeed, t3.Text.Length / textSpeed, delegate(float time)
+            new Event(10, 5, delegate(float time)
             {
-                t3.Index = (int)(time*textSpeed);
-                if(MathF.Cos(time * textSpeed * MathF.Tau) > 0.975f)
-                {
-                    SoundManager.PlayGlobalSound(Assets.Get(Sound.Interact));
-                }
+
             }),
-            new Event((t1.Text.Length + t3.Text.Length) / textSpeed, 5.1f, delegate(float time)
+            new Event(15, 5.1f, delegate(float time)
             {
-                t4.Index = t4.Text.Length;
                 t5.Index = (int)(time) * 7;
                 if((time - Math.Truncate(time)) < 0.01666f && time > 0.5f)
                 {

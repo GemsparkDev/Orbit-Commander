@@ -19,9 +19,10 @@ public class TextActor(Vector2 _position, string _text) : IActor
     public int Index { get; set; } = 0;
     public string Text { get; } = _text;
     public Color TextColor { get; set; } = Color.White;
+    public float TextSize { get; set; } = 1;
     public void Draw(SpriteBatch _spriteBatch)
     {
-        _spriteBatch.DrawString(Assets.TextFont, Text[0..Index], Position, TextColor);
+        _spriteBatch.DrawString(Assets.TextFont, Text[0..Index], Position, TextColor, 0, Vector2.Zero, TextSize, 0, 0);
     }
 }
 public interface IActor
