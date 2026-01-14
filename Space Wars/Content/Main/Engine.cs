@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using UILib.Content.Main;
+using System.Diagnostics;
 
 namespace Space_Wars.Content.Main;
 
@@ -203,9 +204,10 @@ public class Engine : Game
         Time += DeltaSeconds;
         base.Update(gameTime);
     }
-    public void Rotate(int _dir)
+    public void Rotate(int _dir, bool _override = false)
     {
-        if(SaveGame.Player.Progression <= 0)
+        Debug.WriteLine(SaveGame.Player.Progression);
+        if (SaveGame.Player.Progression <= 0 && !_override)
         {
             return;
         }

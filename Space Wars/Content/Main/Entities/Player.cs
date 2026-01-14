@@ -129,16 +129,14 @@ public class Player : Entity
         }
         if (Progression > 0)
         {
-            int dir = 0;
             if(Input.OldState.IsKeyUp(Keys.Z) && Input.NewState.IsKeyDown(Keys.Z))
             {
-                dir = 1;
+                Engine.Self.Rotate(1);
             }
             else if(Input.OldState.IsKeyUp(Keys.X) && Input.NewState.IsKeyDown(Keys.X))
             {
-                dir = -1;
+                Engine.Self.Rotate(-1);
             }
-            Engine.Self.Rotate(dir);
         }
         if (modules[ModuleType.Core].Health <= 0)
         {

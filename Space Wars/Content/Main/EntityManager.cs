@@ -672,18 +672,23 @@ public class EntityManager
             "Error: Retrying",
             "Error: Retrying",
             "Error: Retrying",
-            "Error 2101 - Boot from CD-ROM Failed. Please insert recovery medium.",
-            "",
+            "Error 2101 - Boot from CD-ROM Failed.",
+            "Please insert recovery medium.",
             "Recovery Medium Detected.",
             "Loading core.dll...",
             "Loading ship-seeker.dll...",
             "Loading navnet.dll...",
             "Load complete, initiating system check.",
-            "Hull:\nGuns:\nEngn:\nSnsr:\nCore:",
+            "Hull:",
+            "Guns:",
+            "Engn:",
+            "Snsr:",
+            "Core:",
+            "Please restart modules to restore functionality."
         ];
         Cutscene scene = null;
         Vector2 screen = Engine.ScreenSize / 2;
-        var t5 = new TextActor(new Vector2(50, 60) * 3 - screen, "Failed\nFailed\nFailed\nFailed\nFailed\n")
+        var t5 = new TextActor(new Vector2(50, 260) * 3 - screen, "Failed\nFailed\nFailed\nFailed\nFailed\n")
         {
             TextSize = 3,
             TextColor = Color.Red
@@ -698,16 +703,24 @@ public class EntityManager
         actors.Add(t5);
         actors.Add(inserter);
         actors.Add(floppy);
+        float ts = 0.2f;
         //Ensure planets still orbit and render
         List<IEvent> events =
         [
-            new Event(0, 10, delegate (float time)
+            new Event(0, ts * 3, delegate (float time)
             {
-                var a = actors[(int)time] as TextActor;
-                (a).Index = a.Text.Length;
+                var a = actors[(int)(time/ts)] as TextActor;
+                a.Index = a.Text.Length;
             }),
-            new Event(10, 0.01667f, delegate(float time)
+            new Event(ts*3, 8f + 0.01667f, delegate (float time)
             {
+                var a = actors[(int)(time/2) + 2] as TextActor;
+                a.Index = a.Text.Length;
+            }),
+            new Event(8 + ts * 4, 0.01667f, delegate(float time)
+            {
+                var a = actors[7] as TextActor;
+                a.Index = a.Text.Length;
                 scene.IsPaused = true;
                 Vector2 mousePos = new Vector2(Input.NewMouseState.X, Input.NewMouseState.Y) - Engine.BackBuffer / 2;
                 floppy.Position = mousePos;
@@ -727,21 +740,62 @@ public class EntityManager
                     floppy.Color = Color.Gray;
                 }
             }),
-            new Event(10, 5, delegate(float time)
+            new Event(8 + ts * 5, ts * 10, delegate (float time)
             {
-
-            }),
-            new Event(15, 5.1f, delegate(float time)
-            {
-                t5.Index = (int)(time) * 7;
-                if((time - Math.Truncate(time)) < 0.01666f && time > 0.5f)
+                if(time/ts - Math.Truncate(time/ts) <= Engine.DeltaSeconds/ts)
                 {
+                    PushTextUp();
+                }
+                var a = actors[(int)(time/ts) + 8] as TextActor;
+                a.Index = a.Text.Length;
+            }),
+            new Event(8 + ts * 11, 6, delegate (float time)
+            {
+                if(time - Math.Truncate(time) <= Engine.DeltaSeconds && time > 0.5f)
+                {
+                    t5.Index += 7;
                     SoundManager.PlayGlobalSound(Assets.Get(Sound.Beep));
+                }
+            }),
+            new TriggerEvent(14 + ts * 12, delegate(float time)
+            {
+                scene.IsPaused = true;
+                for(ModuleType i = 0; i < (ModuleType)5; i++)
+                {
+                    Engine.SaveGame.Player.modules[i].isFailed = true;
+                }
+                PushTextUp();
+                var a = actors[18] as TextActor;
+                a.Index = a.Text.Length;
+            }),
+            new EndlessEvent(0, delegate(float time)
+            {
+                Engine.SaveGame.Player.Update();
+                if(Input.NewState.IsKeyDown(Keys.Z))
+                {
+                    UI.GlobalMenu.enabled = false;
+                    Engine.Self.Rotate(1, true);
+                }
+                if(Input.NewState.IsKeyDown(Keys.X))
+                {
+                    UI.GlobalMenu.enabled = true;
+                    Engine.Self.Rotate(-1, true);
                 }
             }),
             new Event(0, 100, delegate(float time){ })
         ];
         scene = new Cutscene(events, actors, new PlayingGame());
         return scene;
+        void PushTextUp()
+        {
+            foreach(var actor in actors)
+            {
+                TextActor text;
+                if((text = (actor as TextActor)) != null)
+                {
+                    text.Position += new Vector2(0, -20) * 3;
+                }
+            }
+        }
     }
 }
