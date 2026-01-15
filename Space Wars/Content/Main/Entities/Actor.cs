@@ -6,11 +6,12 @@ public class Actor(Texture2D _texture, Vector2 _position, Color _color, float _a
 {
     public Vector2 Position { get; set; } = _position;
     public float Angle { get; set; } = _angle;
+    public float Scale { get; set; } = 1f;
     public Color Color { get; set; } = _color;
 
     public void Draw(SpriteBatch _spriteBatch)
     {
-        _spriteBatch.Draw(_texture, Position, null, Color, Angle, new Vector2(_texture.Width, _texture.Height) / 2, 1, 0, 0);
+        _spriteBatch.Draw(_texture, Position, null, Color, Angle, new Vector2(_texture.Width, _texture.Height) / 2, Scale, 0, 0);
     }
 }
 public class TextActor(Vector2 _position, string _text) : IActor

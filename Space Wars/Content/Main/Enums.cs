@@ -195,6 +195,7 @@ public enum Sprite
     SwitchFour,
     SwitchFive,
     Overlay,
+    Floppy,
 
     SmeltIcon,
     RepairIcon,

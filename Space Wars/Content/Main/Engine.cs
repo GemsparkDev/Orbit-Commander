@@ -40,6 +40,7 @@ public class Engine : Game
     public static float ScreenShakeFactor { get; private set; } = 0;
     public static int SaveSlot { get; private set; } = 0;
     public static ColorScheme ColorScheme { get; set; } = new StandardScheme();
+    private List<IActor> ShaderExceptions { get; } = [];
 
     public static float Time { get; private set; } = 0;
 
@@ -174,6 +175,13 @@ public class Engine : Game
             EventHandler.MissionSelectTrigger();
         }
     }
+    public void QueueShaderException(IActor _exception)
+    {
+        if(!ShaderExceptions.Contains(_exception))
+        {
+            ShaderExceptions.Add(_exception);
+        }
+    }
     protected override void Update(GameTime gameTime)
     {
         Input.Update();
@@ -206,7 +214,6 @@ public class Engine : Game
     }
     public void Rotate(int _dir, bool _override = false)
     {
-        Debug.WriteLine(SaveGame.Player.Progression);
         if (SaveGame.Player.Progression <= 0 && !_override)
         {
             return;
@@ -283,6 +290,11 @@ public class Engine : Game
         spriteBatch.End();
 
         spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, null, null, null);
+        foreach(var exception in ShaderExceptions)
+        {
+            exception.Draw(spriteBatch);
+        }
+        ShaderExceptions.Clear();
         DialogueManager.Draw(spriteBatch);
         UIManager.Draw(spriteBatch);
         if ((Input.NewMouseState.LeftButton == ButtonState.Released))

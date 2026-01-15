@@ -604,7 +604,7 @@ public class EntityManager
         //Ensure planets still orbit and render
         List<IEvent> events = 
         [
-            new EndlessEvent(0, delegate (float time)
+            new EndlessEvent(delegate (float time)
             {
                 Engine.SaveGame.CurrentMission.PlanetUpdate();
             }),
@@ -666,15 +666,15 @@ public class EntityManager
     {
         List<string> text =
         [
-            "Kernel ver Ship-Master 3.1.1 - Copyright(C) In-Tech 2059",
-            "Kernel parameters -a -f",
-            "Attempting boot from CD-ROM",
+            "Kernel Ship-Master ver 3.1.1 - Copyright(C) In-Tech 2059",
+            "Detected x86 P5 Pentium @ 250MHz, 1MB available",
+            "Booting with parameters -v -f",
             "Error: Retrying",
             "Error: Retrying",
             "Error: Retrying",
-            "Error 2101 - Boot from CD-ROM Failed.",
-            "Please insert recovery medium.",
-            "Recovery Medium Detected.",
+            "Fatal Error: Boot sector missing or corrupted.",
+            "Please insert disk image.",
+            "Image Detected, booting from disk.",
             "Loading core.dll...",
             "Loading ship-seeker.dll...",
             "Loading navnet.dll...",
@@ -690,19 +690,19 @@ public class EntityManager
         Vector2 screen = Engine.ScreenSize / 2;
         var t5 = new TextActor(new Vector2(50, 260) * 3 - screen, "Failed\nFailed\nFailed\nFailed\nFailed\n")
         {
-            TextSize = 3,
+            TextSize = 1.5f * UIManager.UIScale,
             TextColor = Color.Red
         };
-        var floppy = new Actor(Assets.Get(Sprite.SelectedTab), Engine.BackBuffer, Color.White, 0);
-        var inserter = new Actor(Assets.Get(Sprite.Terminal), Engine.BackBuffer, Color.White, 0);
+        var floppy = new Actor(Assets.Get(Sprite.Floppy), new Vector2(Engine.BackBuffer.X * 4 / 5, Engine.BackBuffer.Y), Color.Gray, MathF.PI / 8) { Scale = UIManager.UIScale};
+        var floppyVel = Vector2.Zero;
+        float floppyAngVel = Util.OneToNegOne();
+        var inserter = new Actor(Assets.Get(Sprite.Terminal), Engine.BackBuffer/2, Color.White, 0) { Scale = UIManager.UIScale};
         List<IActor> actors = [];
         for (int i = 0; i < text.Count; i++)
         {
-            actors.Add(new TextActor(new Vector2(0, 20 * 3 * i) - screen, text[i]) { TextSize = 3 });
+            actors.Add(new TextActor(new Vector2(0, 20 * 3 * i) - screen, text[i]) { TextSize = 1.5f * UIManager.UIScale });
         }
         actors.Add(t5);
-        actors.Add(inserter);
-        actors.Add(floppy);
         float ts = 0.2f;
         //Ensure planets still orbit and render
         List<IEvent> events =
@@ -722,27 +722,54 @@ public class EntityManager
                 var a = actors[7] as TextActor;
                 a.Index = a.Text.Length;
                 scene.IsPaused = true;
-                Vector2 mousePos = new Vector2(Input.NewMouseState.X, Input.NewMouseState.Y) - Engine.BackBuffer / 2;
-                floppy.Position = mousePos;
-                inserter.Position = Vector2.Zero;
-                if(Vector2.Distance(mousePos, inserter.Position) < 100)
+                if(Input.OldMouseState.LeftButton == ButtonState.Pressed && Vector2.Distance(floppy.Position, inserter.Position) < 100)
                 {
-                    if(Input.NewMouseState.LeftButton == ButtonState.Pressed)
+                    floppy.Color = Color.White * (MathF.Sin(Engine.Time * 4) / 8 + 0.875f);
+                    if(Input.NewMouseState.LeftButton == ButtonState.Released)
                     {
                         scene.IsPaused = false;
-                        floppy.Position = Engine.BackBuffer;
-                        inserter.Position = Engine.BackBuffer;
                     }
-                    floppy.Color = Color.White * (MathF.Sin(Engine.Time * 4) / 8 + 0.875f);
                 }
                 else
                 {
-                    floppy.Color = Color.Gray;
+                    floppy.Color = Color.White;
                 }
+                Engine.Self.QueueShaderException(inserter);
+            }),
+            new Event(0, 8 + ts * 4 + 0.01667f, delegate(float time) //Render floppy overtop of inserter
+            {
+                Engine.Self.QueueShaderException(floppy);
+                var mousePos = new Vector2(Input.OldMouseState.X, Input.OldMouseState.Y);
+                if(Input.NewMouseState.LeftButton == ButtonState.Pressed && Vector2.Distance(floppy.Position, mousePos) < 100 * UIManager.UIScale)
+                {
+                    var newPos = new Vector2(Input.NewMouseState.X, Input.NewMouseState.Y);
+                    floppyVel = newPos - mousePos;
+                    floppy.Position = newPos;
+                    floppy.Angle *= Util.FIED(0.02f);
+                    floppyAngVel = Util.OneToNegOne();
+                    return;
+                }
+                if(floppy.Position.X < 0 || floppy.Position.X > Engine.BackBuffer.X)
+                {
+                    floppy.Position = new Vector2(Math.Clamp(floppy.Position.X, 0, Engine.BackBuffer.X), floppy.Position.Y);
+                    floppyVel.X *= -0.2f;
+                    floppyVel.Y *= Util.FIED(0.03f);
+                    floppyAngVel = 0;
+                }
+                if(floppy.Position.Y < 0 || floppy.Position.Y > Engine.BackBuffer.Y)
+                {
+                    floppy.Position = new Vector2(floppy.Position.X, Math.Clamp(floppy.Position.Y, 0, Engine.BackBuffer.Y));
+                    floppyVel.Y *= -0.2f;
+                    floppyVel.X *= Util.FIED(0.03f);
+                    floppyAngVel = 0;
+                }
+                floppyVel += new Vector2(0,18) * Engine.DeltaSeconds;
+                floppy.Position += floppyVel;
+                floppy.Angle += floppyAngVel * Engine.DeltaSeconds;
             }),
             new Event(8 + ts * 5, ts * 10, delegate (float time)
             {
-                if(time/ts - Math.Truncate(time/ts) <= Engine.DeltaSeconds/ts)
+                if(time/ts - Math.Truncate(time/ts) <= Engine.DeltaSeconds/ts && time > ts * 5)
                 {
                     PushTextUp();
                 }
@@ -768,7 +795,7 @@ public class EntityManager
                 var a = actors[18] as TextActor;
                 a.Index = a.Text.Length;
             }),
-            new EndlessEvent(0, delegate(float time)
+            new EndlessEvent(delegate(float time)
             {
                 Engine.SaveGame.Player.Update();
                 if(Input.NewState.IsKeyDown(Keys.Z))
