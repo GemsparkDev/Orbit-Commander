@@ -226,6 +226,7 @@ public enum Sound
     Full,
     FireEngines,
     FireLaser,
+    ComputerSounds,
     Beep,
 
     OpenMenu,

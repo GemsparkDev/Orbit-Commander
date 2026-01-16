@@ -9,6 +9,8 @@ using System.Collections.Generic;
 using System.Linq;
 using UILib.Content.Main;
 using Space_Wars.Content.Main.Story;
+using Microsoft.Xna.Framework.Audio;
+using System.Diagnostics;
 
 namespace Space_Wars.Content.Main;
 
@@ -675,16 +677,34 @@ public class EntityManager
             "Fatal Error: Boot sector missing or corrupted.",
             "Please insert disk image.",
             "Image Detected, booting from disk.",
-            "Loading core.dll...",
-            "Loading ship-seeker.dll...",
-            "Loading navnet.dll...",
+            "Loading core.bin...",
+            "Loading navnet.bin...",
+            "Loading music_player.bin...",
             "Load complete, initiating system check.",
             "Hull:",
             "Guns:",
             "Engn:",
             "Snsr:",
             "Core:",
-            "Please restart modules to restore functionality."
+            "Please restart modules to restore functionality.",
+            "                             @@@@@@                ",
+            "                         @@@@@@@@@@@@@@            ",
+            "                     @@@@@@@@@@@@@@@@@@@@@@        ",
+            "                 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@    ",
+            "             =      @@@@@@@@@      @@@@@@@@@       ",
+            "             ====      @@@    %%%%    @@@      ####",
+            "             =======       %%%%%%%%%%       #######",
+            "             ==========  %%%%%%%%%%%%%%  ##########",
+            "             =========  %%%%%%%%%%%%%%%%  #########",
+            "                      Welcome aboard pilot         ",
+            "             =========  %%%%%%%%%%%%%%%%  #########",
+            "             ==========  %%%%%%%%%%%%%%  ##########",
+            "             ============  %%%%%%%%%%   ###########",
+            "             =============    %%%%    #############",
+            "             ================      ################",
+            "                 =============    #############    ",
+            "                     =========    #########        ",
+            "                         =====    #####            ",
         ];
         Cutscene scene = null;
         Vector2 screen = Engine.ScreenSize / 2;
@@ -693,10 +713,10 @@ public class EntityManager
             TextSize = 1.5f * UIManager.UIScale,
             TextColor = Color.Red
         };
-        var floppy = new Actor(Assets.Get(Sprite.Floppy), new Vector2(Engine.BackBuffer.X * 4 / 5, Engine.BackBuffer.Y), Color.Gray, MathF.PI / 8) { Scale = UIManager.UIScale};
+        var floppy = new Actor(Assets.Get(Sprite.Floppy), new Vector2(Engine.BackBuffer.X * 4 / 5, Engine.BackBuffer.Y), Color.Gray, MathF.PI / 8) { Scale = UIManager.UIScale };
         var floppyVel = Vector2.Zero;
         float floppyAngVel = Util.OneToNegOne();
-        var inserter = new Actor(Assets.Get(Sprite.Terminal), Engine.BackBuffer/2, Color.White, 0) { Scale = UIManager.UIScale};
+        var inserter = new Actor(Assets.Get(Sprite.Terminal), Engine.BackBuffer / 2, Color.White, 0) { Scale = UIManager.UIScale };
         List<IActor> actors = [];
         for (int i = 0; i < text.Count; i++)
         {
@@ -704,20 +724,31 @@ public class EntityManager
         }
         actors.Add(t5);
         float ts = 0.2f;
+        float trueTime = 0;
+        SoundEffectInstance computerSounds;
         //Ensure planets still orbit and render
         List<IEvent> events =
         [
+            new EndlessEvent(delegate(float time)
+            {
+                trueTime += Engine.DeltaSeconds;
+                if(trueTime / 28 - Math.Truncate(trueTime / 28) <= Engine.DeltaSeconds / 28 + float.Epsilon)
+                {
+                    computerSounds = Assets.Get(Sound.ComputerSounds).CreateInstance();
+                    computerSounds.Play();
+                }
+            }),
             new Event(0, ts * 3, delegate (float time)
             {
                 var a = actors[(int)(time/ts)] as TextActor;
                 a.Index = a.Text.Length;
             }),
-            new Event(ts*3, 8f + 0.01667f, delegate (float time)
+            new Event(ts*3, 8f + Engine.DeltaSeconds, delegate (float time)
             {
                 var a = actors[(int)(time/2) + 2] as TextActor;
                 a.Index = a.Text.Length;
             }),
-            new Event(8 + ts * 4, 0.01667f, delegate(float time)
+            new Event(8 + ts * 4, Engine.DeltaSeconds, delegate(float time)
             {
                 var a = actors[7] as TextActor;
                 a.Index = a.Text.Length;
@@ -736,7 +767,7 @@ public class EntityManager
                 }
                 Engine.Self.QueueShaderException(inserter);
             }),
-            new Event(0, 8 + ts * 4 + 0.01667f, delegate(float time) //Render floppy overtop of inserter
+            new Event(0, 8 + ts * 4 + Engine.DeltaSeconds, delegate(float time) //Render floppy overtop of inserter
             {
                 Engine.Self.QueueShaderException(floppy);
                 var mousePos = new Vector2(Input.OldMouseState.X, Input.OldMouseState.Y);
@@ -795,7 +826,25 @@ public class EntityManager
                 var a = actors[18] as TextActor;
                 a.Index = a.Text.Length;
             }),
-            new EndlessEvent(delegate(float time)
+            new Event(14 + ts * 12, Engine.DeltaSeconds, delegate(float time)
+            {
+                bool notReady = UI.RestartSwitch.Intervals[0] < 0.95f;
+                foreach(var module in Engine.SaveGame.Player.modules)
+                {
+                    notReady = module.Value.isFailed || notReady;
+                }
+                if(!notReady)
+                {
+                    UI.GlobalMenu.enabled = false;
+                    Engine.Self.Rotate(1, true);
+                    scene.IsPaused = false;
+                    for(int i = 0; i < 13; i++)
+                    {
+                        PushTextUp();
+                    }
+                }
+            }),
+            new Event(0, 14 + ts*12 + Engine.DeltaSeconds, delegate(float time)
             {
                 Engine.SaveGame.Player.Update();
                 if(Input.NewState.IsKeyDown(Keys.Z))
@@ -809,7 +858,12 @@ public class EntityManager
                     Engine.Self.Rotate(-1, true);
                 }
             }),
-            new Event(0, 100, delegate(float time){ })
+            new Event(14 + ts * 12 + Engine.DeltaSeconds, 2f, delegate (float time)
+            {
+                var a = actors[(int)(time*9) + 19] as TextActor;
+                a.Index = a.Text.Length;
+            }),
+            new Event(14 + ts * 12 + Engine.DeltaSeconds, 5, delegate(float time){ })
         ];
         scene = new Cutscene(events, actors, new PlayingGame());
         return scene;

@@ -191,6 +191,7 @@ public static class Assets
         SoundFX.Add(Sound.Full, Content.Load<SoundEffect>("Sounds/Full"));
         SoundFX.Add(Sound.FireEngines, Content.Load<SoundEffect>("Sounds/Loop_0"));
         SoundFX.Add(Sound.FireLaser, Content.Load<SoundEffect>("Sounds/Loop_1"));
+        SoundFX.Add(Sound.ComputerSounds, Content.Load<SoundEffect>("Sounds/Loop_2"));
         SoundFX.Add(Sound.Beep, Content.Load<SoundEffect>("Sounds/Timer"));
 
         //Menu Sounds
