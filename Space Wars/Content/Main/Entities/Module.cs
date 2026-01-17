@@ -1272,7 +1272,7 @@ public class CreateFighter() : Module(Modules.CreateFighter)
     private List<Enemy> allies = [];
     public override void OnAbility()
     {
-        if (cooldown > 0 || allies.Count >= 10)
+        if (cooldown > 0 || allies.Count >= 20)
         {
             return;
         }
@@ -1285,6 +1285,7 @@ public class CreateFighter() : Module(Modules.CreateFighter)
                 {
                     var enemy = Enemy.NewSurgeChild(Player.position + new Vector2(Util.OneToNegOne(), Util.OneToNegOne()), Player.velocity, Player.angle, Player, allies);
                     enemy.isFriendly = true;
+                    enemy.AddBehaviour(enemy.AvoidProjectiles(1));
                     Engine.EntityManager.Add(enemy);
                     allies.Add(enemy);
                 }
@@ -1297,7 +1298,7 @@ public class CreateFighter() : Module(Modules.CreateFighter)
     {
         UI.PlayerAbility.SetInterval(1 - cooldown / MaxCooldown, 1);
         allies = [.. allies.Where(x => !x.isExpired)];
-        base.Update();
+        base.OnUpdate();
     }
 }
 public class Assault() : Module(Modules.Assault)

@@ -30,8 +30,16 @@ public class EntityManager
     public static float StealthThreshold { get; private set; } = 0.75f;
     public int MissionLength => missions.Count;
     private readonly List<Mission> missions =
-[
-    //Possibly add a few cold related missions?
+    [
+    new Mission([new Planet(Vector2.Zero, Vector2.Zero, 15000, 12, true, Color.White, true)],
+     [
+        //new EntityCondition(new AdvancedConstructor(Enemy.NewEnemySpawner, new Vector2(0, 1200), Planet.GetOrbitalVelocity(new Vector2(0, 1200), Vector2.Zero, 20000), 0, false), [Condition.Kill]),
+        //new EntityCondition(new AdvancedConstructor(Enemy.NewEnemySpawner, new Vector2(0, -1200), Planet.GetOrbitalVelocity(new Vector2(0, -1200), Vector2.Zero, 20000), 0, false), [Condition.Kill]),
+        new EntityCondition(new AdvancedConstructor(Enemy.NewEnemySpawner, new Vector2(1200, 0), Planet.GetOrbitalVelocity(new Vector2(1200, 0), Vector2.Zero, 20000), 0, true), [Condition.Kill]),
+        new EntityCondition(new AdvancedConstructor(Enemy.NewEnemySpawner, new Vector2(-1200, 0), Planet.GetOrbitalVelocity(new Vector2(-1200, 0), Vector2.Zero, 20000), 0, true), [Condition.Kill]),
+     ],
+     "War", "Defend the planet", 0.1f, Vector2.One, Mission.TierOne(), Mission.TierOneBosses(), RestartCutscene) { isAggressive = true },
+
     new Mission([new Planet(Vector2.Zero, Vector2.Zero, 10000, 8, true, Color.Cyan, false),
         new Planet(new Vector2(1000, 0), Planet.GetOrbitalVelocity(new Vector2(1000, 0), Vector2.Zero, 10000), 250, 1.5f, false, Color.Cyan) ],
         [ new EntityCondition(new EntityConstructor(Enemy.NewMothership, new Vector2(0, -8*50 - Assets.DimsOf(Sprite.Mothership).Y / 2), Vector2.Zero, 0f), [ Condition.Protect, Condition.CustomIncomplete ]),
@@ -39,7 +47,7 @@ public class EntityManager
         new EntityCondition(new PickupConstructor(ItemFactory.NewScrap, new Vector2(0, -8*50), new Vector2(-8, -4), -0.03f),[])],
         "Crash Landing",
         "A simple system with a large planet and one closely orbiting moon. Drone activity detected, but minimal.",
-        -1, new Vector2(0, -8*50 - Assets.DimsOf(Sprite.Mothership).Y / 2), Mission.TierOne(), Mission.TierOneBosses(), RestartCutscene) { playerProgression = 0, playerDocked = true, tip = "WASD to move, Space to dock and undock.\nRmb to collect scrap, Lmb to shoot." },
+        -1, new Vector2(0, -8*50 - Assets.DimsOf(Sprite.Mothership).Y / 2), Mission.TierOne(), Mission.TierOneBosses()) { playerProgression = 0, playerDocked = true, tip = "WASD to move, Space to dock and undock.\nRmb to collect scrap, Lmb to shoot." },
 
         new Mission( [new Planet(Vector2.Zero, Vector2.Zero, 3500, 4, true, Color.Cyan, true) ],
         [
@@ -382,7 +390,7 @@ public class EntityManager
         }
         return returnEntity;
     }
-    public Entity NearestEnemy(Entity entity, bool _getDeadEnemies = true)
+    public Entity NearestEnemy(Entity entity, bool _getDeadEnemies = false)
     {
         float maxDistSqr = StealthRange * StealthRange * StealthThreshold * StealthThreshold;
         float nearestDistance = float.MaxValue;
@@ -725,7 +733,7 @@ public class EntityManager
         actors.Add(t5);
         float ts = 0.2f;
         float trueTime = 0;
-        SoundEffectInstance computerSounds;
+        SoundEffectInstance computerSounds = null;
         //Ensure planets still orbit and render
         List<IEvent> events =
         [
@@ -863,7 +871,14 @@ public class EntityManager
                 var a = actors[(int)(time*9) + 19] as TextActor;
                 a.Index = a.Text.Length;
             }),
-            new Event(14 + ts * 12 + Engine.DeltaSeconds, 5, delegate(float time){ })
+            new TriggerEvent(19 + ts * 12 + Engine.DeltaSeconds, delegate(float time)
+            { 
+                foreach(var module in Engine.SaveGame.Player.modules)
+                {
+                    module.Value.isFailed = false;
+                }
+                computerSounds.Pause();
+            })
         ];
         scene = new Cutscene(events, actors, new PlayingGame());
         return scene;
