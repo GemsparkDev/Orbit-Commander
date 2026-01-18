@@ -66,7 +66,7 @@ public class PulseShot : Projectile
     {
         position += velocity * Engine.DeltaSeconds * 60;
         angle += angularVelocity * Engine.DeltaSeconds * 60;
-        Entity nearestEnemy = Engine.EntityManager.NearestEnemy(this);
+        Entity nearestEnemy = Engine.EntityManager.NearestEnemy(this, true);
         if(isHoming && nearestEnemy != null)
         {
             var relativePosition = Vector2.Normalize(nearestEnemy.position - position);
@@ -97,7 +97,7 @@ public class SpiralShot : Projectile
         time += Engine.DeltaSeconds;
         Vector2 posOffset = Util.ToUnitVector(angle) * MathF.Cos(time * 8 + offset);
         position += new Vector2(posOffset.Y, -posOffset.X);
-        EntityManager.Collide(this, Engine.EntityManager.NearestEnemy(this));
+        EntityManager.Collide(this, Engine.EntityManager.NearestEnemy(this, true));
     }
 }
 public class AssassinShot : Projectile

@@ -30,7 +30,7 @@ public abstract class Entity
     public ComponentList Components { get; } = new();
     public virtual float ColliderRadius
     {
-        get { return (texture.Height + texture.Width) / 4 + 1; }
+        get { return Engine.EnemyHitboxModifier * (texture.Height + texture.Width) / 4 + 1; }
     }
     protected ParticleEmitter collider;
     public Vector2 Size

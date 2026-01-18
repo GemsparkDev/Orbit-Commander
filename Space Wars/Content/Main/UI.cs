@@ -151,7 +151,7 @@ public static class UI
     public static int type = 1;
     public static Vector2[] resolutions = [ new Vector2(1920, 1080), new Vector2(640, 480) ];
     public static int selectedResolution = 0;
-    public static Modules[] setModules = [ Modules.Hull, Modules.GuidedRound, Modules.Engines, Modules.Sensors, Modules.CreateFighter ];
+    public static Modules[] setModules = [ Modules.Hull, Modules.Basic, Modules.Engines, Modules.Sensors, Modules.Assault ];
 
     //Hack menu
     public static Button HackButton { get; } = new Button(Vector2.Zero, Assets.Get(Sprite.Button), Assets.TextFont, "Hack", Color.Yellow);

@@ -94,13 +94,13 @@ public class Enemy : Entity
         {
             healthCD -= Engine.DeltaSeconds;
         }
-        float d = (health <= 0 ? 0.75f : 1f);
-        Color c = (isFriendly ? Engine.ColorScheme.FriendlyEnemy() : Engine.ColorScheme.HostileEnemy()) * d;
+        float d = (health <= 0 ? 0.5f : 1f); //Death dimming
+        Color c = (isFriendly ? Engine.ColorScheme.FriendlyEnemy() : Engine.ColorScheme.HostileEnemy()) * d; //Sets color based on friendlyness
         if (color != c)
         {
             Engine.WriteLine(color.B);
             float l = Util.FIED(0.025f);
-            color = new Color((byte)(color.R * l + c.R * (1f - l)), (byte)(color.G * l + c.G * (1f - l)), (byte)(color.B * l + c.B * (1f - l)), (byte)(c.A));
+            color = new Color((byte)(color.R * l + c.R * (1f - l)), (byte)(color.G * l + c.G * (1f - l)), (byte)(color.B * l + c.B * (1f - l)), (byte)(c.A)); //Lerp towards ideal color
         }
         base.Update();
     }
@@ -244,7 +244,7 @@ public class Enemy : Entity
          || position.X - Engine.Camera.Position.X - Size.X / 2 > halfSize.X || position.Y - Engine.Camera.Position.Y - Size.Y / 2 > halfSize.Y))
         {
             var pos = position - Engine.SaveGame.Player.position;
-            ParticleManager.Add(new Particle(Assets.Get(Sprite.Dot), pos / 50 + Engine.SaveGame.Player.position, 0, color * 0.75f));
+            ParticleManager.Add(new Particle(Assets.Get(Sprite.Dot), pos / 50 + Engine.SaveGame.Player.position, 0, color * 0.67f));
         }
         base.Draw(_spriteBatch);
     }
@@ -393,67 +393,71 @@ public class Enemy : Entity
             {
                 missileCooldown -= Engine.DeltaSeconds;
             }
-            float speed = (Player.position - position).Length() / 75;
-            float timeToHit;
-            float prevTimeToHit = 0;
-            Vector2 playerIterativePosition = Player.position;
-            for (int i = 0; i < 5; i++)
+            var nearestEnemy = Engine.EntityManager.NearestEnemy(this);
+            if(nearestEnemy != null)
             {
-                timeToHit = MathF.Sqrt(EntityManager.DistanceSqr(position, playerIterativePosition)) / (8);
-                playerIterativePosition += (Player.velocity - velocity) * (timeToHit - prevTimeToHit);
-                prevTimeToHit = timeToHit;
-            }
-            targetVector = playerIterativePosition - position;
-            targetAngle = MathF.Atan2(targetVector.X, -targetVector.Y);
-            Vector2 gravityForce = GetNormalizedAcceleration();
-            float theta = MathF.Atan2(gravityForce.Y, gravityForce.X);
-
-            GoToPosition(Player.position + 100 * new Vector2(MathF.Cos(theta), MathF.Sin(theta)), speed);
-            if (!hasLaunchedAllies && ((float)health / (float)maxHealth < 0.5f))
-            {
-                hasLaunchedAllies = !hasLaunchedAllies;
-                Engine.EntityManager.Add(NewShield(this, 12, 25, 0, 0));
-                SoundManager.PlaySound(Assets.Get(Sound.MissileFire), position);
-            }
-            if (EntityManager.DistanceSqr(this, Player) < 500 * 500)
-            {
-                velocity += gravityForce * Engine.DeltaSeconds * 60;
-                if (cd[0] <= 0 && missileCooldown > 0)
+                float speed = (nearestEnemy.position - position).Length() / 75;
+                float timeToHit;
+                float prevTimeToHit = 0;
+                Vector2 playerIterativePosition = nearestEnemy.position;
+                for (int i = 0; i < 5; i++)
                 {
-                    if (bulletCount < 2)
-                    {
-                        cd[0] = 0.1f;
-                        bulletCount += 1;
-                    }
-                    else
-                    {
-                        cd[0] = (float)maxHealth / (maxHealth * 2 - health);
-                        bulletCount = 0;
-                    }
-                    Vector2 direction = Util.ToUnitVector(angle);
-                    Engine.EntityManager.Add(new PulseShot(position, velocity + direction * 8, angle, 0, false, damage, true));
-                    SoundManager.PlaySound(Assets.Get(Sound.PulseFire), position);
+                    timeToHit = MathF.Sqrt(EntityManager.DistanceSqr(position, playerIterativePosition)) / (8);
+                    playerIterativePosition += (nearestEnemy.velocity - velocity) * (timeToHit - prevTimeToHit);
+                    prevTimeToHit = timeToHit;
                 }
-                else if (missileCooldown < 0)
+                targetVector = playerIterativePosition - position;
+                targetAngle = MathF.Atan2(targetVector.X, -targetVector.Y);
+                Vector2 gravityForce = GetNormalizedAcceleration();
+                float theta = MathF.Atan2(gravityForce.Y, gravityForce.X);
+
+                GoToPosition(nearestEnemy.position + 100 * new Vector2(MathF.Cos(theta), MathF.Sin(theta)), speed);
+                if (!hasLaunchedAllies && ((float)health / (float)maxHealth < 0.5f))
                 {
-                    if (missileCount < 3 - (int)(3 * health / maxHealth))
-                    {
-                        cd[0] += 0.25f;
-                        missileCount += 1;
-                        missileCooldown = 0.25f;
-                    }
-                    else
-                    {
-                        cd[0] += 2f;
-                        missileCount = 0;
-                        missileCooldown = 10;
-                    }
-                    Vector2 direction = Util.ToUnitVector(angle + MathF.PI / 2 + MathF.PI * missileCount);
-                    Engine.EntityManager.Add(NewMissile(position, direction * 2 + velocity, angle, isFriendly));
+                    hasLaunchedAllies = !hasLaunchedAllies;
+                    Engine.EntityManager.Add(NewShield(this, 12, 25, 0, 0));
                     SoundManager.PlaySound(Assets.Get(Sound.MissileFire), position);
                 }
+                if (EntityManager.DistanceSqr(this, nearestEnemy) < 500 * 500)
+                {
+                    velocity += gravityForce * Engine.DeltaSeconds * 60;
+                    if (cd[0] <= 0 && missileCooldown > 0)
+                    {
+                        if (bulletCount < 2)
+                        {
+                            cd[0] = 0.1f;
+                            bulletCount += 1;
+                        }
+                        else
+                        {
+                            cd[0] = (float)maxHealth / (maxHealth * 2 - health);
+                            bulletCount = 0;
+                        }
+                        Vector2 direction = Util.ToUnitVector(angle);
+                        Engine.EntityManager.Add(new PulseShot(position, velocity + direction * 8, angle, 0, isFriendly, damage, true));
+                        SoundManager.PlaySound(Assets.Get(Sound.PulseFire), position);
+                    }
+                    else if (missileCooldown < 0)
+                    {
+                        if (missileCount < 3 - (int)(3 * health / maxHealth))
+                        {
+                            cd[0] += 0.25f;
+                            missileCount += 1;
+                            missileCooldown = 0.25f;
+                        }
+                        else
+                        {
+                            cd[0] += 2f;
+                            missileCount = 0;
+                            missileCooldown = 10;
+                        }
+                        Vector2 direction = Util.ToUnitVector(angle + MathF.PI / 2 + MathF.PI * missileCount);
+                        Engine.EntityManager.Add(NewMissile(position, direction * 2 + velocity, angle, isFriendly));
+                        SoundManager.PlaySound(Assets.Get(Sound.MissileFire), position);
+                    }
+                }
+                RotateTowards(targetAngle);
             }
-            RotateTowards(targetAngle);
             LowerCooldown();
 
             if (health <= 0)
@@ -475,13 +479,16 @@ public class Enemy : Entity
                 }
                 isExpired = true;
                 SoundManager.PlaySound(Assets.Get(Sound.Death), position);
-                if (Engine.SaveGame.GiveWeapon)
+                if(!isFriendly)
                 {
-                    Engine.EntityManager.Add(new Missile() { position = this.position, velocity = GetNormalizedAcceleration() * 10, angularVelocity = this.angularVelocity });
-                }
-                else
-                {
-                    Engine.EntityManager.Add(new SummonShield() { position = this.position, velocity = GetNormalizedAcceleration() * 10, angularVelocity = this.angularVelocity });
+                    if (Engine.SaveGame.GiveWeapon)
+                    {
+                        Engine.EntityManager.Add(new Missile() { position = this.position, velocity = GetNormalizedAcceleration() * 10, angularVelocity = this.angularVelocity });
+                    }
+                    else
+                    {
+                        Engine.EntityManager.Add(new SummonShield() { position = this.position, velocity = GetNormalizedAcceleration() * 10, angularVelocity = this.angularVelocity });
+                    }
                 }
             }
             velocity *= 0.8f;
@@ -2643,7 +2650,7 @@ public class Enemy : Entity
                 float distSqr = EntityManager.DistanceSqr(this, nearestEnemy);
                 if (distSqr > 500 * 500)
                 {
-                    GoToPosition(nearestEnemy.position, 1.5f);
+                    GoToPosition(nearestEnemy.position, 2.5f);
                 }
                 else if (distSqr < 75 * 75)
                 {
@@ -2695,7 +2702,7 @@ public class Enemy : Entity
                 targetAngle = MathF.Atan2(targetVector.X, -targetVector.Y);
                 if (EntityManager.DistanceSqr(this, nearestEnemy) > 400 * 400)
                 {
-                    GoToPosition(nearestEnemy.position, 2);
+                    GoToPosition(nearestEnemy.position, 3);
                 }
                 else
                 {
@@ -4327,7 +4334,7 @@ public class Enemy : Entity
             if (cd[0] <= 0)
             {
                 int enemyType = Util.Random.Next(1, 4);
-                cd[0] = enemyType;
+                cd[0] = enemyType * 2;
                 switch (enemyType)
                 {
                     case 1:
