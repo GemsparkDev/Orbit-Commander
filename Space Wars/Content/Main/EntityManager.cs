@@ -724,10 +724,11 @@ public class EntityManager
         Vector2 screen = Engine.ScreenSize / 2;
         var t5 = new TextActor(new Vector2(50, 260) * 3 - screen, "Failed\nFailed\nFailed\nFailed\nFailed\n")
         {
-            TextSize = 1.5f * UIManager.UIScale,
+            TextSize = 1.45f * UIManager.UIScale,
             TextColor = Color.Red
         };
         var floppy = new Actor(Assets.Get(Sprite.Floppy), new Vector2(Engine.BackBuffer.X * 4 / 5, Engine.BackBuffer.Y), Color.Gray, MathF.PI / 8) { Scale = UIManager.UIScale };
+        var floppyFlat = new Actor(Assets.Get(Sprite.FloppyFlat), new Vector2(Engine.BackBuffer.X * 4 / 5, Engine.BackBuffer.Y), Color.White, 0) { Scale = UIManager.UIScale };
         var floppyVel = Vector2.Zero;
         float floppyAngVel = Util.OneToNegOne();
         var inserter = new Actor(Assets.Get(Sprite.Terminal), Engine.BackBuffer / 2, Color.White, 0) { Scale = UIManager.UIScale };
@@ -812,7 +813,14 @@ public class EntityManager
                 floppy.Position += floppyVel;
                 floppy.Angle += floppyAngVel * Engine.DeltaSeconds;
             }),
-            new Event(8 + ts * 5, ts * 10, delegate (float time)
+            new Event(8 + ts * 4 + Engine.DeltaSeconds,2,delegate(float time)
+            {
+                floppyFlat.Position = inserter.Position + (new Vector2(94, 189) - Assets.DimsOf(Sprite.Terminal) / 2) * UIManager.UIScale;
+                floppyFlat.Color = Color.White * ((2f - time)/2f);
+                Engine.Self.QueueShaderException(inserter);
+                Engine.Self.QueueShaderException(floppyFlat);
+            }),
+            new Event(10 + ts * 5, ts * 10, delegate (float time)
             {
                 if(time/ts - Math.Truncate(time/ts) <= Engine.DeltaSeconds/ts && time > ts * 5)
                 {
@@ -821,7 +829,7 @@ public class EntityManager
                 var a = actors[(int)(time/ts) + 8] as TextActor;
                 a.Index = a.Text.Length;
             }),
-            new Event(8 + ts * 11, 6, delegate (float time)
+            new Event(10 + ts * 11, 6, delegate (float time)
             {
                 if(time - Math.Truncate(time) <= Engine.DeltaSeconds && time > 0.5f)
                 {
@@ -829,7 +837,7 @@ public class EntityManager
                     SoundManager.PlayGlobalSound(Assets.Get(Sound.Beep));
                 }
             }),
-            new TriggerEvent(14 + ts * 12, delegate(float time)
+            new TriggerEvent(16 + ts * 12, delegate(float time)
             {
                 scene.IsPaused = true;
                 for(ModuleType i = 0; i < (ModuleType)5; i++)
@@ -840,7 +848,7 @@ public class EntityManager
                 var a = actors[18] as TextActor;
                 a.Index = a.Text.Length;
             }),
-            new Event(14 + ts * 12, Engine.DeltaSeconds, delegate(float time)
+            new Event(16 + ts * 12, Engine.DeltaSeconds, delegate(float time)
             {
                 bool notReady = UI.RestartSwitch.Intervals[0] < 0.95f;
                 foreach(var module in Engine.SaveGame.Player.modules)
@@ -858,7 +866,7 @@ public class EntityManager
                     }
                 }
             }),
-            new Event(0, 14 + ts*12 + Engine.DeltaSeconds, delegate(float time)
+            new Event(0, 16 + ts*12 + Engine.DeltaSeconds, delegate(float time)
             {
                 Engine.SaveGame.Player.Update();
                 if(Input.NewState.IsKeyDown(Keys.Z))
@@ -872,12 +880,12 @@ public class EntityManager
                     Engine.Self.Rotate(-1, true);
                 }
             }),
-            new Event(14 + ts * 12 + Engine.DeltaSeconds, 2f, delegate (float time)
+            new Event(16 + ts * 12 + Engine.DeltaSeconds, 2f, delegate (float time)
             {
                 var a = actors[(int)(time*9) + 19] as TextActor;
                 a.Index = a.Text.Length;
             }),
-            new TriggerEvent(19 + ts * 12 + Engine.DeltaSeconds, delegate(float time)
+            new TriggerEvent(21 + ts * 12 + Engine.DeltaSeconds, delegate(float time)
             { 
                 foreach(var module in Engine.SaveGame.Player.modules)
                 {
