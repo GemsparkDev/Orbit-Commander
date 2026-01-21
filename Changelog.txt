@@ -3,66 +3,68 @@
 Lagrange Commander is a game made using C# in monogame. It is a 2D top down wave based shooter where you must repair and upgrade your ship by salvaging from enemies you defeat. It features realistic N-Body gravitation, which affects all entities and projectiles.
   
 # Changelog
-0.7.2.6 - 1/19/2025
+0.7.2.7 - 1/20/2026
+ - Removed screen zoom in effect.
+0.7.2.6 - 1/19/2026
  - Added a sprite for inserting the floppy to the RestartCutscene.
-0.7.2.5 - 1/18/2025
+0.7.2.5 - 1/18/2026
  - Updated the sprite for the side panel menu.
-0.7.2.4 - 1/17/2025
+0.7.2.4 - 1/17/2026
  - Added additional troops to the War mission.
  - Reduced the color strength of dead enemies and nearby friendly dots.
  - Increased the movement speed of the carrier and sniper.
-0.7.2.3 - 1/16/2025
+0.7.2.3 - 1/16/2026
  - Fixed an issue where the CreateFighter module did not lower it's cooldown.
  - Fixed an issue where the player modules stayed failed after the RestartCutscene.
  - Fixed an issue where the computer sounds continued to play after the RestartCutscene.
  - Friendly SurgeChilds now regenerate when friendly and dodge bullets.
  - Added a enemy vs enemy example mission.
  - Carriers and Snipers are now enemy agnostic.
-0.7.2.2 - 1/15/2025
+0.7.2.2 - 1/15/2026
  - Added additional text after restarting for the RestartCutscene.
  - Added computer sounds to the RestartCutscene.
-0.7.2.1 - 1/14/2025
+0.7.2.1 - 1/14/2026
  - Added new floppy disk sprite.
  - Added a special Shader Override function for rendering.
  - The floppy disk and inserter now no longer see the shader.
-0.7.2.0 - 1/13/2025
+0.7.2.0 - 1/13/2026
  - Added a module restart section to the RestartCutscene.
  - The RestartCutscene now pushes text up at the halfway point.
-0.7.1.9 - 1/12/2025
+0.7.1.9 - 1/12/2026
  - Added additional text to the RestartCutscene.
-0.7.1.8 - 1/11/2025
+0.7.1.8 - 1/11/2026
  - Cutscenes can now be paused.
  - Developed the RestartCutscene.
-0.7.1.7 - 1/10/2025
+0.7.1.7 - 1/10/2026
  - Added a new TextActor for cutscenes.
-0.7.1.6 - 1/9/2025
+0.7.1.6 - 1/9/2026
  - Added two moons to the Gas Giant mission.
  - Dead entities in the core of gas giants are now removed.
-0.7.1.5 - 1/8/2025
+0.7.1.5 - 1/8/2026
  - Added another gas giant mission.
  - The Gas Giant mission is now called the Ice Giant, and has a -20 temperature.
  - Fixed an issue where the Engineer made friendly constructs when hostile.
  - Fixed an issue where hostile constructs did not target the player.
  - Added a RingOffset parameter to planets for rings.
  - Increased the FlameBolt cooldown time to 0.1 seconds, from 0.05 seconds.
-0.7.1.4 - 1/7/2025
+0.7.1.4 - 1/7/2026
  - Added a sprite to the Hunter enemy.
-0.7.1.3 - 1/6/2025
+0.7.1.3 - 1/6/2026
  - Added the ThermalShield module.
  - The Turtle module cooldown is now based on getting hit rather than shooting.
  - Increased the Stealth module damage resistance.
  - The FlameBolt now hits enemies equally in it's radius.
-0.7.1.2 - 1/5/2025
+0.7.1.2 - 1/5/2026
  - The Binary System mission now has a cold planet and a hot planet.
-0.7.1.1 - 1/4/2025
+0.7.1.1 - 1/4/2026
  - The Decoy enemy now tries to target nearby enemies.
  - The Pursuer boss now drops the GuidedRound module.
  - Tweaked the Pursuer boss tracking projectile speed and sprite.
-0.7.1.0 - 1/3/2025
+0.7.1.0 - 1/3/2026
  - Added the GuidedRound module.
-0.7.0.9 - 1/2/2025
+0.7.0.9 - 1/2/2026
  - Added a new attack to the Pursuer boss.
-0.7.0.8 - 1/1/2025
+0.7.0.8 - 1/1/2026
  - The Expose module can now generate fire auras when pressing shift.
  - The Expose module can now remove it's aura early to regain cooldown.
 0.7.0.7 - 12/31/2025

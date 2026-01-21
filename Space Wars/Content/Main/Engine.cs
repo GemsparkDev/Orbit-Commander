@@ -281,12 +281,8 @@ public class Engine : Game
         //Render renderTarget with custom bloom shader
         GraphicsDevice.SetRenderTarget(null);
         GraphicsDevice.Clear(new Color(50, 50, 50));
-        spriteBatch.Begin();
-        spriteBatch.Draw(Assets.Get(Sprite.Underlay), BackBuffer / 2 + offset, null, Color.White, 0, Assets.DimsOf(Sprite.Underlay) / 2, 1.18f, 0, 0);
-        spriteBatch.End();
         spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, null, null, Assets.GlobalShader);
-        float scale = 0.95f;
-        spriteBatch.Draw(renderTarget, new Rectangle((int)(BackBuffer.X / 2 * (1-scale) + offset.X), (int)(BackBuffer.Y / 2 * (1 - scale)), (int)(BackBuffer.X * scale), (int)(BackBuffer.Y * scale)), Color.White);
+        spriteBatch.Draw(renderTarget, new Rectangle((int)(offset.X), 0, (int)(BackBuffer.X), (int)(BackBuffer.Y)), Color.White);
         spriteBatch.End();
 
         spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, null, null, null);

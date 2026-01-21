@@ -576,7 +576,6 @@ public class Player : Entity
                 smokeParticles.Update();
             }
         }
-        //Prevents unusual interations between various game states
         if (EventHandler.AcknowledgeMessage(Message.ToggleTerminal))
         {
             if (dockedEntity != null)

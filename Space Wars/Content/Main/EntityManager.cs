@@ -731,7 +731,6 @@ public class EntityManager
         var floppyFlat = new Actor(Assets.Get(Sprite.FloppyFlat), new Vector2(Engine.BackBuffer.X * 4 / 5, Engine.BackBuffer.Y), Color.White, 0) { Scale = UIManager.UIScale };
         var floppyVel = Vector2.Zero;
         float floppyAngVel = Util.OneToNegOne();
-        var inserter = new Actor(Assets.Get(Sprite.Terminal), Engine.BackBuffer / 2, Color.White, 0) { Scale = UIManager.UIScale };
         List<IActor> actors = [];
         for (int i = 0; i < text.Count; i++)
         {
@@ -744,6 +743,10 @@ public class EntityManager
         //Ensure planets still orbit and render
         List<IEvent> events =
         [
+            new TriggerEvent(0, delegate(float time)
+            {
+                Engine.UIManager.ScreenWindow = UI.CutsceneGlobalMenu;
+            }),
             new EndlessEvent(delegate(float time)
             {
                 trueTime += Engine.DeltaSeconds;
@@ -751,6 +754,10 @@ public class EntityManager
                 {
                     computerSounds = Assets.Get(Sound.ComputerSounds).CreateInstance();
                     computerSounds.Play();
+                }
+                if(EventHandler.AcknowledgeMessage(Message.ToggleTerminal))
+                {
+                    UI.FloppyTerminal.enabled = !UI.FloppyTerminal.enabled;
                 }
             }),
             new Event(0, ts * 3, delegate (float time)
@@ -768,9 +775,10 @@ public class EntityManager
                 var a = actors[7] as TextActor;
                 a.Index = a.Text.Length;
                 scene.IsPaused = true;
-                if(Input.OldMouseState.LeftButton == ButtonState.Pressed && Vector2.Distance(floppy.Position, inserter.Position) < 100)
+                if(Input.OldMouseState.LeftButton == ButtonState.Pressed && MathF.Abs(UI.FloppyTerminal.position.X - floppy.Position.X - 25) < 200 && MathF.Abs(UI.FloppyTerminal.position.Y + 175 - floppy.Position.Y) < 75)
                 {
                     floppy.Color = Color.White * (MathF.Sin(Engine.Time * 4) / 8 + 0.875f);
+                    floppy.Angle = MathF.Sin(Engine.Time * 5) / 20;
                     if(Input.NewMouseState.LeftButton == ButtonState.Released)
                     {
                         scene.IsPaused = false;
@@ -780,7 +788,6 @@ public class EntityManager
                 {
                     floppy.Color = Color.White;
                 }
-                Engine.Self.QueueShaderException(inserter);
             }),
             new Event(0, 8 + ts * 4 + Engine.DeltaSeconds, delegate(float time) //Render floppy overtop of inserter
             {
@@ -815,9 +822,8 @@ public class EntityManager
             }),
             new Event(8 + ts * 4 + Engine.DeltaSeconds,2,delegate(float time)
             {
-                floppyFlat.Position = inserter.Position + (new Vector2(94, 189) - Assets.DimsOf(Sprite.Terminal) / 2) * UIManager.UIScale;
+                floppyFlat.Position = UI.FloppyTerminal.position + (new Vector2(94, 189) - Assets.DimsOf(Sprite.Terminal) / 2) * UIManager.UIScale;
                 floppyFlat.Color = Color.White * ((2f - time)/2f);
-                Engine.Self.QueueShaderException(inserter);
                 Engine.Self.QueueShaderException(floppyFlat);
             }),
             new Event(10 + ts * 5, ts * 10, delegate (float time)
@@ -892,6 +898,8 @@ public class EntityManager
                     module.Value.isFailed = false;
                 }
                 computerSounds.Pause();
+                Engine.UIManager.ScreenWindow = UI.GlobalMenu;
+                UI.FloppyTerminal.enabled = false;
             })
         ];
         scene = new Cutscene(events, actors, new PlayingGame());

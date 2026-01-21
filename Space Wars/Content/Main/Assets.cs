@@ -121,6 +121,8 @@ public static class Assets
         Sprites.Add(Sprite.LidarReal, Content.Load<Texture2D>("Images/UI_43"));
         Sprites.Add(Sprite.Floppy, Content.Load<Texture2D>("Images/UI_44"));
         Sprites.Add(Sprite.FloppyFlat, Content.Load<Texture2D>("Images/UI_45"));
+        Sprites.Add(Sprite.RightSideOpen, Content.Load<Texture2D>("Images/UI_46"));
+        Sprites.Add(Sprite.DeadFile, Content.Load<Texture2D>("Images/UI_47"));
 
         //Projectiles
         Sprites.Add(Sprite.SpiralShot, Content.Load<Texture2D>("Images/Projectile_0"));

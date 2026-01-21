@@ -197,6 +197,8 @@ public enum Sprite
     Overlay,
     Floppy,
     FloppyFlat,
+    RightSideOpen,
+    DeadFile,
 
     SmeltIcon,
     RepairIcon,
