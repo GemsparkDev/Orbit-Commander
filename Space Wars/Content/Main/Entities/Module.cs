@@ -211,14 +211,15 @@ public class Turtle() : Module(Modules.Turtle)
     ParticleEmitter effect = new ParticleEmitter(Assets.Get(Sprite.Dot), Vector2.Zero, 10, Color.Orange) { sprayAngle = MathF.PI / 2};
     public override int OnCollide(int _damage)
     {
-        cooldown = 1;
+        float dr = 0.5f * ((1 - cooldown / 5) * (1 - cooldown / 5) + 0.5f);
+        cooldown = 5;
         Engine.SaveGame.Player.Reveal(1);
-        return (int)(_damage * 2 * (1 - (1 - cooldown) * (1 - cooldown)));
+        return (int)(_damage * dr);
     }
     public override void OnUpdate()
     {
         UI.PlayerSpecialHealth.Colors[0] = Color.Orange;
-        UI.PlayerSpecialHealth.SetInterval((1 - cooldown) * (1 - cooldown), 1);
+        UI.PlayerSpecialHealth.SetInterval(1-(1 - cooldown/5) * (1 - cooldown/5), 1);
         time += Engine.DeltaSeconds;
         if (time > 1)
         {
@@ -239,7 +240,7 @@ public class Turtle() : Module(Modules.Turtle)
         {
             effect.sprayCone = MathF.Tau * (1 - time);
         }
-        effect.particleColor = Color.Orange * (1 - cooldown) * (1 - cooldown);
+        effect.particleColor = Color.Orange * (1 - (1 - cooldown / 5) * (1 - cooldown / 5));
         effect.Update();
         base.OnUpdate();
     }
@@ -260,7 +261,7 @@ public class Ablative() : Module(Modules.Ablative)
     }
     public override void OnUpdate()
     {
-        UI.PlayerSpecialHealth.Colors[0] = Color.White;
+        UI.PlayerSpecialHealth.Colors[0] = Color.Cyan;
         UI.PlayerSpecialHealth.SetInterval(buffer, 25f);
         if (cooldown <= 0 && buffer < 25)
         {
@@ -1327,9 +1328,9 @@ public class Assault() : Module(Modules.Assault)
     {
         if(resistanceCooldown > 0)
         {
-            return damage * 4 / 5;
+            return _damage * 4 / 5;
         }
-        return damage;
+        return _damage;
     }
     public override void OnUpdate()
     {

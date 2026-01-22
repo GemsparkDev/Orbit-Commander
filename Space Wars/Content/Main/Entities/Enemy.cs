@@ -52,9 +52,12 @@ public class Enemy : Entity
     }
     public override void Update()
     {
-        enemyRange.isEmitterActive = Engine.DebugMode;
-        enemyRange.position = position;
-        enemyRange.Update();
+        if(health > 0)
+        {
+            enemyRange.isEmitterActive = Engine.DebugMode;
+            enemyRange.position = position;
+            enemyRange.Update();
+        }
 
         if (angle - targetAngle >= Math.PI)
         {
@@ -94,11 +97,15 @@ public class Enemy : Entity
         {
             healthCD -= Engine.DeltaSeconds;
         }
-        float d = (health <= 0 ? 0.5f : 1f); //Death dimming
+        float d = (health <= 0 ? 0.67f : 1f); //Death dimming
         Color c = (isFriendly ? Engine.ColorScheme.FriendlyEnemy() : Engine.ColorScheme.HostileEnemy()) * d; //Sets color based on friendlyness
+        if(health <= 0)
+        {
+            c = Color.Gray; //Color change to signify death
+            isFriendly = !Engine.SaveGame.Player.isFriendly;
+        }
         if (color != c)
         {
-            Engine.WriteLine(color.B);
             float l = Util.FIED(0.025f);
             color = new Color((byte)(color.R * l + c.R * (1f - l)), (byte)(color.G * l + c.G * (1f - l)), (byte)(color.B * l + c.B * (1f - l)), (byte)(c.A)); //Lerp towards ideal color
         }
@@ -187,7 +194,7 @@ public class Enemy : Entity
             }
             else
             {
-                velocity += new Vector2(Util.OneToNegOne(), Util.OneToNegOne()) + Vector2.Normalize(position - Player.position) * 0.15f * (float)damage;
+                velocity += new Vector2(Util.OneToNegOne(), Util.OneToNegOne()) + Vector2.Normalize(position - Player.position) * 0.3f * (float)damage;
                 angularVelocity += Util.OneToNegOne()*0.05f * (float)damage;
             }
             ApplyWork(damage);
@@ -195,6 +202,7 @@ public class Enemy : Entity
             health -= damage;
             Engine.ShakeScreen(10 / ((position - Engine.Camera.Position).Length() + 200) * damage);
             ParticleManager.Add(new Particle(null, 1, position + new Vector2(0, -1), new Vector2(0, -1.5f), 0, 0, Color.Orange, new Color(255, 0, 0, 0)) { drawText = $"{damage}" });
+            ParticleManager.Add(new Particle(Assets.Get(Sprite.Glow), 0.33f, position, Vector2.Zero, 0, 0, Color.Wheat, Color.Transparent));
             revealDuration = Math.Max(revealDuration, 0.3f * MathF.Sqrt(damage));
             return true;
         }
@@ -271,7 +279,7 @@ public class Enemy : Entity
                     hasExploded = true;
                     SoundManager.PlaySound(Assets.Get(Sound.Death), position);
                 }
-                velocity *= Util.FIED(0.1f);
+                velocity *= Util.FIED(0.05f);
                 angularVelocity *= Util.FIED(0.1f);
             }
             if (mineTime > MathF.Sqrt((float)(maxHealth) / 8))
@@ -2867,15 +2875,10 @@ public class Enemy : Entity
         hitSound = Assets.Get(Sound.ShieldHit);
         while (true)
         {
-            if (parent == null)
-            {
-                isExpired = true;
-                yield return 0;
-            }
             angle = parent.angle + theta;
             position = parent.position + new Vector2(MathF.Sin(angle), -MathF.Cos(angle)) * distance;
             velocity = parent.velocity;
-            if(parent.isExpired)
+            if(parent.isExpired || (parent as Enemy != null && (parent as Enemy).health <= 0))
             {
                 isExpired = true;
                 parent = null;

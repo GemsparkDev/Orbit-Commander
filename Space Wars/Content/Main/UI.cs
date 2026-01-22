@@ -31,6 +31,7 @@ public static class UI
     public static Screen CutsceneGlobalMenu { get; } = new Screen() { enabled = true };
     public static Window HackMenu { get; } = new Window(center, Assets.Get(Sprite.LargePanel));
     public static Window FloppyTerminal { get; } = new Window(new Vector2(0, center.Y), Assets.Get(Sprite.Terminal)) { alignment = Alignment.Left };
+    public static Window FuseMenu { get; } = new Window(new Vector2(BackBuffer.X, center.Y), Assets.Get(Sprite.Terminal)) { alignment = Alignment.Right };
 
     //Main Menu
     public static Button PatchedConicsToggle { get; } = new Button(new Vector2(0, -MainMenu.Size.Y / 4), Assets.Get(Sprite.WideButton), Assets.TextFont, $"Patched Conics: {PatchedConics}", Color.White);
@@ -81,7 +82,7 @@ public static class UI
     public static Slider EnemySlider { get; } = new Slider(Engine.Line, new Vector2(0, -PlayerMenu.Size.Y / 3), new Vector2(50, 2), true, [Color.White, Color.Gray]);
     public static Decal WaveText { get; } = new Decal(new Vector2(-20, 0), Assets.TextFont, "0", Color.White, 10);
     public static Decal EnemiesLeft { get; } = new Decal(new Vector2(0, 0), Assets.TextFont, "0", Color.Red, 10);
-    public static Decal Overlay { get; } = new Decal(new Vector2(7.5f, 37.5f), Assets.Get(Sprite.Overlay)) { color = Color.White * 0.5f };
+    public static Decal Overlay { get; } = new Decal(new Vector2(-10.5f, 49f), Assets.Get(Sprite.Overlay)) { color = Color.White * 0.5f };
 
     //Mission Select Menu
     public static Decal MissionName { get; } = new Decal(new Vector2(0, -30), Assets.TextFont, "Name", Color.White, 10);
@@ -113,6 +114,7 @@ public static class UI
 
     //Global Menu
     public static Button GlobalSidePanelOpen { get; } = new Button(Vector2.Zero, Assets.Get(Sprite.ToggleButton));
+    public static Button GlobalFusePanelOpen { get; } = new Button(Vector2.Zero, Assets.Get(Sprite.RightSideOpen));
     public static Decal Timer { get; } = new Decal(new Vector2(-50, 0), Assets.TextFont, $"{Engine.IngameTime.DrawText}", Color.White, 10);
     public static Slider PlayerHealth { get; } = new Slider(Line, new Vector2(5, 5), new Vector2(150, 15), true, [Color.Red, Color.White, new Color(0.2f, 0.2f, 0.2f)]);
     public static Slider PlayerSpecialHealth { get; } = new Slider(Line, new Vector2(5, 5), new Vector2(150, 15), true, [Color.Transparent, Color.Transparent]);
@@ -134,14 +136,14 @@ public static class UI
     public static Decal UpgradeText { get; } = new Decal(new Vector2(-30, -20), Assets.TextFont, "", Color.White, 10);
 
     //Repair Menu
-    public static Slider RestartSlider { get; } = new Slider(Engine.Line, new Vector2(-100 + Engine.BackBuffer.X / 2, 50), new Vector2(50, 2), true, [Color.Cyan, Color.Black]);
+    public static Slider RestartSlider { get; } = new Slider(Engine.Line, new Vector2(-100, 50), new Vector2(50, 2), true, [Color.Cyan, Color.Black]);
     public static Decal[] StatusLights { get; } = new Decal[5];
-    public static Slider RestartSwitch { get; } = new Slider(Engine.Line, new Vector2(-100 + Engine.BackBuffer.X / 2, 0), Assets.DimsOf(Sprite.SwitchOne) + new Vector2(2, 4), false, [Color.Transparent, Color.Transparent]);
-    public static Decal Switch { get; } = new Decal(RestartSwitch.Offset + new Vector2(RestartSwitch.Size.X - Engine.BackBuffer.X / 2, 0), Assets.Get(Sprite.SwitchFive));
-    public static Decal FuseCounter { get; } = new Decal(new Vector2(-60 + Engine.BackBuffer.X / 2, -55), Assets.TextFont, "0", Color.Yellow, 10);
+    public static Slider RestartSwitch { get; } = new Slider(Engine.Line, new Vector2(0, 0), Assets.DimsOf(Sprite.SwitchOne) + new Vector2(2, 4), false, [Color.Transparent, Color.Transparent]);
+    public static Decal Switch { get; } = new Decal(RestartSwitch.Offset, Assets.Get(Sprite.SwitchFive));
+    public static Decal FuseCounter { get; } = new Decal(new Vector2(-60, -55), Assets.TextFont, "0", Color.Yellow, 10);
     public static Button[,] Fuses { get; } = new Button[4, 5];
     public static Decal[] ModuleIcons { get; } = new Decal[5];
-    public static Decal FragilityTextbox { get; } = new Decal(new Vector2(Engine.BackBuffer.X / 2, -55), Assets.TextFont, "Fuse Fragility: Med", Color.Yellow, 6);
+    public static Decal FragilityTextbox { get; } = new Decal(new Vector2(0, -55), Assets.TextFont, "Fuse Fragility: Med", Color.Yellow, 6);
 
     //Misc
     public static Button SidePanelClose { get; } = new Button(new Vector2(Assets.Get(Sprite.Terminal).Width / 2 - Assets.Get(Sprite.ToggleButton).Width / 2, 0), Assets.Get(Sprite.ToggleButton));
@@ -153,11 +155,16 @@ public static class UI
     public static int type = 1;
     public static Vector2[] resolutions = [ new Vector2(1920, 1080), new Vector2(640, 480) ];
     public static int selectedResolution = 0;
-    public static Modules[] setModules = [ Modules.Hull, Modules.Basic, Modules.Engines, Modules.Sensors, Modules.Assault ];
+    public static Modules[] setModules = [ Modules.Ablative, Modules.Basic, Modules.Work, Modules.Sensors, Modules.Assault ];
 
     //Hack menu
     public static Button HackButton { get; } = new Button(Vector2.Zero, Assets.Get(Sprite.Button), Assets.TextFont, "Hack", Color.Yellow);
     public static Slider HackTimer { get; } = new Slider(Engine.Line, new Vector2(0, 50), new Vector2(50, 2), true, [Color.Yellow, new Color(0.1f, 0.1f, 0.1f)]);
+
+    //Restart Terminal
+    public static Decal DeadFile { get; } = new Decal(new Vector2(-10, 0), Assets.Get(Sprite.DeadFile));
+
+    public static Button FuseMenuClose { get; } = new Button(new Vector2(-Assets.Get(Sprite.Terminal).Width / 2 + Assets.Get(Sprite.ToggleButton).Width / 2, 0), Assets.Get(Sprite.RightSideOpen));
 
     public static void AddUIElements()
     {
@@ -279,7 +286,17 @@ public static class UI
         RestartSwitch.SetInterval(1, 1);
 
         GlobalSidePanelOpen.AddBehaviour(EventHandler.ToggleDockingMenus);
+        GlobalFusePanelOpen.AddBehaviour(delegate () 
+        { 
+            SoundManager.PlayGlobalSound(Assets.Get(Sound.Interact));
+            FuseMenu.enabled = true;
+        });
         SidePanelClose.AddBehaviour(EventHandler.ToggleDockingMenus);
+        FuseMenuClose.AddBehaviour(delegate ()
+        {
+            SoundManager.PlayGlobalSound(Assets.Get(Sound.Interact));
+            FuseMenu.enabled = false;
+        });
         PrevMission.AddBehaviour(delegate () { Engine.SaveGame.PrevMission(); }); //Do not remove outer delegate
         NextMission.AddBehaviour(delegate() { Engine.SaveGame.NextMission(); }); //Doing so causes exception due to null savegame
         SelectMission.AddBehaviour(delegate () { if ((Engine.SaveGame.CurrentMission.relaunchable || !Engine.SaveGame.CurrentMissionCompleted) && EventHandler.SyncModules()) { Startgame(); } });
@@ -491,6 +508,7 @@ public static class UI
         UpgradeMenu.AddWidget(UpgradeCore as IFunctional, 2);
 
         GlobalMenu.AddWidget(GlobalSidePanelOpen as IFunctional, (int)Alignment.Left);
+        GlobalMenu.AddWidget(GlobalFusePanelOpen as IFunctional, (int)Alignment.Right);
         GlobalMenu.AddWidget(Timer, (int)Alignment.TopRight);
         GlobalMenu.AddWidget(PlayerHealth as IFunctional, (int)Alignment.TopLeft);
         GlobalMenu.AddWidget(PlayerSpecialHealth as IFunctional, (int)Alignment.TopLeft);
@@ -531,10 +549,10 @@ public static class UI
         GarageMenu.AddWidget(SecondarySlot as IFunctional);
         MissionSelect.AddWidget(SecondarySlot as IFunctional, 1);
 
-        GlobalMenu.AddWidget(RestartSwitch as IFunctional, (int)Alignment.Center);
-        GlobalMenu.AddWidget(RestartSlider as IFunctional, (int)Alignment.Center);
-        GlobalMenu.AddWidget(Switch, (int)Alignment.Center);
-        GlobalMenu.AddWidget(FuseCounter, (int)Alignment.Center);
+        FuseMenu.AddWidget(RestartSwitch as IFunctional, (int)Alignment.Center);
+        FuseMenu.AddWidget(RestartSlider as IFunctional, (int)Alignment.Center);
+        FuseMenu.AddWidget(Switch, (int)Alignment.Center);
+        FuseMenu.AddWidget(FuseCounter, (int)Alignment.Center);
         for (int i = 0; i < 4; i++)
         {
             for (int j = -2; j < 3; j++)
@@ -548,23 +566,26 @@ public static class UI
                     Engine.SaveGame.Player.ToggleFuse(x, y);
                 });
                 Fuses[i, j + 2] = fuse;
-                GlobalMenu.AddWidget(fuse as IFunctional, (int)Alignment.Center);
+                FuseMenu.AddWidget(fuse as IFunctional, (int)Alignment.Center);
             }
         }
-        GlobalMenu.AddWidget(FragilityTextbox, (int)Alignment.Center);
+        FuseMenu.AddWidget(FragilityTextbox, (int)Alignment.Center);
         for (int i = 0; i < 5; i++)
         {
             float y = (i - 2) * 20;
-            GlobalMenu.AddWidget(ModuleIcons[i] = new Decal(new Vector2(-15 + Engine.BackBuffer.X / 2, y), null), (int)Alignment.Center);
-            GlobalMenu.AddWidget(StatusLights[i] = new Decal(new Vector2(-30 + Engine.BackBuffer.X / 2, y), Assets.Get(Sprite.Circle)), (int)Alignment.Center);
+            FuseMenu.AddWidget(ModuleIcons[i] = new Decal(new Vector2(-15, y), null), (int)Alignment.Center);
+            FuseMenu.AddWidget(StatusLights[i] = new Decal(new Vector2(-30, y), Assets.Get(Sprite.Circle)), (int)Alignment.Center);
         }
+        FuseMenu.AddWidget(FuseMenuClose as IFunctional);
 
         CutsceneGlobalMenu.AddWidget(GlobalSidePanelOpen as IFunctional, (int)Alignment.Left);
+        CutsceneGlobalMenu.AddWidget(GlobalFusePanelOpen as IFunctional, (int)Alignment.Right);
 
         HackMenu.AddWidget(HackButton as IFunctional);
         HackMenu.AddWidget(HackTimer as IFunctional);
 
         FloppyTerminal.AddWidget(SidePanelClose as IFunctional);
+        FloppyTerminal.AddWidget(DeadFile);
         FloppyTerminal.AddWidget(Overlay);
 
         Engine.UIManager.AddContainer(MainMenu);
@@ -580,6 +601,7 @@ public static class UI
         Engine.UIManager.AddContainer(SettingsMenu);
         Engine.UIManager.AddContainer(HackMenu);
         Engine.UIManager.AddContainer(FloppyTerminal);
+        Engine.UIManager.AddContainer(FuseMenu);
 
         Engine.UIManager.ScreenWindow = GlobalMenu;
     }

@@ -44,9 +44,6 @@ public class Engine : Game
 
     public static float Time { get; private set; } = 0;
 
-    private int dir = 0;
-    private Vector2 offset = Vector2.Zero;
-
     public Engine()
     {
         graphics = new GraphicsDeviceManager(this);
@@ -206,9 +203,6 @@ public class Engine : Game
             ScreenShakeFactor = 0;
         }
         UI.Timer.text = $"{IngameTime.DrawText}";
-        float speed = Util.FIED(0.01f);
-        offset = new Vector2((offset.X * (speed) + dir * BackBuffer.X * (1-speed)), 0);
-        UI.GlobalMenu.position = new Vector2(offset.X, 0);
         Time += DeltaSeconds;
         base.Update(gameTime);
     }
@@ -218,7 +212,6 @@ public class Engine : Game
         {
             return;
         }
-        dir = Math.Clamp(dir + _dir, -1, 0);
         EventHandler.UpdateModulesStatus();
     }
     public static Pickup MoveSelectedPickup()
@@ -282,17 +275,17 @@ public class Engine : Game
         GraphicsDevice.SetRenderTarget(null);
         GraphicsDevice.Clear(new Color(50, 50, 50));
         spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, null, null, Assets.GlobalShader);
-        spriteBatch.Draw(renderTarget, new Rectangle((int)(offset.X), 0, (int)(BackBuffer.X), (int)(BackBuffer.Y)), Color.White);
+        spriteBatch.Draw(renderTarget, new Rectangle(0, 0, (int)(BackBuffer.X), (int)(BackBuffer.Y)), Color.White);
         spriteBatch.End();
 
         spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, null, null, null);
-        foreach(var exception in ShaderExceptions)
+        DialogueManager.Draw(spriteBatch);
+        UIManager.Draw(spriteBatch);
+        foreach (var exception in ShaderExceptions)
         {
             exception.Draw(spriteBatch);
         }
         ShaderExceptions.Clear();
-        DialogueManager.Draw(spriteBatch);
-        UIManager.Draw(spriteBatch);
         if ((Input.NewMouseState.LeftButton == ButtonState.Released))
         {
             spriteBatch.Draw(Assets.Get(Sprite.Cursor), new Vector2(Mouse.GetState().X, Mouse.GetState().Y), null, Color.White, 0, Vector2.Zero, UIManager.UIScale / 2, 0, 0.5f);

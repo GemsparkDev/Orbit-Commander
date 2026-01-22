@@ -31,7 +31,7 @@ public class EntityManager
     public int MissionLength => missions.Count;
     private readonly List<Mission> missions =
     [
-    new Mission([new Planet(Vector2.Zero, Vector2.Zero, 15000, 12, true, Color.White, true)],
+        new Mission([new Planet(Vector2.Zero, Vector2.Zero, 15000, 12, true, Color.White, true)],
      [
         //new EntityCondition(new AdvancedConstructor(Enemy.NewEnemySpawner, new Vector2(0, 1200), Planet.GetOrbitalVelocity(new Vector2(0, 1200), Vector2.Zero, 20000), 0, false), [Condition.Kill]),
         //new EntityCondition(new AdvancedConstructor(Enemy.NewEnemySpawner, new Vector2(0, -1200), Planet.GetOrbitalVelocity(new Vector2(0, -1200), Vector2.Zero, 20000), 0, false), [Condition.Kill]),
@@ -45,8 +45,8 @@ public class EntityManager
         new EntityCondition(new AdvancedConstructor(Enemy.NewTurret, new Vector2(MathF.Sin(0.3f), -MathF.Cos(0.3f)) * 12 * 50, Vector2.Zero, 0.3f, true), []),
         new EntityCondition(new AdvancedConstructor(Enemy.NewTurret, new Vector2(MathF.Sin(-0.3f), -MathF.Cos(-0.3f)) * 12 * 50, Vector2.Zero, -0.3f, true), []),
         ], "War", "Defend the planet", 0.15f, new Vector2(0, -800), Mission.TierOne(), Mission.TierOneBosses(), RestartCutscene, true) { isAggressive = true, playerProgression = 0 },
-
-    new Mission([new Planet(Vector2.Zero, Vector2.Zero, 10000, 8, true, Color.Cyan, false),
+        
+        new Mission([new Planet(Vector2.Zero, Vector2.Zero, 10000, 8, true, Color.Cyan, false),
         new Planet(new Vector2(1000, 0), Planet.GetOrbitalVelocity(new Vector2(1000, 0), Vector2.Zero, 10000), 250, 1.5f, false, Color.Cyan) ],
         [ new EntityCondition(new EntityConstructor(Enemy.NewMothership, new Vector2(0, -8*50 - Assets.DimsOf(Sprite.Mothership).Y / 2), Vector2.Zero, 0f), [ Condition.Protect, Condition.CustomIncomplete ]),
         new EntityCondition(new PickupConstructor(ItemFactory.NewScrap, new Vector2(0, -8*50), new Vector2(10, -10), 0.07f),[]),
@@ -407,7 +407,7 @@ public class EntityManager
             {
                 continue;
             }
-            if(!_getDeadEnemies && (targetEnemy as Enemy).health <= 0)
+            if(!_getDeadEnemies && targetEnemy as Enemy != null && (targetEnemy as Enemy).health <= 0)
             {
                 continue;
             }
@@ -701,28 +701,28 @@ public class EntityManager
             "Snsr:",
             "Core:",
             "Please restart modules to restore functionality.",
-            "                             @@@@@@                ",
-            "                         @@@@@@@@@@@@@@            ",
-            "                     @@@@@@@@@@@@@@@@@@@@@@        ",
-            "                 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@    ",
-            "             =      @@@@@@@@@      @@@@@@@@@       ",
-            "             ====      @@@    %%%%    @@@      ####",
-            "             =======       %%%%%%%%%%       #######",
-            "             ==========  %%%%%%%%%%%%%%  ##########",
-            "             =========  %%%%%%%%%%%%%%%%  #########",
-            "                      Welcome aboard pilot         ",
-            "             =========  %%%%%%%%%%%%%%%%  #########",
-            "             ==========  %%%%%%%%%%%%%%  ##########",
-            "             ============  %%%%%%%%%%   ###########",
-            "             =============    %%%%    #############",
-            "             ================      ################",
-            "                 =============    #############    ",
-            "                     =========    #########        ",
-            "                         =====    #####            ",
+            "                           @@@@@@                ",
+            "                       @@@@@@@@@@@@@@            ",
+            "                   @@@@@@@@@@@@@@@@@@@@@@        ",
+            "               @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@    ",
+            "           =      @@@@@@@@@      @@@@@@@@@       ",
+            "           ====      @@@    %%%%    @@@      ####",
+            "           =======       %%%%%%%%%%       #######",
+            "           ==========  %%%%%%%%%%%%%%  ##########",
+            "           =========  %%%%%%%%%%%%%%%%  #########",
+            "                    Welcome aboard pilot         ",
+            "           =========  %%%%%%%%%%%%%%%%  #########",
+            "           ==========  %%%%%%%%%%%%%%  ##########",
+            "           ============  %%%%%%%%%%   ###########",
+            "           =============    %%%%    #############",
+            "           ================      ################",
+            "               =============    #############    ",
+            "                   =========    #########        ",
+            "                       =====    #####            ",
         ];
         Cutscene scene = null;
         Vector2 screen = Engine.ScreenSize / 2;
-        var t5 = new TextActor(new Vector2(50, 260) * 3 - screen, "Failed\nFailed\nFailed\nFailed\nFailed\n")
+        var t5 = new TextActor(new Vector2(80, 260) * 3 - screen, "Failed\nFailed\nFailed\nFailed\nFailed\n")
         {
             TextSize = 1.45f * UIManager.UIScale,
             TextColor = Color.Red
@@ -734,7 +734,7 @@ public class EntityManager
         List<IActor> actors = [];
         for (int i = 0; i < text.Count; i++)
         {
-            actors.Add(new TextActor(new Vector2(0, 20 * 3 * i) - screen, text[i]) { TextSize = 1.5f * UIManager.UIScale });
+            actors.Add(new TextActor(new Vector2(60, 20 * 3 * i) - screen, text[i]) { TextSize = 1.5f * UIManager.UIScale });
         }
         actors.Add(t5);
         float ts = 0.2f;
@@ -746,6 +746,10 @@ public class EntityManager
             new TriggerEvent(0, delegate(float time)
             {
                 Engine.UIManager.ScreenWindow = UI.CutsceneGlobalMenu;
+                for(ModuleType i = 0; i < (ModuleType)5; i++)
+                {
+                    Engine.SaveGame.Player.modules[i].isFailed = true;
+                }
             }),
             new EndlessEvent(delegate(float time)
             {
@@ -754,10 +758,6 @@ public class EntityManager
                 {
                     computerSounds = Assets.Get(Sound.ComputerSounds).CreateInstance();
                     computerSounds.Play();
-                }
-                if(EventHandler.AcknowledgeMessage(Message.ToggleTerminal))
-                {
-                    UI.FloppyTerminal.enabled = !UI.FloppyTerminal.enabled;
                 }
             }),
             new Event(0, ts * 3, delegate (float time)
@@ -775,7 +775,8 @@ public class EntityManager
                 var a = actors[7] as TextActor;
                 a.Index = a.Text.Length;
                 scene.IsPaused = true;
-                if(Input.OldMouseState.LeftButton == ButtonState.Pressed && MathF.Abs(UI.FloppyTerminal.position.X - floppy.Position.X - 25) < 200 && MathF.Abs(UI.FloppyTerminal.position.Y + 175 - floppy.Position.Y) < 75)
+                //Check this line for differing UI scales
+                if(Input.OldMouseState.LeftButton == ButtonState.Pressed && MathF.Abs((UI.FloppyTerminal.position.X - floppy.Position.X + 200)) < 200 && MathF.Abs(UI.FloppyTerminal.position.Y + 175 - floppy.Position.Y) < 75)
                 {
                     floppy.Color = Color.White * (MathF.Sin(Engine.Time * 4) / 8 + 0.875f);
                     floppy.Angle = MathF.Sin(Engine.Time * 5) / 20;
@@ -819,12 +820,20 @@ public class EntityManager
                 floppyVel += new Vector2(0,18) * Engine.DeltaSeconds;
                 floppy.Position += floppyVel;
                 floppy.Angle += floppyAngVel * Engine.DeltaSeconds;
+                if(EventHandler.AcknowledgeMessage(Message.ToggleTerminal))
+                {
+                    UI.FloppyTerminal.enabled = !UI.FloppyTerminal.enabled;
+                }
             }),
             new Event(8 + ts * 4 + Engine.DeltaSeconds,2,delegate(float time)
             {
-                floppyFlat.Position = UI.FloppyTerminal.position + (new Vector2(94, 189) - Assets.DimsOf(Sprite.Terminal) / 2) * UIManager.UIScale;
+                floppyFlat.Position = UI.FloppyTerminal.position + (new Vector2(107, 94.5f) * UIManager.UIScale - Assets.DimsOf(Sprite.Terminal) / 2) * UIManager.UIScale;
                 floppyFlat.Color = Color.White * ((2f - time)/2f);
                 Engine.Self.QueueShaderException(floppyFlat);
+            }),
+            new TriggerEvent(10 + ts * 4, delegate(float time)
+            {
+                UI.FloppyTerminal.enabled = false;
             }),
             new Event(10 + ts * 5, ts * 10, delegate (float time)
             {
@@ -846,10 +855,6 @@ public class EntityManager
             new TriggerEvent(16 + ts * 12, delegate(float time)
             {
                 scene.IsPaused = true;
-                for(ModuleType i = 0; i < (ModuleType)5; i++)
-                {
-                    Engine.SaveGame.Player.modules[i].isFailed = true;
-                }
                 PushTextUp();
                 var a = actors[18] as TextActor;
                 a.Index = a.Text.Length;
@@ -863,9 +868,8 @@ public class EntityManager
                 }
                 if(!notReady)
                 {
-                    UI.GlobalMenu.enabled = false;
-                    Engine.Self.Rotate(1, true);
                     scene.IsPaused = false;
+                    UI.FuseMenu.enabled = false;
                     for(int i = 0; i < 13; i++)
                     {
                         PushTextUp();
@@ -875,16 +879,6 @@ public class EntityManager
             new Event(0, 16 + ts*12 + Engine.DeltaSeconds, delegate(float time)
             {
                 Engine.SaveGame.Player.Update();
-                if(Input.NewState.IsKeyDown(Keys.Z))
-                {
-                    UI.GlobalMenu.enabled = false;
-                    Engine.Self.Rotate(1, true);
-                }
-                if(Input.NewState.IsKeyDown(Keys.X))
-                {
-                    UI.GlobalMenu.enabled = true;
-                    Engine.Self.Rotate(-1, true);
-                }
             }),
             new Event(16 + ts * 12 + Engine.DeltaSeconds, 2f, delegate (float time)
             {
@@ -892,7 +886,7 @@ public class EntityManager
                 a.Index = a.Text.Length;
             }),
             new TriggerEvent(21 + ts * 12 + Engine.DeltaSeconds, delegate(float time)
-            { 
+            {
                 foreach(var module in Engine.SaveGame.Player.modules)
                 {
                     module.Value.isFailed = false;
@@ -900,6 +894,8 @@ public class EntityManager
                 computerSounds.Pause();
                 Engine.UIManager.ScreenWindow = UI.GlobalMenu;
                 UI.FloppyTerminal.enabled = false;
+                UI.FuseMenu.enabled = false;
+                EventHandler.AcknowledgeMessage(Message.ToggleTerminal);
             })
         ];
         scene = new Cutscene(events, actors, new PlayingGame());

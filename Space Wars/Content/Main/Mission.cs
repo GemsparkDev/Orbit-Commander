@@ -42,7 +42,7 @@ public class Mission
     private float maxWaveTimer = 5;
     private bool currentWaveActive = false;
 
-    public Mission(Planet[] _planets, List<ICondition> _missionObjectives, string _name, string _description, float _timerModifier, Vector2 _playerPosition, List<(int, DelegateEnemy)> _enemies, List<DelegateEnemy> _bosses, Func<Cutscene> _cutscene = null, bool _escapeVehicle = false, bool _isInFleet = false)
+    public Mission(Planet[] _planets, List<ICondition> _missionObjectives, string _name, string _description, float _timerModifier, Vector2 _playerPosition, List<(int, DelegateEnemy)> _enemies, List<DelegateEnemy> _bosses, Func<Cutscene> _cutscene = null, bool _escapeVehicle = false)
     {
         Name = _name;
         Description = _description;
@@ -62,14 +62,6 @@ public class Mission
         if (_escapeVehicle)
         {
             escapeVehicle = new EntityConstructor(Enemy.NewPickupDrone, new Vector2(-2000, -2000), Vector2.Zero, 0);
-        }
-        if (_isInFleet)
-        {
-            isAggressive = true;
-            if (TimerModifier != -1)
-            {
-                TimerModifier /= 2;
-            }
         }
         UI.WaveText.text = "0";
         UI.EnemiesLeft.text = "0";
@@ -468,8 +460,14 @@ public class Mission
         {
             _planets[i] = planets[i].Copy();
         }
-        return new Mission(_planets, CopyObjectives, Name, Description, TimerModifier, playerPosition, enemyCreditValues, bosses, cutscene, escapeVehicle != null, Engine.SaveGame.FleetSystem > Engine.EntityManager.Systems[Engine.SaveGame.CurrentMissionIndex].system)
-        { playerProgression = this.playerProgression, playerDocked = this.playerDocked, isAggressive = this.isAggressive, music = this.music, tip = this.tip, relaunchable = this.relaunchable };
+        bool isInFleet = Engine.SaveGame.FleetSystem > Engine.EntityManager.Systems[Engine.SaveGame.CurrentMissionIndex].system;
+        float tm = TimerModifier;
+        if (isInFleet && tm != -1)
+        {
+            tm /= 2;
+        }
+        return new Mission(_planets, CopyObjectives, Name, Description, tm, playerPosition, enemyCreditValues, bosses, cutscene, escapeVehicle != null)
+        { playerProgression = this.playerProgression, playerDocked = this.playerDocked, isAggressive = this.isAggressive || isInFleet, music = this.music, tip = this.tip, relaunchable = this.relaunchable };
     }
     private Vector2 NewSpawnLocation()
     {
@@ -635,7 +633,7 @@ public interface ICondition
 }
 public class EntityCondition(IConstructor _constructor, Condition[] _conditions) : ICondition
 {
-    private Entity daughterEntity = _constructor.Construct();
+    private Entity daughterEntity = null;
     public bool IsComplete()
     {
         foreach (var condition in _conditions)
@@ -663,6 +661,7 @@ public class EntityCondition(IConstructor _constructor, Condition[] _conditions)
     }
     public void Initialize()
     {
+        daughterEntity = _constructor.Construct();
         Engine.EntityManager.Add(daughterEntity);
     }
     public ICondition Clone()

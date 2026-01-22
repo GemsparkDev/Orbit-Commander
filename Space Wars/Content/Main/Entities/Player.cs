@@ -9,6 +9,7 @@ using System.Linq;
 using UILib.Content.Main;
 using Space_Wars.Content.Main.Components;
 using System.Text;
+using System.Diagnostics;
 
 namespace Space_Wars.Content.Main.Entities;
 
@@ -99,8 +100,8 @@ public class Player : Entity
         }
     }
 
-    public Player(Vector2 _position, Vector2 _velocity, float _angle, float _angularVelocity)
-        : base(Assets.Get(Sprite.Player), _position, _velocity, _angle, _angularVelocity, 5, true)
+    public Player(Vector2 _position, Vector2 _velocity, float _angle, bool _isFriendly = true)
+        : base(Assets.Get(Sprite.Player), _position, _velocity, _angle, 0, 5, _isFriendly)
     {
         UpdateColor();
         smokeParticles.isEmitterActive = false;
@@ -114,29 +115,22 @@ public class Player : Entity
         EventHandler.SetFuseModuleDecals(textures);
         EventHandler.UpdateFuseUI(moduleFuses, spareFuses);
     }
+    public static Player NewPlayer(Vector2 _position, Vector2 _velocity, float _angle, bool _isFriendly)
+    {
+        return new Player(_position, _velocity, _angle, _isFriendly);
+    }
     public override void UpdateColor()
     {
-        color = Engine.ColorScheme.FriendlyEnemy();
+        color = isFriendly ? Engine.ColorScheme.FriendlyEnemy() : Engine.ColorScheme.HostileEnemy();
     }
     public override void Update()
     {
         collider.offsetVelocity = velocity;
-        Color c = Engine.ColorScheme.FriendlyEnemy();
-        if(color != c)
+        Color c = isFriendly ? Engine.ColorScheme.FriendlyEnemy() : Engine.ColorScheme.HostileEnemy();
+        if (color != c)
         {
             float l = Util.FIED(0.025f);
             color = new Color((byte)(color.R * l + c.R * (1f - l)), (byte)(color.G * l + c.G * (1f - l)), (byte)(color.B * l + c.B * (1f - l)));
-        }
-        if (Progression > 0)
-        {
-            if(Input.OldState.IsKeyUp(Keys.Z) && Input.NewState.IsKeyDown(Keys.Z))
-            {
-                Engine.Self.Rotate(1);
-            }
-            else if(Input.OldState.IsKeyUp(Keys.X) && Input.NewState.IsKeyDown(Keys.X))
-            {
-                Engine.Self.Rotate(-1);
-            }
         }
         if (modules[ModuleType.Core].Health <= 0)
         {
@@ -292,19 +286,6 @@ public class Player : Entity
         //Ensures that target vector performs identically in all resolutions
         Vector2 ratio = Engine.ScreenSize / Engine.BackBuffer;
         targetVector = Vector2.Normalize(new Vector2(Input.NewMouseState.X * ratio.X, Input.NewMouseState.Y * ratio.Y) - Engine.ScreenSize / 2 - position + Engine.Camera.Position + Engine.MousePositionOffset);
-        if (Input.NewState.IsKeyDown(Keys.E) && !Input.OldState.IsKeyDown(Keys.E)) 
-        {
-            if (SecondaryWeapon != null)
-            {
-                SoundManager.PlayGlobalSound(Assets.Get(Sound.Click));
-                (modules[ModuleType.Guns], SecondaryWeapon) = (SecondaryWeapon, modules[ModuleType.Guns]);
-                EventHandler.UpdateModulesUI();
-            }
-            else
-            {
-                SoundManager.PlayGlobalSound(Assets.Get(Sound.Fail));
-            }
-        }
     }
     public override void LowerCooldown()
     {
@@ -338,6 +319,19 @@ public class Player : Entity
             if (Input.OldState.IsKeyUp(Keys.I) && Input.NewState.IsKeyDown(Keys.I))
             {
                 EventHandler.ToggleDockingMenus();
+            }
+            if (Input.NewState.IsKeyDown(Keys.E) && !Input.OldState.IsKeyDown(Keys.E))
+            {
+                if (SecondaryWeapon != null)
+                {
+                    SoundManager.PlayGlobalSound(Assets.Get(Sound.Click));
+                    (modules[ModuleType.Guns], SecondaryWeapon) = (SecondaryWeapon, modules[ModuleType.Guns]);
+                    EventHandler.UpdateModulesUI();
+                }
+                else
+                {
+                    SoundManager.PlayGlobalSound(Assets.Get(Sound.Fail));
+                }
             }
             if (Progression > 1 && Input.OldState.IsKeyUp(Keys.LeftControl) && Input.NewState.IsKeyDown(Keys.LeftControl))
             {
@@ -650,7 +644,7 @@ public class Player : Entity
             dockedEntity.Collide(_damage);
             return false;
         }
-        if(!_ignoreImmunity)
+        if (!_ignoreImmunity)
         {
             foreach (var module in modules)
             {
@@ -661,7 +655,7 @@ public class Player : Entity
         if (_damage > 0 && (invincibilityCooldown <= 0 || _ignoreImmunity))
         {
             Flash(Color.White);
-            Engine.ShakeScreen(0.08f * _damage);
+            Engine.ShakeScreen(0.08f * (float)(_damage));
             //Helps to cushion huge hits
             //Player will never be one shot (unless they deserve it)
             cachedDamage += Math.Min(50, _damage);
