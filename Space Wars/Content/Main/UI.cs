@@ -396,124 +396,124 @@ public static class UI
 
         HackButton.AddBehaviour(delegate { EventHandler.SendMessage(Message.Hack); });
 
-        MainMenu.AddWidget(ExitButton as IFunctional, 0);
-        MainMenu.AddWidget(SingleplayerButton as IFunctional, 0);
+        MainMenu.AddWidget(ExitButton, 0);
+        MainMenu.AddWidget(SingleplayerButton, 0);
         MainMenu.AddWidget(TitleName, 0);
         MainMenu.AddWidget(TitleName, 1);
-        MainMenu.AddWidget(PatchedConicsToggle as IFunctional, 1);
-        MainMenu.AddWidget(SFXSlider as IFunctional, 1);
-        MainMenu.AddWidget(MusicSlider as IFunctional, 1);
-        MainMenu.AddWidget(UIScaleSlider as IFunctional, 1);
+        MainMenu.AddWidget(PatchedConicsToggle, 1);
+        MainMenu.AddWidget(SFXSlider, 1);
+        MainMenu.AddWidget(MusicSlider, 1);
+        MainMenu.AddWidget(UIScaleSlider, 1);
         MainMenu.AddWidget(SFXVolume, 1);
         MainMenu.AddWidget(MusicVolume, 1);
         MainMenu.AddWidget(UIScale, 1);
-        MainMenu.AddWidget(ShaderToggle as IFunctional, 1);
-        MainMenu.AddWidget(LoadButton as IFunctional, 0);
+        MainMenu.AddWidget(ShaderToggle, 1);
+        MainMenu.AddWidget(LoadButton, 0);
         MainMenu.AddWidget(WindowType, 1);
-        MainMenu.AddWidget(NextWindowType as IFunctional, 1);
+        MainMenu.AddWidget(NextWindowType, 1);
         MainMenu.AddWidget(Resolution, 1);
-        MainMenu.AddWidget(NextResolution as IFunctional, 1);
-        MainMenu.AddWidget(ApplyChanges as IFunctional, 1);
+        MainMenu.AddWidget(NextResolution, 1);
+        MainMenu.AddWidget(ApplyChanges, 1);
 
         for(int i = 0; i < NextModule.Length; i++)
         {
             int module = i;
-            MainMenu.AddWidget((NextModule[i] = new Button(new Vector2(60, 25 * i - 40), Assets.Get(Sprite.Button), Assets.TextFont, $"{i + 5}", Color.White)) as IFunctional, 2);
+            MainMenu.AddWidget((NextModule[i] = new Button(new Vector2(60, 25 * i - 40), Assets.Get(Sprite.Button), Assets.TextFont, $"{i + 5}", Color.White)), 2);
             NextModule[i].AddBehaviour(delegate () { setModules[module] = (Modules)Math.Clamp((int)(setModules[module] + 1), 0, (int)(Modules.End - 1)); EventHandler.SetModules(); });
-            MainMenu.AddWidget((PrevModule[i] = new Button(new Vector2(-60, 25 * i - 40), Assets.Get(Sprite.Button), Assets.TextFont, $"{i}", Color.White)) as IFunctional, 2);
+            MainMenu.AddWidget((PrevModule[i] = new Button(new Vector2(-60, 25 * i - 40), Assets.Get(Sprite.Button), Assets.TextFont, $"{i}", Color.White)), 2);
             PrevModule[i].AddBehaviour(delegate () { setModules[module] = (Modules)Math.Clamp((int)(setModules[module] - 1), 0, (int)(Modules.End - 1)); EventHandler.SetModules(); });
             MainMenu.AddWidget(Module[i] = new Decal(new Vector2(0, 25 * i - 40), Assets.TextFont, "", Color.White, 10), 2);
         }
         EventHandler.SetModules();
 
-        PauseMenu.AddWidget(QuitToMissionButton as IFunctional);
-        PauseMenu.AddWidget(SettingsButton as IFunctional);
+        PauseMenu.AddWidget(QuitToMissionButton);
+        PauseMenu.AddWidget(SettingsButton);
 
-        SettingsMenu.AddWidget(PauseMenuButton as IFunctional);
-        SettingsMenu.AddWidget(PatchedConicsToggle as IFunctional);
-        SettingsMenu.AddWidget(SFXSlider as IFunctional);
-        SettingsMenu.AddWidget(MusicSlider as IFunctional);
-        SettingsMenu.AddWidget(UIScaleSlider as IFunctional);
+        SettingsMenu.AddWidget(PauseMenuButton);
+        SettingsMenu.AddWidget(PatchedConicsToggle);
+        SettingsMenu.AddWidget(SFXSlider);
+        SettingsMenu.AddWidget(MusicSlider);
+        SettingsMenu.AddWidget(UIScaleSlider);
         SettingsMenu.AddWidget(SFXVolume);
         SettingsMenu.AddWidget(MusicVolume);
         SettingsMenu.AddWidget(UIScale);
-        SettingsMenu.AddWidget(ShaderToggle as IFunctional);
+        SettingsMenu.AddWidget(ShaderToggle);
 
         GarageMenu.AddWidget(MothershipScrap);
-        GarageMenu.AddWidget(RepairButton as IFunctional);
-        GarageMenu.AddWidget(RepairSlot as IFunctional);
+        GarageMenu.AddWidget(RepairButton);
+        GarageMenu.AddWidget(RepairSlot);
         GarageMenu.AddWidget(RepairText);
         GarageMenu.AddWidget(GaragePlayerImage);
         GarageMenu.AddWidget(ValidConfigText);
 
-        MothershipMenu.AddWidget(FurnaceSlider as IFunctional, 0);
-        MothershipMenu.AddWidget(FurnaceSlot as IFunctional, 0);
-        MothershipMenu.AddWidget(GarageButton as IFunctional, 1);
-        MothershipMenu.AddWidget(CraftingSlider as IFunctional, 2);
+        MothershipMenu.AddWidget(FurnaceSlider, 0);
+        MothershipMenu.AddWidget(FurnaceSlot, 0);
+        MothershipMenu.AddWidget(GarageButton, 1);
+        MothershipMenu.AddWidget(CraftingSlider, 2);
         MothershipMenu.AddWidget(RequiredCraftsText, 2);
-        MothershipMenu.AddWidget(CraftButton as IFunctional, 2);
+        MothershipMenu.AddWidget(CraftButton, 2);
         for (int i = 0; i < 3; i++)
         {
-            MothershipMenu.AddWidget(SidePanelClose as IFunctional, i);
+            MothershipMenu.AddWidget(SidePanelClose, i);
         }
         MothershipMenu.AddWidget(Overlay, 0);
         MothershipMenu.AddWidget(Overlay, 1);
         MothershipMenu.AddWidget(Overlay, 2);
 
-        PlayerMenu.AddWidget(EnemySlider as IFunctional);
+        PlayerMenu.AddWidget(EnemySlider);
         PlayerMenu.AddWidget(WaveText);
-        PlayerMenu.AddWidget(SidePanelClose as IFunctional);
+        PlayerMenu.AddWidget(SidePanelClose);
         PlayerMenu.AddWidget(EnemiesLeft);
         PlayerMenu.AddWidget(Overlay);
 
         MissionSelect.AddWidget(MissionName, 0);
         MissionSelect.AddWidget(MissionDescription, 0);
-        MissionSelect.AddWidget(PrevMission as IFunctional, 0);
-        MissionSelect.AddWidget(NextMission as IFunctional, 0);
-        MissionSelect.AddWidget(SelectMission as IFunctional, 0);
+        MissionSelect.AddWidget(PrevMission, 0);
+        MissionSelect.AddWidget(NextMission, 0);
+        MissionSelect.AddWidget(SelectMission, 0);
         MissionSelect.AddWidget(IsComplete, 0);
         MissionSelect.AddWidget(ValidConfigText, 1);
-        MissionSelect.AddWidget(CreateFuse as IFunctional, 1);
-        MissionSelect.AddWidget(SmeltScrap as IFunctional, 1);
-        MissionSelect.AddWidget(RepairModule as IFunctional, 1);
-        MissionSelect.AddWidget(CancelQueue as IFunctional, 1);
-        MissionSelect.AddWidget(SaveButton as IFunctional, 0);
+        MissionSelect.AddWidget(CreateFuse, 1);
+        MissionSelect.AddWidget(SmeltScrap, 1);
+        MissionSelect.AddWidget(RepairModule, 1);
+        MissionSelect.AddWidget(CancelQueue, 1);
+        MissionSelect.AddWidget(SaveButton, 0);
         MissionSelect.AddWidget(AlertText, 0);
 
-        PickupDroneMenu.AddWidget(LaunchButton as IFunctional);
+        PickupDroneMenu.AddWidget(LaunchButton);
 
-        SaveMenu.AddWidget(SaveToFile as IFunctional);
-        SaveMenu.AddWidget(PrevSave as IFunctional);
-        SaveMenu.AddWidget(NextSave as IFunctional);
-        SaveMenu.AddWidget(DeleteSave as IFunctional);
-        SaveMenu.AddWidget(Name as IFunctional);
+        SaveMenu.AddWidget(SaveToFile);
+        SaveMenu.AddWidget(PrevSave);
+        SaveMenu.AddWidget(NextSave);
+        SaveMenu.AddWidget(DeleteSave);
+        SaveMenu.AddWidget(Name);
         SaveMenu.AddWidget(LoadedName);
-        SaveMenu.AddWidget(SaveBack as IFunctional);
+        SaveMenu.AddWidget(SaveBack);
 
-        LoadMenu.AddWidget(LoadFromFile as IFunctional);
-        LoadMenu.AddWidget(PrevSave as IFunctional);
-        LoadMenu.AddWidget(NextSave as IFunctional);
-        LoadMenu.AddWidget(DeleteSave as IFunctional);
+        LoadMenu.AddWidget(LoadFromFile);
+        LoadMenu.AddWidget(PrevSave);
+        LoadMenu.AddWidget(NextSave);
+        LoadMenu.AddWidget(DeleteSave);
         LoadMenu.AddWidget(LoadedName);
-        LoadMenu.AddWidget(LoadBack as IFunctional);
+        LoadMenu.AddWidget(LoadBack);
 
         UpgradeMenu.AddWidget(TraderChat, 0);
-        UpgradeMenu.AddWidget(LidarUpgrade as IFunctional, 1);
-        UpgradeMenu.AddWidget(RadarUpgrade as IFunctional, 1);
-        UpgradeMenu.AddWidget(PulseEmitterUpgrade as IFunctional, 1);
+        UpgradeMenu.AddWidget(LidarUpgrade, 1);
+        UpgradeMenu.AddWidget(RadarUpgrade, 1);
+        UpgradeMenu.AddWidget(PulseEmitterUpgrade, 1);
         UpgradeMenu.AddWidget(UpgradeText, 2);
-        UpgradeMenu.AddWidget(UpgradeHull as IFunctional, 2);
-        UpgradeMenu.AddWidget(UpgradeGuns as IFunctional, 2);
-        UpgradeMenu.AddWidget(UpgradeEngine as IFunctional, 2);
-        UpgradeMenu.AddWidget(UpgradeCore as IFunctional, 2);
+        UpgradeMenu.AddWidget(UpgradeHull, 2);
+        UpgradeMenu.AddWidget(UpgradeGuns, 2);
+        UpgradeMenu.AddWidget(UpgradeEngine, 2);
+        UpgradeMenu.AddWidget(UpgradeCore, 2);
 
-        GlobalMenu.AddWidget(GlobalSidePanelOpen as IFunctional, (int)Alignment.Left);
-        GlobalMenu.AddWidget(GlobalFusePanelOpen as IFunctional, (int)Alignment.Right);
+        GlobalMenu.AddWidget(GlobalSidePanelOpen, (int)Alignment.Left);
+        GlobalMenu.AddWidget(GlobalFusePanelOpen, (int)Alignment.Right);
         GlobalMenu.AddWidget(Timer, (int)Alignment.TopRight);
-        GlobalMenu.AddWidget(PlayerHealth as IFunctional, (int)Alignment.TopLeft);
-        GlobalMenu.AddWidget(PlayerSpecialHealth as IFunctional, (int)Alignment.TopLeft);
-        GlobalMenu.AddWidget(PlayerAbility as IFunctional, (int)Alignment.TopLeft);
-        GlobalMenu.AddWidget(PlayerAmmo as IFunctional, (int)Alignment.TopLeft);
+        GlobalMenu.AddWidget(PlayerHealth, (int)Alignment.TopLeft);
+        GlobalMenu.AddWidget(PlayerSpecialHealth, (int)Alignment.TopLeft);
+        GlobalMenu.AddWidget(PlayerAbility, (int)Alignment.TopLeft);
+        GlobalMenu.AddWidget(PlayerAmmo, (int)Alignment.TopLeft);
         PlayerSpecialHealth.SetInterval(1, 1);
         PlayerHealth.Intervals = [1, 1];
 
@@ -529,8 +529,8 @@ public static class UI
                 ModuleSlots[x] = new ItemSlot<Module>(new Vector2(Assets.DimsOf(Sprite.EmptySlot).X / 1.4142f - 30,
                     Assets.DimsOf(Sprite.EmptySlot).Y * x / 2 - Assets.DimsOf(Sprite.EmptySlot).Y), Assets.Get(Sprite.EmptySlot), Engine.UIManager, x);
             }
-            GarageMenu.AddWidget(ModuleSlots[x] as IFunctional);
-            MissionSelect.AddWidget(ModuleSlots[x] as IFunctional, 1);
+            GarageMenu.AddWidget(ModuleSlots[x]);
+            MissionSelect.AddWidget(ModuleSlots[x], 1);
             ModuleSlots[x].AddBehaviour(EventHandler.UpdateModules);
         }
         for (int i = 0; i < InventorySlots.GetLength(0); i++)
@@ -539,25 +539,25 @@ public static class UI
                 Assets.DimsOf(Sprite.EmptySlot).Y * (i + 1) - Assets.DimsOf(Sprite.LargePanel).X / 2), Assets.Get(Sprite.EmptySlot), Engine.UIManager, -1);
             MissionSelectSlots[i] = new ItemSlot<Pickup>(new Vector2(Assets.DimsOf(Sprite.LargePanel).X / 2,
                 Assets.DimsOf(Sprite.EmptySlot).Y * (i + 1) - Assets.DimsOf(Sprite.LargePanel).X / 2), Assets.Get(Sprite.EmptySlot), Engine.UIManager, -1);
-            MothershipMenu.AddWidget(InventorySlots[i] as IFunctional, 0);
-            PickupDroneMenu.AddWidget(InventorySlots[i] as IFunctional);
-            MissionSelect.AddWidget(InventorySlots[i] as IFunctional, 1);
-            MissionSelect.AddWidget(MissionSelectSlots[i] as IFunctional, 1);
+            MothershipMenu.AddWidget(InventorySlots[i], 0);
+            PickupDroneMenu.AddWidget(InventorySlots[i]);
+            MissionSelect.AddWidget(InventorySlots[i], 1);
+            MissionSelect.AddWidget(MissionSelectSlots[i], 1);
             InventorySlots[i].AddBehaviour(EventHandler.UpdateInventory);
             MissionSelectSlots[i].AddBehaviour(EventHandler.UpdateInventory);
         }
-        GarageMenu.AddWidget(SecondarySlot as IFunctional);
-        MissionSelect.AddWidget(SecondarySlot as IFunctional, 1);
+        GarageMenu.AddWidget(SecondarySlot);
+        MissionSelect.AddWidget(SecondarySlot, 1);
 
-        FuseMenu.AddWidget(RestartSwitch as IFunctional, (int)Alignment.Center);
-        FuseMenu.AddWidget(RestartSlider as IFunctional, (int)Alignment.Center);
+        FuseMenu.AddWidget(RestartSwitch, (int)Alignment.Center);
+        FuseMenu.AddWidget(RestartSlider, (int)Alignment.Center);
         FuseMenu.AddWidget(Switch, (int)Alignment.Center);
         FuseMenu.AddWidget(FuseCounter, (int)Alignment.Center);
         for (int i = 0; i < 4; i++)
         {
             for (int j = -2; j < 3; j++)
             {
-                var fuse = new Button(new Vector2(i * 10 + Engine.BackBuffer.X / 2, j * 20), Assets.Get(Sprite.Fuse));
+                var fuse = new Button(new Vector2(i * 10, j * 20), Assets.Get(Sprite.Fuse));
                 //Not sure why this works, don't touch
                 int x = j + 2;
                 int y = i;
@@ -566,7 +566,7 @@ public static class UI
                     Engine.SaveGame.Player.ToggleFuse(x, y);
                 });
                 Fuses[i, j + 2] = fuse;
-                FuseMenu.AddWidget(fuse as IFunctional, (int)Alignment.Center);
+                FuseMenu.AddWidget(fuse, (int)Alignment.Center);
             }
         }
         FuseMenu.AddWidget(FragilityTextbox, (int)Alignment.Center);
@@ -576,15 +576,15 @@ public static class UI
             FuseMenu.AddWidget(ModuleIcons[i] = new Decal(new Vector2(-15, y), null), (int)Alignment.Center);
             FuseMenu.AddWidget(StatusLights[i] = new Decal(new Vector2(-30, y), Assets.Get(Sprite.Circle)), (int)Alignment.Center);
         }
-        FuseMenu.AddWidget(FuseMenuClose as IFunctional);
+        FuseMenu.AddWidget(FuseMenuClose);
 
-        CutsceneGlobalMenu.AddWidget(GlobalSidePanelOpen as IFunctional, (int)Alignment.Left);
-        CutsceneGlobalMenu.AddWidget(GlobalFusePanelOpen as IFunctional, (int)Alignment.Right);
+        CutsceneGlobalMenu.AddWidget(GlobalSidePanelOpen, (int)Alignment.Left);
+        CutsceneGlobalMenu.AddWidget(GlobalFusePanelOpen, (int)Alignment.Right);
 
-        HackMenu.AddWidget(HackButton as IFunctional);
-        HackMenu.AddWidget(HackTimer as IFunctional);
+        HackMenu.AddWidget(HackButton);
+        HackMenu.AddWidget(HackTimer);
 
-        FloppyTerminal.AddWidget(SidePanelClose as IFunctional);
+        FloppyTerminal.AddWidget(SidePanelClose);
         FloppyTerminal.AddWidget(DeadFile);
         FloppyTerminal.AddWidget(Overlay);
 
