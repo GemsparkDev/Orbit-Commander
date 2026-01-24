@@ -9,7 +9,7 @@ namespace Space_Wars.Content.Main;
 public class Dial : FunctionalWidget
 {
     private List<Action> behaviours = [];
-    public float Target { get; set; } = 0; //0 to 1
+    public float Target { get; set; } = 0;
     private Texture2D dialTexture;
     private float currentVal = 0;
     public Window Tooltip { get; private set; }
@@ -59,6 +59,6 @@ public class Dial : FunctionalWidget
     public override void Update() 
     {
         float lerp = Util.FIED(0.05f);
-        currentVal = currentVal * lerp + (Target + Util.OneToNegOne() * 0.02f) * (1 - lerp);
+        currentVal = currentVal * lerp + (Target + Util.OneToNegOne() * 0.05f) * (1 - lerp);
     }
 }

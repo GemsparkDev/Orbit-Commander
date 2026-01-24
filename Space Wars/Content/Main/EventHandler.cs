@@ -270,21 +270,8 @@ public static class EventHandler
             }
         }
         UI.FuseCounter.text = $"{_spareFuses}";
-        string text;
-        if (totalFuses < 13)
-        {
-            text = "Low";
-        }
-        else if (totalFuses is >= 13 and <= 17)
-        {
-            text = "Med";
-        }
-        else
-        {
-            text = "High";
-        }
-        UI.FragilityTextbox.text = "Fuse Fragility: " + text;
-        UI.FragilityTextbox.textColor = new Color(Math.Clamp(totalFuses / 5 - 2, 0, 1), Math.Clamp(4 - totalFuses / 5, 0, 1), 0);
+        UI.FuseDial.Target = (float)(totalFuses) / 20 - 2;
+
         Color[] possibleColors = [ Color.Red, Color.Orange, Color.Yellow, Color.White, Color.Cyan ];
         for (int i = 0; i < 5; i++)
         {

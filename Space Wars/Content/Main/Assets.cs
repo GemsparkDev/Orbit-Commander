@@ -119,10 +119,6 @@ public static class Assets
         Sprites.Add(Sprite.Shield, Content.Load<Texture2D>("Images/Item_10"));
         Sprites.Add(Sprite.Lidar, Content.Load<Texture2D>("Images/Item_11"));
         Sprites.Add(Sprite.LidarReal, Content.Load<Texture2D>("Images/UI_43"));
-        Sprites.Add(Sprite.Floppy, Content.Load<Texture2D>("Images/UI_44"));
-        Sprites.Add(Sprite.FloppyFlat, Content.Load<Texture2D>("Images/UI_45"));
-        Sprites.Add(Sprite.RightSideOpen, Content.Load<Texture2D>("Images/UI_46"));
-        Sprites.Add(Sprite.DeadFile, Content.Load<Texture2D>("Images/UI_47"));
 
         //Projectiles
         Sprites.Add(Sprite.SpiralShot, Content.Load<Texture2D>("Images/Projectile_0"));
@@ -151,13 +147,17 @@ public static class Assets
         Sprites.Add(Sprite.ToggleButton, Content.Load<Texture2D>("Images/UI_25"));
         Sprites.Add(Sprite.Terminal, Content.Load<Texture2D>("Images/UI_26"));
         Sprites.Add(Sprite.Miniplayer, Content.Load<Texture2D>("Images/miniship"));
-        Sprites.Add(Sprite.Underlay, Content.Load<Texture2D>("Images/underlay"));
         Sprites.Add(Sprite.SwitchOne, Content.Load<Texture2D>("Images/UI_40-1"));
         Sprites.Add(Sprite.SwitchTwo, Content.Load<Texture2D>("Images/UI_40-2"));
         Sprites.Add(Sprite.SwitchThree, Content.Load<Texture2D>("Images/UI_40-3"));
         Sprites.Add(Sprite.SwitchFour, Content.Load<Texture2D>("Images/UI_40-4"));
         Sprites.Add(Sprite.SwitchFive, Content.Load<Texture2D>("Images/UI_40-5"));
         Sprites.Add(Sprite.Overlay, Content.Load<Texture2D>("Images/UI_42"));
+        Sprites.Add(Sprite.Floppy, Content.Load<Texture2D>("Images/UI_44"));
+        Sprites.Add(Sprite.FloppyFlat, Content.Load<Texture2D>("Images/UI_45"));
+        Sprites.Add(Sprite.RightSideOpen, Content.Load<Texture2D>("Images/UI_46"));
+        Sprites.Add(Sprite.DeadFile, Content.Load<Texture2D>("Images/UI_47"));
+        Sprites.Add(Sprite.RightSidePanel, Content.Load<Texture2D>("Images/UI_48"));
 
         Sprites.Add(Sprite.SmeltIcon, Content.Load<Texture2D>("Images/UI_19"));
         Sprites.Add(Sprite.RepairIcon, Content.Load<Texture2D>("Images/UI_20"));

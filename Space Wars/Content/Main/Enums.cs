@@ -199,6 +199,7 @@ public enum Sprite
     FloppyFlat,
     RightSideOpen,
     DeadFile,
+    RightSidePanel,
 
     SmeltIcon,
     RepairIcon,

@@ -31,7 +31,7 @@ public static class UI
     public static Screen CutsceneGlobalMenu { get; } = new Screen() { enabled = true };
     public static Window HackMenu { get; } = new Window(center, Assets.Get(Sprite.LargePanel));
     public static Window FloppyTerminal { get; } = new Window(new Vector2(0, center.Y), Assets.Get(Sprite.Terminal)) { alignment = Alignment.Left };
-    public static Window FuseMenu { get; } = new Window(new Vector2(BackBuffer.X, center.Y), Assets.Get(Sprite.Terminal)) { alignment = Alignment.Right };
+    public static Window FuseMenu { get; } = new Window(new Vector2(BackBuffer.X, center.Y), Assets.Get(Sprite.RightSidePanel)) { alignment = Alignment.Right };
 
     //Main Menu
     public static Button PatchedConicsToggle { get; } = new Button(new Vector2(0, -MainMenu.Size.Y / 4), Assets.Get(Sprite.WideButton), Assets.TextFont, $"Patched Conics: {PatchedConics}", Color.White);
@@ -143,7 +143,6 @@ public static class UI
     public static Decal FuseCounter { get; } = new Decal(new Vector2(-60, -55), Assets.TextFont, "0", Color.Yellow, 10);
     public static Button[,] Fuses { get; } = new Button[4, 5];
     public static Decal[] ModuleIcons { get; } = new Decal[5];
-    public static Decal FragilityTextbox { get; } = new Decal(new Vector2(0, -55), Assets.TextFont, "Fuse Fragility: Med", Color.Yellow, 6);
 
     //Misc
     public static Button SidePanelClose { get; } = new Button(new Vector2(Assets.Get(Sprite.Terminal).Width / 2 - Assets.Get(Sprite.ToggleButton).Width / 2, 0), Assets.Get(Sprite.ToggleButton));
@@ -164,7 +163,8 @@ public static class UI
     //Restart Terminal
     public static Decal DeadFile { get; } = new Decal(new Vector2(-10, 0), Assets.Get(Sprite.DeadFile));
 
-    public static Button FuseMenuClose { get; } = new Button(new Vector2(-Assets.Get(Sprite.Terminal).Width / 2 + Assets.Get(Sprite.ToggleButton).Width / 2, 0), Assets.Get(Sprite.RightSideOpen));
+    public static Dial FuseDial { get; } = new Dial(Assets.Get(Sprite.LargeMinerArm), new Vector2(-80, 0), Assets.Get(Sprite.AdvancedFighter));
+    public static Button FuseMenuClose { get; } = new Button(new Vector2(-Assets.Get(Sprite.RightSidePanel).Width / 2 + Assets.Get(Sprite.ToggleButton).Width / 2, 0), Assets.Get(Sprite.RightSideOpen));
 
     public static void AddUIElements()
     {
@@ -569,7 +569,6 @@ public static class UI
                 FuseMenu.AddWidget(fuse, (int)Alignment.Center);
             }
         }
-        FuseMenu.AddWidget(FragilityTextbox, (int)Alignment.Center);
         for (int i = 0; i < 5; i++)
         {
             float y = (i - 2) * 20;
@@ -577,6 +576,7 @@ public static class UI
             FuseMenu.AddWidget(StatusLights[i] = new Decal(new Vector2(-30, y), Assets.Get(Sprite.Circle)), (int)Alignment.Center);
         }
         FuseMenu.AddWidget(FuseMenuClose);
+        FuseMenu.AddWidget(FuseDial);
 
         CutsceneGlobalMenu.AddWidget(GlobalSidePanelOpen, (int)Alignment.Left);
         CutsceneGlobalMenu.AddWidget(GlobalFusePanelOpen, (int)Alignment.Right);

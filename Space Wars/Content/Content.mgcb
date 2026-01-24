@@ -1628,6 +1628,18 @@
 /processorParam:TextureFormat=Color
 /build:Images/UI_47.png
 
+#begin Images/UI_48.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:Images/UI_48.png
+
 #begin Images/UI_6.png
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -1675,18 +1687,6 @@
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
 /build:Images/UI_9.png
-
-#begin Images/underlay.png
-/importer:TextureImporter
-/processor:TextureProcessor
-/processorParam:ColorKeyColor=255,0,255,255
-/processorParam:ColorKeyEnabled=True
-/processorParam:GenerateMipmaps=False
-/processorParam:PremultiplyAlpha=True
-/processorParam:ResizeToPowerOfTwo=False
-/processorParam:MakeSquare=False
-/processorParam:TextureFormat=Color
-/build:Images/underlay.png
 
 #begin Shaders/BloomShader.fx
 /importer:EffectImporter
