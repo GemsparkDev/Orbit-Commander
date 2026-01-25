@@ -270,7 +270,7 @@ public static class EventHandler
             }
         }
         UI.FuseCounter.text = $"{_spareFuses}";
-        UI.FuseDial.Target = (float)(totalFuses) / 20 - 2;
+        UI.FuseDial.Target = (float)(totalFuses) / 10 - 0.5f;
 
         Color[] possibleColors = [ Color.Red, Color.Orange, Color.Yellow, Color.White, Color.Cyan ];
         for (int i = 0; i < 5; i++)

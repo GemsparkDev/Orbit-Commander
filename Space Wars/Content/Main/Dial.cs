@@ -42,8 +42,8 @@ public class Dial : FunctionalWidget
     }
     public override void Draw(SpriteBatch _spriteBatch, Vector2 _parentPosition, float _transparency, Vector2 _center)
     {
-        _spriteBatch.Draw(dialTexture, _parentPosition + Offset - _center, null, color * _transparency, (2 * currentVal - 1) * MathF.PI/4, Size / 2, UIManager.UIScale, 0, 0);
         base.Draw(_spriteBatch, _parentPosition, _transparency, _center);
+        _spriteBatch.Draw(dialTexture, _parentPosition + Offset - _center, null, color * _transparency, (2 * currentVal - 1) * MathF.PI / 4, new Vector2(dialTexture.Width, dialTexture.Height) / 2, UIManager.UIScale, 0, 0);
     }
     public override void HoveringDraw(SpriteBatch _spriteBatch)
     {

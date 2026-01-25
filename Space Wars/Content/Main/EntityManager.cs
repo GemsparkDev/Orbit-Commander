@@ -876,7 +876,7 @@ public class EntityManager
                     }
                 }
             }),
-            new Event(0, 16 + ts*12 + Engine.DeltaSeconds, delegate(float time)
+            new Event(16 + ts * 12, Engine.DeltaSeconds, delegate(float time)
             {
                 Engine.SaveGame.Player.Update();
             }),

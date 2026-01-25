@@ -163,7 +163,7 @@ public static class UI
     //Restart Terminal
     public static Decal DeadFile { get; } = new Decal(new Vector2(-10, 0), Assets.Get(Sprite.DeadFile));
 
-    public static Dial FuseDial { get; } = new Dial(Assets.Get(Sprite.LargeMinerArm), new Vector2(-80, 0), Assets.Get(Sprite.AdvancedFighter));
+    public static Dial FuseDial { get; } = new Dial(Assets.Get(Sprite.Indicator), new Vector2(-80, 0), Assets.Get(Sprite.Dial));
     public static Button FuseMenuClose { get; } = new Button(new Vector2(-Assets.Get(Sprite.RightSidePanel).Width / 2 + Assets.Get(Sprite.ToggleButton).Width / 2, 0), Assets.Get(Sprite.RightSideOpen));
 
     public static void AddUIElements()

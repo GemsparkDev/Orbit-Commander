@@ -200,6 +200,8 @@ public enum Sprite
     RightSideOpen,
     DeadFile,
     RightSidePanel,
+    Dial,
+    Indicator,
 
     SmeltIcon,
     RepairIcon,
