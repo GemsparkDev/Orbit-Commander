@@ -6,6 +6,7 @@ using System.Linq;
 using Space_Wars.Content.Main.Particles;
 using Microsoft.Xna.Framework.Graphics;
 using System.Diagnostics;
+using Space_Wars.Content.Main.Story;
 
 namespace Space_Wars.Content.Main;
 public class Mission
@@ -686,5 +687,25 @@ public class WaveGoal(int _targetWave) : ICondition
     public ICondition Clone()
     {
         return new WaveGoal(_targetWave);
+    }
+}
+public class DialogueCondition(Dialogue[] _dialogues) : ICondition
+{
+    private bool isComplete = false;
+    public void Initialize() 
+    {
+        foreach(var dialogue in _dialogues)
+        {
+            Engine.DialogueManager.Add(dialogue);
+        }
+        isComplete = true;
+    }
+    public bool IsComplete()
+    {
+        return isComplete;
+    }
+    public ICondition Clone()
+    {
+        return new DialogueCondition(_dialogues);
     }
 }

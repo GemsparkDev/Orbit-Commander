@@ -367,7 +367,6 @@ public class Cutscene(List<IEvent> _events, List<IActor> _actors, GameState _nex
         if (!isActive)
         {
             CurrentGameState.SwitchState(_nextGameState);
-            Engine.DialogueManager.Clear();
         }
     }
     public override void Draw(SpriteBatch _spriteBatch)

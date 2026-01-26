@@ -9,6 +9,7 @@ using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Linq;
 using UILib.Content.Main;
+using static Assimp.Metadata;
 
 namespace Space_Wars.Content.Main.Entities;
 
@@ -4753,7 +4754,7 @@ public class Enemy : Entity
     }
     public static Enemy NewEnemySpawner(Vector2 _position, Vector2 _velocity, float _angle, bool _isFriendly = false)
     {
-        var enemy = new Enemy(_position, _velocity, _angle, 0, 100000, Assets.Get(Sprite.Orbiter), _isFriendly);
+        var enemy = new Enemy(_position, _velocity, _angle, 0,500, Assets.Get(Sprite.Orbiter), _isFriendly);
         enemy.AddBehaviour(enemy.EnemySpawner());
         return enemy;
     }

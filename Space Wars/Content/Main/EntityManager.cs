@@ -896,6 +896,11 @@ public class EntityManager
                 UI.FloppyTerminal.enabled = false;
                 UI.FuseMenu.enabled = false;
                 EventHandler.AcknowledgeMessage(Message.ToggleTerminal);
+
+                Engine.DialogueManager.Add(new Dialogue("-ies approaching in 5 seconds", null));
+                Engine.DialogueManager.Add(new Dialogue("The pilot got the prototype working! Sierra squadron, protect it!", null));
+                Engine.DialogueManager.Add(new Dialogue("Dammit, radar readings indicate our fleet got intercepted!", null));
+                Engine.DialogueManager.Add(new Dialogue("Requesting air support, get the prototype out of here!", null));
             })
         ];
         scene = new Cutscene(events, actors, new PlayingGame());
