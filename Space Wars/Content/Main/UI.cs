@@ -136,9 +136,9 @@ public static class UI
     public static Decal UpgradeText { get; } = new Decal(new Vector2(-30, -20), Assets.TextFont, "", Color.White, 10);
 
     //Repair Menu
-    public static Slider RestartSlider { get; } = new Slider(Engine.Line, new Vector2(-100, 50), new Vector2(50, 2), true, [Color.Cyan, Color.Black]);
+    public static Slider RestartSlider { get; } = new Slider(Engine.Line, new Vector2(0, 50), new Vector2(50, 2), true, [Color.Cyan, Color.Black]);
     public static Decal[] StatusLights { get; } = new Decal[5];
-    public static Slider RestartSwitch { get; } = new Slider(Engine.Line, new Vector2(0, 0), Assets.DimsOf(Sprite.SwitchOne) + new Vector2(2, 4), false, [Color.Transparent, Color.Transparent]);
+    public static Slider RestartSwitch { get; } = new Slider(Engine.Line, new Vector2(0, 30), Assets.DimsOf(Sprite.SwitchOne) + new Vector2(2, 4), false, [Color.Transparent, Color.Transparent]);
     public static Decal Switch { get; } = new Decal(RestartSwitch.Offset, Assets.Get(Sprite.SwitchFive));
     public static Decal FuseCounter { get; } = new Decal(new Vector2(-60, -55), Assets.TextFont, "0", Color.Yellow, 10);
     public static Button[,] Fuses { get; } = new Button[4, 5];
