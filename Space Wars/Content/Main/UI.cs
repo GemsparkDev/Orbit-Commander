@@ -67,8 +67,8 @@ public static class UI
     public static Button GarageButton { get; } = new Button(new Vector2(0, -MainMenu.Size.Y / 4), Assets.Get(Sprite.WideButton), Assets.TextFont, "To Garage", Color.White);
     public static Button CraftButton { get; } = new Button(new Vector2(0, MainMenu.Size.Y / 4), Assets.Get(Sprite.Button), Assets.TextFont, "Repair", Color.LightBlue);
     public static Decal RequiredCraftsText { get; } = new Decal(new Vector2(0) + new Vector2(0, -6), Assets.TextFont, "25", Color.White, 10);
-    public static Slider FurnaceSlider { get; } = new Slider(Engine.Line, new Vector2(-20, -MainMenu.Size.Y / 6), new Vector2(60, 2), true, [new Color(255, 239, 85), new Color(50, 51, 67)]);
-    public static Slider CraftingSlider { get; } = new Slider(Engine.Line, new Vector2(0, -MainMenu.Size.Y / 4), new Vector2(60, 2), true, [Color.Cyan, Color.Gray]);
+    public static Slider FurnaceSlider { get; } = new Slider(Line, new Vector2(-20, -MainMenu.Size.Y / 6), new Vector2(60, 2), true, [new Color(255, 239, 85), new Color(50, 51, 67)]);
+    public static Slider CraftingSlider { get; } = new Slider(Line, new Vector2(0, -MainMenu.Size.Y / 4), new Vector2(60, 2), true, [Color.Cyan, Color.Gray]);
 
     //Garage Menu
     public static Button RepairButton { get; } = new Button(new Vector2(-GarageMenu.Size.X / 4 - 25, -40), Assets.Get(Sprite.Button), Assets.TextFont, "Repair", Color.LightBlue);
@@ -79,7 +79,7 @@ public static class UI
     public static Decal ValidConfigText { get; } = new Decal(-GarageMenu.Size / 4 + new Vector2(20, GarageMenu.Size.Y / 1.5f), Assets.TextFont, "Ready for Combat", Color.Green, 10);
 
     //Player Menu
-    public static Slider EnemySlider { get; } = new Slider(Engine.Line, new Vector2(0, -PlayerMenu.Size.Y / 3), new Vector2(50, 2), true, [Color.White, Color.Gray]);
+    public static Slider EnemySlider { get; } = new Slider(Line, new Vector2(0, -PlayerMenu.Size.Y / 3), new Vector2(50, 2), true, [Color.White, Color.Gray]);
     public static Decal WaveText { get; } = new Decal(new Vector2(-20, 0), Assets.TextFont, "0", Color.White, 10);
     public static Decal EnemiesLeft { get; } = new Decal(new Vector2(0, 0), Assets.TextFont, "0", Color.Red, 10);
     public static Decal Overlay { get; } = new Decal(new Vector2(-10.5f, 49f), Assets.Get(Sprite.Overlay)) { color = Color.White * 0.5f };
@@ -136,10 +136,10 @@ public static class UI
     public static Decal UpgradeText { get; } = new Decal(new Vector2(-30, -20), Assets.TextFont, "", Color.White, 10);
 
     //Repair Menu
-    public static Slider RestartSlider { get; } = new Slider(Engine.Line, new Vector2(0, 50), new Vector2(50, 2), true, [Color.Cyan, Color.Black]);
+    public static Slider RestartSlider { get; } = new Slider(Line, new Vector2(0, 50), new Vector2(50, 2), true, [Color.Cyan, Color.Black]);
     public static Decal[] StatusLights { get; } = new Decal[5];
-    public static Slider RestartSwitch { get; } = new Slider(Engine.Line, new Vector2(0, 30), Assets.DimsOf(Sprite.SwitchOne) + new Vector2(2, 4), false, [Color.Transparent, Color.Transparent]);
-    public static Decal Switch { get; } = new Decal(RestartSwitch.Offset, Assets.Get(Sprite.SwitchFive));
+    public static Slider RestartSwitch { get; } = new Slider(Line, new Vector2(0, 60), Assets.DimsOf(Sprite.SwitchOne) + new Vector2(2, 4), false, [Color.Transparent, Color.Transparent]);
+    public static Decal Switch { get; } = new Decal(RestartSwitch.Offset / UILib.Content.Main.UIManager.UIScale, Assets.Get(Sprite.SwitchFive));
     public static Decal FuseCounter { get; } = new Decal(new Vector2(-60, -55), Assets.TextFont, "0", Color.Yellow, 10);
     public static Button[,] Fuses { get; } = new Button[4, 5];
     public static Decal[] ModuleIcons { get; } = new Decal[5];
