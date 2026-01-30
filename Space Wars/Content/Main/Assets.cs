@@ -160,6 +160,7 @@ public static class Assets
         Sprites.Add(Sprite.RightSidePanel, Content.Load<Texture2D>("Images/UI_48"));
         Sprites.Add(Sprite.Dial, Content.Load<Texture2D>("Images/UI_49"));
         Sprites.Add(Sprite.Indicator, Content.Load<Texture2D>("Images/UI_50"));
+        Sprites.Add(Sprite.LEDGlow, Content.Load<Texture2D>("Images/UI_51"));
 
         Sprites.Add(Sprite.SmeltIcon, Content.Load<Texture2D>("Images/UI_19"));
         Sprites.Add(Sprite.RepairIcon, Content.Load<Texture2D>("Images/UI_20"));

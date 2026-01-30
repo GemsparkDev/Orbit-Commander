@@ -730,6 +730,7 @@ public class EntityManager
         var floppy = new Actor(Assets.Get(Sprite.Floppy), new Vector2(Engine.BackBuffer.X * 4 / 5, Engine.BackBuffer.Y), Color.Gray, MathF.PI / 8) { Scale = UIManager.UIScale };
         var floppyFlat = new Actor(Assets.Get(Sprite.FloppyFlat), new Vector2(Engine.BackBuffer.X * 4 / 5, Engine.BackBuffer.Y), Color.White, 0) { Scale = UIManager.UIScale };
         var floppyVel = Vector2.Zero;
+        var ledGlow = new Actor(Assets.Get(Sprite.LEDGlow), UI.FloppyTerminal.position + (new Vector2(72.5f, 94.5f) * UIManager.UIScale - Assets.DimsOf(Sprite.Terminal) / 2) * UIManager.UIScale, Color.Red, 0) { Scale = UIManager.UIScale };
         float floppyAngVel = Util.OneToNegOne();
         List<IActor> actors = [];
         for (int i = 0; i < text.Count; i++)
@@ -830,6 +831,7 @@ public class EntityManager
                 floppyFlat.Position = UI.FloppyTerminal.position + (new Vector2(107, 94.5f) * UIManager.UIScale - Assets.DimsOf(Sprite.Terminal) / 2) * UIManager.UIScale;
                 floppyFlat.Color = Color.White * ((2f - time)/2f);
                 Engine.Self.QueueShaderException(floppyFlat);
+                Engine.Self.QueueShaderException(ledGlow);
             }),
             new TriggerEvent(10 + ts * 4, delegate(float time)
             {

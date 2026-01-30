@@ -571,9 +571,9 @@ public static class UI
         }
         for (int i = 0; i < 5; i++)
         {
-            float y = (i - 2) * 20;
+            float y = (i - 2) * 20 + 0.5f;
             FuseMenu.AddWidget(ModuleIcons[i] = new Decal(new Vector2(-15, y), null), (int)Alignment.Center);
-            FuseMenu.AddWidget(StatusLights[i] = new Decal(new Vector2(-30, y), Assets.Get(Sprite.Circle)), (int)Alignment.Center);
+            FuseMenu.AddWidget(StatusLights[i] = new Decal(new Vector2(-30, y), Assets.Get(Sprite.LEDGlow)), (int)Alignment.Center);
         }
         FuseMenu.AddWidget(FuseMenuClose);
         FuseMenu.AddWidget(FuseDial);

@@ -227,10 +227,10 @@ public static class EventHandler
         {
             if(!Engine.SaveGame.Player.IsEnabled)
             {
-                UI.StatusLights[i].color = new Color(50, 50, 50) * 0.5f;
+                UI.StatusLights[i].color = Color.Transparent;
                 continue;
             }
-            UI.StatusLights[i].color = (Engine.SaveGame.Player.modules[(ModuleType)i].isFailed ? Color.Red * 0.5f : Color.White * 0.5f);
+            UI.StatusLights[i].color = (Engine.SaveGame.Player.modules[(ModuleType)i].isFailed ? Color.Red : Color.White);
         }
     }
     public static void DisableDockingMenus()

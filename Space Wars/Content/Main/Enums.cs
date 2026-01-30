@@ -202,6 +202,7 @@ public enum Sprite
     RightSidePanel,
     Dial,
     Indicator,
+    LEDGlow,
 
     SmeltIcon,
     RepairIcon,
