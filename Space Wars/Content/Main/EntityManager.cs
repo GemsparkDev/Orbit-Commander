@@ -33,10 +33,8 @@ public class EntityManager
     [
         new Mission([new Planet(Vector2.Zero, Vector2.Zero, 15000, 12, true, Color.White, true)],
      [
-        //new EntityCondition(new AdvancedConstructor(Enemy.NewEnemySpawner, new Vector2(0, 1200), Planet.GetOrbitalVelocity(new Vector2(0, 1200), Vector2.Zero, 20000), 0, false), [Condition.Kill]),
-        //new EntityCondition(new AdvancedConstructor(Enemy.NewEnemySpawner, new Vector2(0, -1200), Planet.GetOrbitalVelocity(new Vector2(0, -1200), Vector2.Zero, 20000), 0, false), [Condition.Kill]),
-        new EntityCondition(new AdvancedConstructor(Enemy.NewEnemySpawner, new Vector2(1200, 0), Planet.GetOrbitalVelocity(new Vector2(1200, 0), Vector2.Zero, 20000), 0, true), [Condition.Kill]),
-        new EntityCondition(new AdvancedConstructor(Enemy.NewEnemySpawner, new Vector2(-1200, 0), Planet.GetOrbitalVelocity(new Vector2(-1200, 0), Vector2.Zero, 20000), 0, true), [Condition.Kill]),
+        new EntityCondition(new AdvancedConstructor(Enemy.NewEnemySpawner, new Vector2(1200, 0), Planet.GetOrbitalVelocity(new Vector2(1200, 0), Vector2.Zero, 20000), 0, true), []),
+        new EntityCondition(new AdvancedConstructor(Enemy.NewEnemySpawner, new Vector2(-1200, 0), Planet.GetOrbitalVelocity(new Vector2(-1200, 0), Vector2.Zero, 20000), 0, true), []),
         new EntityCondition(new AdvancedConstructor(Enemy.NewCarrier, new Vector2(50, -750), Vector2.Zero, 0, true), []),
         new EntityCondition(new AdvancedConstructor(Enemy.NewCarrier, new Vector2(-50, -750), Vector2.Zero, 0, true), []),
         new EntityCondition(new AdvancedConstructor(Enemy.NewCarrier, new Vector2(100, -700), Vector2.Zero, 0, true), []),
@@ -44,6 +42,7 @@ public class EntityManager
         new EntityCondition(new AdvancedConstructor(Enemy.NewSymmetryBoss, new Vector2(700, 0), Vector2.Zero, 0, true), []),
         new EntityCondition(new AdvancedConstructor(Enemy.NewTurret, new Vector2(MathF.Sin(0.3f), -MathF.Cos(0.3f)) * 12 * 50, Vector2.Zero, 0.3f, true), []),
         new EntityCondition(new AdvancedConstructor(Enemy.NewTurret, new Vector2(MathF.Sin(-0.3f), -MathF.Cos(-0.3f)) * 12 * 50, Vector2.Zero, -0.3f, true), []),
+        new EntityCondition(new EntityConstructor(Enemy.NewEscapeMothership, new Vector2(0, 100000), Vector2.Zero, 0), [ Condition.Protect, Condition.CustomIncomplete ])
         ], "War", "Defend the planet", 0.15f, new Vector2(0, -800), Mission.TierOne(), Mission.TierOneBosses(), RestartCutscene, true) { isAggressive = true, playerProgression = 0 },
         
         new Mission([new Planet(Vector2.Zero, Vector2.Zero, 10000, 8, true, Color.Cyan, false),
@@ -903,6 +902,7 @@ public class EntityManager
                 Engine.DialogueManager.Add(new Dialogue("The pilot got the prototype working! Sierra squadron, protect it!", null));
                 Engine.DialogueManager.Add(new Dialogue("Dammit, radar readings indicate our fleet got intercepted!", null));
                 Engine.DialogueManager.Add(new Dialogue("Requesting air support, get the prototype out of here!", null));
+                Engine.DialogueManager.Add(new Dialogue("Sending in a portable mothership. Pilot, dock to it and escape!", null));
             })
         ];
         scene = new Cutscene(events, actors, new PlayingGame());

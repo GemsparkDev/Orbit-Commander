@@ -4359,6 +4359,43 @@ public class Enemy : Entity
             yield return 0;
         }
     }
+    IEnumerable<int> EscapeMothership()
+    {
+        float cd = -5;
+        bool isLanded = false;
+        while(true)
+        {
+            velocity = Vector2.Zero;
+            if(Engine.DialogueManager.QueuedDialogues <= 0)
+            {
+                if (!isLanded)
+                {
+                    position = new Vector2(0, -100) * cd * cd + new Vector2(0, -Engine.SaveGame.CurrentMission.Planet.radius);
+                    if (cd < 0)
+                    {
+                        cd += Engine.DeltaSeconds;
+                        if (cd >= 0)
+                        {
+                            isLanded = true;
+                        }
+                    }
+                    else
+                    {
+                        cd += Engine.DeltaSeconds;
+                        if (cd > 3)
+                        {
+                            Engine.SaveGame.CurrentMission.CompleteCustomRule(this);
+                        }
+                    }
+                }
+                if (EventHandler.AcknowledgeMessage(Message.EscapeDroneLeave))
+                {
+                    isLanded = false;
+                }
+            }
+            yield return 0;
+        }
+    }
     #endregion
     public static Enemy NewDummyEnemy(Vector2 _position, bool _isFriendly = false)
     {
@@ -4785,5 +4822,11 @@ public class Enemy : Entity
         enemy.AddBehaviour(enemy.EnemyDeath());
         return enemy;
     }
-
+    public static Enemy NewEscapeMothership(Vector2 _position, Vector2 _velocity, float _angle)
+    {
+        var enemy = new Enemy(_position, _velocity, _angle, 10, 1000, Assets.Get(Sprite.Mothership), true);
+        enemy.AddBehaviour(enemy.EscapeMothership());
+        enemy.Components.Add(new DockableComponent(enemy, UI.EscapeMenu, false));
+        return enemy;
+    }
 }

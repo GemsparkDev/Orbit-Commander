@@ -9,6 +9,7 @@ namespace Space_Wars.Content.Main.Story;
 public class DialogueManager
 {
     private List<Dialogue> dialogues = [];
+    public int QueuedDialogues { get { return dialogues.Count; } }
     public void Clear()
     {
         dialogues = [];

@@ -32,6 +32,7 @@ public static class UI
     public static Window HackMenu { get; } = new Window(center, Assets.Get(Sprite.LargePanel));
     public static Window FloppyTerminal { get; } = new Window(new Vector2(0, center.Y), Assets.Get(Sprite.Terminal)) { alignment = Alignment.Left };
     public static Window FuseMenu { get; } = new Window(new Vector2(BackBuffer.X, center.Y), Assets.Get(Sprite.RightSidePanel)) { alignment = Alignment.Right };
+    public static Window EscapeMenu { get; } = new Window(center, Assets.Get(Sprite.LargePanel));
 
     //Main Menu
     public static Button PatchedConicsToggle { get; } = new Button(new Vector2(0, -MainMenu.Size.Y / 4), Assets.Get(Sprite.WideButton), Assets.TextFont, $"Patched Conics: {PatchedConics}", Color.White);
@@ -165,6 +166,8 @@ public static class UI
 
     public static Dial FuseDial { get; } = new Dial(Assets.Get(Sprite.Indicator), new Vector2(-80, 0), Assets.Get(Sprite.Dial));
     public static Button FuseMenuClose { get; } = new Button(new Vector2(-Assets.Get(Sprite.RightSidePanel).Width / 2 + Assets.Get(Sprite.ToggleButton).Width / 2, 0), Assets.Get(Sprite.RightSideOpen));
+
+    public static Button EscapeButton { get; } = new Button(Vector2.Zero, Assets.Get(Sprite.Button), Assets.TextFont, "Escape!", Color.White);
 
     public static void AddUIElements()
     {
@@ -396,6 +399,8 @@ public static class UI
 
         HackButton.AddBehaviour(delegate { EventHandler.SendMessage(Message.Hack); });
 
+        EscapeButton.AddBehaviour(delegate { EventHandler.SendMessage(Message.EscapeDroneLeave); });
+
         MainMenu.AddWidget(ExitButton, 0);
         MainMenu.AddWidget(SingleplayerButton, 0);
         MainMenu.AddWidget(TitleName, 0);
@@ -588,6 +593,8 @@ public static class UI
         FloppyTerminal.AddWidget(DeadFile);
         FloppyTerminal.AddWidget(Overlay);
 
+        EscapeMenu.AddWidget(EscapeButton);
+
         Engine.UIManager.AddContainer(MainMenu);
         Engine.UIManager.AddContainer(PauseMenu);
         Engine.UIManager.AddContainer(PlayerMenu);
@@ -602,6 +609,7 @@ public static class UI
         Engine.UIManager.AddContainer(HackMenu);
         Engine.UIManager.AddContainer(FloppyTerminal);
         Engine.UIManager.AddContainer(FuseMenu);
+        Engine.UIManager.AddContainer(EscapeMenu);
 
         Engine.UIManager.ScreenWindow = GlobalMenu;
     }
