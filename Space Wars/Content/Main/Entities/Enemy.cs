@@ -2593,6 +2593,28 @@ public class Enemy : Entity
             yield return 0;
         }
     }
+    IEnumerable<int> Decoy()
+    {
+        while (true)
+        {
+            Entity nearestEnemy = Engine.EntityManager.NearestEnemy(this, false);
+            if (nearestEnemy != null)
+            {
+                Vector2 relativePosition = nearestEnemy.position - position;
+                GoToPosition(nearestEnemy.position - Vector2.Normalize(relativePosition) * 100, 3f);
+                targetAngle = Util.ToAngle(relativePosition);
+                RotateTowards(targetAngle, 0.1f);
+            }
+            velocity *= Util.FIED(0.1f);
+            if (health <= 0)
+            {
+                Explode(damage, 200);
+                isExpired = true;
+                SoundManager.PlaySound(Assets.Get(Sound.Explosion), position);
+            }
+            yield return 0;
+        }
+    }
     #endregion
     #region Enemies
     IEnumerable<int> Fighter()
@@ -3469,28 +3491,6 @@ public class Enemy : Entity
             yield return 0;
         }
     }
-    IEnumerable<int> Decoy()
-    {
-        while (true)
-        {
-            Entity nearestEnemy = Engine.EntityManager.NearestEnemy(this, false);
-            if(nearestEnemy != null)
-            {
-                Vector2 relativePosition = nearestEnemy.position - position;
-                GoToPosition(nearestEnemy.position - Vector2.Normalize(relativePosition) * 100, 3f);
-                targetAngle = Util.ToAngle(relativePosition);
-                RotateTowards(targetAngle, 0.1f);
-            }
-            velocity *= Util.FIED(0.1f);
-            if (health <= 0)
-            {
-                Explode(damage, 200);
-                isExpired = true;
-                SoundManager.PlaySound(Assets.Get(Sound.Explosion), position);
-            }
-            yield return 0;
-        }
-    }
     #endregion
     #region Infrastructure
     IEnumerable<int> Mothership()
@@ -4363,11 +4363,18 @@ public class Enemy : Entity
     {
         float cd = -5;
         bool isLanded = false;
-        while(true)
+        ParticleEmitter engineParticles = new(Assets.Get(Sprite.Circle), 0.1f, position, MathF.PI, MathF.PI / 4, 6,
+         200f, Color.Yellow, EmitterType.EmissionOverTime)
+        { particleFadeToColor = Color.Transparent };
+        while (true)
         {
             velocity = Vector2.Zero;
             if(Engine.DialogueManager.QueuedDialogues <= 0)
             {
+                engineParticles.position = position + new Vector2(0, 10);
+                engineParticles.speedOfEmission = 500 * MathF.Tanh(cd * cd * 2) + 1f;
+                engineParticles.offsetVelocity = new Vector2(0, -3f) * cd;
+                engineParticles.Update();
                 if (!isLanded)
                 {
                     position = new Vector2(0, -100) * cd * cd + new Vector2(0, -Engine.SaveGame.CurrentMission.Planet.radius);
@@ -4382,7 +4389,7 @@ public class Enemy : Entity
                     else
                     {
                         cd += Engine.DeltaSeconds;
-                        if (cd > 3)
+                        if (cd > 4)
                         {
                             Engine.SaveGame.CurrentMission.CompleteCustomRule(this);
                         }
