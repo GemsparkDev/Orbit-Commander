@@ -288,10 +288,11 @@ public static class UI
             });
         RestartSwitch.SetInterval(1, 1);
 
-        GlobalSidePanelOpen.AddBehaviour(EventHandler.ToggleDockingMenus);
+        GlobalSidePanelOpen.AddBehaviour(delegate() { EventHandler.ToggleDockingMenus(); });
         GlobalFusePanelOpen.AddBehaviour(delegate () 
         { 
             SoundManager.PlayGlobalSound(Assets.Get(Sound.Interact));
+            EventHandler.UpdateModulesStatus();
             FuseMenu.enabled = true;
         });
         SidePanelClose.AddBehaviour(EventHandler.ToggleDockingMenus);
