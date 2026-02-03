@@ -43,7 +43,7 @@ public class EntityManager
         new EntityCondition(new AdvancedConstructor(Enemy.NewTurret, new Vector2(MathF.Sin(0.3f), -MathF.Cos(0.3f)) * 12 * 50, Vector2.Zero, 0.3f, true), []),
         new EntityCondition(new AdvancedConstructor(Enemy.NewTurret, new Vector2(MathF.Sin(-0.3f), -MathF.Cos(-0.3f)) * 12 * 50, Vector2.Zero, -0.3f, true), []),
         new EntityCondition(new EntityConstructor(Enemy.NewEscapeMothership, new Vector2(0, 100000), Vector2.Zero, 0), [ Condition.Protect, Condition.CustomIncomplete ])
-        ], "War", "Defend the planet", 0.15f, new Vector2(0, -800), Mission.TierOne(), Mission.TierOneBosses(), RestartCutscene, false) { isAggressive = true, playerProgression = 0 },
+        ], "War", "Defend the planet", 0.1f, new Vector2(0, -800), Mission.TierOne(), Mission.TierOneBosses(), RestartCutscene, false) { isAggressive = true, playerProgression = 0 },
         
         new Mission([new Planet(Vector2.Zero, Vector2.Zero, 10000, 8, true, Color.Cyan, false),
         new Planet(new Vector2(1000, 0), Planet.GetOrbitalVelocity(new Vector2(1000, 0), Vector2.Zero, 10000), 250, 1.5f, false, Color.Cyan) ],

@@ -330,9 +330,10 @@ public class StandardEngine() : Module(Modules.Engines)
 public class PlasmaEngine() : Module(Modules.Plasma)
 {
     float engineTime = 0;
+    float burstTime = 0;
     public override void OnEngine()
     {
-        engineTime = Math.Clamp(engineTime + Engine.DeltaSeconds * 2, 0, 1);
+        engineTime = Math.Clamp(engineTime + Engine.DeltaSeconds * 3, 0, 1);
         float engineTimeModifier = 1 - (1 - engineTime) * (1 - engineTime);
         float fuseRatio = (float)(Player.CountFuses(ModuleType.Engines)) / 3;
         var dir = Vector2.Normalize(-Player.direction + new Vector2(Util.OneToNegOne(), Util.OneToNegOne()) / 10);
@@ -344,14 +345,23 @@ public class PlasmaEngine() : Module(Modules.Plasma)
         }
         if (Player.direction != Vector2.Zero)
         {
-            Player.velocity += Vector2.Normalize(Player.direction) * 20 * Engine.DeltaSeconds * engineTimeModifier * fuseRatio / (Player.leashedMaterials.Count + 1);
+            Player.velocity += Vector2.Normalize(Player.direction) * 20 * Engine.DeltaSeconds * engineTimeModifier * fuseRatio * (0.75f - MathF.Tanh((burstTime - 5)/2)/4) / (Player.leashedMaterials.Count + 1);
+        }
+        if(burstTime < 6)
+        {
+            burstTime += Engine.DeltaSeconds * 3;
         }
     }
     public override void OnUpdate()
     {
+        Engine.WriteLine(burstTime);
         if (!Player.isEngineActive && engineTime > 0)
         {
             engineTime -= Engine.DeltaSeconds;
+        }
+        if(burstTime > 0)
+        {
+            burstTime -= Engine.DeltaSeconds * 2;
         }
     }
 }
