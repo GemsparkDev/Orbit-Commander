@@ -203,6 +203,7 @@ public enum Sprite
     Dial,
     Indicator,
     LEDGlow,
+    FuseDetailing,
 
     SmeltIcon,
     RepairIcon,
