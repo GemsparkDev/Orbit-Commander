@@ -1,0 +1,5 @@
+
+<Solution>
+  <Project Path="../UILib/UILib.csproj" />
+  <Project Path="Space Wars/Space Wars.csproj" />
+</Solution>

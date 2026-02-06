@@ -5,11 +5,9 @@ using Space_Wars.Content.Main.Components;
 using Space_Wars.Content.Main.Particles;
 using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Linq;
 using UILib.Content.Main;
-using static Assimp.Metadata;
 
 namespace Space_Wars.Content.Main.Entities;
 
