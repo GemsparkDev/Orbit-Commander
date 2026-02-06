@@ -274,8 +274,9 @@ public class Engine : Game
         //Render renderTarget with custom bloom shader
         GraphicsDevice.SetRenderTarget(null);
         GraphicsDevice.Clear(new Color(50, 50, 50));
+        int renderCoord = (int)(BackBuffer.Y/0.5625f);
         spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, null, null, Assets.GlobalShader);
-        spriteBatch.Draw(renderTarget, new Rectangle(0, 0, (int)(BackBuffer.X), (int)(BackBuffer.Y)), Color.White);
+        spriteBatch.Draw(renderTarget, new Rectangle((int)BackBuffer.X/2 - renderCoord/2, 0, (int)(renderCoord), (int)(BackBuffer.Y)), Color.White);
         spriteBatch.End();
 
         spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, null, null, null);

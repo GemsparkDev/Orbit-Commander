@@ -560,18 +560,6 @@
 /processorParam:TextureFormat=Color
 /build:Images/Entity_40-3.png
 
-#begin Images/Entity_41.png
-/importer:TextureImporter
-/processor:TextureProcessor
-/processorParam:ColorKeyColor=255,0,255,255
-/processorParam:ColorKeyEnabled=True
-/processorParam:GenerateMipmaps=False
-/processorParam:PremultiplyAlpha=True
-/processorParam:ResizeToPowerOfTwo=False
-/processorParam:MakeSquare=False
-/processorParam:TextureFormat=Color
-/build:Images/Entity_41.png
-
 #begin Images/Entity_41-1.png
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -596,7 +584,7 @@
 /processorParam:TextureFormat=Color
 /build:Images/Entity_41-2.png
 
-#begin Images/Entity_42.png
+#begin Images/Entity_41.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -606,7 +594,7 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:Images/Entity_42.png
+/build:Images/Entity_41.png
 
 #begin Images/Entity_42-1.png
 /importer:TextureImporter
@@ -619,6 +607,18 @@
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
 /build:Images/Entity_42-1.png
+
+#begin Images/Entity_42.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:Images/Entity_42.png
 
 #begin Images/Entity_43.png
 /importer:TextureImporter
@@ -644,18 +644,6 @@
 /processorParam:TextureFormat=Color
 /build:Images/Entity_44.png
 
-#begin Images/Entity_45.png
-/importer:TextureImporter
-/processor:TextureProcessor
-/processorParam:ColorKeyColor=255,0,255,255
-/processorParam:ColorKeyEnabled=True
-/processorParam:GenerateMipmaps=False
-/processorParam:PremultiplyAlpha=True
-/processorParam:ResizeToPowerOfTwo=False
-/processorParam:MakeSquare=False
-/processorParam:TextureFormat=Color
-/build:Images/Entity_45.png
-
 #begin Images/Entity_45-1.png
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -679,6 +667,18 @@
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
 /build:Images/Entity_45-2.png
+
+#begin Images/Entity_45.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:Images/Entity_45.png
 
 #begin Images/Entity_46.png
 /importer:TextureImporter
