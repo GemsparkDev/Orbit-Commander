@@ -26,7 +26,7 @@ public class Engine : Game
     public static Camera Camera { get; private set; }
     public static Engine Self { get; private set; }
     public static Texture2D Line { get; private set; }
-    public static Vector2 ScreenSize => new(1920, 1080); //Render target size
+    public static Vector2 ScreenSize { get; private set; } //Render target size
     public static Vector2 BackBuffer { get; private set; } //Monitor size
     public static Vector2 MousePositionOffset { get; set; }
     public static Timespan IngameTime { get; set; } = new();
@@ -64,6 +64,7 @@ public class Engine : Game
         TargetElapsedTime = TimeSpan.FromSeconds(1d / (double)(targetFramerate));
         
         BackBuffer = new Vector2(graphics.PreferredBackBufferWidth, graphics.PreferredBackBufferHeight);
+        ScreenSize = new Vector2(1920 * BackBuffer.Y/1080,1080);
         DebugMode = false;
         Line = new Texture2D(graphics.GraphicsDevice, 1, 1, false, SurfaceFormat.Color);
         Line.SetData([ Color.White ]);
@@ -76,7 +77,7 @@ public class Engine : Game
         DialogueManager = new DialogueManager();
         AddUIElements();
         CurrentGameState.SwitchState(new MainMenu());
-        renderTarget = new RenderTarget2D(GraphicsDevice, (int)ScreenSize.X, (int)ScreenSize.Y);
+        renderTarget = new RenderTarget2D(GraphicsDevice, 1920, 1080);
 
         IsMouseVisible = false;
     }

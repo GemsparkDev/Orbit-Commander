@@ -720,7 +720,7 @@ public class EntityManager
             "                       =====    #####            ",
         ];
         Cutscene scene = null;
-        Vector2 screen = Engine.ScreenSize / 2;
+        Vector2 screen = Engine.BackBuffer / 2;
         var t5 = new TextActor(new Vector2(80, 260) * 3 - screen, "Failed\nFailed\nFailed\nFailed\nFailed\n")
         {
             TextSize = 1.45f * UIManager.UIScale,

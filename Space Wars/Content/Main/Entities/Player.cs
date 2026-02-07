@@ -284,8 +284,9 @@ public class Player : Entity
             isEngineActive = false;
         }
         //Ensures that target vector performs identically in all resolutions
-        Vector2 ratio = Engine.ScreenSize / Engine.BackBuffer;
-        targetVector = Vector2.Normalize(new Vector2(Input.NewMouseState.X * ratio.X, Input.NewMouseState.Y * ratio.Y) - Engine.ScreenSize / 2 - position + Engine.Camera.Position + Engine.MousePositionOffset);
+        Vector2 mousePos = new Vector2(Input.NewMouseState.Position.X - (Engine.ScreenSize.X - Engine.BackBuffer.X) / 2 * Engine.BackBuffer.X/Engine.ScreenSize.X, Input.NewMouseState.Position.Y) + velocity - Engine.BackBuffer/2;
+        Vector2 playerCamPos =  position - Engine.Camera.Position;
+        targetVector =  Vector2.Normalize(mousePos - playerCamPos);
     }
     public override void LowerCooldown()
     {
@@ -371,10 +372,6 @@ public class Player : Entity
                         {
                             Vector2 dir = Util.ToUnitVector(angle);
                             Vector2 mouseDir = targetVector;
-                            if(i == 0)
-                            {
-                                Engine.WriteLine($"Dir: {dir.X * mouseDir.X + dir.Y * mouseDir.Y}, Dist: {dist}");
-                            }
                             if (dir.X * mouseDir.X + dir.Y * mouseDir.Y > (1f - 0.9f / constructs.Count) && dist > 300)
                             {
                                 color = Color.White;

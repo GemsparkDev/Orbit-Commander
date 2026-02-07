@@ -354,7 +354,6 @@ public class PlasmaEngine() : Module(Modules.Plasma)
     }
     public override void OnUpdate()
     {
-        Engine.WriteLine(burstTime);
         if (!Player.isEngineActive && engineTime > 0)
         {
             engineTime -= Engine.DeltaSeconds;
@@ -1193,15 +1192,12 @@ public class SummonGrapplingHook() : Module(Modules.GrapplingHook)
                 foreach (var planet in Engine.SaveGame.CurrentMission.Planets)
                 {
                     var planetDir = Vector2.Normalize(mousePos + planet.position);
-                    Engine.WriteLine(mousePos);
-                    Engine.WriteLine(planet.position + planetDir * planet.radius);
                     if (Vector2.DistanceSquared(mousePos, planet.position + planetDir * planet.radius) < 10000)
                     {
                         hook.Parent = new Enemy(planet.position + planetDir * planet.radius, Vector2.Zero, 0, 0, 1, null, true);
                         hasHooked = true;
                         p = planet;
                         offset = planetDir * planet.radius;
-                        Engine.WriteLine("Ahh");
                         break;
                     }
                 }
