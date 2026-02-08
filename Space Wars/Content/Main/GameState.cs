@@ -40,6 +40,8 @@ public abstract class GameState
         //Disables rendering when disabled
         if(Engine.SaveGame != null && !Engine.SaveGame.Player.IsEnabled)
         {
+            Vector2 dims = Assets.DimsOf(Sprite.DeadFile);
+            _spriteBatch.Draw(Assets.Get(Sprite.DeadFile), Engine.Camera.Position + Engine.MousePositionOffset - Assets.DimsOf(Sprite.DeadFile)/2, Color.White );
             return;
         }
         Engine.SaveGame.CurrentMission.Draw(_spriteBatch);
@@ -209,6 +211,7 @@ public class MissionSelect : GameState
         EventHandler.UpdateModulesUI();
         EventHandler.UpdateMissionText();
         EventHandler.UpdateInventoryUI();
+        Engine.DialogueManager.Clear();
     }
     public override void Update() 
     {
