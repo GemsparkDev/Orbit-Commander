@@ -716,18 +716,21 @@ public class Player : Entity
     public void ToggleFuse(int x, int y)
     {
         bool fuse = moduleFuses[x, y];
-        if (!fuse && spareFuses <= 0)
+        if ((UI.Fuses[y, x].daughterItem == null) != fuse)
         {
             return;
         }
-        spareFuses += fuse ? 1 : -1;
-        moduleFuses[x, y] = !moduleFuses[x, y];
+        moduleFuses[x, y] = !fuse;
         EventHandler.UpdateFuseUI(moduleFuses, spareFuses);
     }
     public void AddFuse()
     {
         spareFuses++;
         EventHandler.UpdateFuseUI(moduleFuses, spareFuses);
+    }
+    public void UpdateSpares()
+    {
+        spareFuses = UI.FuseCounter.Count;
     }
     public int CountFuses(ModuleType _module)
     {

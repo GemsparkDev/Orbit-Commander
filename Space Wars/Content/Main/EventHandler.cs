@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Xna.Framework.Graphics;
 using System.IO;
-using System;
+using Space_Wars.Content.Main.UIElements;
 
 namespace Space_Wars.Content.Main;
 
@@ -255,7 +255,7 @@ public static class EventHandler
                 Color color;
                 if (!_fuses[i, j])
                 {
-                    color = Color.Cyan * 0.25f;
+                    continue;
                 }
                 else if (!_fuses[(int)ModuleType.Core, j])
                 {
@@ -266,10 +266,10 @@ public static class EventHandler
                     color = Color.White;
                     totalFuses++;
                 }
-                UI.Fuses[j, i].color = color;
+                UI.Fuses[j, i].daughterItem = new Fuse(color);
             }
         }
-        UI.FuseCounter.text = $"{_spareFuses}";
+        UI.FuseCounter.Count = _spareFuses;
         UI.FuseDial.Target = (float)(totalFuses) / 10 - 0.5f;
 
         Color[] possibleColors = [ Color.Red, Color.Orange, Color.Yellow, Color.White, Color.Cyan ];
@@ -297,7 +297,7 @@ public static class EventHandler
     {
         for (int i = 0; i < 5; i++)
         {
-            UI.ModuleIcons[i].SetTexture(moduleTextures[i]);
+            UI.ModuleIcons[i].Texture = moduleTextures[i];
         }
     }
     public static void GetSave()

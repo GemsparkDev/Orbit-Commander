@@ -162,6 +162,7 @@ public static class Assets
         Sprites.Add(Sprite.Indicator, Content.Load<Texture2D>("Images/UI_50"));
         Sprites.Add(Sprite.LEDGlow, Content.Load<Texture2D>("Images/UI_51"));
         Sprites.Add(Sprite.FuseDetailing, Content.Load<Texture2D>("Images/UI_52"));
+        Sprites.Add(Sprite.FuseSlot, Content.Load<Texture2D>("Images/UI_53"));
 
         Sprites.Add(Sprite.SmeltIcon, Content.Load<Texture2D>("Images/UI_19"));
         Sprites.Add(Sprite.RepairIcon, Content.Load<Texture2D>("Images/UI_20"));

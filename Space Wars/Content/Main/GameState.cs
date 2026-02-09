@@ -41,7 +41,7 @@ public abstract class GameState
         if(Engine.SaveGame != null && !Engine.SaveGame.Player.IsEnabled)
         {
             Vector2 dims = Assets.DimsOf(Sprite.DeadFile);
-            _spriteBatch.Draw(Assets.Get(Sprite.DeadFile), Engine.Camera.Position + Engine.MousePositionOffset - Assets.DimsOf(Sprite.DeadFile)/2, Color.White );
+            _spriteBatch.Draw(Assets.Get(Sprite.DeadFile), Engine.Camera.Position + Engine.MousePositionOffset, null, Color.White, 0, Assets.DimsOf(Sprite.DeadFile) / 2, UIManager.UIScale, 0, 0);
             return;
         }
         Engine.SaveGame.CurrentMission.Draw(_spriteBatch);

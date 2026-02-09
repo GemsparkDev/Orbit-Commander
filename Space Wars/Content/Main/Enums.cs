@@ -212,6 +212,7 @@ public enum Sprite
     SettingsIcon,
     PlanetIcon,
     Fuse,
+    FuseSlot,
 
     Cursor,
     ClickedCursor,

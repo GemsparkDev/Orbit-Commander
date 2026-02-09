@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using UILib.Content.Main;
 
-namespace Space_Wars.Content.Main;
+namespace Space_Wars.Content.Main.UIElements;
 public class Dial : FunctionalWidget
 {
     private List<Action> behaviours = [];
@@ -16,9 +16,8 @@ public class Dial : FunctionalWidget
     public Dial(Texture2D _dialTexture, Vector2 _offset, Texture2D _texture)
     {
         dialTexture = _dialTexture;
-        Size = UIManager.DimsOf(_texture);
         offset = _offset;
-        texture = _texture;
+        Texture = _texture;
     }
     public override void Interact(Vector2 parentPosition)
     {
