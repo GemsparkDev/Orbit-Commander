@@ -188,7 +188,6 @@ public class Player : Entity
         else if (IsRestarting)
         {
             restartCooldown -= Engine.DeltaSeconds;
-            EventHandler.UpdateRestartSlider(restart - restartCooldown, restart);
         }
         if (invincibilityCooldown > 0)
         {

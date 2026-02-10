@@ -138,16 +138,16 @@ public static class UI
     public static Decal UpgradeText { get; } = new Decal(new Vector2(-30, -20), Assets.TextFont, "", Color.White, 10);
 
     //Fuse Menu
-    public static Slider RestartSlider { get; } = new Slider(Line, new Vector2(40, 50), new Vector2(50, 2), true, [Color.Cyan, Color.Black]);
     public static Decal[] StatusLights { get; } = new Decal[5];
-    public static Slider RestartSwitch { get; } = new Slider(Line, new Vector2(55, 20), Assets.DimsOf(Sprite.SwitchOne) + new Vector2(2, 4), false, [Color.Transparent, Color.Transparent]);
+    public static Slider RestartSwitch { get; } = new Slider(Line, new Vector2(15, 70), Assets.DimsOf(Sprite.SwitchOne) + new Vector2(2, 4), false, [Color.Transparent, Color.Transparent]);
     public static Decal Switch { get; } = new Decal(RestartSwitch.Offset / UILib.Content.Main.UIManager.UIScale, Assets.Get(Sprite.SwitchFive));
-    public static UIElements.Stack<Fuse> FuseCounter { get; } = new UIElements.Stack<Fuse>(new Vector2(50, -30), Assets.Get(Sprite.Button), 1, Assets.Get(Sprite.Fuse), new Vector2(-Assets.Get(Sprite.Button).Width/2 * 4/5, 0), new Vector2(8,0), delegate () { return new Fuse(Color.White); });
+    public static UIElements.Stack<Fuse> FuseCounter { get; } = new UIElements.Stack<Fuse>(new Vector2(-5, -70), Assets.Get(Sprite.Button), 1, Assets.Get(Sprite.Fuse), new Vector2(-Assets.Get(Sprite.Button).Width/2 * 4/5, 0), new Vector2(8,0), delegate () { return new Fuse(Color.White); });
     public static ItemSlot<Fuse>[,] Fuses { get; } = new ItemSlot<Fuse>[4, 5];
     public static Decal[] ModuleIcons { get; } = new Decal[5];
-    public static Decal FuseDetailing { get; } = new Decal(new Vector2(-10, 0), Assets.Get(Sprite.FuseDetailing));
-    public static Dial FuseDial { get; } = new Dial(Assets.Get(Sprite.Indicator), new Vector2(80, -10), Assets.Get(Sprite.Dial));
+    public static Decal FuseDetailing { get; } = new Decal(new Vector2(30, 0), Assets.Get(Sprite.FuseDetailing));
+    public static Dial FuseDial { get; } = new Dial(Assets.Get(Sprite.Indicator), new Vector2(55, -58), Assets.Get(Sprite.Dial));
     public static Button FuseMenuClose { get; } = new Button(new Vector2(-Assets.Get(Sprite.RightSidePanel).Width / 2 + Assets.Get(Sprite.ToggleButton).Width / 2, 0), Assets.Get(Sprite.RightSideOpen));
+    public static Decal FuseText { get; } = new Decal(FuseDial.Offset / UILib.Content.Main.UIManager.UIScale + new Vector2(0, 5), Assets.TextFont, "Instability", Color.Black, 5);
 
     //Misc
     public static Button SidePanelClose { get; } = new Button(new Vector2(Assets.Get(Sprite.Terminal).Width / 2 - Assets.Get(Sprite.ToggleButton).Width / 2, 0), Assets.Get(Sprite.ToggleButton));
@@ -559,14 +559,13 @@ public static class UI
 
         FuseMenu.AddWidget(FuseDetailing, (int)Alignment.Center);
         FuseMenu.AddWidget(RestartSwitch, (int)Alignment.Center);
-        FuseMenu.AddWidget(RestartSlider, (int)Alignment.Center);
         FuseMenu.AddWidget(Switch, (int)Alignment.Center);
         FuseMenu.AddWidget(FuseCounter, (int)Alignment.Center);
         for (int i = 0; i < 4; i++)
         {
             for (int j = -2; j < 3; j++)
             {
-                var fuse = new ItemSlot<Fuse>(new Vector2(i * 11 - 38, j * 20 + 0.5f), Assets.Get(Sprite.FuseSlot), Engine.UIManager, -1);
+                var fuse = new ItemSlot<Fuse>(new Vector2(i * 11 + 2, j * 20 + 0.5f), Assets.Get(Sprite.FuseSlot), Engine.UIManager, -1);
                 //Not sure why this works, don't touch
                 int x = j + 2;
                 int y = i;
@@ -581,11 +580,12 @@ public static class UI
         for (int i = 0; i < 5; i++)
         {
             float y = (i - 2) * 20 + 0.5f;
-            FuseMenu.AddWidget(ModuleIcons[i] = new Decal(new Vector2(-56.5f, y + 0.5f), null), (int)Alignment.Center);
-            FuseMenu.AddWidget(StatusLights[i] = new Decal(new Vector2(-73f, y), Assets.Get(Sprite.LEDGlow)), (int)Alignment.Center);
+            FuseMenu.AddWidget(ModuleIcons[i] = new Decal(new Vector2(-16.5f, y + 0.5f), null), (int)Alignment.Center);
+            FuseMenu.AddWidget(StatusLights[i] = new Decal(new Vector2(-33f, y), Assets.Get(Sprite.LEDGlow)), (int)Alignment.Center);
         }
         FuseMenu.AddWidget(FuseMenuClose);
         FuseMenu.AddWidget(FuseDial);
+        FuseMenu.AddWidget(FuseText);
 
         CutsceneGlobalMenu.AddWidget(GlobalSidePanelOpen, (int)Alignment.Left);
         CutsceneGlobalMenu.AddWidget(GlobalFusePanelOpen, (int)Alignment.Right);

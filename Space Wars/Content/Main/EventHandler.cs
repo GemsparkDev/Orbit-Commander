@@ -168,10 +168,6 @@ public static class EventHandler
         UI.MothershipScrap.text = Engine.SaveGame.Scrap.ToString();
         UI.RequiredCraftsText.text = requiredCraftsLeft.ToString();
     }
-    public static void UpdateRestartSlider(float _value, float _maxValue)
-    {
-        UI.RestartSlider.SetInterval(_value, _maxValue);
-    }
     public static void UpdateEnemyCountdownUI(float _value, float _maxValue, float _wave)
     {
         UI.EnemySlider.Intervals[0] = _value / _maxValue;
