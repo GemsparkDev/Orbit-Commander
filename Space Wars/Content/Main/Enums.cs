@@ -162,6 +162,8 @@ public enum Sprite
     ShieldReal,
     Lidar,
     LidarReal,
+    Nanomachines,
+    NanomachinesReal,
 
     SpiralShot,
     PulseShot,
