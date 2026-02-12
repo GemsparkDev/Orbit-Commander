@@ -164,6 +164,8 @@ public enum Sprite
     LidarReal,
     Nanomachines,
     NanomachinesReal,
+    Expose,
+    ExposeReal,
 
     SpiralShot,
     PulseShot,

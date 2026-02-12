@@ -63,7 +63,7 @@ public static class ItemFactory
         { Modules.SummonShield, new ModuleData(Sprite.CoreModule, Sprite.CoreModule, "Shield Core", (int)ModuleType.Core, 20, typeof(SummonShield)) },
         { Modules.Nanomachines, new ModuleData(Sprite.NanomachinesReal, Sprite.Nanomachines, "Nanomachines", (int)ModuleType.Core, 20, typeof(Nanomachines)) },
         { Modules.CreateFighter, new ModuleData(Sprite.CoreModule, Sprite.CoreModule, "Construct fighter", (int)ModuleType.Core, 20, typeof(CreateFighter)) },
-        { Modules.Expose, new ModuleData(Sprite.AssaultReal, Sprite.Assault, "Exposure", (int)ModuleType.Core, 20, typeof(Expose)) },
+        { Modules.Expose, new ModuleData(Sprite.ExposeReal, Sprite.Expose, "Exposure", (int)ModuleType.Core, 20, typeof(Expose)) },
 
     };
     public readonly static Dictionary<Constructs, ConstructData> constructData = new() 
