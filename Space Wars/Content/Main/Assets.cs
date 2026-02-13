@@ -123,6 +123,8 @@ public static class Assets
         Sprites.Add(Sprite.NanomachinesReal, Content.Load<Texture2D>("Images/UI_54"));
         Sprites.Add(Sprite.Expose, Content.Load<Texture2D>("Images/Item_13"));
         Sprites.Add(Sprite.ExposeReal, Content.Load<Texture2D>("Images/UI_55"));
+        Sprites.Add(Sprite.Stealth, Content.Load<Texture2D>("Images/Item_13"));
+        Sprites.Add(Sprite.StealthReal, Content.Load<Texture2D>("Images/UI_55"));
 
         //Projectiles
         Sprites.Add(Sprite.SpiralShot, Content.Load<Texture2D>("Images/Projectile_0"));

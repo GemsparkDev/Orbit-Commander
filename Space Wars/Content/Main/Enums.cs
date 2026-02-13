@@ -166,6 +166,8 @@ public enum Sprite
     NanomachinesReal,
     Expose,
     ExposeReal,
+    Stealth,
+    StealthReal,
 
     SpiralShot,
     PulseShot,
