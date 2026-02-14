@@ -11,6 +11,7 @@ using UILib.Content.Main;
 using Space_Wars.Content.Main.Story;
 using Microsoft.Xna.Framework.Audio;
 using System.Diagnostics;
+using System.Net.NetworkInformation;
 
 namespace Space_Wars.Content.Main;
 
@@ -30,9 +31,18 @@ public class EntityManager
     public static float StealthThreshold { get; private set; } = 0.75f;
     public int MissionLength => missions.Count;
     private readonly List<Mission> missions =
-    [
+    [        
+        new Mission([new Planet(Vector2.Zero, Vector2.Zero, 10000, 8, true, Color.Cyan, false),
+        new Planet(new Vector2(1000, 0), Planet.GetOrbitalVelocity(new Vector2(1000, 0), Vector2.Zero, 10000), 250, 1.5f, false, Color.Cyan) ],
+        [ new EntityCondition(new EntityConstructor(Enemy.NewMothership, new Vector2(0, -8*50 - Assets.DimsOf(Sprite.Mothership).Y / 2), Vector2.Zero, 0f), [ Condition.Protect, Condition.CustomIncomplete ]),
+        new EntityCondition(new PickupConstructor(ItemFactory.NewScrap, new Vector2(0, -8*50), new Vector2(10, -10), 0.07f),[]),
+        new EntityCondition(new PickupConstructor(ItemFactory.NewScrap, new Vector2(0, -8*50), new Vector2(-8, -4), -0.03f),[])],
+        "Crash Landing",
+        "A simple system with a large planet and one closely orbiting moon. Drone activity detected, but minimal.",
+        -1, new Vector2(0, -8*50 - Assets.DimsOf(Sprite.Mothership).Y / 2), Mission.TierOne(), Mission.TierOneBosses(), RestartCutscene) { playerProgression = 0, playerDocked = true, tip = "WASD to move, Space to dock and undock.\nRmb to collect scrap, Lmb to shoot." },
+
         new Mission([new Planet(Vector2.Zero, Vector2.Zero, 15000, 12, true, Color.White, true)],
-     [
+        [
         new EntityCondition(new AdvancedConstructor(Enemy.NewEnemySpawner, new Vector2(1200, 0), Planet.GetOrbitalVelocity(new Vector2(1200, 0), Vector2.Zero, 20000), 0, true), []),
         new EntityCondition(new AdvancedConstructor(Enemy.NewEnemySpawner, new Vector2(-1200, 0), Planet.GetOrbitalVelocity(new Vector2(-1200, 0), Vector2.Zero, 20000), 0, true), []),
         new EntityCondition(new AdvancedConstructor(Enemy.NewCarrier, new Vector2(50, -750), Vector2.Zero, 0, true), []),
@@ -43,16 +53,7 @@ public class EntityManager
         new EntityCondition(new AdvancedConstructor(Enemy.NewTurret, new Vector2(MathF.Sin(0.3f), -MathF.Cos(0.3f)) * 12 * 50, Vector2.Zero, 0.3f, true), []),
         new EntityCondition(new AdvancedConstructor(Enemy.NewTurret, new Vector2(MathF.Sin(-0.3f), -MathF.Cos(-0.3f)) * 12 * 50, Vector2.Zero, -0.3f, true), []),
         new EntityCondition(new EntityConstructor(Enemy.NewEscapeMothership, new Vector2(0, 100000), Vector2.Zero, 0), [ Condition.Protect, Condition.CustomIncomplete ])
-        ], "War", "Defend the planet", 0.1f, new Vector2(0, -800), Mission.TierOne(), Mission.TierOneBosses(), RestartCutscene, false) { isAggressive = true, playerProgression = 0 },
-        
-        new Mission([new Planet(Vector2.Zero, Vector2.Zero, 10000, 8, true, Color.Cyan, false),
-        new Planet(new Vector2(1000, 0), Planet.GetOrbitalVelocity(new Vector2(1000, 0), Vector2.Zero, 10000), 250, 1.5f, false, Color.Cyan) ],
-        [ new EntityCondition(new EntityConstructor(Enemy.NewMothership, new Vector2(0, -8*50 - Assets.DimsOf(Sprite.Mothership).Y / 2), Vector2.Zero, 0f), [ Condition.Protect, Condition.CustomIncomplete ]),
-        new EntityCondition(new PickupConstructor(ItemFactory.NewScrap, new Vector2(0, -8*50), new Vector2(10, -10), 0.07f),[]),
-        new EntityCondition(new PickupConstructor(ItemFactory.NewScrap, new Vector2(0, -8*50), new Vector2(-8, -4), -0.03f),[])],
-        "Crash Landing",
-        "A simple system with a large planet and one closely orbiting moon. Drone activity detected, but minimal.",
-        -1, new Vector2(0, -8*50 - Assets.DimsOf(Sprite.Mothership).Y / 2), Mission.TierOne(), Mission.TierOneBosses()) { playerProgression = 0, playerDocked = true, tip = "WASD to move, Space to dock and undock.\nRmb to collect scrap, Lmb to shoot." },
+        ], "War", "Defend the planet", 0.1f, new Vector2(0, -800), Mission.TierOne(), Mission.TierOneBosses(), null, true) { isAggressive = true, playerProgression = 0 },
 
         new Mission( [new Planet(Vector2.Zero, Vector2.Zero, 3500, 4, true, Color.Cyan, true) ],
         [
@@ -897,12 +898,6 @@ public class EntityManager
                 UI.FloppyTerminal.enabled = false;
                 UI.FuseMenu.enabled = false;
                 EventHandler.AcknowledgeMessage(Message.ToggleTerminal);
-
-                Engine.DialogueManager.Add(new Dialogue("-ies approaching in 5 seconds", null));
-                Engine.DialogueManager.Add(new Dialogue("The pilot got the prototype working! Sierra squadron, protect it!", null));
-                Engine.DialogueManager.Add(new Dialogue("Dammit, radar readings indicate our fleet got intercepted!", null));
-                Engine.DialogueManager.Add(new Dialogue("Requesting air support, get the prototype out of here!", null));
-                Engine.DialogueManager.Add(new Dialogue("Sending in a portable mothership. Pilot, dock to it and escape!", null));
             })
         ];
         scene = new Cutscene(events, actors, new PlayingGame());
@@ -918,5 +913,36 @@ public class EntityManager
                 }
             }
         }
+    }
+    private static Cutscene DayOneLog()
+    {
+        Cutscene scene;
+        List<string> text =
+        [
+            "Day one log:",
+            "System diagnostics indicate full memory corruption.",
+            "Original mission parameters lost.",
+            "Encounter with hostile force suggests wanted status",
+            "Recommended actions:",
+            "Investigate nearby planets.",
+            "Discover original mission.",
+            "Survive.", 
+        ];
+        List<IActor> actors = [];
+        List<IEvent> events = [];
+        Vector2 screen = Engine.BackBuffer / 2;
+        float sum = 0;
+        float ts = 0.2f;
+        for (int i = 0; i < text.Count; i++)
+        {
+            actors.Add(new TextActor(new Vector2(60, 20 * 3 * i) - screen, text[i]) { TextSize = 1.5f * UIManager.UIScale });
+            events.Add(new Event(sum, text[i].Length * ts, delegate(float time)
+            {
+                (actors[i] as TextActor).Index = (int)(time / ts);
+            }));
+            sum += text[i].Length * ts;
+        }
+        scene = new Cutscene(events, actors, new PlayingGame());
+        return scene;
     }
 }
