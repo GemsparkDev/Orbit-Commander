@@ -291,7 +291,7 @@ public class EntityManager
             }
             Player.isExpired = false;
             EventHandler.UpdateModulesStatus();
-            EventHandler.MissionSelectTrigger();
+            EventHandler.MissionSelectTrigger(new MissionSelect());
         }
     }
     public void Update()
@@ -922,7 +922,7 @@ public class EntityManager
             "Day one log:",
             "System diagnostics indicate full memory corruption.",
             "Original mission parameters lost.",
-            "Encounter with hostile force suggests wanted status",
+            "Encounter with hostile force suggests wanted status.",
             "Recommended actions:",
             "Investigate nearby planets.",
             "Discover original mission.",
@@ -932,17 +932,25 @@ public class EntityManager
         List<IEvent> events = [];
         Vector2 screen = Engine.BackBuffer / 2;
         float sum = 0;
-        float ts = 0.2f;
+        float ts = 0.65f;
         for (int i = 0; i < text.Count; i++)
         {
-            actors.Add(new TextActor(new Vector2(60, 20 * 3 * i) - screen, text[i]) { TextSize = 1.5f * UIManager.UIScale });
-            events.Add(new Event(sum, text[i].Length * ts, delegate(float time)
+            var actor = new TextActor(new Vector2(60, 20 * 3 * i) - screen, text[i]) { TextSize = 1.5f * UIManager.UIScale };
+            actors.Add(actor);
+            events.Add(new Event(sum + i, text[i].Length * ts, delegate(float time)
             {
-                (actors[i] as TextActor).Index = (int)(time / ts);
+                float index = time / ts;
+                actor.Index = (int)(index) + 1;
+                if(index - MathF.Floor(index) <= Engine.DeltaSeconds / ts)
+                {
+                    SoundManager.PlayGlobalSound(Assets.Get(Sound.Interact));
+                }
             }));
             sum += text[i].Length * ts;
         }
-        scene = new Cutscene(events, actors, new PlayingGame());
+        Debug.WriteLine(sum);
+        events.Add(new Event(sum + text.Count, 1, delegate (float time) { }));
+        scene = new Cutscene(events, actors, new MissionSelect());
         return scene;
     }
 }

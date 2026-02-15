@@ -38,12 +38,13 @@ public class Mission
     private List<DelegateEnemy> bosses;
     private Vector2 playerPosition;
     private Func<Cutscene> cutscene;
+    private Func<Cutscene> endCutscene;
     private int currentBoss;
     private float waveTimer = 5;
     private float maxWaveTimer = 5;
     private bool currentWaveActive = false;
 
-    public Mission(Planet[] _planets, List<ICondition> _missionObjectives, string _name, string _description, float _timerModifier, Vector2 _playerPosition, List<(int, DelegateEnemy)> _enemies, List<DelegateEnemy> _bosses, Func<Cutscene> _cutscene = null, bool _escapeVehicle = false)
+    public Mission(Planet[] _planets, List<ICondition> _missionObjectives, string _name, string _description, float _timerModifier, Vector2 _playerPosition, List<(int, DelegateEnemy)> _enemies, List<DelegateEnemy> _bosses, Func<Cutscene> _cutscene = null, bool _escapeVehicle = false, Func<Cutscene> _endCutscene = null)
     {
         Name = _name;
         Description = _description;
@@ -60,6 +61,7 @@ public class Mission
 
         currentBoss = Util.Random.Next(bosses.Count);
         cutscene = _cutscene;
+        endCutscene = _endCutscene;
         if (_escapeVehicle)
         {
             escapeVehicle = new EntityConstructor(Enemy.NewPickupDrone, new Vector2(-2000, -2000), Vector2.Zero, 0);
@@ -113,7 +115,14 @@ public class Mission
                 RestartTimer -= Engine.DeltaSeconds;
                 return;
             }
-            EventHandler.MissionSelectTrigger();
+            if(endCutscene != null)
+            {
+                EventHandler.MissionSelectTrigger(endCutscene());
+            }
+            else
+            {
+                EventHandler.MissionSelectTrigger(new MissionSelect());
+            }
             if (TestCompletion())
             {
                 Engine.SaveGame.CompleteMission(Wave);
@@ -467,7 +476,7 @@ public class Mission
         {
             tm /= 2;
         }
-        return new Mission(_planets, CopyObjectives, Name, Description, tm, playerPosition, enemyCreditValues, bosses, cutscene, escapeVehicle != null)
+        return new Mission(_planets, CopyObjectives, Name, Description, tm, playerPosition, enemyCreditValues, bosses, cutscene, escapeVehicle != null, endCutscene)
         { playerProgression = this.playerProgression, playerDocked = this.playerDocked, isAggressive = this.isAggressive || isInFleet, music = this.music, tip = this.tip, relaunchable = this.relaunchable };
     }
     private Vector2 NewSpawnLocation()

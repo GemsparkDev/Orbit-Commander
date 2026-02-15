@@ -187,19 +187,14 @@ public static class EventHandler
             CurrentGameState.SwitchState(new PlayingGame());
         }
     }
-    public static void MissionSelectTrigger()
+    public static void MissionSelectTrigger(GameState _gameState)
     {
         SoundManager.PlayGlobalSound(Assets.Get(Sound.Interact));
         if (!Engine.UIManager.ToggleToMenu(UI.MissionSelect))
         {
             UI.MissionSelect.enabled = !UI.MissionSelect.enabled;
         }
-        if (UI.MissionSelect.enabled)
-        {
-            CurrentGameState.SwitchState(new MissionSelect());
-            return;
-        }
-        CurrentGameState.SwitchState(new PlayingGame());
+        CurrentGameState.SwitchState(_gameState);
     }
     public static void UpdateMissionText()
     {
