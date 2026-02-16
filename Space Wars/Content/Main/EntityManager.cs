@@ -11,7 +11,6 @@ using UILib.Content.Main;
 using Space_Wars.Content.Main.Story;
 using Microsoft.Xna.Framework.Audio;
 using System.Diagnostics;
-using System.Net.NetworkInformation;
 
 namespace Space_Wars.Content.Main;
 
@@ -38,7 +37,7 @@ public class EntityManager
         new EntityCondition(new PickupConstructor(ItemFactory.NewScrap, new Vector2(0, -8*50), new Vector2(10, -10), 0.07f),[]),
         new EntityCondition(new PickupConstructor(ItemFactory.NewScrap, new Vector2(0, -8*50), new Vector2(-8, -4), -0.03f),[])],
         "Crash Landing",
-        "A simple system with a large planet and one closely orbiting moon. Drone activity detected, but minimal.",
+        "The crash landing site. Objective: Explore the system.",
         -1, new Vector2(0, -8*50 - Assets.DimsOf(Sprite.Mothership).Y / 2), Mission.TierOne(), Mission.TierOneBosses(), RestartCutscene) { playerProgression = 0, playerDocked = true, tip = "WASD to move, Space to dock and undock.\nRmb to collect scrap, Lmb to shoot." },
 
         new Mission([new Planet(Vector2.Zero, Vector2.Zero, 15000, 12, true, Color.White, true)],
@@ -53,7 +52,7 @@ public class EntityManager
         new EntityCondition(new AdvancedConstructor(Enemy.NewTurret, new Vector2(MathF.Sin(0.3f), -MathF.Cos(0.3f)) * 12 * 50, Vector2.Zero, 0.3f, true), []),
         new EntityCondition(new AdvancedConstructor(Enemy.NewTurret, new Vector2(MathF.Sin(-0.3f), -MathF.Cos(-0.3f)) * 12 * 50, Vector2.Zero, -0.3f, true), []),
         new EntityCondition(new EntityConstructor(Enemy.NewEscapeMothership, new Vector2(0, 100000), Vector2.Zero, 0), [ Condition.Protect, Condition.CustomIncomplete ])
-        ], "War", "Defend the planet", 0.1f, new Vector2(0, -800), Mission.TierOne(), Mission.TierOneBosses(), null, true) { isAggressive = true, playerProgression = 0 },
+        ], "Crossfire", "Sensors indicate a group fighting against the same hostiles encountered during our crash landing.\nAiding them could gain us a powerful ally.", 0.1f, new Vector2(0, -800), Mission.TierOne(), Mission.TierOneBosses(), null, true) { isAggressive = true, playerProgression = 0 },
 
         new Mission( [new Planet(Vector2.Zero, Vector2.Zero, 3500, 4, true, Color.Cyan, true) ],
         [
