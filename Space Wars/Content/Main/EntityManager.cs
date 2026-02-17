@@ -38,7 +38,7 @@ public class EntityManager
         new EntityCondition(new PickupConstructor(ItemFactory.NewScrap, new Vector2(0, -8*50), new Vector2(-8, -4), -0.03f),[])],
         "Crash Landing",
         "The crash landing site. Objective: Explore the system.",
-        -1, new Vector2(0, -8*50 - Assets.DimsOf(Sprite.Mothership).Y / 2), Mission.TierOne(), Mission.TierOneBosses(), RestartCutscene) { playerProgression = 0, playerDocked = true, tip = "WASD to move, Space to dock and undock.\nRmb to collect scrap, Lmb to shoot." },
+        -1, new Vector2(0, -8*50 - Assets.DimsOf(Sprite.Mothership).Y / 2), Mission.TierOne(), Mission.TierOneBosses(), RestartCutscene, false, DayOneLog) { playerProgression = 0, playerDocked = true, tip = "WASD to move, Space to dock and undock.\nRmb to collect scrap, Lmb to shoot." },
 
         new Mission([new Planet(Vector2.Zero, Vector2.Zero, 15000, 12, true, Color.White, true)],
         [
@@ -52,7 +52,7 @@ public class EntityManager
         new EntityCondition(new AdvancedConstructor(Enemy.NewTurret, new Vector2(MathF.Sin(0.3f), -MathF.Cos(0.3f)) * 12 * 50, Vector2.Zero, 0.3f, true), []),
         new EntityCondition(new AdvancedConstructor(Enemy.NewTurret, new Vector2(MathF.Sin(-0.3f), -MathF.Cos(-0.3f)) * 12 * 50, Vector2.Zero, -0.3f, true), []),
         new EntityCondition(new EntityConstructor(Enemy.NewEscapeMothership, new Vector2(0, 100000), Vector2.Zero, 0), [ Condition.Protect, Condition.CustomIncomplete ])
-        ], "Crossfire", "Sensors indicate a group fighting against the same hostiles encountered during our crash landing.\nAiding them could gain us a powerful ally.", 0.1f, new Vector2(0, -800), Mission.TierOne(), Mission.TierOneBosses(), null, true) { isAggressive = true, playerProgression = 0 },
+        ], "Crossfire", "Sensors indicate a group fighting against the same hostiles encountered during our crash landing.\nAiding them could gain us a powerful ally.", 0.1f, new Vector2(0, -800), Mission.TierOne(), Mission.TierOneBosses(), QueueCrossfireDialogue, true) { isAggressive = true, playerProgression = 0 },
 
         new Mission( [new Planet(Vector2.Zero, Vector2.Zero, 3500, 4, true, Color.Cyan, true) ],
         [
@@ -951,5 +951,18 @@ public class EntityManager
         events.Add(new Event(sum + text.Count, 1, delegate (float time) { }));
         scene = new Cutscene(events, actors, new MissionSelect());
         return scene;
+    }
+    private static Cutscene QueueCrossfireDialogue()
+    {
+        List<IEvent> events = 
+        [
+            new TriggerEvent(0, delegate(float time)
+            {
+                Engine.DialogueManager.Add(new Dialogue("Incoming: Sir, an unknown ship appears to be approaching!", null));
+                Engine.DialogueManager.Add(new Dialogue("They seem to be hailing us... They're on our side!", null));
+                Engine.DialogueManager.Add(new Dialogue("Pilot! Aid us in this fight and we'll help you however we can!", null));
+            }),
+        ];
+        return new Cutscene(events, [], new PlayingGame());
     }
 }
