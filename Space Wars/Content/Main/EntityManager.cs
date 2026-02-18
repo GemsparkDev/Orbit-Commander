@@ -51,8 +51,7 @@ public class EntityManager
         new EntityCondition(new AdvancedConstructor(Enemy.NewSymmetryBoss, new Vector2(700, 0), Vector2.Zero, 0, true), []),
         new EntityCondition(new AdvancedConstructor(Enemy.NewTurret, new Vector2(MathF.Sin(0.3f), -MathF.Cos(0.3f)) * 12 * 50, Vector2.Zero, 0.3f, true), []),
         new EntityCondition(new AdvancedConstructor(Enemy.NewTurret, new Vector2(MathF.Sin(-0.3f), -MathF.Cos(-0.3f)) * 12 * 50, Vector2.Zero, -0.3f, true), []),
-        new EntityCondition(new EntityConstructor(Enemy.NewEscapeMothership, new Vector2(0, 100000), Vector2.Zero, 0), [ Condition.Protect, Condition.CustomIncomplete ])
-        ], "Crossfire", "Sensors indicate a group fighting against the same hostiles encountered during our crash landing.\nAiding them could gain us a powerful ally.", 0.1f, new Vector2(0, -800), Mission.TierOne(), Mission.TierOneBosses(), QueueCrossfireDialogue, true) { isAggressive = true, playerProgression = 0 },
+        ], "Crossfire", "Sensors indicate a group fighting against the same hostiles encountered during our crash landing.\nAiding them could gain us a powerful ally.", 0.15f, new Vector2(0, -800), Mission.TierOne(), Mission.TierOneBosses(), QueueCrossfireDialogue, true) { isAggressive = true, playerProgression = 0 },
 
         new Mission( [new Planet(Vector2.Zero, Vector2.Zero, 3500, 4, true, Color.Cyan, true) ],
         [

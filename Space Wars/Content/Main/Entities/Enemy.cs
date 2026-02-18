@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using UILib.Content.Main;
+using Space_Wars.Content.Main.Story;
 
 namespace Space_Wars.Content.Main.Entities;
 
@@ -4357,46 +4358,44 @@ public class Enemy : Entity
             yield return 0;
         }
     }
-    IEnumerable<int> EscapeMothership()
+    IEnumerable<int> CrashedShip()
     {
-        float cd = -5;
-        bool isLanded = false;
-        ParticleEmitter engineParticles = new(Assets.Get(Sprite.Circle), 0.1f, position, MathF.PI, MathF.PI / 4, 6,
-         200f, Color.Yellow, EmitterType.EmissionOverTime)
+        //Shoots at nearby enemies
+        //Need to spend scrap to reload ammunition, or to repair the ship
+        float cd = 30;
+        bool hasLanded = false;
+        ParticleEmitter engineParticles = new(Assets.Get(Sprite.Circle), 0.1f, position, 0, MathF.PI / 8, 6,
+         200f, Color.Gray, EmitterType.EmissionOverTime)
         { particleFadeToColor = Color.Transparent };
         while (true)
         {
-            velocity = Vector2.Zero;
-            if(Engine.DialogueManager.QueuedDialogues <= 0)
+            engineParticles.offsetVelocity = velocity;
+            engineParticles.Update();
+            if(position.X > 0)
             {
-                engineParticles.position = position + new Vector2(0, 10);
-                engineParticles.speedOfEmission = 500 * MathF.Tanh(cd * cd * 2) + 1f;
-                engineParticles.offsetVelocity = new Vector2(0, -3f) * cd;
-                engineParticles.Update();
-                if (!isLanded)
+                velocity = new Vector2(5, -5);
+            }
+            else
+            {
+                if(!hasLanded)
                 {
-                    position = new Vector2(0, -100) * cd * cd + new Vector2(0, -Engine.SaveGame.CurrentMission.Planet.radius);
-                    if (cd < 0)
-                    {
-                        cd += Engine.DeltaSeconds;
-                        if (cd >= 0)
-                        {
-                            isLanded = true;
-                        }
-                    }
-                    else
-                    {
-                        cd += Engine.DeltaSeconds;
-                        if (cd > 4)
-                        {
-                            Engine.SaveGame.CurrentMission.CompleteCustomRule(this);
-                        }
-                    }
+                    hasLanded = false;
+                    Engine.EntityManager.Explode(10, Size.Length(), position);
                 }
-                if (EventHandler.AcknowledgeMessage(Message.EscapeDroneLeave))
-                {
-                    isLanded = false;
-                }
+                velocity = Vector2.Zero;
+            }
+            if (cd > 30)
+            {
+                cd -= Engine.DeltaSeconds;
+            }
+            else if (0 > cd && cd > -10)
+            {
+                cd = -30;
+                Engine.DialogueManager.Add(new Dialogue("Incoming: Ship going down, I repeat, ship going down!", null));
+                Engine.DialogueManager.Add(new Dialogue("All allies, clear immediately!", null));
+                Engine.DialogueManager.Add(new Dialogue("We are down! Requesting assistance!", null));
+                Engine.DialogueManager.Add(new Dialogue("Dammit, that was our escape route...", null));
+                Engine.DialogueManager.Add(new Dialogue("Get that ship online ASAP!", null));
             }
             yield return 0;
         }
@@ -4827,10 +4826,10 @@ public class Enemy : Entity
         enemy.AddBehaviour(enemy.EnemyDeath());
         return enemy;
     }
-    public static Enemy NewEscapeMothership(Vector2 _position, Vector2 _velocity, float _angle)
+    public static Enemy NewCrashedShip(Vector2 _position, Vector2 _velocity, float _angle)
     {
         var enemy = new Enemy(_position, _velocity, _angle, 10, 1000, Assets.Get(Sprite.Mothership), true);
-        enemy.AddBehaviour(enemy.EscapeMothership());
+        enemy.AddBehaviour(enemy.CrashedShip());
         enemy.Components.Add(new DockableComponent(enemy, UI.EscapeMenu, false));
         return enemy;
     }
