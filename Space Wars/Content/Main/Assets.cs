@@ -125,6 +125,8 @@ public static class Assets
         Sprites.Add(Sprite.ExposeReal, Content.Load<Texture2D>("Images/UI_55"));
         Sprites.Add(Sprite.Stealth, Content.Load<Texture2D>("Images/Item_13"));
         Sprites.Add(Sprite.StealthReal, Content.Load<Texture2D>("Images/UI_55"));
+        Sprites.Add(Sprite.Radar, Content.Load<Texture2D>("Images/Item_14"));
+        Sprites.Add(Sprite.RadarReal, Content.Load<Texture2D>("Images/UI_56"));
 
         //Projectiles
         Sprites.Add(Sprite.SpiralShot, Content.Load<Texture2D>("Images/Projectile_0"));

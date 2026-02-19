@@ -39,7 +39,6 @@ public static class ItemFactory
         { Modules.PrismArray, new ModuleData(Sprite.RealCrossbowModule,Sprite.CrossbowModule, "Prism Array", (int)ModuleType.Guns, 15, typeof(PrismArray), Color.Cyan)},
         { Modules.MatrixLauncher, new ModuleData(Sprite.RealCrossbowModule,Sprite.CrossbowModule, "Matrix Launcher", (int)ModuleType.Guns, 15, typeof(MatrixLauncher), Color.Cyan)},
         { Modules.Torch, new ModuleData(Sprite.TorchReal,Sprite.Torch, "Torch", (int)ModuleType.Guns, 15, typeof(Torch), Color.Yellow)},
-        { Modules.Decoy, new ModuleData(Sprite.TorchReal,Sprite.Torch, "Decoy", (int)ModuleType.Guns, 20, typeof(Decoy))},
         { Modules.SplitterModule, new ModuleData(Sprite.TorchReal,Sprite.Torch, "Splitter", (int)ModuleType.Guns, 20, typeof(SplitterModule))},
         { Modules.Fractal, new ModuleData(Sprite.TorchReal,Sprite.Torch, "Fractal", (int)ModuleType.Guns, 20, typeof(Fractal))},
         { Modules.CrackShot, new ModuleData(Sprite.TorchReal,Sprite.Torch, "Crackshot", (int)ModuleType.Guns, 20, typeof(CrackShot))},
@@ -54,7 +53,7 @@ public static class ItemFactory
 
         { Modules.Sensors, new ModuleData(Sprite.SensorModule,Sprite.SensorModule, "Sensors", (int)ModuleType.Sensors, 20, typeof(Sensors), Color.CornflowerBlue) },
         { Modules.Lidar, new ModuleData(Sprite.LidarReal,Sprite.Lidar, "Lidar", (int)ModuleType.Sensors, 20, typeof(Lidar), Color.Yellow) },
-        { Modules.Radar, new ModuleData(Sprite.SensorModule,Sprite.SensorModule, "Radar", (int)ModuleType.Sensors, 20, typeof(Radar), Color.Yellow) },
+        { Modules.Radar, new ModuleData(Sprite.RadarReal,Sprite.Radar, "Radar", (int)ModuleType.Sensors, 20, typeof(Radar), Color.Yellow) },
         { Modules.PulseEmitter, new ModuleData(Sprite.SensorModule,Sprite.SensorModule, "Pulse Emitter", (int)ModuleType.Sensors, 20, typeof(PulseEmitter), Color.Yellow) },
 
         { Modules.Assault, new ModuleData(Sprite.AssaultReal, Sprite.Assault, "Assault", (int)ModuleType.Core, 20, typeof(Assault)) },
@@ -64,6 +63,7 @@ public static class ItemFactory
         { Modules.Nanomachines, new ModuleData(Sprite.NanomachinesReal, Sprite.Nanomachines, "Nanomachines", (int)ModuleType.Core, 20, typeof(Nanomachines)) },
         { Modules.CreateFighter, new ModuleData(Sprite.CoreModule, Sprite.CoreModule, "Construct fighter", (int)ModuleType.Core, 20, typeof(CreateFighter)) },
         { Modules.Expose, new ModuleData(Sprite.ExposeReal, Sprite.Expose, "Exposure", (int)ModuleType.Core, 20, typeof(Expose)) },
+        { Modules.Decoy, new ModuleData(Sprite.TorchReal,Sprite.Torch, "Decoy", (int)ModuleType.Guns, 20, typeof(Decoy))},
 
     };
     public readonly static Dictionary<Constructs, ConstructData> constructData = new() 
