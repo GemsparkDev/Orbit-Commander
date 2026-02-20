@@ -4362,13 +4362,101 @@ public class Enemy : Entity
     {
         //Shoots at nearby enemies
         //Need to spend scrap to reload ammunition, or to repair the ship
-        float cd = 30;
         bool hasLanded = false;
         ParticleEmitter engineParticles = new(Assets.Get(Sprite.Circle), 0.1f, position, 0, MathF.PI / 8, 6,
          200f, Color.Gray, EmitterType.EmissionOverTime)
         { particleFadeToColor = Color.Transparent };
+        bool currentlyCrafting = false;
+        Pickup furnaceItem = null;
+        float furnaceCooldown = 15;
+        float craftingCooldown = 8;
+        int requiredCraftsLeft = 10;
+        int ammo = 200;
+        cd = [0, 30];
         while (true)
         {
+            if (EventHandler.AcknowledgeMessage(Message.MothershipCraftItem))
+            {
+                currentlyCrafting = true;
+            }
+            if (EventHandler.AcknowledgeMessage(Message.MothershipUpdateFurnace))
+            {
+                furnaceItem = UI.FurnaceSlot.daughterItem;
+            }
+            if (health <= 0)
+            {
+                isExpired = true;
+                SoundManager.PlaySound(Assets.Get(Sound.Death), position);
+            }
+            if (furnaceItem != null)
+            {
+                furnaceCooldown -= Engine.DeltaSeconds;
+                if (furnaceCooldown <= 0)
+                {
+                    if (furnaceItem is Module)
+                    {
+                        Engine.SaveGame.Scrap += 3;
+                    }
+                    else
+                    {
+                        Engine.SaveGame.Scrap++;
+                    }
+                    furnaceItem = null;
+                    SoundManager.PlaySound(Assets.Get(Sound.Interact), position);
+                }
+            }
+            else
+            {
+                furnaceCooldown = 15;
+            }
+            if (currentlyCrafting)
+            {
+                craftingCooldown -= Engine.DeltaSeconds;
+                if (craftingCooldown <= 0)
+                {
+                    craftingCooldown = 8;
+                    if (ammo > 0)
+                    {
+                        requiredCraftsLeft -= 1;
+                        Collide(-100);
+                        ammo = Math.Clamp(ammo + 25, 0, 200);
+                    }
+                    else
+                    {
+                        ammo = 200;
+                    }
+                    currentlyCrafting = false;
+                }
+            }
+
+            //Updating UI
+            EventHandler.UpdateFurnaceUI(15 - furnaceCooldown, 15, furnaceItem);
+            EventHandler.UpdateCraftingUI(8 - craftingCooldown, 8, requiredCraftsLeft);
+            LowerCooldown();
+
+            //Firing at enemies
+            if (requiredCraftsLeft <= 5)
+            {
+                if (ammo > 0 && cd[0] <= 0)
+                {
+                    Entity nearestEnemy = Engine.EntityManager.NearestEnemy(this);
+                    if (nearestEnemy != null)
+                    {
+                        Vector2 relativePosition = position - nearestEnemy.position;
+                        if (relativePosition.Length() < enemyRange.particleVelocity)
+                        {
+                            Engine.EntityManager.Add(new PulseShot(position, -Vector2.Normalize(relativePosition) * 10 + nearestEnemy.velocity, MathF.Atan2(relativePosition.Y, relativePosition.X) - MathF.PI / 2, 0, isFriendly, damage));
+                            SoundManager.PlaySound(Assets.Get(Sound.PulseFire), position);
+                            cd[0] = 0.25f;
+                        }
+                    }
+                }
+            }
+            if (requiredCraftsLeft <= 0)
+            {
+                Engine.SaveGame.CurrentMission.CompleteCustomRule(this);
+                Engine.DialogueManager.Add(new Dialogue("Repair complete, let's get out of here.", null));
+            }
             engineParticles.offsetVelocity = velocity;
             engineParticles.Update();
             if(position.X > 0)
@@ -4384,13 +4472,9 @@ public class Enemy : Entity
                 }
                 velocity = Vector2.Zero;
             }
-            if (cd > 30)
+            if (0 > cd[1] && cd[1] > -10)
             {
-                cd -= Engine.DeltaSeconds;
-            }
-            else if (0 > cd && cd > -10)
-            {
-                cd = -30;
+                cd[1] = -30;
                 Engine.DialogueManager.Add(new Dialogue("Incoming: Ship going down, I repeat, ship going down!", null));
                 Engine.DialogueManager.Add(new Dialogue("All allies, clear immediately!", null));
                 Engine.DialogueManager.Add(new Dialogue("We are down! Requesting assistance!", null));
@@ -4830,7 +4914,7 @@ public class Enemy : Entity
     {
         var enemy = new Enemy(_position, _velocity, _angle, 10, 1000, Assets.Get(Sprite.Mothership), true);
         enemy.AddBehaviour(enemy.CrashedShip());
-        enemy.Components.Add(new DockableComponent(enemy, UI.EscapeMenu, false));
+        enemy.Components.Add(new DockableComponent(enemy, UI.MothershipMenu, false));
         return enemy;
     }
 }
