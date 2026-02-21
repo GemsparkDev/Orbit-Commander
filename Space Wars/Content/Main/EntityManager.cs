@@ -40,6 +40,7 @@ public class EntityManager
         "The crash landing site. Objective: Explore the system.",
         -1, new Vector2(0, -8*50 - Assets.DimsOf(Sprite.Mothership).Y / 2), Mission.TierOne(), Mission.TierOneBosses(), RestartCutscene, false, DayOneLog) { playerProgression = 0, playerDocked = true, tip = "WASD to move, Space to dock and undock.\nRmb to collect scrap, Lmb to shoot." },
 
+        //Note: Add custom "Humanlike" enemies
         new Mission([new Planet(Vector2.Zero, Vector2.Zero, 15000, 12, true, Color.White, true)],
         [
         new EntityCondition(new AdvancedConstructor(Enemy.NewEnemySpawner, new Vector2(1200, 0), Planet.GetOrbitalVelocity(new Vector2(1200, 0), Vector2.Zero, 20000), 0, true), []),
@@ -51,7 +52,10 @@ public class EntityManager
         new EntityCondition(new AdvancedConstructor(Enemy.NewSymmetryBoss, new Vector2(700, 0), Vector2.Zero, 0, true), []),
         new EntityCondition(new AdvancedConstructor(Enemy.NewTurret, new Vector2(MathF.Sin(0.3f), -MathF.Cos(0.3f)) * 12 * 50, Vector2.Zero, 0.3f, true), []),
         new EntityCondition(new AdvancedConstructor(Enemy.NewTurret, new Vector2(MathF.Sin(-0.3f), -MathF.Cos(-0.3f)) * 12 * 50, Vector2.Zero, -0.3f, true), []),
-        ], "Crossfire", "Sensors indicate a group fighting against the same hostiles encountered during our crash landing.\nAiding them could gain us a powerful ally.", 0.15f, new Vector2(0, -800), Mission.TierOne(), Mission.TierOneBosses(), QueueCrossfireDialogue, true) { isAggressive = true, playerProgression = 0 },
+        new EntityCondition(new LaunchConstructor(Enemy.NewDropPod, new Vector2(0,-4000), 600), []),
+        new EntityCondition(new EntityConstructor(Enemy.NewCrashedShip, new Vector2(-6000, -6640), Vector2.Zero, -MathF.PI * 3 / 8), [Condition.Protect, Condition.CustomIncomplete]),
+        ], "Crossfire", "Sensors indicate a group fighting against the same hostiles encountered during our crash landing.\nAiding them could gain us a powerful ally.", 0.15f, new Vector2(0, -4000), Mission.TierOne(), Mission.TierOneBosses(), QueueCrossfireDialogue, true) 
+        { isAggressive = true, playerProgression = 2, playerDocked = true },
 
         new Mission( [new Planet(Vector2.Zero, Vector2.Zero, 3500, 4, true, Color.Cyan, true) ],
         [

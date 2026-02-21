@@ -4363,8 +4363,8 @@ public class Enemy : Entity
         //Shoots at nearby enemies
         //Need to spend scrap to reload ammunition, or to repair the ship
         bool hasLanded = false;
-        ParticleEmitter engineParticles = new(Assets.Get(Sprite.Circle), 0.1f, position, 0, MathF.PI / 8, 6,
-         200f, Color.Gray, EmitterType.EmissionOverTime)
+        ParticleEmitter engineParticles = new(Assets.Get(Sprite.Circle), 1f, position, 0, MathF.PI/2, 6,
+         200f, Color.LightGray, EmitterType.EmissionOverTime)
         { particleFadeToColor = Color.Transparent };
         bool currentlyCrafting = false;
         Pickup furnaceItem = null;
@@ -4373,8 +4373,10 @@ public class Enemy : Entity
         int requiredCraftsLeft = 10;
         int ammo = 200;
         cd = [0, 30];
+        enemyRange.particleVelocity = 500;
         while (true)
         {
+            //UI handling
             if (EventHandler.AcknowledgeMessage(Message.MothershipCraftItem))
             {
                 currentlyCrafting = true;
@@ -4383,11 +4385,13 @@ public class Enemy : Entity
             {
                 furnaceItem = UI.FurnaceSlot.daughterItem;
             }
+            //Fail state
             if (health <= 0)
             {
                 isExpired = true;
                 SoundManager.PlaySound(Assets.Get(Sound.Death), position);
             }
+            //Smelting
             if (furnaceItem != null)
             {
                 furnaceCooldown -= Engine.DeltaSeconds;
@@ -4409,6 +4413,7 @@ public class Enemy : Entity
             {
                 furnaceCooldown = 15;
             }
+            //Repairing
             if (currentlyCrafting)
             {
                 craftingCooldown -= Engine.DeltaSeconds;
@@ -4452,25 +4457,32 @@ public class Enemy : Entity
                     }
                 }
             }
+            //Success state
             if (requiredCraftsLeft <= 0)
             {
                 Engine.SaveGame.CurrentMission.CompleteCustomRule(this);
                 Engine.DialogueManager.Add(new Dialogue("Repair complete, let's get out of here.", null));
             }
+            //Story beats
             engineParticles.offsetVelocity = velocity;
+            engineParticles.position = position;
             engineParticles.Update();
-            if(position.X > 0)
+            if(cd[1] <= 0)
             {
-                velocity = new Vector2(5, -5);
-            }
-            else
-            {
-                if(!hasLanded)
+                if(position.X < 0)
                 {
-                    hasLanded = false;
-                    Engine.EntityManager.Explode(10, Size.Length(), position);
+                    velocity = new Vector2(6, 6);
                 }
-                velocity = Vector2.Zero;
+                else
+                {
+                    if(!hasLanded)
+                    {
+                        hasLanded = true;
+                        Explode(10, Size.Length());
+                        Engine.ShakeScreen(1);
+                    }
+                    velocity = Vector2.Zero;
+                }   
             }
             if (0 > cd[1] && cd[1] > -10)
             {
@@ -4912,9 +4924,9 @@ public class Enemy : Entity
     }
     public static Enemy NewCrashedShip(Vector2 _position, Vector2 _velocity, float _angle)
     {
-        var enemy = new Enemy(_position, _velocity, _angle, 10, 1000, Assets.Get(Sprite.Mothership), true);
+        var enemy = new Enemy(_position, _velocity, _angle, 5, 1000, Assets.Get(Sprite.Mothership), true);
         enemy.AddBehaviour(enemy.CrashedShip());
-        enemy.Components.Add(new DockableComponent(enemy, UI.MothershipMenu, false));
+        enemy.Components.Add(new DockableComponent(enemy, UI.MothershipMenu, true));
         return enemy;
     }
 }

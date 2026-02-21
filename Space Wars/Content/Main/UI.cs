@@ -230,7 +230,7 @@ public static class UI
         MusicSlider.ApplyBehaviours();
         UIScaleSlider.ApplyBehaviours();
 
-        QuitToMissionButton.AddBehaviour(EventHandler.MissionSelectTrigger);
+        QuitToMissionButton.AddBehaviour(delegate(){EventHandler.MissionSelectTrigger(new MissionSelect());});
         GarageButton.AddBehaviour(EventHandler.GarageTrigger);
         RepairButton.AddBehaviour(EventHandler.RepairModule);
         var tooltip = new Window(Vector2.Zero, wideButton);
