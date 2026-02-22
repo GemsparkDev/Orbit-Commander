@@ -4337,7 +4337,7 @@ public class Enemy : Entity
             if (cd[0] <= 0)
             {
                 int enemyType = Util.Random.Next(1, 4);
-                cd[0] = enemyType * 2;
+                cd[0] = enemyType * 3;
                 switch (enemyType)
                 {
                     case 1:
@@ -4363,13 +4363,14 @@ public class Enemy : Entity
         //Shoots at nearby enemies
         //Need to spend scrap to reload ammunition, or to repair the ship
         bool hasLanded = false;
-        ParticleEmitter engineParticles = new(Assets.Get(Sprite.Circle), 1f, position, 0, MathF.PI/2, 6,
+        bool isRepaired = false;
+        ParticleEmitter engineParticles = new(Assets.Get(Sprite.Circle), 1f, position, 0, MathF.PI/2, 1,
          200f, Color.LightGray, EmitterType.EmissionOverTime)
         { particleFadeToColor = Color.Transparent };
         bool currentlyCrafting = false;
         Pickup furnaceItem = null;
         float furnaceCooldown = 15;
-        float craftingCooldown = 8;
+        float craftingCooldown = 12;
         int requiredCraftsLeft = 10;
         int ammo = 200;
         cd = [0, 30];
@@ -4419,7 +4420,7 @@ public class Enemy : Entity
                 craftingCooldown -= Engine.DeltaSeconds;
                 if (craftingCooldown <= 0)
                 {
-                    craftingCooldown = 8;
+                    craftingCooldown = 12;
                     if (ammo > 0)
                     {
                         requiredCraftsLeft -= 1;
@@ -4436,35 +4437,32 @@ public class Enemy : Entity
 
             //Updating UI
             EventHandler.UpdateFurnaceUI(15 - furnaceCooldown, 15, furnaceItem);
-            EventHandler.UpdateCraftingUI(8 - craftingCooldown, 8, requiredCraftsLeft);
+            EventHandler.UpdateCraftingUI(12 - craftingCooldown, 12, requiredCraftsLeft);
             LowerCooldown();
 
             //Firing at enemies
-            if (requiredCraftsLeft <= 5)
+            if (ammo > 0 && cd[0] <= 0)
             {
-                if (ammo > 0 && cd[0] <= 0)
+                Entity nearestEnemy = Engine.EntityManager.NearestEnemy(this);
+                if (nearestEnemy != null)
                 {
-                    Entity nearestEnemy = Engine.EntityManager.NearestEnemy(this);
-                    if (nearestEnemy != null)
+                    Vector2 relativePosition = nearestEnemy.position-position;
+                    if (relativePosition.Length() < enemyRange.particleVelocity)
                     {
-                        Vector2 relativePosition = position - nearestEnemy.position;
-                        if (relativePosition.Length() < enemyRange.particleVelocity)
-                        {
-                            Engine.EntityManager.Add(new PulseShot(position, -Vector2.Normalize(relativePosition) * 10 + nearestEnemy.velocity, MathF.Atan2(relativePosition.Y, relativePosition.X) - MathF.PI / 2, 0, isFriendly, damage));
-                            SoundManager.PlaySound(Assets.Get(Sound.PulseFire), position);
-                            cd[0] = 0.25f;
-                        }
+                        Engine.EntityManager.Add(new PulseShot(position, Vector2.Normalize(relativePosition + nearestEnemy.velocity * relativePosition.Length() / 10) * 10 + new Vector2(Util.OneToNegOne(), Util.OneToNegOne()), MathF.Atan2(relativePosition.Y, relativePosition.X) + MathF.PI / 2, 0, isFriendly, damage));
+                        SoundManager.PlaySound(Assets.Get(Sound.LMGFire), position);
+                        cd[0] = 0.1f;
                     }
                 }
             }
             //Success state
-            if (requiredCraftsLeft <= 0)
+            if (requiredCraftsLeft <= 0 && !isRepaired)
             {
+                isRepaired = true;
                 Engine.SaveGame.CurrentMission.CompleteCustomRule(this);
                 Engine.DialogueManager.Add(new Dialogue("Repair complete, let's get out of here.", null));
             }
             //Story beats
-            engineParticles.offsetVelocity = velocity;
             engineParticles.position = position;
             engineParticles.Update();
             if(cd[1] <= 0)
@@ -4478,7 +4476,7 @@ public class Enemy : Entity
                     if(!hasLanded)
                     {
                         hasLanded = true;
-                        Explode(10, Size.Length());
+                        Explode(100, 3*Size.Length());
                         Engine.ShakeScreen(1);
                     }
                     velocity = Vector2.Zero;

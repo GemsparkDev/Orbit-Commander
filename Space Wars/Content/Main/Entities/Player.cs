@@ -282,13 +282,13 @@ public class Player : Entity
         {
             isEngineActive = false;
         }
+        Vector2 mousePos = new Vector2(Input.NewMouseState.X, Input.NewMouseState.Y);
         //Ensures that target vector performs identically in all resolutions
-        Vector2 mousePos = Engine.Camera.Position + Engine.ScreenSize - position + new Vector2(Input.NewMouseState.Position.X - (Engine.ScreenSize.X - Engine.BackBuffer.X) / 2 * Engine.BackBuffer.X/Engine.ScreenSize.X, Input.NewMouseState.Position.Y) - Engine.BackBuffer * 3 / 2;
-        Vector2 playerCamPos =  position - Engine.Camera.Position - velocity;
+        Vector2 mouseCamPos = Engine.Camera.Position + mousePos - Engine.BackBuffer/2 + Engine.MousePositionOffset;
         //Testing
-        ParticleManager.Add(new Particle(Assets.Get(Sprite.Circle), mousePos + position, 0, Color.White));
-        ParticleManager.Add(new Particle(Assets.Get(Sprite.Circle), playerCamPos + position, 0, Color.White));
-        targetVector =  Vector2.Normalize(mousePos - playerCamPos);
+        //ParticleManager.Add(new Particle(Assets.Get(Sprite.Circle), mouseCamPos, 0, Color.White));
+        //ParticleManager.Add(new Particle(Assets.Get(Sprite.Circle), position, 0, Color.White));
+        targetVector = Vector2.Normalize(mouseCamPos - position);
     }
     public override void LowerCooldown()
     {

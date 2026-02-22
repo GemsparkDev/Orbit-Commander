@@ -274,8 +274,7 @@ public class Mission
                     }
                 }
             }
-            //Mess with probability later
-            if (Util.Random.NextSingle() > 0.25f)
+            for(int i = 0; i < enemiesSpawned.Count / 4 + 1; i++)
             {
                 Enemy enemy = enemiesSpawned[Util.Random.Next(0, enemiesSpawned.Count)];
                 enemy.AddBehaviour(enemy.DropItem(ItemFactory.NewScrap));
