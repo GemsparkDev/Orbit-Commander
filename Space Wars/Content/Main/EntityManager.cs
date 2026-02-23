@@ -52,7 +52,7 @@ public class EntityManager
         new EntityCondition(new AdvancedConstructor(Enemy.NewTurret, new Vector2(MathF.Sin(-0.3f), -MathF.Cos(-0.3f)) * 12 * 50, Vector2.Zero, -0.3f, true), []),
         new EntityCondition(new LaunchConstructor(Enemy.NewDropPod, new Vector2(0,-4000), 600), []),
         new EntityCondition(new EntityConstructor(Enemy.NewCrashedShip, new Vector2(-6000, -6640), Vector2.Zero, -MathF.PI * 3 / 8), [Condition.Protect, Condition.CustomIncomplete]),
-        ], "Crossfire", "Sensors indicate a group fighting against the same hostiles encountered during our crash landing.\nAiding them could gain us a powerful ally.", 0.18f, new Vector2(0, -4000), Mission.TierOne(), Mission.TierOneBosses(), QueueCrossfireDialogue, true) 
+        ], "Crossfire", "Sensors indicate a group fighting against the same hostiles encountered during our crash landing.\nAiding them could gain us a powerful ally.", 0.18f, new Vector2(0, -4000), Mission.TierOne(), Mission.TierOneBosses(), QueueCrossfireDialogue, true, RepairCrashedShip) 
         { isAggressive = true, playerProgression = 2, playerDocked = true },
 
         new Mission( [new Planet(Vector2.Zero, Vector2.Zero, 3500, 4, true, Color.Cyan, true) ],
@@ -948,7 +948,6 @@ public class EntityManager
             }));
             sum += text[i].Length * ts;
         }
-        Debug.WriteLine(sum);
         events.Add(new Event(sum + text.Count, 1, delegate (float time) { }));
         scene = new Cutscene(events, actors, new MissionSelect());
         return scene;
@@ -965,5 +964,55 @@ public class EntityManager
             }),
         ];
         return new Cutscene(events, [], new PlayingGame());
+    }
+    private static Cutscene RepairCrashedShip()
+    {
+        Actor ship = new Actor(Assets.Get(Sprite.Mothership), Vector2.Zero, Color.White, 0);
+        List<IActor> actors = [ship];
+        List<IEvent> events =
+        [
+            new TriggerEvent(0, delegate(float time)
+            {
+                Engine.DialogueManager.Add(new Dialogue("All teams, rendezvous at the ship if you value your life!", null));
+                Engine.DialogueManager.Add(new Dialogue("Get this ship in the air!", null));
+            }),
+            new Event(6, 3, delegate(float time)
+            {
+                ship.Position += new Vector2(MathF.Sin(MathF.Atan2(time, 1)), MathF.Cos(MathF.Atan2(time, 1))) * time;
+            }),
+            new TriggerEvent(9, delegate(float time)
+            {
+                Engine.DialogueManager.Add(new Dialogue("We barely got out of there.", null));
+                Engine.DialogueManager.Add(new Dialogue("Pilot, I applaud your courage. We're in your debt.", null));
+                Engine.DialogueManager.Add(new Dialogue("Your ship... I've never seen anything like it before.", null));
+                Engine.DialogueManager.Add(new Dialogue("Lets regroup at the base. We might have some information that can aid you on your journey.", null));
+            }),
+        ];
+        Vector2 screen = Engine.BackBuffer / 2;
+        float sum = 0;
+        float ts = 0.65f;
+        List<string> text =
+        [
+            "Day two log",
+            "Group information indicates our ship is advanced technology",
+
+        ];
+        for (int i = 0; i < text.Count; i++)
+        {
+            var actor = new TextActor(new Vector2(60, 20 * 3 * i) - screen, text[i]) { TextSize = 1.5f * UIManager.UIScale };
+            actors.Add(actor);
+            events.Add(new Event(sum + i, text[i].Length * ts, delegate (float time)
+            {
+                float index = time / ts;
+                actor.Index = (int)(index) + 1;
+                if (index - MathF.Floor(index) <= Engine.DeltaSeconds / ts)
+                {
+                    SoundManager.PlayGlobalSound(Assets.Get(Sound.Interact));
+                }
+            }));
+            sum += text[i].Length * ts;
+        }
+        events.Add(new Event(sum + text.Count, 1, delegate (float time) { }));
+        return new Cutscene(events, actors, new MissionSelect());
     }
 }
