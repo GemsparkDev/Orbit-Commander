@@ -994,8 +994,11 @@ public class EntityManager
         List<string> text =
         [
             "Day two log",
-            "Group information indicates our ship is advanced technology",
-
+            "Cross referencing at insurgent group indicates connection between group and original mission parameters.",
+            "Data indicates possible conflict of interests between group and mission.",
+            "Recommended course of action:",
+            "Gain trust within the group.",
+            "Search for more information about original creators.",
         ];
         for (int i = 0; i < text.Count; i++)
         {
