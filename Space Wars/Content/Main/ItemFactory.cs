@@ -58,7 +58,7 @@ public static class ItemFactory
 
         { Modules.Assault, new ModuleData(Sprite.AssaultReal, Sprite.Assault, "Assault", (int)ModuleType.Core, 20, typeof(Assault)) },
         { Modules.Dash, new ModuleData(Sprite.CoreModule,Sprite.CoreModule, "Dash Core", (int)ModuleType.Core, 20, typeof(Dash)) },
-        { Modules.GrapplingHook, new ModuleData(Sprite.CoreModule, Sprite.CoreModule, "Grapple Core", (int)ModuleType.Core, 20, typeof(GrapplingHook)) },
+        { Modules.GrapplingHook, new ModuleData(Sprite.GrapplingHookReal, Sprite.GrapplingHook, "Grapple Core", (int)ModuleType.Core, 20, typeof(GrapplingHook)) },
         { Modules.SummonShield, new ModuleData(Sprite.CoreModule, Sprite.CoreModule, "Shield Core", (int)ModuleType.Core, 20, typeof(SummonShield)) },
         { Modules.Nanomachines, new ModuleData(Sprite.NanomachinesReal, Sprite.Nanomachines, "Nanomachines", (int)ModuleType.Core, 20, typeof(Nanomachines)) },
         { Modules.CreateFighter, new ModuleData(Sprite.CoreModule, Sprite.CoreModule, "Construct fighter", (int)ModuleType.Core, 20, typeof(CreateFighter)) },

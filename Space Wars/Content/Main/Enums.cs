@@ -154,6 +154,7 @@ public enum Sprite
     Expose,ExposeReal,
     Stealth,StealthReal,
     Radar,RadarReal,
+    GrapplingHook,GrapplingHookReal,
 
     SpiralShot,
     PulseShot,
