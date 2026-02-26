@@ -32,7 +32,7 @@ public static class ItemFactory
         { Modules.Sniper, new ModuleData(Sprite.RealSniperModule,Sprite.SniperModule, "Antimaterial Rifle", (int)ModuleType.Guns, 20, typeof(Antimaterial), Color.CornflowerBlue)},
         { Modules.Crossbow, new ModuleData(Sprite.RealCrossbowModule,Sprite.CrossbowModule, "Crossbow", (int)ModuleType.Guns, 20, typeof(Crossbow))},
         { Modules.Flamethrower, new ModuleData(Sprite.RealFlamethrowerModule,Sprite.FlamethrowerModule, "Flamethrower", (int)ModuleType.Guns, 18, typeof(Flamethrower), Color.Orange)},
-        { Modules.Fireball, new ModuleData(Sprite.RealCrossbowModule,Sprite.CrossbowModule, "Fireball", (int)ModuleType.Guns, 18, typeof(Fireball), Color.Orange)},
+        { Modules.Fireball, new ModuleData(Sprite.RealFireball,Sprite.Fireball, "Fireball", (int)ModuleType.Guns, 18, typeof(Fireball), Color.Orange)},
         { Modules.GrenadeLauncher, new ModuleData(Sprite.RealCrossbowModule,Sprite.CrossbowModule, "Grenade Launcher", (int)ModuleType.Guns, 20, typeof(GrenadeLauncher))},
         { Modules.Spewer, new ModuleData(Sprite.RealCrossbowModule,Sprite.CrossbowModule, "Spewer", (int)ModuleType.Guns, 15, typeof(Spewer))},
         { Modules.Antimaterial, new ModuleData(Sprite.RealCrossbowModule,Sprite.CrossbowModule, "Railgun", (int)ModuleType.Guns, 15, typeof(Railgun), Color.Yellow)},

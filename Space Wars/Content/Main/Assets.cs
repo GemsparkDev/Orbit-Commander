@@ -129,6 +129,8 @@ public static class Assets
         Sprites.Add(Sprite.RadarReal, Content.Load<Texture2D>("Images/UI_56"));
         Sprites.Add(Sprite.GrapplingHook, Content.Load<Texture2D>("Images/Item_15"));
         Sprites.Add(Sprite.GrapplingHookReal, Content.Load<Texture2D>("Images/UI_57"));
+        Sprites.Add(Sprite.Fireball, Content.Load<Texture2D>("Images/Item_16"));
+        Sprites.Add(Sprite.RealFireball, Content.Load<Texture2D>("Images/UI_58"));
 
         //Projectiles
         Sprites.Add(Sprite.SpiralShot, Content.Load<Texture2D>("Images/Projectile_0"));
