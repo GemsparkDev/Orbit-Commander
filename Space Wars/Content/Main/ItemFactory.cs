@@ -36,7 +36,7 @@ public static class ItemFactory
         { Modules.GrenadeLauncher, new ModuleData(Sprite.RealCrossbowModule,Sprite.CrossbowModule, "Grenade Launcher", (int)ModuleType.Guns, 20, typeof(GrenadeLauncher))},
         { Modules.Spewer, new ModuleData(Sprite.RealCrossbowModule,Sprite.CrossbowModule, "Spewer", (int)ModuleType.Guns, 15, typeof(Spewer))},
         { Modules.Antimaterial, new ModuleData(Sprite.RealCrossbowModule,Sprite.CrossbowModule, "Railgun", (int)ModuleType.Guns, 15, typeof(Railgun), Color.Yellow)},
-        { Modules.PrismArray, new ModuleData(Sprite.RealCrossbowModule,Sprite.CrossbowModule, "Prism Array", (int)ModuleType.Guns, 15, typeof(PrismArray), Color.Cyan)},
+        { Modules.PrismArray, new ModuleData(Sprite.RealPrismArray,Sprite.PrismArray, "Prism Array", (int)ModuleType.Guns, 15, typeof(PrismArray), Color.Cyan)},
         { Modules.MatrixLauncher, new ModuleData(Sprite.RealCrossbowModule,Sprite.CrossbowModule, "Matrix Launcher", (int)ModuleType.Guns, 15, typeof(MatrixLauncher), Color.Cyan)},
         { Modules.Torch, new ModuleData(Sprite.TorchReal,Sprite.Torch, "Torch", (int)ModuleType.Guns, 15, typeof(Torch), Color.Yellow)},
         { Modules.SplitterModule, new ModuleData(Sprite.TorchReal,Sprite.Torch, "Splitter", (int)ModuleType.Guns, 20, typeof(SplitterModule))},

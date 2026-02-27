@@ -156,6 +156,7 @@ public enum Sprite
     Radar,RadarReal,
     GrapplingHook,GrapplingHookReal,
     Fireball,RealFireball,
+    PrismArray,RealPrismArray,
 
     SpiralShot,
     PulseShot,
