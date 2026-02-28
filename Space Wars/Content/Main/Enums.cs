@@ -157,6 +157,7 @@ public enum Sprite
     GrapplingHook,GrapplingHookReal,
     Fireball,RealFireball,
     PrismArray,RealPrismArray,
+    PulseEmitter,RealPulseEmitter,
 
     SpiralShot,
     PulseShot,

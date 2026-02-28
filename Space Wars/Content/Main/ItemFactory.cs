@@ -54,7 +54,7 @@ public static class ItemFactory
         { Modules.Sensors, new ModuleData(Sprite.SensorModule,Sprite.SensorModule, "Sensors", (int)ModuleType.Sensors, 20, typeof(Sensors), Color.CornflowerBlue) },
         { Modules.Lidar, new ModuleData(Sprite.LidarReal,Sprite.Lidar, "Lidar", (int)ModuleType.Sensors, 20, typeof(Lidar), Color.Yellow) },
         { Modules.Radar, new ModuleData(Sprite.RadarReal,Sprite.Radar, "Radar", (int)ModuleType.Sensors, 20, typeof(Radar), Color.Yellow) },
-        { Modules.PulseEmitter, new ModuleData(Sprite.SensorModule,Sprite.SensorModule, "Pulse Emitter", (int)ModuleType.Sensors, 20, typeof(PulseEmitter), Color.Yellow) },
+        { Modules.PulseEmitter, new ModuleData(Sprite.RealPulseEmitter,Sprite.PulseEmitter, "Pulse Emitter", (int)ModuleType.Sensors, 20, typeof(PulseEmitter), Color.Yellow) },
 
         { Modules.Assault, new ModuleData(Sprite.AssaultReal, Sprite.Assault, "Assault", (int)ModuleType.Core, 20, typeof(Assault)) },
         { Modules.Dash, new ModuleData(Sprite.CoreModule,Sprite.CoreModule, "Dash Core", (int)ModuleType.Core, 20, typeof(Dash)) },

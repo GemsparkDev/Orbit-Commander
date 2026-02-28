@@ -122,8 +122,8 @@ public static class Assets
         Sprites.Add(Sprite.Nanomachines, Content.Load<Texture2D>("Images/Item_12"));
         Sprites.Add(Sprite.NanomachinesReal, Content.Load<Texture2D>("Images/UI_54"));
         Sprites.Add(Sprite.Expose, Content.Load<Texture2D>("Images/Item_13"));
-        Sprites.Add(Sprite.ExposeReal, Content.Load<Texture2D>("Images/UI_55"));
-        Sprites.Add(Sprite.Stealth, Content.Load<Texture2D>("Images/Item_13"));
+        Sprites.Add(Sprite.ExposeReal, Content.Load<Texture2D>("Images/UI_55")); //UI got displaced?
+        Sprites.Add(Sprite.Stealth, Content.Load<Texture2D>("Images/Item_13")); //Confirm later
         Sprites.Add(Sprite.StealthReal, Content.Load<Texture2D>("Images/UI_55"));
         Sprites.Add(Sprite.Radar, Content.Load<Texture2D>("Images/Item_14"));
         Sprites.Add(Sprite.RadarReal, Content.Load<Texture2D>("Images/UI_56"));
@@ -133,6 +133,10 @@ public static class Assets
         Sprites.Add(Sprite.RealFireball, Content.Load<Texture2D>("Images/UI_58"));
         Sprites.Add(Sprite.Fireball, Content.Load<Texture2D>("Images/Item_17"));
         Sprites.Add(Sprite.RealFireball, Content.Load<Texture2D>("Images/UI_59"));
+        Sprites.Add(Sprite.PrismArray, Content.Load<Texture2D>("Images/Item_18"));
+        Sprites.Add(Sprite.RealPrismArray, Content.Load<Texture2D>("Images/UI_60"));
+        Sprites.Add(Sprite.PulseEmitter, Content.Load<Texture2D>("Images/Item_19"));
+        Sprites.Add(Sprite.RealPulseEmitter, Content.Load<Texture2D>("Images/UI_60"));
 
         //Projectiles
         Sprites.Add(Sprite.SpiralShot, Content.Load<Texture2D>("Images/Projectile_0"));
