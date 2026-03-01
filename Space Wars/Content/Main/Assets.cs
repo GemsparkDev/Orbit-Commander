@@ -136,7 +136,9 @@ public static class Assets
         Sprites.Add(Sprite.PrismArray, Content.Load<Texture2D>("Images/Item_18"));
         Sprites.Add(Sprite.RealPrismArray, Content.Load<Texture2D>("Images/UI_60"));
         Sprites.Add(Sprite.PulseEmitter, Content.Load<Texture2D>("Images/Item_19"));
-        Sprites.Add(Sprite.RealPulseEmitter, Content.Load<Texture2D>("Images/UI_60"));
+        Sprites.Add(Sprite.RealPulseEmitter, Content.Load<Texture2D>("Images/UI_61"));
+        Sprites.Add(Sprite.Ablative, Content.Load<Texture2D>("Images/Item_20"));
+        Sprites.Add(Sprite.RealAblative, Content.Load<Texture2D>("Images/UI_62"));
 
         //Projectiles
         Sprites.Add(Sprite.SpiralShot, Content.Load<Texture2D>("Images/Projectile_0"));

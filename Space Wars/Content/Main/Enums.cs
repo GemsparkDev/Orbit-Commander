@@ -158,6 +158,7 @@ public enum Sprite
     Fireball,RealFireball,
     PrismArray,RealPrismArray,
     PulseEmitter,RealPulseEmitter,
+    Ablative,RealAblative,
 
     SpiralShot,
     PulseShot,

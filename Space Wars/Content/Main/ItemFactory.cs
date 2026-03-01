@@ -20,7 +20,7 @@ public static class ItemFactory
         { Modules.Stealth, new ModuleData(Sprite.StealthReal, Sprite.Stealth, "Stealth", (int)ModuleType.Hull, 18, typeof(Stealth)) },
         { Modules.Reflective, new ModuleData(Sprite.HullModule, Sprite.HullModule, "Reflective", (int)ModuleType.Hull, 18, typeof(Reflective)) },
         { Modules.Turtle, new ModuleData(Sprite.HullModule, Sprite.HullModule, "Turtle", (int)ModuleType.Hull, 22, typeof(Turtle)) },
-        { Modules.Ablative, new ModuleData(Sprite.HullModule, Sprite.HullModule, "Ablative", (int)ModuleType.Hull, 17, typeof(Ablative)) },
+        { Modules.Ablative, new ModuleData(Sprite.RealAblative, Sprite.Ablative, "Ablative", (int)ModuleType.Hull, 17, typeof(Ablative)) },
         { Modules.Adaptive, new ModuleData(Sprite.HullModule, Sprite.HullModule, "Ablative", (int)ModuleType.Hull, 20, typeof(Adaptive)) },
         { Modules.ThermalShield,new ModuleData(Sprite.HullModule, Sprite.HullModule, "Thermal Shield", (int)ModuleType.Hull, 20, typeof(ThermalShield)) },
 
