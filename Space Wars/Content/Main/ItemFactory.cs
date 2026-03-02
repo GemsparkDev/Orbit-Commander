@@ -16,8 +16,8 @@ public static class ItemFactory
     public readonly static Dictionary<Modules, ModuleData> moduleData = new()
     {
         { Modules.Hull, new ModuleData(Sprite.HullModule, Sprite.HullModule, "Hull", (int)ModuleType.Hull, 20, typeof(Hull)) },
-        { Modules.Shield, new ModuleData(Sprite.ShieldReal, Sprite.Shield, "Shield", (int)ModuleType.Hull, 16, typeof(Shield)) }, 
-        { Modules.Stealth, new ModuleData(Sprite.StealthReal, Sprite.Stealth, "Stealth", (int)ModuleType.Hull, 18, typeof(Stealth)) },
+        { Modules.Shield, new ModuleData(Sprite.RealShield, Sprite.Shield, "Shield", (int)ModuleType.Hull, 16, typeof(Shield)) },
+        { Modules.Stealth, new ModuleData(Sprite.RealStealth, Sprite.Stealth, "Stealth", (int)ModuleType.Hull, 18, typeof(Stealth)) },
         { Modules.Reflective, new ModuleData(Sprite.HullModule, Sprite.HullModule, "Reflective", (int)ModuleType.Hull, 18, typeof(Reflective)) },
         { Modules.Turtle, new ModuleData(Sprite.HullModule, Sprite.HullModule, "Turtle", (int)ModuleType.Hull, 22, typeof(Turtle)) },
         { Modules.Ablative, new ModuleData(Sprite.RealAblative, Sprite.Ablative, "Ablative", (int)ModuleType.Hull, 17, typeof(Ablative)) },
@@ -38,13 +38,13 @@ public static class ItemFactory
         { Modules.Antimaterial, new ModuleData(Sprite.RealCrossbowModule,Sprite.CrossbowModule, "Railgun", (int)ModuleType.Guns, 15, typeof(Railgun), Color.Yellow)},
         { Modules.PrismArray, new ModuleData(Sprite.RealPrismArray,Sprite.PrismArray, "Prism Array", (int)ModuleType.Guns, 15, typeof(PrismArray), Color.Cyan)},
         { Modules.MatrixLauncher, new ModuleData(Sprite.RealCrossbowModule,Sprite.CrossbowModule, "Matrix Launcher", (int)ModuleType.Guns, 15, typeof(MatrixLauncher), Color.Cyan)},
-        { Modules.Torch, new ModuleData(Sprite.TorchReal,Sprite.Torch, "Torch", (int)ModuleType.Guns, 15, typeof(Torch), Color.Yellow)},
-        { Modules.SplitterModule, new ModuleData(Sprite.TorchReal,Sprite.Torch, "Splitter", (int)ModuleType.Guns, 20, typeof(SplitterModule))},
-        { Modules.Fractal, new ModuleData(Sprite.TorchReal,Sprite.Torch, "Fractal", (int)ModuleType.Guns, 20, typeof(Fractal))},
-        { Modules.CrackShot, new ModuleData(Sprite.TorchReal,Sprite.Torch, "Crackshot", (int)ModuleType.Guns, 20, typeof(CrackShot))},
-        { Modules.MicroRocketLauncher, new ModuleData(Sprite.TorchReal,Sprite.Torch, "Micro Rocket Launcher", (int)ModuleType.Guns, 18, typeof(MicroRocketLauncher), Color.Yellow) },
-        { Modules.AdaptiveShotgun, new ModuleData(Sprite.TorchReal,Sprite.Torch, "Adaptive Shotgun", (int)ModuleType.Guns, 18, typeof(AdaptiveShotgun), Color.Yellow) },
-        { Modules.GuidedRound, new ModuleData(Sprite.TorchReal,Sprite.Torch, "Guided Round", (int)ModuleType.Guns, 20, typeof(GuidedRound), Color.White) },
+        { Modules.Torch, new ModuleData(Sprite.RealTorch,Sprite.Torch, "Torch", (int)ModuleType.Guns, 15, typeof(Torch), Color.Yellow)},
+        { Modules.SplitterModule, new ModuleData(Sprite.RealTorch,Sprite.Torch, "Splitter", (int)ModuleType.Guns, 20, typeof(SplitterModule))},
+        { Modules.Fractal, new ModuleData(Sprite.RealTorch,Sprite.Torch, "Fractal", (int)ModuleType.Guns, 20, typeof(Fractal))},
+        { Modules.CrackShot, new ModuleData(Sprite.RealTorch,Sprite.Torch, "Crackshot", (int)ModuleType.Guns, 20, typeof(CrackShot))},
+        { Modules.MicroRocketLauncher, new ModuleData(Sprite.RealTorch,Sprite.Torch, "Micro Rocket Launcher", (int)ModuleType.Guns, 18, typeof(MicroRocketLauncher), Color.Yellow) },
+        { Modules.AdaptiveShotgun, new ModuleData(Sprite.RealTorch,Sprite.Torch, "Adaptive Shotgun", (int)ModuleType.Guns, 18, typeof(AdaptiveShotgun), Color.Yellow) },
+        { Modules.GuidedRound, new ModuleData(Sprite.RealTorch,Sprite.Torch, "Guided Round", (int)ModuleType.Guns, 20, typeof(GuidedRound), Color.White) },
 
         { Modules.Engines, new ModuleData(Sprite.EngineModule, Sprite.EngineModule, "Engines", (int)ModuleType.Engines, 20, typeof(StandardEngine)) },
         { Modules.Plasma, new ModuleData(Sprite.EngineModule, Sprite.EngineModule, "Plasma", (int)ModuleType.Engines, 15, typeof(PlasmaEngine)) },
@@ -52,18 +52,18 @@ public static class ItemFactory
         { Modules.Orion, new ModuleData(Sprite.EngineModule, Sprite.EngineModule, "Orion", (int)ModuleType.Engines, 20, typeof(OrionEngine)) },
 
         { Modules.Sensors, new ModuleData(Sprite.SensorModule,Sprite.SensorModule, "Sensors", (int)ModuleType.Sensors, 20, typeof(Sensors), Color.CornflowerBlue) },
-        { Modules.Lidar, new ModuleData(Sprite.LidarReal,Sprite.Lidar, "Lidar", (int)ModuleType.Sensors, 20, typeof(Lidar), Color.Yellow) },
-        { Modules.Radar, new ModuleData(Sprite.RadarReal,Sprite.Radar, "Radar", (int)ModuleType.Sensors, 20, typeof(Radar), Color.Yellow) },
+        { Modules.Lidar, new ModuleData(Sprite.RealLidar,Sprite.Lidar, "Lidar", (int)ModuleType.Sensors, 20, typeof(Lidar), Color.Yellow) },
+        { Modules.Radar, new ModuleData(Sprite.RealRadar,Sprite.Radar, "Radar", (int)ModuleType.Sensors, 20, typeof(Radar), Color.Yellow) },
         { Modules.PulseEmitter, new ModuleData(Sprite.RealPulseEmitter,Sprite.PulseEmitter, "Pulse Emitter", (int)ModuleType.Sensors, 20, typeof(PulseEmitter), Color.Yellow) },
 
-        { Modules.Assault, new ModuleData(Sprite.AssaultReal, Sprite.Assault, "Assault", (int)ModuleType.Core, 20, typeof(Assault)) },
+        { Modules.Assault, new ModuleData(Sprite.RealAssault, Sprite.Assault, "Assault", (int)ModuleType.Core, 20, typeof(Assault)) },
         { Modules.Dash, new ModuleData(Sprite.CoreModule,Sprite.CoreModule, "Dash Core", (int)ModuleType.Core, 20, typeof(Dash)) },
-        { Modules.GrapplingHook, new ModuleData(Sprite.GrapplingHookReal, Sprite.GrapplingHook, "Grapple Core", (int)ModuleType.Core, 20, typeof(GrapplingHook)) },
+        { Modules.GrapplingHook, new ModuleData(Sprite.RealGrapplingHook, Sprite.GrapplingHook, "Grapple Core", (int)ModuleType.Core, 20, typeof(GrapplingHook)) },
         { Modules.SummonShield, new ModuleData(Sprite.CoreModule, Sprite.CoreModule, "Shield Core", (int)ModuleType.Core, 20, typeof(SummonShield)) },
-        { Modules.Nanomachines, new ModuleData(Sprite.NanomachinesReal, Sprite.Nanomachines, "Nanomachines", (int)ModuleType.Core, 20, typeof(Nanomachines)) },
+        { Modules.Nanomachines, new ModuleData(Sprite.RealNanomachines, Sprite.Nanomachines, "Nanomachines", (int)ModuleType.Core, 20, typeof(Nanomachines)) },
         { Modules.CreateFighter, new ModuleData(Sprite.CoreModule, Sprite.CoreModule, "Construct fighter", (int)ModuleType.Core, 20, typeof(CreateFighter)) },
-        { Modules.Expose, new ModuleData(Sprite.ExposeReal, Sprite.Expose, "Exposure", (int)ModuleType.Core, 20, typeof(Expose)) },
-        { Modules.Decoy, new ModuleData(Sprite.TorchReal,Sprite.Torch, "Decoy", (int)ModuleType.Guns, 20, typeof(Decoy))},
+        { Modules.Expose, new ModuleData(Sprite.RealExpose, Sprite.Expose, "Exposure", (int)ModuleType.Core, 20, typeof(Expose)) },
+        { Modules.Decoy, new ModuleData(Sprite.RealTorch,Sprite.Torch, "Decoy", (int)ModuleType.Guns, 20, typeof(Decoy))},
 
     };
     public readonly static Dictionary<Constructs, ConstructData> constructData = new() 
@@ -71,7 +71,7 @@ public static class ItemFactory
         { Constructs.Barricade, new ConstructData(Sprite.RealBarricade, Sprite.Barricade, "Barricade", 1, 20) },
         { Constructs.Trap, new ConstructData(Sprite.RealTrap, Sprite.Trap, "Trap", 1, 8) },
         { Constructs.Bomb, new ConstructData(Sprite.RealBomb, Sprite.Bomb, "Bomb", 1, 3) },
-        { Constructs.Furnace, new ConstructData(Sprite.FurnaceReal, Sprite.Furnace, "Furnace", 1, 10) },
+        { Constructs.Furnace, new ConstructData(Sprite.RealFurnace, Sprite.Furnace, "Furnace", 1, 10) },
         { Constructs.SpecializedParts, new ConstructData(Sprite.RealSpecializedParts, Sprite.SpecializedParts, "Specialized Parts", 1, 5, Color.CornflowerBlue) }
     };
     public static Pickup NewScrap(Vector2 _position = default, Vector2 _velocity = default, float _angularVelocity = 0)
