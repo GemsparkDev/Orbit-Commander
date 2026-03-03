@@ -36,23 +36,23 @@ public static class UI
     public static Window EscapeMenu { get; } = new Window(center, Assets.Get(Sprite.LargePanel));
 
     //Main Menu
-    public static Button PatchedConicsToggle { get; } = new Button(new Vector2(0, -MainMenu.Size.Y / 4), Assets.Get(Sprite.WideButton), Assets.TextFont, $"Patched Conics: {PatchedConics}", Color.White);
-    public static Slider SFXSlider { get; } = new Slider(Engine.Line, Assets.Get(Sprite.Knob), new Vector2(25, 0), new Vector2(50, 2), false, [Color.White, Color.Gray]);
-    public static Slider MusicSlider { get; } = new Slider(Engine.Line, Assets.Get(Sprite.Knob), new Vector2(25, -15), new Vector2(50, 2), false, [Color.White, Color.Gray]);
-    public static Slider UIScaleSlider { get; } = new Slider(Engine.Line, Assets.Get(Sprite.Knob), new Vector2(25, 15), new Vector2(50, 2), false, [Color.White, Color.Gray]);
-    public static Decal SFXVolume { get; } = new Decal(new Vector2(-35, 0), Assets.TextFont, "Sound: 100%", Color.White, 5);
-    public static Decal MusicVolume { get; } = new Decal(new Vector2(-35, -15), Assets.TextFont, "Music: 100%", Color.White, 5);
-    public static Decal UIScale { get; } = new Decal(new Vector2(-35, 15), Assets.TextFont, $"UI Scale: {Math.Truncate((UIScaleSlider.Intervals[0] + 1) * 10) / 10}", Color.White, 5);
-    public static Button ShaderToggle { get; } = new Button(new Vector2(0, MainMenu.Size.Y / 4), Assets.Get(Sprite.WideButton), Assets.TextFont, $"Shader: {UseShader}", Color.White);
+    public static Button PatchedConicsToggle { get; } = new Button(new Vector2(75, -MainMenu.Size.Y / 4), Assets.Get(Sprite.WideButton), Assets.TextFont, $"Patched Conics: {PatchedConics}", Color.White);
+    public static Slider SFXSlider { get; } = new Slider(Engine.Line, Assets.Get(Sprite.Knob), new Vector2(100, 0), new Vector2(50, 2), false, [Color.White, Color.Gray]);
+    public static Slider MusicSlider { get; } = new Slider(Engine.Line, Assets.Get(Sprite.Knob), new Vector2(100, -15), new Vector2(50, 2), false, [Color.White, Color.Gray]);
+    public static Slider UIScaleSlider { get; } = new Slider(Engine.Line, Assets.Get(Sprite.Knob), new Vector2(100, 15), new Vector2(50, 2), false, [Color.White, Color.Gray]);
+    public static Decal SFXVolume { get; } = new Decal(new Vector2(40, 0), Assets.TextFont, "Sound: 100%", Color.White, 5);
+    public static Decal MusicVolume { get; } = new Decal(new Vector2(40, -15), Assets.TextFont, "Music: 100%", Color.White, 5);
+    public static Decal UIScale { get; } = new Decal(new Vector2(40, 15), Assets.TextFont, $"UI Scale: {Math.Truncate((UIScaleSlider.Intervals[0] + 1) * 10) / 10}", Color.White, 5);
+    public static Button ShaderToggle { get; } = new Button(new Vector2(75, MainMenu.Size.Y / 4), Assets.Get(Sprite.WideButton), Assets.TextFont, $"Shader: {UseShader}", Color.White);
     public static Button SingleplayerButton { get; } = new Button(new Vector2(0, -MainMenu.Size.Y / 4), Assets.Get(Sprite.WideButton), Assets.TextFont, "Singleplayer", Color.White);
     public static Button ExitButton { get; } = new Button(new Vector2(0, MainMenu.Size.Y / 4), Assets.Get(Sprite.WideButton), Assets.TextFont, "Exit", Color.White);
     public static Decal TitleName { get; } = new Decal(new Vector2(0, -MainMenu.Size.Y), Assets.Get(Sprite.Title));
     public static Button LoadButton { get; } = new Button(new Vector2(0, 0), Assets.Get(Sprite.WideButton), Assets.TextFont, "Load", Color.White);
-    public static Decal WindowType { get; } = new Decal(new Vector2(-80, -15), null, Assets.TextFont, "Borderless Window", Color.White, 10);
-    public static Button NextWindowType { get; } = new Button(new Vector2(-150, 10), Assets.Get(Sprite.Button), Assets.TextFont, "Next", Color.White );
-    public static Decal Resolution { get; } = new Decal(new Vector2(-50, 45), null, Assets.TextFont, "1920 x 1080", Color.White, 10);
-    public static Button NextResolution { get; } = new Button(new Vector2(-150, 45), Assets.Get(Sprite.Button), Assets.TextFont, "Next Resolution", Color.White);
-    public static Button ApplyChanges { get; } = new Button(new Vector2(-50, 10), Assets.Get(Sprite.Button), Assets.TextFont, "Apply changes", Color.White);
+    public static Decal WindowType { get; } = new Decal(new Vector2(-90, -15), null, Assets.TextFont, "Borderless Window", Color.White, 10);
+    public static Button NextWindowType { get; } = new Button(new Vector2(-130, 10), Assets.Get(Sprite.Button), Assets.TextFont, "Next", Color.White );
+    public static Decal Resolution { get; } = new Decal(new Vector2(-30, 45), null, Assets.TextFont, "1920 x 1080", Color.White, 10);
+    public static Button NextResolution { get; } = new Button(new Vector2(-130, 45), Assets.Get(Sprite.Button), Assets.TextFont, "Next Resolution", Color.White);
+    public static Button ApplyChanges { get; } = new Button(new Vector2(-40, 10), Assets.Get(Sprite.Button), Assets.TextFont, "Apply changes", Color.White);
     public static Button[] NextModule { get; } = new Button[5];
     public static Button[] PrevModule { get; } = new Button[5];
     public static Decal[] Module { get; } = new Decal[5];
