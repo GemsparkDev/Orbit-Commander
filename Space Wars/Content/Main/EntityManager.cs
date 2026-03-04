@@ -61,8 +61,8 @@ public class EntityManager
             new EntityCondition(new EntityConstructor(Enemy.NewOrbiter, new Vector2(400, 0), Planet.GetOrbitalVelocity(new Vector2(400, 0), Vector2.Zero, 3500), 0), [ Condition.Protect ]),
             new EntityCondition(new LaunchConstructor(Enemy.NewDropPod, new Vector2(0, -1500), 200),[ ]),
             new WaveGoal(30) ],
-        "Sentry Defense", "A small sentry has been deployed on this abandoned planet. \nDefense of this location will be essential for further development.", 0.75f, new Vector2(0, -1500), Mission.TierOne(), Mission.TierOneBosses())
-        { playerProgression = 1, isAggressive = true, tip = "Press Z and X to rotate in your ship. \nThe left panel contains your fuses, which power modules. \nUse the right panel to restart your modules.", playerDocked = true },
+        "Sentry Defense", "We've been assigned to defend this small planet.\n *Repair will not be available for this mission*", 0.75f, new Vector2(0, -1500), Mission.TierOne(), Mission.TierOneBosses(), SentryDialogue)
+        { playerProgression = 1, isAggressive = true, playerDocked = true },
 
         new Mission( [new Planet(Vector2.Zero, Vector2.Zero, 15000, 6f, true, Color.Cyan),
         new Planet(new Vector2(0, 800), Planet.GetOrbitalVelocity(new Vector2(0, 800), Vector2.Zero, 15000) * 0.85f, 1000, 1f, false, Color.Cyan), ],
@@ -1017,5 +1017,23 @@ public class EntityManager
         }
         events.Add(new Event(sum + text.Count, 1, delegate (float time) { }));
         return new Cutscene(events, actors, new MissionSelect());
+    }
+    private static Cutscene SentryDialogue()
+    {
+        List<IEvent> events = 
+        [
+            new TriggerEvent(0, delegate(float _time)
+            {
+                Engine.DialogueManager.Add(new Dialogue("*incoming* Oye, you recievin' this?", null));
+                Engine.DialogueManager.Add(new Dialogue("Good, now listen up.", null));
+                Engine.DialogueManager.Add(new Dialogue("You've been deployed on one of them there planets that we've scoped out.", null));
+                Engine.DialogueManager.Add(new Dialogue("See that last battle beat us pretty badly, so we need materials!", null));
+                Engine.DialogueManager.Add(new Dialogue("We've deployed a turret as you can see, and we want you to defend it until we say you can leave.", null));
+                Engine.DialogueManager.Add(new Dialogue("We can't spare equipment to fix damage you sustain, so try to avoid getting hit.", null));
+                Engine.DialogueManager.Add(new Dialogue("Hey, we might be able to scrounge up some intel if you help us with this though.", null));
+                Engine.DialogueManager.Add(new Dialogue("See you soon.", null));
+            }),
+        ];
+        return new Cutscene(events, [], new PlayingGame());
     }
 }
