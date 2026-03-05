@@ -138,6 +138,8 @@ public static class Assets
         Sprites.Add(Sprite.RealPulseEmitter, Content.Load<Texture2D>("Images/Item_19-1"));
         Sprites.Add(Sprite.Ablative, Content.Load<Texture2D>("Images/Item_20"));
         Sprites.Add(Sprite.RealAblative, Content.Load<Texture2D>("Images/Item_20-1"));
+        Sprites.Add(Sprite.Ablative, Content.Load<Texture2D>("Images/Item_21"));
+        Sprites.Add(Sprite.RealAblative, Content.Load<Texture2D>("Images/Item_21-1"));
 
         //Projectiles
         Sprites.Add(Sprite.SpiralShot, Content.Load<Texture2D>("Images/Projectile_0"));

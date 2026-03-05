@@ -1172,6 +1172,18 @@
 /processorParam:TextureFormat=Color
 /build:Images/Item_20-1.png
 
+#begin Images/Item_21.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:Images/Item_21.png
+
 #begin Images/Item_2-1.png
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -1183,6 +1195,18 @@
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
 /build:Images/Item_2-1.png
+
+#begin Images/Item_21-1.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:Images/Item_21-1.png
 
 #begin Images/Item_3.png
 /importer:TextureImporter
