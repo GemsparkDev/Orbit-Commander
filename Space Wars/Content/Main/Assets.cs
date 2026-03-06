@@ -83,10 +83,6 @@ public static class Assets
         Sprites.Add(Sprite.Hunter, Content.Load<Texture2D>("Images/Entity_49"));
 
         //Items
-        Sprites.Add(Sprite.HullModule, Content.Load<Texture2D>("Images/UI_7"));
-        Sprites.Add(Sprite.EngineModule, Content.Load<Texture2D>("Images/UI_9"));
-        Sprites.Add(Sprite.SensorModule, Content.Load<Texture2D>("Images/UI_11"));
-        Sprites.Add(Sprite.CoreModule, Content.Load<Texture2D>("Images/UI_12"));
         Sprites.Add(Sprite.RealBarricade, Content.Load<Texture2D>("Images/UI_30"));
         Sprites.Add(Sprite.Trap, Content.Load<Texture2D>("Images/Entity_21"));
         Sprites.Add(Sprite.RealTrap, Content.Load<Texture2D>("Images/UI_31"));
@@ -98,18 +94,18 @@ public static class Assets
 
         Sprites.Add(Sprite.MetalScrap, Content.Load<Texture2D>("Images/Item_0"));
         Sprites.Add(Sprite.RealMetalScrap, Content.Load<Texture2D>("Images/Item_0-1"));
-        Sprites.Add(Sprite.GunModule, Content.Load<Texture2D>("Images/Item_1"));
-        Sprites.Add(Sprite.RealGunModule, Content.Load<Texture2D>("Images/Item_1-1"));
+        Sprites.Add(Sprite.Guns, Content.Load<Texture2D>("Images/Item_1"));
+        Sprites.Add(Sprite.RealGuns, Content.Load<Texture2D>("Images/Item_1-1"));
         Sprites.Add(Sprite.MissileModule, Content.Load<Texture2D>("Images/Item_2"));
         Sprites.Add(Sprite.RealMissileModule, Content.Load<Texture2D>("Images/Item_2-1"));
         Sprites.Add(Sprite.SniperModule, Content.Load<Texture2D>("Images/Item_3"));
         Sprites.Add(Sprite.RealSniperModule, Content.Load<Texture2D>("Images/Item_3-1"));
-        Sprites.Add(Sprite.CrossbowModule, Content.Load<Texture2D>("Images/Item_4"));
-        Sprites.Add(Sprite.RealCrossbowModule, Content.Load<Texture2D>("Images/Item_4-1"));
-        Sprites.Add(Sprite.SpiralModule, Content.Load<Texture2D>("Images/Item_5"));
-        Sprites.Add(Sprite.RealSpiralModule, Content.Load<Texture2D>("Images/Item_5-1"));
-        Sprites.Add(Sprite.FlamethrowerModule, Content.Load<Texture2D>("Images/Item_6"));
-        Sprites.Add(Sprite.RealFlamethrowerModule, Content.Load<Texture2D>("Images/Item_6-1"));
+        Sprites.Add(Sprite.Crossbow, Content.Load<Texture2D>("Images/Item_4"));
+        Sprites.Add(Sprite.RealCrossbow, Content.Load<Texture2D>("Images/Item_4-1"));
+        Sprites.Add(Sprite.Spiral, Content.Load<Texture2D>("Images/Item_5"));
+        Sprites.Add(Sprite.RealSpiral, Content.Load<Texture2D>("Images/Item_5-1"));
+        Sprites.Add(Sprite.Flamethrower, Content.Load<Texture2D>("Images/Item_6"));
+        Sprites.Add(Sprite.RealFlamethrower, Content.Load<Texture2D>("Images/Item_6-1"));
         Sprites.Add(Sprite.SpecializedParts, Content.Load<Texture2D>("Images/Item_7"));
         Sprites.Add(Sprite.RealSpecializedParts, Content.Load<Texture2D>("Images/Item_7-1"));
         Sprites.Add(Sprite.Torch, Content.Load<Texture2D>("Images/Item_8"));
@@ -140,6 +136,14 @@ public static class Assets
         Sprites.Add(Sprite.RealAblative, Content.Load<Texture2D>("Images/Item_20-1"));
         Sprites.Add(Sprite.Ablative, Content.Load<Texture2D>("Images/Item_21"));
         Sprites.Add(Sprite.RealAblative, Content.Load<Texture2D>("Images/Item_21-1"));
+        Sprites.Add(Sprite.Hull, Content.Load<Texture2D>("Images/Item_22"));
+        Sprites.Add(Sprite.Core, Content.Load<Texture2D>("Images/Item_22-1"));
+        Sprites.Add(Sprite.Engines, Content.Load<Texture2D>("Images/Item_23"));
+        Sprites.Add(Sprite.Core, Content.Load<Texture2D>("Images/Item_23-1"));
+        Sprites.Add(Sprite.Sensors, Content.Load<Texture2D>("Images/Item_24"));
+        Sprites.Add(Sprite.Core, Content.Load<Texture2D>("Images/Item_24-1"));
+        Sprites.Add(Sprite.Core, Content.Load<Texture2D>("Images/Item_25"));
+        Sprites.Add(Sprite.Core, Content.Load<Texture2D>("Images/Item_25-1"));
 
         //Projectiles
         Sprites.Add(Sprite.SpiralShot, Content.Load<Texture2D>("Images/Projectile_0"));

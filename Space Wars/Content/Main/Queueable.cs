@@ -91,11 +91,11 @@ public class FuseQueue : Queueable
 public class RepairQueue : Queueable
 {
     ItemSlot<Pickup> module;
-    public RepairQueue(ItemSlot<Pickup> _module) : base(2, Assets.Get(Sprite.HullModule), "Repair")
+    public RepairQueue(ItemSlot<Pickup> _module) : base(2, Assets.Get(Sprite.RealHull), "Repair")
     {
         module = _module;
     }
-    public RepairQueue(List<string> _data, LoadLogger _logger) : base(_data, _logger, 2, Assets.Get(Sprite.HullModule), "Repair")
+    public RepairQueue(List<string> _data, LoadLogger _logger) : base(_data, _logger, 2, Assets.Get(Sprite.RealHull), "Repair")
     {
         _logger.Try(delegate { module = UI.MissionSelectSlots[Int32.Parse(_data[2])]; }, 2);
     }
