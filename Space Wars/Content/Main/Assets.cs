@@ -134,16 +134,16 @@ public static class Assets
         Sprites.Add(Sprite.RealPulseEmitter, Content.Load<Texture2D>("Images/Item_19-1"));
         Sprites.Add(Sprite.Ablative, Content.Load<Texture2D>("Images/Item_20"));
         Sprites.Add(Sprite.RealAblative, Content.Load<Texture2D>("Images/Item_20-1"));
-        Sprites.Add(Sprite.Ablative, Content.Load<Texture2D>("Images/Item_21"));
-        Sprites.Add(Sprite.RealAblative, Content.Load<Texture2D>("Images/Item_21-1"));
+        Sprites.Add(Sprite.Orion, Content.Load<Texture2D>("Images/Item_21"));
+        Sprites.Add(Sprite.RealOrion, Content.Load<Texture2D>("Images/Item_21-1"));
         Sprites.Add(Sprite.Hull, Content.Load<Texture2D>("Images/Item_22"));
-        Sprites.Add(Sprite.Core, Content.Load<Texture2D>("Images/Item_22-1"));
+        Sprites.Add(Sprite.RealHull, Content.Load<Texture2D>("Images/Item_22-1"));
         Sprites.Add(Sprite.Engines, Content.Load<Texture2D>("Images/Item_23"));
-        Sprites.Add(Sprite.Core, Content.Load<Texture2D>("Images/Item_23-1"));
+        Sprites.Add(Sprite.RealEngines, Content.Load<Texture2D>("Images/Item_23-1"));
         Sprites.Add(Sprite.Sensors, Content.Load<Texture2D>("Images/Item_24"));
-        Sprites.Add(Sprite.Core, Content.Load<Texture2D>("Images/Item_24-1"));
+        Sprites.Add(Sprite.RealSensors, Content.Load<Texture2D>("Images/Item_24-1"));
         Sprites.Add(Sprite.Core, Content.Load<Texture2D>("Images/Item_25"));
-        Sprites.Add(Sprite.Core, Content.Load<Texture2D>("Images/Item_25-1"));
+        Sprites.Add(Sprite.RealCore, Content.Load<Texture2D>("Images/Item_25-1"));
 
         //Projectiles
         Sprites.Add(Sprite.SpiralShot, Content.Load<Texture2D>("Images/Projectile_0"));

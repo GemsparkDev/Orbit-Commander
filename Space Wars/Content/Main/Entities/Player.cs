@@ -319,11 +319,11 @@ public class Player : Entity
         //Prevents undocking when in the garage menu
         if (Progression > -1 && IsEnabled)
         {
-            if (Input.OldState.IsKeyUp(Keys.I) && Input.NewState.IsKeyDown(Keys.I))
+            if (Input.WasJustPressed(Input.OpenPanel))
             {
                 EventHandler.ToggleDockingMenus();
             }
-            if (Input.NewState.IsKeyDown(Keys.E) && !Input.OldState.IsKeyDown(Keys.E))
+            if (Input.WasJustPressed(Input.SwapPrimary))
             {
                 if (SecondaryWeapon != null)
                 {
@@ -336,7 +336,7 @@ public class Player : Entity
                     SoundManager.PlayGlobalSound(Assets.Get(Sound.Fail));
                 }
             }
-            if (Progression > 1 && Input.OldState.IsKeyUp(Keys.LeftControl) && Input.NewState.IsKeyDown(Keys.LeftControl))
+            if (Progression > 1 && Input.WasJustPressed(Input.ToggleAimAssist))
             {
                 aimAssist = !aimAssist;
                 SoundEffectInstance sound = Assets.Get(Sound.Click).CreateInstance();
@@ -350,7 +350,7 @@ public class Player : Entity
             {
                 if (Progression > 2)
                 {
-                    if (Input.NewState.IsKeyDown(Keys.C))
+                    if (Input.NewState.IsKeyDown(Input.Construct))
                     {
                         float dist = (new Vector2(Input.NewMouseState.X, Input.NewMouseState.Y) - Engine.BackBuffer / 2).Length();
                         var constructs = new List<(String description, Texture2D sprite)>()
@@ -387,7 +387,7 @@ public class Player : Entity
                             angle += MathF.Tau / constructs.Count;
                         }
                     }
-                    else if (Input.OldState.IsKeyDown(Keys.C) && Input.NewState.IsKeyUp(Keys.C))
+                    else if (Input.WasJustReleased(Input.Construct))
                     {
                         float dist = (new Vector2(Input.NewMouseState.X, Input.NewMouseState.Y) - Engine.BackBuffer / 2).Length();
                         int scrapCount = 0;
@@ -507,11 +507,11 @@ public class Player : Entity
                     SoundManager.PlayGlobalSound(Assets.Get(Sound.CloseMenu));
                     canGatherResources = false;
                 }
-                if (Input.OldState.IsKeyUp(Keys.F) && Input.NewState.IsKeyDown(Keys.F))
+                if (Input.WasJustPressed(Input.DropScrap))
                 {
                     leashedMaterials = [];
                 }
-                if (Progression > 1 && Input.OldState.IsKeyUp(Keys.Q) && Input.NewState.IsKeyDown(Keys.Q))
+                if (Progression > 1 && Input.WasJustPressed(Input.Ability))
                 {
                     foreach (var module in modules)
                     {
@@ -523,10 +523,10 @@ public class Player : Entity
                 isEngineActive = false;
                 var directions = new Dictionary<Keys, Vector2>
                 {
-                    { Keys.W, new Vector2(0, -1) },
-                    { Keys.A, new Vector2(-1, 0) },
-                    { Keys.S, new Vector2(0, 1) },
-                    { Keys.D, new Vector2(1, 0) }
+                    { Input.Up, new Vector2(0, -1) },
+                    { Input.Left, new Vector2(-1, 0) },
+                    { Input.Down, new Vector2(0, 1) },
+                    { Input.Right, new Vector2(1, 0) }
                 };
                 foreach (var key in pressedKey)
                 {
@@ -559,7 +559,7 @@ public class Player : Entity
                     }
                 }
             }
-            if (Input.OldState.IsKeyUp(Keys.Space) && Input.NewState.IsKeyDown(Keys.Space))
+            if (Input.WasJustPressed(Input.Dock))
             {
                 Dock();
             }
