@@ -33,4 +33,7 @@ public static class Input
     public static Keys ToggleAimAssist { get; private set; } = Keys.LeftControl;
     public static Keys DropScrap { get; private set; } = Keys.F;
     public static Keys Ability { get; private set; } = Keys.Q;
+    public static Keys WarpForward { get; private set; } = Keys.RightShift;
+    public static Keys WarpBackward { get; private set; } = Keys.LeftShift;
+    public static Keys SkipCutscene { get; private set; } = Keys.Escape;
 }

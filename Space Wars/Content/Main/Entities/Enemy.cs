@@ -3905,28 +3905,19 @@ public class Enemy : Entity
                 Keys[] pressedKey = Input.NewState.GetPressedKeys();
                 Vector2 direction = Vector2.Zero;
                 bool isEngineActive = false;
-                for (int i = 0; i < pressedKey.Length; i++)
+                var directions = new Dictionary<Keys, Vector2>
                 {
-                    switch (pressedKey[i])
+                    { Input.Up, new Vector2(0, -1) },
+                    { Input.Left, new Vector2(-1, 0) },
+                    { Input.Down, new Vector2(0, 1) },
+                    { Input.Right, new Vector2(1, 0) }
+                };
+                foreach (var key in pressedKey)
+                {
+                    if (directions.TryGetValue(key, out Vector2 value))
                     {
-                        case Keys.W:
-                            direction += new Vector2(0, -1);
-                            isEngineActive = true;
-                            break;
-                        case Keys.A:
-                            direction += new Vector2(-1, 0);
-                            isEngineActive = true;
-                            break;
-                        case Keys.S:
-                            direction += new Vector2(0, 1);
-                            isEngineActive = true;
-                            break;
-                        case Keys.D:
-                            direction += new Vector2(1, 0);
-                            isEngineActive = true;
-                            break;
-                        default:
-                            break;
+                        direction += value;
+                        isEngineActive = true;
                     }
                 }
                 if (isEngineActive)
@@ -4108,11 +4099,11 @@ public class Enemy : Entity
                 {
                     dir = -1;
                 }
-                else if (Input.NewState.IsKeyDown(Keys.LeftShift))
+                else if (Input.NewState.IsKeyDown(Input.WarpBackward))
                 {
                     dir = -1;
                 }
-                else if (Input.NewState.IsKeyDown(Keys.RightShift))
+                else if (Input.NewState.IsKeyDown(Input.WarpForward))
                 {
                     dir = 1;
                 }
