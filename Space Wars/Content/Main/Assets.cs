@@ -144,6 +144,8 @@ public static class Assets
         Sprites.Add(Sprite.RealSensors, Content.Load<Texture2D>("Images/Item_24-1"));
         Sprites.Add(Sprite.Core, Content.Load<Texture2D>("Images/Item_25"));
         Sprites.Add(Sprite.RealCore, Content.Load<Texture2D>("Images/Item_25-1"));
+        Sprites.Add(Sprite.Reflective, Content.Load<Texture2D>("Images/Item_26"));
+        Sprites.Add(Sprite.RealReflective, Content.Load<Texture2D>("Images/Item_26-1"));
 
         //Projectiles
         Sprites.Add(Sprite.SpiralShot, Content.Load<Texture2D>("Images/Projectile_0"));

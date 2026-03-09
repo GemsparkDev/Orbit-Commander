@@ -156,6 +156,7 @@ public enum Sprite
     PulseEmitter,RealPulseEmitter,
     Ablative,RealAblative,
     Orion,RealOrion,
+    Reflective,RealReflective,
 
     SpiralShot,
     PulseShot,
