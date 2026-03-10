@@ -1,4 +1,6 @@
-﻿namespace Space_Wars.Content.Main;
+﻿using Microsoft.Xna.Framework.Input;
+
+namespace Space_Wars.Content.Main;
 
 public enum ModuleType
 {
@@ -267,4 +269,22 @@ public enum Condition
     CustomIncomplete,
     CustomComplete,
     DelayedSpawn,
+}
+
+public enum Binding
+{
+    Up, 
+    Down, 
+    Left, 
+    Right, 
+    Dock, 
+    Construct, 
+    SwapPrimary, 
+    OpenPanel, 
+    ToggleAimAssist,
+    DropScrap, 
+    Ability, 
+    WarpForward, 
+    WarpBackward, 
+    SkipCutscene
 }

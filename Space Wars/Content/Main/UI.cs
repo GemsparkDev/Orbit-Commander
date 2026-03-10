@@ -56,6 +56,8 @@ public static class UI
     public static Button[] NextModule { get; } = new Button[5];
     public static Button[] PrevModule { get; } = new Button[5];
     public static Decal[] Module { get; } = new Decal[5];
+    public static Decal[] KeybindTexts { get; } = new Decal[Input.Keybinds.Count];
+    public static Button[] KeybindInputs { get; } = new Button[Input.Keybinds.Count];
 
     //Pause Menu
     public static Button QuitToMissionButton { get; } = new Button(new Vector2(0, -20), Assets.Get(Sprite.WideButton), Assets.TextFont, "Return", Color.White);
@@ -422,6 +424,12 @@ public static class UI
         MainMenu.AddWidget(Resolution, 1);
         MainMenu.AddWidget(NextResolution, 1);
         MainMenu.AddWidget(ApplyChanges, 1);
+        for(int i = 0; i < Input.Keybinds.Count; i++)
+        {
+            var key = Input.Keybinds[(Binding)i];
+            MainMenu.AddWidget(KeybindTexts[i] = new Decal(new Vector2(0, 10 * i), Assets.TextFont, $"{(Binding)i}", Color.White, 10), 2);
+            MainMenu.AddWidget(KeybindInputs[i] = new Button(new Vector2(50, 10 * i), $"{key}", Color.White), 2);
+        }
 
         for(int i = 0; i < NextModule.Length; i++)
         {

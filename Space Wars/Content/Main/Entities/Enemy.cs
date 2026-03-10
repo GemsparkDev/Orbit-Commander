@@ -3905,18 +3905,18 @@ public class Enemy : Entity
                 Keys[] pressedKey = Input.NewState.GetPressedKeys();
                 Vector2 direction = Vector2.Zero;
                 bool isEngineActive = false;
-                var directions = new Dictionary<Keys, Vector2>
+                var directions = new Dictionary<Binding, Vector2>
                 {
-                    { Input.Up, new Vector2(0, -1) },
-                    { Input.Left, new Vector2(-1, 0) },
-                    { Input.Down, new Vector2(0, 1) },
-                    { Input.Right, new Vector2(1, 0) }
+                    { Binding.Up, new Vector2(0, -1) },
+                    { Binding.Left, new Vector2(-1, 0) },
+                    { Binding.Down, new Vector2(0, 1) },
+                    { Binding.Right, new Vector2(1, 0) }
                 };
-                foreach (var key in pressedKey)
+                foreach (var pair in directions)
                 {
-                    if (directions.TryGetValue(key, out Vector2 value))
+                    if (Input.IsDown(pair.Key))
                     {
-                        direction += value;
+                        direction += pair.Value;
                         isEngineActive = true;
                     }
                 }
@@ -4099,11 +4099,11 @@ public class Enemy : Entity
                 {
                     dir = -1;
                 }
-                else if (Input.NewState.IsKeyDown(Input.WarpBackward))
+                else if (Input.IsDown(Binding.WarpBackward))
                 {
                     dir = -1;
                 }
-                else if (Input.NewState.IsKeyDown(Input.WarpForward))
+                else if (Input.IsDown(Binding.WarpForward))
                 {
                     dir = 1;
                 }

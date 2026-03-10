@@ -1,4 +1,5 @@
 ﻿using Microsoft.Xna.Framework.Input;
+using System.Collections.Generic;
 
 namespace Space_Wars.Content.Main;
 public static class Input
@@ -14,26 +15,39 @@ public static class Input
         OldMouseState = NewMouseState;
         NewMouseState = Mouse.GetState();
     }
-    public static bool WasJustPressed(Keys key)
+    public static bool WasJustPressed(Binding binding)
     {
+        Keys key = Keybinds[binding];
         return OldState.IsKeyUp(key) && NewState.IsKeyDown(key);
     }
-    public static bool WasJustReleased(Keys key)
+    public static bool WasJustReleased(Binding binding)
     {
+        Keys key = Keybinds[binding];
         return OldState.IsKeyDown(key) && NewState.IsKeyUp(key);
     }
-    public static Keys Up { get; private set; } = Keys.W;
-    public static Keys Down { get; private set; } = Keys.S;
-    public static Keys Left { get; private set; } = Keys.A;
-    public static Keys Right { get; private set; } = Keys.D;
-    public static Keys Dock { get; private set; } = Keys.Space;
-    public static Keys Construct { get; private set; } = Keys.C;
-    public static Keys SwapPrimary { get; private set; } = Keys.E;
-    public static Keys OpenPanel { get; private set; } = Keys.I;
-    public static Keys ToggleAimAssist { get; private set; } = Keys.LeftControl;
-    public static Keys DropScrap { get; private set; } = Keys.F;
-    public static Keys Ability { get; private set; } = Keys.Q;
-    public static Keys WarpForward { get; private set; } = Keys.RightShift;
-    public static Keys WarpBackward { get; private set; } = Keys.LeftShift;
-    public static Keys SkipCutscene { get; private set; } = Keys.Escape;
+    public static bool IsDown(Binding binding)
+    {
+        return NewState.IsKeyDown(Keybinds[binding]);
+    }
+    public static bool WasDown(Binding binding)
+    {
+        return OldState.IsKeyDown(Keybinds[binding]);
+    }
+    public static Dictionary<Binding, Keys> Keybinds = new() 
+    {
+        { Binding.Up, Keys.W },
+        { Binding.Down, Keys.S },
+        { Binding.Left, Keys.A },
+        { Binding.Right, Keys.D },
+        { Binding.Dock, Keys.Space },
+        { Binding.Construct, Keys.C },
+        { Binding.SwapPrimary, Keys.E },
+        { Binding.OpenPanel, Keys.I },
+        { Binding.ToggleAimAssist, Keys.LeftControl },
+        { Binding.DropScrap, Keys.F },
+        { Binding.Ability, Keys.Q },
+        { Binding.WarpForward, Keys.RightShift },
+        { Binding.WarpBackward, Keys.LeftShift },
+        { Binding.SkipCutscene, Keys.Escape },
+    };
 }

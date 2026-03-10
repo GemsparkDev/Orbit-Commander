@@ -319,11 +319,11 @@ public class Player : Entity
         //Prevents undocking when in the garage menu
         if (Progression > -1 && IsEnabled)
         {
-            if (Input.WasJustPressed(Input.OpenPanel))
+            if (Input.WasJustPressed(Binding.OpenPanel))
             {
                 EventHandler.ToggleDockingMenus();
             }
-            if (Input.WasJustPressed(Input.SwapPrimary))
+            if (Input.WasJustPressed(Binding.SwapPrimary))
             {
                 if (SecondaryWeapon != null)
                 {
@@ -336,7 +336,7 @@ public class Player : Entity
                     SoundManager.PlayGlobalSound(Assets.Get(Sound.Fail));
                 }
             }
-            if (Progression > 1 && Input.WasJustPressed(Input.ToggleAimAssist))
+            if (Progression > 1 && Input.WasJustPressed(Binding.ToggleAimAssist))
             {
                 aimAssist = !aimAssist;
                 SoundEffectInstance sound = Assets.Get(Sound.Click).CreateInstance();
@@ -350,7 +350,7 @@ public class Player : Entity
             {
                 if (Progression > 2)
                 {
-                    if (Input.NewState.IsKeyDown(Input.Construct))
+                    if (Input.IsDown(Binding.Construct))
                     {
                         float dist = (new Vector2(Input.NewMouseState.X, Input.NewMouseState.Y) - Engine.BackBuffer / 2).Length();
                         var constructs = new List<(String description, Texture2D sprite)>()
@@ -387,7 +387,7 @@ public class Player : Entity
                             angle += MathF.Tau / constructs.Count;
                         }
                     }
-                    else if (Input.WasJustReleased(Input.Construct))
+                    else if (Input.WasJustReleased(Binding.Construct))
                     {
                         float dist = (new Vector2(Input.NewMouseState.X, Input.NewMouseState.Y) - Engine.BackBuffer / 2).Length();
                         int scrapCount = 0;
@@ -507,11 +507,11 @@ public class Player : Entity
                     SoundManager.PlayGlobalSound(Assets.Get(Sound.CloseMenu));
                     canGatherResources = false;
                 }
-                if (Input.WasJustPressed(Input.DropScrap))
+                if (Input.WasJustPressed(Binding.DropScrap))
                 {
                     leashedMaterials = [];
                 }
-                if (Progression > 1 && Input.WasJustPressed(Input.Ability))
+                if (Progression > 1 && Input.WasJustPressed(Binding.Ability))
                 {
                     foreach (var module in modules)
                     {
@@ -521,18 +521,18 @@ public class Player : Entity
                 Keys[] pressedKey = Input.NewState.GetPressedKeys();
                 direction = Vector2.Zero;
                 isEngineActive = false;
-                var directions = new Dictionary<Keys, Vector2>
+                var directions = new Dictionary<Binding, Vector2>
                 {
-                    { Input.Up, new Vector2(0, -1) },
-                    { Input.Left, new Vector2(-1, 0) },
-                    { Input.Down, new Vector2(0, 1) },
-                    { Input.Right, new Vector2(1, 0) }
+                    { Binding.Up, new Vector2(0, -1) },
+                    { Binding.Left, new Vector2(-1, 0) },
+                    { Binding.Down, new Vector2(0, 1) },
+                    { Binding.Right, new Vector2(1, 0) }
                 };
-                foreach (var key in pressedKey)
+                foreach (var pair in directions)
                 {
-                    if (directions.TryGetValue(key, out Vector2 value))
+                    if (Input.IsDown(pair.Key))
                     {
-                        direction += value;
+                        direction += pair.Value;
                     }
                 }
                 isEngineActive = (direction.X != 0 || direction.Y != 0);
@@ -559,7 +559,7 @@ public class Player : Entity
                     }
                 }
             }
-            if (Input.WasJustPressed(Input.Dock))
+            if (Input.WasJustPressed(Binding.Dock))
             {
                 Dock();
             }
