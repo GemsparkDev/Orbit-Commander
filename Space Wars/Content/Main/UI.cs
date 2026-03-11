@@ -426,9 +426,20 @@ public static class UI
         MainMenu.AddWidget(ApplyChanges, 1);
         for(int i = 0; i < Input.Keybinds.Count; i++)
         {
-            var key = Input.Keybinds[(Binding)i];
-            MainMenu.AddWidget(KeybindTexts[i] = new Decal(new Vector2(0, 10 * i), Assets.TextFont, $"{(Binding)i}", Color.White, 10), 2);
-            MainMenu.AddWidget(KeybindInputs[i] = new Button(new Vector2(50, 10 * i), $"{key}", Color.White), 2);
+            Binding binding = (Binding)i; //Saving to a variable prevents delegate weirdness
+            var key = Input.Keybinds[binding];
+            MainMenu.AddWidget(KeybindTexts[i] = new Decal(new Vector2(-30, 12 * i-80), Assets.TextFont, $"{binding}", Color.White, 8), 3);
+            var button = new Button(new Vector2(80, 12 * i - 80), Assets.TextFont, $"{key}", Color.White, 8);
+            button.AddBehaviour(delegate () 
+            {
+                var keys = Input.NewState.GetPressedKeys();
+                if (keys.Length > 0)
+                {
+                    Input.Keybinds[binding] = keys[0];
+                    button.text = $"{keys[0]}";
+                }
+            });
+            MainMenu.AddWidget(KeybindInputs[i] = button, 3);
         }
 
         for(int i = 0; i < NextModule.Length; i++)
