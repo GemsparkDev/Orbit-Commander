@@ -428,7 +428,7 @@ public static class UI
         {
             Binding binding = (Binding)i; //Saving to a variable prevents delegate weirdness
             var key = Input.Keybinds[binding];
-            MainMenu.AddWidget(KeybindTexts[i] = new Decal(new Vector2(-30, 12 * i-80), Assets.TextFont, $"{binding}", Color.White, 8), 3);
+            MainMenu.AddWidget(KeybindTexts[i] = new Decal(new Vector2(-140 + Assets.TextFont.MeasureString($"{binding}").X/2.55f, 12 * i-80), Assets.TextFont, $"{binding}", Color.White, 8), 3);
             var button = new Button(new Vector2(80, 12 * i - 80), Assets.TextFont, $"{key}", Color.White, 8);
             button.AddBehaviour(delegate () 
             {
@@ -465,6 +465,11 @@ public static class UI
         SettingsMenu.AddWidget(MusicVolume);
         SettingsMenu.AddWidget(UIScale);
         SettingsMenu.AddWidget(ShaderToggle);
+        SettingsMenu.AddWidget(WindowType);
+        SettingsMenu.AddWidget(NextWindowType);
+        SettingsMenu.AddWidget(Resolution);
+        SettingsMenu.AddWidget(NextResolution);
+        SettingsMenu.AddWidget(ApplyChanges);
 
         GarageMenu.AddWidget(MothershipScrap);
         GarageMenu.AddWidget(RepairButton);
