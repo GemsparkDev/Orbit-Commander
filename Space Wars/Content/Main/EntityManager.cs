@@ -958,9 +958,12 @@ public class EntityManager
         [
             new TriggerEvent(0, delegate(float time)
             {
-                Engine.DialogueManager.Add(new Dialogue("Incoming: Sir, an unknown ship appears to be approaching!", null));
-                Engine.DialogueManager.Add(new Dialogue("They seem to be hailing us... They're on our side!", null));
-                Engine.DialogueManager.Add(new Dialogue("Pilot! Aid us in this fight and we'll help you however we can!", null));
+                Engine.DialogueManager.Add(new Dialogue(
+                    [
+                        "Incoming: Sir, an unknown ship appears to be approaching!",
+                        "They seem to be hailing us... They're on our side!",
+                        "Pilot! Aid us in this fight and we'll help you however we can!",
+                        ], null));
             }),
         ];
         return new Cutscene(events, [], new PlayingGame());
@@ -973,8 +976,11 @@ public class EntityManager
         [
             new TriggerEvent(0, delegate(float time)
             {
-                Engine.DialogueManager.Add(new Dialogue("All teams, rendezvous at the ship if you value your life!", null));
-                Engine.DialogueManager.Add(new Dialogue("Get this ship in the air!", null));
+                Engine.DialogueManager.Add(new Dialogue(
+                    [
+                        "All teams, rendezvous at the ship if you value your life!",
+                        "Get this ship in the air!",
+                    ], null));
             }),
             new Event(6, 3, delegate(float time)
             {
@@ -982,10 +988,13 @@ public class EntityManager
             }),
             new TriggerEvent(9, delegate(float time)
             {
-                Engine.DialogueManager.Add(new Dialogue("We barely got out of there.", null));
-                Engine.DialogueManager.Add(new Dialogue("Pilot, I applaud your courage. We're in your debt.", null));
-                Engine.DialogueManager.Add(new Dialogue("Your ship... I've never seen anything like it before.", null));
-                Engine.DialogueManager.Add(new Dialogue("Lets regroup at the base. We might have some information that can aid you on your journey.", null));
+                Engine.DialogueManager.Add(new Dialogue(
+                    [
+                        "We barely got out of there.",
+                        "Pilot, I applaud your courage. We're in your debt.",
+                        "Your ship... I've never seen anything like it before.",
+                        "Lets regroup at the base. We might have some information that can aid you on your journey."
+                    ], null));
             }),
         ];
         Vector2 screen = Engine.BackBuffer / 2;
@@ -1024,14 +1033,17 @@ public class EntityManager
         [
             new TriggerEvent(0, delegate(float _time)
             {
-                Engine.DialogueManager.Add(new Dialogue("*incoming* Oye, you recievin' this?", null));
-                Engine.DialogueManager.Add(new Dialogue("Good, now listen up.", null));
-                Engine.DialogueManager.Add(new Dialogue("You've been deployed on one of them there planets that we've scoped out.", null));
-                Engine.DialogueManager.Add(new Dialogue("See that last battle beat us pretty badly, so we need materials!", null));
-                Engine.DialogueManager.Add(new Dialogue("We've deployed a turret as you can see, and we want you to defend it until we say you can leave.", null));
-                Engine.DialogueManager.Add(new Dialogue("We can't spare equipment to fix damage you sustain, so try to avoid getting hit.", null));
-                Engine.DialogueManager.Add(new Dialogue("Hey, we might be able to scrounge up some intel if you help us with this though.", null));
-                Engine.DialogueManager.Add(new Dialogue("See you soon.", null));
+                Engine.DialogueManager.Add(new Dialogue(
+                    [
+                        "*incoming* Oye, you recievin' this?", 
+                        "Good, now listen up.",
+                        "You've been deployed on one of them there planets that we've scoped out.",
+                        "See that last battle beat us pretty badly, so we need materials!",
+                        "We've deployed a turret as you can see, and we want you to defend it until we say you can leave.",
+                        "We can't spare equipment to fix damage you sustain, so try to avoid getting hit.",
+                        "Hey, we might be able to scrounge up some intel if you help us with this though.",
+                        "See you soon.",
+                    ], null));
             }),
         ];
         return new Cutscene(events, [], new PlayingGame());
