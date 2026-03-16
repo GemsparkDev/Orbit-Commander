@@ -332,6 +332,10 @@ public class EntityManager
             //Draws all entities in the main list
             entity.Draw(_spriteBatch);
         }
+        foreach(var collider in Engine.SaveGame.CurrentMission.Colliders)
+        {
+            collider.Draw(_spriteBatch);
+        }
     }
     public void Explode(int _damage, float _radius, Vector2 _position)
     {

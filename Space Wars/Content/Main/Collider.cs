@@ -5,19 +5,17 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Space_Wars.Content.Main.Entities;
 
 namespace Space_Wars.Content.Main;
-public interface ICollider
+public class LineCollider(Vector2 _start, Vector2 _end)
 {
-    public abstract Vector2 Collide(Vector2 _point);
-    public abstract void Render(SpriteBatch _spriteBatch);
-    public abstract void Move(Vector2 _offset);
-}
-public class LineCollider(Vector2 _start, Vector2 _end) : ICollider
-{
-    public Vector2 Collide(Vector2 _point)
+    public Vector2 Collide(Entity _entity)
     {
-        throw new NotImplementedException();
+        Vector2 length = _end - _start;
+        Vector2 distance = _start - _entity.position;
+        float circleDistance = (length.X * distance.Y - length.Y * distance.X) / length.Length();
+        return Vector2.Normalize(distance) * circleDistance;
     }
     public void Move(Vector2 _offset)
     {
@@ -26,25 +24,20 @@ public class LineCollider(Vector2 _start, Vector2 _end) : ICollider
     }
     public void Rotate(float _rad)
     {
-        throw new NotImplementedException();
+        float angle = MathF.Atan2((_end.Y - _start.Y),(_end.X - _start.X));
+        Vector2 com = (_end + _start) / 2;
+        float length = (_end - com).Length();
+        Vector2 dir = Util.ToUnitVector(angle + _rad);
+        _end = com + dir * length;
+        _start = com - dir * length;
     }
-    public void Render(SpriteBatch _spriteBatch)
+    public void Draw(SpriteBatch _spriteBatch)
     {
-        throw new NotImplementedException();
-    }
-}
-public class CircleCollider(Vector2 _position, float _radius) : ICollider
-{
-    public Vector2 Collide(Vector2 _point)
-    {
-        throw new NotImplementedException();
-    }
-    public void Move(Vector2 _offset)
-    {
-        _position += _offset;
-    }
-    public void Render(SpriteBatch _spriteBatch)
-    {
-        throw new NotImplementedException();
+        float angle = MathF.Atan2((_end.Y - _start.Y), (_end.X - _start.X));
+        Vector2 dir = Util.ToUnitVector(angle);
+        for (float d = 0; d < (_end - _start).Length(); d += 2)
+        {
+            _spriteBatch.Draw(Assets.Get(Sprite.Dot), _start + dir * d, null, Color.White, angle, Assets.DimsOf(Sprite.Dot), Vector2.One, 0, 0);
+        }
     }
 }
