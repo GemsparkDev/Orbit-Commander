@@ -32,10 +32,10 @@ public class Mission
     public Planet[] Planets { get { return planets; } }
     public LineCollider[] Colliders { get; } = 
         [ 
-        new LineCollider(new Vector2(0, 0), new Vector2(0, 1)), 
-        new LineCollider(new Vector2(0, 1), new Vector2(1, 1)), 
-        new LineCollider(new Vector2(1, 1), new Vector2(1, 0)), 
-        new LineCollider(new Vector2(1, 0), new Vector2(0, 0)) 
+        new LineCollider(new Vector2(1, 1), new Vector2(1, 500)), 
+        new LineCollider(new Vector2(1, 500), new Vector2(500, 500)), 
+        new LineCollider(new Vector2(500, 500), new Vector2(500, 1)), 
+        new LineCollider(new Vector2(500, 1), new Vector2(1, 1)) 
         ];
     //Save original entity parameters to allow cloning
     private List<ICondition> CopyObjectives { get; }

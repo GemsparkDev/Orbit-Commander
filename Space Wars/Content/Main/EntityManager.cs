@@ -265,6 +265,10 @@ public class EntityManager
     {
         Player.Update();
         Engine.SaveGame.CurrentMission.AttractObject(Player);
+        foreach (var collider in Engine.SaveGame.CurrentMission.Colliders)
+        {
+            Player.position += collider.Collide(Player);
+        }
         if (Player.dockedEntity == null && Player.Progression > -1)
         {
             Engine.SaveGame.CurrentMission.CalculateTrajectory(Player.position, Player.velocity, Player.ColliderRadius);
@@ -302,6 +306,10 @@ public class EntityManager
         {
             entity.Update();
             Engine.SaveGame.CurrentMission.AttractObject(entity);
+            foreach(var collider in Engine.SaveGame.CurrentMission.Colliders)
+            {
+                entity.position += collider.Collide(entity);
+            }
         }
         if (projectiles.Count >= 150)
         {
