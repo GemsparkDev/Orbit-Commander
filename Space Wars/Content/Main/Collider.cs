@@ -11,36 +11,35 @@ using Space_Wars.Content.Main.Particles;
 namespace Space_Wars.Content.Main;
 public class LineCollider(Vector2 _start, Vector2 _end)
 {
-    public Vector2 Collide(Entity _entity)
+    public bool Collide(Entity _entity)
     {
         Vector2 length = _start - _end;
-        Vector2 distance = _start - _entity.position;
-        float distanceBetween = MathF.Abs(distance.Length() * Vector2.Dot(distance, length) / distance.Length() / length.Length());
-        if(distanceBetween < 0)
+        float distanceBetween = Math.Clamp(Vector2.Dot((_start - _entity.position), length) / length.LengthSquared(), 0, 1);
+        Vector2 closestPoint = _start-length * distanceBetween;
+        float distance = Vector2.Distance(closestPoint, _entity.position);
+        if (distance < _entity.ColliderRadius)
         {
-            if(Vector2.Distance(_entity.position, _start) < _entity.ColliderRadius)
+            var frictionVector = Vector2.Normalize(-length);
+            var normalVector = (_entity.position - closestPoint) / distance;
+            var relativeVelocity = - _entity.velocity; //Include velocity if colliders are moving in the future.
+            int collisionForce = (int)Math.Floor((relativeVelocity).Length() / 2);
+            if (_entity as Pickup == null && (collisionForce > 5 || _entity is Projectile))
             {
-                _entity.velocity = Vector2.Zero;
-                return Vector2.Normalize(-distance) * (_entity.ColliderRadius - distance.Length());
+                _entity.Collide(collisionForce);
             }
-            return Vector2.Zero;
+            float verticalVelocity = Vector2.Dot(relativeVelocity, normalVector);
+            _entity.velocity += normalVector * verticalVelocity + frictionVector * Vector2.Dot(relativeVelocity, frictionVector) * 0.1f;
+            _entity.position += Vector2.Normalize(_entity.position - closestPoint) * (_entity.ColliderRadius - distance);
         }
-        if (distanceBetween > length.Length())
-        {
-            if (Vector2.Distance(_entity.position, _end) < _entity.ColliderRadius)
-            {
-                _entity.velocity = Vector2.Zero;
-                return Vector2.Normalize(_entity.position - _end) * (_entity.ColliderRadius - (_entity.position - _end).Length());
-            }
-            return Vector2.Zero;
-        }
-        Vector2 closestPoint = _start-Vector2.Normalize(length) * distanceBetween;
-        if(Vector2.Distance(closestPoint, _entity.position) > _entity.ColliderRadius)
-        {
-            return Vector2.Zero;
-        }
-        _entity.velocity = Vector2.Zero;
-        return Vector2.Normalize(_entity.position - closestPoint) * (_entity.ColliderRadius - Vector2.Distance(closestPoint, _entity.position));
+        return distance < _entity.ColliderRadius;
+    }
+    public bool IsColliding(Vector2 _position, float _radius)
+    {
+        Vector2 length = _start - _end;
+        float distanceBetween = Math.Clamp(Vector2.Dot((_start - _position), length) / length.LengthSquared(), 0, 1);
+        Vector2 closestPoint = _start - length * distanceBetween;
+        float distance = Vector2.Distance(closestPoint, _position);
+        return distance < _radius;
     }
     public void Move(Vector2 _offset)
     {
@@ -49,7 +48,7 @@ public class LineCollider(Vector2 _start, Vector2 _end)
     }
     public void Rotate(float _rad)
     {
-        float angle = MathF.Atan2((_end.Y - _start.Y),(_end.X - _start.X));
+        float angle = MathF.Atan2((_end.Y - _start.Y),(_end.X - _start.X)) + MathF.PI/2;
         Vector2 com = (_end + _start) / 2;
         float length = (_end - com).Length();
         Vector2 dir = Util.ToUnitVector(angle + _rad);
@@ -58,7 +57,7 @@ public class LineCollider(Vector2 _start, Vector2 _end)
     }
     public void Draw(SpriteBatch _spriteBatch)
     {
-        float angle = MathF.Atan2((_end.Y - _start.Y), (_end.X - _start.X));
+        float angle = MathF.Atan2((_start.Y - _end.Y), (_start.X - _end.X)) - MathF.PI/2;
         Vector2 dir = Util.ToUnitVector(angle);
         for (float d = 0; d < (_end - _start).Length() / 2; d += 2)
         {

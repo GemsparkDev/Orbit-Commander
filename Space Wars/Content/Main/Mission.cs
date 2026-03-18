@@ -32,10 +32,7 @@ public class Mission
     public Planet[] Planets { get { return planets; } }
     public LineCollider[] Colliders { get; } = 
         [ 
-        new LineCollider(new Vector2(1, 1), new Vector2(1, 500)), 
-        new LineCollider(new Vector2(1, 500), new Vector2(500, 500)), 
-        new LineCollider(new Vector2(500, 500), new Vector2(500, 1)), 
-        new LineCollider(new Vector2(500, 1), new Vector2(1, 1)) 
+        new LineCollider(new Vector2(500, -500), new Vector2(500, 500)) 
         ];
     //Save original entity parameters to allow cloning
     private List<ICondition> CopyObjectives { get; }
@@ -342,6 +339,7 @@ public class Mission
     public void AttractObject(Entity _entity)
     {
         foreach (var planet in planets) { planet.AttractObject(_entity); }
+        foreach (var collider in Colliders) { collider.Collide(_entity); }
     }
     public void AttractObject(Particle _particle)
     {
@@ -378,6 +376,14 @@ public class Mission
 
         for (int n = 0; n < 1000; n++)
         {
+            foreach(var collider in Colliders)
+            {
+                if(collider.IsColliding(futurePosition, Engine.SaveGame.Player.ColliderRadius))
+                {
+                    exit = true;
+                    break;
+                }
+            }
             for (int i = 0; i < planets.Length; i++)
             {
                 if (planets[i].radius + _radius > Vector2.Distance(futurePlanetPositions[i], futurePosition))

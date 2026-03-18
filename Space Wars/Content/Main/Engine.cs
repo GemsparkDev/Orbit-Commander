@@ -207,14 +207,6 @@ public class Engine : Game
         Time += DeltaSeconds;
         base.Update(gameTime);
     }
-    public void Rotate(int _dir, bool _override = false)
-    {
-        if (SaveGame.Player.Progression <= 0 && !_override)
-        {
-            return;
-        }
-        EventHandler.UpdateModulesStatus();
-    }
     public static Pickup MoveSelectedPickup()
     {
         return UIManager.MoveSelectedIcon() as Pickup;
@@ -358,6 +350,10 @@ public static class Util
         float cos = MathF.Cos(a);
         float sin = MathF.Sin(a);
         return new Vector2(v.X * cos - v.Y * sin, v.X * sin + v.Y * cos);
+    }
+    public static float Cross(Vector2 v1, Vector2 v2)
+    {
+        return v1.X * v2.Y - v1.Y * v2.X;
     }
     public static void FiringParticles(Vector2 _position, Vector2 _velocity, Vector2 _direction)
     {
