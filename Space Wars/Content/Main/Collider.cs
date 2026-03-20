@@ -13,13 +13,16 @@ namespace Space_Wars.Content.Main;
 public interface ICollider
 {
     public bool Collide(Entity _entity);
-    public bool IsColliding(Vector2 _position, float _radius);
+    public bool IsColliding(Vector2 _position, Vector2 _velocity, float _radius);
     public void Draw(SpriteBatch _spriteBatch);
     protected static bool ComputeCollisions(float _distance, Vector2 _closestPoint, Vector2 _velocity, Entity _entity)
     {
-        if(_distance < _entity.ColliderRadius)
+        var normalVector = (_entity.position - _closestPoint) / _distance;
+        Vector2 relativePosition = _entity.position - _closestPoint + normalVector * _entity.ColliderRadius;
+        Vector2 futurePosition = relativePosition + (_entity.velocity - _velocity) - 2 * normalVector * _entity.ColliderRadius;
+        bool cond = Vector2.Dot(normalVector, relativePosition) * Vector2.Dot(normalVector, futurePosition) < 0;
+        if(cond)
         {
-            var normalVector = (_entity.position - _closestPoint) / _distance;
             var frictionVector = new Vector2(normalVector.Y, -normalVector.X);
             var relativeVelocity = -_entity.velocity; //Include velocity if colliders are moving in the future.
             int collisionForce = (int)Math.Floor((relativeVelocity).Length() / 2);
@@ -31,7 +34,7 @@ public interface ICollider
             _entity.velocity += normalVector * verticalVelocity + frictionVector * Vector2.Dot(relativeVelocity, frictionVector) * 0.1f;
             _entity.position += Vector2.Normalize(_entity.position - _closestPoint) * (_entity.ColliderRadius - _distance);
         }
-        return _distance < _entity.ColliderRadius;
+        return cond;
     }
 }
 public class LineCollider(Vector2 _start, Vector2 _end) : ICollider
@@ -44,13 +47,16 @@ public class LineCollider(Vector2 _start, Vector2 _end) : ICollider
         float distance = Vector2.Distance(closestPoint, _entity.position);
         return ICollider.ComputeCollisions(distance, closestPoint, Vector2.Zero, _entity);
     }
-    public bool IsColliding(Vector2 _position, float _radius)
+    public bool IsColliding(Vector2 _position, Vector2 _entityVelocity, float _radius)
     {
         Vector2 length = _start - _end;
         float distanceBetween = Math.Clamp(Vector2.Dot((_start - _position), length) / length.LengthSquared(), 0, 1);
         Vector2 closestPoint = _start - length * distanceBetween;
         float distance = Vector2.Distance(closestPoint, _position);
-        return distance < _radius;
+        var normalVector = (_position - closestPoint) / distance;
+        Vector2 relativePosition = _position - closestPoint + normalVector * _radius;
+        Vector2 futurePosition = relativePosition + (_entityVelocity) - 2 * normalVector * _radius;
+        return Vector2.Dot(normalVector, relativePosition) * Vector2.Dot(normalVector, futurePosition) < 0;
     }
     public void Move(Vector2 _offset)
     {
@@ -70,9 +76,9 @@ public class LineCollider(Vector2 _start, Vector2 _end) : ICollider
     {
         float angle = MathF.Atan2((_start.Y - _end.Y), (_start.X - _end.X)) - MathF.PI/2;
         Vector2 dir = Util.ToUnitVector(angle);
-        for (float d = 0; d < (_end - _start).Length() / 2; d += 2)
+        for (float d = 0; d < (_end - _start).Length() / 4; d += 2)
         {
-            _spriteBatch.Draw(Assets.Get(Sprite.Dot), _start + dir * d * 2, null, Color.White, angle, Assets.DimsOf(Sprite.Dot), Vector2.One, 0, 0);
+            _spriteBatch.Draw(Assets.Get(Sprite.Dot), _start + dir * d * 4, null, Color.White, angle, Assets.DimsOf(Sprite.Dot), Vector2.One, 0, 0);
         }
     }
 }
@@ -101,13 +107,15 @@ public class ArcCollider : ICollider
         float distance = Vector2.Distance(_entity.position, closestPoint);
         return ICollider.ComputeCollisions(distance, closestPoint, Vector2.Zero, _entity);
     }
-    public bool IsColliding(Vector2 _position, float _radius)
+    public bool IsColliding(Vector2 _position, Vector2 _velocity, float _radius)
     {
-        Vector2 relativePosition = _position - position;
-        float angle = Math.Clamp(Util.ToAngle(relativePosition), sprayAngle - sprayCone / 2, sprayAngle + sprayCone / 2);
+        float angle = Math.Clamp(Util.ToAngle(_position - position), sprayAngle - sprayCone / 2, sprayAngle + sprayCone / 2);
         Vector2 closestPoint = Util.ToUnitVector(angle) * radius;
         float distance = Vector2.Distance(_position, closestPoint);
-        return distance < _radius;
+        var normalVector = (_position - closestPoint) / distance;
+        Vector2 relativePosition = _position - closestPoint + normalVector * _radius;
+        Vector2 futurePosition = relativePosition + _velocity - 2 * normalVector * _radius;
+        return Vector2.Dot(normalVector, relativePosition) * Vector2.Dot(normalVector, futurePosition) < 0;
     }
     public void Draw(SpriteBatch _spriteBatch)
     {

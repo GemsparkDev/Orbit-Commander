@@ -32,8 +32,8 @@ public class Mission
     public Planet[] Planets { get { return planets; } }
     public ICollider[] Colliders { get; } = 
         [ 
-        new LineCollider(new Vector2(500, -500), new Vector2(500, 500)), 
-        new ArcCollider(Vector2.Zero, MathF.PI, 0, 1000),
+            new LineCollider(new Vector2(500, -1000), new Vector2(500, 1000)),
+            new ArcCollider(new Vector2(-500, -1000), new Vector2(-500, 1000), new Vector2(0, 0))
         ];
     //Save original entity parameters to allow cloning
     private List<ICondition> CopyObjectives { get; }
@@ -44,12 +44,13 @@ public class Mission
     private Vector2 playerPosition;
     private Func<Cutscene> cutscene;
     private Func<Cutscene> endCutscene;
+    private Func<ICollider[]> colliders;
     private int currentBoss;
     private float waveTimer = 5;
     private float maxWaveTimer = 5;
     private bool currentWaveActive = false;
 
-    public Mission(Planet[] _planets, List<ICondition> _missionObjectives, string _name, string _description, float _timerModifier, Vector2 _playerPosition, List<(int, DelegateEnemy)> _enemies, List<DelegateEnemy> _bosses, Func<Cutscene> _cutscene = null, bool _escapeVehicle = false, Func<Cutscene> _endCutscene = null)
+    public Mission(Planet[] _planets, List<ICondition> _missionObjectives, string _name, string _description, float _timerModifier, Vector2 _playerPosition, List<(int, DelegateEnemy)> _enemies, List<DelegateEnemy> _bosses, Func<Cutscene> _cutscene = null, bool _escapeVehicle = false, Func<Cutscene> _endCutscene = null, Func<ICollider[]> _colliders = null)
     {
         Name = _name;
         Description = _description;
@@ -67,6 +68,11 @@ public class Mission
         currentBoss = Util.Random.Next(bosses.Count);
         cutscene = _cutscene;
         endCutscene = _endCutscene;
+        colliders = _colliders;
+        if(_colliders != null)
+        {
+            Colliders = _colliders();
+        }
         if (_escapeVehicle)
         {
             escapeVehicle = new EntityConstructor(Enemy.NewPickupDrone, new Vector2(-2000, -2000), Vector2.Zero, 0);
@@ -379,7 +385,7 @@ public class Mission
         {
             foreach(var collider in Colliders)
             {
-                if(collider.IsColliding(futurePosition, Engine.SaveGame.Player.ColliderRadius))
+                if(collider.IsColliding(futurePosition, futureVelocity, Engine.SaveGame.Player.ColliderRadius))
                 {
                     exit = true;
                     break;
@@ -489,7 +495,7 @@ public class Mission
         {
             tm /= 2;
         }
-        return new Mission(_planets, CopyObjectives, Name, Description, tm, playerPosition, enemyCreditValues, bosses, cutscene, escapeVehicle != null, endCutscene)
+        return new Mission(_planets, CopyObjectives, Name, Description, tm, playerPosition, enemyCreditValues, bosses, cutscene, escapeVehicle != null, endCutscene, colliders)
         { playerProgression = this.playerProgression, playerDocked = this.playerDocked, isAggressive = this.isAggressive || isInFleet, music = this.music, tip = this.tip, relaunchable = this.relaunchable };
     }
     private Vector2 NewSpawnLocation()

@@ -899,7 +899,7 @@ public class EntityManager
     }
     private static Cutscene RepairCrashedShip()
     {
-        Actor ship = new Actor(Assets.Get(Sprite.Mothership), Vector2.Zero, Color.White, 0);
+        var ship = new Actor(Assets.Get(Sprite.Mothership), Vector2.Zero, Color.White, 0);
         List<IActor> actors = [ship];
         List<IEvent> events =
         [
