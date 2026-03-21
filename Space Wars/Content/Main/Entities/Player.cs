@@ -262,6 +262,7 @@ public class Player : Entity
             velocity += Vector2.Normalize(-position) * (position.Length() - (50 * 50 + planet.radius)) * Engine.DeltaSeconds / 30;
         }
         base.Update();
+        collider.position += velocity;
         position += velocity * Engine.DeltaSeconds * 60;
         if (dockedEntity != null)
         {

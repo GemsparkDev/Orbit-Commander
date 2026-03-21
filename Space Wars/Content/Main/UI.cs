@@ -307,7 +307,13 @@ public static class UI
         });
         PrevMission.AddBehaviour(delegate () { Engine.SaveGame.PrevMission(); }); //Do not remove outer delegate
         NextMission.AddBehaviour(delegate() { Engine.SaveGame.NextMission(); }); //Doing so causes exception due to null savegame
-        SelectMission.AddBehaviour(delegate () { if ((Engine.SaveGame.CurrentMission.relaunchable || !Engine.SaveGame.CurrentMissionCompleted) && EventHandler.SyncModules()) { Startgame(); } });
+        SelectMission.AddBehaviour(delegate () 
+        {
+            if ((Engine.SaveGame.CurrentMission.relaunchable || !Engine.SaveGame.CurrentMissionCompleted) && EventHandler.SyncModules()) 
+            { 
+                Startgame(); 
+            } 
+        });
         LaunchButton.AddBehaviour(delegate () { EventHandler.SendMessage(Message.EscapeDroneLeave); });
         SettingsButton.AddBehaviour(delegate() { PauseMenu.enabled = false; SettingsMenu.enabled = true; });
         PauseMenuButton.AddBehaviour(delegate () { PauseMenu.enabled = true; SettingsMenu.enabled = false; });

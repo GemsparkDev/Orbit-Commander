@@ -28,8 +28,9 @@ public abstract class Projectile : Entity
             ParticleManager.Add(new Particle(texture, 1, position, velocity, angle, 0, color, Color.Transparent));
             isExpired = true;
         }
-        AI();
+        collider.offsetVelocity = 2*velocity;
         base.Update();
+        AI();
     }
     public abstract void AI();
     public override void UpdateColor()

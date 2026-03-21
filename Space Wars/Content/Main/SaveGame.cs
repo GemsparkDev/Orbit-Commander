@@ -155,13 +155,11 @@ public class SaveGame
     public void NextMission()
     {
         CurrentMissionIndex = Math.Clamp(CurrentMissionIndex + 1, 0, Engine.EntityManager.Missions() - 1);
-        currentMission = Engine.EntityManager.GetMission(CurrentMissionIndex);
         EventHandler.UpdateMissionText();
     }
     public void PrevMission()
     {
         CurrentMissionIndex = Math.Clamp(CurrentMissionIndex - 1, 0, Engine.EntityManager.Missions() - 1);
-        currentMission = Engine.EntityManager.GetMission(CurrentMissionIndex);
         EventHandler.UpdateMissionText();
     }
     public void CompleteMission(int _duration)

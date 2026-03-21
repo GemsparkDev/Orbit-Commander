@@ -87,7 +87,7 @@ public class Planet
                     if (Util.Random.NextSingle() < q * q / 2)
                     {
                         Vector2 pos = Util.ToUnitVector(Util.Random.NextSingle() * MathF.Tau) * Util.Random.NextSingle() * 8;
-                        ParticleManager.Add(new Particle(Assets.Get(Sprite.Circle), 0.5f + Util.Random.NextSingle() / 5, _entity.position + pos,
+                        ParticleManager.Add(new Particle(Assets.Get(Sprite.Circle), 0.5f + Util.Random.NextSingle() / 5, _entity.position - _entity.velocity + pos,
                             (_entity.velocity + velocity) / 2, 0, 0, Color.Yellow * 0.5f, new Color(1f, 0.5f, 0f, 0f)){ experienceGravity = true });
                     }
                 }

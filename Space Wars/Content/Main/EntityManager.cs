@@ -30,7 +30,7 @@ public class EntityManager
     public static float StealthThreshold { get; private set; } = 0.75f;
     public int MissionLength => missions.Count;
     private readonly List<Mission> missions =
-    [        
+    [
         new Mission([new Planet(Vector2.Zero, Vector2.Zero, 10000, 8, true, Color.Cyan, false),
         new Planet(new Vector2(1000, 0), Planet.GetOrbitalVelocity(new Vector2(1000, 0), Vector2.Zero, 10000), 250, 1.5f, false, Color.Cyan) ],
         [ new EntityCondition(new EntityConstructor(Enemy.NewMothership, new Vector2(0, -8*50 - Assets.DimsOf(Sprite.Mothership).Y / 2), Vector2.Zero, 0f), [ Condition.Protect, Condition.CustomIncomplete ]),
@@ -52,7 +52,7 @@ public class EntityManager
         new EntityCondition(new AdvancedConstructor(Enemy.NewTurret, new Vector2(MathF.Sin(-0.3f), -MathF.Cos(-0.3f)) * 12 * 50, Vector2.Zero, -0.3f, true), []),
         new EntityCondition(new LaunchConstructor(Enemy.NewDropPod, new Vector2(0,-4000), 600), []),
         new EntityCondition(new EntityConstructor(Enemy.NewCrashedShip, new Vector2(-6000, -6640), Vector2.Zero, -MathF.PI * 3 / 8), [Condition.Protect, Condition.CustomIncomplete]),
-        ], "Crossfire", "Sensors indicate a group fighting against the same hostiles encountered during our crash landing.\nAiding them could gain us a powerful ally.", 0.18f, new Vector2(0, -4000), Mission.TierOne(), Mission.TierOneBosses(), QueueCrossfireDialogue, true, RepairCrashedShip) 
+        ], "Crossfire", "Sensors indicate a group fighting against the same hostiles encountered during our crash landing.\nAiding them could gain us a powerful ally.", 0.18f, new Vector2(0, -4000), Mission.TierOne(), Mission.TierOneBosses(), QueueCrossfireDialogue, true, RepairCrashedShip)
         { isAggressive = true, playerProgression = 2, playerDocked = true },
 
         new Mission( [new Planet(Vector2.Zero, Vector2.Zero, 3500, 4, true, Color.Cyan, true) ],
@@ -184,7 +184,7 @@ public class EntityManager
         new(new Vector2(1100, 0), Planet.GetOrbitalVelocity(new Vector2(1100, 0), Vector2.Zero, 18000), 1500, 1.5f, false, Color.Cyan) { Temperature = -2 }],
         [
             new EntityCondition(new EntityConstructor(Enemy.NewMeshNetworkNode, new Vector2(0, -1), Vector2.Zero, 0), [Condition.Protect, Condition.CustomIncomplete]),
-            new EntityCondition(new EntityConstructor(Enemy.NewMeshNetworkNode, new Vector2(1250, 0),-Planet.GetOrbitalVelocity(new Vector2(150, 0), 
+            new EntityCondition(new EntityConstructor(Enemy.NewMeshNetworkNode, new Vector2(1250, 0),-Planet.GetOrbitalVelocity(new Vector2(150, 0),
                 Vector2.Zero, 1500) + Planet.GetOrbitalVelocity(new Vector2(1100, 0), Vector2.Zero, 18000), 0), [Condition.Protect, Condition.CustomIncomplete]),
             new EntityCondition(new EntityConstructor(Enemy.NewMeshNetworkNode, new Vector2(-500, 0), -Planet.GetOrbitalVelocity(new Vector2(-500, 0), Vector2.Zero, 18000), 0), [Condition.Protect, Condition.CustomIncomplete]),
             new EntityCondition(new LaunchConstructor(Enemy.NewDropPod,new Vector2(0, -1500), 310),[ ])],
@@ -197,6 +197,14 @@ public class EntityManager
             new EntityCondition(new EntityConstructor(Enemy.NewEpitomeBoss, new Vector2(0, 2800), Vector2.Zero, 0), [ Condition.Kill ]),
             new EntityCondition(new LaunchConstructor(Enemy.NewGlider,new Vector2(-1500, -2000), -1500),[ ])],
         "Inferno", "Your intel has led you here. Finish this.", -1, new Vector2(-1500, -2000), Mission.TierThree(), Mission.TierThreeBosses(), null, true)
+        { music = false, playerDocked = true },
+
+        new Mission([new Planet(Vector2.Zero, Vector2.Zero, 8000000, 90, true, new Color(1f, 0.8f, 0.5f), false, 20f) { isSun = true, Temperature = 5 }],
+        [
+            new EntityCondition(new LaunchConstructor(Enemy.NewGlider,new Vector2(-6000, -7000), -6500),[ ]),
+            new WaveGoal(10)
+        ],
+        "BEEG", "", -1, new Vector2(-6000, -7000), Mission.TierThree(), Mission.TierThreeBosses(), null, true)
         { music = false, playerDocked = true },
 
         new Mission([ new(Vector2.Zero, Vector2.Zero, 20000, 9, true, Color.OrangeRed, true, 1.5f),
@@ -218,6 +226,11 @@ public class EntityManager
     public Mission GetMission(int _index)
     {
         return missions[_index].Clone();
+    }
+    //Only use for reading
+    public Mission GetMissionDirty(int _index)
+    {
+        return missions[_index];
     }
     public int Missions()
     {

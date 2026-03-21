@@ -198,7 +198,7 @@ public static class EventHandler
     }
     public static void UpdateMissionText()
     {
-        Mission mission = Engine.SaveGame.CurrentMission;
+        Mission mission = Engine.EntityManager.GetMissionDirty(Engine.SaveGame.CurrentMissionIndex);
         bool completed = Engine.SaveGame.CurrentMissionCompleted;
         bool isDangerous = Engine.SaveGame.FleetSystem > Engine.EntityManager.Systems[Engine.SaveGame.CurrentMissionIndex].system;
         UI.MissionName.text = mission.Name;

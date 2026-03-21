@@ -59,9 +59,9 @@ public abstract class Entity
             revealDuration -= Engine.DeltaSeconds;
         }
         StatusHolder.Update(this);
+        collider.Update();
         collider.position = position;
         collider.particleVelocity = ColliderRadius;
-        collider.Update();
         Temperature *= Util.FIED(0.707f); //Radiative
         if(Temperature > 1)
         {

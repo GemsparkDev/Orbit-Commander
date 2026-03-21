@@ -96,21 +96,21 @@ public class ArcCollider : ICollider
     {
         radius = Vector2.Distance(_start, _position);
         position = _position;
-        sprayCone = MathF.PI * 2 - MathF.Acos(Vector2.Dot(_start - _position, _end - _position) / (radius * radius));
-        sprayAngle = Util.ToAngle(_start - _position) + MathF.PI;
+         sprayCone = MathF.Acos(Vector2.Dot(_start - _position, _end - _position) / (radius * radius));
+        sprayAngle = Util.ToAngle(_start / 2 + _end / 2 - _position);
     }
     public bool Collide(Entity _entity)
     {
         Vector2 relativePosition = _entity.position - position;
         float angle = Math.Clamp(Util.ToAngle(relativePosition), sprayAngle-sprayCone/2, sprayAngle+sprayCone/2);
-        Vector2 closestPoint = Util.ToUnitVector(angle) * radius;
+        Vector2 closestPoint = Util.ToUnitVector(angle) * radius + position;
         float distance = Vector2.Distance(_entity.position, closestPoint);
         return ICollider.ComputeCollisions(distance, closestPoint, Vector2.Zero, _entity);
     }
     public bool IsColliding(Vector2 _position, Vector2 _velocity, float _radius)
     {
         float angle = Math.Clamp(Util.ToAngle(_position - position), sprayAngle - sprayCone / 2, sprayAngle + sprayCone / 2);
-        Vector2 closestPoint = Util.ToUnitVector(angle) * radius;
+        Vector2 closestPoint = Util.ToUnitVector(angle) * radius + position;
         float distance = Vector2.Distance(_position, closestPoint);
         var normalVector = (_position - closestPoint) / distance;
         Vector2 relativePosition = _position - closestPoint + normalVector * _radius;

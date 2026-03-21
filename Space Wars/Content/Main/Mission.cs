@@ -30,11 +30,7 @@ public class Mission
     private EntityConstructor escapeVehicle = null;
     private Planet[] planets;
     public Planet[] Planets { get { return planets; } }
-    public ICollider[] Colliders { get; } = 
-        [ 
-            new LineCollider(new Vector2(500, -1000), new Vector2(500, 1000)),
-            new ArcCollider(new Vector2(-500, -1000), new Vector2(-500, 1000), new Vector2(0, 0))
-        ];
+    public ICollider[] Colliders { get; } = [];
     //Save original entity parameters to allow cloning
     private List<ICondition> CopyObjectives { get; }
     private List<ICondition> MissionObjectives { get; } = [];

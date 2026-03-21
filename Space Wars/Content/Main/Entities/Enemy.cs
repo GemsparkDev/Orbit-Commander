@@ -72,6 +72,7 @@ public class Enemy : Entity
             velocity = Vector2.Zero;
             Engine.WriteLine("Velocity was NaN");
         }
+        base.Update();
         position += velocity * Engine.DeltaSeconds * 60;
         angle += angularVelocity * Engine.DeltaSeconds * 60;
 
@@ -109,7 +110,6 @@ public class Enemy : Entity
             float l = Util.FIED(0.025f);
             color = new Color((byte)(color.R * l + c.R * (1f - l)), (byte)(color.G * l + c.G * (1f - l)), (byte)(color.B * l + c.B * (1f - l)), (byte)(c.A)); //Lerp towards ideal color
         }
-        base.Update();
     }
     public override void UpdateColor()
     {
