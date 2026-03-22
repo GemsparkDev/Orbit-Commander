@@ -16,7 +16,8 @@ public class Mission
     public Planet Planet => (planets.Length > 0) ? planets[0] : new Planet(Vector2.Zero, Vector2.Zero, 0, 1, true, Color.White);
     public string Name { get; }
     public string Description { get; }
-    public int playerProgression = 3;
+    private int playerProgression = 3;
+    public int PlayerProgression { get { if (Engine.DebugMode) { return 99; } else { return playerProgression; } } set { playerProgression = value; } }
     public int Wave { get; private set; } = 0;
     public int EnemiesSpawned { get; private set; } = 0;
     public float RestartTimer { get; set; } = -1;
@@ -83,7 +84,7 @@ public class Mission
         {
             objective.Initialize();
         }
-        Engine.SaveGame.Player.Progression = playerProgression;
+        Engine.SaveGame.Player.Progression = PlayerProgression;
         Engine.SaveGame.Player.position = playerPosition;
         TestCompletion();
         if (playerDocked)
@@ -212,7 +213,7 @@ public class Mission
                 }
             }
 
-            if (playerProgression > 1 && (Wave % 20 == 0))
+            if (PlayerProgression > 1 && (Wave % 20 == 0))
             {
                 var pos = NewSpawnLocation();
                 Enemy boss = bosses[currentBoss](pos, Vector2.Zero, MathF.Atan2(-pos.X, pos.Y));
@@ -492,7 +493,7 @@ public class Mission
             tm /= 2;
         }
         return new Mission(_planets, CopyObjectives, Name, Description, tm, playerPosition, enemyCreditValues, bosses, cutscene, escapeVehicle != null, endCutscene, colliders)
-        { playerProgression = this.playerProgression, playerDocked = this.playerDocked, isAggressive = this.isAggressive || isInFleet, music = this.music, tip = this.tip, relaunchable = this.relaunchable };
+        { PlayerProgression = this.PlayerProgression, playerDocked = this.playerDocked, isAggressive = this.isAggressive || isInFleet, music = this.music, tip = this.tip, relaunchable = this.relaunchable };
     }
     private Vector2 NewSpawnLocation()
     {

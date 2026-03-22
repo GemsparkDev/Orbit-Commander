@@ -1,11 +1,12 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
+using Microsoft.Xna.Framework.Graphics;
 using Space_Wars.Content.Main.Particles;
 using System;
-using Microsoft.Xna.Framework.Graphics;
-using System.Diagnostics;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+//using System.Numerics;
 
 namespace Space_Wars.Content.Main.Entities;
 
@@ -161,6 +162,12 @@ public class GrapplingHook : Projectile
         //Prevents deorbiting planets
         public void ApplyForce(Vector2 _force) { }
     }
+    internal class GenericLatch(Vector2 _position) : ILatchable
+    {
+        public Vector2 Position => _position;
+        public bool IsExpired => false;
+        public void ApplyForce(Vector2 _force) { }
+    }
     public Entity Parent { get; set; }
     private ILatchable target;
     private float maxDistance = 800;
@@ -203,6 +210,15 @@ public class GrapplingHook : Projectile
             {
                 isExpired = true;
             }
+            foreach (var collider in Engine.SaveGame.CurrentMission.Colliders)
+            {
+                if (collider.Collide(this))
+                {
+                    target = new GenericLatch(position);
+                    SoundManager.PlaySound(Assets.Get(Sound.ShieldHit), position);
+                    maxDistance = Vector2.Distance(position, Parent.position);
+                }
+            }
             var planet = Engine.SaveGame.CurrentMission.IsColliding(position + velocity * Engine.DeltaSeconds * 60);
             if (planet != null)
             {
@@ -210,18 +226,14 @@ public class GrapplingHook : Projectile
                 SoundManager.PlaySound(Assets.Get(Sound.ShieldHit), position);
                 maxDistance = distance;
             }
-            else
+            List<Entity> entities = [Engine.EntityManager.NearestEnemy(this), Engine.EntityManager.NearestAlly(this), Engine.EntityManager.NearestItem(this, true)];
+            foreach (var entity in entities)
             {
-                List<Entity> entities = [Engine.EntityManager.NearestEnemy(this), Engine.EntityManager.NearestAlly(this), Engine.EntityManager.NearestItem(this, true)];
-                foreach(var entity in entities)
+                if (entity != null && Vector2.Distance(position, entity.position) < (entity.ColliderRadius + ColliderRadius) * 2)
                 {
-                    if (entity != null && Vector2.Distance(position, entity.position) < (entity.ColliderRadius + ColliderRadius) * 2)
-                    {
-                        target = new LatchedEntity(entity);
-                        SoundManager.PlaySound(Assets.Get(Sound.ShieldHit), position);
-                        maxDistance = distance;
-                        break;
-                    }
+                    target = new LatchedEntity(entity);
+                    SoundManager.PlaySound(Assets.Get(Sound.ShieldHit), position);
+                    maxDistance = distance;
                 }
             }
         }

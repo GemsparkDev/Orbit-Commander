@@ -38,7 +38,7 @@ public class EntityManager
         new EntityCondition(new PickupConstructor(ItemFactory.NewScrap, new Vector2(0, -8*50), new Vector2(-8, -4), -0.03f),[])],
         "Crash Landing",
         "The crash landing site. Objective: Explore the system.",
-        -1, new Vector2(0, -8*50 - Assets.DimsOf(Sprite.Mothership).Y / 2), Mission.TierOne(), Mission.TierOneBosses(), RestartCutscene, false, DayOneLog) { playerProgression = 0, playerDocked = true, tip = "WASD to move, Space to dock and undock.\nRmb to collect scrap, Lmb to shoot." },
+        -1, new Vector2(0, -8*50 - Assets.DimsOf(Sprite.Mothership).Y / 2), Mission.TierOne(), Mission.TierOneBosses(), RestartCutscene, false, DayOneLog) { PlayerProgression = 0, playerDocked = true, tip = "WASD to move, Space to dock and undock.\nRmb to collect scrap, Lmb to shoot." },
 
         //Note: Add custom "Humanlike" enemies
         new Mission([new Planet(Vector2.Zero, Vector2.Zero, 15000, 12, true, Color.White, true)],
@@ -53,7 +53,7 @@ public class EntityManager
         new EntityCondition(new LaunchConstructor(Enemy.NewDropPod, new Vector2(0,-4000), 600), []),
         new EntityCondition(new EntityConstructor(Enemy.NewCrashedShip, new Vector2(-6000, -6640), Vector2.Zero, -MathF.PI * 3 / 8), [Condition.Protect, Condition.CustomIncomplete]),
         ], "Crossfire", "Sensors indicate a group fighting against the same hostiles encountered during our crash landing.\nAiding them could gain us a powerful ally.", 0.18f, new Vector2(0, -4000), Mission.TierOne(), Mission.TierOneBosses(), QueueCrossfireDialogue, true, RepairCrashedShip)
-        { isAggressive = true, playerProgression = 2, playerDocked = true },
+        { isAggressive = true, PlayerProgression = 2, playerDocked = true },
 
         new Mission( [new Planet(Vector2.Zero, Vector2.Zero, 3500, 4, true, Color.Cyan, true) ],
         [
@@ -62,7 +62,7 @@ public class EntityManager
             new EntityCondition(new LaunchConstructor(Enemy.NewDropPod, new Vector2(0, -1500), 200),[ ]),
             new WaveGoal(30) ],
         "Sentry Defense", "We've been assigned to defend this small planet.\n *Repair will not be available for this mission*", 0.75f, new Vector2(0, -1500), Mission.TierOne(), Mission.TierOneBosses(), SentryDialogue)
-        { playerProgression = 1, isAggressive = true, playerDocked = true },
+        { PlayerProgression = 1, isAggressive = true, playerDocked = true },
 
         new Mission( [new Planet(Vector2.Zero, Vector2.Zero, 15000, 6f, true, Color.Cyan),
         new Planet(new Vector2(0, 800), Planet.GetOrbitalVelocity(new Vector2(0, 800), Vector2.Zero, 15000) * 0.85f, 1000, 1f, false, Color.Cyan), ],
@@ -70,7 +70,7 @@ public class EntityManager
             new EntityCondition(new EntityConstructor(Enemy.NewLargeMiner, new Vector2(0, -6*50 - Assets.Get(Sprite.LargeMiner).Height/2), Vector2.Zero, 0), [ Condition.Kill ]),
             new EntityCondition(new LaunchConstructor(Enemy.NewDropPod,new Vector2(0, -1500), 300),[ ])],
         "Meet the locals", "Local scans indicate a nearby mineral rich planet occupied by enemy forces. \nCapturing this site will aid in future resource gathering.", 0.75f, new Vector2(0, -1500), Mission.TierOne(), Mission.TierOneBosses(), null, true)
-        { playerProgression = 2, isAggressive = true, tip = "Press Q to use your special ability.\nCtrl to toggle aim assist.", playerDocked = true },
+        { PlayerProgression = 2, isAggressive = true, tip = "Press Q to use your special ability.\nCtrl to toggle aim assist.", playerDocked = true },
 
         new Mission([new Planet(Vector2.Zero, Vector2.Zero, 5000, 3, true, Color.Cyan),
             new Planet(new Vector2(400, 0), Planet.GetOrbitalVelocity(new Vector2(400, 0), Vector2.Zero, 5000), 240, 1f, false, Color.Cyan),
@@ -79,7 +79,7 @@ public class EntityManager
             new EntityCondition(new EntityConstructor(Enemy.NewScrambled, new Vector2(0, -6*50), Vector2.Zero, 0), [ Condition.Kill ]),
             new EntityCondition(new LaunchConstructor(Enemy.NewDropPod,new Vector2(0, -1500), 150),[ ])],
         "Showdown", "Our activities appear to have gathered the attention of an advanced drone.\nAttacking now will suprise the enemy before it can develop any reinforcements.", 1f, new Vector2(0, -1500), Mission.TierOne(), Mission.TierOneBosses(), null, true)
-        { playerProgression = 2, isAggressive = true, playerDocked = true },
+        { PlayerProgression = 2, isAggressive = true, playerDocked = true },
 
         new Mission([new Planet(Vector2.Zero, Vector2.Zero, 16000, 4, true, new Color(167, 156, 134), true, 6, 500f),
             new Planet(new Vector2(900, 0), Planet.GetOrbitalVelocity(new Vector2(900, 0), Vector2.Zero, 16000), 100, 0.5f, false, Color.OldLace),
@@ -213,7 +213,7 @@ public class EntityManager
             new EntityCondition(new LaunchConstructor(Enemy.NewDropPod,new Vector2(0, -1500), 950),[ ]),
             new WaveGoal(1000)],
         "Last Stand", "Survive", 0.25f, new Vector2(0, -1500), Mission.All(), Mission.AllBosses())
-        { isAggressive = true, playerProgression = 4, tip = "You can now construct the makeshift mothership in the construct menu.\n Requires 3 scrap.", relaunchable = true },
+        { isAggressive = true, PlayerProgression = 4, tip = "You can now construct the makeshift mothership in the construct menu.\n Requires 3 scrap.", relaunchable = true },
 
         new Mission([], [], "Penultimate", "", 1, Vector2.Zero, [], []),
     ];
