@@ -199,12 +199,20 @@ public class EntityManager
         "Inferno", "Your intel has led you here. Finish this.", -1, new Vector2(-1500, -2000), Mission.TierThree(), Mission.TierThreeBosses(), null, true)
         { music = false, playerDocked = true },
 
-        new Mission([new Planet(Vector2.Zero, Vector2.Zero, 8000000, 90, true, new Color(1f, 0.8f, 0.5f), false, 20f) { isSun = true, Temperature = 5 }],
+        new Mission([new Planet(Vector2.Zero, Vector2.Zero, 8000000, 100, true, new Color(1f, 0.8f, 0.5f), false, 10f) { isSun = true, Temperature = 5 }],
         [
             new EntityCondition(new LaunchConstructor(Enemy.NewGlider,new Vector2(-6000, -7000), -6500),[ ]),
             new WaveGoal(10)
         ],
-        "BEEG", "", -1, new Vector2(-6000, -7000), Mission.TierThree(), Mission.TierThreeBosses(), null, true)
+        "BEEG", "", -1, new Vector2(-1000, -7000), Mission.TierThree(), Mission.TierThreeBosses(), null, true, null, SolarStation)
+        { music = false, playerDocked = true },
+
+        new Mission([new Planet(Vector2.Zero, Vector2.Zero, 800000, 10, true, new Color(1f, 0.2f, 0.1f), false, 50f) { isSun = false, Temperature = 5 }],
+        [
+            new EntityCondition(new LaunchConstructor(Enemy.NewGlider,new Vector2(-1000, -700), -600),[ ]),
+            new WaveGoal(10)
+        ],
+        "Black Hole", "", -1, new Vector2(-1000, -700), Mission.TierThree(), Mission.TierThreeBosses(), null, true, null, SolarStation)
         { music = false, playerDocked = true },
 
         new Mission([ new(Vector2.Zero, Vector2.Zero, 20000, 9, true, Color.OrangeRed, true, 1.5f),
@@ -221,7 +229,7 @@ public class EntityManager
     [
         (200, [], 0), (160, [0], 0), (140, [0], 0), (100, [1, 2], 0), (400, [3], 0), (50, [3], 0),
         (210, [], 1), (170, [6], 1), (145, [7], 1), (130, [8], 1), (150, [9], 1),
-        (200, [], 2), (150, [11], 2), (100, [12], 2), (80, [13], 2), (60, [14], 2), (0, [15], 2), (0, [], 2), (0, [], 2), (0, [], 2), (0, [], 2)
+        (200, [], 2), (150, [11], 2), (100, [12], 2), (80, [13], 2), (60, [14], 2), (0, [15], 2), (0, [], 2), (0, [], 2), (0, [], 2), (0, [], 2), (0, [], 2), (0, [], 2)
     ];
     public Mission GetMission(int _index)
     {
@@ -990,4 +998,10 @@ public class EntityManager
         ];
         return new Cutscene(events, [], new PlayingGame());
     }
+    private static ICollider[] SolarStation() => [
+            new LineCollider(new Vector2(-1000, -5800), new Vector2(1000, -5800)), 
+    ];
+    private static ICollider[] BlackHoleStation() => [
+        new ArcCollider(new Vector2(-200, -1000), new Vector2(200, -1000), Vector2.Zero),
+    ];
 }

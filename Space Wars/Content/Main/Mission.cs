@@ -39,6 +39,7 @@ public class Mission
     private List<(int cost, DelegateEnemy enemy)> enemyCreditValues;
     private List<DelegateEnemy> bosses;
     private Vector2 playerPosition;
+
     private Func<Cutscene> cutscene;
     private Func<Cutscene> endCutscene;
     private Func<ICollider[]> colliders;

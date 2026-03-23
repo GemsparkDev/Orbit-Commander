@@ -37,7 +37,7 @@ public class Planet
         atmosphereStrength = _atmosphereStrength;
         if(_atmosphereStrength > 0)
         {
-            atmosphere = Engine.Self.RenderAtmosphere(AtmosphereRadius(), _atmosphereStrength, radius, color, this);
+            atmosphere = Engine.Self.RenderAtmosphere(AtmosphereRadius(), _atmosphereStrength, radius, color, this, isSun);
         }
         RingOffset = _ringOffset;
     }
@@ -101,7 +101,7 @@ public class Planet
                     _entity.ConductHeat(Temperature, MathF.Tanh(strength));
                 }
                     //Buoyancy
-                    acceleration += relativePosition / distance * strength * mass / distance / distance / 5;
+                acceleration += relativePosition / distance * strength * mass / distance / distance / 5;
                 if (strength > 2)
                 {
                     _entity.StatusHolder.ApplyStatus(new Pressure(Color.Red, isSun));

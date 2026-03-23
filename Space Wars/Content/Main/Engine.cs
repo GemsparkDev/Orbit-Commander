@@ -220,16 +220,16 @@ public class Engine : Game
     {
         ScreenShakeFactor = Math.Min(ScreenShakeFactor + _val * _val / (ScreenShakeFactor + _val), 1);
     }
-    public Texture2D RenderAtmosphere(float _atmosphereRadius, float _atmosphereStrength, float _planetRadius, Color _color, Planet _planet)
+    public Texture2D RenderAtmosphere(float _atmosphereRadius, float _atmosphereStrength, float _planetRadius, Color _color, Planet _planet, bool _isSun)
     {
         var renderTarget = new RenderTarget2D(GraphicsDevice, (int)(_atmosphereRadius * 2), (int)(_atmosphereRadius * 2));
         GraphicsDevice.SetRenderTarget(renderTarget);
         GraphicsDevice.Clear(Color.Transparent);
         spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, null, null);
         float start = _planetRadius;
-        if (_atmosphereStrength > 5)
+        if (_isSun)
         {
-            start = 0;
+            start = Math.Max(_planetRadius - Engine.BackBuffer.Length()/2, 0);
         }
         for (float r = start; r < _atmosphereRadius; r += MathF.Sqrt(36 + 36 / MathF.Pow(_planet.GetAtmosphereDensity(r), 2)))
         {
