@@ -227,7 +227,7 @@ public class Engine : Game
         GraphicsDevice.Clear(Color.Transparent);
         spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, null, null);
         float start = _planetRadius;
-        if (_isSun)
+        if (_atmosphereStrength > 2)
         {
             start = Math.Max(_planetRadius - Engine.BackBuffer.Length()/2, 0);
         }
@@ -241,7 +241,7 @@ public class Engine : Game
             }
             for (float t = MathF.Tau / MathF.Ceiling(iterations) / 2; t < MathF.Tau; t += MathF.Tau / MathF.Ceiling(iterations))
             {
-                spriteBatch.Draw(Assets.Get(Sprite.Circle), new Vector2(_atmosphereRadius, _atmosphereRadius) + Util.ToUnitVector(t) * r, null, _color * MathF.Tanh(_planet.GetAtmosphereDensity(r) / 4f) * offset, t, Assets.DimsOf(Sprite.Circle), 1, 0, 0);
+                spriteBatch.Draw(Assets.Get(Sprite.Circle), new Vector2(_atmosphereRadius, _atmosphereRadius) + Util.ToUnitVector(t) * r, null, _color * MathF.Tanh(_planet.GetAtmosphereDensity(r) / 4f) * offset, t, Assets.DimsOf(Sprite.Circle)/2, 1, 0, 0);
             }
         }
         spriteBatch.End();

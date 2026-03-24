@@ -81,7 +81,7 @@ public class EntityManager
         "Showdown", "Our activities appear to have gathered the attention of an advanced drone.\nAttacking now will suprise the enemy before it can develop any reinforcements.", 1f, new Vector2(0, -1500), Mission.TierOne(), Mission.TierOneBosses(), null, true)
         { PlayerProgression = 2, isAggressive = true, playerDocked = true },
 
-        new Mission([new Planet(Vector2.Zero, Vector2.Zero, 16000, 4, true, new Color(167, 156, 134), true, 6, 500f),
+        new Mission([new Planet(Vector2.Zero, Vector2.Zero, 16000, 4, true, new Color(167, 156, 134), true, 6, 500f, true),
             new Planet(new Vector2(900, 0), Planet.GetOrbitalVelocity(new Vector2(900, 0), Vector2.Zero, 16000), 100, 0.5f, false, Color.OldLace),
             new Planet(new Vector2(-1200, 0), Planet.GetOrbitalVelocity(new Vector2(-1200, 0), Vector2.Zero, 16000) * 1.05f, 100, 0.5f, false, Color.OldLace),],
         [
@@ -157,7 +157,7 @@ public class EntityManager
         "Clockwork creation", "A strange sentinal appears to be housed on this ancient planet.\nDismantling it may yield unusual resources.", 1f, new Vector2(0, -1500), Mission.TierTwo(), Mission.TierTwoBosses(), null, true)
         { isAggressive = true, playerDocked = true },
 
-        new Mission([new Planet(Vector2.Zero, Vector2.Zero, 10000, 3, true, new Color(41, 144, 181), false, 15f) { Temperature = -20 }],
+        new Mission([new Planet(Vector2.Zero, Vector2.Zero, 10000, 3, true, new Color(41, 144, 181), false, 15f, 0, true) { Temperature = -20 }],
         [
             new EntityCondition(new LaunchConstructor(Enemy.NewGlider,new Vector2(-800, -1300), -1150),[ ]),
             new WaveGoal(30)],
@@ -191,7 +191,7 @@ public class EntityManager
         "Hack", "The enemy has set up a mesh node network for storing information.\nHack it to discover the location of their leader.", 0.8f, new Vector2(0, -1500), Mission.TierThree(), Mission.TierThreeBosses(), null, true)
         { playerDocked = true, isAggressive = true },
 
-        new Mission([new Planet(Vector2.Zero, Vector2.Zero, 160000, 6, true, new Color(0.9f, 1f, 0.75f), false, 50f) { isSun = true, Temperature = 5 },
+        new Mission([new Planet(Vector2.Zero, Vector2.Zero, 160000, 6, true, new Color(0.9f, 1f, 0.75f), false, 50f, 0, true) { Temperature = 5 },
         new Planet(new Vector2(0, 2000), Planet.GetOrbitalVelocity(new Vector2(0, 2000) * 0.99f, Vector2.Zero, 16-000), 8000, 4, false, new Color(0.95f, 0.2f, 0.1f))],
         [
             new EntityCondition(new EntityConstructor(Enemy.NewEpitomeBoss, new Vector2(0, 2800), Vector2.Zero, 0), [ Condition.Kill ]),
@@ -199,7 +199,7 @@ public class EntityManager
         "Inferno", "Your intel has led you here. Finish this.", -1, new Vector2(-1500, -2000), Mission.TierThree(), Mission.TierThreeBosses(), null, true)
         { music = false, playerDocked = true },
 
-        new Mission([new Planet(Vector2.Zero, Vector2.Zero, 8000000, 100, true, new Color(1f, 0.8f, 0.5f), false, 10f) { isSun = true, Temperature = 5 }],
+        new Mission([new Planet(Vector2.Zero, Vector2.Zero, 8000000, 100, true, new Color(1f, 0.8f, 0.5f), false, 10f, 0, true) { Temperature = 5 }],
         [
             new EntityCondition(new LaunchConstructor(Enemy.NewGlider,new Vector2(-6000, -7000), -6500),[ ]),
             new WaveGoal(10)
@@ -207,12 +207,13 @@ public class EntityManager
         "BEEG", "", -1, new Vector2(-1000, -7000), Mission.TierThree(), Mission.TierThreeBosses(), null, true, null, SolarStation)
         { music = false, playerDocked = true },
 
-        new Mission([new Planet(Vector2.Zero, Vector2.Zero, 800000, 10, true, new Color(1f, 0.2f, 0.1f), false, 50f) { isSun = false, Temperature = 5 }],
+        new Mission([new Planet(Vector2.Zero, Vector2.Zero, 5000, 0.1f, true, Color.Black, false, 0)],
         [
-            new EntityCondition(new LaunchConstructor(Enemy.NewGlider,new Vector2(-1000, -700), -600),[ ]),
-            new WaveGoal(10)
+            new EntityCondition(new LaunchConstructor(Enemy.NewGlider,new Vector2(-1000, -700), -1000),[ ]),
+            new WaveGoal(10),
+            new EntityCondition(new PickupConstructor(ItemFactory.NewScrap, new Vector2(0, -8*50), Vector2.Zero, -0.03f),[]),
         ],
-        "Black Hole", "", -1, new Vector2(-1000, -700), Mission.TierThree(), Mission.TierThreeBosses(), null, true, null, SolarStation)
+        "Black Hole", "", -1, new Vector2(-1000, -700), Mission.TierThree(), Mission.TierThreeBosses(), null, true, null, BlackHoleStation)
         { music = false, playerDocked = true },
 
         new Mission([ new(Vector2.Zero, Vector2.Zero, 20000, 9, true, Color.OrangeRed, true, 1.5f),
@@ -1002,6 +1003,7 @@ public class EntityManager
             new LineCollider(new Vector2(-1000, -5800), new Vector2(1000, -5800)), 
     ];
     private static ICollider[] BlackHoleStation() => [
-        new ArcCollider(new Vector2(-200, -1000), new Vector2(200, -1000), Vector2.Zero),
+        new ArcCollider(Vector2.Zero, MathF.PI * 2/3, 0, 250),
+        new ArcCollider(new Vector2(0, 0), MathF.PI / 4, MathF.PI, 125),
     ];
 }

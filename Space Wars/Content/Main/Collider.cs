@@ -102,20 +102,21 @@ public class ArcCollider : ICollider
     public bool Collide(Entity _entity)
     {
         Vector2 relativePosition = _entity.position - position;
-        float angle = Math.Clamp(Util.ToAngle(relativePosition), sprayAngle-sprayCone/2, sprayAngle+sprayCone/2);
-        Vector2 closestPoint = Util.ToUnitVector(angle) * radius + position;
+        float relativeAngle = -Math.Clamp(MathF.Asin(Util.Cross(relativePosition, Util.ToUnitVector(sprayAngle)) / relativePosition.Length()), -sprayCone/2, sprayCone/2);
+        Vector2 closestPoint = Util.ToUnitVector(sprayAngle + relativeAngle) * radius + position;
         float distance = Vector2.Distance(_entity.position, closestPoint);
         return ICollider.ComputeCollisions(distance, closestPoint, Vector2.Zero, _entity);
     }
     public bool IsColliding(Vector2 _position, Vector2 _velocity, float _radius)
     {
-        float angle = Math.Clamp(Util.ToAngle(_position - position), sprayAngle - sprayCone / 2, sprayAngle + sprayCone / 2);
-        Vector2 closestPoint = Util.ToUnitVector(angle) * radius + position;
+        Vector2 relativePosition = _position - position;
+        float relativeAngle = -Math.Clamp(MathF.Asin(Util.Cross(relativePosition, Util.ToUnitVector(sprayAngle)) / relativePosition.Length()), -sprayCone / 2, sprayCone / 2);
+        Vector2 closestPoint = Util.ToUnitVector(sprayAngle + relativeAngle) * radius + position;
         float distance = Vector2.Distance(_position, closestPoint);
         var normalVector = (_position - closestPoint) / distance;
-        Vector2 relativePosition = _position - closestPoint + normalVector * _radius;
-        Vector2 futurePosition = relativePosition + _velocity - 2 * normalVector * _radius;
-        return Vector2.Dot(normalVector, relativePosition) * Vector2.Dot(normalVector, futurePosition) < 0;
+        Vector2 entityPosition = _position - closestPoint + normalVector * _radius;
+        Vector2 futurePosition = entityPosition + _velocity - 2 * normalVector * _radius;
+        return Vector2.Dot(normalVector, entityPosition) * Vector2.Dot(normalVector, futurePosition) < 0;
     }
     public void Draw(SpriteBatch _spriteBatch)
     {

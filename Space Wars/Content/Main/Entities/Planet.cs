@@ -16,7 +16,7 @@ public class Planet
     private Texture2D atmosphere;
     public bool isImmovable;
     private bool hasRing;
-    public bool isSun = false;
+    private bool isSun = false;
     public bool EasterEgg { get; set; } = false;
     private Color color;
     private float atmosphereStrength = 0;
@@ -24,7 +24,7 @@ public class Planet
     public float RingOffset { get; set; } = 0;
 
     //Remember to update the clone function too!
-    public Planet(Vector2 _position, Vector2 _velocity, float _mass, float _radius, bool _isImmovable, Color _color, bool _hasRing = false, float _atmosphereStrength = 0, float _ringOffset = 0)
+    public Planet(Vector2 _position, Vector2 _velocity, float _mass, float _radius, bool _isImmovable, Color _color, bool _hasRing = false, float _atmosphereStrength = 0, float _ringOffset = 0, bool _isSun = false)
     {
         position = _position;
         velocity = _velocity;
@@ -35,9 +35,10 @@ public class Planet
         trajectory = new ParticleEmitter(Assets.Get(Sprite.Dot), 10, position, 0, 0, 0, 10f, _color * 0.5f, EmitterType.EmissionOverDistance) { particleFadeToColor = Color.Transparent };
         hasRing = _hasRing;
         atmosphereStrength = _atmosphereStrength;
+        isSun = _isSun;
         if(_atmosphereStrength > 0)
         {
-            atmosphere = Engine.Self.RenderAtmosphere(AtmosphereRadius(), _atmosphereStrength, radius, color, this, isSun);
+            atmosphere = Engine.Self.RenderAtmosphere(AtmosphereRadius(), _atmosphereStrength, radius, color, this, _isSun);
         }
         RingOffset = _ringOffset;
     }
