@@ -35,7 +35,7 @@ public class Player : Entity
         { ModuleType.Core, ItemFactory.moduleData[UI.setModules[4]].Retrieve() }
     };
     public Module SecondaryWeapon { get; set; } = null;
-
+    private Vector2 startLocation = Vector2.Zero;
     public Vector2 Direction => targetVector;
     public DockableComponent dockedEntity;
     public List<Pickup> leashedMaterials = [];
@@ -317,6 +317,38 @@ public class Player : Entity
     }
     public void RestrictedActions()
     {
+        if(Engine.DebugMode)
+        {
+            Vector2 mousePos = new Vector2(Input.NewMouseState.X, Input.NewMouseState.Y) + position - Engine.ScreenSize/2 + Engine.MousePositionOffset - velocity;
+            mousePos = new Vector2(MathF.Round(mousePos.X/25), MathF.Round(mousePos.Y/25))*25;
+            ParticleManager.Add(new Particle(Assets.Get(Sprite.Dot), mousePos, 0, Color.Red));
+            if (startLocation != Vector2.Zero)
+            {
+                float angle = MathF.Atan2((startLocation.Y - mousePos.Y), (startLocation.X - mousePos.X)) - MathF.PI / 2;
+                Vector2 dir = Util.ToUnitVector(angle);
+                for (float d = 0; d < (startLocation - mousePos).Length() / 4; d += 2)
+                {
+                    ParticleManager.Add(new Particle(Assets.Get(Sprite.Dot), startLocation + dir * d * 4, angle, Color.White));
+                }
+            }
+            if(Input.WasJustReleased(Binding.WarpBackward) && Engine.SaveGame.CurrentMission.Colliders.Length > 0)
+            {
+                Engine.SaveGame.CurrentMission.Colliders = Engine.SaveGame.CurrentMission.Colliders[0..^1];
+            }
+            if(Input.NewState.IsKeyDown(Keys.F) && Input.OldState.IsKeyUp(Keys.F))
+            {
+                if(startLocation == Vector2.Zero)
+                {
+                    startLocation = mousePos;
+                }
+                else
+                {
+                    Debug.WriteLine($"new LineCollider(new Vector2({startLocation.X},{startLocation.Y}), new Vector2({mousePos.X},{mousePos.Y}))");
+                    Engine.SaveGame.CurrentMission.Colliders = Engine.SaveGame.CurrentMission.Colliders.Concat([new LineCollider(startLocation, mousePos)]).ToArray();
+                    startLocation = Vector2.Zero;
+                }
+            }
+        }
         //Prevents undocking when in the garage menu
         if (Progression > -1 && IsEnabled)
         {
