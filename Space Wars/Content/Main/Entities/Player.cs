@@ -319,7 +319,7 @@ public class Player : Entity
     {
         if(Engine.DebugMode)
         {
-            Vector2 mousePos = new Vector2(Input.NewMouseState.X, Input.NewMouseState.Y) + position - Engine.ScreenSize/2 + Engine.MousePositionOffset - velocity;
+            Vector2 mousePos = new Vector2(Input.NewMouseState.X, Input.NewMouseState.Y) + Engine.Camera.Position - Engine.ScreenSize/2 + Engine.MousePositionOffset;
             mousePos = new Vector2(MathF.Round(mousePos.X/25), MathF.Round(mousePos.Y/25))*25;
             ParticleManager.Add(new Particle(Assets.Get(Sprite.Dot), mousePos, 0, Color.Red));
             if (startLocation != Vector2.Zero)
