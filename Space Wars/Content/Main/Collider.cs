@@ -4,8 +4,11 @@ using Space_Wars.Content.Main.Entities;
 using Space_Wars.Content.Main.Particles;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+
 //using System.Drawing;
 using System.Linq;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -15,6 +18,7 @@ public interface ICollider
     public bool Collide(Entity _entity);
     public bool IsColliding(Vector2 _position, Vector2 _velocity, float _radius);
     public void Draw(SpriteBatch _spriteBatch);
+    public string Print();
     protected static bool ComputeCollisions(float _distance, Vector2 _closestPoint, Vector2 _velocity, Entity _entity)
     {
         var normalVector = (_entity.position - _closestPoint) / _distance;
@@ -80,6 +84,10 @@ public class LineCollider(Vector2 _start, Vector2 _end) : ICollider
         {
             _spriteBatch.Draw(Assets.Get(Sprite.Dot), _start + dir * d * 4, null, Color.White, angle, Assets.DimsOf(Sprite.Dot), Vector2.One, 0, 0);
         }
+    }
+    public string Print()
+    {
+        return $"new LineCollider(new Vector2({_start.X},{_start.Y}), new Vector2({_end.X},{_end.Y})),";
     }
 }
 public class ArcCollider : ICollider
@@ -149,5 +157,9 @@ public class ArcCollider : ICollider
             normalVector = Util.ToUnitVector(angle + sprayAngle) * radius;
             _spriteBatch.Draw(Assets.Get(Sprite.Dot), position + normalVector, null, Color.White, angle, Assets.DimsOf(Sprite.Dot)/2, 1, 0, 0);
         }
+    }
+    public string Print()
+    {
+        return $"new ArcCollider(new Vector2({position.X},{position.Y}),{sprayCone}f,{sprayAngle}f,{radius}f),";
     }
 }

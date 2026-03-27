@@ -283,7 +283,7 @@ public class Player : Entity
         {
             isEngineActive = false;
         }
-        Vector2 mousePos = new Vector2(Input.NewMouseState.X, Input.NewMouseState.Y);
+        var mousePos = new Vector2(Input.NewMouseState.X, Input.NewMouseState.Y);
         //Ensures that target vector performs identically in all resolutions
         Vector2 mouseCamPos = Engine.Camera.Position + mousePos - Engine.BackBuffer/2 + Engine.MousePositionOffset;
         //Testing
@@ -331,9 +331,11 @@ public class Player : Entity
                     ParticleManager.Add(new Particle(Assets.Get(Sprite.Dot), startLocation + dir * d * 4, angle, Color.White));
                 }
             }
-            if(Input.WasJustReleased(Binding.WarpBackward) && Engine.SaveGame.CurrentMission.Colliders.Length > 0)
+            if(Input.IsDown(Binding.WarpBackward) && Engine.SaveGame.CurrentMission.Colliders.Length > 0)
             {
-                Engine.SaveGame.CurrentMission.Colliders = Engine.SaveGame.CurrentMission.Colliders[0..^1];
+                Vector2 newPos = new Vector2(Input.NewMouseState.X, Input.NewMouseState.Y) + Engine.Camera.Position - Engine.ScreenSize / 2 + Engine.MousePositionOffset; ;
+                Vector2 prevPos = new Vector2(Input.OldMouseState.X, Input.OldMouseState.Y) + Engine.Camera.Position - Engine.ScreenSize / 2 + Engine.MousePositionOffset;
+                Engine.SaveGame.CurrentMission.Colliders = [.. Engine.SaveGame.CurrentMission.Colliders.Where(x => !x.IsColliding(prevPos, newPos - prevPos, 10))];
             }
             if(Input.NewState.IsKeyDown(Keys.F) && Input.OldState.IsKeyUp(Keys.F))
             {
@@ -343,9 +345,15 @@ public class Player : Entity
                 }
                 else
                 {
-                    Debug.WriteLine($"new LineCollider(new Vector2({startLocation.X},{startLocation.Y}), new Vector2({mousePos.X},{mousePos.Y}))");
                     Engine.SaveGame.CurrentMission.Colliders = Engine.SaveGame.CurrentMission.Colliders.Concat([new LineCollider(startLocation, mousePos)]).ToArray();
                     startLocation = Vector2.Zero;
+                }
+            }
+            if (Input.NewState.IsKeyDown(Keys.Tab) && Input.OldState.IsKeyUp(Keys.Tab))
+            {
+                foreach(var collider in Engine.SaveGame.CurrentMission.Colliders)
+                {
+                    Debug.WriteLine(collider.Print());
                 }
             }
         }
