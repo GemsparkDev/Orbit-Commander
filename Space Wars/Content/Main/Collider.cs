@@ -5,7 +5,6 @@ using Space_Wars.Content.Main.Particles;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-
 //using System.Drawing;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
@@ -16,7 +15,7 @@ namespace Space_Wars.Content.Main;
 public interface ICollider
 {
     public bool Collide(Entity _entity);
-    public bool IsColliding(Vector2 _position, Vector2 _velocity, float _radius);
+    public bool IsColliding(Vector2 _position, Vector2 _velocity, float _radius, bool _override = false);
     public void Draw(SpriteBatch _spriteBatch);
     public string Print();
     protected static bool ComputeCollisions(float _distance, Vector2 _closestPoint, Vector2 _velocity, Entity _entity)
@@ -41,18 +40,26 @@ public interface ICollider
         return cond;
     }
 }
-public class LineCollider(Vector2 _start, Vector2 _end) : ICollider
+public class LineCollider(Vector2 _start, Vector2 _end, bool _isVisual = false) : ICollider
 {
     public bool Collide(Entity _entity)
     {
+        if(_isVisual)
+        {
+            return false;
+        }
         Vector2 length = _start - _end;
         float distanceBetween = Math.Clamp(Vector2.Dot((_start - _entity.position), length) / length.LengthSquared(), 0, 1);
         Vector2 closestPoint = _start-length * distanceBetween;
         float distance = Vector2.Distance(closestPoint, _entity.position);
         return ICollider.ComputeCollisions(distance, closestPoint, Vector2.Zero, _entity);
     }
-    public bool IsColliding(Vector2 _position, Vector2 _entityVelocity, float _radius)
+    public bool IsColliding(Vector2 _position, Vector2 _entityVelocity, float _radius, bool _override = false)
     {
+        if(_isVisual && !_override)
+        {
+            return false;
+        }
         Vector2 length = _start - _end;
         float distanceBetween = Math.Clamp(Vector2.Dot((_start - _position), length) / length.LengthSquared(), 0, 1);
         Vector2 closestPoint = _start - length * distanceBetween;
@@ -80,14 +87,19 @@ public class LineCollider(Vector2 _start, Vector2 _end) : ICollider
     {
         float angle = MathF.Atan2((_start.Y - _end.Y), (_start.X - _end.X)) - MathF.PI/2;
         Vector2 dir = Util.ToUnitVector(angle);
+        float f = 1;
+        if(_isVisual)
+        {
+            f = 0.5f;
+        }
         for (float d = 0; d < (_end - _start).Length() / 4; d += 2)
         {
-            _spriteBatch.Draw(Assets.Get(Sprite.Dot), _start + dir * d * 4, null, Color.White, angle, Assets.DimsOf(Sprite.Dot), Vector2.One, 0, 0);
+            _spriteBatch.Draw(Assets.Get(Sprite.Dot), _start + dir * d * 4, null, Color.White * f, angle, Assets.DimsOf(Sprite.Dot)/2, Vector2.One, 0, 0);
         }
     }
     public string Print()
     {
-        return $"new LineCollider(new Vector2({_start.X},{_start.Y}), new Vector2({_end.X},{_end.Y})),";
+        return $"new LineCollider(new Vector2({_start.X},{_start.Y}),new Vector2({_end.X},{_end.Y},{_isVisual})),";
     }
 }
 public class ArcCollider : ICollider
@@ -96,27 +108,37 @@ public class ArcCollider : ICollider
     private float sprayAngle;
     private float sprayCone;
     private float radius;
-    public ArcCollider(Vector2 _position, float _sprayCone, float _sprayAngle, float _radius)
+    private bool isVisual;
+    public ArcCollider(Vector2 _position, float _sprayCone, float _sprayAngle, float _radius, bool _isVisual = false)
     {
-        position = _position; sprayAngle = _sprayAngle; radius = _radius; sprayCone = _sprayCone;
+        position = _position; sprayAngle = _sprayAngle; radius = _radius; sprayCone = _sprayCone; isVisual = _isVisual;
     }
-    public ArcCollider(Vector2 _start, Vector2 _end, Vector2 _position)
+    public ArcCollider(Vector2 _start, Vector2 _end, Vector2 _position, bool _isVisual = false)
     {
         radius = Vector2.Distance(_start, _position);
         position = _position;
-         sprayCone = MathF.Acos(Vector2.Dot(_start - _position, _end - _position) / (radius * radius));
+        sprayCone = MathF.Acos(Vector2.Dot(_start - _position, _end - _position) / (radius * radius));
         sprayAngle = Util.ToAngle(_start / 2 + _end / 2 - _position);
+        isVisual = _isVisual;
     }
     public bool Collide(Entity _entity)
     {
+        if(isVisual)
+        {
+            return false;
+        }
         Vector2 relativePosition = _entity.position - position;
         float relativeAngle = -Math.Clamp(MathF.Asin(Util.Cross(relativePosition, Util.ToUnitVector(sprayAngle)) / relativePosition.Length()), -sprayCone/2, sprayCone/2);
         Vector2 closestPoint = Util.ToUnitVector(sprayAngle + relativeAngle) * radius + position;
         float distance = Vector2.Distance(_entity.position, closestPoint);
         return ICollider.ComputeCollisions(distance, closestPoint, Vector2.Zero, _entity);
     }
-    public bool IsColliding(Vector2 _position, Vector2 _velocity, float _radius)
+    public bool IsColliding(Vector2 _position, Vector2 _velocity, float _radius, bool _override)
     {
+        if(isVisual && !_override)
+        {
+            return false;
+        }
         Vector2 relativePosition = _position - position;
         float relativeAngle = -Math.Clamp(MathF.Asin(Util.Cross(relativePosition, Util.ToUnitVector(sprayAngle)) / relativePosition.Length()), -sprayCone / 2, sprayCone / 2);
         Vector2 closestPoint = Util.ToUnitVector(sprayAngle + relativeAngle) * radius + position;
@@ -128,6 +150,11 @@ public class ArcCollider : ICollider
     }
     public void Draw(SpriteBatch _spriteBatch)
     {
+        float f = 1;
+        if(isVisual)
+        {
+            f = 0.5f;
+        }
         Vector2 normalVector;
         float increment = MathF.Tau / radius;
         int count = (int)Math.Ceiling(Math.Truncate(sprayCone / increment));
@@ -155,11 +182,11 @@ public class ArcCollider : ICollider
         void DrawParticle(float angle)
         {
             normalVector = Util.ToUnitVector(angle + sprayAngle) * radius;
-            _spriteBatch.Draw(Assets.Get(Sprite.Dot), position + normalVector, null, Color.White, angle, Assets.DimsOf(Sprite.Dot)/2, 1, 0, 0);
+            _spriteBatch.Draw(Assets.Get(Sprite.Dot), position + normalVector, null, Color.White*f, angle, Assets.DimsOf(Sprite.Dot)/2, 1, 0, 0);
         }
     }
     public string Print()
     {
-        return $"new ArcCollider(new Vector2({position.X},{position.Y}),{sprayCone}f,{sprayAngle}f,{radius}f),";
+        return $"new ArcCollider(new Vector2({position.X},{position.Y}),{sprayCone}f,{sprayAngle}f,{radius}f,{isVisual}),";
     }
 }

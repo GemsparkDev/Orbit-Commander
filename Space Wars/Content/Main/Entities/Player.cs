@@ -256,10 +256,10 @@ public class Player : Entity
             smokeParticles.speedOfEmission = 25f - currentHealth/4;
         }
         var planet = Engine.SaveGame.CurrentMission.Planet;
-        if (position.Length() >= 50 * 50 + planet.radius)
+        if (position.Length() >= 40 * 50 + planet.radius * 2)
         {
             velocity *= Util.FIED(0.1f);
-            velocity += Vector2.Normalize(-position) * (position.Length() - (50 * 50 + planet.radius)) * Engine.DeltaSeconds / 30;
+            velocity += Vector2.Normalize(-position) * (position.Length() - (40 * 50 + planet.radius*2)) * Engine.DeltaSeconds / 30;
         }
         base.Update();
         collider.position += velocity;
@@ -319,22 +319,27 @@ public class Player : Entity
     {
         if(Engine.DebugMode)
         {
-            Vector2 mousePos = new Vector2(Input.NewMouseState.X, Input.NewMouseState.Y) + Engine.Camera.Position - Engine.ScreenSize/2 + Engine.MousePositionOffset;
+            Vector2 mousePos = new Vector2(Input.NewMouseState.X, Input.NewMouseState.Y) + Engine.Camera.Position - Engine.BackBuffer/2;
             mousePos = new Vector2(MathF.Round(mousePos.X/25), MathF.Round(mousePos.Y/25))*25;
             ParticleManager.Add(new Particle(Assets.Get(Sprite.Dot), mousePos, 0, Color.Red));
             if (startLocation != Vector2.Zero)
             {
+                float f = 1;
+                if(Input.NewState.IsKeyDown(Keys.LeftControl))
+                {
+                    f = 0.5f;
+                }
                 float angle = MathF.Atan2((startLocation.Y - mousePos.Y), (startLocation.X - mousePos.X)) - MathF.PI / 2;
                 Vector2 dir = Util.ToUnitVector(angle);
                 for (float d = 0; d < (startLocation - mousePos).Length() / 4; d += 2)
                 {
-                    ParticleManager.Add(new Particle(Assets.Get(Sprite.Dot), startLocation + dir * d * 4, angle, Color.White));
+                    ParticleManager.Add(new Particle(Assets.Get(Sprite.Dot), startLocation + dir * d * 4, angle, Color.White*f));
                 }
             }
             if(Input.IsDown(Binding.WarpBackward) && Engine.SaveGame.CurrentMission.Colliders.Length > 0)
             {
-                Vector2 newPos = new Vector2(Input.NewMouseState.X, Input.NewMouseState.Y) + Engine.Camera.Position - Engine.ScreenSize / 2 + Engine.MousePositionOffset; ;
-                Vector2 prevPos = new Vector2(Input.OldMouseState.X, Input.OldMouseState.Y) + Engine.Camera.Position - Engine.ScreenSize / 2 + Engine.MousePositionOffset;
+                Vector2 newPos = new Vector2(Input.NewMouseState.X, Input.NewMouseState.Y) + Engine.Camera.Position - Engine.BackBuffer / 2;
+                Vector2 prevPos = new Vector2(Input.OldMouseState.X, Input.OldMouseState.Y) + Engine.Camera.Position - Engine.BackBuffer / 2;
                 Engine.SaveGame.CurrentMission.Colliders = [.. Engine.SaveGame.CurrentMission.Colliders.Where(x => !x.IsColliding(prevPos, newPos - prevPos, 10))];
             }
             if(Input.NewState.IsKeyDown(Keys.F) && Input.OldState.IsKeyUp(Keys.F))
@@ -345,7 +350,7 @@ public class Player : Entity
                 }
                 else
                 {
-                    Engine.SaveGame.CurrentMission.Colliders = Engine.SaveGame.CurrentMission.Colliders.Concat([new LineCollider(startLocation, mousePos)]).ToArray();
+                    Engine.SaveGame.CurrentMission.Colliders = Engine.SaveGame.CurrentMission.Colliders.Concat([new LineCollider(startLocation, mousePos,Input.NewState.IsKeyDown(Keys.LeftControl))]).ToArray();
                     startLocation = Vector2.Zero;
                 }
             }
@@ -804,7 +809,7 @@ public class Player : Entity
         {
             return;
         }
-        if (position.Length() > Engine.SaveGame.CurrentMission.Planet.radius + 25 * 50)
+        if (position.Length() > Engine.SaveGame.CurrentMission.Planet.radius * 2 + 15 * 50)
         {
             _spriteBatch.Draw(Assets.Get(Sprite.Arrow), position - Vector2.Normalize(position) * 25, null, color, MathF.Atan2(-position.X, position.Y), Assets.DimsOf(Sprite.Arrow) / 2, 1, 0, 0.2f);
             _spriteBatch.DrawString(Assets.TextFont, "Return to planet.", Engine.Camera.Position - new Vector2(Assets.TextFont.MeasureString("Return to planet.").X/2, 225), Color.Crimson);
