@@ -211,6 +211,7 @@ public class EntityManager
         [
             new EntityCondition(new LaunchConstructor(Enemy.NewGlider,new Vector2(-1000, -700), -1000),[ ]),
             new WaveGoal(10),
+            new EntityCondition(new AdvancedConstructor(Enemy.NewFighter, Vector2.Zero, Vector2.Zero, 0, false), []),
             new EntityCondition(new PickupConstructor(ItemFactory.NewScrap, new Vector2(0, -8*50), Vector2.Zero, -0.03f),[]),
         ],
         "Black Hole", "", -1, new Vector2(-1000, -700), Mission.TierThree(), Mission.TierThreeBosses(), null, true, null, BlackHoleStation)

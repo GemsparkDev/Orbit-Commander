@@ -67,6 +67,10 @@ public class LineCollider(Vector2 _start, Vector2 _end, bool _isVisual = false) 
         var normalVector = (_position - closestPoint) / distance;
         Vector2 relativePosition = _position - closestPoint + normalVector * _radius;
         Vector2 futurePosition = relativePosition + (_entityVelocity) - 2 * normalVector * _radius;
+        if(Vector2.Dot(normalVector, relativePosition) * Vector2.Dot(normalVector, futurePosition) < 0)
+        {
+            ParticleManager.Add(new Particle(Assets.Get(Sprite.Circle), closestPoint, 0, Color.Red));
+        }
         return Vector2.Dot(normalVector, relativePosition) * Vector2.Dot(normalVector, futurePosition) < 0;
     }
     public void Move(Vector2 _offset)
@@ -146,6 +150,10 @@ public class ArcCollider : ICollider
         var normalVector = (_position - closestPoint) / distance;
         Vector2 entityPosition = _position - closestPoint + normalVector * _radius;
         Vector2 futurePosition = entityPosition + _velocity - 2 * normalVector * _radius;
+        if (Vector2.Dot(normalVector, entityPosition) * Vector2.Dot(normalVector, futurePosition) < 0)
+        {
+            ParticleManager.Add(new Particle(Assets.Get(Sprite.Circle), closestPoint, 0, Color.Red));
+        }
         return Vector2.Dot(normalVector, entityPosition) * Vector2.Dot(normalVector, futurePosition) < 0;
     }
     public void Draw(SpriteBatch _spriteBatch)

@@ -147,6 +147,13 @@ public class Enemy : Entity
     }
     public void GoToPosition(Vector2 _position, float speed)
     {
+        foreach(var collider in Engine.SaveGame.CurrentMission.Colliders)
+        {
+            if(collider.IsColliding(_position, position-_position, 10))
+            {
+                return;
+            }
+        }
         targetVector = Vector2.Normalize(Vector2.Normalize(_position - position) + GetNormalizedAcceleration() * 20f);
         velocity += targetVector * speed * Engine.DeltaSeconds * 10;
     }

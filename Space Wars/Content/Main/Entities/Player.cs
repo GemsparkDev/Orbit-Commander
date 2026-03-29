@@ -340,7 +340,7 @@ public class Player : Entity
             {
                 Vector2 newPos = new Vector2(Input.NewMouseState.X, Input.NewMouseState.Y) + Engine.Camera.Position - Engine.BackBuffer / 2;
                 Vector2 prevPos = new Vector2(Input.OldMouseState.X, Input.OldMouseState.Y) + Engine.Camera.Position - Engine.BackBuffer / 2;
-                Engine.SaveGame.CurrentMission.Colliders = [.. Engine.SaveGame.CurrentMission.Colliders.Where(x => !x.IsColliding(prevPos, newPos - prevPos, 10))];
+                Engine.SaveGame.CurrentMission.Colliders = [.. Engine.SaveGame.CurrentMission.Colliders.Where(x => !x.IsColliding(prevPos, newPos - prevPos, 10, true))];
             }
             if(Input.NewState.IsKeyDown(Keys.F) && Input.OldState.IsKeyUp(Keys.F))
             {
