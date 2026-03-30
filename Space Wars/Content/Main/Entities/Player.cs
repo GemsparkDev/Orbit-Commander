@@ -101,7 +101,7 @@ public class Player : Entity
     }
 
     public Player(Vector2 _position, Vector2 _velocity, float _angle, bool _isFriendly = true)
-        : base(Assets.Get(Sprite.Player), _position, _velocity, _angle, 0, 5, _isFriendly)
+        : base(Assets.Get(Sprite.Player), _position, _velocity, _angle, 0, _isFriendly)
     {
         UpdateColor();
         smokeParticles.isEmitterActive = false;
@@ -268,8 +268,9 @@ public class Player : Entity
         {
             if (dockedEntity.IsValid)
             {
-                position = dockedEntity.Position;
-                velocity = dockedEntity.Velocity;
+                throw new NotImplementedException();
+                //position = dockedEntity.Position;
+                //velocity = dockedEntity.Velocity;
             }
             else
             {
@@ -822,7 +823,7 @@ public class Player : Entity
         base.Draw(_spriteBatch);
     }
     public Player(string _serialization, LoadLogger _logger)
-    : base(Assets.Get(Sprite.Player), Vector2.One, Vector2.One, 0, 0, 5, true)
+    : base(Assets.Get(Sprite.Player), Vector2.One, Vector2.One, 0, 0, true)
     {
         List<string> disassembly = SaveGame.Disassemble(_serialization);
 

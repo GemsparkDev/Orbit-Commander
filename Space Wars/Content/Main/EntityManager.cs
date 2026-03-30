@@ -391,26 +391,13 @@ public class EntityManager
             }
         }
     }
-    public static void Collide(Entity entity, Entity targetEntity)
-    {
-        if (entity == null || targetEntity == null)
-        {
-            return;
-        }
-        float combinedRadius = entity.ColliderRadius + targetEntity.ColliderRadius;
-        if (entity.isFriendly != targetEntity.isFriendly && DistanceSqr(entity, targetEntity) <= combinedRadius * combinedRadius)
-        {
-            entity.Collide(targetEntity.damage);
-            targetEntity.Collide(entity.damage);
-        }
-    }
     public DockableComponent NearestDockableEntity(Entity _entity)
     {
         float nearestDistance = float.MaxValue;
         DockableComponent returnEntity = null;
         foreach (Entity entity in entities)
         {
-            var component = entity.Components.GetComponent(ComponentType.DockableComponent);
+            var component = entity.GetComponent<DockableComponent>();
             if (component.IsValid)
             {
                 float distanceSqr = DistanceSqr(entity, _entity);

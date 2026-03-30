@@ -12,8 +12,8 @@ namespace Space_Wars.Content.Main.Entities;
 public enum EntityType { Projectile, Enemy, Item, None }
 public abstract class Entity
 {
+    public ComponentType ID { get; private set; } = 0;
     public Texture2D texture;
-    public SoundEffect hitSound;
     protected Color color = Color.White;
     public Vector2 position;
     public Vector2 velocity;
@@ -21,13 +21,13 @@ public abstract class Entity
     public float angle;
     public bool isExpired = false;
     public bool isFriendly;
-    public int damage;
     public virtual int SensingAbility { get; protected set; } = 1;
     public virtual int StealthAbility { get { return stealthAbility; } protected set { stealthAbility = value; } }
     private int stealthAbility = 0;
     protected float revealDuration = 0;
     public EntityType entityType;
-    public ComponentList Components { get; } = new();
+    private List<Component> components = [];
+
     public virtual float ColliderRadius
     {
         get { return Engine.EnemyHitboxModifier * (texture.Height + texture.Width) / 4 + 1; }
@@ -41,14 +41,13 @@ public abstract class Entity
     public virtual void LowerCooldown() { }
     protected static Player Player => Engine.SaveGame.Player;
     public StatusHolder StatusHolder { get; private set; } = new();
-    public Entity(Texture2D _texture, Vector2 _position, Vector2 _velocity, float _angle, float _angularVelocity, int _damage, bool _isFriendly)
+    public Entity(Texture2D _texture, Vector2 _position, Vector2 _velocity, float _angle, float _angularVelocity, bool _isFriendly)
     {
         texture = _texture;
         position = _position;
         velocity = _velocity;
         angle = _angle;
         angularVelocity = _angularVelocity;
-        damage = _damage;
         isFriendly = _isFriendly;
         collider = new ParticleEmitter(Assets.Get(Sprite.Dot), position, ColliderRadius, Color.Yellow) { isEmitterActive = false };
     }
@@ -71,6 +70,22 @@ public abstract class Entity
         {
             StatusHolder.ApplyStatus(new Frost(1));
         }
+    }
+    public T GetComponent<T>() where T : Component
+    {
+        foreach (Component component in components)
+        {
+            if (component.GetType().Equals(typeof(T)))
+            {
+                return (T)component;
+            }
+        }
+        return null;
+    }
+    public void AddComponent(Component component)
+    {
+        components.Add(component);
+        ID = ID | component.Type;
     }
     public abstract bool Collide(int _damage, bool _ignoreImmunity = false);
     public void ClearAll()

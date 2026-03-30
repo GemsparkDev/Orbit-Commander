@@ -1,4 +1,5 @@
 ﻿using Microsoft.Xna.Framework.Input;
+using System;
 
 namespace Space_Wars.Content.Main;
 
@@ -247,10 +248,11 @@ public enum Sound
     secretBoss,
     finalBoss,
 }
+[Flags]
 public enum ComponentType
 {
-    DockableComponent,
-    TeamComponent,
+    None,
+    Transform,
 }
 public enum Message
 {

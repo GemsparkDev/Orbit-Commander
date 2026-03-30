@@ -104,7 +104,7 @@ public class Construct : Pickup
                 var nearestProjectile = Engine.EntityManager.NearestProjectile(this, !isFriendly);
                 if (nearestProjectile != null && Vector2.Distance(nearestProjectile.position, position) < ColliderRadius + nearestProjectile.ColliderRadius)
                 {
-                    Collide(nearestProjectile.damage);
+                    Collide(1); //Colliding with 1 is a bandaid fix!
                     nearestProjectile.Collide(1);
                 }
                 attackRadius.Update();

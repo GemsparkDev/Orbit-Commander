@@ -14,12 +14,15 @@ public abstract class Projectile : Entity
 {
     private Random random = new ();
     public float timeLeft = 8;
+    protected int damage;
+    public int Damage { get { return damage; } }
     //Projectiles should always be able to hit potential targets
     public override int SensingAbility { get { return 99; } }
     public Projectile(Texture2D _texture, Vector2 _position, Vector2 _velocity, float _angle, float _angularVelocity, bool _isFriendly, int _damage, int _stealth)
-        : base(_texture, _position, _velocity, _angle, _angularVelocity, _damage, _isFriendly)
+        : base(_texture, _position, _velocity, _angle, _angularVelocity, _isFriendly)
     {
         StealthAbility = _stealth;
+        damage = _damage;
     }
     public override void Update()
     {
@@ -77,7 +80,8 @@ public class PulseShot : Projectile
             velocity += normalDirection * MathF.Sqrt(MathF.Abs(dot)) * MathF.Sign(dot) / 8;
             angle = Util.ToAngle(velocity - nearestEnemy.velocity);
         }
-        EntityManager.Collide(this, nearestEnemy);
+        nearestEnemy.Collide(damage);
+        Collide(1);
     }
 }
 public class SpiralShot : Projectile
@@ -99,7 +103,9 @@ public class SpiralShot : Projectile
         time += Engine.DeltaSeconds;
         Vector2 posOffset = Util.ToUnitVector(angle) * MathF.Cos(time * 8 + offset);
         position += new Vector2(posOffset.Y, -posOffset.X);
-        EntityManager.Collide(this, Engine.EntityManager.NearestEnemy(this, true));
+        Entity nearestEnemy = Engine.EntityManager.NearestEnemy(this, true);
+        nearestEnemy.Collide(damage);
+        Collide(1);
     }
 }
 public class AssassinShot : Projectile
@@ -480,7 +486,8 @@ public class Splitter : Projectile
         position += velocity * Engine.DeltaSeconds * 60;
         angle += angularVelocity * Engine.DeltaSeconds * 60;
         Entity nearestEnemy = Engine.EntityManager.NearestEnemy(this);
-        EntityManager.Collide(this, nearestEnemy);
+        nearestEnemy.Collide(damage);
+        Collide(1);
         if (cooldown < 0)
         {
             if (targetting && nearestEnemy != null)

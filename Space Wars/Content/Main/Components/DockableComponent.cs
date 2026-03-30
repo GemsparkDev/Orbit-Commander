@@ -1,15 +1,15 @@
 ﻿using UILib.Content.Main;
 using Microsoft.Xna.Framework;
 using Space_Wars.Content.Main.Entities;
+using System;
 
 namespace Space_Wars.Content.Main.Components;
 
-public class DockableComponent(Entity _parentEntity, Container _menu, bool hasInventory = true) : IComponent
+
+public class DockableComponent(Entity _parentEntity, Container _menu, bool hasInventory = true) : Component(_parentEntity, ComponentType.None)
 {
-    public Vector2 Position => _parentEntity.position;
-    public Vector2 Velocity => _parentEntity.velocity;
     public bool IsDocked { get; private set; } = false;
-    public ComponentType Type => ComponentType.DockableComponent;
+    //public ComponentType Type => ComponentType.DockableComponent;
     public bool IsValid => !_parentEntity.isExpired;
     public Container Menu { get; private set; } = _menu;
     private static void AddItem(Pickup _pickup)
@@ -27,6 +27,7 @@ public class DockableComponent(Entity _parentEntity, Container _menu, bool hasIn
     }
     public bool Dock(Player _player, bool _withVelocity)
     {
+        throw new NotImplementedException();
         EventHandler.DisableDockingMenus();
         if (EntityManager.DistanceSqr(_player, _parentEntity) > 1250)
         {
@@ -44,7 +45,7 @@ public class DockableComponent(Entity _parentEntity, Container _menu, bool hasIn
             {
                 EventHandler.UpdateInventoryUI();
                 pickup.isExpired = false;
-                pickup.position = Position;
+                //pickup.position = entity.Position;
                 _player.leashedMaterials.Add(pickup);
                 Engine.EntityManager.Add(pickup);
             }

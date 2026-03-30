@@ -1,14 +1,15 @@
 ﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Space_Wars.Content.Main.Components;
 using Space_Wars.Content.Main.Particles;
+using Space_Wars.Content.Main.Story;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using UILib.Content.Main;
-using Space_Wars.Content.Main.Story;
 
 namespace Space_Wars.Content.Main.Entities;
 
@@ -23,6 +24,9 @@ public class Enemy : Entity
     private float healthCD = 0;
     private float mineTime = 0;
     private int maxHealth;
+    private int damage;
+    private SoundEffect hitSound;
+    public int Damage { get { return damage; } }
     private bool deleteOnCollide = false;
     public bool ChildEnemy { get; private set; }
     private bool wasHit = false;
@@ -40,7 +44,7 @@ public class Enemy : Entity
     private Vector2 targetVector;
     public ParticleEmitter enemyRange = new(Assets.Get(Sprite.Dot), Vector2.Zero, 0, Color.Red * 0.75f);
     public Enemy(Vector2 _position, Vector2 _velocity, float _angle, int _damage, int _health, Texture2D _texture, bool _isFriendly = false)
-        : base(_texture, _position, _velocity, _angle, 0, _damage, _isFriendly)
+        : base(_texture, _position, _velocity, _angle, 0, _isFriendly)
     {
         entityType = EntityType.Enemy;
         health = _health;
@@ -49,6 +53,7 @@ public class Enemy : Entity
         enemyRange.position = position;
         hitSound = Assets.Get(Sound.Hit);
         UpdateColor();
+        damage = _damage;
     }
     public override void Update()
     {
@@ -3850,7 +3855,7 @@ public class Enemy : Entity
             {
                 furnaceItem = UI.FurnaceSlot.daughterItem;
             }
-            var dockableComponent = (Components.GetComponent(ComponentType.DockableComponent));
+            var dockableComponent = (GetComponent<DockableComponent>());
             if (furnaceItem != null)
             {
                 furnaceCooldown -= Engine.DeltaSeconds;
@@ -4574,7 +4579,7 @@ public class Enemy : Entity
     {
         Enemy enemy = new(position, velocity, angle, 8, 1000, Assets.Get(Sprite.Mothership), true);
         enemy.AddBehaviour(enemy.Mothership());
-        enemy.Components.Add(new DockableComponent(enemy, UI.MothershipMenu));
+        enemy.AddComponent(new DockableComponent(enemy, UI.MothershipMenu));
         return enemy;
     }
     public static Enemy NewTurret(Vector2 position, Vector2 velocity, float angle, bool _isFriendly)
@@ -4639,7 +4644,7 @@ public class Enemy : Entity
     {
         Enemy enemy = new(position, velocity, angle, 10, 300, Assets.Get(Sprite.Orbiter), true);
         enemy.AddBehaviour(enemy.Orbiter());
-        enemy.Components.Add(new DockableComponent(enemy, UI.MothershipMenu));
+        enemy.AddComponent(new DockableComponent(enemy, UI.MothershipMenu));
         enemy.angularVelocity = -0.01f;
         return enemy;
     }
@@ -4647,7 +4652,7 @@ public class Enemy : Entity
     {
         Enemy enemy = new(position, velocity, angle, 0, 250, Assets.Get(Sprite.PickupDrone), true);
         enemy.AddBehaviour(enemy.PickupDrone());
-        enemy.Components.Add(new DockableComponent(enemy, UI.PickupDroneMenu));
+        enemy.AddComponent(new DockableComponent(enemy, UI.PickupDroneMenu));
         return enemy;
     }
     public static Enemy NewStealthFighter(Vector2 position, Vector2 velocity, float angle, bool _isFriendly = false)
@@ -4671,7 +4676,7 @@ public class Enemy : Entity
         Enemy enemy = new(position, velocity, angle, 8, 500, Assets.Get(Sprite.Mothership), _isFriendly);
         enemy.AddBehaviour(enemy.MakeshiftMothership());
         enemy.AddBehaviour(enemy.EnemyDeath());
-        enemy.Components.Add(new DockableComponent(enemy, UI.MothershipMenu));
+        enemy.AddComponent(new DockableComponent(enemy, UI.MothershipMenu));
         return enemy;
     }
     public static Enemy NewExodusBoss(Vector2 position, Vector2 velocity, float angle, bool _isFriendly = false)
@@ -4738,14 +4743,14 @@ public class Enemy : Entity
     public static Enemy NewTrader(Vector2 _position, Vector2 _velocity, float _angle)
     {
         var enemy = new Enemy(_position, _velocity, _angle, 999, 400, Assets.Get(Sprite.Trader), true);
-        enemy.Components.Add(new DockableComponent(enemy, UI.UpgradeMenu, false));
+        enemy.AddComponent(new DockableComponent(enemy, UI.UpgradeMenu, false));
         return enemy;
     }
     public static Enemy MassRelay(Vector2 _position, Vector2 _velocity, float _angle)
     {
         Enemy enemy = new(_position, _velocity, _angle, 0, 200, Assets.Get(Sprite.MassRelayOne), true);
         enemy.AddBehaviour(enemy.MassRelay());
-        enemy.Components.Add(new DockableComponent(enemy, UI.MothershipMenu));
+        enemy.AddComponent(new DockableComponent(enemy, UI.MothershipMenu));
         return enemy;
     }
     public static Enemy NewSurgeBoss(Vector2 position, Vector2 velocity, float angle, bool isFriendly = false)
@@ -4868,21 +4873,21 @@ public class Enemy : Entity
     {
         Enemy enemy = new(position, Vector2.Zero, 0, 8, 500, Assets.Get(Sprite.DropPod), true);
         enemy.AddBehaviour(enemy.DropPod(_distance));
-        enemy.Components.Add(new DockableComponent(enemy, null));
+        enemy.AddComponent(new DockableComponent(enemy, null));
         return enemy;
     }
     public static Enemy NewGlider(Vector2 position, float _distance)
     {
         Enemy enemy = new(position, Vector2.Zero, 0, 8, 500, Assets.Get(Sprite.PickupDrone), true);
         enemy.AddBehaviour(enemy.Glider(_distance));
-        enemy.Components.Add(new DockableComponent(enemy, null));
+        enemy.AddComponent(new DockableComponent(enemy, null));
         return enemy;
     }
     public static Enemy NewMeshNetworkNode(Vector2 _position, Vector2 _velocity, float _angle)
     {
         var enemy = new Enemy(_position, _velocity, _angle, 10, 1000, Assets.Get(Sprite.Mothership), false);
         enemy.AddBehaviour(enemy.MeshNetworkNode());
-        enemy.Components.Add(new DockableComponent(enemy, UI.HackMenu, false));
+        enemy.AddComponent(new DockableComponent(enemy, UI.HackMenu, false));
         return enemy;
     }
     public static Enemy NewEnemySpawner(Vector2 _position, Vector2 _velocity, float _angle, bool _isFriendly = false)
@@ -4922,7 +4927,7 @@ public class Enemy : Entity
     {
         var enemy = new Enemy(_position, _velocity, _angle, 5, 1000, Assets.Get(Sprite.Mothership), true);
         enemy.AddBehaviour(enemy.CrashedShip());
-        enemy.Components.Add(new DockableComponent(enemy, UI.MothershipMenu, true));
+        enemy.AddComponent(new DockableComponent(enemy, UI.MothershipMenu, true));
         return enemy;
     }
 }

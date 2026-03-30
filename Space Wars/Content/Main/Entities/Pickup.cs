@@ -21,7 +21,7 @@ public class Pickup : Entity, IData
     public int ID => itemData.ID;
     private Decal textbox;
     public Pickup(ItemData _itemData, Vector2 _position, Vector2 _velocity, float _angularVelocity, int _integrity = 3)
-        : base(_itemData.VirtualSprite, _position, _velocity, 0, _angularVelocity, 0, true)
+        : base(_itemData.VirtualSprite, _position, _velocity, 0, _angularVelocity, true)
     {
         itemData = _itemData;
         color = Color.Cyan;
@@ -31,7 +31,7 @@ public class Pickup : Entity, IData
         hitsLeft = _integrity;
     }
     public Pickup(ItemData _itemData, List<string> _disassembly, LoadLogger _logger)
-        : base(_itemData.VirtualSprite, default, default, 0, 0, 0, true)
+        : base(_itemData.VirtualSprite, default, default, 0, 0, true)
     {
         itemData = _itemData;
         color = Color.Cyan;
@@ -86,7 +86,14 @@ public class Pickup : Entity, IData
         {
             if (Vector2.Distance(nearestProjectile.position, this.position) < nearestProjectile.ColliderRadius + ColliderRadius)
             {
-                EntityManager.Collide(this, nearestProjectile);
+                if(nearestProjectile is Enemy)
+                {
+                    Collide((nearestProjectile as Enemy).Damage);
+                }
+                if (nearestProjectile is Projectile)
+                {
+                    Collide((nearestProjectile as Projectile).Damage);
+                }
             }
         }
         if (invincibilityCooldown > 0)
