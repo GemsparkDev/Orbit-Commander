@@ -17,7 +17,7 @@ public class Mission
     public string Name { get; }
     public string Description { get; }
     private int playerProgression = 3;
-    public int PlayerProgression { get { if (Engine.DebugMode) { return 99; } else { return playerProgression; } } set { playerProgression = value; } }
+    public int PlayerProgression { get { if (SaveGame.DebugMode) { return 99; } else { return playerProgression; } } set { playerProgression = value; } }
     public int Wave { get; private set; } = 0;
     public int EnemiesSpawned { get; private set; } = 0;
     public float RestartTimer { get; set; } = -1;
@@ -86,7 +86,7 @@ public class Mission
             objective.Initialize();
         }
         Engine.SaveGame.Player.Progression = PlayerProgression;
-        Engine.SaveGame.Player.position = playerPosition;
+        Engine.SaveGame.Player.Position = playerPosition;
         TestCompletion();
         if (playerDocked)
         {
@@ -157,13 +157,13 @@ public class Mission
                 foreach (var enemy in enemiesSpawned)
                 {
                     Engine.EntityManager.Add(enemy);
-                    float angle = MathF.Atan2(-enemy.position.X, enemy.position.Y);
-                    float height = Assets.DimsOf(Sprite.Dot).X;
+                    float angle = MathF.Atan2(-enemy.Position.X, enemy.Position.Y);
+                    float height = Assets.DimsOf(Sprites.Dot).X;
                     for (float i = 0; i < 500; i++)
                     {
-                        var dir = Vector2.Normalize(enemy.position);
+                        var dir = Vector2.Normalize(enemy.Position);
                         float pow = (500 - i) / 500;
-                        ParticleManager.Add(new Particle(Assets.Get(Sprite.Dot), 0.5f, enemy.position + dir * i * height, Vector2.Zero, angle, 0, new Color(255, 0, 0), Color.Transparent));
+                        ParticleManager.Add(new Particle(Assets.Get(Sprites.Dot), 0.5f, enemy.Position + dir * i * height, Vector2.Zero, angle, 0, new Color(255, 0, 0), Color.Transparent));
                     }
                     if (isAggressive)
                     {
@@ -178,7 +178,7 @@ public class Mission
                 waveTimer -= Engine.DeltaSeconds;
                 foreach (var enemy in enemiesSpawned)
                 {
-                    ParticleManager.Add(new Particle(enemy.texture, enemy.position, enemy.angle, new Color(255, 127, 0) * (Util.Random.NextSingle() / 2 + 0.25f)));
+                    ParticleManager.Add(new Particle(enemy.Texture, enemy.Position, enemy.Angle, new Color(255, 127, 0) * (Util.Random.NextSingle() / 2 + 0.25f)));
                 }
             }
         }
@@ -254,10 +254,10 @@ public class Mission
                         Vector2 pos;
                         if (squadLeader != null && (count < 2 || Util.Random.Next(0, 4) != 0))
                         {
-                            var offset = Vector2.Normalize(new Vector2(squadLeader.position.X, squadLeader.position.Y));
+                            var offset = Vector2.Normalize(new Vector2(squadLeader.Position.X, squadLeader.Position.Y));
                             int isOdd = (count % 2 == 0) ? 1 : -1;
 
-                            pos = squadLeader.position
+                            pos = squadLeader.Position
                                 //Horizontal offset
                                 + new Vector2(offset.Y, -offset.X) * 10 * isOdd * (count / 2 + 1)
                                 //Vertical offset
@@ -270,7 +270,7 @@ public class Mission
                             squadLeader = null;
                             count = 0;
                         }
-                        var enemy = enemyCreditValues[i].enemy(pos, Engine.SaveGame.Player.velocity, MathF.Atan2(-pos.X, pos.Y));
+                        var enemy = enemyCreditValues[i].enemy(pos, Engine.SaveGame.Player.Velocity, MathF.Atan2(-pos.X, pos.Y));
                         enemiesSpawned.Add(enemy);
                         squadLeader ??= enemy;
                         enemyCredits -= newCosts[i];
@@ -376,7 +376,7 @@ public class Mission
         Vector2[] futurePlanetVelocities = [.. planets.Select(planet => planet.velocity)];
         int currentPlanet = 0;
         bool hasChanged = false;
-        var emitter = new ParticleEmitter(Assets.Get(Sprite.Dot), Engine.DeltaSeconds, _startPosition, 0, 0, 0, 5f, Color.Cyan, EmitterType.EmissionOverDistance);
+        var emitter = new ParticleEmitter(Assets.Get(Sprites.Dot), Engine.DeltaSeconds, _startPosition, 0, 0, 0, 5f, Color.Cyan, EmitterType.EmissionOverDistance);
         bool exit = false;
 
         for (int n = 0; n < 1000; n++)
@@ -421,7 +421,7 @@ public class Mission
             }
             futurePosition += futureVelocity;
             Vector2 particlePos = futurePosition;
-            if (Engine.PatchedConics)
+            if (SaveGame.PatchedConics)
             {
                 hasChanged = false;
                 for (int i = futurePlanetPositions.Length - 1; i >= 0; i--)
@@ -451,7 +451,7 @@ public class Mission
             }
             if (exit)
             {
-                ParticleManager.Add(new Particle(Assets.Get(Sprite.Dot), particlePos, 0, Color.Red * 0.75f));
+                ParticleManager.Add(new Particle(Assets.Get(Sprites.Dot), particlePos, 0, Color.Red * 0.75f));
                 return;
             }
         }
@@ -501,7 +501,7 @@ public class Mission
         float angle = (Util.Random.NextSingle() - 0.5f) * MathF.Tau;
         float distanceMultiplier = 1 + (Util.Random.NextSingle() - 0.5f) / 4;
         float distance = (Engine.ScreenSize.X + Engine.ScreenSize.Y) * distanceMultiplier / 3;
-        Vector2 spawnLocation = Util.ToUnitVector(angle) * distance + Engine.SaveGame.Player.position;
+        Vector2 spawnLocation = Util.ToUnitVector(angle) * distance + Engine.SaveGame.Player.Position;
         foreach (var planet in planets)
         {
             if (Vector2.Distance(spawnLocation, planet.position) < planet.radius)

@@ -32,7 +32,7 @@ public class Planet
         radius = _radius * 50;
         isImmovable = _isImmovable;
         color = _color;
-        trajectory = new ParticleEmitter(Assets.Get(Sprite.Dot), 10, position, 0, 0, 0, 10f, _color * 0.5f, EmitterType.EmissionOverDistance) { particleFadeToColor = Color.Transparent };
+        trajectory = new ParticleEmitter(Assets.Get(Sprites.Dot), 10, position, 0, 0, 0, 10f, _color * 0.5f, EmitterType.EmissionOverDistance) { particleFadeToColor = Color.Transparent };
         hasRing = _hasRing;
         atmosphereStrength = _atmosphereStrength;
         isSun = _isSun;
@@ -65,7 +65,7 @@ public class Planet
     }
     public Vector2 AttractObject(Entity _entity)
     {
-        Vector2 relativePosition = _entity.position - position;
+        Vector2 relativePosition = _entity.Position - position;
         if (relativePosition == Vector2.Zero)
         {
             _entity.isExpired = true;
@@ -79,7 +79,7 @@ public class Planet
             {
                 float strength = GetAtmosphereDensity(distance);
                 //Drag
-                Vector2 relativeVelocity = (velocity - _entity.velocity);
+                Vector2 relativeVelocity = (velocity - _entity.Velocity);
                 Vector2 drag = relativeVelocity * strength / 40;
                 acceleration += drag;
                 float q = (drag * relativeVelocity * relativeVelocity).Length() / 15;
@@ -88,8 +88,8 @@ public class Planet
                     if (Util.Random.NextSingle() < q * q / 2)
                     {
                         Vector2 pos = Util.ToUnitVector(Util.Random.NextSingle() * MathF.Tau) * Util.Random.NextSingle() * 8;
-                        ParticleManager.Add(new Particle(Assets.Get(Sprite.Circle), 0.5f + Util.Random.NextSingle() / 5, _entity.position - _entity.velocity + pos,
-                            (_entity.velocity + velocity) / 2, 0, 0, Color.Yellow * 0.5f, new Color(1f, 0.5f, 0f, 0f)){ experienceGravity = true });
+                        ParticleManager.Add(new Particle(Assets.Get(Sprites.Circle), 0.5f + Util.Random.NextSingle() / 5, _entity.Position - _entity.Velocity + pos,
+                            (_entity.Velocity + velocity) / 2, 0, 0, Color.Yellow * 0.5f, new Color(1f, 0.5f, 0f, 0f)){ experienceGravity = true });
                     }
                 }
                 _entity.ApplyWork(q);
@@ -112,28 +112,28 @@ public class Planet
                     }
                 }
             }
-            _entity.velocity += acceleration * Engine.DeltaSeconds * 60;
+            _entity.Velocity += acceleration * Engine.DeltaSeconds * 60;
             return acceleration;
         }
         else
         {
             var normalVector = Vector2.Normalize(relativePosition);
             var frictionVector = new Vector2(normalVector.Y, -normalVector.X);
-            var relativeVelocity = velocity - _entity.velocity;
+            var relativeVelocity = velocity - _entity.Velocity;
             int collisionForce = (int)Math.Floor((relativeVelocity).Length() / 2);
             if (_entity as Pickup == null && (collisionForce > 5 || _entity is Projectile))
             {
                 _entity.Collide(collisionForce);
             }
             float verticalVelocity = Math.Max(0, Vector2.Dot(relativeVelocity, normalVector));
-            _entity.velocity += normalVector * verticalVelocity + frictionVector * Vector2.Dot(relativeVelocity, frictionVector) * 0.1f;
-            _entity.position += normalVector * (radius + _entity.ColliderRadius - Vector2.Distance(position, _entity.position));
+            _entity.Velocity += normalVector * verticalVelocity + frictionVector * Vector2.Dot(relativeVelocity, frictionVector) * 0.1f;
+            _entity.Position += normalVector * (radius + _entity.ColliderRadius - Vector2.Distance(position, _entity.Position));
             float val = (int)MathF.Sqrt(collisionForce);
             if (verticalVelocity > 1)
             {
                 for (int i = 0; i < val * 1.5f; i++)
                 {
-                    ParticleManager.Add(new Particle(Assets.Get(Sprite.Dot), 10, normalVector * (radius + 2) + position, normalVector * val + new Vector2(Util.OneToNegOne(), Util.OneToNegOne()) * val / 2, 0, 0, color * 0.75f, Color.Transparent) { experienceGravity = true });
+                    ParticleManager.Add(new Particle(Assets.Get(Sprites.Dot), 10, normalVector * (radius + 2) + position, normalVector * val + new Vector2(Util.OneToNegOne(), Util.OneToNegOne()) * val / 2, 0, 0, color * 0.75f, Color.Transparent) { experienceGravity = true });
                 }
             }
             _entity.ConductHeat(Temperature, 5);
@@ -207,7 +207,7 @@ public class Planet
     }
     public void Draw(SpriteBatch _spriteBatch)
     {
-        if (Engine.DebugMode)
+        if (SaveGame.DebugMode)
         {
             //Draws a line in the direction of motion for X
             _spriteBatch.Draw(Engine.Line, position, new Rectangle((int)position.X, (int)position.Y, 10, 1), Color.White,
@@ -224,7 +224,7 @@ public class Planet
         }
         for (float angle = increment / 2; angle < MathF.Tau; angle += increment)
         {
-            _spriteBatch.Draw(Assets.Get(Sprite.Dot), position + Util.ToUnitVector(angle) * radius, null, color, angle, Assets.DimsOf(Sprite.Dot), 1, 0, 0);
+            _spriteBatch.Draw(Assets.Get(Sprites.Dot), position + Util.ToUnitVector(angle) * radius, null, color, angle, Assets.DimsOf(Sprites.Dot), 1, 0, 0);
         }
         if(atmosphereStrength > 0)
         {
@@ -245,14 +245,14 @@ public class Planet
                 Vector2 particlePosition = new Vector2(MathF.Cos(particleAngle), MathF.Sin(particleAngle) * 0.25f) * distance;
                 if (particlePosition.LengthSquared() > radius * radius || particlePosition.Y > 0)
                 {
-                    _spriteBatch.Draw(Assets.Get(Sprite.Dot), position + particlePosition, null, color * 0.75f, particleAngle, Assets.DimsOf(Sprite.Dot), 1, 0, 0);
+                    _spriteBatch.Draw(Assets.Get(Sprites.Dot), position + particlePosition, null, color * 0.75f, particleAngle, Assets.DimsOf(Sprites.Dot), 1, 0, 0);
                 }
             }
         }
     }
     public float GetAtmosphereDensity(Entity _entity)
     {
-        float distance = Vector2.Distance(_entity.position, position);
+        float distance = Vector2.Distance(_entity.Position, position);
         if(distance > AtmosphereRadius())
         {
             return 0;

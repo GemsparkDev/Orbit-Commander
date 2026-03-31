@@ -10,7 +10,7 @@ using Microsoft.Xna.Framework;
 namespace Space_Wars.Content.Main.UIElements;
 public class Fuse : IData
 {
-    public Texture2D Texture { get; private set; } = Assets.Get(Sprite.Fuse);
+    public Texture2D Texture { get; private set; } = Assets.Get(Sprites.Fuse);
     public Window Tooltip { get; private set; }
     public int ID { get; private set; } = 0;
     public Color Color { get; private set; }

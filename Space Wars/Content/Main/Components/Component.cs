@@ -3,9 +3,8 @@ using Space_Wars.Content.Main.Entities;
 
 namespace Space_Wars.Content.Main.Components;
 
-public abstract class Component(Entity _entity, ComponentType _type)
+public abstract class Component(Entity _entity)
 {
-    public Entity entity = _entity;
-    public ComponentType Type { get; } = _type;
+    public Entity Entity { get;} = _entity;
     public virtual void Update() { }
 }

@@ -28,17 +28,18 @@ public class EntityManager
     public static float StealthRange { get; private set; } = 750;
     //Threshold of detection for enemies
     public static float StealthThreshold { get; private set; } = 0.75f;
-    public int MissionLength => missions.Count;
-    private readonly List<Mission> missions =
+    public static int MissionLength => missions.Count;
+    private static readonly List<Mission> missions =
     [
         new Mission([new Planet(Vector2.Zero, Vector2.Zero, 10000, 8, true, Color.Cyan, false),
         new Planet(new Vector2(1000, 0), Planet.GetOrbitalVelocity(new Vector2(1000, 0), Vector2.Zero, 10000), 250, 1.5f, false, Color.Cyan) ],
-        [ new EntityCondition(new EntityConstructor(Enemy.NewMothership, new Vector2(0, -8*50 - Assets.DimsOf(Sprite.Mothership).Y / 2), Vector2.Zero, 0f), [ Condition.Protect, Condition.CustomIncomplete ]),
+        [ new EntityCondition(new EntityConstructor(Enemy.NewMothership, new Vector2(0, -8*50 - Assets.DimsOf(Sprites.Mothership).Y / 2), Vector2.Zero, 0f), [ Condition.Protect, Condition.CustomIncomplete ]),
         new EntityCondition(new PickupConstructor(ItemFactory.NewScrap, new Vector2(0, -8*50), new Vector2(10, -10), 0.07f),[]),
         new EntityCondition(new PickupConstructor(ItemFactory.NewScrap, new Vector2(0, -8*50), new Vector2(-8, -4), -0.03f),[])],
         "Crash Landing",
         "The crash landing site. Objective: Explore the system.",
-        -1, new Vector2(0, -8*50 - Assets.DimsOf(Sprite.Mothership).Y / 2), Mission.TierOne(), Mission.TierOneBosses(), RestartCutscene, false, DayOneLog) { PlayerProgression = 0, playerDocked = true, tip = "WASD to move, Space to dock and undock.\nRmb to collect scrap, Lmb to shoot." },
+        -1, new Vector2(0, -8*50 - Assets.DimsOf(Sprites.Mothership).Y / 2), Mission.TierOne(), Mission.TierOneBosses(), RestartCutscene, false, DayOneLog) 
+        { PlayerProgression = 0, playerDocked = false, tip = "WASD to move, Space to dock and undock.\nRmb to collect scrap, Lmb to shoot." },
 
         //Note: Add custom "Humanlike" enemies
         new Mission([new Planet(Vector2.Zero, Vector2.Zero, 15000, 12, true, Color.White, true)],
@@ -57,7 +58,7 @@ public class EntityManager
 
         new Mission( [new Planet(Vector2.Zero, Vector2.Zero, 3500, 4, true, Color.Cyan, true) ],
         [
-            new EntityCondition(new EntityConstructor(Enemy.NewTurret, new Vector2(0, -200 - Assets.DimsOf(Sprite.TurretBase).Y / 2), Vector2.Zero, 0), [ Condition.Protect ]),
+            new EntityCondition(new EntityConstructor(Enemy.NewTurret, new Vector2(0, -200 - Assets.DimsOf(Sprites.TurretBase).Y / 2), Vector2.Zero, 0), [ Condition.Protect ]),
             new EntityCondition(new EntityConstructor(Enemy.NewOrbiter, new Vector2(400, 0), Planet.GetOrbitalVelocity(new Vector2(400, 0), Vector2.Zero, 3500), 0), [ Condition.Protect ]),
             new EntityCondition(new LaunchConstructor(Enemy.NewDropPod, new Vector2(0, -1500), 200),[ ]),
             new WaveGoal(30) ],
@@ -67,7 +68,7 @@ public class EntityManager
         new Mission( [new Planet(Vector2.Zero, Vector2.Zero, 15000, 6f, true, Color.Cyan),
         new Planet(new Vector2(0, 800), Planet.GetOrbitalVelocity(new Vector2(0, 800), Vector2.Zero, 15000) * 0.85f, 1000, 1f, false, Color.Cyan), ],
         [
-            new EntityCondition(new EntityConstructor(Enemy.NewLargeMiner, new Vector2(0, -6*50 - Assets.Get(Sprite.LargeMiner).Height/2), Vector2.Zero, 0), [ Condition.Kill ]),
+            new EntityCondition(new EntityConstructor(Enemy.NewLargeMiner, new Vector2(0, -6*50 - Assets.Get(Sprites.LargeMiner).Height/2), Vector2.Zero, 0), [ Condition.Kill ]),
             new EntityCondition(new LaunchConstructor(Enemy.NewDropPod,new Vector2(0, -1500), 300),[ ])],
         "Meet the locals", "Local scans indicate a nearby mineral rich planet occupied by enemy forces. \nCapturing this site will aid in future resource gathering.", 0.75f, new Vector2(0, -1500), Mission.TierOne(), Mission.TierOneBosses(), null, true)
         { PlayerProgression = 2, isAggressive = true, tip = "Press Q to use your special ability.\nCtrl to toggle aim assist.", playerDocked = true },
@@ -281,7 +282,7 @@ public class EntityManager
         addedEntities.Clear();
         enemies.Clear();
         projectiles.Clear();
-        Player.velocity = Vector2.Zero;
+        Player.Velocity = Vector2.Zero;
         Engine.SaveGame.CurrentMission.Initialize();
     }
     public void IngameUpdate()
@@ -290,15 +291,15 @@ public class EntityManager
         Engine.SaveGame.CurrentMission.AttractObject(Player);
         if (Player.dockedEntity == null && Player.Progression > -1)
         {
-            Engine.SaveGame.CurrentMission.CalculateTrajectory(Player.position, Player.velocity, Player.ColliderRadius);
+            Engine.SaveGame.CurrentMission.CalculateTrajectory(Player.Position, Player.Velocity, Player.ColliderRadius);
         }
         Engine.MousePositionOffset = new Vector2(Mouse.GetState().X, Mouse.GetState().Y) / 10 - Engine.BackBuffer / 20
         + Engine.ScreenShakeFactor * Engine.ScreenShakeFactor * new Vector2(Util.Random.NextSingle() - 0.5f, Util.Random.NextSingle() - 0.5f) * 50;
         Engine.Camera.Rotation = Engine.ScreenShakeFactor * Engine.ScreenShakeFactor * (Util.Random.NextSingle() - 0.5f) * 0.15f;
         //If the player is further from the camera, put more weight on the player
         //Tanh prevents frac from going above 1
-        float frac = MathF.Tanh(Vector2.Distance(Player.position, Engine.Camera.Position) / 750);
-        Engine.Camera.Position = Player.position * frac + Engine.Camera.Position * (1 - frac);
+        float frac = MathF.Tanh(Vector2.Distance(Player.Position, Engine.Camera.Position) / 750);
+        Engine.Camera.Position = Player.Position * frac + Engine.Camera.Position * (1 - frac);
         var time = Engine.IngameTime;
         time.Duration += Engine.DeltaSeconds;
         Engine.IngameTime = time;
@@ -369,13 +370,13 @@ public class EntityManager
             {
                 continue;
             }
-            dist = Vector2.Distance(_position, entity.position);
+            dist = Vector2.Distance(_position, entity.Position);
             if (dist < _radius + entity.ColliderRadius && dist > float.Epsilon)
             {
                 entity.Collide(_damage);
             }
         }
-        dist = Vector2.Distance(_position, Player.position);
+        dist = Vector2.Distance(_position, Player.Position);
         if (dist < _radius && dist > 0.001f)
         {
             Player.Collide(_damage);
@@ -398,7 +399,7 @@ public class EntityManager
         foreach (Entity entity in entities)
         {
             var component = entity.GetComponent<DockableComponent>();
-            if (component.IsValid)
+            if (!(component == null) && !component.Entity.isExpired)
             {
                 float distanceSqr = DistanceSqr(entity, _entity);
                 if (distanceSqr < nearestDistance)
@@ -541,7 +542,7 @@ public class EntityManager
         {
             return float.MaxValue;
         }
-        Vector2 Target = _entity2.position - _entity1.position;
+        Vector2 Target = _entity2.Position - _entity1.Position;
         return Target.X * Target.X + Target.Y * Target.Y;
     }
     public static float DistanceSqr(Vector2 _vectorOne, Vector2 _vectorTwo)
@@ -596,9 +597,9 @@ public class EntityManager
             {
                 return;
             }
-            Vector2 relativePos = _entity.position - _pos;
+            Vector2 relativePos = _entity.Position - _pos;
             float closestLength = (relativePos.X * dir.X + relativePos.Y * dir.Y);
-            float closestDistance = Vector2.Distance((dir * closestLength + _pos), _entity.position);
+            float closestDistance = Vector2.Distance((dir * closestLength + _pos), _entity.Position);
             if (closestLength > 0 && closestLength < maxDist && closestDistance < _entity.ColliderRadius)
             {
                 if (_getAll)
@@ -666,10 +667,10 @@ public class EntityManager
             TextSize = 1.45f * UIManager.UIScale,
             TextColor = Color.Red
         };
-        var floppy = new Actor(Assets.Get(Sprite.Floppy), new Vector2(Engine.BackBuffer.X * 4 / 5, Engine.BackBuffer.Y), Color.Gray, MathF.PI / 8) { Scale = UIManager.UIScale };
-        var floppyFlat = new Actor(Assets.Get(Sprite.FloppyFlat), new Vector2(Engine.BackBuffer.X * 4 / 5, Engine.BackBuffer.Y), Color.White, 0) { Scale = UIManager.UIScale };
+        var floppy = new Actor(Assets.Get(Sprites.Floppy), new Vector2(Engine.BackBuffer.X * 4 / 5, Engine.BackBuffer.Y), Color.Gray, MathF.PI / 8) { Scale = UIManager.UIScale };
+        var floppyFlat = new Actor(Assets.Get(Sprites.FloppyFlat), new Vector2(Engine.BackBuffer.X * 4 / 5, Engine.BackBuffer.Y), Color.White, 0) { Scale = UIManager.UIScale };
         var floppyVel = Vector2.Zero;
-        var ledGlow = new Actor(Assets.Get(Sprite.LEDGlow), UI.FloppyTerminal.position + (new Vector2(72.5f, 94.5f) * UIManager.UIScale - Assets.DimsOf(Sprite.Terminal) / 2) * UIManager.UIScale, Color.Red, 0) { Scale = UIManager.UIScale };
+        var ledGlow = new Actor(Assets.Get(Sprites.LEDGlow), UI.FloppyTerminal.position + (new Vector2(72.5f, 94.5f) * UIManager.UIScale - Assets.DimsOf(Sprites.Terminal) / 2) * UIManager.UIScale, Color.Red, 0) { Scale = UIManager.UIScale };
         float floppyAngVel = Util.OneToNegOne();
         List<IActor> actors = [];
         for (int i = 0; i < text.Count; i++)
@@ -767,7 +768,7 @@ public class EntityManager
             }),
             new Event(8 + ts * 4 + Engine.DeltaSeconds,2,delegate(float time)
             {
-                floppyFlat.Position = UI.FloppyTerminal.position + (new Vector2(107, 94.5f) * UIManager.UIScale - Assets.DimsOf(Sprite.Terminal) / 2) * UIManager.UIScale;
+                floppyFlat.Position = UI.FloppyTerminal.position + (new Vector2(107, 94.5f) * UIManager.UIScale - Assets.DimsOf(Sprites.Terminal) / 2) * UIManager.UIScale;
                 floppyFlat.Color = Color.White * ((2f - time)/2f);
                 Engine.Self.QueueShaderException(floppyFlat);
                 Engine.Self.QueueShaderException(ledGlow);
@@ -909,7 +910,7 @@ public class EntityManager
     }
     private static Cutscene RepairCrashedShip()
     {
-        var ship = new Actor(Assets.Get(Sprite.Mothership), Vector2.Zero, Color.White, 0);
+        var ship = new Actor(Assets.Get(Sprites.Mothership), Vector2.Zero, Color.White, 0);
         List<IActor> actors = [ship];
         List<IEvent> events =
         [

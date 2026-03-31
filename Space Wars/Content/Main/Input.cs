@@ -14,6 +14,11 @@ public static class Input
         NewState = Keyboard.GetState();
         OldMouseState = NewMouseState;
         NewMouseState = Mouse.GetState();
+        
+        if (OldState.IsKeyUp(Keys.OemTilde) && NewState.IsKeyDown(Keys.OemTilde))
+        {
+            SaveGame.DebugMode = !SaveGame.DebugMode;
+        }
     }
     public static bool WasJustPressed(Binding binding)
     {

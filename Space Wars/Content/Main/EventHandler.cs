@@ -31,7 +31,7 @@ public static class EventHandler
     }
     public static void QuitToMenu()
     {
-        player.velocity = Vector2.Zero;
+        player.Velocity = Vector2.Zero;
         Engine.IngameTime = new();
         Engine.MousePositionOffset = Vector2.Zero;
         Engine.UIManager.DisableAll();

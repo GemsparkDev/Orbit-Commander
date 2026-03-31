@@ -6,11 +6,9 @@ using System;
 namespace Space_Wars.Content.Main.Components;
 
 
-public class DockableComponent(Entity _parentEntity, Container _menu, bool hasInventory = true) : Component(_parentEntity, ComponentType.None)
+public class DockableComponent(Entity _parentEntity, Container _menu, bool hasInventory = true) : Component(_parentEntity)
 {
     public bool IsDocked { get; private set; } = false;
-    //public ComponentType Type => ComponentType.DockableComponent;
-    public bool IsValid => !_parentEntity.isExpired;
     public Container Menu { get; private set; } = _menu;
     private static void AddItem(Pickup _pickup)
     {
@@ -27,9 +25,8 @@ public class DockableComponent(Entity _parentEntity, Container _menu, bool hasIn
     }
     public bool Dock(Player _player, bool _withVelocity)
     {
-        throw new NotImplementedException();
         EventHandler.DisableDockingMenus();
-        if (EntityManager.DistanceSqr(_player, _parentEntity) > 1250)
+        if (EntityManager.DistanceSqr(_player, Entity) > 1250)
         {
             return false;
         }
@@ -37,7 +34,7 @@ public class DockableComponent(Entity _parentEntity, Container _menu, bool hasIn
         {
             if (_withVelocity)
             {
-                _player.velocity += new Vector2(0, -2);
+                _player.Velocity += new Vector2(0, -2);
             }
             SoundManager.PlayGlobalSound(Assets.Get(Sound.Undock));
             Pickup pickup = Engine.MoveSelectedPickup();
@@ -45,7 +42,7 @@ public class DockableComponent(Entity _parentEntity, Container _menu, bool hasIn
             {
                 EventHandler.UpdateInventoryUI();
                 pickup.isExpired = false;
-                //pickup.position = entity.Position;
+                pickup.Position = Entity.Position;
                 _player.leashedMaterials.Add(pickup);
                 Engine.EntityManager.Add(pickup);
             }
@@ -59,7 +56,7 @@ public class DockableComponent(Entity _parentEntity, Container _menu, bool hasIn
                 for (int i = 0; i < _player.leashedMaterials.Count; i++)
                 {
                     //Launches the leashed material away if the docking module cannot store it
-                    _player.leashedMaterials[i].velocity += Engine.SaveGame.CurrentMission.GetNormalizedAcceleration(_player.leashedMaterials[i].position) * 15;
+                    _player.leashedMaterials[i].Velocity += Engine.SaveGame.CurrentMission.GetNormalizedAcceleration(_player.leashedMaterials[i].Position) * 15;
                     bool isFull = true;
                     for (int j = 0; j < Engine.SaveGame.Inventory.Length; j++)
                     {
@@ -86,6 +83,6 @@ public class DockableComponent(Entity _parentEntity, Container _menu, bool hasIn
     }
     public void Collide(int _damage)
     {
-        _parentEntity.Collide(_damage);
+        Entity.Collide(_damage);
     }
 }

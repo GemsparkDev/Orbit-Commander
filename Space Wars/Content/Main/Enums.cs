@@ -66,7 +66,7 @@ public enum Modules
 
     End, //Used for enumeration
 }
-public enum Sprite
+public enum Sprites
 {
     Fighter,
     Player,
@@ -247,12 +247,6 @@ public enum Sound
     menu,
     secretBoss,
     finalBoss,
-}
-[Flags]
-public enum ComponentType
-{
-    None,
-    Transform,
 }
 public enum Message
 {

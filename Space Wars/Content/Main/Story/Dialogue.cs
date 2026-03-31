@@ -67,10 +67,10 @@ public class Dialogue
             size = 1 - MathF.Sqrt(end/WINDUP);
         }
         var pos = new Vector2(Engine.ScreenSize.X / 2, Engine.ScreenSize.Y * 3 / 4);
-        _spriteBatch.Draw(Assets.Get(Sprite.Textbox), pos, null, Color.White, 0, Assets.DimsOf(Sprite.Textbox) / 2, new Vector2(size, size), 0, 0);
+        _spriteBatch.Draw(Assets.Get(Sprites.Textbox), pos, null, Color.White, 0, Assets.DimsOf(Sprites.Textbox) / 2, new Vector2(size, size), 0, 0);
         if (icon != null)
         {
-            _spriteBatch.Draw(icon, pos - new Vector2(30, 0), null, Color.White, 0, new Vector2(icon.Width, icon.Height) / 2 + new Vector2(Assets.Get(Sprite.WideButton).Width / 2 + 50, 0), new Vector2(size, size), 0, 0);
+            _spriteBatch.Draw(icon, pos - new Vector2(30, 0), null, Color.White, 0, new Vector2(icon.Width, icon.Height) / 2 + new Vector2(Assets.Get(Sprites.WideButton).Width / 2 + 50, 0), new Vector2(size, size), 0, 0);
         }
         int characters = text[index].Length - (int)Math.Clamp((NextDialogueTime() - time -4) / SPEED, 0, text[index].Length);
         if (characters != prevCharCount)

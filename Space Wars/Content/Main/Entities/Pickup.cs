@@ -14,7 +14,7 @@ public class Pickup : Entity, IData
 
     protected ItemData itemData;
     public Texture2D Texture => itemData.RealSprite;
-    public Window Tooltip { get; } = new Window(Vector2.Zero, Assets.Get(Sprite.WideButton));
+    public Window Tooltip { get; } = new Window(Vector2.Zero, Assets.Get(Sprites.WideButton));
     public String Name => itemData.Name;
     public virtual Color Color => itemData.Color;
     protected float invincibilityCooldown = 5;
@@ -24,7 +24,7 @@ public class Pickup : Entity, IData
         : base(_itemData.VirtualSprite, _position, _velocity, 0, _angularVelocity, true)
     {
         itemData = _itemData;
-        color = Color.Cyan;
+        base.Color = Color.Cyan;
         Tooltip.AddWidget(new Decal(new Vector2(-Tooltip.Size.X / 3, 0), _itemData.RealSprite));
         textbox = new Decal(new Vector2(0, -5), Assets.TextFont, _itemData.Name, _itemData.TextColor, 5f);
         Tooltip.AddWidget(textbox);
@@ -34,7 +34,7 @@ public class Pickup : Entity, IData
         : base(_itemData.VirtualSprite, default, default, 0, 0, true)
     {
         itemData = _itemData;
-        color = Color.Cyan;
+        base.Color = Color.Cyan;
         Tooltip.AddWidget(new Decal(new Vector2(-Tooltip.Size.X / 3, 0), _itemData.RealSprite));
         textbox = new Decal(new Vector2(0, -5), Assets.TextFont, _itemData.Name, _itemData.TextColor, 5f);
         Tooltip.AddWidget(textbox);
@@ -54,14 +54,14 @@ public class Pickup : Entity, IData
                 Player.leashedMaterials.Add(this);
                 if (Player.leashedMaterials.Count < 3)
                 {
-                    SoundManager.PlaySound(Assets.Get(Sound.Interact), position);
+                    SoundManager.PlaySound(Assets.Get(Sound.Interact), Position);
                 }
                 else
                 {
-                    SoundManager.PlaySound(Assets.Get(Sound.Full), position);
+                    SoundManager.PlaySound(Assets.Get(Sound.Full), Position);
                 }
             }
-            velocity *= 1 - Engine.DeltaSeconds * 2;
+            Velocity *= 1 - Engine.DeltaSeconds * 2;
         }
         else
         {
@@ -74,17 +74,17 @@ public class Pickup : Entity, IData
             {
                 parent = Player.leashedMaterials[index - 1];
             }
-            var relativePos = Vector2.Normalize(parent.position - position);
-            velocity += (parent.position - relativePos * 20 - position) * Engine.DeltaSeconds * 0.4f;
+            var relativePos = Vector2.Normalize(parent.Position - Position);
+            Velocity += (parent.Position - relativePos * 20 - Position) * Engine.DeltaSeconds * 0.4f;
             float offset = Util.FIED(0.05f);
-            velocity = parent.velocity * (1 - offset) + velocity * (offset);
+            Velocity = parent.Velocity * (1 - offset) + Velocity * (offset);
         }
-        position += velocity * Engine.DeltaSeconds * 60;
-        angle += angularVelocity * Engine.DeltaSeconds * 60;
+        Position += Velocity * Engine.DeltaSeconds * 60;
+        Angle += AngularVelocity * Engine.DeltaSeconds * 60;
         var nearestProjectile = Engine.EntityManager.NearestProjectile(this, isFriendly);
         if (nearestProjectile != null)
         {
-            if (Vector2.Distance(nearestProjectile.position, this.position) < nearestProjectile.ColliderRadius + ColliderRadius)
+            if (Vector2.Distance(nearestProjectile.Position, this.Position) < nearestProjectile.ColliderRadius + ColliderRadius)
             {
                 if(nearestProjectile is Enemy)
                 {
@@ -128,9 +128,9 @@ public class Pickup : Entity, IData
         {
             isExpired = true;
         }
-        SoundManager.PlaySound(Assets.Get(Sound.Death), position);
-        Engine.ShakeScreen(10 / ((position - Engine.Camera.Position).Length() + 150));
-        ParticleManager.Add(new Particle(null, 1, position + new Vector2(0, -1), new Vector2(0, -1.5f), 0, 0, Color.Orange, new Color(255, 0, 0, 0)) { drawText = $"Integrity: {hitsLeft}" });
+        SoundManager.PlaySound(Assets.Get(Sound.Death), Position);
+        Engine.ShakeScreen(10 / ((Position - Engine.Camera.Position).Length() + 150));
+        ParticleManager.Add(new Particle(null, 1, Position + new Vector2(0, -1), new Vector2(0, -1.5f), 0, 0, Color.Orange, new Color(255, 0, 0, 0)) { drawText = $"Integrity: {hitsLeft}" });
         return true;
     }
     public virtual string SerializeAttributes()
@@ -142,7 +142,7 @@ public class Pickup : Entity, IData
         return $"{{{Type},{hitsLeft}}}";
     }
 }
-public class ItemData(Sprite _realSprite, Sprite _virtualSprite, String _name, int _id, Color _color, Color? _textColor = null)
+public class ItemData(Sprites _realSprite, Sprites _virtualSprite, String _name, int _id, Color _color, Color? _textColor = null)
 {
     public Texture2D RealSprite { get; } = Assets.Get(_realSprite);
     public Texture2D VirtualSprite { get; } = Assets.Get(_virtualSprite);

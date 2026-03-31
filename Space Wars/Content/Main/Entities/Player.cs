@@ -1,15 +1,16 @@
 ﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Audio;
+using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using Space_Wars.Content.Main.Components;
+using Space_Wars.Content.Main.Particles;
 using System;
 using System.Collections.Generic;
-using Space_Wars.Content.Main.Particles;
-using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Audio;
-using System.Linq;
-using UILib.Content.Main;
-using Space_Wars.Content.Main.Components;
-using System.Text;
+using System.ComponentModel;
 using System.Diagnostics;
+using System.Linq;
+using System.Text;
+using UILib.Content.Main;
 
 namespace Space_Wars.Content.Main.Entities;
 
@@ -39,7 +40,7 @@ public class Player : Entity
     public Vector2 Direction => targetVector;
     public DockableComponent dockedEntity;
     public List<Pickup> leashedMaterials = [];
-    private ParticleEmitter smokeParticles = new(Assets.Get(Sprite.Circle), 1f, Vector2.Zero, 0, MathF.PI/4, 1, 0.5f, Color.Gray, EmitterType.EmissionOverTime) { isEmitterActive = false, particleFadeToColor = new Color(169, 169, 169, 0) };
+    private ParticleEmitter smokeParticles = new(Assets.Get(Sprites.Circle), 1f, Vector2.Zero, 0, MathF.PI/4, 1, 0.5f, Color.Gray, EmitterType.EmissionOverTime) { isEmitterActive = false, particleFadeToColor = new Color(169, 169, 169, 0) };
     private SoundEffectInstance engineSounds;
     public float invincibilityCooldown = 0;
     public float cachedDamage = 0;
@@ -101,7 +102,7 @@ public class Player : Entity
     }
 
     public Player(Vector2 _position, Vector2 _velocity, float _angle, bool _isFriendly = true)
-        : base(Assets.Get(Sprite.Player), _position, _velocity, _angle, 0, _isFriendly)
+        : base(Assets.Get(Sprites.Player), _position, _velocity, _angle, 0, _isFriendly)
     {
         UpdateColor();
         smokeParticles.isEmitterActive = false;
@@ -121,16 +122,16 @@ public class Player : Entity
     }
     public override void UpdateColor()
     {
-        color = isFriendly ? Engine.ColorScheme.FriendlyEnemy() : Engine.ColorScheme.HostileEnemy();
+        Color = isFriendly ? SaveGame.ColorScheme.FriendlyEnemy() : SaveGame.ColorScheme.HostileEnemy();
     }
     public override void Update()
     {
-        collider.offsetVelocity = velocity;
-        Color c = isFriendly ? Engine.ColorScheme.FriendlyEnemy() : Engine.ColorScheme.HostileEnemy();
-        if (color != c)
+        collider.offsetVelocity = Velocity;
+        Color c = isFriendly ? SaveGame.ColorScheme.FriendlyEnemy() : SaveGame.ColorScheme.HostileEnemy();
+        if (Color != c)
         {
             float l = Util.FIED(0.025f);
-            color = new Color((byte)(color.R * l + c.R * (1f - l)), (byte)(color.G * l + c.G * (1f - l)), (byte)(color.B * l + c.B * (1f - l)));
+            Color = new Color((byte)(Color.R * l + c.R * (1f - l)), (byte)(Color.G * l + c.G * (1f - l)), (byte)(Color.B * l + c.B * (1f - l)));
         }
         if (modules[ModuleType.Core].Health <= 0)
         {
@@ -139,7 +140,7 @@ public class Player : Entity
             Assets.Get(Sound.Death).Play();
             return;
         }
-        smokeParticles.position = position;
+        smokeParticles.position = Position;
         leashedMaterials = [.. leashedMaterials.Where(x => !x.isExpired)];
         float restart = 1.5f;
         if (EventHandler.AcknowledgeMessage(Message.RestartModules))
@@ -155,7 +156,7 @@ public class Player : Entity
             if (restartCooldown > 0)
             {
                 IsRestarting = true;
-                SoundManager.PlaySound(Assets.Get(Sound.Interact), position);
+                SoundManager.PlaySound(Assets.Get(Sound.Interact), Position);
             }
         }
         if (IsRestarting && restartCooldown <= 0)
@@ -182,7 +183,7 @@ public class Player : Entity
             if (restartedModules)
             {
                 IsRestarting = false;
-                SoundManager.PlaySound(Assets.Get(Sound.Full), position);
+                SoundManager.PlaySound(Assets.Get(Sound.Full), Position);
             }
         }
         else if (IsRestarting)
@@ -256,21 +257,20 @@ public class Player : Entity
             smokeParticles.speedOfEmission = 25f - currentHealth/4;
         }
         var planet = Engine.SaveGame.CurrentMission.Planet;
-        if (position.Length() >= 40 * 50 + planet.radius * 2)
+        if (Position.Length() >= 40 * 50 + planet.radius * 2)
         {
-            velocity *= Util.FIED(0.1f);
-            velocity += Vector2.Normalize(-position) * (position.Length() - (40 * 50 + planet.radius*2)) * Engine.DeltaSeconds / 30;
+            Velocity *= Util.FIED(0.1f);
+            Velocity += Vector2.Normalize(-Position) * (Position.Length() - (40 * 50 + planet.radius*2)) * Engine.DeltaSeconds / 30;
         }
         base.Update();
-        collider.position += velocity;
-        position += velocity * Engine.DeltaSeconds * 60;
+        collider.position += Velocity;
+        Position += Velocity * Engine.DeltaSeconds * 60;
         if (dockedEntity != null)
         {
-            if (dockedEntity.IsValid)
+            if (!(dockedEntity == null) && !dockedEntity.Entity.isExpired)
             {
-                throw new NotImplementedException();
-                //position = dockedEntity.Position;
-                //velocity = dockedEntity.Velocity;
+                Position = dockedEntity.Entity.GetComponent<Transform>().Position;
+                Velocity = dockedEntity.Entity.GetComponent<Transform>().Velocity;
             }
             else
             {
@@ -290,7 +290,7 @@ public class Player : Entity
         //Testing
         //ParticleManager.Add(new Particle(Assets.Get(Sprite.Circle), mouseCamPos, 0, Color.White));
         //ParticleManager.Add(new Particle(Assets.Get(Sprite.Circle), position, 0, Color.White));
-        targetVector = Vector2.Normalize(mouseCamPos - position);
+        targetVector = Vector2.Normalize(mouseCamPos - Position);
     }
     public override void LowerCooldown()
     {
@@ -318,11 +318,11 @@ public class Player : Entity
     }
     public void RestrictedActions()
     {
-        if(Engine.DebugMode)
+        if(SaveGame.DebugMode)
         {
             Vector2 mousePos = new Vector2(Input.NewMouseState.X, Input.NewMouseState.Y) + Engine.Camera.Position - Engine.BackBuffer/2;
             mousePos = new Vector2(MathF.Round(mousePos.X/25), MathF.Round(mousePos.Y/25))*25;
-            ParticleManager.Add(new Particle(Assets.Get(Sprite.Dot), mousePos, 0, Color.Red));
+            ParticleManager.Add(new Particle(Assets.Get(Sprites.Dot), mousePos, 0, Color.Red));
             if (startLocation != Vector2.Zero)
             {
                 float f = 1;
@@ -334,7 +334,7 @@ public class Player : Entity
                 Vector2 dir = Util.ToUnitVector(angle);
                 for (float d = 0; d < (startLocation - mousePos).Length() / 4; d += 2)
                 {
-                    ParticleManager.Add(new Particle(Assets.Get(Sprite.Dot), startLocation + dir * d * 4, angle, Color.White*f));
+                    ParticleManager.Add(new Particle(Assets.Get(Sprites.Dot), startLocation + dir * d * 4, angle, Color.White*f));
                 }
             }
             if(Input.IsDown(Binding.WarpBackward) && Engine.SaveGame.CurrentMission.Colliders.Length > 0)
@@ -402,18 +402,18 @@ public class Player : Entity
                         float dist = (new Vector2(Input.NewMouseState.X, Input.NewMouseState.Y) - Engine.BackBuffer / 2).Length();
                         var constructs = new List<(String description, Texture2D sprite)>()
                     {
-                        ("Req. 1 scrap, blocks enemy fire. 20 integrity.", Assets.Get(Sprite.Barricade)),
-                        ("Req. 1 scrap, attacks enemies. 8 integrity.", Assets.Get(Sprite.Trap)),
-                        ("Req. 1 scrap, 100 dmg to all in radius when destroyed. 3 integrity.", Assets.Get(Sprite.Bomb)),
-                        ("Req. 1 scrap, smelts all scrap within it", Assets.Get(Sprite.Furnace))                    
+                        ("Req. 1 scrap, blocks enemy fire. 20 integrity.", Assets.Get(Sprites.Barricade)),
+                        ("Req. 1 scrap, attacks enemies. 8 integrity.", Assets.Get(Sprites.Trap)),
+                        ("Req. 1 scrap, 100 dmg to all in radius when destroyed. 3 integrity.", Assets.Get(Sprites.Bomb)),
+                        ("Req. 1 scrap, smelts all scrap within it", Assets.Get(Sprites.Furnace))                    
                     };
                         if (Progression > 3)
                         {
-                            constructs.Add(("Req. 3 scrap, deployable garage. Use metal to upgrade.", Assets.Get(Sprite.Mothership)));
+                            constructs.Add(("Req. 3 scrap, deployable garage. Use metal to upgrade.", Assets.Get(Sprites.Mothership)));
                         }
                         if (Engine.SaveGame.CurrentMission.Name == "???")
                         {
-                            constructs.Add(("1 scrap to construct. Be ready.", Assets.Get(Sprite.QuantumResonator)));
+                            constructs.Add(("1 scrap to construct. Be ready.", Assets.Get(Sprites.QuantumResonator)));
                         }
                         float angle = 0;
                         Color color;
@@ -424,13 +424,13 @@ public class Player : Entity
                             if (dir.X * mouseDir.X + dir.Y * mouseDir.Y > (1f - 0.9f / constructs.Count) && dist > 300)
                             {
                                 color = Color.White;
-                                ParticleManager.Add(new Particle(null, new Vector2(0, -100) + position, 0, Color.White) { drawText = constructs[(int)i].description });
+                                ParticleManager.Add(new Particle(null, new Vector2(0, -100) + Position, 0, Color.White) { drawText = constructs[(int)i].description });
                             }
                             else
                             {
                                 color = Color.Cyan;
                             }
-                            ParticleManager.Add(new Particle(constructs[(int)i].sprite, dir * 45 + position, 0, color));
+                            ParticleManager.Add(new Particle(constructs[(int)i].sprite, dir * 45 + Position, 0, color));
                             angle += MathF.Tau / constructs.Count;
                         }
                     }
@@ -474,25 +474,25 @@ public class Player : Entity
                                 {
                                     case "Barricade":
                                         firstScrap.isExpired = true;
-                                        var barricade = new Construct(Constructs.Barricade, firstScrap.position, firstScrap.velocity, 0, 0);
+                                        var barricade = new Construct(Constructs.Barricade, firstScrap.Position, firstScrap.Velocity, 0, 0);
                                         leashedMaterials.Add(barricade);
                                         Engine.EntityManager.Add(barricade);
                                         break;
                                     case "Trap":
                                         firstScrap.isExpired = true;
-                                        var trap = new Construct(Constructs.Trap, firstScrap.position, firstScrap.velocity, 0, 0);
+                                        var trap = new Construct(Constructs.Trap, firstScrap.Position, firstScrap.Velocity, 0, 0);
                                         leashedMaterials.Add(trap);
                                         Engine.EntityManager.Add(trap);
                                         break;
                                     case "Bomb":
                                         firstScrap.isExpired = true;
-                                        var bomb = new Construct(Constructs.Bomb, firstScrap.position, firstScrap.velocity, 0, 0);
+                                        var bomb = new Construct(Constructs.Bomb, firstScrap.Position, firstScrap.Velocity, 0, 0);
                                         leashedMaterials.Add(bomb);
                                         Engine.EntityManager.Add(bomb);
                                         break;
                                     case "Furnace":
                                         firstScrap.isExpired = true;
-                                        var furnace = new Construct(Constructs.Furnace, firstScrap.position, firstScrap.velocity, 0, 0);
+                                        var furnace = new Construct(Constructs.Furnace, firstScrap.Position, firstScrap.Velocity, 0, 0);
                                         leashedMaterials.Add(furnace);
                                         Engine.EntityManager.Add(furnace);
                                         break;
@@ -504,12 +504,12 @@ public class Player : Entity
                                                 pickup.isExpired = true;
                                             }
                                             leashedMaterials.Clear();
-                                            Engine.EntityManager.Add(Enemy.NewMakeshiftMothership(position, velocity, 0));
+                                            Engine.EntityManager.Add(Enemy.NewMakeshiftMothership(Position, Velocity, 0));
                                         }
                                         break;
                                     case "Resonator":
                                         //firstScrap.isExpired = true;
-                                        Engine.EntityManager.Add(Enemy.NewQuantumResonator(position));
+                                        Engine.EntityManager.Add(Enemy.NewQuantumResonator(Position));
                                         break;
                                 }
                             }
@@ -525,23 +525,23 @@ public class Player : Entity
                         Entity nearestEnemy = Engine.EntityManager.NearestEnemy(this, true);
                         if(nearestEnemy != null && (nearestEnemy as Enemy).health <= 0)
                         {
-                            var relativePos = Vector2.Normalize(nearestEnemy.position - position);
+                            var relativePos = Vector2.Normalize(nearestEnemy.Position - Position);
                             if (Vector2.Dot(relativePos, targetVector) > 0.9f)
                             {
                                 targetDir = relativePos;
                             }
                         }
                     }
-                    List<Entity> miningEnemies = Engine.EntityManager.Hitscan(position, targetDir, 120, false, out Vector2 _end);
+                    List<Entity> miningEnemies = Engine.EntityManager.Hitscan(Position, targetDir, 120, false, out Vector2 _end);
                     if (miningEnemies.Count > 0 && miningEnemies[0] as Enemy != null)
                     {
                         (miningEnemies[0] as Enemy).Mine();
                     }
-                    for (float i = 0; i < (_end - position - targetVector * 8).Length() / 2; i++)
+                    for (float i = 0; i < (_end - Position - targetVector * 8).Length() / 2; i++)
                     {
                         float lerp = i / 60;
                         Vector3 color = new Vector3(1, 1, 0) * (1 - lerp) + new Vector3(1, 0, 0) * (lerp);
-                        ParticleManager.Add(new Particle(Assets.Get(Sprite.Dot), targetDir * (i + 4f) * 2 + position + new Vector2(targetDir.Y, -targetDir.X) * MathF.Sin(i / 2 - Engine.Time * 5) / 2, Util.ToAngle(targetDir), new Color(color.X, color.Y, color.Z) * (1 - (lerp))));
+                        ParticleManager.Add(new Particle(Assets.Get(Sprites.Dot), targetDir * (i + 4f) * 2 + Position + new Vector2(targetDir.Y, -targetDir.X) * MathF.Sin(i / 2 - Engine.Time * 5) / 2, Util.ToAngle(targetDir), new Color(color.X, color.Y, color.Z) * (1 - (lerp))));
                     }
                     if (Input.OldMouseState.RightButton == ButtonState.Released)
                     {
@@ -592,11 +592,11 @@ public class Player : Entity
                 }
                 if (isEngineActive)
                 {
-                    angle = angle * 0.5f + Util.ToAngle(targetVector) * 0.5f; //Better shield aiming
+                    Angle = Angle * 0.5f + Util.ToAngle(targetVector) * 0.5f; //Better shield aiming
                 }
                 else
                 {
-                    angle = angle * 0.5f + Util.ToAngle(targetVector) * 0.5f;
+                    Angle = Angle * 0.5f + Util.ToAngle(targetVector) * 0.5f;
                 }
                 if (Input.NewMouseState.LeftButton == ButtonState.Pressed && !UIManager.LockMouseInput)
                 {
@@ -610,7 +610,7 @@ public class Player : Entity
             {
                 Dock();
             }
-            smokeParticles.offsetVelocity = velocity;
+            smokeParticles.offsetVelocity = Velocity;
             if (Util.Random.Next(0, 2) == 0)
             {
                 smokeParticles.Update();
@@ -646,8 +646,8 @@ public class Player : Entity
 
         if (aimAssist)
         {
-            Vector2 acc = Engine.SaveGame.CurrentMission.GetNormalizedAcceleration(position + targetVector * _speed * 3) * 180 / _speed;
-            Vector2 vel = velocity - acc;
+            Vector2 acc = Engine.SaveGame.CurrentMission.GetNormalizedAcceleration(Position + targetVector * _speed * 3) * 180 / _speed;
+            Vector2 vel = Velocity - acc;
             float b = targetVector.X * vel.X + targetVector.Y * vel.Y;
             float c = vel.X * vel.X + vel.Y * vel.Y - _speed * _speed;
             float disc = b * b - c;
@@ -660,7 +660,7 @@ public class Player : Entity
                 }
             }
         }
-        return targetVector * _speed + velocity;
+        return targetVector * _speed + Velocity;
     }
     public void Dock(bool _withVelocity = true)
     {
@@ -705,12 +705,12 @@ public class Player : Entity
             //Helps to cushion huge hits
             //Player will never be one shot (unless they deserve it)
             cachedDamage += Math.Min(50, _damage);
-            SoundManager.PlaySound(Assets.Get(Sound.Hit), position);
+            SoundManager.PlaySound(Assets.Get(Sound.Hit), Position);
             if (!_ignoreImmunity) 
             {
                 invincibilityCooldown = 1;
             }
-            ParticleManager.Add(new Particle(null, 1, position + new Vector2(0, -1), new Vector2(0, -1.5f), 0, 0, Color.Red, Color.Transparent) { drawText = $"{_damage}" });
+            ParticleManager.Add(new Particle(null, 1, Position + new Vector2(0, -1), new Vector2(0, -1.5f), 0, 0, Color.Red, Color.Transparent) { drawText = $"{_damage}" });
             //Part and Fuse Failure
             if (Progression > 0)
             {
@@ -721,8 +721,8 @@ public class Player : Entity
                 if (Util.Random.NextSingle() < threshold && modules[(ModuleType)targetFuse.X].isFailed && moduleFuses[(int)targetFuse.X, (int)targetFuse.Y])
                 {
                     moduleFuses[(int)targetFuse.X, (int)targetFuse.Y] = false;
-                    ParticleManager.Add(new Particle(null, 2, position + new Vector2(0, -3), new Vector2(0, -0.75f), 0, 0, Color.Red, Color.Transparent) { drawText = "Fuse damaged!" });
-                    SoundManager.PlaySound(Assets.Get(Sound.Beep), position);
+                    ParticleManager.Add(new Particle(null, 2, Position + new Vector2(0, -3), new Vector2(0, -0.75f), 0, 0, Color.Red, Color.Transparent) { drawText = "Fuse damaged!" });
+                    SoundManager.PlaySound(Assets.Get(Sound.Beep), Position);
                     EventHandler.UpdateFuseUI(moduleFuses, spareFuses);
                 }
                 else if (Util.Random.Next(0, 5) == 0 && modules[failedPart].Health < modules[failedPart].MaxHealth / 2)
@@ -736,8 +736,8 @@ public class Player : Entity
                         }
                     }
                     modules[failedPart].isFailed = true;
-                    ParticleManager.Add(new Particle(null, 2, position + new Vector2(0, -3), new Vector2(0, -0.75f), 0, 0, Color.Red, Color.Transparent) { drawText = $"{failedPart} has failed!" });
-                    SoundManager.PlaySound(Assets.Get(Sound.Beep), position);
+                    ParticleManager.Add(new Particle(null, 2, Position + new Vector2(0, -3), new Vector2(0, -0.75f), 0, 0, Color.Red, Color.Transparent) { drawText = $"{failedPart} has failed!" });
+                    SoundManager.PlaySound(Assets.Get(Sound.Beep), Position);
                     EventHandler.UpdateModulesStatus();
                 }
             }
@@ -756,8 +756,8 @@ public class Player : Entity
                 }
                 _damage += 1;
             }
-            SoundManager.PlaySound(Assets.Get(Sound.Full), position);
-            ParticleManager.Add(new Particle(null, 1, position + new Vector2(0, -1), new Vector2(0, -1.5f), 0, 0, Color.Green, Color.Transparent) { drawText = $"{healed}" });
+            SoundManager.PlaySound(Assets.Get(Sound.Full), Position);
+            ParticleManager.Add(new Particle(null, 1, Position + new Vector2(0, -1), new Vector2(0, -1.5f), 0, 0, Color.Green, Color.Transparent) { drawText = $"{healed}" });
             return true;
         }
         return false;
@@ -810,9 +810,9 @@ public class Player : Entity
         {
             return;
         }
-        if (position.Length() > Engine.SaveGame.CurrentMission.Planet.radius * 2 + 15 * 50)
+        if (Position.Length() > Engine.SaveGame.CurrentMission.Planet.radius * 2 + 15 * 50)
         {
-            _spriteBatch.Draw(Assets.Get(Sprite.Arrow), position - Vector2.Normalize(position) * 25, null, color, MathF.Atan2(-position.X, position.Y), Assets.DimsOf(Sprite.Arrow) / 2, 1, 0, 0.2f);
+            _spriteBatch.Draw(Assets.Get(Sprites.Arrow), Position - Vector2.Normalize(Position) * 25, null, Color, MathF.Atan2(-Position.X, Position.Y), Assets.DimsOf(Sprites.Arrow) / 2, 1, 0, 0.2f);
             _spriteBatch.DrawString(Assets.TextFont, "Return to planet.", Engine.Camera.Position - new Vector2(Assets.TextFont.MeasureString("Return to planet.").X/2, 225), Color.Crimson);
         }
         if(dockedEntity != null)
@@ -823,7 +823,7 @@ public class Player : Entity
         base.Draw(_spriteBatch);
     }
     public Player(string _serialization, LoadLogger _logger)
-    : base(Assets.Get(Sprite.Player), Vector2.One, Vector2.One, 0, 0, true)
+    : base(Assets.Get(Sprites.Player), Vector2.One, Vector2.One, 0, 0, true)
     {
         List<string> disassembly = SaveGame.Disassemble(_serialization);
 

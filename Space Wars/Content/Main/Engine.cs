@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.IO;
 using UILib.Content.Main;
 using System.Diagnostics;
+using Space_Wars.Content.Main.Systems;
 
 namespace Space_Wars.Content.Main;
 
@@ -33,13 +34,8 @@ public class Engine : Game
     public static float DeltaSeconds { get; private set; }
     private readonly float timeScale = 1f;
     private readonly int targetFramerate = 60;
-    public static float EnemyHitboxModifier { get; private set; } = 1.2f;
-    public static bool DebugMode { get; private set; }
-    public static bool PatchedConics { get; private set; } = true;
-    public static bool UseShader { get; private set; } = true;
     public static float ScreenShakeFactor { get; private set; } = 0;
     public static int SaveSlot { get; private set; } = 0;
-    public static ColorScheme ColorScheme { get; set; } = new StandardScheme();
     private List<IActor> ShaderExceptions { get; } = [];
 
     public static float Time { get; private set; } = 0;
@@ -65,7 +61,6 @@ public class Engine : Game
         
         BackBuffer = new Vector2(graphics.PreferredBackBufferWidth, graphics.PreferredBackBufferHeight);
         ScreenSize = new Vector2(1920 * BackBuffer.Y/1080,1080);
-        DebugMode = false;
         Line = new Texture2D(graphics.GraphicsDevice, 1, 1, false, SurfaceFormat.Color);
         Line.SetData([ Color.White ]);
 
@@ -86,8 +81,8 @@ public class Engine : Game
         //UI behaviors that need special permission
         UI.PatchedConicsToggle.AddBehaviour(delegate
         {
-            PatchedConics = !PatchedConics;
-            UI.PatchedConicsToggle.text = $"Patched Conics: {PatchedConics}";
+            SaveGame.PatchedConics = !SaveGame.PatchedConics;
+            UI.PatchedConicsToggle.text = $"Patched Conics: {SaveGame.PatchedConics}";
         });
         UI.SingleplayerButton.AddBehaviour(delegate ()
         {
@@ -95,7 +90,7 @@ public class Engine : Game
             EventHandler.UpdateModulesUI();
             Startgame();
         });
-        UI.ShaderToggle.AddBehaviour(delegate () { UseShader = !UseShader; UI.ShaderToggle.text = $"Shader: {UseShader}"; });
+        UI.ShaderToggle.AddBehaviour(delegate () { SaveGame.UseShader = !SaveGame.UseShader; UI.ShaderToggle.text = $"Shader: {SaveGame.UseShader}"; });
         UI.PrevSave.AddBehaviour(delegate
         {
             SaveSlot = Math.Clamp(SaveSlot - 1, 0, 10);
@@ -190,10 +185,6 @@ public class Engine : Game
         SoundManager.Update();
         CurrentGameState.Update();
 
-        if (Input.OldState.IsKeyUp(Keys.OemTilde) && Input.NewState.IsKeyDown(Keys.OemTilde))
-        {
-            DebugMode = !DebugMode;
-        }
         DeltaSeconds = (float)gameTime.ElapsedGameTime.TotalSeconds * timeScale;
         if(ScreenShakeFactor > 0)
         {
@@ -241,7 +232,7 @@ public class Engine : Game
             }
             for (float t = MathF.Tau / MathF.Ceiling(iterations) / 2; t < MathF.Tau; t += MathF.Tau / MathF.Ceiling(iterations))
             {
-                spriteBatch.Draw(Assets.Get(Sprite.Circle), new Vector2(_atmosphereRadius, _atmosphereRadius) + Util.ToUnitVector(t) * r, null, _color * MathF.Tanh(_planet.GetAtmosphereDensity(r) / 4f) * offset, t, Assets.DimsOf(Sprite.Circle)/2, 1, 0, 0);
+                spriteBatch.Draw(Assets.Get(Sprites.Circle), new Vector2(_atmosphereRadius, _atmosphereRadius) + Util.ToUnitVector(t) * r, null, _color * MathF.Tanh(_planet.GetAtmosphereDensity(r) / 4f) * offset, t, Assets.DimsOf(Sprites.Circle)/2, 1, 0, 0);
             }
         }
         spriteBatch.End();
@@ -259,7 +250,7 @@ public class Engine : Game
 
         //Render to renderTarget
         GraphicsDevice.SetRenderTarget(renderTarget);
-        GraphicsDevice.Clear(ColorScheme.Background());
+        GraphicsDevice.Clear(SaveGame.ColorScheme.Background());
         spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, null, null, null, transformMatrix: Camera.Transform);
         CurrentGameState.Draw(spriteBatch);
         spriteBatch.End();
@@ -282,13 +273,13 @@ public class Engine : Game
         ShaderExceptions.Clear();
         if ((Input.NewMouseState.LeftButton == ButtonState.Released))
         {
-            spriteBatch.Draw(Assets.Get(Sprite.Cursor), new Vector2(Mouse.GetState().X, Mouse.GetState().Y), null, Color.White, 0, Vector2.Zero, UIManager.UIScale / 2, 0, 0.5f);
+            spriteBatch.Draw(Assets.Get(Sprites.Cursor), new Vector2(Mouse.GetState().X, Mouse.GetState().Y), null, Color.White, 0, Vector2.Zero, UIManager.UIScale / 2, 0, 0.5f);
         }
         else
         {
-            spriteBatch.Draw(Assets.Get(Sprite.ClickedCursor), new Vector2(Mouse.GetState().X, Mouse.GetState().Y), null, Color.White, 0, Vector2.Zero, UIManager.UIScale / 2, 0, 0.5f);
+            spriteBatch.Draw(Assets.Get(Sprites.ClickedCursor), new Vector2(Mouse.GetState().X, Mouse.GetState().Y), null, Color.White, 0, Vector2.Zero, UIManager.UIScale / 2, 0, 0.5f);
         }
-        if (DebugMode)
+        if (SaveGame.DebugMode)
         {
             int logCount = debugLog.Count;
             if (logCount > 10)
@@ -367,10 +358,10 @@ public static class Util
                 3 => Color.Orange,
                 _ => Color.White,
             };
-            ParticleManager.Add(new Particle(Assets.Get(Sprite.Circle), 0.25f, _position - _velocity, _velocity + _direction * 2
+            ParticleManager.Add(new Particle(Assets.Get(Sprites.Circle), 0.25f, _position - _velocity, _velocity + _direction * 2
                 + new Vector2(OneToNegOne(), OneToNegOne()) / 2 + _direction * (OneToNegOne() - 0.25f) * 1.5f, 0, 0, color, new Color(0.3f, 0.2f, 0.1f, 0f)));
         }
-        ParticleManager.Add(new Particle(Assets.Get(Sprite.Dot), 60, _position - _velocity, _velocity 
+        ParticleManager.Add(new Particle(Assets.Get(Sprites.Dot), 60, _position - _velocity, _velocity 
             + new Vector2(_direction.Y + OneToNegOne() / 2, -_direction.X + OneToNegOne() / 4), 0, OneToNegOne() / 5, Color.Yellow, Color.Transparent) { experienceGravity = true });
     }
     public static void Explode(Vector2 _position, Vector2 _velocity, int _damage, float _radius)
@@ -380,25 +371,25 @@ public static class Util
         {
             float angle = Random.NextSingle() * MathF.PI * 2;
             Vector2 particleVelocity = new Vector2(MathF.Cos(angle), MathF.Sin(angle)) * (Util.Random.NextSingle() * 2 + 2);
-            ParticleManager.Add(new Particle(Assets.Get(Sprite.Dot), 0.25f, _position - _velocity, particleVelocity + _velocity, angle, 0, Color.Yellow, new Color(255, 0, 0, 0)));
+            ParticleManager.Add(new Particle(Assets.Get(Sprites.Dot), 0.25f, _position - _velocity, particleVelocity + _velocity, angle, 0, Color.Yellow, new Color(255, 0, 0, 0)));
         }
         particles = Random.Next(8, 16);
         for (int i = 0; i < particles; i++)
         {
             float angle = Random.NextSingle() * MathF.PI * 2;
             Vector2 particleVelocity = new Vector2(MathF.Cos(angle), MathF.Sin(angle)) * (Util.Random.NextSingle() * 2 + 2);
-            ParticleManager.Add(new Particle(Assets.Get(Sprite.Circle), 0.25f, _position - _velocity, particleVelocity + _velocity, angle, 0, Color.DarkSlateGray, Color.Transparent));
+            ParticleManager.Add(new Particle(Assets.Get(Sprites.Circle), 0.25f, _position - _velocity, particleVelocity + _velocity, angle, 0, Color.DarkSlateGray, Color.Transparent));
         }
         Engine.EntityManager.Explode(_damage, _radius, _position);
         Engine.ShakeScreen(150 / ((_position - Engine.Camera.Position).Length() + 300));
     }
     public static Vector2 PredictEnemy(Entity nearestEnemy, Entity shooter, float speed, float offset = 0)
     {
-        Vector2 d = nearestEnemy.position - shooter.position;
-        Vector2 v = nearestEnemy.velocity - shooter.velocity;
+        Vector2 d = nearestEnemy.Position - shooter.Position;
+        Vector2 v = nearestEnemy.Velocity - shooter.Velocity;
         float cross = d.X * v.Y - d.Y * v.X;
         float sinTheta = Math.Clamp(cross / (d.Length() * speed), -1, 1);
         Vector2 vel = ToUnitVector(offset + ToAngle(d) + MathF.Asin(sinTheta));
-        return shooter.velocity + vel * 12;
+        return shooter.Velocity + vel * 12;
     }
 }

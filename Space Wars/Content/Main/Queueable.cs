@@ -73,8 +73,8 @@ public abstract class Queueable
 }
 public class FuseQueue : Queueable
 {
-    public FuseQueue() : base(1, Assets.Get(Sprite.Fuse), "Fuse") { }
-    public FuseQueue(List<string> _disassembly, LoadLogger _logger) : base(_disassembly, _logger, 1, Assets.Get(Sprite.Fuse), "Fuse") { }
+    public FuseQueue() : base(1, Assets.Get(Sprites.Fuse), "Fuse") { }
+    public FuseQueue(List<string> _disassembly, LoadLogger _logger) : base(_disassembly, _logger, 1, Assets.Get(Sprites.Fuse), "Fuse") { }
     protected override void Construct()
     {
         Engine.SaveGame.Player.AddFuse();
@@ -91,11 +91,11 @@ public class FuseQueue : Queueable
 public class RepairQueue : Queueable
 {
     ItemSlot<Pickup> module;
-    public RepairQueue(ItemSlot<Pickup> _module) : base(2, Assets.Get(Sprite.RealHull), "Repair")
+    public RepairQueue(ItemSlot<Pickup> _module) : base(2, Assets.Get(Sprites.RealHull), "Repair")
     {
         module = _module;
     }
-    public RepairQueue(List<string> _data, LoadLogger _logger) : base(_data, _logger, 2, Assets.Get(Sprite.RealHull), "Repair")
+    public RepairQueue(List<string> _data, LoadLogger _logger) : base(_data, _logger, 2, Assets.Get(Sprites.RealHull), "Repair")
     {
         _logger.Try(delegate { module = UI.MissionSelectSlots[Int32.Parse(_data[2])]; }, 2);
     }
@@ -124,11 +124,11 @@ public class RepairQueue : Queueable
 public class SmeltQueue : Queueable
 {
     private ItemSlot<Pickup> pickup;
-    public SmeltQueue(ItemSlot<Pickup> _pickup) : base(2, Assets.Get(Sprite.RealMetalScrap), "Smelt")
+    public SmeltQueue(ItemSlot<Pickup> _pickup) : base(2, Assets.Get(Sprites.RealMetalScrap), "Smelt")
     {
         pickup = _pickup;
     }
-    public SmeltQueue(List<String> _data, LoadLogger _logger) : base(_data, _logger, 2, Assets.Get(Sprite.RealMetalScrap), "Smelt")
+    public SmeltQueue(List<String> _data, LoadLogger _logger) : base(_data, _logger, 2, Assets.Get(Sprites.RealMetalScrap), "Smelt")
     {
         _logger.Try(delegate { pickup = UI.MissionSelectSlots[Int32.Parse(_data[2])]; }, 2);
     }

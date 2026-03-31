@@ -60,7 +60,7 @@ public static class SoundManager
     }
     public static void PlaySound(SoundEffect _sound, Vector2 _playLocation)
     {
-        Vector2 listenerLocation = player.position;
+        Vector2 listenerLocation = player.Position;
         float distance = MathF.Sqrt(MathF.Pow(_playLocation.X - listenerLocation.X, 2) + MathF.Pow(_playLocation.Y - listenerLocation.Y, 2));
         float volume = MathF.Max(0, -(distance / 1000) + 1) * SFXVolume;
         //float pan = -(listenerLocation.X - playLocation.X) / (screenSize.X);

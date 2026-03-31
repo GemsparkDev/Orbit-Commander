@@ -15,7 +15,7 @@ public class Construct : Pickup
     public Construct(Constructs _type, Vector2 _position, Vector2 _velocity, float _angle, float _angularVelocity, int _stealth = 0, bool _isFriendly = true)
         : base(ItemFactory.constructData[_type], _position, _velocity, _angularVelocity, ItemFactory.constructData[_type].Integrity)
     {
-        angle = _angle;
+        Angle = _angle;
         Type = _type;
         int radius = 0;
         if (_type == Constructs.Bomb)
@@ -27,12 +27,12 @@ public class Construct : Pickup
         {
             radius = 300;
         }
-        attackRadius = new ParticleEmitter(Assets.Get(Sprite.Dot), position, radius, new Color(255, 0, 0));
+        attackRadius = new ParticleEmitter(Assets.Get(Sprites.Dot), Position, radius, new Color(255, 0, 0));
         isFriendly = _isFriendly;
         StealthAbility = _stealth;
         if (!_isFriendly)
         {
-            color = Color.Red;
+            //Color = Color.Red;
         }
     }
     public Construct(Constructs _type, List<string> _disassembly, LoadLogger _logger)
@@ -49,7 +49,7 @@ public class Construct : Pickup
         {
             radius = 300;
         }
-        attackRadius = new ParticleEmitter(Assets.Get(Sprite.Dot), position, radius, new Color(255, 0, 0));
+        attackRadius = new ParticleEmitter(Assets.Get(Sprites.Dot), Position, radius, new Color(255, 0, 0));
     }
     public override void Update()
     {
@@ -57,52 +57,52 @@ public class Construct : Pickup
         {
             cooldown -= Engine.DeltaSeconds;
         }
-        attackRadius.position = position;
+        attackRadius.position = Position;
         Entity nearestEnemy;
         switch (Type)
         {
             case Constructs.Barricade:
-                velocity = Vector2.Zero;
-                angle = MathF.Atan2(position.X, -position.Y);
-                nearestEnemy = Engine.EntityManager.NearestEnemy(new Enemy(position, Vector2.Zero, 0, 0, 0, null, isFriendly));
-                if (cooldown <= 0 && nearestEnemy != null && Vector2.Distance(nearestEnemy.position, position) < 300)
+                Velocity = Vector2.Zero;
+                Angle = MathF.Atan2(Position.X, -Position.Y);
+                nearestEnemy = Engine.EntityManager.NearestEnemy(new Enemy(Position, Vector2.Zero, 0, 0, 0, null, isFriendly));
+                if (cooldown <= 0 && nearestEnemy != null && Vector2.Distance(nearestEnemy.Position, Position) < 300)
                 {
-                    var dir = Vector2.Normalize(nearestEnemy.position - position);
-                    Engine.EntityManager.Add(new PulseShot(position, dir * 10, MathF.Atan2(dir.X, -dir.Y), 0, isFriendly, 5, true)); 
-                    SoundManager.PlaySound(Assets.Get(Sound.PulseFire), position);
+                    var dir = Vector2.Normalize(nearestEnemy.Position - Position);
+                    Engine.EntityManager.Add(Projectile.NewPulseShot(Position, dir * 10, MathF.Atan2(dir.X, -dir.Y), 0, isFriendly, 5, true)); 
+                    SoundManager.PlaySound(Assets.Get(Sound.PulseFire), Position);
                     cooldown = 1.5f;
                 }
-                if (Engine.DebugMode)
+                if (SaveGame.DebugMode)
                 {
                     attackRadius.Update();
                 }
                 break;
             case Constructs.Trap:
-                velocity = Vector2.Zero;
-                nearestEnemy = Engine.EntityManager.NearestEnemy(new Enemy(position, Vector2.Zero, 0, 0, 0, null, isFriendly));
-                if (cooldown <= 0 && nearestEnemy != null && Vector2.Distance(nearestEnemy.position, position) < 800)
+                Velocity = Vector2.Zero;
+                nearestEnemy = Engine.EntityManager.NearestEnemy(new Enemy(Position, Vector2.Zero, 0, 0, 0, null, isFriendly));
+                if (cooldown <= 0 && nearestEnemy != null && Vector2.Distance(nearestEnemy.Position, Position) < 800)
                 {
-                    var dir = Vector2.Normalize(nearestEnemy.position - position);
-                    var enemies = Engine.EntityManager.Hitscan(position, dir, 800, true, out Vector2 _end, (isFriendly ? -1 : 1));
+                    var dir = Vector2.Normalize(nearestEnemy.Position - Position);
+                    var enemies = Engine.EntityManager.Hitscan(Position, dir, 800, true, out Vector2 _end, (isFriendly ? -1 : 1));
                     foreach (var enemy in enemies)
                     {
                         enemy.Collide(10);
                     }
-                    for (int i = 0; i < (_end - position).Length() / 4; i++)
+                    for (int i = 0; i < (_end - Position).Length() / 4; i++)
                     {
-                        ParticleManager.Add(new Particle(Assets.Get(Sprite.Dot), 1, position + dir * 4 * i, Vector2.Zero, Util.ToAngle(dir), 0, Color.Red, Color.Transparent));
+                        ParticleManager.Add(new Particle(Assets.Get(Sprites.Dot), 1, Position + dir * 4 * i, Vector2.Zero, Util.ToAngle(dir), 0, Color.Red, Color.Transparent));
                     }
-                    SoundManager.PlaySound(Assets.Get(Sound.LMGFire), position);
+                    SoundManager.PlaySound(Assets.Get(Sound.LMGFire), Position);
                     cooldown = 0.75f;
                 }
-                if (Engine.DebugMode)
+                if (SaveGame.DebugMode)
                 {
                     attackRadius.Update();
                 }
                 break;
             case Constructs.Bomb:
                 var nearestProjectile = Engine.EntityManager.NearestProjectile(this, !isFriendly);
-                if (nearestProjectile != null && Vector2.Distance(nearestProjectile.position, position) < ColliderRadius + nearestProjectile.ColliderRadius)
+                if (nearestProjectile != null && Vector2.Distance(nearestProjectile.Position, Position) < ColliderRadius + nearestProjectile.ColliderRadius)
                 {
                     Collide(1); //Colliding with 1 is a bandaid fix!
                     nearestProjectile.Collide(1);
@@ -110,32 +110,32 @@ public class Construct : Pickup
                 attackRadius.Update();
                 break;
             case Constructs.Furnace:
-                velocity *= Util.FIED(0.2f);    
+                Velocity *= Util.FIED(0.2f);    
                 foreach(var enemy in Engine.EntityManager.Entities)
                 {
-                    if(Vector2.DistanceSquared(enemy.position, position) < 3600)
+                    if(Vector2.DistanceSquared(enemy.Position, Position) < 3600)
                     {
                         enemy.ApplyWork(5);
                     }
                 }
-                Vector2 offset = Util.RotateVector2(new Vector2(Util.OneToNegOne(), Util.OneToNegOne()) * 5, angle);
-                ParticleManager.Add(new Particle(Assets.Get(Sprite.Dot), 1, position + offset, velocity, angle, 0, Color.Orange, Color.Transparent));
+                Vector2 offset = Util.RotateVector2(new Vector2(Util.OneToNegOne(), Util.OneToNegOne()) * 5, Angle);
+                ParticleManager.Add(new Particle(Assets.Get(Sprites.Dot), 1, Position + offset, Velocity, Angle, 0, Color.Orange, Color.Transparent));
                 var nearestPickup = Engine.EntityManager.NearestItem(this, true);
                 if (nearestPickup == null)
                 {
                     break;
                 }
-                Vector2 relativePosition = nearestPickup.position - position;
+                Vector2 relativePosition = nearestPickup.Position - Position;
                 if (relativePosition.X < 7 && relativePosition.X > -7 && relativePosition.Y < 7 && relativePosition.Y > -7)
                 {
-                    nearestPickup.position = position;
+                    nearestPickup.Position = Position;
                     if (Player.leashedMaterials.Contains(nearestPickup as Pickup))
                     {
                         Player.leashedMaterials.Remove(nearestPickup as Pickup);
                     }
                     cooldown += Engine.DeltaSeconds * 2;
-                    ParticleManager.Add(new Particle(Assets.Get(Sprite.Dot), 1, position + Util.RotateVector2(new Vector2(Util.OneToNegOne(), Util.OneToNegOne()) * 5, angle), 
-                        velocity, angle, 0, Color.Orange, Color.Transparent));
+                    ParticleManager.Add(new Particle(Assets.Get(Sprites.Dot), 1, Position + Util.RotateVector2(new Vector2(Util.OneToNegOne(), Util.OneToNegOne()) * 5, Angle), 
+                        Velocity, Angle, 0, Color.Orange, Color.Transparent));
                     if (cooldown > 15)
                     {
                         nearestPickup.isExpired = true;
@@ -148,7 +148,7 @@ public class Construct : Pickup
                         {
                             Engine.SaveGame.Scrap++;
                         }
-                        SoundManager.PlaySound(Assets.Get(Sound.Full), position);
+                        SoundManager.PlaySound(Assets.Get(Sound.Full), Position);
                     }
                 }
                 break;
@@ -163,9 +163,9 @@ public class Construct : Pickup
         bool result = base.Collide(_damage);
         if (Type == Constructs.Bomb && isExpired && isActive)
         {
-            var tex = Assets.Get(Sprite.Explosion);
-            ParticleManager.Add(new Particle(tex, 3, position, Vector2.Zero, 0, 0, Color.White, Color.Transparent));
-            Engine.EntityManager.Explode(100, 100, position);
+            var tex = Assets.Get(Sprites.Explosion);
+            ParticleManager.Add(new Particle(tex, 3, Position, Vector2.Zero, 0, 0, Color.White, Color.Transparent));
+            Engine.EntityManager.Explode(100, 100, Position);
         }
         return result;
     }
@@ -174,7 +174,7 @@ public class Construct : Pickup
         return $"{{{Type},{SerializeAttributes()}}}";
     }
 }
-public class ConstructData(Sprite _realSprite, Sprite _virtualSprite, String _name, int _id, int _integrity, Color? _textColor = null)
+public class ConstructData(Sprites _realSprite, Sprites _virtualSprite, String _name, int _id, int _integrity, Color? _textColor = null)
     : ItemData(_realSprite, _virtualSprite, _name, _id, Color.White, _textColor)
 {
     public int Integrity { get; } = _integrity;

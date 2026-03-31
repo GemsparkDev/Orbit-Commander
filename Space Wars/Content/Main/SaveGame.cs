@@ -27,7 +27,7 @@ public class SaveGame
     }
     public int CurrentMissionIndex { get; set; } = 0;
     private bool giveWeapon = true;
-    public bool[] CompletedMissions { get; } = new bool[Engine.EntityManager.MissionLength];
+    public bool[] CompletedMissions { get; } = new bool[EntityManager.MissionLength];
     public Player Player { get; } = new Player(Vector2.Zero, Vector2.Zero, 0);
     public Pickup[] Inventory { get; } = new Pickup[4];
     public Pickup[] MissionSelectInventory { get; } = new Pickup[4];
@@ -49,6 +49,11 @@ public class SaveGame
     }
     public bool CurrentMissionCompleted => CompletedMissions[CurrentMissionIndex];
     public bool GiveWeapon { get { giveWeapon = !giveWeapon; return !giveWeapon; } }
+    public static float EnemyHitboxModifier { get; set; } = 1.2f;
+    public static bool DebugMode { get; set; } = false;
+    public static bool PatchedConics { get; set; } = true;
+    public static bool UseShader { get; set; } = true;
+    public static ColorScheme ColorScheme { get; set; } = new StandardScheme();
     public SaveGame() { }
     public SaveGame(string _serialization)
     {

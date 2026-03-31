@@ -7,10 +7,10 @@ using System.Linq;
 using Microsoft.Xna.Framework.Graphics;
 
 namespace Space_Wars.Content.Main;
-public abstract class Status(Sprite _icon)
+public abstract class Status(Sprites _icon)
 {
     public bool IsExpired { get; protected set; } = false;
-    public Sprite Icon { get; } = _icon;
+    public Sprites Icon { get; } = _icon;
     public abstract StatusType Type { get; }
     public abstract void Update(Entity _parent);
     public abstract void Reset();
@@ -73,12 +73,12 @@ public class StatusHolder
         float maxOffset = (float)(effects.Count - 1) / 2;
         foreach (var effect in effects)
         {
-            _spriteBatch.Draw(Assets.Get(effect.Icon), _parent.position + new Vector2(maxOffset * 20, 20), null, Color.White, 0, Assets.DimsOf(effect.Icon) / 2, 1, 0, 0);
+            _spriteBatch.Draw(Assets.Get(effect.Icon), _parent.Position + new Vector2(maxOffset * 20, 20), null, Color.White, 0, Assets.DimsOf(effect.Icon) / 2, 1, 0, 0);
             maxOffset -= 1;
         }
     }
 }
-public class Bomb() : Status(Sprite.Knob)
+public class Bomb() : Status(Sprites.Knob)
 {
     float time = 0;
     float maxTime = 300;
@@ -92,7 +92,7 @@ public class Bomb() : Status(Sprite.Knob)
         {
             SoundManager.PlayGlobalSound(Assets.Get(Sound.Beep));
         }
-        ParticleManager.Add(new Particle(null, _parent.position + _parent.velocity + new Vector2(0, -15), 0, Color.Red) { drawText = (Math.Truncate((maxTime - time) * 100) / 100).ToString()});
+        ParticleManager.Add(new Particle(null, _parent.Position + _parent.Velocity + new Vector2(0, -15), 0, Color.Red) { drawText = (Math.Truncate((maxTime - time) * 100) / 100).ToString()});
         if (time > maxTime)
         {
             _parent.Collide(999);
@@ -105,7 +105,7 @@ public class Bomb() : Status(Sprite.Knob)
         IsExpired = true;
     }
 }
-public class Fire(float _duration, Color _color) : Status(Sprite.Knob)
+public class Fire(float _duration, Color _color) : Status(Sprites.Knob)
 {
     float initialDuration = _duration;
     float duration = _duration;
@@ -123,8 +123,8 @@ public class Fire(float _duration, Color _color) : Status(Sprite.Knob)
         else
         {
             fireCooldown = 0.05f;
-            ParticleManager.Add(new Particle(Assets.Get(Sprite.Circle), 0.5f + Util.Random.NextSingle() / 10, _parent.position, 
-                _parent.velocity + new Vector2(Util.OneToNegOne() / 3, -Util.Random.NextSingle() - 0.5f), 0, Util.OneToNegOne() / 5, _color, Color.Transparent));
+            ParticleManager.Add(new Particle(Assets.Get(Sprites.Circle), 0.5f + Util.Random.NextSingle() / 10, _parent.Position, 
+                _parent.Velocity + new Vector2(Util.OneToNegOne() / 3, -Util.Random.NextSingle() - 0.5f), 0, Util.OneToNegOne() / 5, _color, Color.Transparent));
         }
         if (attackCooldown > 0)
         {
@@ -153,7 +153,7 @@ public class Fire(float _duration, Color _color) : Status(Sprite.Knob)
         duration = initialDuration;
     }
 }
-public class Frost(float _duration) : Status(Sprite.Knob)
+public class Frost(float _duration) : Status(Sprites.Knob)
 {
     float initialDuration = _duration;
     float duration = _duration;
@@ -171,8 +171,8 @@ public class Frost(float _duration) : Status(Sprite.Knob)
         {
             fireCooldown = 1024 / (_parent.Size.X * _parent.Size.Y + 1024);
             Vector2 pos = Util.ToUnitVector(Util.Random.NextSingle() * MathF.Tau) * Util.Random.NextSingle() * _parent.Size / 1.5f;
-            ParticleManager.Add(new Particle(Assets.Get(Sprite.Glow), 1.5f + Util.Random.NextSingle() / 5, _parent.position + pos,
-             _parent.velocity, 0, 0, Color.Cyan, Color.Transparent));
+            ParticleManager.Add(new Particle(Assets.Get(Sprites.Glow), 1.5f + Util.Random.NextSingle() / 5, _parent.Position + pos,
+             _parent.Velocity, 0, 0, Color.Cyan, Color.Transparent));
         }
         if (duration > 0)
         {
@@ -192,7 +192,7 @@ public class Frost(float _duration) : Status(Sprite.Knob)
         duration = initialDuration;
     }
 }
-public class Healing(float _duration) : Status(Sprite.Knob)
+public class Healing(float _duration) : Status(Sprites.Knob)
 {
     float initialDuration = _duration;
     float duration = _duration;
@@ -209,8 +209,8 @@ public class Healing(float _duration) : Status(Sprite.Knob)
         else
         {
             fireCooldown = 0.2f;
-            ParticleManager.Add(new Particle(Assets.Get(Sprite.Circle), 0.5f + Util.Random.NextSingle() / 10, _parent.position,
-                _parent.velocity + new Vector2(Util.OneToNegOne() / 3, -Util.Random.NextSingle() - 0.5f), -0, Util.OneToNegOne() / 5, Color.Green, Color.Transparent));
+            ParticleManager.Add(new Particle(Assets.Get(Sprites.Circle), 0.5f + Util.Random.NextSingle() / 10, _parent.Position,
+                _parent.Velocity + new Vector2(Util.OneToNegOne() / 3, -Util.Random.NextSingle() - 0.5f), -0, Util.OneToNegOne() / 5, Color.Green, Color.Transparent));
         }
         if (healCooldown > 0)
         {
@@ -239,11 +239,11 @@ public class Healing(float _duration) : Status(Sprite.Knob)
         duration += initialDuration;
     }
 }
-public class Berserk(float _timeLeft) : Status(Sprite.Knob)
+public class Berserk(float _timeLeft) : Status(Sprites.Knob)
 {
     private bool bonus = false;
     float timeLeft = _timeLeft;
-    private ParticleEmitter effect = new ParticleEmitter(Assets.Get(Sprite.Circle), Vector2.Zero, 28.3f, Color.Red * 0.5f) 
+    private ParticleEmitter effect = new ParticleEmitter(Assets.Get(Sprites.Circle), Vector2.Zero, 28.3f, Color.Red * 0.5f) 
     { particleFadeToColor = Color.Transparent, particleTimeAlive = 0.5f, speedOfEmission = 0.25f };
 
     public override StatusType Type => StatusType.Berserk;
@@ -255,9 +255,9 @@ public class Berserk(float _timeLeft) : Status(Sprite.Knob)
             _parent.LowerCooldown();
         }
         bonus = !bonus;
-        effect.position = _parent.position;
+        effect.position = _parent.Position;
         effect.sprayAngle += Engine.DeltaSeconds * 2;
-        effect.offsetVelocity = _parent.velocity;
+        effect.offsetVelocity = _parent.Velocity;
         effect.Update();
         if (timeLeft > 0)
         {
@@ -286,7 +286,7 @@ public class Berserk(float _timeLeft) : Status(Sprite.Knob)
         return (int)(_damage * 1.5f);
     }
 }
-public class Pressure(Color _color, bool _isFatal) : Status(Sprite.Knob)
+public class Pressure(Color _color, bool _isFatal) : Status(Sprites.Knob)
 {
     float duration = Engine.DeltaSeconds * 2;
     float fireCooldown = 0.05f;
@@ -303,8 +303,8 @@ public class Pressure(Color _color, bool _isFatal) : Status(Sprite.Knob)
         else
         {
             fireCooldown = 0.1f;
-            ParticleManager.Add(new Particle(_parent.texture, 1f, _parent.position - _parent.velocity,
-                _parent.velocity + new Vector2(Util.OneToNegOne() / 5, Util.OneToNegOne() / 5), Util.OneToNegOne() / 10, Util.OneToNegOne() / 50, _color * MathF.Sqrt(duration / 10), Color.Transparent));
+            ParticleManager.Add(new Particle(_parent.Texture, 1f, _parent.Position - _parent.Velocity,
+                _parent.Velocity + new Vector2(Util.OneToNegOne() / 5, Util.OneToNegOne() / 5), Util.OneToNegOne() / 10, Util.OneToNegOne() / 50, _color * MathF.Sqrt(duration / 10), Color.Transparent));
         }
         if (attackCooldown > 0)
         {
