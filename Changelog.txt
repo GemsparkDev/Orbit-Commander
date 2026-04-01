@@ -3,6 +3,10 @@
 Lagrange Commander is a game made using C# in monogame. It is a 2D top down wave based shooter where you must repair and upgrade your ship by salvaging from enemies you defeat. It features realistic N-Body gravitation, which affects all entities and projectiles.
   
 # Changelog
+0.7.9.6 - 3/31/2026
+ - Further decoupled projectile code from the Projectile class.
+ - Reorganized the enemy IEnumerable layout.
+ - Removed the damage field from the Enemy.
 0.7.9.5 - 3/30/2026
  - Major reorganization of several class fields and properties.
  - Turned several fields into wrappers for components.
