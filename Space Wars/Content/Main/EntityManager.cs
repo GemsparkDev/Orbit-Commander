@@ -493,7 +493,7 @@ public class EntityManager
             {
                 continue;
             }
-            if (!_findAll && (targetEntity is Module || targetEntity is Construct))
+            if (!_findAll && (targetEntity is Module || targetEntity.GetComponent<SpecializedTag>() != null || targetEntity.GetComponent<Behaviour> != null))
             {
                 continue;
             }

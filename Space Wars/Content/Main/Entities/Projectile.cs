@@ -136,8 +136,8 @@ public class Projectile : Entity
     IEnumerable<int> Explosive(float explosionRadius)
     {
         TimeLeft = 4;
-        ParticleEmitter radius = new ParticleEmitter(Assets.Get(Sprites.Dot), Position, explosionRadius, Color.Red * 0.5f);
-        ParticleEmitter activationRadius = new ParticleEmitter(Assets.Get(Sprites.Dot), Position, explosionRadius / 2, Color.Red * 0.25f);
+        var radius = new ParticleEmitter(Assets.Get(Sprites.Dot), Position, explosionRadius, Color.Red * 0.5f);
+        var activationRadius = new ParticleEmitter(Assets.Get(Sprites.Dot), Position, explosionRadius / 2, Color.Red * 0.25f);
         float time = 0;
         Vector3 col = isFriendly ? new Vector3(1, 0.65f, 0) : new Vector3(1, 0, 0);
         while(true)

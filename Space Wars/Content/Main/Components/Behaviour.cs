@@ -9,9 +9,10 @@ namespace Space_Wars.Content.Main.Components;
 internal class Behaviour(Entity _entity) : Component(_entity)
 {
     private List<IEnumerator<int>> behaviours = [];
-    public void AddBehaviour(IEnumerable<int> behaviour)
+    public Behaviour AddBehaviour(IEnumerable<int> behaviour)
     {
         behaviours.Add(behaviour.GetEnumerator());
+        return this;
     }
     public override void Update()
     {

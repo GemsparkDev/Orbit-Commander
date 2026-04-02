@@ -716,7 +716,7 @@ public class Enemy : Entity
                 {
                     for (float angle = 0; angle < MathF.Tau; angle += MathF.PI / 3)
                     {
-                        Engine.EntityManager.Add(new AssassinShot(Position, Util.ToUnitVector(angle) * 8, angle, 0, isFriendly, 6, 1));
+                        Engine.EntityManager.Add(Projectile.NewAssassinShot(Position, Util.ToUnitVector(angle) * 8, angle, 0, isFriendly, 6, 1));
                     }
                 }
                 if (!hasExploded)
@@ -917,7 +917,7 @@ public class Enemy : Entity
                 else
                 {
                     Vector2 direction = Util.ToUnitVector(Angle);
-                    Projectile shot = new AssassinShot(Position, direction * 100, Angle, 0, isFriendly, 15);
+                    var shot = Projectile.NewAssassinShot(Position, direction * 100, Angle, 0, isFriendly, 15);
                     Engine.EntityManager.Add(shot);
                     SoundManager.PlaySound(Assets.Get(Sound.SniperFire), Position);
                     Velocity -= direction * 15;
@@ -932,11 +932,9 @@ public class Enemy : Entity
                     Vector2 normalOffset = Util.ToUnitVector(Angle + MathF.PI / 2);
                     Vector2 offset = normalOffset * Util.Random.Next(-2, 3);
                     Texture2D dot = Assets.Get(Sprites.Microshot);
-                    Projectile shot = new AssassinShot(Position + normalOffset * bulletOffset, Util.ToUnitVector(Angle) * 10 + offset / 4, Angle, 0, isFriendly, 3)
-                    {
-                        Texture = dot,
-                        TimeLeft = 3
-                    };
+                    var shot = Projectile.NewAssassinShot(Position + normalOffset * bulletOffset, Util.ToUnitVector(Angle) * 10 + offset / 4, Angle, 0, isFriendly, 3);
+                    shot.Texture = dot;
+                    shot.TimeLeft = 3;
                     Engine.EntityManager.Add(shot);
                     SoundManager.PlaySound(Assets.Get(Sound.LMGFire), Position);
                     cd[0] = 0.25f;
@@ -1241,7 +1239,7 @@ public class Enemy : Entity
                 {
                     cd[0] = 0.25f;
                     revealDuration += 0.2f;
-                    Engine.EntityManager.Add(new Explosive(Position, Velocity + targetVector * 10 + new Vector2(Util.OneToNegOne(), Util.OneToNegOne()) * 5, Util.OneToNegOne() * MathF.PI, Util.OneToNegOne(), isFriendly, damage / 2, 40, 1));
+                    Engine.EntityManager.Add(Projectile.NewExplosive(Position, Velocity + targetVector * 10 + new Vector2(Util.OneToNegOne(), Util.OneToNegOne()) * 5, Util.OneToNegOne() * MathF.PI, Util.OneToNegOne(), isFriendly, damage / 2, 40, 1));
                     SoundManager.PlaySound(Assets.Get(Sound.LMGFire), Position);
                 }
                 if (relativePosition.Length() < 100)
@@ -1264,7 +1262,9 @@ public class Enemy : Entity
                 {
                     cd[0] = 1;
                     revealDuration += 0.5f;
-                    Engine.EntityManager.Add(new Explosive(Position, Velocity + GetNormalizedAcceleration() * 160, Util.OneToNegOne() * MathF.PI, Util.OneToNegOne(), isFriendly, damage, 200, 1) { TimeLeft = 10 });
+                    var p1 = Projectile.NewExplosive(Position, Velocity + GetNormalizedAcceleration() * 160, Util.OneToNegOne() * MathF.PI, Util.OneToNegOne(), isFriendly, damage, 200, 1);
+                    p1.TimeLeft = 10;
+                    Engine.EntityManager.Add(p1);
                     SoundManager.PlaySound(Assets.Get(Sound.LMGFire), Position);
                 }
             }
@@ -1567,8 +1567,8 @@ public class Enemy : Entity
                     {
                         cd[0] = 0.8f;
                         Vector2 dir = Util.ToUnitVector(Angle) * 12;
-                        Engine.EntityManager.Add(new SpiralShot(Position, dir, Angle, 0, isFriendly, damage, 0));
-                        Engine.EntityManager.Add(new SpiralShot(Position, dir, Angle, 0, isFriendly, damage, MathF.PI));
+                        Engine.EntityManager.Add(Projectile.NewSpiralShot(Position, dir, Angle, 0, isFriendly, damage, 0));
+                        Engine.EntityManager.Add(Projectile.NewSpiralShot(Position, dir, Angle, 0, isFriendly, damage, MathF.PI));
                     }
                     Angle = Util.ToAngle(Velocity);
                 }
@@ -1589,7 +1589,7 @@ public class Enemy : Entity
                     if (cd[0] <= 0 && Vector2.Distance(Engine.SaveGame.Player.Position, Position) < 300 && Vector2.Dot(Velocity, (Engine.SaveGame.Player.Position - Position)) / (Velocity.Length() * (Engine.SaveGame.Player.Position - Position).Length()) > 0.75f)
                     {
                         cd[0] = 1f;
-                        Engine.EntityManager.Add(new SpiralShot(Position, Util.ToUnitVector(Angle) * 8, Angle, 0, isFriendly, damage, 0));
+                        Engine.EntityManager.Add(Projectile.NewSpiralShot(Position, Util.ToUnitVector(Angle) * 8, Angle, 0, isFriendly, damage, 0));
                     }
                     Angle = Util.ToAngle(Velocity);
                 }
@@ -1760,7 +1760,7 @@ public class Enemy : Entity
                 if (cd[0] <= 0)
                 {
                     cd[0] = 12;
-                    Engine.EntityManager.Add(new Spewer(Position, Velocity, 0, 0, isFriendly, damage));
+                    Engine.EntityManager.Add(Projectile.NewSpewer(Position, Velocity, 0, 0, isFriendly, damage));
                     SoundManager.PlaySound(Assets.Get(Sound.LMGFire), Position);
                 }
 
@@ -1871,7 +1871,7 @@ public class Enemy : Entity
                     float offset = Util.Random.NextSingle() * MathF.Tau;
                     for (float angle = 0; angle < MathF.Tau; angle += MathF.PI / 3)
                     {
-                        Engine.EntityManager.Add(new AssassinShot(Position, Util.ToUnitVector(angle + offset) * 8, angle + offset, 0, isFriendly, damage, 1));
+                        Engine.EntityManager.Add(Projectile.NewAssassinShot(Position, Util.ToUnitVector(angle + offset) * 8, angle + offset, 0, isFriendly, damage, 1));
                     }
                 }
                 health = maxHealth;
@@ -1953,8 +1953,8 @@ public class Enemy : Entity
                         var vel = Vector2.Normalize(randomPosition - Position);
                         float angle = Util.ToAngle(vel);
                         Engine.EntityManager.Add(Projectile.NewPulseShot(Position, vel * 5 + Player.Velocity, angle, 0, isFriendly, damage, true, 1));
-                        Engine.EntityManager.Add(new Explosive(Position, vel * 5 + new Vector2(vel.Y, -vel.X) * 5 + Player.Velocity, angle, 0, isFriendly, 8, 25, 1));
-                        Engine.EntityManager.Add(new Explosive(Position, vel * 5 - new Vector2(vel.Y, -vel.X) * 5 + Player.Velocity, angle, 0, isFriendly, 8, 25, 1));
+                        Engine.EntityManager.Add(Projectile.NewExplosive(Position, vel * 5 + new Vector2(vel.Y, -vel.X) * 5 + Player.Velocity, angle, 0, isFriendly, 8, 25, 1));
+                        Engine.EntityManager.Add(Projectile.NewExplosive(Position, vel * 5 - new Vector2(vel.Y, -vel.X) * 5 + Player.Velocity, angle, 0, isFriendly, 8, 25, 1));
                         cd[2] = 1;
                         shotCount++;
                         if (shotCount >= 10)
@@ -2153,7 +2153,7 @@ public class Enemy : Entity
                         {
                             bullets.Add(Projectile.NewPulseShot(Vector2.Zero, Vector2.Zero, 0, 0, isFriendly, damage, true, 0));
                         }
-                        Engine.EntityManager.Add(new Splitter(Position, Velocity + dir * 10 + new Vector2(Util.OneToNegOne(), Util.OneToNegOne()) * 2, Angle, isFriendly, damage, bullets, 0.25f));
+                        Engine.EntityManager.Add(Projectile.NewSplitter(Position, Velocity + dir * 10 + new Vector2(Util.OneToNegOne(), Util.OneToNegOne()) * 2, Angle, isFriendly, damage, bullets, 0.25f));
                         SoundManager.PlaySound(Assets.Get(Sound.PulseFire), Position);
                         cd[0] = 0.4f;
                     }
@@ -2210,18 +2210,18 @@ public class Enemy : Entity
                 Velocity += velocityOffset * Engine.DeltaSeconds + GetNormalizedAcceleration() * 2;
                 if (cd[0] <= 0)
                 {
-                    Engine.EntityManager.Add(new Splitter(Position, Velocity + Util.ToUnitVector(Angle) * 8, Angle, isFriendly, 6,
-                        [new AssassinShot(default, default, 0, 0, isFriendly, damage)], 0.5f, 0, true));
+                    Engine.EntityManager.Add(Projectile.NewSplitter(Position, Velocity + Util.ToUnitVector(Angle) * 8, Angle, isFriendly, 6,
+                        [Projectile.NewAssassinShot(default, default, 0, 0, isFriendly, damage)], 0.5f, 0, true));
                     SoundManager.PlaySound(Assets.Get(Sound.PulseFire), Position);
                     cd[0] = 1;
                 }
                 if (cd[1] <= 0 && bullets < 5)
                 {
                     float cooldown = 1.5f - 0.25f * bullets;
-                    Engine.EntityManager.Add(new Splitter(Position, Velocity + Util.ToUnitVector(Angle + 0.1f * bullets) * 8, Angle + 0.1f * bullets, isFriendly, 6,
-                        [new AssassinShot(default, default, 0, 0, isFriendly, damage)], cooldown, 0, true));
-                    Engine.EntityManager.Add(new Splitter(Position, Velocity + Util.ToUnitVector(Angle - 0.1f * bullets) * 8, Angle - 0.1f * bullets, isFriendly, 6,
-                        [new AssassinShot(default, default, 0, 0, isFriendly, damage)], cooldown, 0, true));
+                    Engine.EntityManager.Add(Projectile.NewSplitter(Position, Velocity + Util.ToUnitVector(Angle + 0.1f * bullets) * 8, Angle + 0.1f * bullets, isFriendly, 6,
+                        [Projectile.NewAssassinShot(default, default, 0, 0, isFriendly, damage)], cooldown, 0, true));
+                    Engine.EntityManager.Add(Projectile.NewSplitter(Position, Velocity + Util.ToUnitVector(Angle - 0.1f * bullets) * 8, Angle - 0.1f * bullets, isFriendly, 6,
+                        [Projectile.NewAssassinShot(default, default, 0, 0, isFriendly, damage)], cooldown, 0, true));
                     SoundManager.PlaySound(Assets.Get(Sound.PulseFire), Position);
                     cd[1] = 0.25f;
                     cd[0] = 1;
@@ -2343,10 +2343,10 @@ public class Enemy : Entity
                             {
                                 finalBullets.Add(Projectile.NewPulseShot(Position, Velocity, 0, 0, isFriendly, damage, false, 1));
                             }
-                            splitters.Add(new Splitter(Position, Velocity, 0, Player.isFriendly, (int)(damage * 1.5f), finalBullets, 0.05f, 1));
+                            splitters.Add(Projectile.NewSplitter(Position, Velocity, 0, Player.isFriendly, (int)(damage * 1.5f), finalBullets, 0.05f, 1));
                         }
                         var dir = Vector2.Normalize(relativePosition);
-                        Engine.EntityManager.Add(new Splitter(Position, nearestEnemy.Velocity + dir * 8, Util.ToAngle(dir), isFriendly, damage * 2, splitters, 0.05f));
+                        Engine.EntityManager.Add(Projectile.NewSplitter(Position, nearestEnemy.Velocity + dir * 8, Util.ToAngle(dir), isFriendly, damage * 2, splitters, 0.05f));
                         SoundManager.PlaySound(Assets.Get(Sound.LMGFire), Position);
                         revealDuration += 1.5f;
                         cd[0] = 1.5f;
@@ -2359,12 +2359,12 @@ public class Enemy : Entity
                             List<Entity> finalBullets = [];
                             for (int j = 0; j < 3; j++)
                             {
-                                finalBullets.Add(new AssassinShot(Position, Velocity, 0, 0, isFriendly, damage));
+                                finalBullets.Add(Projectile.NewAssassinShot(Position, Velocity, 0, 0, isFriendly, damage));
                             }
-                            splitters.Add(new Splitter(Position, Velocity, 0, Player.isFriendly, (int)(damage * 1.5f), finalBullets, 0.2f, 1, true));
+                            splitters.Add(Projectile.NewSplitter(Position, Velocity, 0, Player.isFriendly, (int)(damage * 1.5f), finalBullets, 0.2f, 1, true));
                         }
                         var dir = Vector2.Normalize(relativePosition);
-                        Engine.EntityManager.Add(new Splitter(Position, nearestEnemy.Velocity + dir * 4, Util.ToAngle(dir), isFriendly, damage * 2, splitters, 0.2f));
+                        Engine.EntityManager.Add(Projectile.NewSplitter(Position, nearestEnemy.Velocity + dir * 4, Util.ToAngle(dir), isFriendly, damage * 2, splitters, 0.2f));
                         SoundManager.PlaySound(Assets.Get(Sound.LMGFire), Position);
                         revealDuration += 1.5f;
                         abilityShots++;
@@ -2492,7 +2492,7 @@ public class Enemy : Entity
                         if (!isPhase1)
                         {
                             Vector2 relPos = nearestEnemy.Position - Position;
-                            Engine.EntityManager.Add(new Explosive(Position, Velocity + Vector2.Normalize(relPos) * 12, 0, 0, isFriendly, damage, 20));
+                            Engine.EntityManager.Add(Projectile.NewExplosive(Position, Velocity + Vector2.Normalize(relPos) * 12, 0, 0, isFriendly, damage, 20));
                         }
                         unitsPerAbility = 0;
                     }
@@ -2508,7 +2508,7 @@ public class Enemy : Entity
                 Explode(10, ColliderRadius);
                 _cog.isExpired = true;
                 isExpired = true;
-                Engine.EntityManager.Add(new Construct(Constructs.SpecializedParts, Position, GetNormalizedAcceleration() * 10, Angle, 0.1f));
+                Engine.EntityManager.Add(Pickup.NewSpecializedParts(Position, GetNormalizedAcceleration() * 10, Angle, 0.1f));
                 Engine.EntityManager.Add(new OrionEngine() { Position = this.Position, Velocity = GetNormalizedAcceleration() * 5, AngularVelocity = this.AngularVelocity });
             }
             targetVector = Velocity;
@@ -2928,7 +2928,7 @@ public class Enemy : Entity
                     Velocity += gravityForce * Engine.DeltaSeconds * 60 * 2;
                     if (cd[0] <= 0 && MathF.Abs(targetAngle - Angle) < 0.1f)
                     {
-                        Engine.EntityManager.Add(new AssassinShot(Position, Util.ToUnitVector(Angle) * 15, Angle, 0, isFriendly, damage));
+                        Engine.EntityManager.Add(Projectile.NewAssassinShot(Position, Util.ToUnitVector(Angle) * 15, Angle, 0, isFriendly, damage));
                         SoundManager.PlaySound(Assets.Get(Sound.SniperFire), Position);
                         cd[0] = 2.5f;
                     }
@@ -3295,8 +3295,14 @@ public class Enemy : Entity
                             }
                             else
                             {
-                                Engine.EntityManager.Add(new SpiralShot(Position, Util.ToUnitVector(Angle) * 8, Angle, 0, isFriendly, damage, 0) { Texture = tex, TimeLeft = 3 });
-                                Engine.EntityManager.Add(new SpiralShot(Position, Util.ToUnitVector(Angle) * 8, Angle, 0, isFriendly, damage, MathF.PI) { Texture = tex, TimeLeft = 3 });
+                                var p1 = Projectile.NewSpiralShot(Position, Util.ToUnitVector(Angle) * 8, Angle, 0, isFriendly, damage, 0);
+                                p1.Texture = tex;
+                                p1.TimeLeft = 3;
+                                Engine.EntityManager.Add(p1);
+                                p1 = Projectile.NewSpiralShot(Position, Util.ToUnitVector(Angle) * 8, Angle, 0, isFriendly, damage, MathF.PI);
+                                p1.Texture = tex;
+                                p1.TimeLeft = 3;
+                                Engine.EntityManager.Add(p1);
                             }
                             if (shotCount < 1)
                             {
@@ -3404,7 +3410,9 @@ public class Enemy : Entity
                 }
                 if (diff < 0.2f && cd[0] <= 0)
                 {
-                    Engine.EntityManager.Add(new AssassinShot(Position, Vector2.Normalize(targetVector) * 300, Angle, 0, isFriendly, damage) { TimeLeft = 0.2f });
+                    var p1 = Projectile.NewAssassinShot(Position, Vector2.Normalize(targetVector) * 300, Angle, 0, isFriendly, damage);
+                    p1.TimeLeft = 0.2f;
+                    Engine.EntityManager.Add(p1);
                     cd[0] = 1;
                 }
             }
@@ -3686,7 +3694,7 @@ public class Enemy : Entity
                     if (Vector2.Distance(trackedEnemy.Position, Position) < 500 && cd[0] <= 0)
                     {
                         cd[0] = 1.5f;
-                        Engine.EntityManager.Add(new SpiralShot(Position, Velocity + Util.ToUnitVector(Angle) * 8, Angle, 0, isFriendly, damage, 0));
+                        Engine.EntityManager.Add(Projectile.NewSpiralShot(Position, Velocity + Util.ToUnitVector(Angle) * 8, Angle, 0, isFriendly, damage, 0));
                     }
                 }
                 else
@@ -3698,7 +3706,7 @@ public class Enemy : Entity
             {
                 if (constructionTime <= 0)
                 {
-                    Engine.EntityManager.Add(new Construct(Constructs.Trap, Position, Vector2.Zero, 0, 0, 1, isFriendly));
+                    Engine.EntityManager.Add(Pickup.NewTrap(Position, Vector2.Zero, 0, 0, 1, isFriendly));
                     constructing = false;
                     cd[1] = 15;
                 }
@@ -3879,7 +3887,7 @@ public class Enemy : Entity
                         Vector2 relativePosition = Position - nearestEnemy.Position;
                         if (relativePosition.Length() < enemyRange.particleVelocity)
                         {
-                            Engine.EntityManager.Add(new AssassinShot(Position, -Vector2.Normalize(relativePosition) * 100 + nearestEnemy.Velocity, MathF.Atan2(relativePosition.Y, relativePosition.X) - MathF.PI / 2, 0, isFriendly, damage));
+                            Engine.EntityManager.Add(Projectile.NewAssassinShot(Position, -Vector2.Normalize(relativePosition) * 100 + nearestEnemy.Velocity, MathF.Atan2(relativePosition.Y, relativePosition.X) - MathF.PI / 2, 0, isFriendly, damage));
                             SoundManager.PlaySound(Assets.Get(Sound.MissileFire), Position);
                             cd[0] = 3;
                         }
@@ -4611,7 +4619,7 @@ public class Enemy : Entity
             {
                 var dir = Vector2.Normalize(new Vector2(Util.OneToNegOne(), Util.OneToNegOne()));
                 SoundManager.PlaySound(Assets.Get(Sound.LMGFire), Position);
-                Engine.EntityManager.Add(new AssassinShot(Position, dir * 10, MathF.Atan2(dir.Y, dir.X), 0, isFriendly, 5, 1));
+                Engine.EntityManager.Add(Projectile.NewAssassinShot(Position, dir * 10, MathF.Atan2(dir.Y, dir.X), 0, isFriendly, 5, 1));
             }
             if (cooldown > 0)
             {
@@ -4914,7 +4922,7 @@ public class Enemy : Entity
                     Velocity = Vector2.Zero;
                 }   
             }
-            if (0 > cd[1] && cd[1] > -10)
+            if (cd[1] is < 0 and > (-10))
             {
                 cd[1] = -30;
                 Engine.DialogueManager.Add(new Dialogue("Incoming: Ship going down, I repeat, ship going down!", null));

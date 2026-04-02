@@ -34,7 +34,7 @@ public static class ItemFactory
         { Modules.Flamethrower, new ModuleData(Sprites.RealFlamethrower,Sprites.Flamethrower, "Flamethrower", (int)ModuleType.Guns, 18, typeof(Flamethrower), Color.Orange)},
         { Modules.Fireball, new ModuleData(Sprites.RealFireball,Sprites.Fireball, "Fireball", (int)ModuleType.Guns, 18, typeof(Fireball), Color.Orange)},
         { Modules.GrenadeLauncher, new ModuleData(Sprites.RealCrossbow,Sprites.Crossbow, "Grenade Launcher", (int)ModuleType.Guns, 20, typeof(GrenadeLauncher))},
-        { Modules.Spewer, new ModuleData(Sprites.RealCrossbow,Sprites.Crossbow, "Spewer", (int)ModuleType.Guns, 15, typeof(Spewer))},
+        { Modules.Spewer, new ModuleData(Sprites.RealCrossbow,Sprites.Crossbow, "Spewer", (int)ModuleType.Guns, 15, typeof(SpewerModule))},
         { Modules.Antimaterial, new ModuleData(Sprites.RealCrossbow,Sprites.Crossbow, "Railgun", (int)ModuleType.Guns, 15, typeof(Railgun), Color.Yellow)},
         { Modules.PrismArray, new ModuleData(Sprites.RealPrismArray,Sprites.PrismArray, "Prism Array", (int)ModuleType.Guns, 15, typeof(PrismArray), Color.Cyan)},
         { Modules.MatrixLauncher, new ModuleData(Sprites.RealCrossbow,Sprites.Crossbow, "Matrix Launcher", (int)ModuleType.Guns, 15, typeof(MatrixLauncher), Color.Cyan)},
@@ -80,6 +80,7 @@ public static class ItemFactory
     }
     public static Pickup TryDeserialize(string _data, LoadLogger _logger)
     {
+        throw new NotImplementedException();
         List<string> disassembly = SaveGame.Disassemble(_data);
         if (disassembly[0] == "")
         {
@@ -97,7 +98,7 @@ public static class ItemFactory
         }
         if (Enum.TryParse<Constructs>(disassembly[0], true, out Constructs result3))
         {
-            return new Construct(result3, disassembly, _logger);
+            //return new Construct(result3, disassembly, _logger);
         }
         throw new IOException("The module could not be parsed properly.");
     }

@@ -351,7 +351,11 @@ public class Player : Entity
                 }
                 else
                 {
-                    Engine.SaveGame.CurrentMission.Colliders = Engine.SaveGame.CurrentMission.Colliders.Concat([new LineCollider(startLocation, mousePos,Input.NewState.IsKeyDown(Keys.LeftControl))]).ToArray();
+                    Engine.SaveGame.CurrentMission.Colliders =
+                    [
+                        .. Engine.SaveGame.CurrentMission.Colliders,
+                        new LineCollider(startLocation, mousePos,Input.NewState.IsKeyDown(Keys.LeftControl)),
+                    ];
                     startLocation = Vector2.Zero;
                 }
             }
@@ -441,7 +445,7 @@ public class Player : Entity
                         Entity firstScrap = null;
                         foreach (var pickup in leashedMaterials)
                         {
-                            if (pickup is not Module and not Construct)
+                            if (pickup is not Module)
                             {
                                 scrapCount++;
                                 firstScrap ??= pickup;
@@ -467,32 +471,31 @@ public class Player : Entity
                         {
                             Vector2 dir = Util.ToUnitVector(angle);
                             Vector2 mouseDir = targetVector;
-                            //dir.X * mouseDir.X + dir.Y * mouseDir.Y > (0.2f * types.Count) && dist > 500 && firstScrap != null
-                            if (dir.X * mouseDir.X + dir.Y * mouseDir.Y > (1f - 0.9f / types.Count) && dist > 300)
+                            if (dir.X * mouseDir.X + dir.Y * mouseDir.Y > (1f - 0.9f / types.Count) && dist > 300 && firstScrap != null)
                             {
                                 switch (types[i])
                                 {
                                     case "Barricade":
                                         firstScrap.isExpired = true;
-                                        var barricade = new Construct(Constructs.Barricade, firstScrap.Position, firstScrap.Velocity, 0, 0);
+                                        var barricade = Pickup.NewBarricade(firstScrap.Position, firstScrap.Velocity, 0, 0);
                                         leashedMaterials.Add(barricade);
                                         Engine.EntityManager.Add(barricade);
                                         break;
                                     case "Trap":
                                         firstScrap.isExpired = true;
-                                        var trap = new Construct(Constructs.Trap, firstScrap.Position, firstScrap.Velocity, 0, 0);
+                                        var trap = Pickup.NewTrap(firstScrap.Position, firstScrap.Velocity, 0, 0);
                                         leashedMaterials.Add(trap);
                                         Engine.EntityManager.Add(trap);
                                         break;
                                     case "Bomb":
                                         firstScrap.isExpired = true;
-                                        var bomb = new Construct(Constructs.Bomb, firstScrap.Position, firstScrap.Velocity, 0, 0);
+                                        var bomb = Pickup.NewBomb(firstScrap.Position, firstScrap.Velocity, 0, 0);
                                         leashedMaterials.Add(bomb);
                                         Engine.EntityManager.Add(bomb);
                                         break;
                                     case "Furnace":
                                         firstScrap.isExpired = true;
-                                        var furnace = new Construct(Constructs.Furnace, firstScrap.Position, firstScrap.Velocity, 0, 0);
+                                        var furnace = Pickup.NewFurnace(firstScrap.Position, firstScrap.Velocity, 0, 0);
                                         leashedMaterials.Add(furnace);
                                         Engine.EntityManager.Add(furnace);
                                         break;

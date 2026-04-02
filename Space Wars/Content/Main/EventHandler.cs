@@ -8,6 +8,7 @@ using System.Linq;
 using Microsoft.Xna.Framework.Graphics;
 using System.IO;
 using Space_Wars.Content.Main.UIElements;
+using Space_Wars.Content.Main.Components;
 
 namespace Space_Wars.Content.Main;
 
@@ -326,13 +327,13 @@ public static class EventHandler
                 return;
             }
         }
-        Construct firstScrap = null;
+        Pickup firstScrap = null;
         ItemSlot<Pickup> slot = null;
         foreach (var item in UI.MissionSelectSlots)
         {
-            if (item.daughterItem is Construct && (item.daughterItem as Construct).Type == Constructs.SpecializedParts)
+            if (item.daughterItem.GetComponent<SpecializedTag>() != null)
             {
-                firstScrap = (Construct)item.daughterItem;
+                firstScrap = item.daughterItem;
                 slot = item;
                 break;
             }
@@ -341,9 +342,9 @@ public static class EventHandler
         {
             foreach (var item in UI.InventorySlots)
             {
-                if (item.daughterItem is Construct && (item.daughterItem as Construct).Type == Constructs.SpecializedParts)
+                if (item.daughterItem.GetComponent<SpecializedTag>() != null)
                 {
-                    firstScrap = (Construct)item.daughterItem;
+                    firstScrap = item.daughterItem;
                     slot = item;
                     break;
                 }
