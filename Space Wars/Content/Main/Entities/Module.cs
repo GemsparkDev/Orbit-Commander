@@ -1300,7 +1300,7 @@ public class CreateFighter() : Module(Modules.CreateFighter)
                 {
                     var enemy = Enemy.NewSurgeChild(Player.Position + new Vector2(Util.OneToNegOne(), Util.OneToNegOne()), Player.Velocity, Player.Angle, Player, allies);
                     enemy.isFriendly = true;
-                    enemy.AddBehaviour(enemy.AvoidProjectiles(1));
+                    enemy.AddComponent(new Behaviour(enemy).AddBehaviour(enemy.AvoidProjectiles(1)));
                     Engine.EntityManager.Add(enemy);
                     allies.Add(enemy);
                 }
