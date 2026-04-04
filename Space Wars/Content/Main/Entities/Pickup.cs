@@ -29,7 +29,38 @@ public class Pickup : Entity, IData
         Tooltip.AddWidget(new Decal(new Vector2(-Tooltip.Size.X / 3, 0), _itemData.RealSprite));
         textbox = new Decal(new Vector2(0, -5), Assets.TextFont, _itemData.Name, _itemData.TextColor, 5f);
         Tooltip.AddWidget(textbox);
-        hitsLeft = _integrity;
+        AddComponent(new Collide(this, delegate(int _damage, bool _ignoreImmunity)
+        {
+            if (_damage <= 0)
+            {
+                return false;
+            }
+            if (invincibilityCooldown > 0 && !_ignoreImmunity)
+            {
+                invincibilityCooldown = 0;
+                return false;
+            }
+            hitsLeft--;
+            if (_damage >= 10)
+            {
+                hitsLeft--;
+            }
+            //Prevents negative integrity values
+            hitsLeft = Math.Max(hitsLeft, 0);
+            if (!_ignoreImmunity)
+            {
+                invincibilityCooldown = 1;
+            }
+            if (hitsLeft <= 0)
+            {
+                isExpired = true;
+            }
+            SoundManager.PlaySound(Assets.Get(Sound.Death), Position);
+            Engine.ShakeScreen(10 / ((Position - Engine.Camera.Position).Length() + 150));
+            ParticleManager.Add(new Particle(null, 1, Position + new Vector2(0, -1), new Vector2(0, -1.5f), 0, 0, Color.Orange, new Color(255, 0, 0, 0)) { drawText = $"Integrity: {hitsLeft}" });
+            return true;
+            }));
+            hitsLeft = _integrity;
     }
     public Pickup(ItemData _itemData, List<string> _disassembly, LoadLogger _logger)
         : base(_itemData.VirtualSprite, default, default, 0, 0, true)
@@ -88,13 +119,9 @@ public class Pickup : Entity, IData
         {
             if (Vector2.Distance(nearestProjectile.Position, this.Position) < nearestProjectile.ColliderRadius + ColliderRadius)
             {
-                if(nearestProjectile is Enemy && nearestProjectile.GetComponent<Damager>() != null)
+                if(nearestProjectile.GetComponent<Damager>() != null)
                 {
                     Collide(nearestProjectile.GetComponent<Damager>().Damage);
-                }
-                if (nearestProjectile is Projectile)
-                {
-                    Collide((nearestProjectile as Projectile).Damage);
                 }
             }
         }
@@ -103,37 +130,6 @@ public class Pickup : Entity, IData
             invincibilityCooldown -= Engine.DeltaSeconds;
         }
         base.Update();
-    }
-    public override bool Collide(int _damage, bool _ignoreImmunity = false)
-    {
-        if (_damage <= 0)
-        {
-            return false;
-        }
-        if (invincibilityCooldown > 0 && !_ignoreImmunity)
-        {
-            invincibilityCooldown = 0;
-            return false;
-        }
-        hitsLeft--;
-        if (_damage >= 10)
-        {
-            hitsLeft--;
-        }
-        //Prevents negative integrity values
-        hitsLeft = Math.Max(hitsLeft, 0);
-        if (!_ignoreImmunity)
-        {
-            invincibilityCooldown = 1;
-        }
-        if (hitsLeft <= 0)
-        {
-            isExpired = true;
-        }
-        SoundManager.PlaySound(Assets.Get(Sound.Death), Position);
-        Engine.ShakeScreen(10 / ((Position - Engine.Camera.Position).Length() + 150));
-        ParticleManager.Add(new Particle(null, 1, Position + new Vector2(0, -1), new Vector2(0, -1.5f), 0, 0, Color.Orange, new Color(255, 0, 0, 0)) { drawText = $"Integrity: {hitsLeft}" });
-        return true;
     }
     public virtual string SerializeAttributes()
     {
@@ -161,7 +157,7 @@ public class Pickup : Entity, IData
             if (cooldown <= 0 && nearestEnemy != null && Vector2.Distance(nearestEnemy.Position, Position) < 300)
             {
                 var dir = Vector2.Normalize(nearestEnemy.Position - Position);
-                Engine.EntityManager.Add(Projectile.NewPulseShot(Position, dir * 10, MathF.Atan2(dir.X, -dir.Y), 0, isFriendly, 5, true));
+                Engine.EntityManager.Add(NewPulseShot(Position, dir * 10, MathF.Atan2(dir.X, -dir.Y), 0, isFriendly, 5, true));
                 SoundManager.PlaySound(Assets.Get(Sound.PulseFire), Position);
                 cooldown = 1.5f;
             }

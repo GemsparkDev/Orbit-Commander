@@ -7,6 +7,7 @@ using Space_Wars.Content.Main.Particles;
 using Microsoft.Xna.Framework.Graphics;
 using System.Diagnostics;
 using Space_Wars.Content.Main.Story;
+using Space_Wars.Content.Main.Components;
 
 namespace Space_Wars.Content.Main;
 public class Mission
@@ -286,7 +287,15 @@ public class Mission
             for(int i = 0; i < enemiesSpawned.Count / 4 + 1; i++)
             {
                 Enemy enemy = enemiesSpawned[Util.Random.Next(0, enemiesSpawned.Count)];
-                enemy.AddBehaviour(enemy.DropItem(ItemFactory.NewScrap));
+                var comp = enemy.GetComponent<Behaviour>();
+                if(comp != null)
+                {
+                    comp.AddBehaviour(enemy.DropItem(ItemFactory.NewScrap));
+                }
+                else
+                {
+                    enemy.AddComponent(new Behaviour(enemy).AddBehaviour(enemy.DropItem(ItemFactory.NewScrap)));
+                }
             }
         }
         UI.EnemiesLeft.text = (currentWaveActive ? enemiesSpawned.Where(x => x.health > 0).Count() : 0).ToString();

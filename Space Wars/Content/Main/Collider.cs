@@ -10,6 +10,7 @@ using System.Linq;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
+using Space_Wars.Content.Main.Components;
 
 namespace Space_Wars.Content.Main;
 public interface ICollider
@@ -29,7 +30,7 @@ public interface ICollider
             var frictionVector = new Vector2(normalVector.Y, -normalVector.X);
             var relativeVelocity = -_entity.Velocity; //Include velocity if colliders are moving in the future.
             int collisionForce = (int)Math.Floor((relativeVelocity).Length() / 2);
-            if (_entity as Pickup == null && (collisionForce > 5 || _entity is Projectile))
+            if (_entity as Pickup == null && (collisionForce > 5 || _entity.GetComponent<Damager>() != null))
             {
                 _entity.Collide(collisionForce);
             }

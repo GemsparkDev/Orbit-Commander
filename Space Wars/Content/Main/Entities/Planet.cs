@@ -3,6 +3,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Space_Wars.Content.Main.Particles;
 using System;
 using System.Linq;
+using Space_Wars.Content.Main.Components;
 
 namespace Space_Wars.Content.Main.Entities;
 
@@ -121,7 +122,7 @@ public class Planet
             var frictionVector = new Vector2(normalVector.Y, -normalVector.X);
             var relativeVelocity = velocity - _entity.Velocity;
             int collisionForce = (int)Math.Floor((relativeVelocity).Length() / 2);
-            if (_entity as Pickup == null && (collisionForce > 5 || _entity is Projectile))
+            if (_entity as Pickup == null && (collisionForce > 5 || _entity.GetComponent<Damager>() != null))
             {
                 _entity.Collide(collisionForce);
             }

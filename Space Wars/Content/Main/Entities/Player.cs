@@ -113,6 +113,7 @@ public class Player : Entity
         {
             textures[i] = modules[(ModuleType)i].Texture;
         }
+        AddComponent(new Collide(this, PlayerCollide));
         EventHandler.SetFuseModuleDecals(textures);
         EventHandler.UpdateFuseUI(moduleFuses, spareFuses);
     }
@@ -685,7 +686,7 @@ public class Player : Entity
             isEngineActive = false;
         }
     }
-    public override bool Collide(int _damage, bool _ignoreImmunity = false)
+    public bool PlayerCollide(int _damage, bool _ignoreImmunity = false)
     {
         if (dockedEntity != null)
         {

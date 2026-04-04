@@ -21,7 +21,7 @@ public class EntityManager
     public List<Entity> Entities { get { return entities; } }
     private List<Entity> addedEntities = [];
     private List<Entity> enemies = [];
-    private List<Projectile> projectiles = [];
+    private List<Entity> projectiles = [];
     private static float currentKarma = 0;
     private static Player Player => Engine.SaveGame.Player;
     //Maximum distance for any detection when sensing = stealth
@@ -260,9 +260,9 @@ public class EntityManager
         {
             //Checks the entity type, and adds it to the corresponding list for each type
             entities.Add(entity);
-            if (entity is Projectile)
+            if (entity.GetComponent<Damager>() != null)
             {
-                projectiles.Add(entity as Projectile);
+                projectiles.Add(entity);
             }
             if (entity is Enemy || entity is Player)
             {
@@ -366,10 +366,6 @@ public class EntityManager
         float dist;
         foreach (var entity in entities)
         {
-            if (entity is Projectile)
-            {
-                continue;
-            }
             dist = Vector2.Distance(_position, entity.Position);
             if (dist < _radius + entity.ColliderRadius && dist > float.Epsilon)
             {
@@ -510,7 +506,7 @@ public class EntityManager
     {
         float nearestDistance = float.MaxValue;
         Entity returnProjectile = null;
-        foreach (Projectile targetProjectile in projectiles)
+        foreach (var targetProjectile in projectiles)
         {
             float distance = DistanceSqr(_entity, targetProjectile);
             if (distance < nearestDistance && _isFriendly != targetProjectile.isFriendly
