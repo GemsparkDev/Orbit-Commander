@@ -418,7 +418,7 @@ public class EntityManager
             {
                 continue;
             }
-            if(!_getDeadEnemies && targetEnemy as Enemy != null && (targetEnemy as Enemy).health <= 0)
+            if(!_getDeadEnemies && targetEnemy as Enemy != null && (targetEnemy as Enemy).Health <= 0)
             {
                 continue;
             }
@@ -516,20 +516,6 @@ public class EntityManager
                 returnProjectile = targetProjectile;
             }
         }
-        foreach (Entity missile in enemies)
-        {
-            if (missile.entityType != EntityType.Projectile)
-            {
-                continue;
-            }
-            float distance = DistanceSqr(_entity, missile);
-            if (distance < nearestDistance && _isFriendly != missile.isFriendly
-                && (missile.StealthAbility < _entity.SensingAbility || (missile.StealthAbility == _entity.SensingAbility && distance < StealthRange * StealthThreshold)))
-            {
-                nearestDistance = distance;
-                returnProjectile = missile;
-            }
-        }
         return returnProjectile;
     }
     public static float DistanceSqr(Entity _entity1, Entity _entity2)
@@ -571,7 +557,7 @@ public class EntityManager
         }
         foreach (var entity in entities)
         {
-            if(entity.entityType != EntityType.Projectile || _getProjectiles)
+            if(_getProjectiles || entity.GetComponent<Damager>() != null)
             {
                 CalculateIntersection(entity);
             }

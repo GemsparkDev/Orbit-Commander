@@ -10,18 +10,16 @@ using UILib.Content.Main;
 namespace Space_Wars.Content.Main.Entities;
 public class Pickup : Entity, IData
 {
-    private int hitsLeft;
+    Texture2D IData.Texture => itemData.RealSprite;
+    Color IData.Color => itemData.Color;
     public Items Type { get; } = Items.Scrap;
-
     protected ItemData itemData;
-    public Texture2D Texture => itemData.RealSprite;
     public Window Tooltip { get; } = new Window(Vector2.Zero, Assets.Get(Sprites.WideButton));
     public String Name => itemData.Name;
-    public virtual Color Color => itemData.Color;
     protected float invincibilityCooldown = 5;
     public int ID => itemData.ID;
     private Decal textbox;
-    public Pickup(ItemData _itemData, Vector2 _position, Vector2 _velocity, float _angularVelocity, int _integrity = 3)
+    public Pickup(ItemData _itemData, Vector2 _position, Vector2 _velocity, float _angularVelocity, int _health = 3)
         : base(_itemData.VirtualSprite, _position, _velocity, 0, _angularVelocity, true)
     {
         itemData = _itemData;
@@ -29,6 +27,7 @@ public class Pickup : Entity, IData
         Tooltip.AddWidget(new Decal(new Vector2(-Tooltip.Size.X / 3, 0), _itemData.RealSprite));
         textbox = new Decal(new Vector2(0, -5), Assets.TextFont, _itemData.Name, _itemData.TextColor, 5f);
         Tooltip.AddWidget(textbox);
+        AddComponent(new Health(this) { CurrentHealth = _health, MaxHealth = _health});
         AddComponent(new Collide(this, delegate(int _damage, bool _ignoreImmunity)
         {
             if (_damage <= 0)
@@ -40,27 +39,24 @@ public class Pickup : Entity, IData
                 invincibilityCooldown = 0;
                 return false;
             }
-            hitsLeft--;
+            Health--;
             if (_damage >= 10)
             {
-                hitsLeft--;
+                Health--;
             }
-            //Prevents negative integrity values
-            hitsLeft = Math.Max(hitsLeft, 0);
             if (!_ignoreImmunity)
             {
                 invincibilityCooldown = 1;
             }
-            if (hitsLeft <= 0)
+            if (Health <= 0)
             {
                 isExpired = true;
             }
             SoundManager.PlaySound(Assets.Get(Sound.Death), Position);
             Engine.ShakeScreen(10 / ((Position - Engine.Camera.Position).Length() + 150));
-            ParticleManager.Add(new Particle(null, 1, Position + new Vector2(0, -1), new Vector2(0, -1.5f), 0, 0, Color.Orange, new Color(255, 0, 0, 0)) { drawText = $"Integrity: {hitsLeft}" });
+            ParticleManager.Add(new Particle(null, 1, Position + new Vector2(0, -1), new Vector2(0, -1.5f), 0, 0, Color.Orange, new Color(255, 0, 0, 0)) { drawText = $"Integrity: {Math.Max(Health, 0)}" });
             return true;
-            }));
-            hitsLeft = _integrity;
+        }));
     }
     public Pickup(ItemData _itemData, List<string> _disassembly, LoadLogger _logger)
         : base(_itemData.VirtualSprite, default, default, 0, 0, true)
@@ -71,11 +67,11 @@ public class Pickup : Entity, IData
         Tooltip.AddWidget(new Decal(new Vector2(-Tooltip.Size.X / 3, 0), _itemData.RealSprite));
         textbox = new Decal(new Vector2(0, -5), Assets.TextFont, _itemData.Name, _itemData.TextColor, 5f);
         Tooltip.AddWidget(textbox);
-        _logger.Try(delegate { hitsLeft = Int32.Parse(_disassembly[1]);}, 1);
+        _logger.Try(delegate { Health = Int32.Parse(_disassembly[1]);}, 1);
     }
     public void Parse(List<string> _disassembly, LoadLogger _logger)
     {
-        _logger.Try(delegate { hitsLeft = Int32.Parse(_disassembly[1]); }, 1);
+        _logger.Try(delegate { Health = Int32.Parse(_disassembly[1]); }, 1);
     }
     public override void Update()
     {
@@ -112,8 +108,6 @@ public class Pickup : Entity, IData
             float offset = Util.FIED(0.05f);
             Velocity = parent.Velocity * (1 - offset) + Velocity * (offset);
         }
-        Position += Velocity * Engine.DeltaSeconds * 60;
-        Angle += AngularVelocity * Engine.DeltaSeconds * 60;
         var nearestProjectile = Engine.EntityManager.NearestProjectile(this, isFriendly);
         if (nearestProjectile != null)
         {
@@ -134,12 +128,12 @@ public class Pickup : Entity, IData
     public virtual string SerializeAttributes()
     {
         throw new NotImplementedException();
-        return $"{hitsLeft}";
+        return $"{Health}";
     }
     public virtual string Serialize()
     {
         throw new NotImplementedException();
-        return $"{{{Type},{hitsLeft}}}";
+        return $"{{{Type},{Health}}}";
     }
     IEnumerable<int> Barricade()
     {

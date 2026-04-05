@@ -10,7 +10,6 @@ using System.Linq;
 
 namespace Space_Wars.Content.Main.Entities;
 
-public enum EntityType { Projectile, Enemy, Item, None }
 public class Entity
 {
     //TODO: Make sure to add null checks to all these!
@@ -20,29 +19,28 @@ public class Entity
     public float AngularVelocity { get { return GetComponent<Transform>().AngularVelocity; } set { GetComponent<Transform>().AngularVelocity = value; } }
     public float TimeLeft { get { return GetComponent<ExpireTimer>().TimeLeft; } set { GetComponent<ExpireTimer>().TimeLeft = value; } }
     public int Damage { get { return GetComponent<Damager>().Damage; } }
+    public int Health { get { return GetComponent<Health>().CurrentHealth; } set { GetComponent<Health>().CurrentHealth = value; } }
+    public int MaxHealth { get { return GetComponent<Health>().MaxHealth; } set { GetComponent<Health>().MaxHealth = value; } }
+    protected List<float> CD { get { return GetComponent<Cooldown>().Cooldowns; } set { GetComponent<Cooldown>().Cooldowns = value; } }
+    public Texture2D Texture { get { return GetComponent<Sprite>().Texture; } set { GetComponent<Sprite>().Texture = value; } }
+    public Color Color { get { return GetComponent<Sprite>().Color; } set { GetComponent<Sprite>().Color = value; } }
+    public Vector2 Size => GetComponent<Sprite>().Size;
+    public virtual float ColliderRadius => GetComponent<Sprite>().ColliderRadius;
     public bool isExpired = false;
     public bool isFriendly;
     public virtual int SensingAbility { get; protected set; } = 1;
     public virtual int StealthAbility { get { return stealthAbility; } protected set { stealthAbility = value; } }
     private int stealthAbility = 0;
-    protected float revealDuration = 0;
-    public EntityType entityType;
-    private List<Component> components;
-
-    protected ParticleEmitter collider;
-    public virtual float ColliderRadius => GetComponent<Sprite>().ColliderRadius;
-    public Vector2 Size => GetComponent<Sprite>().Size;
+    protected float RevealDuration { get { return GetComponent<Sprite>().RevealDuration; } set { GetComponent<Sprite>().RevealDuration = value; } }
+    private List<Component> components = [];
     public float Temperature { get; private set; } = 0; //-1: Freeze, 0: Neutral, 1: Burn
-    public virtual void LowerCooldown() { }
     protected static Player Player => Engine.SaveGame.Player;
-    public Texture2D Texture { get { return GetComponent<Sprite>().Texture; } set { GetComponent<Sprite>().Texture = value; } }
-    public Color Color { get { return GetComponent<Sprite>().Color; } set { GetComponent<Sprite>().Color = value; } }
-    public StatusHolder StatusHolder { get; private set; } = new();
+    public StatusHolder StatusHolder { get; set; } = new();
     public Entity(Texture2D _texture, Vector2 _position, Vector2 _velocity, float _angle, float _angularVelocity, bool _isFriendly)
     {
-        components = [new Transform(this) { Position = _position, Velocity = _velocity, Angle = _angle, AngularVelocity = _angularVelocity }, new Sprite(this) { Texture = _texture }];
+        AddComponent(new Transform(this) { Position = _position, Velocity = _velocity, Angle = _angle, AngularVelocity = _angularVelocity });
+        AddComponent(new Sprite(this) { Texture = _texture });
         isFriendly = _isFriendly;
-        collider = new ParticleEmitter(Assets.Get(Sprites.Dot), Position, ColliderRadius, Color.Yellow) { isEmitterActive = false };
     }
     public virtual void Update()
     {
@@ -50,14 +48,7 @@ public class Entity
         {
             comp.Update();
         }
-        if (revealDuration > 0)
-        {
-            revealDuration -= Engine.DeltaSeconds;
-        }
         StatusHolder.Update(this);
-        collider.Update();
-        collider.position = Position;
-        collider.particleVelocity = ColliderRadius;
         Temperature *= Util.FIED(0.707f); //Radiative
         if(Temperature > 1)
         {
@@ -70,11 +61,13 @@ public class Entity
     }
     public T GetComponent<T>() where T : Component
     {
+        T comp;
         foreach (Component component in components)
         {
-            if (component.GetType().Equals(typeof(T)))
+            comp = (T)component;
+            if(comp != null)
             {
-                return (T)component;
+                return comp;
             }
         }
         return null;
@@ -88,7 +81,9 @@ public class Entity
         var comp = GetComponent<Collide>(); 
         if(comp != null)
         {
-            return comp.OnCollide(_damage, _ignoreImmunity);
+            bool wasHit = comp.OnCollide(_damage, _ignoreImmunity);
+            comp.WasHit = comp.WasHit || wasHit;
+            return wasHit;
         }
         return false;
     }
@@ -122,7 +117,7 @@ public class Entity
     }
     public void Reveal(float _duration)
     {
-        revealDuration = _duration;
+        RevealDuration = _duration;
     }
     public void ApplyWork(float _q)
     {
@@ -162,7 +157,7 @@ public class Entity
         {
             stealth  = 0;
         }
-        stealth = MathF.Max(stealth, (float)Math.Clamp(revealDuration, 0f, 1f));
+        stealth = MathF.Max(stealth, (float)Math.Clamp(RevealDuration, 0f, 1f));
         //Outline in atmosphere looks better
         if (Engine.SaveGame.CurrentMission.GetAtmospherePressure(this) > 0 || SaveGame.ColorScheme.IsOutlined())
         {
@@ -182,7 +177,6 @@ public class Entity
             _spriteBatch.Draw(Engine.Line, Position, new Rectangle((int)Position.X, (int)Position.Y, 10, 1), Color.Red,
                 Angle - MathF.PI / 2, Vector2.Zero, Vector2.One, SpriteEffects.None, 0.4f);
         }
-        collider.isEmitterActive = SaveGame.DebugMode;
     }
     public static Entity NewProjectile(Texture2D _texture, Vector2 _position, Vector2 _velocity, float _angle, float _angularVelocity, bool _isFriendly, int _damage, int _stealth)
     {
@@ -207,7 +201,6 @@ public class Entity
         projectile.AddComponent(new ExpireTimer(projectile) { TimeLeft = 8 });
         projectile.AddComponent(new Damager(projectile) { Damage = _damage });
         projectile.Color = _isFriendly ? SaveGame.ColorScheme.FriendlyProjectile() : SaveGame.ColorScheme.HostileEnemy();
-        projectile.entityType = EntityType.Projectile;
         return projectile;
     }
     IEnumerable<int> PulseShot(bool _isHoming)
@@ -215,8 +208,6 @@ public class Entity
         bool isHoming = _isHoming;
         while (true)
         {
-            Position += Velocity * Engine.DeltaSeconds * 60;
-            Angle += AngularVelocity * Engine.DeltaSeconds * 60;
             Entity nearestEnemy = Engine.EntityManager.NearestEnemy(this, true);
             if (isHoming && nearestEnemy != null)
             {
@@ -247,8 +238,6 @@ public class Entity
         float time = 0;
         while (true)
         {
-            Position += Velocity * Engine.DeltaSeconds * 60;
-            Angle += AngularVelocity * Engine.DeltaSeconds * 60;
             time += Engine.DeltaSeconds;
             Vector2 posOffset = Util.ToUnitVector(Angle) * MathF.Cos(time * 8 + offset);
             Position += new Vector2(posOffset.Y, -posOffset.X);
@@ -282,7 +271,6 @@ public class Entity
             }
             var nearestEnemy = Engine.EntityManager.Hitscan(Position, Velocity, Velocity.Length() * Engine.DeltaSeconds * 60, false, out Vector2 end, (isFriendly ? -1 : 1));
             Position = end;
-            Angle += AngularVelocity * Engine.DeltaSeconds * 60;
             beam.position = Position;
             beam.Update();
             if (nearestEnemy.Count > 0)
@@ -311,7 +299,6 @@ public class Entity
         while(true)
         {
             time += Engine.DeltaSeconds;
-            Position += Velocity * Engine.DeltaSeconds * 60;
             Velocity *= (1 - Engine.DeltaSeconds);
             Angle += AngularVelocity * Engine.DeltaSeconds * 60 + MathF.Sin(time * 4) / 15;
             AngularVelocity *= (1 - Engine.DeltaSeconds * 2);
@@ -368,8 +355,6 @@ public class Entity
         float cooldown = 0.1f;
         while(true)
         {
-            Position += Velocity * Engine.DeltaSeconds * 60;
-            Angle += AngularVelocity * Engine.DeltaSeconds * 60;
             if (cooldown > 0)
             {
                 cooldown -= Engine.DeltaSeconds;
@@ -397,8 +382,6 @@ public class Entity
     {
         while(true)
         {
-            Position += Velocity * Engine.DeltaSeconds * 60;
-            Angle += AngularVelocity * Engine.DeltaSeconds * 60;
             Entity nearestEnemy = Engine.EntityManager.NearestEnemy(this);
             nearestEnemy.Collide(GetComponent<Damager>().Damage);
             Collide(1);
@@ -498,16 +481,13 @@ public class GrapplingHook : Entity
     {
         Parent = _parent;
         Color = _isFriendly ? new Color(0, 255, 255) : Color.Red;
-        entityType = EntityType.Projectile;
         StealthAbility = 0;
         AddComponent(new ExpireTimer(this) { TimeLeft = 60 });
-        Color = isFriendly ? SaveGame.ColorScheme.FriendlyProjectile() : SaveGame.ColorScheme.HostileEnemy();
     }
     public override void Update()
     {
         base.Update();
         Velocity *= (1 - Engine.DeltaSeconds) * 0.97f;
-        Position += Velocity * Engine.DeltaSeconds * 60;
         if (target != null)
         {
             Position = target.Position;
@@ -621,7 +601,6 @@ public class FlameBolt : Entity
     public FlameBolt(Vector2 _position, Vector2 _velocity, bool _isFriendly, int _damage, float _timeLeft = 0.7f, float _particleVelocity = 1, int _stealth = 0, float _temp = 10)
         : base(Assets.Get(Sprites.Circle), _position, _velocity, 0, 0, _isFriendly)
     {
-        entityType = EntityType.Projectile;
         StealthAbility = _stealth;
         AddComponent(new ExpireTimer(this) { TimeLeft = _timeLeft });
         AddComponent(new Damager(this) { Damage = _damage });
@@ -638,12 +617,10 @@ public class FlameBolt : Entity
     public FlameBolt(Vector2 _position, Vector2 _velocity, bool _isFriendly, int _damage, ParticleEmitter _emitter, float _timeLeft = 0.7f, int _stealth = 0, float _temp = 10)
         : base(Assets.Get(Sprites.Circle), _position, _velocity, 0, 0, _isFriendly)
     {
-        entityType = EntityType.Projectile;
         StealthAbility = _stealth;
         AddComponent(new ExpireTimer(this) { TimeLeft = _timeLeft });
         AddComponent(new Damager(this) { Damage = _damage });
         emitter = _emitter;
-        entityType = EntityType.Projectile;
         Color = Color.Transparent;
         maxTimeLeft = _timeLeft;
         temp = _temp;
@@ -656,12 +633,9 @@ public class FlameBolt : Entity
     public override void Update()
     {
         base.Update();
-        collider.particleVelocity = ColliderRadius;
         emitter.position = Position;
         emitter.offsetVelocity = Velocity;
         emitter.Update();
-        Position += Velocity * Engine.DeltaSeconds * 60;
-        Angle += AngularVelocity * Engine.DeltaSeconds * 60;
         if (emitter.EmitterType == EmitterType.Circle)
         {
             emitter.particleVelocity = MathF.Tanh(maxTimeLeft - TimeLeft) * MathF.Tanh(TimeLeft) * 100;

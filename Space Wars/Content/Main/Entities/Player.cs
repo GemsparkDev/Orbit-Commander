@@ -72,7 +72,7 @@ public class Player : Entity
     {
         get
         {
-            if (revealDuration > 0)
+            if (RevealDuration > 0)
             {
                 return -10;
             }
@@ -127,7 +127,6 @@ public class Player : Entity
     }
     public override void Update()
     {
-        collider.offsetVelocity = Velocity;
         Color c = isFriendly ? SaveGame.ColorScheme.FriendlyEnemy() : SaveGame.ColorScheme.HostileEnemy();
         if (Color != c)
         {
@@ -236,7 +235,7 @@ public class Player : Entity
         UI.PlayerHealth.Colors[0] = new Color(colorVec.X, colorVec.Y, colorVec.Z);
 
         //Only displays if the player has abilities unlocked
-        if (Progression > 1) 
+        if (Progression > 1 || SaveGame.DebugMode) 
         {
             colorVec = new Vector3(0, 1, 1) * val + new Vector3(0.2f, 1, 0.8f) * (1f - val);
             UI.PlayerAbility.Colors[0] = new Color(colorVec.X, colorVec.Y, colorVec.Z);
@@ -247,7 +246,7 @@ public class Player : Entity
             UI.PlayerAbility.Colors[0] = Color.Transparent;
             UI.PlayerAbility.Colors[1] = Color.Transparent;
         }
-
+        LowerCooldown();
         if (currentHealth > 50)
         {
             smokeParticles.isEmitterActive = false;
@@ -264,8 +263,6 @@ public class Player : Entity
             Velocity += Vector2.Normalize(-Position) * (Position.Length() - (40 * 50 + planet.radius*2)) * Engine.DeltaSeconds / 30;
         }
         base.Update();
-        collider.position += Velocity;
-        Position += Velocity * Engine.DeltaSeconds * 60;
         if (dockedEntity != null)
         {
             if (!(dockedEntity == null) && !dockedEntity.Entity.isExpired)
@@ -280,7 +277,7 @@ public class Player : Entity
         }
         UI.PlayerSpecialHealth.Colors[0] = Color.Transparent;
         UI.PlayerSpecialHealth.Colors[1] = Color.Transparent;
-        LowerCooldown();
+
         if (Progression < 0)
         {
             isEngineActive = false;
@@ -293,7 +290,7 @@ public class Player : Entity
         //ParticleManager.Add(new Particle(Assets.Get(Sprite.Circle), position, 0, Color.White));
         targetVector = Vector2.Normalize(mouseCamPos - Position);
     }
-    public override void LowerCooldown()
+    public void LowerCooldown()
     {
         if (SecondaryWeapon != null && Util.Random.NextSingle() < 0.25f)
         {
@@ -527,7 +524,7 @@ public class Player : Entity
                     if(aimAssist)
                     {
                         Entity nearestEnemy = Engine.EntityManager.NearestEnemy(this, true);
-                        if(nearestEnemy != null && (nearestEnemy as Enemy).health <= 0)
+                        if(nearestEnemy != null && (nearestEnemy as Enemy).Health <= 0)
                         {
                             var relativePos = Vector2.Normalize(nearestEnemy.Position - Position);
                             if (Vector2.Dot(relativePos, targetVector) > 0.9f)
@@ -562,7 +559,7 @@ public class Player : Entity
                 {
                     leashedMaterials = [];
                 }
-                if (Progression > 1 && Input.WasJustPressed(Binding.Ability))
+                if ((Progression > 1 || SaveGame.DebugMode) && Input.WasJustPressed(Binding.Ability))
                 {
                     foreach (var module in modules)
                     {
@@ -698,7 +695,7 @@ public class Player : Entity
         {
             foreach (var module in modules)
             {
-                _damage = module.Value.OnCollide(_damage);
+                _damage = module.Value.Collide(_damage);
             }
         }
         _damage = StatusHolder.ModifyDamage(_damage);

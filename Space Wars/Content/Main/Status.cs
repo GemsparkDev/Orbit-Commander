@@ -5,6 +5,7 @@ using Microsoft.Xna.Framework;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Xna.Framework.Graphics;
+using Space_Wars.Content.Main.Components;
 
 namespace Space_Wars.Content.Main;
 public abstract class Status(Sprites _icon)
@@ -252,7 +253,21 @@ public class Berserk(float _timeLeft) : Status(Sprites.Knob)
     {
         if (bonus)
         {
-            _parent.LowerCooldown();
+            var comp = _parent.GetComponent<Cooldown>();
+            if(comp != null)
+            {
+                for (int i = 0; i < comp.Cooldowns.Count; i++)
+                {
+                    if (comp.Cooldowns[i] > 0)
+                    {
+                        comp.Cooldowns[i] -= Engine.DeltaSeconds;
+                    }
+                }
+            }
+            if(_parent is Player)
+            {
+                (_parent as Player).LowerCooldown();
+            }
         }
         bonus = !bonus;
         effect.position = _parent.Position;

@@ -146,7 +146,7 @@ public class Mission
         var isReady = true;
         foreach (var enemy in enemiesSpawned)
         {
-            if (enemy.health > 0)
+            if (enemy.Health > 0)
             {
                 isReady = false;
             }
@@ -298,7 +298,7 @@ public class Mission
                 }
             }
         }
-        UI.EnemiesLeft.text = (currentWaveActive ? enemiesSpawned.Where(x => x.health > 0).Count() : 0).ToString();
+        UI.EnemiesLeft.text = (currentWaveActive ? enemiesSpawned.Where(x => x.Health > 0).Count() : 0).ToString();
         EventHandler.UpdateEnemyCountdownUI(waveTimer, maxWaveTimer, Wave);
     }
     public void PlanetUpdate()

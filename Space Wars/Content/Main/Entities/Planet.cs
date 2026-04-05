@@ -107,7 +107,7 @@ public class Planet
                 if (strength > 2)
                 {
                     _entity.StatusHolder.ApplyStatus(new Pressure(Color.Red, isSun));
-                    if((_entity as Enemy) != null && (_entity as Enemy).health <= 0)
+                    if((_entity as Enemy) != null && (_entity as Enemy).Health <= 0)
                     {
                         _entity.isExpired = true;
                     }

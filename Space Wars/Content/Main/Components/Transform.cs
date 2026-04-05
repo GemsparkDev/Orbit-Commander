@@ -13,4 +13,9 @@ internal class Transform(Entity _entity) : Component(_entity)
     public Vector2 Velocity { get; set; } = Vector2.Zero;
     public float Angle { get; set; } = 0;
     public float AngularVelocity { get; set; } = 0;
+    public override void Update()
+    {
+        Position += Velocity * Engine.DeltaSeconds * 60;
+        Angle += AngularVelocity * Engine.DeltaSeconds * 60;
+    }
 }
