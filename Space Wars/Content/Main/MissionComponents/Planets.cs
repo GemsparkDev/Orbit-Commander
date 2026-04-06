@@ -6,9 +6,11 @@ using System.Threading.Tasks;
 using Space_Wars.Content.Main.Entities;
 using Microsoft.Xna.Framework.Graphics;
 using Space_Wars.Content.Main.Particles;
+using Microsoft.Xna.Framework;
+using Space_Wars.Content.Main.Components;
 
 namespace Space_Wars.Content.Main.MissionComponents;
-internal class Planets(Planet[] _planets) : IMissionComponent
+internal class Planets(Planet[] _planets) : IMissionComponent, IObstacle
 {
     public Planet[] GetPlanets { get { return _planets; } }
     public void Initialize()
@@ -23,32 +25,48 @@ internal class Planets(Planet[] _planets) : IMissionComponent
     }
     public void Update()
     {
-        foreach (var planet in _planets)
+        foreach (var planet1 in _planets)
         {
             foreach (var planet2 in _planets)
             {
-                if (planet == planet2)
+                if (planet1 == planet2)
                 {
                     continue;
                 }
-                planet.AttractObject(planet2);
+                planet1.AttractObject(planet2);
             }
             foreach(var entity in Engine.EntityManager.Entities)
             {
-                planet.AttractObject(entity);
+                planet1.AttractObject(entity);
             }
             foreach(var particle in ParticleManager.Particles)
             {
                 if(particle.experienceGravity)
                 {
-                    planet.AttractObject(particle);
+                    planet1.AttractObject(particle);
                 }
             }
         }
-        foreach (var planet in _planets)
+        foreach (var planet1 in _planets)
         {
-            planet.Update();
+            planet1.Update();
         }
+        //Prevents players from losing important items
+        Entity[] importantEntites = Engine.EntityManager.GetEntity<KeyTag>();
+        var planet = _planets[0];
+        foreach(var entity in importantEntites)
+        {
+            if (entity.Position.Length() >= 40 * 50 + planet.radius)
+            {
+                entity.Velocity *= 0.8f;
+                entity.Velocity += Vector2.Normalize(-entity.Position) * Engine.DeltaSeconds * (entity.Position.Length() - (40 * 50 + planet.radius));
+            }   
+        }
+        if (Engine.SaveGame.Player.Position.Length() >= 40 * 50 + planet.radius)
+        {
+            Engine.SaveGame.Player.Velocity *= 0.8f;
+            Engine.SaveGame.Player.Velocity += Vector2.Normalize(-Engine.SaveGame.Player.Position) * Engine.DeltaSeconds * (Engine.SaveGame.Player.Position.Length() - (40 * 50 + planet.radius));
+        }  
     }
     public float GetAtmospherePressure(Entity _entity)
     {
@@ -65,5 +83,30 @@ internal class Planets(Planet[] _planets) : IMissionComponent
         {
             planet.Draw(_spriteBatch);
         }
+        if (Engine.SaveGame.Player.Position.Length() > _planets[0].radius * 2 + 15 * 50)
+        {
+            _spriteBatch.Draw(Assets.Get(Sprites.Arrow), Engine.SaveGame.Player.Position - Vector2.Normalize(Engine.SaveGame.Player.Position) * 25, null, Engine.SaveGame.Player.Color, -Util.ToAngle(Engine.SaveGame.Player.Position), Assets.DimsOf(Sprites.Arrow) / 2, 1, 0, 0.2f);
+            _spriteBatch.DrawString(Assets.TextFont, "Return to planet.", Engine.Camera.Position - new Vector2(Assets.TextFont.MeasureString("Return to planet.").X/2, 225), Color.Crimson);
+        }
+    }
+    public bool Collide(Entity _entity)
+    {
+        bool IsColliding = false;
+        foreach(var planet in _planets)
+        {
+            IsColliding = IsColliding || planet.Collide(_entity);
+        }
+        return IsColliding;
+    }
+    public ICollider IsColliding(Vector2 _position, Vector2 _velocity, float _colliderRadius, bool _override)
+    {
+        foreach(var planet in _planets)
+        {
+            if(planet.IsColliding(_position, _velocity, _colliderRadius, _override))
+            {
+                return planet;
+            }
+        }
+        return null;
     }
 }

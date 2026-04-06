@@ -22,7 +22,7 @@ internal class WaveSpawner(List<(int cost, Func<Vector2, Vector2, float, bool, E
     private int currentBoss = Util.Random.Next(bosses.Count);
     public float TimerModifier { get; set; } = _timerModifier;
     public int EnemiesSpawned { get; set; } = 0;
-    public int Wave { get; set; } = 0;
+    public int Wave {get{return Engine.SaveGame.CurrentMission.Wave;} set{Engine.SaveGame.CurrentMission.Wave = value;}}
     public void Draw(SpriteBatch _spriteBatch)
     {
     }

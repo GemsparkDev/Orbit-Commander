@@ -7,7 +7,7 @@ using Space_Wars.Content.Main.Components;
 
 namespace Space_Wars.Content.Main.Entities;
 
-public class Planet
+public class Planet : ICollider
 {
     public Vector2 position;
     public Vector2 velocity;
@@ -64,6 +64,40 @@ public class Planet
         float speed = MathF.Sqrt(_planetMass / distance);
         return new Vector2(-relativePosition.Y, relativePosition.X) / distance * speed;
     }
+    public bool Collide(Entity _entity)
+    {
+        Vector2 relativePosition = _entity.Position - position;
+        if(relativePosition.Length() >= radius + _entity.ColliderRadius)
+        {
+            return false;
+        }
+        var normalVector = Vector2.Normalize(relativePosition);
+        var frictionVector = new Vector2(normalVector.Y, -normalVector.X);
+        var relativeVelocity = velocity - _entity.Velocity;
+        int collisionForce = (int)Math.Floor((relativeVelocity).Length() / 2);
+        if (_entity as Pickup == null && (collisionForce > 5 || _entity.GetComponent<Damager>() != null))
+        {
+            _entity.Collide(collisionForce);
+        }
+        float verticalVelocity = Math.Max(0, Vector2.Dot(relativeVelocity, normalVector));
+        _entity.Velocity += normalVector * verticalVelocity + frictionVector * Vector2.Dot(relativeVelocity, frictionVector) * 0.1f;
+        _entity.Position += normalVector * (radius + _entity.ColliderRadius - Vector2.Distance(position, _entity.Position));
+        float val = (int)MathF.Sqrt(collisionForce);
+        if (verticalVelocity > 1)
+        {
+            for (int i = 0; i < val * 1.5f; i++)
+            {
+                ParticleManager.Add(new Particle(Assets.Get(Sprites.Dot), 10, normalVector * (radius + 2) + position, normalVector * val + new Vector2(Util.OneToNegOne(), Util.OneToNegOne()) * val / 2, 0, 0, color * 0.75f, Color.Transparent) { experienceGravity = true });
+            }
+        }
+        _entity.ConductHeat(Temperature, 5);
+        return true;
+    }
+    public bool IsColliding(Vector2 _position, Vector2 _velocity, float _colliderRadius, bool _override)
+    {
+        return (position - _position).Length() >= radius + _colliderRadius;
+    }
+    public string Print() { return ""; }
     public Vector2 AttractObject(Entity _entity)
     {
         Vector2 relativePosition = _entity.Position - position;
@@ -118,26 +152,7 @@ public class Planet
         }
         else
         {
-            var normalVector = Vector2.Normalize(relativePosition);
-            var frictionVector = new Vector2(normalVector.Y, -normalVector.X);
-            var relativeVelocity = velocity - _entity.Velocity;
-            int collisionForce = (int)Math.Floor((relativeVelocity).Length() / 2);
-            if (_entity as Pickup == null && (collisionForce > 5 || _entity.GetComponent<Damager>() != null))
-            {
-                _entity.Collide(collisionForce);
-            }
-            float verticalVelocity = Math.Max(0, Vector2.Dot(relativeVelocity, normalVector));
-            _entity.Velocity += normalVector * verticalVelocity + frictionVector * Vector2.Dot(relativeVelocity, frictionVector) * 0.1f;
-            _entity.Position += normalVector * (radius + _entity.ColliderRadius - Vector2.Distance(position, _entity.Position));
-            float val = (int)MathF.Sqrt(collisionForce);
-            if (verticalVelocity > 1)
-            {
-                for (int i = 0; i < val * 1.5f; i++)
-                {
-                    ParticleManager.Add(new Particle(Assets.Get(Sprites.Dot), 10, normalVector * (radius + 2) + position, normalVector * val + new Vector2(Util.OneToNegOne(), Util.OneToNegOne()) * val / 2, 0, 0, color * 0.75f, Color.Transparent) { experienceGravity = true });
-                }
-            }
-            _entity.ConductHeat(Temperature, 5);
+            Collide(_entity);
             return Vector2.Zero;
         }
     }

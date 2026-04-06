@@ -7,11 +7,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Xna.Framework;
 
 namespace Space_Wars.Content.Main.MissionComponents;
-public class Colliders(Func<ICollider[]> _colliders) : IMissionComponent
+public class Colliders(Func<ICollider[]> _colliders) : IMissionComponent, IObstacle
 {
-    public ICollider[] GetColliders { get; private set; }
+    public ICollider[] GetColliders { get; set; }
     public void Draw(SpriteBatch _spriteBatch)
     {
     }
@@ -34,5 +35,25 @@ public class Colliders(Func<ICollider[]> _colliders) : IMissionComponent
                 //collider.Collide(particle);
             }
         }
+    }
+    public bool Collide(Entity _entity)
+    {
+        bool IsColliding = false;
+        foreach(var collider in GetColliders)
+        {
+            IsColliding = IsColliding || collider.Collide(_entity);
+        }
+        return IsColliding;
+    }
+    public ICollider IsColliding(Vector2 _position, Vector2 _velocity, float _colliderRadius, bool _override)
+    {
+        foreach(var collider in GetColliders)
+        {
+            if(collider.IsColliding(_position, _velocity, _colliderRadius, _override))
+            {
+                return collider;
+            }
+        }
+        return null;
     }
 }

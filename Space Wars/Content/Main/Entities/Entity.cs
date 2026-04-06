@@ -491,21 +491,13 @@ public class GrapplingHook : Entity
             {
                 isExpired = true;
             }
-            foreach (var collider in Engine.SaveGame.CurrentMission.Colliders)
+            //TODO: Get the grappling hook to work for moving colliders
+            var collider = Engine.SaveGame.CurrentMission.IsColliding(Position, Velocity, ColliderRadius, false);
+            if (collider != null)
             {
-                if (collider.Collide(this))
-                {
-                    target = new GenericLatch(Position);
-                    SoundManager.PlaySound(Assets.Get(Sound.ShieldHit), Position);
-                    maxDistance = Vector2.Distance(Position, Parent.Position);
-                }
-            }
-            var planet = Engine.SaveGame.CurrentMission.IsColliding(Position + Velocity * Engine.DeltaSeconds * 60);
-            if (planet != null)
-            {
-                target = new LatchedPlanet(planet, Position);
+                target = new GenericLatch(Position);
                 SoundManager.PlaySound(Assets.Get(Sound.ShieldHit), Position);
-                maxDistance = distance;
+                maxDistance = Vector2.Distance(Position, Parent.Position);
             }
             List<Entity> entities = [Engine.EntityManager.NearestEnemy(this), Engine.EntityManager.NearestAlly(this), Engine.EntityManager.NearestItem(this, true)];
             foreach (var entity in entities)

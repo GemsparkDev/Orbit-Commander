@@ -9,6 +9,7 @@ using System.Diagnostics;
 using Space_Wars.Content.Main.Story;
 using Space_Wars.Content.Main.Components;
 using Space_Wars.Content.Main.MissionComponents;
+//using System.Numerics;
 
 namespace Space_Wars.Content.Main;
 public class Mission
@@ -20,6 +21,9 @@ public class Mission
     public float RestartTimer { get; set; } = -1;
     public bool music = true;
     public bool relaunchable = false;
+    public int Wave {get; set;} = 0;
+    //TODO: Add behavior for when there is no planet
+    public Planet Planet { get { return GetComponent<Planets>().GetPlanets[0]; }}
 
     private EntityConstructor escapeVehicle = null;
     //Save original entity parameters to allow cloning
@@ -28,6 +32,15 @@ public class Mission
     private IPlayerSpawner spawner;
 
     private List<IMissionComponent> components = [];
+    private List<IObstacle> obstacles = [];
+    public void AddComponent(IMissionComponent component)
+    {
+        components.Add(component);
+        if(component is IObstacle)
+        {
+            obstacles.Add(component as IObstacle);
+        }
+    }
     public T GetComponent<T>() where T : class, IMissionComponent
     {
         T comp;
@@ -44,6 +57,13 @@ public class Mission
     public Mission(List<IMissionComponent> _components, List<ICondition> _missionObjectives, string _name, string _description, IPlayerSpawner _spawner, bool _escapeVehicle = false)
     {
         components = _components;
+        foreach(var comp in _components)
+        {
+            if(comp is IObstacle)
+            {
+                obstacles.Add(comp as IObstacle);
+            }
+        }
         Name = _name;
         Description = _description;
         CopyObjectives = _missionObjectives;
@@ -96,19 +116,18 @@ public class Mission
             }
             if (TestCompletion())
             {
-                //TODO: Figure out what counts as a wave
-                throw new NotImplementedException();
-                //Engine.SaveGame.CompleteMission(Wave);
+                Engine.SaveGame.CompleteMission(Wave);
             }
         }        
     }
-    public Planet IsColliding(Vector2 _position)
+    public ICollider IsColliding(Vector2 _position, Vector2 _velocity, float _colliderRadius, bool _override)
     {
-        foreach (var planet in planets)
+        foreach(var obstacle in obstacles)
         {
-            if (planet.IsColliding(_position))
+            var collider = obstacle.IsColliding(_position, _velocity, _colliderRadius, _override);
+            if(collider != null)
             {
-                return planet;
+                return collider;
             }
         }
         return null;
@@ -241,12 +260,17 @@ public class Mission
     }
     public Vector2 GetNormalizedAcceleration(Vector2 _position)
     {
-        Vector2 acceleration = Vector2.Zero;
-        foreach (var planet in planets)
+        var comp = GetComponent<Planets>();
+        if(comp != null)
         {
-            acceleration -= planet.GetAcceleration(_position);
+            Vector2 acceleration = Vector2.Zero;
+            foreach (var planet in comp.GetPlanets)
+            {
+                acceleration -= planet.GetAcceleration(_position);
+            }
+            return acceleration;
         }
-        return acceleration;
+        return Vector2.Zero;
     }
     public Mission Clone()
     {
@@ -258,30 +282,20 @@ public class Mission
         float distanceMultiplier = 1 + (Util.Random.NextSingle() - 0.5f) / 4;
         float distance = (Engine.ScreenSize.X + Engine.ScreenSize.Y) * distanceMultiplier / 3;
         Vector2 spawnLocation = Util.ToUnitVector(angle) * distance + Engine.SaveGame.Player.Position;
-        foreach (var planet in planets)
+        if(IsColliding(spawnLocation, Vector2.Zero, 10, true) != null)
         {
-            if (Vector2.Distance(spawnLocation, planet.position) < planet.radius)
-            {
-                return NewSpawnLocation();
-            }
+            return NewSpawnLocation();
         }
         return spawnLocation;
     }
     public float Hitscan(Vector2 _pos, Vector2 _dir)
     {
-        float distance = 999999;
-        foreach (var planet in planets)
+        Enemy enemy = new Enemy(_pos, _dir * 99999, 0, 1, Assets.Get(Sprites.Dot));
+        foreach(var obstacle in obstacles)
         {
-            Vector2 relativePos = planet.position - _pos;
-            float closestLength = (relativePos.X * _dir.X + relativePos.Y * _dir.Y);
-            float closestDistance = Vector2.Distance(_dir * closestLength + _pos, planet.position);
-            float discriminant = MathF.Sqrt(planet.radius * planet.radius - closestDistance * closestDistance);
-            if (closestLength > 0 && closestDistance < planet.radius && distance > closestLength - discriminant)
-            {
-                distance = closestLength - discriminant;
-            }
+            obstacle.Collide(enemy);
         }
-        return distance;
+        return Vector2.Distance(_pos, enemy.Position);
     }
     private bool TestCompletion()
     {

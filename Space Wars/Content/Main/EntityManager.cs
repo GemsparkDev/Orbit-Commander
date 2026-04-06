@@ -517,6 +517,18 @@ public class EntityManager
         }
         return returnProjectile;
     }
+    public Entity[] GetEntity<T>() where T : Component
+    {
+        List<Entity> selectedEntities = [];
+        foreach(var entity in entities)
+        {
+            if(entity.GetComponent<T>() != null)
+            {
+                selectedEntities.Add(entity);
+            }
+        }
+        return selectedEntities.ToArray();
+    }
     public static float DistanceSqr(Entity _entity1, Entity _entity2)
     {
         if (_entity1 == null || _entity2 == null)

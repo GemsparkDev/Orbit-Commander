@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using UILib.Content.Main;
+using Space_Wars.Content.Main.MissionComponents;
 
 namespace Space_Wars.Content.Main.Entities;
 
@@ -30,6 +31,16 @@ public class Enemy : Entity
     {
         get => (base.SensingAbility + StatusHolder.SensingChange);
         protected set => base.SensingAbility = value;
+    }
+    public Vector2 NewGoToLocation()
+    {
+        Vector2 rand;
+        do
+        {
+            rand = new Vector2((Util.Random.NextSingle() * 2 - 1) * 8 * 50 * 3, (Util.Random.NextSingle() * 2 - 1) * 8 * 50 * 3);
+        }
+        while (Engine.SaveGame.CurrentMission.IsColliding(rand, Vector2.Zero, ColliderRadius, false) == null);
+        return rand;
     }
     public ParticleEmitter EnemyRange { get{ return GetComponent<Emitter>().ParticleEmitter; } }
     public Enemy(Vector2 _position, Vector2 _velocity, float _angle, int _health, Texture2D _texture, bool _isFriendly = false)
@@ -145,12 +156,11 @@ public class Enemy : Entity
     }
     public void GoToPosition(Vector2 _position, float speed)
     {
-        foreach(var collider in Engine.SaveGame.CurrentMission.Colliders)
+        var collider = Engine.SaveGame.CurrentMission.IsColliding(Position, _position - Position, ColliderRadius, false);
+        //TODO: Implement A# algorithm
+        if(collider != null)
         {
-            if(collider.IsColliding(_position, Position-_position, 10))
-            {
-                return;
-            }
+            return;
         }
         var targetVector = Vector2.Normalize(Vector2.Normalize(_position - Position) + GetNormalizedAcceleration() * 20f);
         Velocity += targetVector * speed * Engine.DeltaSeconds * 10;
@@ -3211,12 +3221,7 @@ public class Enemy : Entity
             {
                 if (Vector2.Distance(rand, Position) < 500)
                 {
-                    float radius = Engine.SaveGame.CurrentMission.Planet.radius;
-                    do
-                    {
-                        rand = new Vector2((Util.Random.NextSingle() * 2 - 1) * radius * 3, (Util.Random.NextSingle() * 2 - 1) * radius * 3);
-                    }
-                    while (rand.Length() < radius);
+                    rand = NewGoToLocation();
                 }
                 GoToPosition(rand, 5);
                 targetAngle = Util.ToAngle(Velocity);
@@ -3304,12 +3309,7 @@ public class Enemy : Entity
             {
                 if (Vector2.Distance(rand, Position) < 500)
                 {
-                    float radius = Engine.SaveGame.CurrentMission.Planet.radius;
-                    do
-                    {
-                        rand = new Vector2((Util.Random.NextSingle() * 2 - 1) * radius * 3, (Util.Random.NextSingle()* 2 - 1) * radius * 3);
-                    }
-                    while (rand.Length() < radius);
+                    rand = NewGoToLocation();
                 }
                 GoToPosition(rand, 5);
                 targetAngle = MathF.Atan2(Velocity.Y, Velocity.X) + MathF.PI / 2;
@@ -3423,12 +3423,7 @@ public class Enemy : Entity
             {
                 if (Vector2.Distance(rand, Position) < 500)
                 {
-                    float radius = Engine.SaveGame.CurrentMission.Planet.radius;
-                    do
-                    {
-                        rand = new Vector2((Util.Random.NextSingle() * 2 - 1) * radius * 3, (Util.Random.NextSingle() * 2 - 1) * radius * 3);
-                    }
-                    while (rand.Length() < radius);
+                    rand = NewGoToLocation();
                 }
                 GoToPosition(rand, 5);
                 targetAngle = MathF.Atan2(Velocity.Y, Velocity.X) + MathF.PI / 2;
@@ -3556,7 +3551,7 @@ public class Enemy : Entity
             {
                 if (!constructing)
                 {
-                    constructLocation = Util.ToUnitVector(Util.OneToNegOne() * MathF.PI) * Engine.SaveGame.CurrentMission.Planet.radius * 1.5f;
+                    constructLocation = NewGoToLocation();
                     constructing = true;
                     constructionTime = 10;
                 }
@@ -3615,7 +3610,7 @@ public class Enemy : Entity
         int damage = 8;
         CD = [0];
         StealthAbility = 2;
-        Vector2 randomLocation = Util.ToUnitVector(Util.Random.NextSingle() * MathF.Tau) * Engine.SaveGame.CurrentMission.Planet.radius * 1.5f;
+        Vector2 randomLocation = NewGoToLocation();
         while (Health > 0)
         {
             if (CD[0] <= 0)
@@ -3653,7 +3648,7 @@ public class Enemy : Entity
                     GoToPosition(randomLocation, 1);
                     if (Vector2.DistanceSquared(randomLocation, Position) < 100)
                     {
-                        randomLocation = Util.ToUnitVector(Util.Random.NextSingle() * MathF.Tau) * Engine.SaveGame.CurrentMission.Planet.radius * 1.5f;
+                        randomLocation = NewGoToLocation();
                     }
                 }
                 Velocity *= Util.FIED(0.1f);
@@ -3770,7 +3765,7 @@ public class Enemy : Entity
             {
                 SoundManager.PlaySound(Assets.Get(Sound.Beep), Position);
                 ParticleManager.Add(new Particle(null, 5, Position + new Vector2(0, -30), Velocity, Angle, 0, Color.Red, Color.Transparent) { drawText = "Alert: Enemies detected.\nDefend the mothership." });
-                Engine.SaveGame.CurrentMission.TimerModifier = 1;
+                Engine.SaveGame.CurrentMission.GetComponent<WaveSpawner>().TimerModifier = 1;
                 alert = true;
             }
             yield return 0;
@@ -3931,7 +3926,7 @@ public class Enemy : Entity
         enemy.AngularVelocity = -0.01f;
         return enemy;
     }
-    IEnumerable<int> PickupDrone()
+    IEnumerable<int> PickupDrone(float _distance)
     {
         bool currentlyLeaving = false;
         while (true)
@@ -3953,15 +3948,15 @@ public class Enemy : Entity
             else
             {
                 Velocity = Vector2.Zero;
-                Position = Position * (1f - Engine.DeltaSeconds) - new Vector2(0, Engine.SaveGame.CurrentMission.Planet.radius * 1.5f) * Engine.DeltaSeconds;
+                Position = Position * (1f - Engine.DeltaSeconds) - new Vector2(0, _distance) * Engine.DeltaSeconds;
             }
             yield return 0;
         }
     }
-    public static Enemy NewPickupDrone(Vector2 position, Vector2 velocity, float angle)
+    public static Enemy NewPickupDrone(Vector2 position, Vector2 velocity, float angle, float _distance)
     {
         Enemy enemy = new(position, velocity, angle, 250, Assets.Get(Sprites.PickupDrone), true);
-        enemy.AddComponent(new Behaviour(enemy).AddBehaviour(enemy.PickupDrone()));
+        enemy.AddComponent(new Behaviour(enemy).AddBehaviour(enemy.PickupDrone(_distance)));
         enemy.AddComponent(new DockableComponent(enemy, UI.PickupDroneMenu));
         return enemy;
     }
@@ -3991,7 +3986,10 @@ public class Enemy : Entity
     IEnumerable<int> Glider(float _distance)
     {
         bool isDocked = true;
-        float xSpeed = Planet.GetOrbitalVelocity(new Vector2(0, _distance), Engine.SaveGame.CurrentMission.Planet.position, Engine.SaveGame.CurrentMission.Planet.mass).X;
+        throw new NotImplementedException();
+        //TODO: Figure this out
+        //float xSpeed = Planet.GetOrbitalVelocity(new Vector2(0, _distance), Engine.SaveGame.CurrentMission.Planet.position, Engine.SaveGame.CurrentMission.Planet.mass).X;
+        float xSpeed = 1;
         while (true)
         {
             Velocity = new Vector2(xSpeed, xSpeed * 2 * (Position.Y - _distance) / Position.X);
@@ -4178,13 +4176,6 @@ public class Enemy : Entity
                 }
             }
             Engine.SaveGame.CurrentMission.CalculateTrajectory(Position, Velocity, ColliderRadius);
-            //Prevents the player from losing it accidentally
-            var planet = Engine.SaveGame.CurrentMission.Planet;
-            if (Position.Length() >= 40 * 50 + planet.radius)
-            {
-                Velocity *= 0.8f;
-                Velocity += Vector2.Normalize(-Position) * Engine.DeltaSeconds * (Position.Length() - (40 * 50 + planet.radius));
-            }
             yield return 0;
         }
     }
@@ -4193,6 +4184,7 @@ public class Enemy : Entity
         Enemy enemy = new(position, velocity, angle, 500, Assets.Get(Sprites.Mothership), _isFriendly);
         enemy.AddComponent(new Behaviour(enemy).AddBehaviour(enemy.MakeshiftMothership()).AddBehaviour(enemy.EnemyDeath()));
         enemy.AddComponent(new DockableComponent(enemy, UI.MothershipMenu));
+        enemy.AddComponent(new KeyTag(enemy));
         return enemy;
     }
     IEnumerable<int> LargeMiner()

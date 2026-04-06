@@ -3,6 +3,7 @@ using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Space_Wars.Content.Main.Components;
+using Space_Wars.Content.Main.MissionComponents;
 using Space_Wars.Content.Main.Particles;
 using System;
 using System.Collections.Generic;
@@ -336,11 +337,12 @@ public class Player : Entity
                     ParticleManager.Add(new Particle(Assets.Get(Sprites.Dot), startLocation + dir * d * 4, angle, Color.White*f));
                 }
             }
-            if(Input.IsDown(Binding.WarpBackward) && Engine.SaveGame.CurrentMission.Colliders.Length > 0)
+            var comp = Engine.SaveGame.CurrentMission.GetComponent<Colliders>();
+            if(Input.IsDown(Binding.WarpBackward) && comp.GetColliders.Length > 0)
             {
                 Vector2 newPos = new Vector2(Input.NewMouseState.X, Input.NewMouseState.Y) + Engine.Camera.Position - Engine.BackBuffer / 2;
                 Vector2 prevPos = new Vector2(Input.OldMouseState.X, Input.OldMouseState.Y) + Engine.Camera.Position - Engine.BackBuffer / 2;
-                Engine.SaveGame.CurrentMission.Colliders = [.. Engine.SaveGame.CurrentMission.Colliders.Where(x => !x.IsColliding(prevPos, newPos - prevPos, 10, true))];
+                comp.GetColliders = [.. comp.GetColliders.Where(x => !x.IsColliding(prevPos, newPos - prevPos, 10, true))];   
             }
             if(Input.NewState.IsKeyDown(Keys.F) && Input.OldState.IsKeyUp(Keys.F))
             {
@@ -350,19 +352,30 @@ public class Player : Entity
                 }
                 else
                 {
-                    Engine.SaveGame.CurrentMission.Colliders =
-                    [
-                        .. Engine.SaveGame.CurrentMission.Colliders,
-                        new LineCollider(startLocation, mousePos,Input.NewState.IsKeyDown(Keys.LeftControl)),
-                    ];
+                    if(comp != null)
+                    {
+                        comp.GetColliders =
+                        [
+                            .. comp.GetColliders,
+                            new LineCollider(startLocation, mousePos,Input.NewState.IsKeyDown(Keys.LeftControl)),
+                        ];   
+                    }
+                    else
+                    {
+                        comp = new Colliders(delegate() { return [new LineCollider(startLocation, mousePos)];});
+                        Engine.SaveGame.CurrentMission.AddComponent(comp);
+                    }
                     startLocation = Vector2.Zero;
                 }
             }
             if (Input.NewState.IsKeyDown(Keys.Tab) && Input.OldState.IsKeyUp(Keys.Tab))
             {
-                foreach(var collider in Engine.SaveGame.CurrentMission.Colliders)
+                if(comp != null)
                 {
-                    Debug.WriteLine(collider.Print());
+                    foreach(var collider in comp.GetColliders)
+                    {
+                        Debug.WriteLine(collider.Print());
+                    }   
                 }
             }
         }
@@ -811,11 +824,6 @@ public class Player : Entity
         if (Progression <= -1)
         {
             return;
-        }
-        if (Position.Length() > Engine.SaveGame.CurrentMission.Planet.radius * 2 + 15 * 50)
-        {
-            _spriteBatch.Draw(Assets.Get(Sprites.Arrow), Position - Vector2.Normalize(Position) * 25, null, Color, MathF.Atan2(-Position.X, Position.Y), Assets.DimsOf(Sprites.Arrow) / 2, 1, 0, 0.2f);
-            _spriteBatch.DrawString(Assets.TextFont, "Return to planet.", Engine.Camera.Position - new Vector2(Assets.TextFont.MeasureString("Return to planet.").X/2, 225), Color.Crimson);
         }
         if(dockedEntity != null)
         {

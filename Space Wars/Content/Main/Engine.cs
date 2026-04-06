@@ -136,7 +136,6 @@ public class Engine : Game
         SoundManager.PlayGlobalSound(Assets.Get(Sound.Interact));
         ScreenShakeFactor = 0;
         SaveGame.CurrentMission.Initialize();
-        SaveGame.CurrentMission.PlayIntroCutscene();
     }
 
     protected override void LoadContent()
