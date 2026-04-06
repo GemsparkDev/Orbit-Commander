@@ -24,17 +24,17 @@ public class Entity
     protected List<float> CD { get { return GetComponent<Cooldown>().Cooldowns; } set { GetComponent<Cooldown>().Cooldowns = value; } }
     public Texture2D Texture { get { return GetComponent<Sprite>().Texture; } set { GetComponent<Sprite>().Texture = value; } }
     public Color Color { get { return GetComponent<Sprite>().Color; } set { GetComponent<Sprite>().Color = value; } }
+    public float RevealDuration { get { return GetComponent<Sprite>().RevealDuration; } set { GetComponent<Sprite>().RevealDuration = value; } }
     public Vector2 Size => GetComponent<Sprite>().Size;
     public virtual float ColliderRadius => GetComponent<Sprite>().ColliderRadius;
+    protected static Player Player => Engine.SaveGame.Player;
     public bool isExpired = false;
     public bool isFriendly;
     public virtual int SensingAbility { get; protected set; } = 1;
     public virtual int StealthAbility { get { return stealthAbility; } protected set { stealthAbility = value; } }
     private int stealthAbility = 0;
-    protected float RevealDuration { get { return GetComponent<Sprite>().RevealDuration; } set { GetComponent<Sprite>().RevealDuration = value; } }
     private List<Component> components = [];
     public float Temperature { get; private set; } = 0; //-1: Freeze, 0: Neutral, 1: Burn
-    protected static Player Player => Engine.SaveGame.Player;
     public StatusHolder StatusHolder { get; set; } = new();
     public Entity(Texture2D _texture, Vector2 _position, Vector2 _velocity, float _angle, float _angularVelocity, bool _isFriendly)
     {
@@ -64,7 +64,7 @@ public class Entity
         T comp;
         foreach (Component component in components)
         {
-            comp = (T)component;
+            comp = component as T;
             if(comp != null)
             {
                 return comp;
@@ -87,10 +87,6 @@ public class Entity
         }
         return false;
     }
-    public void ClearAll()
-    {
-        StatusHolder = new();
-    }
     public virtual void UpdateColor()
     {
         Color = Color.White;
@@ -98,26 +94,6 @@ public class Entity
     public void Flash(Color _color)
     {
         Color = _color;
-    }
-    public void ClampVelocity(float speed)
-    {
-        Vector2 clampVelocity = Vector2.Normalize(Velocity) * speed;
-        if (MathF.Abs(Velocity.X) < 0.0001 && MathF.Abs(Velocity.Y) < 0.0001)
-        {
-            clampVelocity = Vector2.One * speed;
-        }
-        if (MathF.Abs(Velocity.X) > MathF.Abs(clampVelocity.X))
-        {
-            Velocity = new Vector2(clampVelocity.X, Velocity.Y);
-        }
-        if (MathF.Abs(Velocity.Y) > MathF.Abs(clampVelocity.Y))
-        {
-            Velocity = new Vector2(Velocity.X, clampVelocity.Y);
-        }
-    }
-    public void Reveal(float _duration)
-    {
-        RevealDuration = _duration;
     }
     public void ApplyWork(float _q)
     {

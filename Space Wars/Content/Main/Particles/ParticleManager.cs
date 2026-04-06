@@ -11,7 +11,7 @@ namespace Space_Wars.Content.Main.Particles
     public static class ParticleManager
     {
         private static bool isUpdating;
-        private static List<Particle> particles = [];
+        public static List<Particle> Particles { get; private set; } = [];
         private static List<Particle> addedParticles = [];
 
         public static void Add(Particle particle)
@@ -19,7 +19,7 @@ namespace Space_Wars.Content.Main.Particles
             if (!isUpdating)
             {
                 //Checks the entity type, and adds it to the corresponding list for each type
-                particles.Add(particle);
+                Particles.Add(particle);
             }
             else
             {
@@ -30,24 +30,24 @@ namespace Space_Wars.Content.Main.Particles
         }
         public static void Initialize()
         {
-            particles.Clear();
+            Particles.Clear();
         }
         public static void Update()
         {
             isUpdating = true;
 
-            foreach (var particle in particles)
+            foreach (var particle in Particles)
             {
                 particle.Update();
             }
-            if (particles.Count >= 50000)
+            if (Particles.Count >= 50000)
             {
-                for(int i = 0; i < particles.Count - 50000; i++)
+                for(int i = 0; i < Particles.Count - 50000; i++)
                 {
-                    particles[i].isExpired = true;
+                    Particles[i].isExpired = true;
                 }
             }
-            particles = particles.Where(x => !x.isExpired).ToList();
+            Particles = Particles.Where(x => !x.isExpired).ToList();
 
             isUpdating = false;
 
@@ -60,7 +60,7 @@ namespace Space_Wars.Content.Main.Particles
 
         public static void Draw(SpriteBatch _spriteBatch)
         {
-            foreach (var particle in particles)
+            foreach (var particle in Particles)
             {
                 particle.Draw(_spriteBatch);
             }

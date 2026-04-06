@@ -9,9 +9,14 @@ namespace Space_Wars.Content.Main.Components;
 internal class Collide(Entity _entity, Func<int, bool, bool> _onCollide) : Component(_entity)
 {
     public bool WasHit { get; set; } = false;
+    public float InvincibilityCooldown { get; set; } = 0;
     public Func<int, bool, bool> OnCollide { get; set; } = _onCollide;
     public override void Update()
     {
         WasHit = false;
+        if(InvincibilityCooldown > 0)
+        {
+            InvincibilityCooldown = 0;
+        }
     }
 }

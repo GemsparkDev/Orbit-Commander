@@ -12,11 +12,12 @@ public class Pickup : Entity, IData
 {
     Texture2D IData.Texture => itemData.RealSprite;
     Color IData.Color => itemData.Color;
-    public Items Type { get; } = Items.Scrap;
+    public Items Type => itemData.Type;
     protected ItemData itemData;
     public Window Tooltip { get; } = new Window(Vector2.Zero, Assets.Get(Sprites.WideButton));
     public String Name => itemData.Name;
-    protected float invincibilityCooldown = 5;
+
+    public float InvincibilityCooldown { get { return GetComponent<Collide>().InvincibilityCooldown; } set { GetComponent<Collide>().InvincibilityCooldown = value; } }
     public int ID => itemData.ID;
     private Decal textbox;
     public Pickup(ItemData _itemData, Vector2 _position, Vector2 _velocity, float _angularVelocity, int _health = 3)
@@ -34,19 +35,15 @@ public class Pickup : Entity, IData
             {
                 return false;
             }
-            if (invincibilityCooldown > 0 && !_ignoreImmunity)
+            if (InvincibilityCooldown > 0 && !_ignoreImmunity)
             {
-                invincibilityCooldown = 0;
+                InvincibilityCooldown = 0;
                 return false;
             }
-            Health--;
-            if (_damage >= 10)
-            {
-                Health--;
-            }
+            Health-=_damage;
             if (!_ignoreImmunity)
             {
-                invincibilityCooldown = 1;
+                InvincibilityCooldown = 1;
             }
             if (Health <= 0)
             {
@@ -57,7 +54,9 @@ public class Pickup : Entity, IData
             ParticleManager.Add(new Particle(null, 1, Position + new Vector2(0, -1), new Vector2(0, -1.5f), 0, 0, Color.Orange, new Color(255, 0, 0, 0)) { drawText = $"Integrity: {Math.Max(Health, 0)}" });
             return true;
         }));
+        InvincibilityCooldown = 5;
     }
+    //TODO: Review all serialization!
     public Pickup(ItemData _itemData, List<string> _disassembly, LoadLogger _logger)
         : base(_itemData.VirtualSprite, default, default, 0, 0, true)
     {
@@ -119,20 +118,14 @@ public class Pickup : Entity, IData
                 }
             }
         }
-        if (invincibilityCooldown > 0)
-        {
-            invincibilityCooldown -= Engine.DeltaSeconds;
-        }
         base.Update();
     }
     public virtual string SerializeAttributes()
     {
-        throw new NotImplementedException();
         return $"{Health}";
     }
     public virtual string Serialize()
     {
-        throw new NotImplementedException();
         return $"{{{Type},{Health}}}";
     }
     IEnumerable<int> Barricade()
@@ -161,7 +154,7 @@ public class Pickup : Entity, IData
     }
     public static Pickup NewBarricade(Vector2 _position, Vector2 _velocity, float _angle, float _angularVelocity, int _stealth = 0, bool _isFriendly = true)
     {
-        var construct = new Pickup(ItemFactory.constructData[Constructs.Barricade], _position, _velocity, _angularVelocity, ItemFactory.constructData[Constructs.Barricade].Integrity);
+        var construct = new Pickup(ItemFactory.itemData[Items.Barricade], _position, _velocity, _angularVelocity, ItemFactory.itemData[Items.Barricade].Integrity);
         construct.AddComponent(new Behaviour(construct).AddBehaviour(construct.Barricade()));
         construct.Angle = _angle;
         construct.StealthAbility = _stealth;
@@ -201,7 +194,7 @@ public class Pickup : Entity, IData
     }
     public static Pickup NewTrap(Vector2 _position, Vector2 _velocity, float _angle, float _angularVelocity, int _stealth = 0, bool _isFriendly = true)
     {
-        var construct = new Pickup(ItemFactory.constructData[Constructs.Trap], _position, _velocity, _angularVelocity, ItemFactory.constructData[Constructs.Trap].Integrity);
+        var construct = new Pickup(ItemFactory.itemData[Items.Trap], _position, _velocity, _angularVelocity, ItemFactory.itemData[ Items.Trap].Integrity);
         construct.AddComponent(new Behaviour(construct).AddBehaviour(construct.Trap()));
         construct.AddComponent(new Emitter(construct) { ParticleEmitter = new ParticleEmitter(Assets.Get(Sprites.Dot), _position, 300, new Color(255, 0, 0)) });
         construct.Angle = _angle;
@@ -228,7 +221,7 @@ public class Pickup : Entity, IData
     }
     public static Pickup NewBomb(Vector2 _position, Vector2 _velocity, float _angle, float _angularVelocity, int _stealth = 0)
     {
-        var construct = new Pickup(ItemFactory.constructData[Constructs.Bomb], _position, _velocity, _angularVelocity, ItemFactory.constructData[Constructs.Bomb].Integrity);
+        var construct = new Pickup(ItemFactory.itemData[Items.Bomb], _position, _velocity, _angularVelocity, ItemFactory.itemData[Items.Bomb].Integrity);
         construct.AddComponent(new Behaviour(construct).AddBehaviour(construct.Bomb()));
         construct.AddComponent(new Emitter(construct) { ParticleEmitter = new ParticleEmitter(Assets.Get(Sprites.Dot), _position, 100, new Color(255, 0, 0)) });
         construct.Angle = _angle;
@@ -291,7 +284,7 @@ public class Pickup : Entity, IData
     }
     public static Pickup NewFurnace(Vector2 _position, Vector2 _velocity, float _angle, float _angularVelocity, int _stealth = 0, bool _isFriendly = true)
     {
-        var construct = new Pickup(ItemFactory.constructData[Constructs.Furnace], _position, _velocity, _angularVelocity, ItemFactory.constructData[Constructs.Furnace].Integrity);
+        var construct = new Pickup(ItemFactory.itemData[Items.Furnace], _position, _velocity, _angularVelocity, ItemFactory.itemData[Items.Furnace].Integrity);
         construct.AddComponent(new Behaviour(construct).AddBehaviour(construct.Bomb()));
         construct.AddComponent(new Emitter(construct) { ParticleEmitter = new ParticleEmitter(Assets.Get(Sprites.Dot), _position, 100, new Color(255, 0, 0)) });
         construct.Angle = _angle;
@@ -301,7 +294,7 @@ public class Pickup : Entity, IData
     }
     public static Pickup NewSpecializedParts(Vector2 _position, Vector2 _velocity, float _angle, float _angularVelocity, int _stealth = 0, bool _isFriendly = true)
     {
-        var construct = new Pickup(ItemFactory.constructData[Constructs.SpecializedParts], _position, _velocity, _angularVelocity, ItemFactory.constructData[Constructs.SpecializedParts].Integrity)
+        var construct = new Pickup(ItemFactory.itemData[Items.SpecializedParts], _position, _velocity, _angularVelocity, ItemFactory.itemData[Items.SpecializedParts].Integrity)
         {
             Angle = _angle,
             StealthAbility = _stealth,
@@ -311,7 +304,7 @@ public class Pickup : Entity, IData
         return construct;
     }
 }
-public class ItemData(Sprites _realSprite, Sprites _virtualSprite, String _name, int _id, Color _color, Color? _textColor = null)
+public class ItemData(Sprites _realSprite, Sprites _virtualSprite, String _name, int _id, Color _color, Color? _textColor = null, int _integrity = 3)
 {
     public Texture2D RealSprite { get; } = Assets.Get(_realSprite);
     public Texture2D VirtualSprite { get; } = Assets.Get(_virtualSprite);
@@ -319,13 +312,15 @@ public class ItemData(Sprites _realSprite, Sprites _virtualSprite, String _name,
     public int ID { get; } = _id;
     public Color Color { get; } = _color;
     public Color TextColor { get; } = _textColor ?? Color.White;
-}
-public class ConstructData(Sprites _realSprite, Sprites _virtualSprite, String _name, int _id, int _integrity, Color? _textColor = null)
-    : ItemData(_realSprite, _virtualSprite, _name, _id, Color.White, _textColor)
-{
+    public Items Type { get; } = Items.Scrap;
     public int Integrity { get; } = _integrity;
 }
 public enum Items
 {
-    Scrap
+    Scrap,
+    Barricade,
+    Trap,
+    Bomb,
+    SpecializedParts,
+    Furnace
 }

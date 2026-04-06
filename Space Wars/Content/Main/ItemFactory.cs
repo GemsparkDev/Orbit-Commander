@@ -12,6 +12,11 @@ public static class ItemFactory
     public readonly static Dictionary<Items, ItemData> itemData = new()
     {
         { Items.Scrap, (new ItemData(Sprites.RealMetalScrap,Sprites.MetalScrap, "Metal Salvage", 1, Color.White)) },
+        { Items.Barricade, new ItemData(Sprites.RealBarricade, Sprites.Barricade, "Barricade", 1, Color.White,Color.White,20) },
+        { Items.Trap, new ItemData(Sprites.RealTrap, Sprites.Trap, "Trap", 1, Color.White,Color.White,8) },
+        { Items.Bomb, new ItemData(Sprites.RealBomb, Sprites.Bomb, "Bomb", 1, Color.White,Color.White,3) },
+        { Items.Furnace, new ItemData(Sprites.RealFurnace, Sprites.Furnace, "Furnace", 1, Color.White, Color.White,10) },
+        { Items.SpecializedParts, new ItemData(Sprites.RealSpecializedParts, Sprites.SpecializedParts, "Specialized Parts", 1, Color.White, Color.CornflowerBlue, 5) }
     };
     public readonly static Dictionary<Modules, ModuleData> moduleData = new()
     {
@@ -66,21 +71,12 @@ public static class ItemFactory
         { Modules.Decoy, new ModuleData(Sprites.RealTorch,Sprites.Torch, "Decoy", (int)ModuleType.Guns, 20, typeof(Decoy))},
 
     };
-    public readonly static Dictionary<Constructs, ConstructData> constructData = new() 
-    {
-        { Constructs.Barricade, new ConstructData(Sprites.RealBarricade, Sprites.Barricade, "Barricade", 1, 20) },
-        { Constructs.Trap, new ConstructData(Sprites.RealTrap, Sprites.Trap, "Trap", 1, 8) },
-        { Constructs.Bomb, new ConstructData(Sprites.RealBomb, Sprites.Bomb, "Bomb", 1, 3) },
-        { Constructs.Furnace, new ConstructData(Sprites.RealFurnace, Sprites.Furnace, "Furnace", 1, 10) },
-        { Constructs.SpecializedParts, new ConstructData(Sprites.RealSpecializedParts, Sprites.SpecializedParts, "Specialized Parts", 1, 5, Color.CornflowerBlue) }
-    };
     public static Pickup NewScrap(Vector2 _position = default, Vector2 _velocity = default, float _angularVelocity = 0)
     {
         return new Pickup(itemData[0], _position, _velocity, _angularVelocity);
     }
     public static Pickup TryDeserialize(string _data, LoadLogger _logger)
     {
-        throw new NotImplementedException();
         List<string> disassembly = SaveGame.Disassemble(_data);
         if (disassembly[0] == "")
         {
@@ -95,10 +91,6 @@ public static class ItemFactory
             var module = moduleData[result2].Retrieve();
             module.Parse(disassembly, _logger);
             return module;
-        }
-        if (Enum.TryParse<Constructs>(disassembly[0], true, out Constructs result3))
-        {
-            //return new Construct(result3, disassembly, _logger);
         }
         throw new IOException("The module could not be parsed properly.");
     }

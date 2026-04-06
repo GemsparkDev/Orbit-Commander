@@ -28,8 +28,8 @@ public class EntityManager
     public static float StealthRange { get; private set; } = 750;
     //Threshold of detection for enemies
     public static float StealthThreshold { get; private set; } = 0.75f;
-    public static int MissionLength => missions.Count;
-    private static readonly List<Mission> missions =
+    public int MissionLength => missions.Count;
+    private readonly List<Mission> missions =
     [
         new Mission([new Planet(Vector2.Zero, Vector2.Zero, 10000, 8, true, Color.Cyan, false),
         new Planet(new Vector2(1000, 0), Planet.GetOrbitalVelocity(new Vector2(1000, 0), Vector2.Zero, 10000), 250, 1.5f, false, Color.Cyan) ],
@@ -38,7 +38,7 @@ public class EntityManager
         new EntityCondition(new PickupConstructor(ItemFactory.NewScrap, new Vector2(0, -8*50), new Vector2(-8, -4), -0.03f),[])],
         "Crash Landing",
         "The crash landing site. Objective: Explore the system.",
-        -1, new Vector2(0, -8*50 - Assets.DimsOf(Sprites.Mothership).Y / 2), Mission.TierOne(), Mission.TierOneBosses(), RestartCutscene, false, DayOneLog) 
+        -1, new Vector2(0, -8*50 - Assets.DimsOf(Sprites.Mothership).Y / 2), Mission.TierOne(), Mission.TierOneBosses(), RestartCutscene, false, DayOneLog)
         { PlayerProgression = 0, playerDocked = false, tip = "WASD to move, Space to dock and undock.\nRmb to collect scrap, Lmb to shoot." },
 
         //Note: Add custom "Humanlike" enemies
@@ -283,7 +283,6 @@ public class EntityManager
         enemies.Clear();
         projectiles.Clear();
         Player.Velocity = Vector2.Zero;
-        Engine.SaveGame.CurrentMission.Initialize();
     }
     public void IngameUpdate()
     {

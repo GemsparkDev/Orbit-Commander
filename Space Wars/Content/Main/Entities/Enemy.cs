@@ -1828,7 +1828,7 @@ public class Enemy : Entity
             if (holo != null && holo.isExpired)
             {
                 holo = null;
-                Engine.SaveGame.Player.Reveal(5);
+                Engine.SaveGame.Player.RevealDuration = 5;
             }
             if (CD[0] <= 0)
             {
@@ -3354,7 +3354,7 @@ public class Enemy : Entity
                 {
                     if (Vector2.Distance(grapplingHook.Position, target.Position) < 50)
                     {
-                        target.Reveal(3f);
+                        target.RevealDuration = 3f;
                     }
                     else
                     {

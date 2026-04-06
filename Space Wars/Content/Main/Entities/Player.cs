@@ -83,6 +83,7 @@ public class Player : Entity
                 if (modules[ModuleType.Engines].Type == Modules.Plasma)
                 {
                     stealth -= 1;
+                    ParticleManager.Add(new Particle(Assets.Get(Sprites.Circle), Position, 0, Color.Red));
                 }
             }
             if (modules[ModuleType.Guns].Cooldown > 0)
@@ -695,7 +696,7 @@ public class Player : Entity
         {
             foreach (var module in modules)
             {
-                _damage = module.Value.Collide(_damage);
+                _damage = module.Value.OnCollide(_damage);
             }
         }
         _damage = StatusHolder.ModifyDamage(_damage);

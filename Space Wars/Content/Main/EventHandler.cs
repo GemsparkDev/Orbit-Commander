@@ -14,7 +14,7 @@ namespace Space_Wars.Content.Main;
 
 public static class EventHandler
 {
-    private static Player player => Engine.SaveGame.Player;
+    private static Player Player => Engine.SaveGame.Player;
     private static readonly List<Message> eventLog = [];
 
     public static bool AcknowledgeMessage(Message _message)
@@ -32,7 +32,7 @@ public static class EventHandler
     }
     public static void QuitToMenu()
     {
-        player.Velocity = Vector2.Zero;
+        Player.Velocity = Vector2.Zero;
         Engine.IngameTime = new();
         Engine.MousePositionOffset = Vector2.Zero;
         Engine.UIManager.DisableAll();
@@ -108,9 +108,9 @@ public static class EventHandler
     {
         for (int x = 0; x < UI.ModuleSlots.Length; x++)
         {
-            UI.ModuleSlots[x].daughterItem = player.modules.ElementAt(x).Value;
+            UI.ModuleSlots[x].daughterItem = Player.modules.ElementAt(x).Value;
         }
-        UI.SecondarySlot.daughterItem = player.SecondaryWeapon;
+        UI.SecondarySlot.daughterItem = Player.SecondaryWeapon;
     }
     public static void UpdateModules()
     {
@@ -133,11 +133,11 @@ public static class EventHandler
                 return false;
             }
         }
-        for (int x = 0; x < player.modules.Count; x++)
+        for (int x = 0; x < Player.modules.Count; x++)
         {
-            player.modules[(ModuleType)x] = UI.ModuleSlots[x].daughterItem;
+            Player.modules[(ModuleType)x] = UI.ModuleSlots[x].daughterItem;
         }
-        player.SecondaryWeapon = UI.SecondarySlot.daughterItem;
+        Player.SecondaryWeapon = UI.SecondarySlot.daughterItem;
         return true;
     }
     public static void UpdateFurnaceUI(float _value, float _maxValue, Pickup furnaceItem)

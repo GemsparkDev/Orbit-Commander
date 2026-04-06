@@ -266,14 +266,6 @@ public enum Condition
     CustomComplete,
     DelayedSpawn,
 }
-public enum Constructs
-{
-    Barricade,
-    Trap,
-    Bomb,
-    SpecializedParts,
-    Furnace
-}
 public enum Binding
 {
     Up, 

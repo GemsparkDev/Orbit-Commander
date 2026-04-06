@@ -18,7 +18,7 @@ public class Sprite(Entity _entity) : Component(_entity)
         set 
         {
             texture = value;
-            collider = new ParticleEmitter(Assets.Get(Sprites.Dot), Entity.Position, Entity.ColliderRadius, Color.Yellow) { isEmitterActive = false };
+            collider = new ParticleEmitter(Assets.Get(Sprites.Dot), Entity.Position, ColliderRadius, Color.Yellow) { isEmitterActive = false };
         } }
     public Color Color { get; set; } = Color.White;
     public virtual float ColliderRadius

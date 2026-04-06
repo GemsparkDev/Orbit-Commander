@@ -18,7 +18,7 @@ public abstract class Module : Pickup, IData
 {
     //Serialized fields
     public bool isFailed = false;
-    public Modules Type { get; }
+    public new Modules Type { get; }
     Color IData.Color => isFailed ? Color.Red : Color.White;
     private Decal healthDecal;
     public float Cooldown { get; protected set; } = 0;
@@ -29,41 +29,13 @@ public abstract class Module : Pickup, IData
         Type = _type;
         healthDecal = new Decal(new Vector2(0, 5), Assets.TextFont, $"{Health} / {MaxHealth}", Color.Pink, 5f);
         Tooltip.AddWidget(healthDecal);
-        GetComponent<Collide>().OnCollide = delegate(int _damage, bool _ignoreImmunity)
-        {
-            if (_damage <= 0)
-            {
-                return false;
-            }
-            if (invincibilityCooldown > 0 && !_ignoreImmunity)
-            {
-                invincibilityCooldown = 0;
-                return false;
-            }
-            ParticleManager.Add(new Particle(null, 1, Player.Position + new Vector2(0, -1), new Vector2(0, -1.5f), 0, 0, Color.Orange, new Color(255, 0, 0, 0)) { drawText = $"Integrity: {Health}" });
-            SoundManager.PlaySound(Assets.Get(Sound.Death), Player.Position);
-            Engine.ShakeScreen(10 / ((Player.Position - Engine.Camera.Position).Length() + 150));
-            if (Health > 0)
-            {
-                Health -= _damage;
-                if (!_ignoreImmunity) 
-                {
-                    invincibilityCooldown = 1;
-                }
-            }
-            else
-            {
-                isExpired = true;
-            }
-            return true;
-        };
     }
     private void UpdateHealth()
     {
         healthDecal.text = $"{Health} / {MaxHealth}";
     }
 
-    public virtual int Collide(int _damage) { return _damage; }
+    public virtual int OnCollide(int _damage) { return _damage; }
     public virtual void OnShoot() { }
     public virtual void OnUpdate() 
     {
@@ -138,7 +110,7 @@ public class ReloadSystem(int _magazineSize, float _reloadSpeed, Action _reloadC
     }
 }
 public class ModuleData(Sprites _realSprite, Sprites _virtualSprite, String _name, int _id, int _health, Type _type, Color? _textColor = null)
-    : ItemData(_realSprite, _virtualSprite, _name, _id, Color.White, _textColor)
+    : ItemData(_realSprite, _virtualSprite, _name, _id, Color.White, _textColor, _health)
 {
     public int MaxHealth { get; } = _health;
     public Type ModuleType { get; } = _type;
@@ -149,7 +121,7 @@ public class ModuleData(Sprites _realSprite, Sprites _virtualSprite, String _nam
 }
 public class Hull() : Module(Modules.Hull)
 {
-    public override int Collide(int _damage)
+    public override int OnCollide(int _damage)
     {
         return _damage / 2;
     }
@@ -157,7 +129,7 @@ public class Hull() : Module(Modules.Hull)
 public class Shield() : Module(Modules.Shield)
 {
     private ParticleEmitter shieldEffect = new(Assets.Get(Sprites.Dot), Vector2.Zero, 10, Color.Violet) { particleAngularVelocity = 0.1f };
-    public override int Collide(int _damage)
+    public override int OnCollide(int _damage)
     {
         if (Cooldown <= 0)
         {
@@ -179,14 +151,14 @@ public class Shield() : Module(Modules.Shield)
 }
 public class Stealth() : Module(Modules.Stealth)
 {
-    public override int Collide(int _damage)
+    public override int OnCollide(int _damage)
     {
         return (int)(_damage / 1.75f);
     }
 }
 public class Reflective() : Module(Modules.Reflective)
 {
-    public override int Collide(int _damage)
+    public override int OnCollide(int _damage)
     {
         if (Util.Random.Next(0, 2) == 0)
         {
@@ -204,11 +176,11 @@ public class Turtle() : Module(Modules.Turtle)
     float time = 0;
     int flipped = 1;
     ParticleEmitter effect = new ParticleEmitter(Assets.Get(Sprites.Dot), Vector2.Zero, 10, Color.Orange) { sprayAngle = MathF.PI / 2};
-    public override int Collide(int _damage)
+    public override int OnCollide(int _damage)
     {
         float dr = 0.5f * ((1 - Cooldown / 5) * (1 - Cooldown / 5) + 0.5f);
         Cooldown = 5;
-        Engine.SaveGame.Player.Reveal(1);
+        Engine.SaveGame.Player.RevealDuration = 1;
         return (int)(_damage * dr);
     }
     public override void OnUpdate()
@@ -243,7 +215,7 @@ public class Turtle() : Module(Modules.Turtle)
 public class Ablative() : Module(Modules.Ablative)
 {
     float buffer = 25;
-    public override int Collide(int _damage)
+    public override int OnCollide(int _damage)
     {
         Cooldown = 1;
         if (buffer >= _damage)
@@ -267,7 +239,7 @@ public class Ablative() : Module(Modules.Ablative)
 }
 public class Adaptive() : Module(Modules.Adaptive)
 {
-    public override int Collide(int _damage)
+    public override int OnCollide(int _damage)
     {
         if (Health > 0)
         {
@@ -280,7 +252,7 @@ public class Adaptive() : Module(Modules.Adaptive)
 }
 public class ThermalShield() : Module(Modules.ThermalShield)
 {
-    public override int Collide(int _damage)
+    public override int OnCollide(int _damage)
     {
         if(Player.Temperature is > 1 or < (-1))
         {
@@ -1338,7 +1310,7 @@ public class Assault() : Module(Modules.Assault)
         isShooting = true;
         SoundManager.PlaySound(Assets.Get(Sound.PulseFire), Player.Position);
     }
-    public override int Collide(int _damage)
+    public override int OnCollide(int _damage)
     {
         if(resistanceCooldown > 0)
         {
@@ -1414,7 +1386,7 @@ public class Radar() : Module(Modules.Radar)
         List<Entity> revealedEntities = Engine.EntityManager.Hitscan(Player.Position, dir, 2000, true, out Vector2 end);
         foreach (var entity in revealedEntities)
         {
-            entity.Reveal(2f);
+            entity.RevealDuration = 2f;
         }
         for (int i = 0; i < 10; i++)
         {
@@ -1432,8 +1404,16 @@ public class PulseEmitter() : Module(Modules.PulseEmitter)
         {
             return;
         }
-        Engine.EntityManager.NearestEnemy(this)?.Reveal(1);
-        Engine.EntityManager.NearestProjectile(this, isFriendly)?.Reveal(1);
+        var enemy = Engine.EntityManager.NearestEnemy(this);
+        if(enemy != null)
+        {
+            enemy.RevealDuration = 1;
+        }
+        var proj = Engine.EntityManager.NearestProjectile(this, isFriendly);
+        if (proj != null)
+        {
+            proj.RevealDuration = 1;
+        }
         Cooldown = 2;
         SoundManager.PlayGlobalSound(Assets.Get(Sound.Beep));
     }

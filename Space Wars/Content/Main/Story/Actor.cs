@@ -1,7 +1,7 @@
 ﻿using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework;
 
-namespace Space_Wars.Content.Main.Entities;
+namespace Space_Wars.Content.Main.Story;
 public class Actor(Texture2D _texture, Vector2 _position, Color _color, float _angle) : IActor
 {
     public Vector2 Position { get; set; } = _position;

@@ -8,98 +8,69 @@ using Microsoft.Xna.Framework.Graphics;
 using System.Diagnostics;
 using Space_Wars.Content.Main.Story;
 using Space_Wars.Content.Main.Components;
+using Space_Wars.Content.Main.MissionComponents;
 
 namespace Space_Wars.Content.Main;
 public class Mission
 {
-    public delegate Enemy DelegateEnemy(Vector2 position, Vector2 velocity, float angle, bool _isFriendly = false);
-    //Change me when multiple main planets are added
-    public Planet Planet => (planets.Length > 0) ? planets[0] : new Planet(Vector2.Zero, Vector2.Zero, 0, 1, true, Color.White);
     public string Name { get; }
     public string Description { get; }
     private int playerProgression = 3;
     public int PlayerProgression { get { if (SaveGame.DebugMode) { return 99; } else { return playerProgression; } } set { playerProgression = value; } }
-    public int Wave { get; private set; } = 0;
-    public int EnemiesSpawned { get; private set; } = 0;
     public float RestartTimer { get; set; } = -1;
-    public float TimerModifier { get; set; }
-    public bool playerDocked = false;
-    public bool isAggressive = false;
     public bool music = true;
     public bool relaunchable = false;
-    public string tip = null;
 
     private EntityConstructor escapeVehicle = null;
-    private Planet[] planets;
-    public Planet[] Planets { get { return planets; } }
-    public ICollider[] Colliders { get; set; } = [];
     //Save original entity parameters to allow cloning
     private List<ICondition> CopyObjectives { get; }
     private List<ICondition> MissionObjectives { get; } = [];
-    private List<Enemy> enemiesSpawned = [];
-    private List<(int cost, DelegateEnemy enemy)> enemyCreditValues;
-    private List<DelegateEnemy> bosses;
-    private Vector2 playerPosition;
+    private IPlayerSpawner spawner;
 
-    private Func<Cutscene> cutscene;
-    private Func<Cutscene> endCutscene;
-    private Func<ICollider[]> colliders;
-    private int currentBoss;
-    private float waveTimer = 5;
-    private float maxWaveTimer = 5;
-    private bool currentWaveActive = false;
-
-    public Mission(Planet[] _planets, List<ICondition> _missionObjectives, string _name, string _description, float _timerModifier, Vector2 _playerPosition, List<(int, DelegateEnemy)> _enemies, List<DelegateEnemy> _bosses, Func<Cutscene> _cutscene = null, bool _escapeVehicle = false, Func<Cutscene> _endCutscene = null, Func<ICollider[]> _colliders = null)
+    private List<IMissionComponent> components = [];
+    public T GetComponent<T>() where T : class, IMissionComponent
     {
+        T comp;
+        foreach (IMissionComponent component in components)
+        {
+            comp = component as T;
+            if (comp != null)
+            {
+                return comp;
+            }
+        }
+        return null;
+    }
+    public Mission(List<IMissionComponent> _components, List<ICondition> _missionObjectives, string _name, string _description, IPlayerSpawner _spawner, bool _escapeVehicle = false)
+    {
+        components = _components;
         Name = _name;
         Description = _description;
-        planets = _planets;
         CopyObjectives = _missionObjectives;
-        playerPosition = _playerPosition;
+        spawner = _spawner;
         foreach (var condition in _missionObjectives)
         {
             MissionObjectives.Add(condition.Clone());
-        }
-        TimerModifier = _timerModifier;
-        enemyCreditValues = _enemies;
-        bosses = _bosses;
-
-        currentBoss = Util.Random.Next(bosses.Count);
-        cutscene = _cutscene;
-        endCutscene = _endCutscene;
-        colliders = _colliders;
-        if(_colliders != null)
-        {
-            Colliders = _colliders();
         }
         if (_escapeVehicle)
         {
             escapeVehicle = new EntityConstructor(Enemy.NewPickupDrone, new Vector2(-2000, -2000), Vector2.Zero, 0);
         }
-        UI.WaveText.text = "0";
-        UI.EnemiesLeft.text = "0";
     }
     public void Initialize()
     {
+        foreach(var comp in components)
+        {
+            comp.Initialize();
+        }
         Engine.SaveGame.Player.dockedEntity = null;
         foreach (var objective in MissionObjectives)
         {
             objective.Initialize();
         }
         Engine.SaveGame.Player.Progression = PlayerProgression;
-        Engine.SaveGame.Player.Position = playerPosition;
+        spawner.Spawn();
         TestCompletion();
-        if (playerDocked)
-        {
-            Engine.SaveGame.Player.Dock();
-        }
-        if (Engine.SaveGame.CurrentMissionCompleted && Util.Random.Next(0, 10000) == 0)
-        {
-            foreach (var planet in planets)
-            {
-                planet.EasterEgg = true;
-            }
-        }
         if (!music)
         {
             SoundManager.ChangeTrack(null);
@@ -111,12 +82,10 @@ public class Mission
     }
     public void Update()
     {
-        if (tip != null)
+        foreach(var comp in components)
         {
-            ParticleManager.Add(new Particle(null, tip.Length, new Vector2(0, -1.5f * Planet.radius) + new Vector2(0, -50), Vector2.Zero, 0, 0, Color.White, Color.Transparent) { drawText = tip });
-            tip = null;
+            comp.Update();
         }
-        PlanetUpdate();
         TestCompletion();
         if (RestartTimer != -1)
         {
@@ -125,199 +94,13 @@ public class Mission
                 RestartTimer -= Engine.DeltaSeconds;
                 return;
             }
-            if(endCutscene != null)
-            {
-                EventHandler.MissionSelectTrigger(endCutscene());
-            }
-            else
-            {
-                EventHandler.MissionSelectTrigger(new MissionSelect());
-            }
             if (TestCompletion())
             {
-                Engine.SaveGame.CompleteMission(Wave);
+                //TODO: Figure out what counts as a wave
+                throw new NotImplementedException();
+                //Engine.SaveGame.CompleteMission(Wave);
             }
-        }
-        //Natural enemy spawning toggle
-        if (TimerModifier == -1)
-        {
-            return;
-        }
-        var isReady = true;
-        foreach (var enemy in enemiesSpawned)
-        {
-            if (enemy.Health > 0)
-            {
-                isReady = false;
-            }
-        }
-        if (!currentWaveActive)
-        {
-            if (waveTimer <= 0)
-            {
-                foreach (var enemy in enemiesSpawned)
-                {
-                    Engine.EntityManager.Add(enemy);
-                    float angle = MathF.Atan2(-enemy.Position.X, enemy.Position.Y);
-                    float height = Assets.DimsOf(Sprites.Dot).X;
-                    for (float i = 0; i < 500; i++)
-                    {
-                        var dir = Vector2.Normalize(enemy.Position);
-                        float pow = (500 - i) / 500;
-                        ParticleManager.Add(new Particle(Assets.Get(Sprites.Dot), 0.5f, enemy.Position + dir * i * height, Vector2.Zero, angle, 0, new Color(255, 0, 0), Color.Transparent));
-                    }
-                    if (isAggressive)
-                    {
-                        waveTimer = (enemiesSpawned.Count * 4f + 5f) * TimerModifier;
-                        maxWaveTimer = waveTimer;
-                    }
-                }
-                currentWaveActive = true;
-            }
-            else
-            {
-                waveTimer -= Engine.DeltaSeconds;
-                foreach (var enemy in enemiesSpawned)
-                {
-                    ParticleManager.Add(new Particle(enemy.Texture, enemy.Position, enemy.Angle, new Color(255, 127, 0) * (Util.Random.NextSingle() / 2 + 0.25f)));
-                }
-            }
-        }
-        if (isAggressive && currentWaveActive)
-        {
-            if (waveTimer <= 0)
-            {
-                isReady = true;
-            }
-            else
-            {
-                waveTimer -= Engine.DeltaSeconds;
-            }
-        }
-        if (isReady)
-        {
-            currentWaveActive = false;
-            enemiesSpawned.Clear();
-            EnemiesSpawned = 0;
-            waveTimer = 10f * TimerModifier;
-            maxWaveTimer = waveTimer;
-            Wave++;
-            Engine.EntityManager.DecayPickups();
-            if (music)
-            {
-                if ((Wave - 1) % 20 == 0)
-                {
-                    SoundManager.ChangeTrack(Assets.Get(Sound.main));
-                }
-                if (Wave % 20 == 0)
-                {
-                    SoundManager.ChangeTrack(Assets.Get(Sound.boss));
-                }
-            }
-
-            if (PlayerProgression > 1 && (Wave % 20 == 0))
-            {
-                var pos = NewSpawnLocation();
-                Enemy boss = bosses[currentBoss](pos, Vector2.Zero, MathF.Atan2(-pos.X, pos.Y));
-                if (Wave == 40)
-                {
-                    boss = bosses[2](NewSpawnLocation(), Vector2.Zero, 0);
-                }
-                enemiesSpawned.Add(boss);
-                EnemiesSpawned = 1;
-                currentBoss = (currentBoss + 1) % bosses.Count;
-            }
-            else
-            {
-                float difficulty = 0;
-                if (isAggressive)
-                {
-                    difficulty = (int)(Math.Pow(Wave, 1.5) + 5);
-                }
-                else
-                {
-                    difficulty = (int)((Wave + 1) * MathF.Log(Wave + 1, MathF.E) - Wave) + 1;
-                }
-                List<int> newCosts = [];
-                int availableEnemies = Math.Min(enemyCreditValues.Count, Wave / 10 + 1 + ((isAggressive) ? 1 : 0));
-                Enemy squadLeader = null;
-                int count = 0;
-                for (int i = 0; i < availableEnemies; i++)
-                {
-                    newCosts.Add(enemyCreditValues[i].cost);
-                }
-                var enemyCredits = Util.Random.Next((int)(difficulty), (int)(difficulty * 2));
-                while (enemyCredits > 0)
-                {
-                    int i = Util.Random.Next(0, availableEnemies);
-                    if (Util.Random.Next(0, enemyCreditValues[i].cost / 2) == 0 && newCosts[i] <= enemyCredits)
-                    {
-                        Vector2 pos;
-                        if (squadLeader != null && (count < 2 || Util.Random.Next(0, 4) != 0))
-                        {
-                            var offset = Vector2.Normalize(new Vector2(squadLeader.Position.X, squadLeader.Position.Y));
-                            int isOdd = (count % 2 == 0) ? 1 : -1;
-
-                            pos = squadLeader.Position
-                                //Horizontal offset
-                                + new Vector2(offset.Y, -offset.X) * 10 * isOdd * (count / 2 + 1)
-                                //Vertical offset
-                                + offset * (count / 2 + 1) * 10;
-                            count++;
-                        }
-                        else
-                        {
-                            pos = NewSpawnLocation();
-                            squadLeader = null;
-                            count = 0;
-                        }
-                        var enemy = enemyCreditValues[i].enemy(pos, Engine.SaveGame.Player.Velocity, MathF.Atan2(-pos.X, pos.Y));
-                        enemiesSpawned.Add(enemy);
-                        squadLeader ??= enemy;
-                        enemyCredits -= newCosts[i];
-                        newCosts[i] += 1;
-                        EnemiesSpawned++;
-                    }
-                    if (enemyCredits < newCosts.Min(c => c))
-                    {
-                        break;
-                    }
-                }
-            }
-            for(int i = 0; i < enemiesSpawned.Count / 4 + 1; i++)
-            {
-                Enemy enemy = enemiesSpawned[Util.Random.Next(0, enemiesSpawned.Count)];
-                var comp = enemy.GetComponent<Behaviour>();
-                if(comp != null)
-                {
-                    comp.AddBehaviour(enemy.DropItem(ItemFactory.NewScrap));
-                }
-                else
-                {
-                    enemy.AddComponent(new Behaviour(enemy).AddBehaviour(enemy.DropItem(ItemFactory.NewScrap)));
-                }
-            }
-        }
-        UI.EnemiesLeft.text = (currentWaveActive ? enemiesSpawned.Where(x => x.Health > 0).Count() : 0).ToString();
-        EventHandler.UpdateEnemyCountdownUI(waveTimer, maxWaveTimer, Wave);
-    }
-    public void PlanetUpdate()
-    {
-        foreach (var planet in planets)
-        {
-            foreach (var planet2 in planets)
-            {
-                if (planet == planet2)
-                {
-                    continue;
-                }
-                planet.AttractObject(planet2);
-            }
-        }
-        foreach (var planet in planets)
-        {
-            planet.Update();
-        }
+        }        
     }
     public Planet IsColliding(Vector2 _position)
     {
@@ -330,34 +113,15 @@ public class Mission
         }
         return null;
     }
-    public void PlayIntroCutscene()
-    {
-        if (cutscene != null)
-        {
-            CurrentGameState.SwitchState(cutscene());
-        }
-        else
-        {
-            CurrentGameState.SwitchState(new PlayingGame());
-        }
-    }
     public float GetAtmospherePressure(Entity _entity)
     {
         float sum = 0;
-        foreach (var planet in planets) 
-        { 
-            sum += planet.GetAtmosphereDensity(_entity); 
+        var comp = GetComponent<Planets>();
+        if(comp != null)
+        {
+            sum = comp.GetAtmospherePressure(_entity);
         }
         return sum;
-    }
-    public void AttractObject(Entity _entity)
-    {
-        foreach (var planet in planets) { planet.AttractObject(_entity); }
-        foreach (var collider in Colliders) { collider.Collide(_entity); }
-    }
-    public void AttractObject(Particle _particle)
-    {
-        foreach (var planet in planets) { planet.AttractObject(_particle); }
     }
     public void FailMission()
     {
@@ -379,6 +143,16 @@ public class Mission
     }
     public void CalculateTrajectory(Vector2 _startPosition, Vector2 _startVelocity, float _radius)
     {
+        Planet[] planets = [];
+        if(GetComponent<Planets>() != null)
+        {
+            planets = GetComponent<Planets>().GetPlanets;
+        }
+        ICollider[] Colliders = [];
+        if (GetComponent<Colliders>() != null)
+        {
+            Colliders = GetComponent<Colliders>().GetColliders;
+        }
         Vector2 futurePosition = _startPosition;
         Vector2 futureVelocity = _startVelocity;
         Vector2[] futurePlanetPositions = [.. planets.Select(planet => planet.position)];
@@ -474,38 +248,11 @@ public class Mission
         }
         return acceleration;
     }
-    public Planet GetNearestPlanet(Vector2 _position)
-    {
-        float nearestDistance = float.MaxValue;
-        Planet nearestPlanet = null;
-        foreach(var planet in planets)
-        {
-            float distance = Vector2.Distance(_position, planet.position);
-            if(distance < nearestDistance)
-            {
-                nearestDistance = distance;
-                nearestPlanet = planet;
-            }
-        }
-        return nearestPlanet;
-    }
     public Mission Clone()
     {
-        var _planets = new Planet[planets.Length];
-        for (int i = 0; i < planets.Length; i++)
-        {
-            _planets[i] = planets[i].Copy();
-        }
-        bool isInFleet = Engine.SaveGame.FleetSystem > Engine.EntityManager.Systems[Engine.SaveGame.CurrentMissionIndex].system;
-        float tm = TimerModifier;
-        if (isInFleet && tm != -1)
-        {
-            tm /= 2;
-        }
-        return new Mission(_planets, CopyObjectives, Name, Description, tm, playerPosition, enemyCreditValues, bosses, cutscene, escapeVehicle != null, endCutscene, colliders)
-        { PlayerProgression = this.PlayerProgression, playerDocked = this.playerDocked, isAggressive = this.isAggressive || isInFleet, music = this.music, tip = this.tip, relaunchable = this.relaunchable };
+        throw new NotImplementedException();
     }
-    private Vector2 NewSpawnLocation()
+    public Vector2 NewSpawnLocation()
     {
         float angle = (Util.Random.NextSingle() - 0.5f) * MathF.Tau;
         float distanceMultiplier = 1 + (Util.Random.NextSingle() - 0.5f) / 4;
@@ -561,12 +308,12 @@ public class Mission
     }
     public void Draw(SpriteBatch _spriteBatch)
     {
-        foreach (var planet in planets)
+        foreach(var comp in components)
         {
-            planet.Draw(_spriteBatch);
+            comp.Draw(_spriteBatch);
         }
     }
-    public static List<(int, DelegateEnemy)> TierOne()
+    public static List<(int, Func<Vector2, Vector2, float, bool, Enemy>)> TierOne()
     {
         return
         [
@@ -576,7 +323,7 @@ public class Mission
             (4, Enemy.NewCarrier),
         ];
     }
-    public static List<DelegateEnemy> TierOneBosses()
+    public static List<Func<Vector2, Vector2, float, bool, Enemy>> TierOneBosses()
     {
         return
         [
@@ -585,7 +332,7 @@ public class Mission
             Enemy.NewDeadeyeBoss,
         ];
     }
-    public static List<(int, DelegateEnemy)> TierTwo()
+    public static List<(int, Func<Vector2, Vector2, float, bool, Enemy>)> TierTwo()
     {
         return
         [
@@ -594,7 +341,7 @@ public class Mission
             (2, Enemy.NewHealer),
         ];
     }
-    public static List<DelegateEnemy> TierTwoBosses()
+    public static List<Func<Vector2, Vector2, float, bool, Enemy>> TierTwoBosses()
     {
         return
         [
@@ -603,7 +350,7 @@ public class Mission
             Enemy.NewStreamlineBoss
         ];
     }
-    public static List<(int, DelegateEnemy)> TierThree()
+    public static List<(int, Func<Vector2, Vector2, float, bool, Enemy>)> TierThree()
     {
         return
         [
@@ -612,7 +359,7 @@ public class Mission
             (3, Enemy.NewEngineer),
         ];
     }
-    public static List<DelegateEnemy> TierThreeBosses()
+    public static List<Func<Vector2, Vector2, float, bool, Enemy>> TierThreeBosses()
     {
         return
         [
@@ -620,11 +367,11 @@ public class Mission
             Enemy.NewContinuumBoss,
         ];
     }
-    public static List<(int, DelegateEnemy)> All()
+    public static List<(int, Func<Vector2, Vector2, float, bool, Enemy>)> All()
     {
         return [.. TierOne(), .. TierTwo(), .. TierThree()];
     }
-    public static List<DelegateEnemy> AllBosses()
+    public static List<Func<Vector2, Vector2, float, bool, Enemy>> AllBosses()
     {
         return [.. TierOneBosses(), .. TierTwoBosses(), .. TierThreeBosses()];
     }
@@ -641,13 +388,6 @@ public class AdvancedConstructor(Func<Vector2, Vector2, float, bool, Entity> _co
     public Entity Construct()
     {
         return _constructor(_position, _velocity, _angle, _isFriendly);
-    }
-}
-public class LaunchConstructor(Func<Vector2, float, Entity> _constructor,Vector2 _position, float _distance) : IConstructor
-{
-    public Entity Construct()
-    {
-        return _constructor(_position, _distance);
     }
 }
 public class PickupConstructor(Func<Vector2, Vector2, float, Entity> _constructor, Vector2 _position, Vector2 _velocity, float _angularVelocity) : IConstructor
