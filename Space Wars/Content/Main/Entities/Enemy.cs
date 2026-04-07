@@ -3765,7 +3765,9 @@ public class Enemy : Entity
             {
                 SoundManager.PlaySound(Assets.Get(Sound.Beep), Position);
                 ParticleManager.Add(new Particle(null, 5, Position + new Vector2(0, -30), Velocity, Angle, 0, Color.Red, Color.Transparent) { drawText = "Alert: Enemies detected.\nDefend the mothership." });
-                Engine.SaveGame.CurrentMission.GetComponent<WaveSpawner>().TimerModifier = 1;
+                var comp = new WaveSpawner(Mission.T1, 1, false);
+                Engine.SaveGame.CurrentMission.AddComponent(comp);
+                comp.Initialize();
                 alert = true;
             }
             yield return 0;
@@ -3953,9 +3955,9 @@ public class Enemy : Entity
             yield return 0;
         }
     }
-    public static Enemy NewPickupDrone(Vector2 position, Vector2 velocity, float angle, float _distance)
+    public static Enemy NewPickupDrone(Vector2 position, float _distance)
     {
-        Enemy enemy = new(position, velocity, angle, 250, Assets.Get(Sprites.PickupDrone), true);
+        Enemy enemy = new(position, Vector2.Zero, 0, 250, Assets.Get(Sprites.PickupDrone), true);
         enemy.AddComponent(new Behaviour(enemy).AddBehaviour(enemy.PickupDrone(_distance)));
         enemy.AddComponent(new DockableComponent(enemy, UI.PickupDroneMenu));
         return enemy;
@@ -3986,10 +3988,7 @@ public class Enemy : Entity
     IEnumerable<int> Glider(float _distance)
     {
         bool isDocked = true;
-        throw new NotImplementedException();
-        //TODO: Figure this out
-        //float xSpeed = Planet.GetOrbitalVelocity(new Vector2(0, _distance), Engine.SaveGame.CurrentMission.Planet.position, Engine.SaveGame.CurrentMission.Planet.mass).X;
-        float xSpeed = 1;
+        float xSpeed = Planet.GetOrbitalVelocity(new Vector2(0, _distance), Engine.SaveGame.CurrentMission.Planet.position, Engine.SaveGame.CurrentMission.Planet.mass).X;
         while (true)
         {
             Velocity = new Vector2(xSpeed, xSpeed * 2 * (Position.Y - _distance) / Position.X);

@@ -27,7 +27,7 @@ public abstract class Status(Sprites _icon)
         Berserk,
     }
 }
-public class StatusHolder
+public class StatusHolder(Entity _entity) : Component(_entity)
 {
     List<Status> effects = [];
     public int StealthChange { get; private set; }
@@ -59,6 +59,10 @@ public class StatusHolder
             }
         }
         effects.Add(_status);
+    }
+    public void Clear()
+    {
+        effects = [];
     }
     public virtual int ModifyDamage(int _damage)
     {

@@ -8,7 +8,6 @@ using Microsoft.Xna.Framework.Graphics;
 using Space_Wars.Content.Main.Particles;
 using Microsoft.Xna.Framework;
 using Space_Wars.Content.Main.Components;
-
 namespace Space_Wars.Content.Main.MissionComponents;
 internal class Planets(Planet[] _planets) : IMissionComponent, IObstacle
 {
@@ -46,6 +45,7 @@ internal class Planets(Planet[] _planets) : IMissionComponent, IObstacle
                     planet1.AttractObject(particle);
                 }
             }
+            planet1.AttractObject(Engine.SaveGame.Player);
         }
         foreach (var planet1 in _planets)
         {
@@ -108,5 +108,11 @@ internal class Planets(Planet[] _planets) : IMissionComponent, IObstacle
             }
         }
         return null;
+    }
+    //TODO: Check if this clone function has side effects for replaying missions.
+    //Should work for now
+    public IMissionComponent Clone()
+    {
+        return new Planets(_planets);
     }
 }

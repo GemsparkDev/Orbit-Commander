@@ -25,4 +25,8 @@ internal class Tip(string tip, Vector2 _position) : IMissionComponent
             tip = null;
         }
     }
+    public IMissionComponent Clone()
+    {
+        return new Tip(tip, _position);
+    }
 }

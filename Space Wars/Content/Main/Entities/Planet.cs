@@ -67,35 +67,48 @@ public class Planet : ICollider
     public bool Collide(Entity _entity)
     {
         Vector2 relativePosition = _entity.Position - position;
-        if(relativePosition.Length() >= radius + _entity.ColliderRadius)
+        if(false)
         {
-            return false;
-        }
-        var normalVector = Vector2.Normalize(relativePosition);
-        var frictionVector = new Vector2(normalVector.Y, -normalVector.X);
-        var relativeVelocity = velocity - _entity.Velocity;
-        int collisionForce = (int)Math.Floor((relativeVelocity).Length() / 2);
-        if (_entity as Pickup == null && (collisionForce > 5 || _entity.GetComponent<Damager>() != null))
-        {
-            _entity.Collide(collisionForce);
-        }
-        float verticalVelocity = Math.Max(0, Vector2.Dot(relativeVelocity, normalVector));
-        _entity.Velocity += normalVector * verticalVelocity + frictionVector * Vector2.Dot(relativeVelocity, frictionVector) * 0.1f;
-        _entity.Position += normalVector * (radius + _entity.ColliderRadius - Vector2.Distance(position, _entity.Position));
-        float val = (int)MathF.Sqrt(collisionForce);
-        if (verticalVelocity > 1)
-        {
-            for (int i = 0; i < val * 1.5f; i++)
+            ParticleManager.Add(new Particle(Assets.Get(Sprites.Circle), _entity.Position + _entity.Velocity * Engine.DeltaSeconds, 0, Color.Red));
+            Vector2 dir = Vector2.Normalize(_entity.Velocity);
+            float closestLength = -(relativePosition.X * dir.X + relativePosition.Y * dir.Y);
+            float closestDistance = Vector2.Distance((dir * closestLength + _entity.Position), _entity.Position);
+            if (closestLength > 0 && closestLength < _entity.Velocity.Length() && closestDistance < _entity.ColliderRadius)
             {
-                ParticleManager.Add(new Particle(Assets.Get(Sprites.Dot), 10, normalVector * (radius + 2) + position, normalVector * val + new Vector2(Util.OneToNegOne(), Util.OneToNegOne()) * val / 2, 0, 0, color * 0.75f, Color.Transparent) { experienceGravity = true });
-            }
+                float discriminant = MathF.Sqrt(_entity.ColliderRadius * _entity.ColliderRadius - closestDistance * closestDistance);
+                _entity.Position += dir * (closestLength - discriminant);
+                _entity.Velocity = Vector2.Zero;
+            } 
         }
-        _entity.ConductHeat(Temperature, 5);
-        return true;
+        else if(relativePosition.Length() <= radius + _entity.ColliderRadius)
+        {
+            var normalVector = Vector2.Normalize(relativePosition);
+            var frictionVector = new Vector2(normalVector.Y, -normalVector.X);
+            var relativeVelocity = velocity - _entity.Velocity;
+            int collisionForce = (int)Math.Floor((relativeVelocity).Length() / 2);
+            if (_entity as Pickup == null && (collisionForce > 5 || _entity.GetComponent<Damager>() != null))
+            {
+                _entity.Collide(collisionForce);
+            }
+            float verticalVelocity = Math.Max(0, Vector2.Dot(relativeVelocity, normalVector));
+            _entity.Velocity += normalVector * verticalVelocity + frictionVector * Vector2.Dot(relativeVelocity, frictionVector) * 0.1f;
+            _entity.Position += normalVector * (radius + _entity.ColliderRadius - Vector2.Distance(position, _entity.Position));
+            float val = (int)MathF.Sqrt(collisionForce);
+            if (verticalVelocity > 1)
+            {
+                for (int i = 0; i < val * 1.5f; i++)
+                {
+                    ParticleManager.Add(new Particle(Assets.Get(Sprites.Dot), 10, normalVector * (radius + 2) + position, normalVector * val + new Vector2(Util.OneToNegOne(), Util.OneToNegOne()) * val / 2 + velocity, 0, 0, color * 0.75f, Color.Transparent) { experienceGravity = true });
+                }
+            }
+            _entity.ConductHeat(Temperature, 5);
+            return true;
+        }
+        return false;
     }
     public bool IsColliding(Vector2 _position, Vector2 _velocity, float _colliderRadius, bool _override)
     {
-        return (position - _position).Length() >= radius + _colliderRadius;
+        return (position - _position).Length() <= radius + _colliderRadius;
     }
     public string Print() { return ""; }
     public Vector2 AttractObject(Entity _entity)

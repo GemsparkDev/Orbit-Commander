@@ -4,6 +4,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Space_Wars.Content.Main;
 using Space_Wars.Content.Main.Components;
+using Space_Wars.Content.Main.MissionComponents;
 using Space_Wars.Content.Main.Particles;
 using System;
 using System.Collections.Generic;
@@ -1167,17 +1168,21 @@ public class SummonGrapplingHook() : Module(Modules.GrapplingHook)
                 {
                     return;
                 }
-                foreach (var planet in Engine.SaveGame.CurrentMission.Planets)
+                var comp = Engine.SaveGame.CurrentMission.GetComponent<Planets>();
+                if(comp != null)
                 {
-                    var planetDir = Vector2.Normalize(mousePos + planet.position);
-                    if (Vector2.DistanceSquared(mousePos, planet.position + planetDir * planet.radius) < 1000)
+                    foreach (var planet in comp.GetPlanets)
                     {
-                        hook.Parent = new Enemy(planet.position + planetDir * planet.radius, Vector2.Zero, 0, 1, null, true);
-                        hasHooked = true;
-                        p = planet;
-                        offset = planetDir * planet.radius;
-                        break;
-                    }
+                        var planetDir = Vector2.Normalize(mousePos + planet.position);
+                        if (Vector2.DistanceSquared(mousePos, planet.position + planetDir * planet.radius) < 1000)
+                        {
+                            hook.Parent = new Enemy(planet.position + planetDir * planet.radius, Vector2.Zero, 0, 1, null, true);
+                            hasHooked = true;
+                            p = planet;
+                            offset = planetDir * planet.radius;
+                            break;
+                        }
+                    }   
                 }
                 foreach (var entity in Engine.EntityManager.Entities)
                 {

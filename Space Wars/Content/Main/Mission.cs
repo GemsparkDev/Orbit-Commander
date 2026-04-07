@@ -24,11 +24,7 @@ public class Mission
     public int Wave {get; set;} = 0;
     //TODO: Add behavior for when there is no planet
     public Planet Planet { get { return GetComponent<Planets>().GetPlanets[0]; }}
-
-    private EntityConstructor escapeVehicle = null;
-    //Save original entity parameters to allow cloning
-    private List<ICondition> CopyObjectives { get; }
-    private List<ICondition> MissionObjectives { get; } = [];
+    private Conditional objective;
     private IPlayerSpawner spawner;
 
     private List<IMissionComponent> components = [];
@@ -54,7 +50,8 @@ public class Mission
         }
         return null;
     }
-    public Mission(List<IMissionComponent> _components, List<ICondition> _missionObjectives, string _name, string _description, IPlayerSpawner _spawner, bool _escapeVehicle = false)
+    public Mission(List<IMissionComponent> _components, Conditional _objective, 
+    string _name, string _description, IPlayerSpawner _spawner, int _playerProgression = 3)
     {
         components = _components;
         foreach(var comp in _components)
@@ -66,31 +63,20 @@ public class Mission
         }
         Name = _name;
         Description = _description;
-        CopyObjectives = _missionObjectives;
         spawner = _spawner;
-        foreach (var condition in _missionObjectives)
-        {
-            MissionObjectives.Add(condition.Clone());
-        }
-        if (_escapeVehicle)
-        {
-            escapeVehicle = new EntityConstructor(Enemy.NewPickupDrone, new Vector2(-2000, -2000), Vector2.Zero, 0);
-        }
+        objective = _objective;
+        playerProgression = _playerProgression;
     }
     public void Initialize()
     {
+        Engine.SaveGame.Player.dockedEntity = null;
+        Engine.SaveGame.Player.Progression = PlayerProgression;
         foreach(var comp in components)
         {
             comp.Initialize();
         }
-        Engine.SaveGame.Player.dockedEntity = null;
-        foreach (var objective in MissionObjectives)
-        {
-            objective.Initialize();
-        }
-        Engine.SaveGame.Player.Progression = PlayerProgression;
+        objective.Initialize();
         spawner.Spawn();
-        TestCompletion();
         if (!music)
         {
             SoundManager.ChangeTrack(null);
@@ -106,7 +92,10 @@ public class Mission
         {
             comp.Update();
         }
-        TestCompletion();
+        if(objective != null)
+        {
+            objective = objective.Update();    
+        }
         if (RestartTimer != -1)
         {
             if (RestartTimer > 0)
@@ -114,9 +103,9 @@ public class Mission
                 RestartTimer -= Engine.DeltaSeconds;
                 return;
             }
-            if (TestCompletion())
+            if(objective == null)
             {
-                Engine.SaveGame.CompleteMission(Wave);
+                Engine.SaveGame.CompleteMission(Wave);                
             }
         }        
     }
@@ -152,13 +141,7 @@ public class Mission
     }
     public void CompleteCustomRule(Entity _target)
     {
-        foreach (var objective in MissionObjectives)
-        {
-            if (objective is EntityCondition)
-            {
-                (objective as EntityCondition).CustomCompleteRule(_target);
-            }
-        }
+        objective.CompleteCustomRule(_target);
     }
     public void CalculateTrajectory(Vector2 _startPosition, Vector2 _startVelocity, float _radius)
     {
@@ -274,51 +257,35 @@ public class Mission
     }
     public Mission Clone()
     {
-        throw new NotImplementedException();
+        List<IMissionComponent> comps = [];
+        foreach(var component in components)
+        {
+            comps.Add(component.Clone());
+        }
+        return new Mission(comps, objective.Clone(), Name, Description, spawner, PlayerProgression);
     }
     public Vector2 NewSpawnLocation()
     {
-        float angle = (Util.Random.NextSingle() - 0.5f) * MathF.Tau;
-        float distanceMultiplier = 1 + (Util.Random.NextSingle() - 0.5f) / 4;
-        float distance = (Engine.ScreenSize.X + Engine.ScreenSize.Y) * distanceMultiplier / 3;
-        Vector2 spawnLocation = Util.ToUnitVector(angle) * distance + Engine.SaveGame.Player.Position;
-        if(IsColliding(spawnLocation, Vector2.Zero, 10, true) != null)
+        Vector2 spawnLocation;
+        do
         {
-            return NewSpawnLocation();
+            float angle = (Util.Random.NextSingle() - 0.5f) * MathF.Tau;
+            float distanceMultiplier = 1 + (Util.Random.NextSingle() - 0.5f) / 4;
+            float distance = (Engine.ScreenSize.X + Engine.ScreenSize.Y) * distanceMultiplier / 3;
+            spawnLocation = Util.ToUnitVector(angle) * distance + Engine.SaveGame.Player.Position;
         }
+        while(IsColliding(spawnLocation, Vector2.Zero, 10, false) != null);
         return spawnLocation;
     }
     public float Hitscan(Vector2 _pos, Vector2 _dir)
     {
-        Enemy enemy = new Enemy(_pos, _dir * 99999, 0, 1, Assets.Get(Sprites.Dot));
+        Enemy enemy = new Enemy(_pos, _dir, 0, 1, Assets.Get(Sprites.Dot));
+        enemy.Update();
         foreach(var obstacle in obstacles)
         {
             obstacle.Collide(enemy);
         }
         return Vector2.Distance(_pos, enemy.Position);
-    }
-    private bool TestCompletion()
-    {
-        bool allCompleted = true;
-        foreach (var objective in MissionObjectives)
-        {
-            allCompleted &= objective.IsComplete();
-        }
-        if (allCompleted && RestartTimer == -1)
-        {
-            if (escapeVehicle != null)
-            {
-                var objective = new EntityCondition(escapeVehicle, [Condition.Protect, Condition.CustomIncomplete]);
-                MissionObjectives.Add(objective);
-                objective.Initialize();
-                escapeVehicle = null;
-            }
-            else
-            {
-                RestartTimer = 2;
-            }
-        }
-        return allCompleted;
     }
     public void Draw(SpriteBatch _spriteBatch)
     {
@@ -327,7 +294,7 @@ public class Mission
             comp.Draw(_spriteBatch);
         }
     }
-    public static List<(int, Func<Vector2, Vector2, float, bool, Enemy>)> TierOne()
+    public static List<(int, Func<Vector2, Vector2, float, bool, Enemy>)> TierOneEnemies()
     {
         return
         [
@@ -346,7 +313,7 @@ public class Mission
             Enemy.NewDeadeyeBoss,
         ];
     }
-    public static List<(int, Func<Vector2, Vector2, float, bool, Enemy>)> TierTwo()
+    public static List<(int, Func<Vector2, Vector2, float, bool, Enemy>)> TierTwoEnemies()
     {
         return
         [
@@ -364,7 +331,7 @@ public class Mission
             Enemy.NewStreamlineBoss
         ];
     }
-    public static List<(int, Func<Vector2, Vector2, float, bool, Enemy>)> TierThree()
+    public static List<(int, Func<Vector2, Vector2, float, bool, Enemy>)> TierThreeEnemies()
     {
         return
         [
@@ -381,13 +348,41 @@ public class Mission
             Enemy.NewContinuumBoss,
         ];
     }
-    public static List<(int, Func<Vector2, Vector2, float, bool, Enemy>)> All()
+    public static List<(int, Func<Vector2, Vector2, float, bool, Enemy>)> AllEnemies()
     {
-        return [.. TierOne(), .. TierTwo(), .. TierThree()];
+        return [.. TierOneEnemies(), .. TierTwoEnemies(), .. TierThreeEnemies()];
     }
     public static List<Func<Vector2, Vector2, float, bool, Enemy>> AllBosses()
     {
         return [.. TierOneBosses(), .. TierTwoBosses(), .. TierThreeBosses()];
+    }
+    public static (List<(int, Func<Vector2, Vector2, float, bool, Enemy>)>, 
+    List<Func<Vector2, Vector2, float, bool, Enemy>>) T1()
+    {
+        return (TierOneEnemies(), TierOneBosses());
+    }
+        public static (List<(int, Func<Vector2, Vector2, float, bool, Enemy>)>, 
+    List<Func<Vector2, Vector2, float, bool, Enemy>>) T2()
+    {
+        return (TierTwoEnemies(), TierTwoBosses());
+    }
+        public static (List<(int, Func<Vector2, Vector2, float, bool, Enemy>)>, 
+    List<Func<Vector2, Vector2, float, bool, Enemy>>) T3()
+    {
+        return (TierThreeEnemies(), TierThreeBosses());
+    }
+        public static (List<(int, Func<Vector2, Vector2, float, bool, Enemy>)>, 
+    List<Func<Vector2, Vector2, float, bool, Enemy>>) All()
+    {
+        return (AllEnemies(), AllBosses());
+    }
+    public static Conditional SendPickup()
+    {
+        return new Conditional([new EntityCondition(new LaunchConstructor(Enemy.NewPickupDrone, new Vector2(-2000, 2000), Engine.SaveGame.CurrentMission.Planet.radius * 1.25f), [Condition.CustomIncomplete])], Win);
+    }
+    public static Conditional Win()
+    {
+        return null;
     }
 }
 public class EntityConstructor(Func<Vector2, Vector2, float, Entity> _constructor, Vector2 _position, Vector2 _velocity, float _angle) : IConstructor
@@ -411,9 +406,33 @@ public class PickupConstructor(Func<Vector2, Vector2, float, Entity> _constructo
         return _constructor(_position, _velocity, _angularVelocity);
     }
 }
-public interface IConstructor
+public class LaunchConstructor(Func<Vector2, float, Entity> _constructor, Vector2 _position, float _distance) : IConstructor
+{
+    public Entity Construct()
+    {
+        return _constructor(_position, _distance);
+    }
+}
+public interface IConstructor : IMissionComponent
 {
     public Entity Construct();
+    void IMissionComponent.Initialize()
+    {
+        Engine.EntityManager.Add(Construct());
+    }
+    void IMissionComponent.Update()
+    {
+        
+    }
+    void IMissionComponent.Draw(SpriteBatch _spriteBatch)
+    {
+        
+    }
+    //All constructors should be constant methods
+    IMissionComponent IMissionComponent.Clone()
+    {
+        return this;
+    }
 }
 public interface ICondition
 {

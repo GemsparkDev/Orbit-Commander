@@ -48,10 +48,6 @@ namespace Space_Wars.Content.Main.Particles
         }
         public void Update()
         {
-            if (experienceGravity) 
-            {
-                Engine.SaveGame.CurrentMission.AttractObject(this);
-            }
             float timeScalar = Math.Clamp(timeLeft / originalTimeLeft, 0, 1);
             renderColor = new Color(
             (byte)Util.Lerp(color.R, fadeToColor.R, 1 - timeScalar),

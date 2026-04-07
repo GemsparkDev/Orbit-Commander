@@ -39,4 +39,8 @@ internal class Cutscenes(Func<Cutscene> startCutscene, Func<Cutscene> endCutscen
             }
         }
     }
+    public IMissionComponent Clone()
+    {
+        return new Cutscenes(startCutscene, endCutscene);
+    }
 }

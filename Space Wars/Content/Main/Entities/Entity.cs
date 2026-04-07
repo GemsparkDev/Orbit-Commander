@@ -35,11 +35,12 @@ public class Entity
     private int stealthAbility = 0;
     private List<Component> components = [];
     public float Temperature { get; private set; } = 0; //-1: Freeze, 0: Neutral, 1: Burn
-    public StatusHolder StatusHolder { get; set; } = new();
+    public StatusHolder StatusHolder { get {return GetComponent<StatusHolder>(); } }
     public Entity(Texture2D _texture, Vector2 _position, Vector2 _velocity, float _angle, float _angularVelocity, bool _isFriendly)
     {
         AddComponent(new Transform(this) { Position = _position, Velocity = _velocity, Angle = _angle, AngularVelocity = _angularVelocity });
         AddComponent(new Sprite(this) { Texture = _texture });
+        AddComponent(new StatusHolder(this));
         isFriendly = _isFriendly;
     }
     public virtual void Update()

@@ -11,16 +11,36 @@ using System.Threading.Tasks;
 using static Space_Wars.Content.Main.Mission;
 
 namespace Space_Wars.Content.Main.MissionComponents;
-internal class WaveSpawner(List<(int cost, Func<Vector2, Vector2, float, bool, Enemy> enemy)> enemyCreditValues, 
-    List<Func<Vector2, Vector2, float, Enemy>> bosses, float _timerModifier) : IMissionComponent
+internal class WaveSpawner : IMissionComponent
 {
+    public WaveSpawner(List<(int cost, Func<Vector2, Vector2, float, bool, Enemy> enemy)> _enemyCreditValues, 
+    List<Func<Vector2, Vector2, float, bool, Enemy>> _bosses, float _timerModifier, bool _isAggressive)
+    {
+        enemyCreditValues = _enemyCreditValues;
+        bosses = _bosses;
+        TimerModifier = _timerModifier;
+        currentBoss = Util.Random.Next(bosses.Count);
+        isAggressive = _isAggressive;
+    }
+    public WaveSpawner(Func<(List<(int, Func<Vector2, Vector2, float, bool, Enemy>)> _enemyCreditValues, 
+    List<Func<Vector2, Vector2, float, bool, Enemy>> _bosses)> _spawner, float _timerModifier, bool _isAggressive)
+    {
+        var spawns = _spawner();
+        enemyCreditValues = spawns._enemyCreditValues;
+        bosses = spawns._bosses;
+        TimerModifier = _timerModifier;
+        currentBoss = Util.Random.Next(bosses.Count);
+        isAggressive = _isAggressive;
+    }
+    List<(int cost, Func<Vector2, Vector2, float, bool, Enemy> enemy)> enemyCreditValues;
+    List<Func<Vector2, Vector2, float, bool, Enemy>> bosses;
     private List<Enemy> enemiesSpawned = [];
     private bool currentWaveActive = false;
     private float waveTimer = 5;
     private float maxWaveTimer = 5;
     private bool isAggressive;
-    private int currentBoss = Util.Random.Next(bosses.Count);
-    public float TimerModifier { get; set; } = _timerModifier;
+    private int currentBoss;
+    public float TimerModifier { get; set; }
     public int EnemiesSpawned { get; set; } = 0;
     public int Wave {get{return Engine.SaveGame.CurrentMission.Wave;} set{Engine.SaveGame.CurrentMission.Wave = value;}}
     public void Draw(SpriteBatch _spriteBatch)
@@ -105,10 +125,10 @@ internal class WaveSpawner(List<(int cost, Func<Vector2, Vector2, float, bool, E
             if (Engine.SaveGame.CurrentMission.PlayerProgression > 1 && (Wave % 20 == 0))
             {
                 var pos = Engine.SaveGame.CurrentMission.NewSpawnLocation();
-                Enemy boss = bosses[currentBoss](pos, Vector2.Zero, MathF.Atan2(-pos.X, pos.Y));
+                Enemy boss = bosses[currentBoss](pos, Vector2.Zero, MathF.Atan2(-pos.X, pos.Y), false);
                 if (Wave == 40)
                 {
-                    boss = bosses[2](Engine.SaveGame.CurrentMission.NewSpawnLocation(), Vector2.Zero, 0);
+                    boss = bosses[2](pos, Vector2.Zero, 0, false);
                 }
                 enemiesSpawned.Add(boss);
                 EnemiesSpawned = 1;
@@ -187,5 +207,9 @@ internal class WaveSpawner(List<(int cost, Func<Vector2, Vector2, float, bool, E
         }
         UI.EnemiesLeft.text = (currentWaveActive ? enemiesSpawned.Where(x => x.Health > 0).Count() : 0).ToString();
         EventHandler.UpdateEnemyCountdownUI(waveTimer, maxWaveTimer, Wave);
+    }
+    public IMissionComponent Clone()
+    {
+        return new WaveSpawner(enemyCreditValues, bosses, TimerModifier, isAggressive);
     }
 }

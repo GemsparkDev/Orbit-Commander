@@ -108,17 +108,6 @@ public class Pickup : Entity, IData
             float offset = Util.FIED(0.05f);
             Velocity = parent.Velocity * (1 - offset) + Velocity * (offset);
         }
-        var nearestProjectile = Engine.EntityManager.NearestProjectile(this, isFriendly);
-        if (nearestProjectile != null)
-        {
-            if (Vector2.Distance(nearestProjectile.Position, this.Position) < nearestProjectile.ColliderRadius + ColliderRadius)
-            {
-                if(nearestProjectile.GetComponent<Damager>() != null)
-                {
-                    Collide(nearestProjectile.GetComponent<Damager>().Damage);
-                }
-            }
-        }
         base.Update();
     }
     public virtual string SerializeAttributes()

@@ -180,7 +180,7 @@ public class SaveGame
             }
         }
         QueuedItems = [.. from item in QueuedItems where !item.IsExpired select item];
-        Engine.SaveGame.Player.StatusHolder = new();
+        Engine.SaveGame.Player.StatusHolder.Clear();
         Engine.Autosave();
     }
     public string Serialize()

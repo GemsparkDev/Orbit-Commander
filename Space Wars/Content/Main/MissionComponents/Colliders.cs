@@ -15,6 +15,10 @@ public class Colliders(Func<ICollider[]> _colliders) : IMissionComponent, IObsta
     public ICollider[] GetColliders { get; set; }
     public void Draw(SpriteBatch _spriteBatch)
     {
+        foreach(var collider in GetColliders)
+        {
+            collider.Draw(_spriteBatch);
+        }
     }
 
     public void Initialize()
@@ -55,5 +59,9 @@ public class Colliders(Func<ICollider[]> _colliders) : IMissionComponent, IObsta
             }
         }
         return null;
+    }
+    public IMissionComponent Clone()
+    {
+        return new Colliders(_colliders);
     }
 }
