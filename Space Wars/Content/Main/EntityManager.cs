@@ -34,11 +34,11 @@ public class EntityManager
     [
         new Mission([
             new Planets([new Planet(Vector2.Zero, Vector2.Zero, 10000, 8, true, Color.Cyan, false), new Planet(new Vector2(1000, 0), Planet.GetOrbitalVelocity(new Vector2(1000, 0), Vector2.Zero, 10000), 250, 1.5f, false, Color.Cyan)]),
-            new Cutscenes(RestartCutscene, DayOneLog),
+            new IntroCutscene(RestartCutscene),
             new Tip("WASD to move, Space to dock and undock.\nRmb to collect scrap, Lmb to shoot.", new Vector2(0, 9*50)),
             new PickupConstructor(ItemFactory.NewScrap, new Vector2(0, -8*50), new Vector2(10, -10), 0.07f),
             new PickupConstructor(ItemFactory.NewScrap, new Vector2(0, -8*50), new Vector2(-8, -4), -0.03f),], 
-        new Conditional([new EntityCondition(new EntityConstructor(Enemy.NewMothership, new Vector2(0, -8*50 - Assets.DimsOf(Sprites.Mothership).Y / 2), Vector2.Zero, 0f), [ Condition.Protect, Condition.CustomIncomplete ])], Mission.Win),
+        new Conditional([new EntityCondition(new EntityConstructor(Enemy.NewMothership, new Vector2(0, -8*50 - Assets.DimsOf(Sprites.Mothership).Y / 2), Vector2.Zero, 0f), [ Condition.Protect, Condition.CustomIncomplete ])], Mission.Win(DayOneLog)),
         "Crash Landing", "The crash landing site. Objective: Explore the system.", 
         new CustomSpawner(new Vector2(0, -8*50 - Assets.DimsOf(Sprites.Mothership).Y / 2)), 0),
         
@@ -53,28 +53,27 @@ public class EntityManager
             new AdvancedConstructor(Enemy.NewTurret, new Vector2(MathF.Sin(0.3f), -MathF.Cos(0.3f)) * 12 * 50, Vector2.Zero, 0.3f, true),
             new AdvancedConstructor(Enemy.NewTurret, new Vector2(MathF.Sin(-0.3f), -MathF.Cos(-0.3f)) * 12 * 50, Vector2.Zero, -0.3f, true),
             new WaveSpawner(Mission.T1, 0.18f, true),
-            new Cutscenes(QueueCrossfireDialogue, RepairCrashedShip),
+            new IntroCutscene(QueueCrossfireDialogue),
         ], new Conditional([
             new EntityCondition(new EntityConstructor(Enemy.NewCrashedShip, new Vector2(-6000, -6640), Vector2.Zero, -MathF.PI * 3 / 8), [Condition.Protect, Condition.CustomIncomplete]),
-        ], Mission.SendPickup), "Crossfire", "Sensors indicate a group fighting against the same hostiles encountered during our crash landing.\nAiding them could gain us a powerful ally.", new DropSpawner(4000), 2),
+        ], Mission.SendPickup(RepairCrashedShip)), "Crossfire", "Sensors indicate a group fighting against the same hostiles encountered during our crash landing.\nAiding them could gain us a powerful ally.", new DropSpawner(4000), 2),
 
         new Mission([
             new Planets([new Planet(Vector2.Zero, Vector2.Zero, 3500, 4, true, Color.Cyan, true)]),
             new WaveSpawner(Mission.T1, 0.75f, true),
-            new Cutscenes(SentryDialogue, null)
+            new IntroCutscene(SentryDialogue)
         ], new Conditional([
             new EntityCondition(new EntityConstructor(Enemy.NewTurret, new Vector2(0, -200 - Assets.DimsOf(Sprites.TurretBase).Y / 2), Vector2.Zero, 0), [ Condition.Protect ]),
             new EntityCondition(new EntityConstructor(Enemy.NewOrbiter, new Vector2(400, 0), Planet.GetOrbitalVelocity(new Vector2(400, 0), Vector2.Zero, 3500), 0), [ Condition.Protect ]),
-            new WaveGoal(30)], Mission.SendPickup), "Sentry Defense", "We've been assigned to defend this small planet.\n *Repair will not be available for this mission*", new DropSpawner(1500), 1),
+            new WaveGoal(30)], Mission.SendPickup()), "Sentry Defense", "We've been assigned to defend this small planet.\n *Repair will not be available for this mission*", new DropSpawner(1500), 1),
 
         new Mission([
             new Planets([new Planet(Vector2.Zero, Vector2.Zero, 15000, 6f, true, Color.Cyan),
             new Planet(new Vector2(0, 800), Planet.GetOrbitalVelocity(new Vector2(0, 800), Vector2.Zero, 15000) * 0.85f, 1000, 1f, false, Color.Cyan)]),
-            new Cutscenes(null, null),
             new Tip("Press Q to use your special ability.\nCtrl to toggle aim assist.", new Vector2(0, -6*50)),
             new WaveSpawner(Mission.T1, 0.75f, true),
         ], new Conditional([new EntityCondition(new EntityConstructor(Enemy.NewLargeMiner, new Vector2(0, -6*50 - Assets.Get(Sprites.LargeMiner).Height/2), Vector2.Zero, 0), [ Condition.Kill ])], 
-            Mission.SendPickup), "Meet the locals", "Local scans indicate a nearby mineral rich planet occupied by enemy forces. \nCapturing this site will aid in future resource gathering.", new DropSpawner(1500), 2),
+            Mission.SendPickup()), "Meet the locals", "Local scans indicate a nearby mineral rich planet occupied by enemy forces. \nCapturing this site will aid in future resource gathering.", new DropSpawner(1500), 2),
         /*
 
         new Mission([new Planet(Vector2.Zero, Vector2.Zero, 5000, 3, true, Color.Cyan),

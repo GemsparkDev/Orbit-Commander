@@ -1,15 +1,12 @@
-using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Space_Wars.Content.Main;
+using Microsoft.Xna.Framework.Graphics;
 using Space_Wars.Content.Main.Entities;
 
 namespace Space_Wars.Content.Main.MissionComponents;
 public class Conditional(ICondition[] _conditions, Func<Conditional> _result)
 {
+    private float restartTimer = -1;
     public void Initialize()
     {
         foreach(var condition in _conditions)
@@ -26,9 +23,17 @@ public class Conditional(ICondition[] _conditions, Func<Conditional> _result)
         }
         if (allCompleted)
         {
-            var conditional = _result();
-            conditional.Initialize();
-            return conditional;
+            restartTimer = 5;
+        }
+        if (restartTimer > 0)
+        {
+            restartTimer -= Engine.DeltaSeconds;
+            if(restartTimer <= 0)
+            {
+                var conditional = _result();
+                conditional.Initialize();
+                return conditional;
+            }
         }
         return this;
     }

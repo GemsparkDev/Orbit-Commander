@@ -18,15 +18,13 @@ public class Mission
     public string Description { get; }
     private int playerProgression = 3;
     public int PlayerProgression { get { if (SaveGame.DebugMode) { return 99; } else { return playerProgression; } } set { playerProgression = value; } }
-    public float RestartTimer { get; set; } = -1;
-    public bool music = true;
     public bool relaunchable = false;
     public int Wave {get; set;} = 0;
     //TODO: Add behavior for when there is no planet
     public Planet Planet { get { return GetComponent<Planets>().GetPlanets[0]; }}
+    private Sound music;
     private Conditional objective;
     private IPlayerSpawner spawner;
-
     private List<IMissionComponent> components = [];
     private List<IObstacle> obstacles = [];
     public void AddComponent(IMissionComponent component)
@@ -50,8 +48,8 @@ public class Mission
         }
         return null;
     }
-    public Mission(List<IMissionComponent> _components, Conditional _objective, 
-    string _name, string _description, IPlayerSpawner _spawner, int _playerProgression = 3)
+    public Mission(List<IMissionComponent> _components, Conditional _objective, string _name, 
+    string _description, IPlayerSpawner _spawner, int _playerProgression = 3, Sound _music = Sound.main)
     {
         components = _components;
         foreach(var comp in _components)
@@ -66,9 +64,11 @@ public class Mission
         spawner = _spawner;
         objective = _objective;
         playerProgression = _playerProgression;
+        music = _music;
     }
     public void Initialize()
     {
+        CurrentGameState.SwitchState(new PlayingGame());
         Engine.SaveGame.Player.dockedEntity = null;
         Engine.SaveGame.Player.Progression = PlayerProgression;
         foreach(var comp in components)
@@ -77,14 +77,7 @@ public class Mission
         }
         objective.Initialize();
         spawner.Spawn();
-        if (!music)
-        {
-            SoundManager.ChangeTrack(null);
-        }
-        else
-        {
-            SoundManager.ChangeTrack(Assets.Get(Sound.main));
-        }
+        SoundManager.ChangeTrack(Assets.Get(music));
     }
     public void Update()
     {
@@ -96,18 +89,6 @@ public class Mission
         {
             objective = objective.Update();    
         }
-        if (RestartTimer != -1)
-        {
-            if (RestartTimer > 0)
-            {
-                RestartTimer -= Engine.DeltaSeconds;
-                return;
-            }
-            if(objective == null)
-            {
-                Engine.SaveGame.CompleteMission(Wave);                
-            }
-        }        
     }
     public ICollider IsColliding(Vector2 _position, Vector2 _velocity, float _colliderRadius, bool _override)
     {
@@ -133,11 +114,7 @@ public class Mission
     }
     public void FailMission()
     {
-        if (RestartTimer != -1)
-        {
-            return;
-        }
-        RestartTimer = 2;
+        throw new NotImplementedException();
     }
     public void CompleteCustomRule(Entity _target)
     {
@@ -262,7 +239,7 @@ public class Mission
         {
             comps.Add(component.Clone());
         }
-        return new Mission(comps, objective.Clone(), Name, Description, spawner, PlayerProgression);
+        return new Mission(comps, objective.Clone(), Name, Description, spawner, PlayerProgression, music);
     }
     public Vector2 NewSpawnLocation()
     {
@@ -376,13 +353,25 @@ public class Mission
     {
         return (AllEnemies(), AllBosses());
     }
-    public static Conditional SendPickup()
+    //TODO: Find a better way to do this
+    //Delegate stacking is messy
+    public static Func<Conditional> SendPickup(Func<GameState> _scene = null)
     {
-        return new Conditional([new EntityCondition(new LaunchConstructor(Enemy.NewPickupDrone, new Vector2(-2000, 2000), Engine.SaveGame.CurrentMission.Planet.radius * 1.25f), [Condition.CustomIncomplete])], Win);
+        return delegate{
+        return new Conditional([new EntityCondition(new LaunchConstructor(Enemy.NewPickupDrone, new Vector2(-2000, 2000), Engine.SaveGame.CurrentMission.Planet.radius * 1.25f), [Condition.CustomIncomplete])], 
+        Win(_scene));};
     }
-    public static Conditional Win()
+    public static Func<Conditional> Win(Func<GameState> _scene = null)
     {
-        return null;
+        return Begin(_scene ?? delegate{ return new MissionSelect(); }, delegate{Engine.SaveGame.CompleteMission(Engine.SaveGame.CurrentMission.Wave); return null;});
+    }
+    public static Func<Conditional> Begin(Func<GameState> _state, Func<Conditional> _nextConditional)
+    {
+        return delegate
+        {
+            CurrentGameState.SwitchState(_state());
+            return _nextConditional();
+        };
     }
 }
 public class EntityConstructor(Func<Vector2, Vector2, float, Entity> _constructor, Vector2 _position, Vector2 _velocity, float _angle) : IConstructor

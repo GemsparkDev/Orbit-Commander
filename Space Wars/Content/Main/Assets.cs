@@ -241,6 +241,8 @@ public static class Assets
         SoundFX.Add(Sound.secretBoss, Content.Load<SoundEffect>("Sounds/secretBoss"));
         SoundFX.Add(Sound.finalBoss, Content.Load<SoundEffect>("Sounds/finalBoss"));
 
+        SoundFX.Add(Sound.None, null);
+
         TextFont = Content.Load<SpriteFont>("Fonts/RobotoMono");
 
         effect = Content.Load<Effect>("Shaders/BloomShader");

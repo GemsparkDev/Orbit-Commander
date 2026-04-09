@@ -247,6 +247,7 @@ public enum Sound
     menu,
     secretBoss,
     finalBoss,
+    None, //Used for missions w/o music
 }
 public enum Message
 {
