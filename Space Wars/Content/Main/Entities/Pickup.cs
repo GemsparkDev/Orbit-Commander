@@ -21,9 +21,10 @@ public class Pickup : Entity, IData
     public int ID => itemData.ID;
     private Decal textbox;
     public Pickup(ItemData _itemData, Vector2 _position, Vector2 _velocity, float _angularVelocity, int _health = 3)
-        : base(_itemData.VirtualSprite, _position, _velocity, 0, _angularVelocity, true)
+        : base(_itemData.VirtualSprite, _position, _velocity, 0, _angularVelocity)
     {
         itemData = _itemData;
+        AddComponent(new Friendly(this) { Team = Team.Friendly });
         base.Color = Color.Cyan;
         Tooltip.AddWidget(new Decal(new Vector2(-Tooltip.Size.X / 3, 0), _itemData.RealSprite));
         textbox = new Decal(new Vector2(0, -5), Assets.TextFont, _itemData.Name, _itemData.TextColor, 5f);
@@ -59,10 +60,11 @@ public class Pickup : Entity, IData
     }
     //TODO: Review all serialization!
     public Pickup(ItemData _itemData, List<string> _disassembly, LoadLogger _logger)
-        : base(_itemData.VirtualSprite, default, default, 0, 0, true)
+        : base(_itemData.VirtualSprite, default, default, 0, 0)
     {
         throw new NotImplementedException();
         itemData = _itemData;
+        AddComponent(new Friendly(this){Team = Team.Friendly});
         base.Color = Color.Cyan;
         Tooltip.AddWidget(new Decal(new Vector2(-Tooltip.Size.X / 3, 0), _itemData.RealSprite));
         textbox = new Decal(new Vector2(0, -5), Assets.TextFont, _itemData.Name, _itemData.TextColor, 5f);
@@ -78,7 +80,7 @@ public class Pickup : Entity, IData
         int index = Player.leashedMaterials.IndexOf(this);
         if (index == -1)
         {
-            if (isFriendly == Player.isFriendly && EntityManager.DistanceSqr(Player, this) < 1375 && Player.leashedMaterials.Count < 3 && Player.canGatherResources)
+            if (IsFriendly == Player.IsFriendly && EntityManager.DistanceSqr(Player, this) < 1375 && Player.leashedMaterials.Count < 3 && Player.canGatherResources)
             {
                 Player.leashedMaterials.Add(this);
                 if (Player.leashedMaterials.Count < 3)
@@ -130,11 +132,11 @@ public class Pickup : Entity, IData
             }
             Velocity = Vector2.Zero;
             Angle = MathF.Atan2(Position.X, -Position.Y);
-            nearestEnemy = Engine.EntityManager.NearestEnemy(new Enemy(Position, Vector2.Zero, 0, 0, null, isFriendly));
+            nearestEnemy = Engine.EntityManager.NearestEnemy(new Enemy(Position, Vector2.Zero, 0, 0, null, Team));
             if (cooldown <= 0 && nearestEnemy != null && Vector2.Distance(nearestEnemy.Position, Position) < 300)
             {
                 var dir = Vector2.Normalize(nearestEnemy.Position - Position);
-                Engine.EntityManager.Add(NewPulseShot(Position, dir * 10, MathF.Atan2(dir.X, -dir.Y), 0, isFriendly, 5, true));
+                Engine.EntityManager.Add(NewPulseShot(Position, dir * 10, MathF.Atan2(dir.X, -dir.Y), 0, Team, 5, true));
                 SoundManager.PlaySound(Assets.Get(Sound.PulseFire), Position);
                 cooldown = 1.5f;
             }
@@ -142,13 +144,13 @@ public class Pickup : Entity, IData
             yield return 0;
         }
     }
-    public static Pickup NewBarricade(Vector2 _position, Vector2 _velocity, float _angle, float _angularVelocity, int _stealth = 0, bool _isFriendly = true)
+    public static Pickup NewBarricade(Vector2 _position, Vector2 _velocity, float _angle, float _angularVelocity, int _stealth = 0, Team _team = Team.Friendly)
     {
         var construct = new Pickup(ItemFactory.itemData[Items.Barricade], _position, _velocity, _angularVelocity, ItemFactory.itemData[Items.Barricade].Integrity);
         construct.AddComponent(new Behaviour(construct).AddBehaviour(construct.Barricade()));
         construct.Angle = _angle;
         construct.StealthAbility = _stealth;
-        construct.isFriendly = _isFriendly;
+        construct.Team = _team;
         return construct;
     }
     IEnumerable<int> Trap()
@@ -162,11 +164,11 @@ public class Pickup : Entity, IData
                 cooldown -= Engine.DeltaSeconds;
             }
             Velocity = Vector2.Zero;
-            nearestEnemy = Engine.EntityManager.NearestEnemy(new Enemy(Position, Vector2.Zero, 0, 0, null, isFriendly));
+            nearestEnemy = Engine.EntityManager.NearestEnemy(new Enemy(Position, Vector2.Zero, 0, 0, null, Team));
             if (cooldown <= 0 && nearestEnemy != null && Vector2.Distance(nearestEnemy.Position, Position) < 800)
             {
                 var dir = Vector2.Normalize(nearestEnemy.Position - Position);
-                var enemies = Engine.EntityManager.Hitscan(Position, dir, 800, true, out Vector2 _end, (isFriendly ? -1 : 1));
+                var enemies = Engine.EntityManager.Hitscan(Position, dir, 800, true, out Vector2 _end, Friendly.Blacklist(Team));
                 foreach (var enemy in enemies)
                 {
                     enemy.Collide(10);
@@ -182,26 +184,20 @@ public class Pickup : Entity, IData
             yield return 0;
         }
     }
-    public static Pickup NewTrap(Vector2 _position, Vector2 _velocity, float _angle, float _angularVelocity, int _stealth = 0, bool _isFriendly = true)
+    public static Pickup NewTrap(Vector2 _position, Vector2 _velocity, float _angle, float _angularVelocity, int _stealth = 0, Team _team = Team.Friendly)
     {
         var construct = new Pickup(ItemFactory.itemData[Items.Trap], _position, _velocity, _angularVelocity, ItemFactory.itemData[ Items.Trap].Integrity);
         construct.AddComponent(new Behaviour(construct).AddBehaviour(construct.Trap()));
         construct.AddComponent(new Emitter(construct) { ParticleEmitter = new ParticleEmitter(Assets.Get(Sprites.Dot), _position, 300, new Color(255, 0, 0)) });
         construct.Angle = _angle;
         construct.StealthAbility = _stealth;
-        construct.isFriendly = _isFriendly;
+        construct.Team = _team;
         return construct;
     }
     IEnumerable<int> Bomb()
     {
         while (!isExpired)
         {
-            var nearestProjectile = Engine.EntityManager.NearestProjectile(this, !isFriendly);
-            if (nearestProjectile != null && Vector2.Distance(nearestProjectile.Position, Position) < ColliderRadius + nearestProjectile.ColliderRadius)
-            {
-                Collide(1); //Colliding with 1 is a bandaid fix!
-                nearestProjectile.Collide(1);
-            }
             yield return 0;
         }
         var tex = Assets.Get(Sprites.Explosion);
@@ -216,7 +212,7 @@ public class Pickup : Entity, IData
         construct.AddComponent(new Emitter(construct) { ParticleEmitter = new ParticleEmitter(Assets.Get(Sprites.Dot), _position, 100, new Color(255, 0, 0)) });
         construct.Angle = _angle;
         construct.StealthAbility = _stealth;
-        construct.isFriendly = false;
+        construct.Team = Team.Dead; //Allows getting hit by any team
         return construct;
     }
     IEnumerable<int> Furnace()
@@ -272,23 +268,23 @@ public class Pickup : Entity, IData
             yield return 0;
         }
     }
-    public static Pickup NewFurnace(Vector2 _position, Vector2 _velocity, float _angle, float _angularVelocity, int _stealth = 0, bool _isFriendly = true)
+    public static Pickup NewFurnace(Vector2 _position, Vector2 _velocity, float _angle, float _angularVelocity, int _stealth = 0, Team _team = Team.Friendly)
     {
         var construct = new Pickup(ItemFactory.itemData[Items.Furnace], _position, _velocity, _angularVelocity, ItemFactory.itemData[Items.Furnace].Integrity);
         construct.AddComponent(new Behaviour(construct).AddBehaviour(construct.Bomb()));
         construct.AddComponent(new Emitter(construct) { ParticleEmitter = new ParticleEmitter(Assets.Get(Sprites.Dot), _position, 100, new Color(255, 0, 0)) });
         construct.Angle = _angle;
         construct.StealthAbility = _stealth;
-        construct.isFriendly = _isFriendly;
+        construct.Team = _team;
         return construct;
     }
-    public static Pickup NewSpecializedParts(Vector2 _position, Vector2 _velocity, float _angle, float _angularVelocity, int _stealth = 0, bool _isFriendly = true)
+    public static Pickup NewSpecializedParts(Vector2 _position, Vector2 _velocity, float _angle, float _angularVelocity, int _stealth = 0, Team _team = Team.Friendly)
     {
         var construct = new Pickup(ItemFactory.itemData[Items.SpecializedParts], _position, _velocity, _angularVelocity, ItemFactory.itemData[Items.SpecializedParts].Integrity)
         {
             Angle = _angle,
             StealthAbility = _stealth,
-            isFriendly = _isFriendly
+            Team = _team
         };
         construct.AddComponent(new SpecializedTag(construct));
         return construct;
