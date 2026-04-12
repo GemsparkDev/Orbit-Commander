@@ -332,7 +332,7 @@ public class Pressure(Color _color, bool _isFatal) : Status(Sprites.Knob)
         else
         {
             //Only inflicts fatal damage on player (prevents cheese)
-            if (_isFatal && _parent.isFriendly)
+            if (_isFatal && _parent is Player)
             {
                 attackCooldown = 0.1f;
                 _parent.Collide((int)MathF.Pow(3, Math.Min(duration * 10, 5)), true);

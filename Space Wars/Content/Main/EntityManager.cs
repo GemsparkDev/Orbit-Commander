@@ -45,13 +45,13 @@ public class EntityManager
         //TODO: Add custom "Humanlike" enemies
         new([
             new Planets([new Planet(Vector2.Zero, Vector2.Zero, 15000, 12, true, Color.White, true)]),
-            new AdvancedConstructor(Enemy.NewEnemySpawner, new Vector2(1200, 0), Planet.GetOrbitalVelocity(new Vector2(1200, 0), Vector2.Zero, 20000), 0, true),
-            new AdvancedConstructor(Enemy.NewEnemySpawner, new Vector2(-1200, 0), Planet.GetOrbitalVelocity(new Vector2(-1200, 0), Vector2.Zero, 20000), 0, true),
-            new AdvancedConstructor(Enemy.NewCarrier, new Vector2(50, -750), Vector2.Zero, 0, true),
-            new AdvancedConstructor(Enemy.NewCarrier, new Vector2(-50, -750), Vector2.Zero, 0, true),
-            new AdvancedConstructor(Enemy.NewSymmetryBoss, new Vector2(700, 0), Vector2.Zero, 0, true),
-            new AdvancedConstructor(Enemy.NewTurret, new Vector2(MathF.Sin(0.3f), -MathF.Cos(0.3f)) * 12 * 50, Vector2.Zero, 0.3f, true),
-            new AdvancedConstructor(Enemy.NewTurret, new Vector2(MathF.Sin(-0.3f), -MathF.Cos(-0.3f)) * 12 * 50, Vector2.Zero, -0.3f, true),
+            new AdvancedConstructor(Enemy.NewEnemySpawner, new Vector2(1200, 0), Planet.GetOrbitalVelocity(new Vector2(1200, 0), Vector2.Zero, 20000), 0, Team.Friendly),
+            new AdvancedConstructor(Enemy.NewEnemySpawner, new Vector2(-1200, 0), Planet.GetOrbitalVelocity(new Vector2(-1200, 0), Vector2.Zero, 20000), 0, Team.Friendly),
+            new AdvancedConstructor(Enemy.NewCarrier, new Vector2(50, -750), Vector2.Zero, 0, Team.Friendly),
+            new AdvancedConstructor(Enemy.NewCarrier, new Vector2(-50, -750), Vector2.Zero, 0, Team.Friendly),
+            new AdvancedConstructor(Enemy.NewSymmetryBoss, new Vector2(700, 0), Vector2.Zero, 0, Team.Friendly),
+            new AdvancedConstructor(Enemy.NewTurret, new Vector2(MathF.Sin(0.3f), -MathF.Cos(0.3f)) * 12 * 50, Vector2.Zero, 0.3f, Team.Friendly),
+            new AdvancedConstructor(Enemy.NewTurret, new Vector2(MathF.Sin(-0.3f), -MathF.Cos(-0.3f)) * 12 * 50, Vector2.Zero, -0.3f, Team.Friendly),
             new WaveSpawner(Mission.T1, 0.18f, true),
             new IntroCutscene(QueueCrossfireDialogue),
         ], new Conditional([
@@ -102,9 +102,9 @@ public class EntityManager
         new([
             new Planets([new Planet(Vector2.Zero, Vector2.Zero, 30000, 10f, true, Color.HotPink, true) ]),
             new WaveSpawner(Mission.T2, 1, false),
-            ], new Conditional([new EntityCondition(new AdvancedConstructor(Enemy.NewCommunicator, new Vector2(MathF.Sin(1.02f), -MathF.Cos(1.02f)), Vector2.Zero, 1.02f, true), [Condition.Protect]),
-            new EntityCondition(new AdvancedConstructor(Enemy.NewCommunicator, new Vector2(MathF.Sin(2.7f), -MathF.Cos(2.7f)), Vector2.Zero, 2.7f, true), [Condition.Protect]),
-            new EntityCondition(new AdvancedConstructor(Enemy.NewCommunicator, new Vector2(MathF.Sin(5.33f), -MathF.Cos(5.33f)), Vector2.Zero, 5.33f, true), [Condition.Protect]),
+            ], new Conditional([new EntityCondition(new AdvancedConstructor(Enemy.NewCommunicator, new Vector2(MathF.Sin(1.02f), -MathF.Cos(1.02f)), Vector2.Zero, 1.02f, Team.Friendly), [Condition.Protect]),
+            new EntityCondition(new AdvancedConstructor(Enemy.NewCommunicator, new Vector2(MathF.Sin(2.7f), -MathF.Cos(2.7f)), Vector2.Zero, 2.7f, Team.Friendly), [Condition.Protect]),
+            new EntityCondition(new AdvancedConstructor(Enemy.NewCommunicator, new Vector2(MathF.Sin(5.33f), -MathF.Cos(5.33f)), Vector2.Zero, 5.33f, Team.Friendly), [Condition.Protect]),
             new WaveGoal(30),
         ], Mission.SendPickup()), "Base of Operations", "We have deployed several communication stations to this site.\nProtect the location for future development.", new DropSpawner(500)),
 
@@ -114,12 +114,12 @@ public class EntityManager
             new WaveSpawner(Mission.T2, 0.75f, true),
             new Tip("Press C to open the construct menu.\nEach construct requires one scrap to craft.", new Vector2(0, -9*50)),
             ], new Conditional([
-            new EntityCondition(new AdvancedConstructor(Enemy.NewTurret, new Vector2(MathF.Sin(5.5f), -MathF.Cos(5.5f)) * 9 * 50, Vector2.Zero, 5.5f, false), [ Condition.Kill ]),
-            new EntityCondition(new AdvancedConstructor(Enemy.NewTurret, new Vector2(MathF.Sin(3.2f), -MathF.Cos(3.2f)) * 9 * 50, Vector2.Zero, 3.2f, false), [ Condition.Kill ]),
-            new EntityCondition(new AdvancedConstructor(Enemy.NewTurret, new Vector2(MathF.Sin(2.6f), -MathF.Cos(2.6f)) * 9 * 50, Vector2.Zero, 2.6f, false), [ Condition.Kill ]),
-            new EntityCondition(new AdvancedConstructor(Enemy.NewTurret, new Vector2(MathF.Sin(1.1f), -MathF.Cos(1.1f)) * 9 * 50, Vector2.Zero, 1.1f, false), [ Condition.Kill ]),
-            new EntityCondition(new AdvancedConstructor(Enemy.NewMiner, new Vector2(MathF.Sin(3), -MathF.Cos(3)) * 9 * 50, Vector2.Zero, 3, false), [ Condition.Kill ]),
-            new EntityCondition(new AdvancedConstructor(Enemy.NewMiner, new Vector2(MathF.Sin(5.2f), -MathF.Cos(5.2f)) * 9 * 50, Vector2.Zero, 5.2f, false), [ Condition.Kill ]),
+            new EntityCondition(new AdvancedConstructor(Enemy.NewTurret, new Vector2(MathF.Sin(5.5f), -MathF.Cos(5.5f)) * 9 * 50, Vector2.Zero, 5.5f, Team.Hostile), [ Condition.Kill ]),
+            new EntityCondition(new AdvancedConstructor(Enemy.NewTurret, new Vector2(MathF.Sin(3.2f), -MathF.Cos(3.2f)) * 9 * 50, Vector2.Zero, 3.2f, Team.Hostile), [ Condition.Kill ]),
+            new EntityCondition(new AdvancedConstructor(Enemy.NewTurret, new Vector2(MathF.Sin(2.6f), -MathF.Cos(2.6f)) * 9 * 50, Vector2.Zero, 2.6f, Team.Hostile), [ Condition.Kill ]),
+            new EntityCondition(new AdvancedConstructor(Enemy.NewTurret, new Vector2(MathF.Sin(1.1f), -MathF.Cos(1.1f)) * 9 * 50, Vector2.Zero, 1.1f, Team.Hostile), [ Condition.Kill ]),
+            new EntityCondition(new AdvancedConstructor(Enemy.NewMiner, new Vector2(MathF.Sin(3), -MathF.Cos(3)) * 9 * 50, Vector2.Zero, 3, Team.Hostile), [ Condition.Kill ]),
+            new EntityCondition(new AdvancedConstructor(Enemy.NewMiner, new Vector2(MathF.Sin(5.2f), -MathF.Cos(5.2f)) * 9 * 50, Vector2.Zero, 5.2f, Team.Hostile), [ Condition.Kill ]),
             new EntityCondition(new EntityConstructor(Enemy.NewOrbiter, new Vector2(0, 1650), Planet.GetOrbitalVelocity(new Vector2(0, 1650), new Vector2(0, 1800), 1500)
                 + Planet.GetOrbitalVelocity(new Vector2(0, 1800), Vector2.Zero, 20000), 0), [ Condition.Protect ])], Mission.Win()),
             "Assault", "It appears the enemy has improved their fleet, and has pushed the mothership to a non-ideal location.\nDefend the mothership and defeat the fortified miner base on this planet.", new CustomSpawner(new Vector2(0, 1650))),
@@ -136,7 +136,7 @@ public class EntityManager
         new(new Vector2(600, 0), Planet.GetOrbitalVelocity(new Vector2(600, 0), Vector2.Zero, 5000), 240, 1f, false, Color.Cyan),
         new(new Vector2(-600, 0), Planet.GetOrbitalVelocity(new Vector2(-600, 0), Vector2.Zero, 5000), 240, 1f, false, Color.Cyan)]),
             new WaveSpawner(Mission.T2, 1.1f, false),
-            ], new Conditional([new EntityCondition(new AdvancedConstructor(Enemy.NewExodusBoss, new Vector2(0, -6*50), Vector2.Zero, 0, false), [ Condition.Kill ])], Mission.SendPickup()),
+            ], new Conditional([new EntityCondition(new AdvancedConstructor(Enemy.NewExodusBoss, new Vector2(0, -6*50), Vector2.Zero, 0, Team.Hostile), [ Condition.Kill ])], Mission.SendPickup()),
             "Flight of the bumblebee.", "The enemy fleet's fastest fighter appears to have arrived to this planet and is blocking our path.\nDefeating it appears to be the only way forward.", new DropSpawner(1500)),
 
         new([
@@ -156,7 +156,7 @@ public class EntityManager
             new Planets([new Planet(Vector2.Zero, Vector2.Zero, 4000, 3, true, Color.Wheat, false, 1.5f),
             new Planet(new Vector2(500, 0), Planet.GetOrbitalVelocity(new Vector2(500, 0), Vector2.Zero, 4000), 300, 1f, false, Color.Wheat)]),
             new WaveSpawner(Mission.T2, 1f, true),
-            ], new Conditional([new EntityCondition(new AdvancedConstructor(Enemy.NewClockworkBoss, new Vector2(0, -6*50), Vector2.Zero, 0, false), [ Condition.Kill ])], Mission.SendPickup()),
+            ], new Conditional([new EntityCondition(new AdvancedConstructor(Enemy.NewClockworkBoss, new Vector2(0, -6*50), Vector2.Zero, 0, Team.Hostile), [ Condition.Kill ])], Mission.SendPickup()),
             "Clockwork creation", "A strange sentinal appears to be housed on this ancient planet.\nDismantling it may yield unusual resources.", new DropSpawner(1500)),
 
         new([
@@ -400,7 +400,7 @@ public class EntityManager
         Entity returnEnemy = null;
         foreach (Entity targetEnemy in enemies)
         {
-            if (targetEnemy.StealthAbility > entity.SensingAbility || targetEnemy.isFriendly == entity.isFriendly)
+            if (targetEnemy.StealthAbility > entity.SensingAbility || entity.IsFriendly(targetEnemy))
             {
                 continue;
             }
@@ -415,7 +415,7 @@ public class EntityManager
                 returnEnemy = targetEnemy;
             }
         }
-        if (!entity.isFriendly)
+        if (!entity.IsFriendly(Engine.SaveGame.Player))
         {
             //Enemies will prioritize the player
             float distance = DistanceSqr(entity, Player) / 1.5f;
@@ -436,11 +436,7 @@ public class EntityManager
         Entity returnEnemy = null;
         foreach (Entity targetEnemy in enemies)
         {
-            if (targetEnemy.isFriendly != entity.isFriendly)
-            {
-                continue;
-            }
-            if (targetEnemy == entity)
+            if (!entity.IsFriendly(targetEnemy) || targetEnemy == entity)
             {
                 continue;
             }
@@ -455,7 +451,7 @@ public class EntityManager
                 returnEnemy = targetEnemy;
             }
         }
-        if (entity.isFriendly)
+        if (entity.IsFriendly(Engine.SaveGame.Player))
         {
             float distance = DistanceSqr(entity, Player);
             if (distance < nearestDistance)
@@ -488,15 +484,15 @@ public class EntityManager
         }
         return returnItem;
     }
-    public Entity NearestProjectile(Entity _entity, bool _isFriendly)
+    public Entity NearestProjectile(Vector2 _position, int _sensingAbility, Team _team)
     {
         float nearestDistance = float.MaxValue;
         Entity returnProjectile = null;
         foreach (var targetProjectile in projectiles)
         {
-            float distance = DistanceSqr(_entity, targetProjectile);
-            if (distance < nearestDistance && _isFriendly != targetProjectile.isFriendly
-                && (targetProjectile.StealthAbility < _entity.SensingAbility || (targetProjectile.StealthAbility == _entity.SensingAbility && distance < StealthRange * StealthThreshold)))
+            float distance = DistanceSqr(targetProjectile.Position, _position);
+            if (distance < nearestDistance && _team != targetProjectile.Team
+                && (targetProjectile.StealthAbility < _sensingAbility || (targetProjectile.StealthAbility == _sensingAbility && distance < StealthRange * StealthThreshold)))
             {
                 nearestDistance = distance;
                 returnProjectile = targetProjectile;
@@ -542,7 +538,7 @@ public class EntityManager
         currentKarma += (1 / _rarity);
         return false;
     }
-    public List<Entity> Hitscan(Vector2 _pos, Vector2 _dir, float _maxLength, bool _getAll, out Vector2 _end, int _type = 0, bool _getProjectiles = false)
+    public List<Entity> Hitscan(Vector2 _pos, Vector2 _dir, float _maxLength, bool _getAll, out Vector2 _end, Team[] _whitelist = null, bool _getProjectiles = false)
     {
         var dir = Vector2.Normalize(_dir);
         var list = new List<Entity>();
@@ -569,7 +565,7 @@ public class EntityManager
         return list;
         void CalculateIntersection(Entity _entity)
         {
-            if (_type != (_entity.isFriendly ? 1 : -1) && _type != 0)
+            if (_whitelist != null && !_whitelist.Contains(_entity.Team))
             {
                 return;
             }

@@ -103,9 +103,10 @@ public class Player : Entity
         }
     }
 
-    public Player(Vector2 _position, Vector2 _velocity, float _angle, bool _isFriendly = true)
-        : base(Assets.Get(Sprites.Player), _position, _velocity, _angle, 0, _isFriendly)
+    public Player(Vector2 _position, Vector2 _velocity, float _angle)
+        : base(Assets.Get(Sprites.Player), _position, _velocity, _angle, 0)
     {
+        AddComponent(new Friendly(this) { Team = Team.Friendly });
         UpdateColor();
         smokeParticles.isEmitterActive = false;
         engineSounds = Assets.Get(Sound.FireEngines).CreateInstance();
@@ -119,17 +120,17 @@ public class Player : Entity
         EventHandler.SetFuseModuleDecals(textures);
         EventHandler.UpdateFuseUI(moduleFuses, spareFuses);
     }
-    public static Player NewPlayer(Vector2 _position, Vector2 _velocity, float _angle, bool _isFriendly)
+    public static Player NewPlayer(Vector2 _position, Vector2 _velocity, float _angle)
     {
-        return new Player(_position, _velocity, _angle, _isFriendly);
+        return new Player(_position, _velocity, _angle);
     }
     public override void UpdateColor()
     {
-        Color = isFriendly ? SaveGame.ColorScheme.FriendlyEnemy() : SaveGame.ColorScheme.HostileEnemy();
+        Color = SaveGame.ColorScheme.TeamColors[Team];
     }
     public override void Update()
     {
-        Color c = isFriendly ? SaveGame.ColorScheme.FriendlyEnemy() : SaveGame.ColorScheme.HostileEnemy();
+        Color c = SaveGame.ColorScheme.TeamColors[Team];
         if (Color != c)
         {
             float l = Util.FIED(0.025f);
@@ -837,8 +838,10 @@ public class Player : Entity
         base.Draw(_spriteBatch);
     }
     public Player(string _serialization, LoadLogger _logger)
-    : base(Assets.Get(Sprites.Player), Vector2.One, Vector2.One, 0, 0, true)
+    : base(Assets.Get(Sprites.Player), Vector2.One, Vector2.One, 0, 0)
     {
+        throw new NotImplementedException();
+        AddComponent(new Friendly(this) { Team = Team.Friendly });
         List<string> disassembly = SaveGame.Disassemble(_serialization);
 
         spareFuses = Int32.TryParse(disassembly[0], out int spares) ? spares : 1;

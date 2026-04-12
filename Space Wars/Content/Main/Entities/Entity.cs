@@ -25,23 +25,26 @@ public class Entity
     public Texture2D Texture { get { return GetComponent<Sprite>().Texture; } set { GetComponent<Sprite>().Texture = value; } }
     public Color Color { get { return GetComponent<Sprite>().Color; } set { GetComponent<Sprite>().Color = value; } }
     public float RevealDuration { get { return GetComponent<Sprite>().RevealDuration; } set { GetComponent<Sprite>().RevealDuration = value; } }
+    public StatusHolder StatusHolder => GetComponent<StatusHolder>();
     public Vector2 Size => GetComponent<Sprite>().Size;
     public virtual float ColliderRadius => GetComponent<Sprite>().ColliderRadius;
     protected static Player Player => Engine.SaveGame.Player;
     public bool isExpired = false;
-    public bool isFriendly;
+    public bool IsFriendly(Entity _entity)
+    {
+        return _entity.GetComponent<Friendly>().Team == GetComponent<Friendly>().Team;
+    }
+    public Team Team { get { return GetComponent<Friendly>().Team; } set { GetComponent<Friendly>().Team = value;} }
     public virtual int SensingAbility { get; protected set; } = 1;
     public virtual int StealthAbility { get { return stealthAbility; } protected set { stealthAbility = value; } }
     private int stealthAbility = 0;
     private List<Component> components = [];
     public float Temperature { get; private set; } = 0; //-1: Freeze, 0: Neutral, 1: Burn
-    public StatusHolder StatusHolder { get {return GetComponent<StatusHolder>(); } }
-    public Entity(Texture2D _texture, Vector2 _position, Vector2 _velocity, float _angle, float _angularVelocity, bool _isFriendly)
+    public Entity(Texture2D _texture, Vector2 _position, Vector2 _velocity, float _angle, float _angularVelocity)
     {
         AddComponent(new Transform(this) { Position = _position, Velocity = _velocity, Angle = _angle, AngularVelocity = _angularVelocity });
         AddComponent(new Sprite(this) { Texture = _texture });
         AddComponent(new StatusHolder(this));
-        isFriendly = _isFriendly;
     }
     public virtual void Update()
     {
@@ -155,9 +158,10 @@ public class Entity
                 Angle - MathF.PI / 2, Vector2.Zero, Vector2.One, SpriteEffects.None, 0.4f);
         }
     }
-    public static Entity NewProjectile(Texture2D _texture, Vector2 _position, Vector2 _velocity, float _angle, float _angularVelocity, bool _isFriendly, int _damage, int _stealth)
+    public static Entity NewProjectile(Texture2D _texture, Vector2 _position, Vector2 _velocity, float _angle, float _angularVelocity, Team _team, int _damage, int _stealth)
     {
-        var projectile = new Entity(_texture, _position, _velocity, _angle, _angularVelocity, _isFriendly);
+        var projectile = new Entity(_texture, _position, _velocity, _angle, _angularVelocity);
+        projectile.AddComponent(new Friendly(projectile) { Team = _team });
         projectile.AddComponent(new Collide(projectile, 
         delegate(int _damage, bool _ignoreImmunity)
         {
@@ -177,7 +181,7 @@ public class Entity
         projectile.SensingAbility = 99;
         projectile.AddComponent(new ExpireTimer(projectile) { TimeLeft = 8 });
         projectile.AddComponent(new Damager(projectile) { Damage = _damage });
-        projectile.Color = _isFriendly ? SaveGame.ColorScheme.FriendlyProjectile() : SaveGame.ColorScheme.HostileEnemy();
+        projectile.Color = SaveGame.ColorScheme.TeamColors[_team];
         return projectile;
     }
     IEnumerable<int> PulseShot(bool _isHoming)
@@ -202,9 +206,9 @@ public class Entity
             yield return 0;
         }
     }
-    public static Entity NewPulseShot(Vector2 _position, Vector2 _velocity, float _angle, float _angularVelocity, bool _isFriendly, int _damage, bool _isHoming = false, int _stealth = 0)
+    public static Entity NewPulseShot(Vector2 _position, Vector2 _velocity, float _angle, float _angularVelocity, Team _team, int _damage, bool _isHoming = false, int _stealth = 0)
     {
-        var shot = NewProjectile(Assets.Get(Sprites.PulseShot), _position, _velocity, _angle, _angularVelocity, _isFriendly, _damage, _stealth);
+        var shot = NewProjectile(Assets.Get(Sprites.PulseShot), _position, _velocity, _angle, _angularVelocity, _team, _damage, _stealth);
         var behaviour = new Behaviour(shot);
         behaviour.AddBehaviour(shot.PulseShot(_isHoming));
         shot.AddComponent(behaviour);
@@ -224,9 +228,9 @@ public class Entity
             yield return 0;
         }
     }
-    public static Entity NewSpiralShot(Vector2 _position, Vector2 _velocity, float _angle, float _angularVelocity, bool _isFriendly, int _damage, float _offset, int _stealth = 0)
+    public static Entity NewSpiralShot(Vector2 _position, Vector2 _velocity, float _angle, float _angularVelocity, Team _team, int _damage, float _offset, int _stealth = 0)
     {
-        var shot = NewProjectile(Assets.Get(Sprites.SpiralShot), _position, _velocity, _angle, _angularVelocity, _isFriendly, _damage, _stealth);
+        var shot = NewProjectile(Assets.Get(Sprites.SpiralShot), _position, _velocity, _angle, _angularVelocity, _team, _damage, _stealth);
         var behaviour = new Behaviour(shot);
         behaviour.AddBehaviour(shot.SpiralShot(_offset));
         shot.AddComponent(behaviour);
@@ -246,7 +250,7 @@ public class Entity
                 col.A = 0;
                 beam = new(Assets.Get(Sprites.Dot), 0.5f, Position, Angle, 0, 0, 50f, Color, EmitterType.EmissionOverDistance) { particleFadeToColor = col };
             }
-            var nearestEnemy = Engine.EntityManager.Hitscan(Position, Velocity, Velocity.Length() * Engine.DeltaSeconds * 60, false, out Vector2 end, (isFriendly ? -1 : 1));
+            var nearestEnemy = Engine.EntityManager.Hitscan(Position, Velocity, Velocity.Length() * Engine.DeltaSeconds * 60, false, out Vector2 end, Friendly.Blacklist(Team));
             Position = end;
             beam.position = Position;
             beam.Update();
@@ -258,9 +262,9 @@ public class Entity
             yield return 0;
         }
     }
-    public static Entity NewAssassinShot(Vector2 _position, Vector2 _velocity, float _angle, float _angularVelocity, bool _isFriendly, int _damage, int _stealth = 0)
+    public static Entity NewAssassinShot(Vector2 _position, Vector2 _velocity, float _angle, float _angularVelocity, Team _team, int _damage, int _stealth = 0)
     {
-        var shot = NewProjectile(Assets.Get(Sprites.Microshot), _position, _velocity, _angle, _angularVelocity, _isFriendly, _damage, _stealth);
+        var shot = NewProjectile(Assets.Get(Sprites.Microshot), _position, _velocity, _angle, _angularVelocity, _team, _damage, _stealth);
         var behaviour = new Behaviour(shot);
         behaviour.AddBehaviour(shot.AssassinShot());
         shot.AddComponent(behaviour);
@@ -272,7 +276,8 @@ public class Entity
         var radius = new ParticleEmitter(Assets.Get(Sprites.Dot), Position, explosionRadius, Color.Red * 0.5f);
         var activationRadius = new ParticleEmitter(Assets.Get(Sprites.Dot), Position, explosionRadius / 2, Color.Red * 0.25f);
         float time = 0;
-        Vector3 col = isFriendly ? new Vector3(1, 0.65f, 0) : new Vector3(1, 0, 0);
+        Color c = SaveGame.ColorScheme.TeamColors[Team];
+        Vector3 col = new Vector3(c.R, c.G, c.B);
         while(true)
         {
             time += Engine.DeltaSeconds;
@@ -281,7 +286,7 @@ public class Entity
             AngularVelocity *= (1 - Engine.DeltaSeconds * 2);
             radius.position = Position;
             activationRadius.position = Position;
-            if (isFriendly)
+            if (IsFriendly(Engine.SaveGame.Player))
             {
                 radius.Update();
                 activationRadius.Update();
@@ -319,9 +324,9 @@ public class Entity
             yield return 0;
         }
     }
-    public static Entity NewExplosive(Vector2 _position, Vector2 _velocity, float _angle, float _angularVelocity, bool _isFriendly, int _damage, float _radius, int _stealth = 0)
+    public static Entity NewExplosive(Vector2 _position, Vector2 _velocity, float _angle, float _angularVelocity, Team _team, int _damage, float _radius, int _stealth = 0)
     {
-        var shot = NewProjectile(Assets.Get(Sprites.Explosive), _position, _velocity, _angle, _angularVelocity, _isFriendly, _damage, _stealth);
+        var shot = NewProjectile(Assets.Get(Sprites.Explosive), _position, _velocity, _angle, _angularVelocity, _team, _damage, _stealth);
         var behaviour = new Behaviour(shot);
         behaviour.AddBehaviour(shot.Explosive(_radius));
         shot.AddComponent(behaviour);
@@ -340,16 +345,16 @@ public class Entity
             {
                 float angle = Util.Random.NextSingle() * MathF.Tau;
                 Vector2 dir = Util.ToUnitVector(angle);
-                Engine.EntityManager.Add(NewPulseShot(Position, Velocity + dir * 6, angle, 0, isFriendly, GetComponent<Damager>().Damage, true));
+                Engine.EntityManager.Add(NewPulseShot(Position, Velocity + dir * 6, angle, 0, Team, GetComponent<Damager>().Damage, true));
                 cooldown = 0.1f;
                 SoundManager.PlaySound(Assets.Get(Sound.LMGFire), Position);
             }
             yield return 0;
         }
     }
-    public static Entity NewSpewer(Vector2 _position, Vector2 _velocity, float _angle, float _angularVelocity, bool _isFriendly, int _damage, int _stealth = 0)
+    public static Entity NewSpewer(Vector2 _position, Vector2 _velocity, float _angle, float _angularVelocity, Team _team, int _damage, int _stealth = 0)
     {
-        var shot = NewProjectile(Assets.Get(Sprites.Explosive), _position, _velocity, _angle, _angularVelocity, _isFriendly, _damage, _stealth);
+        var shot = NewProjectile(Assets.Get(Sprites.Explosive), _position, _velocity, _angle, _angularVelocity, _team, _damage, _stealth);
         var behaviour = new Behaviour(shot);
         behaviour.AddBehaviour(shot.Spewer());
         shot.AddComponent(behaviour);
@@ -404,9 +409,9 @@ public class Entity
             yield return 0;
         }
     }
-    public static Entity NewSplitter(Vector2 _position, Vector2 _velocity, float _angle, bool _isFriendly, int _damage, List<Entity> _splits, float _cooldown = 1, int _stealth = 0, bool _targetting = false)
+    public static Entity NewSplitter(Vector2 _position, Vector2 _velocity, float _angle, Team _team, int _damage, List<Entity> _splits, float _cooldown = 1, int _stealth = 0, bool _targetting = false)
     {
-        var shot = NewProjectile(Assets.Get(Sprites.Explosive), _position, _velocity, _angle, 0, _isFriendly, _damage, _stealth);
+        var shot = NewProjectile(Assets.Get(Sprites.Explosive), _position, _velocity, _angle, 0, _team, _damage, _stealth);
         var behaviour = new Behaviour(shot);
         behaviour.AddBehaviour(shot.Splitter(_cooldown, _splits, _targetting));
         shot.AddComponent(behaviour);
@@ -453,11 +458,12 @@ public class GrapplingHook : Entity
     public bool IsHooked => target != null;
     //Projectiles should always be able to hit potential targets
     public override int SensingAbility { get { return 99; } }
-    public GrapplingHook(Vector2 _position, Vector2 _velocity, float _angle, Entity _parent, bool _isFriendly = true)
-        : base(Assets.Get(Sprites.Microshot), _position, _velocity, _angle, 0, _isFriendly)
+    public GrapplingHook(Vector2 _position, Vector2 _velocity, float _angle, Entity _parent, Team _team = Team.Friendly)
+        : base(Assets.Get(Sprites.Microshot), _position, _velocity, _angle, 0)
     {
         Parent = _parent;
-        Color = _isFriendly ? new Color(0, 255, 255) : Color.Red;
+        AddComponent(new Friendly(this) { Team = _team });
+        Color = SaveGame.ColorScheme.TeamColors[_team];
         StealthAbility = 0;
         AddComponent(new ExpireTimer(this) { TimeLeft = 60 });
     }
@@ -476,7 +482,7 @@ public class GrapplingHook : Entity
                 Parent.Velocity += force;
                 target.ApplyForce(force);
             }
-            if (isFriendly && Input.NewMouseState.ScrollWheelValue != prevScroll)
+            if (IsFriendly(Engine.SaveGame.Player) && Input.NewMouseState.ScrollWheelValue != prevScroll)
             {
                 maxDistance = Math.Max(0, maxDistance + (Input.NewMouseState.ScrollWheelValue - prevScroll) / 5);
             }
@@ -567,10 +573,11 @@ public class FlameBolt : Entity
         }
     }
     public override int SensingAbility { get { return 99; } }
-    public FlameBolt(Vector2 _position, Vector2 _velocity, bool _isFriendly, int _damage, float _timeLeft = 0.7f, float _particleVelocity = 1, int _stealth = 0, float _temp = 10)
-        : base(Assets.Get(Sprites.Circle), _position, _velocity, 0, 0, _isFriendly)
+    public FlameBolt(Vector2 _position, Vector2 _velocity, Team _team, int _damage, float _timeLeft = 0.7f, float _particleVelocity = 1, int _stealth = 0, float _temp = 10)
+        : base(Assets.Get(Sprites.Circle), _position, _velocity, 0, 0)
     {
         StealthAbility = _stealth;
+        AddComponent(new Friendly(this) { Team = _team });
         AddComponent(new ExpireTimer(this) { TimeLeft = _timeLeft });
         AddComponent(new Damager(this) { Damage = _damage });
         emitter = new ParticleEmitter(Assets.Get(Sprites.Circle), 0.75f, Vector2.Zero, 0, MathF.Tau, _particleVelocity, 750 * _particleVelocity * _particleVelocity * Math.Min(1, MathF.Sqrt(TimeLeft)), new Color(1f, 1f, 0.25f, 1f), EmitterType.EmissionOverTime)
@@ -583,10 +590,11 @@ public class FlameBolt : Entity
         maxTimeLeft = _timeLeft;
         temp = _temp;
     }
-    public FlameBolt(Vector2 _position, Vector2 _velocity, bool _isFriendly, int _damage, ParticleEmitter _emitter, float _timeLeft = 0.7f, int _stealth = 0, float _temp = 10)
-        : base(Assets.Get(Sprites.Circle), _position, _velocity, 0, 0, _isFriendly)
+    public FlameBolt(Vector2 _position, Vector2 _velocity, Team _team, int _damage, ParticleEmitter _emitter, float _timeLeft = 0.7f, int _stealth = 0, float _temp = 10)
+        : base(Assets.Get(Sprites.Circle), _position, _velocity, 0, 0)
     {
         StealthAbility = _stealth;
+        AddComponent(new Friendly(this) { Team = _team });
         AddComponent(new ExpireTimer(this) { TimeLeft = _timeLeft });
         AddComponent(new Damager(this) { Damage = _damage });
         emitter = _emitter;
@@ -621,7 +629,7 @@ public class FlameBolt : Entity
         struckEntities = [.. struckEntities.Where(x => x.cd > 0)];
         foreach (var nearestEnemy in Engine.EntityManager.Entities)
         {
-            if (!(nearestEnemy is Enemy || nearestEnemy is Player) || isFriendly == nearestEnemy.isFriendly)
+            if (!(nearestEnemy is Enemy || nearestEnemy is Player) || IsFriendly == nearestEnemy.IsFriendly)
             {
                 continue;
             }

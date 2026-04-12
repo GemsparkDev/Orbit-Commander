@@ -267,7 +267,7 @@ public class Mission
             comp.Draw(_spriteBatch);
         }
     }
-    public static List<(int, Func<Vector2, Vector2, float, bool, Enemy>)> TierOneEnemies()
+    public static List<(int, Func<Vector2, Vector2, float, Team, Enemy>)> TierOneEnemies()
     {
         return
         [
@@ -277,7 +277,7 @@ public class Mission
             (4, Enemy.NewCarrier),
         ];
     }
-    public static List<Func<Vector2, Vector2, float, bool, Enemy>> TierOneBosses()
+    public static List<Func<Vector2, Vector2, float, Team, Enemy>> TierOneBosses()
     {
         return
         [
@@ -286,7 +286,7 @@ public class Mission
             Enemy.NewDeadeyeBoss,
         ];
     }
-    public static List<(int, Func<Vector2, Vector2, float, bool, Enemy>)> TierTwoEnemies()
+    public static List<(int, Func<Vector2, Vector2, float, Team, Enemy>)> TierTwoEnemies()
     {
         return
         [
@@ -295,7 +295,7 @@ public class Mission
             (2, Enemy.NewHealer),
         ];
     }
-    public static List<Func<Vector2, Vector2, float, bool, Enemy>> TierTwoBosses()
+    public static List<Func<Vector2, Vector2, float, Team, Enemy>> TierTwoBosses()
     {
         return
         [
@@ -304,7 +304,7 @@ public class Mission
             Enemy.NewStreamlineBoss
         ];
     }
-    public static List<(int, Func<Vector2, Vector2, float, bool, Enemy>)> TierThreeEnemies()
+    public static List<(int, Func<Vector2, Vector2, float, Team, Enemy>)> TierThreeEnemies()
     {
         return
         [
@@ -313,7 +313,7 @@ public class Mission
             (3, Enemy.NewEngineer),
         ];
     }
-    public static List<Func<Vector2, Vector2, float, bool, Enemy>> TierThreeBosses()
+    public static List<Func<Vector2, Vector2, float, Team, Enemy>> TierThreeBosses()
     {
         return
         [
@@ -321,31 +321,31 @@ public class Mission
             Enemy.NewContinuumBoss,
         ];
     }
-    public static List<(int, Func<Vector2, Vector2, float, bool, Enemy>)> AllEnemies()
+    public static List<(int, Func<Vector2, Vector2, float, Team, Enemy>)> AllEnemies()
     {
         return [.. TierOneEnemies(), .. TierTwoEnemies(), .. TierThreeEnemies()];
     }
-    public static List<Func<Vector2, Vector2, float, bool, Enemy>> AllBosses()
+    public static List<Func<Vector2, Vector2, float, Team, Enemy>> AllBosses()
     {
         return [.. TierOneBosses(), .. TierTwoBosses(), .. TierThreeBosses()];
     }
-    public static (List<(int, Func<Vector2, Vector2, float, bool, Enemy>)>, 
-    List<Func<Vector2, Vector2, float, bool, Enemy>>) T1()
+    public static (List<(int, Func<Vector2, Vector2, float, Team, Enemy>)>, 
+    List<Func<Vector2, Vector2, float, Team, Enemy>>) T1()
     {
         return (TierOneEnemies(), TierOneBosses());
     }
-        public static (List<(int, Func<Vector2, Vector2, float, bool, Enemy>)>, 
-    List<Func<Vector2, Vector2, float, bool, Enemy>>) T2()
+        public static (List<(int, Func<Vector2, Vector2, float, Team, Enemy>)>, 
+    List<Func<Vector2, Vector2, float, Team, Enemy>>) T2()
     {
         return (TierTwoEnemies(), TierTwoBosses());
     }
-        public static (List<(int, Func<Vector2, Vector2, float, bool, Enemy>)>, 
-    List<Func<Vector2, Vector2, float, bool, Enemy>>) T3()
+        public static (List<(int, Func<Vector2, Vector2, float, Team, Enemy>)>, 
+    List<Func<Vector2, Vector2, float, Team, Enemy>>) T3()
     {
         return (TierThreeEnemies(), TierThreeBosses());
     }
-        public static (List<(int, Func<Vector2, Vector2, float, bool, Enemy>)>, 
-    List<Func<Vector2, Vector2, float, bool, Enemy>>) All()
+        public static (List<(int, Func<Vector2, Vector2, float, Team, Enemy>)>, 
+    List<Func<Vector2, Vector2, float, Team, Enemy>>) All()
     {
         return (AllEnemies(), AllBosses());
     }
@@ -377,11 +377,11 @@ public class EntityConstructor(Func<Vector2, Vector2, float, Entity> _constructo
         return _constructor(_position, _velocity, _angle);
     }
 }
-public class AdvancedConstructor(Func<Vector2, Vector2, float, bool, Entity> _constructor, Vector2 _position, Vector2 _velocity, float _angle, bool _isFriendly) : IConstructor
+public class AdvancedConstructor(Func<Vector2, Vector2, float, Team, Entity> _constructor, Vector2 _position, Vector2 _velocity, float _angle, Team _team) : IConstructor
 {
     public Entity Construct()
     {
-        return _constructor(_position, _velocity, _angle, _isFriendly);
+        return _constructor(_position, _velocity, _angle, _team);
     }
 }
 public class PickupConstructor(Func<Vector2, Vector2, float, Entity> _constructor, Vector2 _position, Vector2 _velocity, float _angularVelocity) : IConstructor
