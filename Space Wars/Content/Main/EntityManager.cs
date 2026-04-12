@@ -210,7 +210,7 @@ public class EntityManager
             new Planets([new Planet(new Vector2(0, 500), Vector2.Zero, 5000, 0.1f, true, Color.Black, false, 0)]),
             new Colliders(BlackHoleStation),
             new PickupConstructor(ItemFactory.NewScrap, new Vector2(0, -8*50), Vector2.Zero, -0.03f),
-            new AdvancedConstructor(Enemy.NewFighter, Vector2.Zero, Vector2.Zero, 0, false)
+            new AdvancedConstructor(Enemy.NewFighter, Vector2.Zero, Vector2.Zero, 0, Team.Hostile)
             ], new Conditional([new WaveGoal(10)], Mission.SendPickup()),
             "Black Hole", "", new GliderSpawner(new Vector2(-1000, -700), -1000), 3, Sound.None),
 
