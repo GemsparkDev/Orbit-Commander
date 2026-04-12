@@ -171,7 +171,7 @@ public class EntityManager
             new WaveSpawner(Mission.T3, 1, true),
             ], new Conditional([
             new EntityCondition(new EntityConstructor(Enemy.MassRelay, Vector2.Zero, Vector2.Zero, 0), [ Condition.Protect, Condition.CustomIncomplete ])], Mission.SendPickup()),
-            "Binary system", "It seems plans for a mass relay have been abandoned here.\nConstruct it to recieve some advanced equipment from our previous stations.", new DropSpawner()),
+            "Binary system", "It seems plans for a mass relay have been abandoned here.\nConstruct it to recieve some advanced equipment from our previous stations.", new DropSpawner(1500)),
 
         new([
             new Planets([new(Vector2.Zero, Vector2.Zero, 4000, 4.5f, true, new Color(0.03f, 0.05f, 0.08f)),
@@ -199,36 +199,28 @@ public class EntityManager
         new Conditional([new EntityCondition(new EntityConstructor(Enemy.NewEpitomeBoss, new Vector2(0, 2800), Vector2.Zero, 0), [ Condition.Kill ])], Mission.SendPickup()),
         "Inferno", "Your intel has led you here. Finish this.", new GliderSpawner(new Vector2(-1500, -2000), -1500), 3, Sound.None),
 
-        /*
+        new([
+            new Planets([new Planet(Vector2.Zero, Vector2.Zero, 8000000, 100, true, new Color(1f, 0.8f, 0.5f), false, 10f, 0, true) { Temperature = 5 }]),
+            new Colliders(SolarStation),
+            new WaveSpawner(Mission.T3, 1, false),
+            ], new Conditional([new WaveGoal(10)], Mission.SendPickup()),
+            "BEEG", "", new GliderSpawner(new Vector2(-1000, -7000), -7000), 3, Sound.None),
 
-        new Mission([new Planet(Vector2.Zero, Vector2.Zero, 8000000, 100, true, new Color(1f, 0.8f, 0.5f), false, 10f, 0, true) { Temperature = 5 }],
-        [
-            new EntityCondition(new LaunchConstructor(Enemy.NewGlider,new Vector2(-6000, -7000), -6500),[ ]),
-            new WaveGoal(10)
-        ],
-        "BEEG", "", -1, new Vector2(-1000, -7000), Mission.TierThreeEnemies(), Mission.TierThreeBosses(), null, true, null, SolarStation)
-        { music = false, playerDocked = true },
+        new Mission([
+            new Planets([new Planet(new Vector2(0, 500), Vector2.Zero, 5000, 0.1f, true, Color.Black, false, 0)]),
+            new Colliders(BlackHoleStation),
+            new PickupConstructor(ItemFactory.NewScrap, new Vector2(0, -8*50), Vector2.Zero, -0.03f),
+            new AdvancedConstructor(Enemy.NewFighter, Vector2.Zero, Vector2.Zero, 0, false)
+            ], new Conditional([new WaveGoal(10)], Mission.SendPickup()),
+            "Black Hole", "", new GliderSpawner(new Vector2(-1000, -700), -1000), 3, Sound.None),
 
-        new Mission([new Planet(new Vector2(0, 500), Vector2.Zero, 5000, 0.1f, true, Color.Black, false, 0)],
-        [
-            new EntityCondition(new LaunchConstructor(Enemy.NewGlider,new Vector2(-1000, -700), -1000),[ ]),
-            new WaveGoal(10),
-            new EntityCondition(new AdvancedConstructor(Enemy.NewFighter, Vector2.Zero, Vector2.Zero, 0, false), []),
-            new EntityCondition(new PickupConstructor(ItemFactory.NewScrap, new Vector2(0, -8*50), Vector2.Zero, -0.03f),[]),
-        ],
-        "Black Hole", "", -1, new Vector2(-1000, -700), Mission.TierThreeEnemies(), Mission.TierThreeBosses(), null, true, null, BlackHoleStation)
-        { music = false, playerDocked = true },
-
-        new Mission([ new(Vector2.Zero, Vector2.Zero, 20000, 9, true, Color.OrangeRed, true, 1.5f),
-        new(new Vector2(1200, 0), Planet.GetOrbitalVelocity(new Vector2(1200, 0), Vector2.Zero, 20000), 750, 2f, false, Color.Red) ],
-        [
-            new EntityCondition(new LaunchConstructor(Enemy.NewDropPod,new Vector2(0, -1500), 950),[ ]),
-            new WaveGoal(1000)],
-        "Last Stand", "Survive", 0.25f, new Vector2(0, -1500), Mission.AllEnemies(), Mission.AllBosses())
-        { isAggressive = true, PlayerProgression = 4, tip = "You can now construct the makeshift mothership in the construct menu.\n Requires 3 scrap.", relaunchable = true },
-
-        new Mission([], [], "Penultimate", "", 1, Vector2.Zero, [], []),
-        */
+        new Mission([
+            new Planets([ new(Vector2.Zero, Vector2.Zero, 20000, 9, true, Color.OrangeRed, true, 1.5f),
+        new(new Vector2(1200, 0), Planet.GetOrbitalVelocity(new Vector2(1200, 0), Vector2.Zero, 20000), 750, 2f, false, Color.Red) ]),
+            new Tip("You can now construct the makeshift mothership in the construct menu.\n Requires 3 scrap.", new Vector2(0, -10 * 50)),
+            new WaveSpawner(Mission.All, 0.25f, true),
+            ], new Conditional([new WaveGoal(1000)], Mission.SendPickup()),
+            "Last Stand", "Survive", new DropSpawner(1500), 4) { relaunchable = true },
     ];
     public List<(float distance, List<int> prerequisites, int system)> Systems { get; } =
     [
@@ -522,7 +514,7 @@ public class EntityManager
                 selectedEntities.Add(entity);
             }
         }
-        return selectedEntities.ToArray();
+        return [.. selectedEntities];
     }
     public static float DistanceSqr(Entity _entity1, Entity _entity2)
     {
@@ -556,14 +548,10 @@ public class EntityManager
         var list = new List<Entity>();
         float dist = _maxLength;
         Entity nearestEnemy = null;
-        float maxDist = Engine.SaveGame.CurrentMission.Hitscan(_pos, dir * dist);
-        if (maxDist > _maxLength)
-        {
-            maxDist = _maxLength;
-        }
+        Engine.SaveGame.CurrentMission.IsColliding(_pos, dir * dist, 1, false, out float maxDist);
         foreach (var entity in entities)
         {
-            if(_getProjectiles || entity.GetComponent<Damager>() != null)
+            if(_getProjectiles || entity.GetComponent<Health>() != null)
             {
                 CalculateIntersection(entity);
             }

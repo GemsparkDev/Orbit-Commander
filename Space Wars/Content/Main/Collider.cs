@@ -16,7 +16,7 @@ namespace Space_Wars.Content.Main;
 public interface ICollider
 {
     public bool Collide(Entity _entity);
-    public bool IsColliding(Vector2 _position, Vector2 _velocity, float _radius, bool _override = false);
+    public bool IsColliding(Vector2 _position, Vector2 _velocity, float _radius, bool _override, out float _end);
     public void Draw(SpriteBatch _spriteBatch);
     public string Print();
     protected static bool ComputeCollisions(float _distance, Vector2 _closestPoint, Vector2 _velocity, Entity _entity)
@@ -55,8 +55,9 @@ public class LineCollider(Vector2 _start, Vector2 _end, bool _isVisual = false) 
         float distance = Vector2.Distance(closestPoint, _entity.Position);
         return ICollider.ComputeCollisions(distance, closestPoint, Vector2.Zero, _entity);
     }
-    public bool IsColliding(Vector2 _position, Vector2 _entityVelocity, float _radius, bool _override = false)
+    public bool IsColliding(Vector2 _position, Vector2 _entityVelocity, float _radius, bool _override, out float end)
     {
+        end = _entityVelocity.Length();
         if(_isVisual && !_override)
         {
             return false;
@@ -138,8 +139,9 @@ public class ArcCollider : ICollider
         float distance = Vector2.Distance(_entity.Position, closestPoint);
         return ICollider.ComputeCollisions(distance, closestPoint, Vector2.Zero, _entity);
     }
-    public bool IsColliding(Vector2 _position, Vector2 _velocity, float _radius, bool _override)
+    public bool IsColliding(Vector2 _position, Vector2 _velocity, float _radius, bool _override, out float end)
     {
+        end = _velocity.Length();
         if(isVisual && !_override)
         {
             return false;

@@ -49,16 +49,22 @@ public class Colliders(Func<ICollider[]> _colliders) : IMissionComponent, IObsta
         }
         return IsColliding;
     }
-    public ICollider IsColliding(Vector2 _position, Vector2 _velocity, float _colliderRadius, bool _override)
+    public ICollider IsColliding(Vector2 _position, Vector2 _velocity, float _colliderRadius, bool _override, out float end)
     {
+        end = _velocity.Length();
+        ICollider returnCollider = null;
         foreach(var collider in GetColliders)
         {
-            if(collider.IsColliding(_position, _velocity, _colliderRadius, _override))
+            if(collider.IsColliding(_position, _velocity, _colliderRadius, _override, out float _end))
             {
-                return collider;
+                if(_end < end)
+                {
+                    end = _end;
+                    returnCollider = collider;
+                }
             }
         }
-        return null;
+        return returnCollider;
     }
     public IMissionComponent Clone()
     {

@@ -493,7 +493,7 @@ public class GrapplingHook : Entity
                 isExpired = true;
             }
             //TODO: Get the grappling hook to work for moving colliders
-            var collider = Engine.SaveGame.CurrentMission.IsColliding(Position, Velocity, ColliderRadius, false);
+            var collider = Engine.SaveGame.CurrentMission.IsColliding(Position, Velocity, ColliderRadius, false, out float _);
             if (collider != null)
             {
                 target = new GenericLatch(Position);

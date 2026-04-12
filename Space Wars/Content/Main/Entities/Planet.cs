@@ -70,7 +70,7 @@ public class Planet : ICollider
         if(false)
         {
             ParticleManager.Add(new Particle(Assets.Get(Sprites.Circle), _entity.Position + _entity.Velocity * Engine.DeltaSeconds, 0, Color.Red));
-            Vector2 dir = Vector2.Normalize(_entity.Velocity);
+            var dir = Vector2.Normalize(_entity.Velocity);
             float closestLength = -(relativePosition.X * dir.X + relativePosition.Y * dir.Y);
             float closestDistance = Vector2.Distance((dir * closestLength + _entity.Position), _entity.Position);
             if (closestLength > 0 && closestLength < _entity.Velocity.Length() && closestDistance < _entity.ColliderRadius)
@@ -106,9 +106,20 @@ public class Planet : ICollider
         }
         return false;
     }
-    public bool IsColliding(Vector2 _position, Vector2 _velocity, float _colliderRadius, bool _override)
+    public bool IsColliding(Vector2 _position, Vector2 _velocity, float _colliderRadius, bool _override, out float _end)
     {
-        return (position - _position).Length() <= radius + _colliderRadius;
+        _end = _velocity.Length();
+        Vector2 relativePosition = position - _position;
+        var dir = Vector2.Normalize(_velocity);
+        float closestLength = (relativePosition.X * dir.X + relativePosition.Y * dir.Y);
+        float closestDistance = (Vector2.Distance((dir * closestLength + _position), position));
+        float discriminant = MathF.Sqrt(radius * radius - closestDistance * closestDistance);
+        if (closestLength - discriminant < _end && closestLength - discriminant > 0)
+        {
+            _end = closestLength - discriminant;
+            return true;
+        }
+        return false;
     }
     public string Print() { return ""; }
     public Vector2 AttractObject(Entity _entity)

@@ -90,17 +90,23 @@ public class Mission
             objective = objective.Update();    
         }
     }
-    public ICollider IsColliding(Vector2 _position, Vector2 _velocity, float _colliderRadius, bool _override)
+    public ICollider IsColliding(Vector2 _position, Vector2 _velocity, float _colliderRadius, bool _override, out float end)
     {
+        end = _velocity.Length();
+        ICollider returnObstacle = null;
         foreach(var obstacle in obstacles)
         {
-            var collider = obstacle.IsColliding(_position, _velocity, _colliderRadius, _override);
+            var collider = obstacle.IsColliding(_position, _velocity, _colliderRadius, _override, out float _end);
             if(collider != null)
             {
-                return collider;
+                if(_end < end)
+                {
+                    end = _end;
+                    returnObstacle = collider;
+                }
             }
         }
-        return null;
+        return returnObstacle;
     }
     public float GetAtmospherePressure(Entity _entity)
     {
@@ -145,7 +151,7 @@ public class Mission
         {
             foreach(var collider in Colliders)
             {
-                if(collider.IsColliding(futurePosition, futureVelocity, Engine.SaveGame.Player.ColliderRadius))
+                if(collider.IsColliding(futurePosition, futureVelocity, Engine.SaveGame.Player.ColliderRadius, false, out float _))
                 {
                     exit = true;
                     break;
@@ -251,18 +257,8 @@ public class Mission
             float distance = (Engine.ScreenSize.X + Engine.ScreenSize.Y) * distanceMultiplier / 3;
             spawnLocation = Util.ToUnitVector(angle) * distance + Engine.SaveGame.Player.Position;
         }
-        while(IsColliding(spawnLocation, Vector2.Zero, 10, false) != null);
+        while(IsColliding(spawnLocation, Vector2.Zero, 10, false, out float _) != null);
         return spawnLocation;
-    }
-    public float Hitscan(Vector2 _pos, Vector2 _dir)
-    {
-        Enemy enemy = new Enemy(_pos, _dir, 0, 1, Assets.Get(Sprites.Dot));
-        enemy.Update();
-        foreach(var obstacle in obstacles)
-        {
-            obstacle.Collide(enemy);
-        }
-        return Vector2.Distance(_pos, enemy.Position);
     }
     public void Draw(SpriteBatch _spriteBatch)
     {

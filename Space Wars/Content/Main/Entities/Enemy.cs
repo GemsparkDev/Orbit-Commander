@@ -39,7 +39,7 @@ public class Enemy : Entity
         {
             rand = new Vector2((Util.Random.NextSingle() * 2 - 1) * 8 * 50 * 3, (Util.Random.NextSingle() * 2 - 1) * 8 * 50 * 3);
         }
-        while (Engine.SaveGame.CurrentMission.IsColliding(rand, Vector2.Zero, ColliderRadius, false) == null);
+        while (Engine.SaveGame.CurrentMission.IsColliding(rand, Vector2.Zero, ColliderRadius, false, out float _) == null);
         return rand;
     }
     public ParticleEmitter EnemyRange { get{ return GetComponent<Emitter>().ParticleEmitter; } }
@@ -156,7 +156,7 @@ public class Enemy : Entity
     }
     public void GoToPosition(Vector2 _position, float speed)
     {
-        var collider = Engine.SaveGame.CurrentMission.IsColliding(Position, _position - Position, ColliderRadius, false);
+        var collider = Engine.SaveGame.CurrentMission.IsColliding(Position, _position - Position, ColliderRadius, false, out float _);
         //TODO: Implement A# algorithm
         if(collider != null)
         {
@@ -3983,6 +3983,14 @@ public class Enemy : Entity
         Enemy enemy = new(position, Vector2.Zero, 0, 500, Assets.Get(Sprites.DropPod), true);
         enemy.AddComponent(new Behaviour(enemy).AddBehaviour(enemy.DropPod(_distance)));
         enemy.AddComponent(new DockableComponent(enemy, null));
+        enemy.GetComponent<Collide>().OnCollide = delegate (int _damage, bool _override)
+        {
+            if (_damage > 0)
+            {
+                enemy.isExpired = true;
+            }
+            return enemy.isExpired;
+        };
         return enemy;
     }
     IEnumerable<int> Glider(float _distance)

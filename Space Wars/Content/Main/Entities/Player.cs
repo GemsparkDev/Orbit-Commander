@@ -342,7 +342,7 @@ public class Player : Entity
             {
                 Vector2 newPos = new Vector2(Input.NewMouseState.X, Input.NewMouseState.Y) + Engine.Camera.Position - Engine.BackBuffer / 2;
                 Vector2 prevPos = new Vector2(Input.OldMouseState.X, Input.OldMouseState.Y) + Engine.Camera.Position - Engine.BackBuffer / 2;
-                comp.GetColliders = [.. comp.GetColliders.Where(x => !x.IsColliding(prevPos, newPos - prevPos, 10, true))];   
+                comp.GetColliders = [.. comp.GetColliders.Where(x => !x.IsColliding(prevPos, newPos - prevPos, 10, true, out float _))];   
             }
             if(Input.NewState.IsKeyDown(Keys.F) && Input.OldState.IsKeyUp(Keys.F))
             {
@@ -548,9 +548,13 @@ public class Player : Entity
                         }
                     }
                     List<Entity> miningEnemies = Engine.EntityManager.Hitscan(Position, targetDir, 120, false, out Vector2 _end);
-                    if (miningEnemies.Count > 0 && miningEnemies[0] as Enemy != null)
+                    Engine.WriteLine(_end.Length());
+                    foreach(var entity in miningEnemies)
                     {
-                        (miningEnemies[0] as Enemy).Mine();
+                        if(entity as Enemy != null)
+                        {
+                            (entity as Enemy).Mine();
+                        }
                     }
                     for (float i = 0; i < (_end - Position - targetVector * 8).Length() / 2; i++)
                     {

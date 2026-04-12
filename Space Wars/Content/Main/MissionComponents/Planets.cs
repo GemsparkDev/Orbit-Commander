@@ -98,16 +98,22 @@ internal class Planets(Planet[] _planets) : IMissionComponent, IObstacle
         }
         return IsColliding;
     }
-    public ICollider IsColliding(Vector2 _position, Vector2 _velocity, float _colliderRadius, bool _override)
+    public ICollider IsColliding(Vector2 _position, Vector2 _velocity, float _colliderRadius, bool _override, out float end)
     {
+        end = _velocity.Length();
+        ICollider returnPlanet = null;
         foreach(var planet in _planets)
         {
-            if(planet.IsColliding(_position, _velocity, _colliderRadius, _override))
+            if(planet.IsColliding(_position, _velocity, _colliderRadius, _override, out float _end))
             {
-                return planet;
+                if(_end < end)
+                {
+                    end = _end;
+                    returnPlanet = planet;
+                }
             }
         }
-        return null;
+        return returnPlanet;
     }
     //TODO: Check if this clone function has side effects for replaying missions.
     //Should work for now
