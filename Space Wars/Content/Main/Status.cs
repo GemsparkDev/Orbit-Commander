@@ -32,16 +32,26 @@ public class StatusHolder(Entity _entity) : Component(_entity)
     List<Status> effects = [];
     public int StealthChange { get; private set; }
     public int SensingChange { get; private set; }
-    public void Update(Entity _parent)
+    public float Temperature { get; set; } = 0; //-1: Freeze, 0: Neutral, 1: Burn
+    public override void Update()
     {
         StealthChange = 0;
         SensingChange = 0;
         effects = [.. effects.Where(x => !x.IsExpired)];
         foreach (var effect in effects)
         {
-            effect.Update(_parent);
+            effect.Update(Entity);
             StealthChange += effect.StealthChange();
             SensingChange += effect.SensingChange();
+        }
+        Temperature *= Util.FIED(0.707f); //Radiative
+        if (Temperature > 1)
+        {
+            ApplyStatus(new Fire(1, Color.Orange));
+        }
+        if (Temperature < -1)
+        {
+            ApplyStatus(new Frost(1));
         }
     }
     public void ApplyStatus(Status _status)

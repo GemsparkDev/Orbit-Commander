@@ -21,11 +21,11 @@ public class Pickup : Entity, IData
     public int ID => itemData.ID;
     private Decal textbox;
     public Pickup(ItemData _itemData, Vector2 _position, Vector2 _velocity, float _angularVelocity, int _health = 3)
-        : base(_itemData.VirtualSprite, _position, _velocity, 0, _angularVelocity)
+        : base(_position, _velocity, 0, _angularVelocity)
     {
+        AddComponent(new Sprite(this) { Texture = _itemData.VirtualSprite, Color = Color.Cyan });
         itemData = _itemData;
         AddComponent(new Friendly(this) { Team = Team.Friendly });
-        base.Color = Color.Cyan;
         Tooltip.AddWidget(new Decal(new Vector2(-Tooltip.Size.X / 3, 0), _itemData.RealSprite));
         textbox = new Decal(new Vector2(0, -5), Assets.TextFont, _itemData.Name, _itemData.TextColor, 5f);
         Tooltip.AddWidget(textbox);
@@ -60,12 +60,12 @@ public class Pickup : Entity, IData
     }
     //TODO: Review all serialization!
     public Pickup(ItemData _itemData, List<string> _disassembly, LoadLogger _logger)
-        : base(_itemData.VirtualSprite, default, default, 0, 0)
+        : base(default, default, 0, 0)
     {
         throw new NotImplementedException();
+        AddComponent(new Sprite(this) { Texture = _itemData.VirtualSprite, Color = Color.Cyan });
         itemData = _itemData;
         AddComponent(new Friendly(this){Team = Team.Friendly});
-        base.Color = Color.Cyan;
         Tooltip.AddWidget(new Decal(new Vector2(-Tooltip.Size.X / 3, 0), _itemData.RealSprite));
         textbox = new Decal(new Vector2(0, -5), Assets.TextFont, _itemData.Name, _itemData.TextColor, 5f);
         Tooltip.AddWidget(textbox);

@@ -44,8 +44,10 @@ public class Enemy : Entity
     }
     public ParticleEmitter EnemyRange { get{ return GetComponent<Emitter>().ParticleEmitter; } }
     public Enemy(Vector2 _position, Vector2 _velocity, float _angle, int _health, Texture2D _texture, Team _team = Team.Hostile)
-        : base(_texture, _position, _velocity, _angle, 0)
+        : base(_position, _velocity, _angle, 0)
     {
+        AddComponent(new StatusHolder(this));
+        AddComponent(new Sprite(this) { Texture = _texture });
         AddComponent(new Friendly(this) { Team = _team });
         AddComponent(new Health(this) { CurrentHealth = _health, MaxHealth = _health });
         prevHealth = _health;

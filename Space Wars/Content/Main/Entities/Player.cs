@@ -102,10 +102,11 @@ public class Player : Entity
             return stealth;
         }
     }
-
     public Player(Vector2 _position, Vector2 _velocity, float _angle)
-        : base(Assets.Get(Sprites.Player), _position, _velocity, _angle, 0)
+        : base(_position, _velocity, _angle, 0)
     {
+        AddComponent(new StatusHolder(this));
+        AddComponent(new Sprite(this) { Texture = Assets.Get(Sprites.Player) });
         AddComponent(new Friendly(this) { Team = Team.Friendly });
         UpdateColor();
         smokeParticles.isEmitterActive = false;
@@ -838,9 +839,11 @@ public class Player : Entity
         base.Draw(_spriteBatch);
     }
     public Player(string _serialization, LoadLogger _logger)
-    : base(Assets.Get(Sprites.Player), Vector2.One, Vector2.One, 0, 0)
+    : base(Vector2.One, Vector2.One, 0, 0)
     {
         throw new NotImplementedException();
+        AddComponent(new StatusHolder(this));
+        AddComponent(new Sprite(this) { Texture = Assets.Get(Sprites.Player)});
         AddComponent(new Friendly(this) { Team = Team.Friendly });
         List<string> disassembly = SaveGame.Disassemble(_serialization);
 

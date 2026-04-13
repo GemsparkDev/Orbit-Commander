@@ -39,28 +39,16 @@ public class Entity
     public virtual int StealthAbility { get { return stealthAbility; } protected set { stealthAbility = value; } }
     private int stealthAbility = 0;
     private List<Component> components = [];
-    public float Temperature { get; private set; } = 0; //-1: Freeze, 0: Neutral, 1: Burn
-    public Entity(Texture2D _texture, Vector2 _position, Vector2 _velocity, float _angle, float _angularVelocity)
+    public float Temperature { get { return GetComponent<StatusHolder>().Temperature; } set { GetComponent<StatusHolder>().Temperature = value; } }
+    public Entity(Vector2 _position, Vector2 _velocity, float _angle, float _angularVelocity)
     {
         AddComponent(new Transform(this) { Position = _position, Velocity = _velocity, Angle = _angle, AngularVelocity = _angularVelocity });
-        AddComponent(new Sprite(this) { Texture = _texture });
-        AddComponent(new StatusHolder(this));
     }
     public virtual void Update()
     {
         foreach (var comp in components)
         {
             comp.Update();
-        }
-        StatusHolder.Update(this);
-        Temperature *= Util.FIED(0.707f); //Radiative
-        if(Temperature > 1)
-        {
-            StatusHolder.ApplyStatus(new Fire(1, Color.Orange));
-        }
-        if(Temperature < -1)
-        {
-            StatusHolder.ApplyStatus(new Frost(1));
         }
     }
     public T GetComponent<T>() where T : Component
@@ -160,7 +148,9 @@ public class Entity
     }
     public static Entity NewProjectile(Texture2D _texture, Vector2 _position, Vector2 _velocity, float _angle, float _angularVelocity, Team _team, int _damage, int _stealth)
     {
-        var projectile = new Entity(_texture, _position, _velocity, _angle, _angularVelocity);
+        var projectile = new Entity(_position, _velocity, _angle, _angularVelocity);
+        projectile.AddComponent(new StatusHolder(projectile));
+        projectile.AddComponent(new Sprite(projectile) { Texture = _texture });
         projectile.AddComponent(new Friendly(projectile) { Team = _team });
         projectile.AddComponent(new Collide(projectile, 
         delegate(int _damage, bool _ignoreImmunity)
@@ -459,8 +449,10 @@ public class GrapplingHook : Entity
     //Projectiles should always be able to hit potential targets
     public override int SensingAbility { get { return 99; } }
     public GrapplingHook(Vector2 _position, Vector2 _velocity, float _angle, Entity _parent, Team _team = Team.Friendly)
-        : base(Assets.Get(Sprites.Microshot), _position, _velocity, _angle, 0)
+        : base(_position, _velocity, _angle, 0)
     {
+        AddComponent(new StatusHolder(this));
+        AddComponent(new Sprite(this) { Texture = Assets.Get(Sprites.Microshot) });
         Parent = _parent;
         AddComponent(new Friendly(this) { Team = _team });
         Color = SaveGame.ColorScheme.TeamColors[_team];
@@ -574,8 +566,9 @@ public class FlameBolt : Entity
     }
     public override int SensingAbility { get { return 99; } }
     public FlameBolt(Vector2 _position, Vector2 _velocity, Team _team, int _damage, float _timeLeft = 0.7f, float _particleVelocity = 1, int _stealth = 0, float _temp = 10)
-        : base(Assets.Get(Sprites.Circle), _position, _velocity, 0, 0)
+        : base(_position, _velocity, 0, 0)
     {
+        AddComponent(new StatusHolder(this));
         StealthAbility = _stealth;
         AddComponent(new Friendly(this) { Team = _team });
         AddComponent(new ExpireTimer(this) { TimeLeft = _timeLeft });
@@ -591,8 +584,9 @@ public class FlameBolt : Entity
         temp = _temp;
     }
     public FlameBolt(Vector2 _position, Vector2 _velocity, Team _team, int _damage, ParticleEmitter _emitter, float _timeLeft = 0.7f, int _stealth = 0, float _temp = 10)
-        : base(Assets.Get(Sprites.Circle), _position, _velocity, 0, 0)
+        : base(_position, _velocity, 0, 0)
     {
+        AddComponent(new StatusHolder(this));
         StealthAbility = _stealth;
         AddComponent(new Friendly(this) { Team = _team });
         AddComponent(new ExpireTimer(this) { TimeLeft = _timeLeft });
