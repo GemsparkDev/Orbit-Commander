@@ -254,7 +254,7 @@ public class EntityManager
         {
             //Checks the entity type, and adds it to the corresponding list for each type
             entities.Add(entity);
-            if (entity.GetComponent<Damager>() != null)
+            if (entity.GetComponent<Attack>() != null)
             {
                 projectiles.Add(entity);
             }
@@ -374,20 +374,20 @@ public class EntityManager
             }
         }
     }
-    public DockableComponent NearestDockableEntity(Entity _entity)
+    public Dockable NearestDockableEntity(Entity _entity)
     {
         float nearestDistance = float.MaxValue;
-        DockableComponent returnEntity = null;
+        Dockable returnEntity = null;
         foreach (Entity entity in entities)
         {
-            var component = entity.GetComponent<DockableComponent>();
+            var component = entity.GetComponent<Dockable>();
             if (!(component == null) && !component.Entity.isExpired)
             {
                 float distanceSqr = DistanceSqr(entity, _entity);
                 if (distanceSqr < nearestDistance)
                 {
                     nearestDistance = distanceSqr;
-                    returnEntity = component as DockableComponent;
+                    returnEntity = component as Dockable;
                 }
             }
         }
@@ -400,7 +400,7 @@ public class EntityManager
         Entity returnEnemy = null;
         foreach (Entity targetEnemy in enemies)
         {
-            if (targetEnemy.StealthAbility > entity.SensingAbility || entity.IsFriendly(targetEnemy))
+            if (entity.IsFriendly(targetEnemy) || targetEnemy.StealthAbility > entity.SensingAbility)
             {
                 continue;
             }

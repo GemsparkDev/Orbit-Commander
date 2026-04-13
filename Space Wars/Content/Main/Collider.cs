@@ -30,7 +30,7 @@ public interface ICollider
             var frictionVector = new Vector2(normalVector.Y, -normalVector.X);
             var relativeVelocity = -_entity.Velocity; //Include velocity if colliders are moving in the future.
             int collisionForce = (int)Math.Floor((relativeVelocity).Length() / 2);
-            if (_entity as Pickup == null && (collisionForce > 5 || _entity.GetComponent<Damager>() != null))
+            if (_entity as Pickup == null && (collisionForce > 5 || _entity.GetComponent<Attack>() != null))
             {
                 _entity.Collide(collisionForce);
             }

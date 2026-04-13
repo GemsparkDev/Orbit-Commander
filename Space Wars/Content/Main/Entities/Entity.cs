@@ -13,36 +13,61 @@ namespace Space_Wars.Content.Main.Entities;
 public class Entity
 {
     //TODO: Make sure to add null checks to all these!
-    public Vector2 Position { get { return GetComponent<Transform>().Position; } set { GetComponent<Transform>().Position = value; } }
-    public Vector2 Velocity { get { return GetComponent<Transform>().Velocity; } set { GetComponent<Transform>().Velocity = value; } }
-    public float Angle { get { return GetComponent<Transform>().Angle; } set { GetComponent<Transform>().Angle = value; } }
-    public float AngularVelocity { get { return GetComponent<Transform>().AngularVelocity; } set { GetComponent<Transform>().AngularVelocity = value; } }
+    private Transform transform; //All game entities have transforms
+    public Vector2 Position { get { return transform.Position; } set { transform.Position = value; } }
+    public Vector2 Velocity { get { return transform.Velocity; } set { transform.Velocity = value; } }
+    public float Angle { get { return transform.Angle; } set { transform.Angle = value; } }
+    public float AngularVelocity { get { return transform.AngularVelocity; } set { transform.AngularVelocity = value; } }
     public float TimeLeft { get { return GetComponent<ExpireTimer>().TimeLeft; } set { GetComponent<ExpireTimer>().TimeLeft = value; } }
-    public int Damage { get { return GetComponent<Damager>().Damage; } }
     public int Health { get { return GetComponent<Health>().CurrentHealth; } set { GetComponent<Health>().CurrentHealth = value; } }
     public int MaxHealth { get { return GetComponent<Health>().MaxHealth; } set { GetComponent<Health>().MaxHealth = value; } }
     protected List<float> CD { get { return GetComponent<Cooldown>().Cooldowns; } set { GetComponent<Cooldown>().Cooldowns = value; } }
     public Texture2D Texture { get { return GetComponent<Sprite>().Texture; } set { GetComponent<Sprite>().Texture = value; } }
-    public Color Color { get { return GetComponent<Sprite>().Color; } set { GetComponent<Sprite>().Color = value; } }
-    public float RevealDuration { get { return GetComponent<Sprite>().RevealDuration; } set { GetComponent<Sprite>().RevealDuration = value; } }
-    public StatusHolder StatusHolder => GetComponent<StatusHolder>();
+    public virtual Color Color { get { return GetComponent<Sprite>().Color; } set { GetComponent<Sprite>().Color = value; } }
+    public float RevealDuration { get { return GetComponent<Stealth>().RevealDuration; } set { GetComponent<Stealth>().RevealDuration = value; } }
+    public float Temperature { get { return GetComponent<Temp>().Temperature; } set { GetComponent<Temp>().Temperature = value; } }
+    public Team Team { get { return GetComponent<Friendly>().Team; } set { GetComponent<Friendly>().Team = value;} }
+    public virtual int SensingAbility { get { return GetComponent<Stealth>().SensingAbility; } protected set { GetComponent<Stealth>().SensingAbility = value; } }
+    public virtual int StealthAbility { get { return GetComponent<Stealth>().StealthAbility; } protected set { GetComponent<Stealth>().StealthAbility = value; } }
+    public Statuses StatusHolder => GetComponent<Statuses>();
     public Vector2 Size => GetComponent<Sprite>().Size;
     public virtual float ColliderRadius => GetComponent<Sprite>().ColliderRadius;
+    public int Damage => GetComponent<Attack>().Damage;
     protected static Player Player => Engine.SaveGame.Player;
-    public bool isExpired = false;
     public bool IsFriendly(Entity _entity)
     {
         return _entity.GetComponent<Friendly>().Team == GetComponent<Friendly>().Team;
     }
-    public Team Team { get { return GetComponent<Friendly>().Team; } set { GetComponent<Friendly>().Team = value;} }
-    public virtual int SensingAbility { get; protected set; } = 1;
-    public virtual int StealthAbility { get { return stealthAbility; } protected set { stealthAbility = value; } }
-    private int stealthAbility = 0;
+    public void ApplyWork(float _q)
+    {
+        var temp = GetComponent<Temp>();
+        if(temp != null)
+        {
+            temp.ApplyWork(_q);
+        }
+    }
+    public void ConductHeat(float _temp, float _rate)
+    {
+        var temp = GetComponent<Temp>();
+        if(temp != null)
+        {
+            temp.ConductHeat(_temp, _rate);
+        }
+    }
+    public virtual void UpdateColor()
+    {
+        Color = Color.White;
+    }
+    public void Flash(Color _color)
+    {
+        Color = _color;
+    }
+    public bool isExpired = false;
     private List<Component> components = [];
-    public float Temperature { get { return GetComponent<StatusHolder>().Temperature; } set { GetComponent<StatusHolder>().Temperature = value; } }
     public Entity(Vector2 _position, Vector2 _velocity, float _angle, float _angularVelocity)
     {
-        AddComponent(new Transform(this) { Position = _position, Velocity = _velocity, Angle = _angle, AngularVelocity = _angularVelocity });
+        transform = new Transform(this) { Position = _position, Velocity = _velocity, Angle = _angle, AngularVelocity = _angularVelocity };
+        AddComponent(transform);
     }
     public virtual void Update()
     {
@@ -79,77 +104,18 @@ public class Entity
         }
         return false;
     }
-    public virtual void UpdateColor()
-    {
-        Color = Color.White;
-    }
-    public void Flash(Color _color)
-    {
-        Color = _color;
-    }
-    public void ApplyWork(float _q)
-    {
-        Temperature += _q * Engine.DeltaSeconds;
-    }
-    public void ConductHeat(float _temp, float _rate)
-    {
-        Temperature += (_temp - Temperature) * _rate * Engine.DeltaSeconds;
-    }
-    public virtual void Draw(SpriteBatch _spriteBatch)
-    {
-        Vector2 halfSize = (Engine.BackBuffer + Size) / 2;
-        Vector2 pos = Engine.Camera.Position + Engine.MousePositionOffset;
-        if (Position.X - pos.X < -halfSize.X || Position.Y - pos.Y < -halfSize.Y
-         || Position.X - pos.X >  halfSize.X || Position.Y - pos.Y >  halfSize.Y)
+    public virtual void Draw(SpriteBatch _spriteBatch) 
+    { 
+        foreach(var comp in components)
         {
-            return;
-        }
-        float stealth = Convert.ToSingle(Color.A) / 255;
-        var maxDistance = EntityManager.StealthRange * (float)Engine.SaveGame.Player.CountFuses(ModuleType.Sensors) / 4;
-        //Player has superior sensing to stealth -> full detection
-        //Player has equal sensing to stealth -> partial detection when nearby
-        //Player has inferior sensing to stealth -> no detection
-        if (Engine.SaveGame.Player.SensingAbility == stealthAbility)
-        {
-            float distanceSqr = EntityManager.DistanceSqr(Engine.SaveGame.Player, this);
-            if (distanceSqr > maxDistance * maxDistance)
-            {
-                stealth = 0;
-            }
-            else
-            {
-                stealth = MathF.Sqrt(maxDistance - MathF.Sqrt(distanceSqr)) / MathF.Sqrt(maxDistance);
-            }
-        }
-        else if (Engine.SaveGame.Player.SensingAbility < stealthAbility)
-        {
-            stealth  = 0;
-        }
-        stealth = MathF.Max(stealth, (float)Math.Clamp(RevealDuration, 0f, 1f));
-        //Outline in atmosphere looks better
-        if (Engine.SaveGame.CurrentMission.GetAtmospherePressure(this) > 0 || SaveGame.ColorScheme.IsOutlined())
-        {
-            _spriteBatch.Draw(Texture, Position + new Vector2(0, 1), null, Color.Black, Angle, Size / 2, 1, 0, 0);
-            _spriteBatch.Draw(Texture, Position + new Vector2(0, -1), null, Color.Black, Angle, Size / 2, 1, 0, 0);
-            _spriteBatch.Draw(Texture, Position + new Vector2(1, 0), null, Color.Black, Angle, Size / 2, 1, 0, 0);
-            _spriteBatch.Draw(Texture, Position + new Vector2(-1, 0), null, Color.Black, Angle, Size / 2, 1, 0, 0);
-        }
-        _spriteBatch.Draw(Texture, Position, null, Color * stealth, Angle, Size / 2, 1, 0, 0);
-
-        if (SaveGame.DebugMode)
-        {
-            //Direction of motion
-            _spriteBatch.Draw(Engine.Line, Position, new Rectangle((int)Position.X, (int)Position.Y, 10, 1), Color.LightBlue,
-                MathF.Atan2(Velocity.Y, Velocity.X), Vector2.Zero, new Vector2(Velocity.Length(), 0.5f), SpriteEffects.None, 0.4f);
-            //Direction the entity is pointing
-            _spriteBatch.Draw(Engine.Line, Position, new Rectangle((int)Position.X, (int)Position.Y, 10, 1), Color.Red,
-                Angle - MathF.PI / 2, Vector2.Zero, Vector2.One, SpriteEffects.None, 0.4f);
+            comp.Draw(_spriteBatch);
         }
     }
     public static Entity NewProjectile(Texture2D _texture, Vector2 _position, Vector2 _velocity, float _angle, float _angularVelocity, Team _team, int _damage, int _stealth)
     {
         var projectile = new Entity(_position, _velocity, _angle, _angularVelocity);
-        projectile.AddComponent(new StatusHolder(projectile));
+        projectile.AddComponent(new Stealth(projectile) { SensingAbility = 99 });
+        projectile.AddComponent(new Temp(projectile));
         projectile.AddComponent(new Sprite(projectile) { Texture = _texture });
         projectile.AddComponent(new Friendly(projectile) { Team = _team });
         projectile.AddComponent(new Collide(projectile, 
@@ -170,7 +136,7 @@ public class Entity
         projectile.StealthAbility = _stealth;
         projectile.SensingAbility = 99;
         projectile.AddComponent(new ExpireTimer(projectile) { TimeLeft = 8 });
-        projectile.AddComponent(new Damager(projectile) { Damage = _damage });
+        projectile.AddComponent(new Attack(projectile) { Damage = _damage });
         projectile.Color = SaveGame.ColorScheme.TeamColors[_team];
         return projectile;
     }
@@ -190,7 +156,7 @@ public class Entity
             }
             if (nearestEnemy != null && Vector2.Distance(nearestEnemy.Position, Position) < GetComponent<Sprite>().ColliderRadius + nearestEnemy.GetComponent<Sprite>().ColliderRadius)
             {
-                nearestEnemy.Collide(GetComponent<Damager>().Damage);
+                nearestEnemy.Collide(GetComponent<Attack>().Damage);
                 Collide(1);
             }
             yield return 0;
@@ -213,7 +179,7 @@ public class Entity
             Vector2 posOffset = Util.ToUnitVector(Angle) * MathF.Cos(time * 8 + offset);
             Position += new Vector2(posOffset.Y, -posOffset.X);
             Entity nearestEnemy = Engine.EntityManager.NearestEnemy(this, true);
-            nearestEnemy.Collide(GetComponent<Damager>().Damage);
+            nearestEnemy.Collide(GetComponent<Attack>().Damage);
             Collide(1);
             yield return 0;
         }
@@ -246,7 +212,7 @@ public class Entity
             beam.Update();
             if (nearestEnemy.Count > 0)
             {
-                nearestEnemy[0].Collide(GetComponent<Damager>().Damage);
+                nearestEnemy[0].Collide(GetComponent<Attack>().Damage);
                 Collide(1, false);
             }
             yield return 0;
@@ -307,7 +273,7 @@ public class Entity
                     Vector2 particleVelocity = new Vector2(MathF.Cos(angle), MathF.Sin(angle)) * (Util.Random.NextSingle() * 2 + 2);
                     ParticleManager.Add(new Particle(Assets.Get(Sprites.Circle), 0.25f, Position, particleVelocity + Velocity, angle, 0, Color.DarkSlateGray, Color.Transparent));
                 }
-                Engine.EntityManager.Explode(GetComponent<Damager>().Damage, explosionRadius, Position);
+                Engine.EntityManager.Explode(GetComponent<Attack>().Damage, explosionRadius, Position);
                 Engine.ShakeScreen(150 / ((Position - Engine.Camera.Position).Length() + 300));
                 SoundManager.PlaySound(Assets.Get(Sound.Death), Position);
             }
@@ -335,7 +301,7 @@ public class Entity
             {
                 float angle = Util.Random.NextSingle() * MathF.Tau;
                 Vector2 dir = Util.ToUnitVector(angle);
-                Engine.EntityManager.Add(NewPulseShot(Position, Velocity + dir * 6, angle, 0, Team, GetComponent<Damager>().Damage, true));
+                Engine.EntityManager.Add(NewPulseShot(Position, Velocity + dir * 6, angle, 0, Team, GetComponent<Attack>().Damage, true));
                 cooldown = 0.1f;
                 SoundManager.PlaySound(Assets.Get(Sound.LMGFire), Position);
             }
@@ -355,7 +321,7 @@ public class Entity
         while(true)
         {
             Entity nearestEnemy = Engine.EntityManager.NearestEnemy(this);
-            nearestEnemy.Collide(GetComponent<Damager>().Damage);
+            nearestEnemy.Collide(GetComponent<Attack>().Damage);
             Collide(1);
             if (cooldown < 0)
             {
@@ -429,8 +395,8 @@ public class GrapplingHook : Entity
     }
     internal class LatchedPlanet(Planet _planet, Vector2 _position) : ILatchable
     {
-        private Vector2 offset = Vector2.Normalize(_position - _planet.position) * _planet.radius;
-        public Vector2 Position => _planet.position + offset;
+        private Vector2 offset = Vector2.Normalize(_position - _planet.Position) * _planet.ColliderRadius;
+        public Vector2 Position => _planet.Position + offset;
         public bool IsExpired => false;
 
         //Prevents deorbiting planets
@@ -446,12 +412,11 @@ public class GrapplingHook : Entity
     private ILatchable target;
     private float maxDistance = 800;
     public bool IsHooked => target != null;
-    //Projectiles should always be able to hit potential targets
-    public override int SensingAbility { get { return 99; } }
     public GrapplingHook(Vector2 _position, Vector2 _velocity, float _angle, Entity _parent, Team _team = Team.Friendly)
         : base(_position, _velocity, _angle, 0)
     {
-        AddComponent(new StatusHolder(this));
+        AddComponent(new Stealth(this) { SensingAbility = 99 });
+        AddComponent(new Temp(this));
         AddComponent(new Sprite(this) { Texture = Assets.Get(Sprites.Microshot) });
         Parent = _parent;
         AddComponent(new Friendly(this) { Team = _team });
@@ -564,15 +529,15 @@ public class FlameBolt : Entity
             return Math.Min((maxTimeLeft - TimeLeft) * emitter.particleVelocity, emitter.particleVelocity * emitter.particleTimeAlive) * 60;
         }
     }
-    public override int SensingAbility { get { return 99; } }
     public FlameBolt(Vector2 _position, Vector2 _velocity, Team _team, int _damage, float _timeLeft = 0.7f, float _particleVelocity = 1, int _stealth = 0, float _temp = 10)
         : base(_position, _velocity, 0, 0)
     {
-        AddComponent(new StatusHolder(this));
+        AddComponent(new Stealth(this) { SensingAbility = 99 });
+        AddComponent(new Temp(this));
         StealthAbility = _stealth;
         AddComponent(new Friendly(this) { Team = _team });
         AddComponent(new ExpireTimer(this) { TimeLeft = _timeLeft });
-        AddComponent(new Damager(this) { Damage = _damage });
+        AddComponent(new Attack(this) { Damage = _damage });
         emitter = new ParticleEmitter(Assets.Get(Sprites.Circle), 0.75f, Vector2.Zero, 0, MathF.Tau, _particleVelocity, 750 * _particleVelocity * _particleVelocity * Math.Min(1, MathF.Sqrt(TimeLeft)), new Color(1f, 1f, 0.25f, 1f), EmitterType.EmissionOverTime)
         {
             particleFadeToColor = new Color(1f, 0, 0, 0),
@@ -586,11 +551,12 @@ public class FlameBolt : Entity
     public FlameBolt(Vector2 _position, Vector2 _velocity, Team _team, int _damage, ParticleEmitter _emitter, float _timeLeft = 0.7f, int _stealth = 0, float _temp = 10)
         : base(_position, _velocity, 0, 0)
     {
-        AddComponent(new StatusHolder(this));
+        AddComponent(new Stealth(this) { SensingAbility = 99 });
+        AddComponent(new Temp(this));
         StealthAbility = _stealth;
         AddComponent(new Friendly(this) { Team = _team });
         AddComponent(new ExpireTimer(this) { TimeLeft = _timeLeft });
-        AddComponent(new Damager(this) { Damage = _damage });
+        AddComponent(new Attack(this) { Damage = _damage });
         emitter = _emitter;
         Color = Color.Transparent;
         maxTimeLeft = _timeLeft;
@@ -642,7 +608,7 @@ public class FlameBolt : Entity
             }
             if (skip) { continue; }
             struckEntities.Add((nearestEnemy, 0.1f));
-            nearestEnemy.Collide(GetComponent<Damager>().Damage);
+            nearestEnemy.Collide(GetComponent<Attack>().Damage);
             //Always apply effect even if no damage hit
             nearestEnemy.ApplyWork(temp);
         }

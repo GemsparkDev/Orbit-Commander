@@ -39,7 +39,7 @@ public class Player : Entity
     public Module SecondaryWeapon { get; set; } = null;
     private Vector2 startLocation = Vector2.Zero;
     public Vector2 Direction => targetVector;
-    public DockableComponent dockedEntity;
+    public Dockable dockedEntity;
     public List<Pickup> leashedMaterials = [];
     private ParticleEmitter smokeParticles = new(Assets.Get(Sprites.Circle), 1f, Vector2.Zero, 0, MathF.PI/4, 1, 0.5f, Color.Gray, EmitterType.EmissionOverTime) { isEmitterActive = false, particleFadeToColor = new Color(169, 169, 169, 0) };
     private SoundEffectInstance engineSounds;
@@ -105,7 +105,9 @@ public class Player : Entity
     public Player(Vector2 _position, Vector2 _velocity, float _angle)
         : base(_position, _velocity, _angle, 0)
     {
-        AddComponent(new StatusHolder(this));
+        AddComponent(new Stealth(this));
+        AddComponent(new Temp(this));
+        AddComponent(new Statuses(this));
         AddComponent(new Sprite(this) { Texture = Assets.Get(Sprites.Player) });
         AddComponent(new Friendly(this) { Team = Team.Friendly });
         UpdateColor();
@@ -261,10 +263,10 @@ public class Player : Entity
             smokeParticles.speedOfEmission = 25f - currentHealth/4;
         }
         var planet = Engine.SaveGame.CurrentMission.Planet;
-        if (Position.Length() >= 40 * 50 + planet.radius * 2)
+        if (Position.Length() >= 40 * 50 + planet.ColliderRadius * 2)
         {
             Velocity *= Util.FIED(0.1f);
-            Velocity += Vector2.Normalize(-Position) * (Position.Length() - (40 * 50 + planet.radius*2)) * Engine.DeltaSeconds / 30;
+            Velocity += Vector2.Normalize(-Position) * (Position.Length() - (40 * 50 + planet.ColliderRadius*2)) * Engine.DeltaSeconds / 30;
         }
         base.Update();
         if (dockedEntity != null)
@@ -687,7 +689,7 @@ public class Player : Entity
     {
         if (dockedEntity == null)
         {
-            DockableComponent dockableEntity = Engine.EntityManager.NearestDockableEntity(this);
+            Dockable dockableEntity = Engine.EntityManager.NearestDockableEntity(this);
             if (dockableEntity != null)
             {
                 if (dockableEntity.Dock(this, _withVelocity))
@@ -842,7 +844,9 @@ public class Player : Entity
     : base(Vector2.One, Vector2.One, 0, 0)
     {
         throw new NotImplementedException();
-        AddComponent(new StatusHolder(this));
+        AddComponent(new Stealth(this));
+        AddComponent(new Temp(this));
+        AddComponent(new Statuses(this));
         AddComponent(new Sprite(this) { Texture = Assets.Get(Sprites.Player)});
         AddComponent(new Friendly(this) { Team = Team.Friendly });
         List<string> disassembly = SaveGame.Disassemble(_serialization);

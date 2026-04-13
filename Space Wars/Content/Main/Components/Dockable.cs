@@ -6,7 +6,7 @@ using System;
 namespace Space_Wars.Content.Main.Components;
 
 
-public class DockableComponent(Entity _parentEntity, Container _menu, bool hasInventory = true) : Component(_parentEntity)
+public class Dockable(Entity _parentEntity, Container _menu, bool hasInventory = true) : Component(_parentEntity)
 {
     public bool IsDocked { get; private set; } = false;
     public Container Menu { get; private set; } = _menu;

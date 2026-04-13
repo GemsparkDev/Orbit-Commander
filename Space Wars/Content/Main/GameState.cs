@@ -86,7 +86,7 @@ public class MainMenu : GameState
     public override void Update()
     {
         menuPlanet.Update();
-        moonPlanet.velocity += menuPlanet.GetAcceleration(moonPlanet.position);
+        moonPlanet.Velocity += menuPlanet.GetAcceleration(moonPlanet.Position);
         moonPlanet.Update();
         smokeParticles.Update();
         ParticleManager.Update();

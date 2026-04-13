@@ -21,6 +21,10 @@ internal class Planets(Planet[] _planets) : IMissionComponent, IObstacle
                 planet.EasterEgg = true;
             }
         }
+        foreach(var p in _planets)
+        {
+            Engine.EntityManager.Add(p);
+        }
     }
     public void Update()
     {
@@ -47,25 +51,21 @@ internal class Planets(Planet[] _planets) : IMissionComponent, IObstacle
             }
             planet1.AttractObject(Engine.SaveGame.Player);
         }
-        foreach (var planet1 in _planets)
-        {
-            planet1.Update();
-        }
         //Prevents players from losing important items
         Entity[] importantEntites = Engine.EntityManager.GetEntity<KeyTag>();
         var planet = _planets[0];
         foreach(var entity in importantEntites)
         {
-            if (entity.Position.Length() >= 40 * 50 + planet.radius)
+            if (entity.Position.Length() >= 40 * 50 + planet.ColliderRadius)
             {
                 entity.Velocity *= 0.8f;
-                entity.Velocity += Vector2.Normalize(-entity.Position) * Engine.DeltaSeconds * (entity.Position.Length() - (40 * 50 + planet.radius));
+                entity.Velocity += Vector2.Normalize(-entity.Position) * Engine.DeltaSeconds * (entity.Position.Length() - (40 * 50 + planet.ColliderRadius));
             }   
         }
-        if (Engine.SaveGame.Player.Position.Length() >= 40 * 50 + planet.radius)
+        if (Engine.SaveGame.Player.Position.Length() >= 40 * 50 + planet.ColliderRadius)
         {
             Engine.SaveGame.Player.Velocity *= 0.8f;
-            Engine.SaveGame.Player.Velocity += Vector2.Normalize(-Engine.SaveGame.Player.Position) * Engine.DeltaSeconds * (Engine.SaveGame.Player.Position.Length() - (40 * 50 + planet.radius));
+            Engine.SaveGame.Player.Velocity += Vector2.Normalize(-Engine.SaveGame.Player.Position) * Engine.DeltaSeconds * (Engine.SaveGame.Player.Position.Length() - (40 * 50 + planet.ColliderRadius));
         }  
     }
     public float GetAtmospherePressure(Entity _entity)
@@ -79,11 +79,7 @@ internal class Planets(Planet[] _planets) : IMissionComponent, IObstacle
     }
     public void Draw(SpriteBatch _spriteBatch)
     {
-        foreach (var planet in _planets)
-        {
-            planet.Draw(_spriteBatch);
-        }
-        if (Engine.SaveGame.Player.Position.Length() > _planets[0].radius * 2 + 15 * 50)
+        if (Engine.SaveGame.Player.Position.Length() > _planets[0].ColliderRadius * 2 + 15 * 50)
         {
             _spriteBatch.Draw(Assets.Get(Sprites.Arrow), Engine.SaveGame.Player.Position - Vector2.Normalize(Engine.SaveGame.Player.Position) * 25, null, Engine.SaveGame.Player.Color, -Util.ToAngle(Engine.SaveGame.Player.Position), Assets.DimsOf(Sprites.Arrow) / 2, 1, 0, 0.2f);
             _spriteBatch.DrawString(Assets.TextFont, "Return to planet.", Engine.Camera.Position - new Vector2(Assets.TextFont.MeasureString("Return to planet.").X/2, 225), Color.Crimson);

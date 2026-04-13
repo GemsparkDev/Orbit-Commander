@@ -46,7 +46,9 @@ public class Enemy : Entity
     public Enemy(Vector2 _position, Vector2 _velocity, float _angle, int _health, Texture2D _texture, Team _team = Team.Hostile)
         : base(_position, _velocity, _angle, 0)
     {
-        AddComponent(new StatusHolder(this));
+        AddComponent(new Stealth(this));
+        AddComponent(new Temp(this));
+        AddComponent(new Statuses(this));
         AddComponent(new Sprite(this) { Texture = _texture });
         AddComponent(new Friendly(this) { Team = _team });
         AddComponent(new Health(this) { CurrentHealth = _health, MaxHealth = _health });
@@ -1181,10 +1183,10 @@ public class Enemy : Entity
             else
             {
                 var planet = Engine.SaveGame.CurrentMission.Planet;
-                var relativePosition = Position - planet.position;
+                var relativePosition = Position - planet.Position;
                 var dir = Vector2.Normalize(relativePosition);
-                Velocity -= Vector2.Normalize(dir * (relativePosition.Length() - planet.radius * 1.5f)) * Engine.DeltaSeconds * 4;
-                Vector2 targetVelocity = new Vector2(dir.Y, -dir.X) * planet.GetOrbitalVelocity((dir * planet.radius * 1.5f));
+                Velocity -= Vector2.Normalize(dir * (relativePosition.Length() - planet.ColliderRadius * 1.5f)) * Engine.DeltaSeconds * 4;
+                Vector2 targetVelocity = new Vector2(dir.Y, -dir.X) * planet.GetOrbitalVelocity((dir * planet.ColliderRadius * 1.5f));
                 Vector2 diffVelocity = targetVelocity - Velocity;
                 Velocity += diffVelocity * Engine.DeltaSeconds;
                 targetAngle = MathF.Atan2(Velocity.Y, Velocity.X) + MathF.PI / 2;
@@ -1224,7 +1226,7 @@ public class Enemy : Entity
                 }
                 else
                 {
-                    Engine.EntityManager.Add(new Stealth() { Position = this.Position, Velocity = GetNormalizedAcceleration() * 10, AngularVelocity = this.AngularVelocity });
+                    Engine.EntityManager.Add(new StealthHull() { Position = this.Position, Velocity = GetNormalizedAcceleration() * 10, AngularVelocity = this.AngularVelocity });
                 }
             }
             yield return 0;
@@ -1912,7 +1914,7 @@ public class Enemy : Entity
             {
                 if (Vector2.DistanceSquared(Position, randomPosition) < 1000)
                 {
-                    randomPosition = Util.ToUnitVector(Util.Random.NextSingle() * MathF.Tau) * (Engine.SaveGame.CurrentMission.Planet.radius) * (1 + Util.Random.NextSingle() / 2);
+                    randomPosition = Util.ToUnitVector(Util.Random.NextSingle() * MathF.Tau) * (Engine.SaveGame.CurrentMission.Planet.ColliderRadius) * (1 + Util.Random.NextSingle() / 2);
                 }
                 GoToPosition(randomPosition, 1);
             }
@@ -2291,9 +2293,9 @@ public class Enemy : Entity
                 }
                 else
                 {
-                    Vector2 relativePosition = Engine.SaveGame.CurrentMission.Planet.position - Position;
+                    Vector2 relativePosition = Engine.SaveGame.CurrentMission.Planet.Position - Position;
                     float distance = relativePosition.Length();
-                    Vector2 velocityOffset = relativePosition * (distance - Engine.SaveGame.CurrentMission.Planet.radius) / distance;
+                    Vector2 velocityOffset = relativePosition * (distance - Engine.SaveGame.CurrentMission.Planet.ColliderRadius) / distance;
                     Velocity += (velocityOffset + Vector2.Normalize(new Vector2(relativePosition.Y, -relativePosition.X)) * 25 * direction) * Engine.DeltaSeconds;
                 }
                 if (CD[2] <= 0)
@@ -2845,7 +2847,7 @@ public class Enemy : Entity
     }
     IEnumerable<int> Missile()
     {
-        int damage = GetComponent<Damager>().Damage;
+        int damage = GetComponent<Attack>().Damage;
         EnemyRange.particleVelocity = 10;
         float fuel = 45;
         float deathCooldown = 2;
@@ -2954,7 +2956,7 @@ public class Enemy : Entity
         Enemy enemy = new(position, velocity, angle, _health, Assets.Get(Sprites.Missile), _team) { SensingAbility = _sensingAbility };
         enemy.AddComponent(new Behaviour(enemy).AddBehaviour(enemy.Missile()).AddBehaviour(enemy.AvoidNearbyAllies()));
         enemy.AddComponent(new MissileTag(enemy));
-        enemy.AddComponent(new Damager(enemy) { Damage = _damage });
+        enemy.AddComponent(new Attack(enemy) { Damage = _damage });
         return enemy;
     }
     public static Enemy NewMissile(Vector2 position, Vector2 velocity, float angle, Team _team = Team.Hostile, int _sensingAbility = 1)
@@ -2962,7 +2964,7 @@ public class Enemy : Entity
         Enemy enemy = new(position, velocity, angle, 10, Assets.Get(Sprites.Missile), _team) { SensingAbility = _sensingAbility };
         enemy.AddComponent(new Behaviour(enemy).AddBehaviour(enemy.Missile()).AddBehaviour(enemy.AvoidNearbyAllies()));
         enemy.AddComponent(new MissileTag(enemy));
-        enemy.AddComponent(new Damager(enemy) { Damage = 8 });
+        enemy.AddComponent(new Attack(enemy) { Damage = 8 });
         return enemy;
     }
     IEnumerable<int> Shotgunner()
@@ -3781,7 +3783,7 @@ public class Enemy : Entity
     {
         Enemy enemy = new(position, velocity, angle, 1000, Assets.Get(Sprites.Mothership), Team.Friendly);
         enemy.AddComponent(new Behaviour(enemy).AddBehaviour(enemy.Mothership()));
-        enemy.AddComponent(new DockableComponent(enemy, UI.MothershipMenu));
+        enemy.AddComponent(new Dockable(enemy, UI.MothershipMenu));
         return enemy;
     }
     IEnumerable<int> Turret()
@@ -3928,7 +3930,7 @@ public class Enemy : Entity
     {
         Enemy enemy = new(position, velocity, angle, 300, Assets.Get(Sprites.Orbiter), Team.Friendly);
         enemy.AddComponent(new Behaviour(enemy).AddBehaviour(enemy.Orbiter()));
-        enemy.AddComponent(new DockableComponent(enemy, UI.MothershipMenu));
+        enemy.AddComponent(new Dockable(enemy, UI.MothershipMenu));
         enemy.AngularVelocity = -0.01f;
         return enemy;
     }
@@ -3963,7 +3965,7 @@ public class Enemy : Entity
     {
         Enemy enemy = new(position, Vector2.Zero, 0, 250, Assets.Get(Sprites.PickupDrone), Team.Friendly);
         enemy.AddComponent(new Behaviour(enemy).AddBehaviour(enemy.PickupDrone(_distance)));
-        enemy.AddComponent(new DockableComponent(enemy, UI.PickupDroneMenu));
+        enemy.AddComponent(new Dockable(enemy, UI.PickupDroneMenu));
         return enemy;
     }
     IEnumerable<int> DropPod(float _distance)
@@ -3986,7 +3988,7 @@ public class Enemy : Entity
     {
         Enemy enemy = new(position, Vector2.Zero, 0, 500, Assets.Get(Sprites.DropPod), Team.Friendly);
         enemy.AddComponent(new Behaviour(enemy).AddBehaviour(enemy.DropPod(_distance)));
-        enemy.AddComponent(new DockableComponent(enemy, null));
+        enemy.AddComponent(new Dockable(enemy, null));
         enemy.GetComponent<Collide>().OnCollide = delegate (int _damage, bool _override)
         {
             if (_damage > 0)
@@ -4000,7 +4002,7 @@ public class Enemy : Entity
     IEnumerable<int> Glider(float _distance)
     {
         bool isDocked = true;
-        float xSpeed = Planet.GetOrbitalVelocity(new Vector2(0, _distance), Engine.SaveGame.CurrentMission.Planet.position, Engine.SaveGame.CurrentMission.Planet.mass).X;
+        float xSpeed = Planet.GetOrbitalVelocity(new Vector2(0, _distance), Engine.SaveGame.CurrentMission.Planet.Position, Engine.SaveGame.CurrentMission.Planet.mass).X;
         while (true)
         {
             Velocity = new Vector2(xSpeed, xSpeed * 2 * (Position.Y - _distance) / Position.X);
@@ -4020,7 +4022,7 @@ public class Enemy : Entity
     {
         Enemy enemy = new(position, Vector2.Zero, 8, 500, Assets.Get(Sprites.PickupDrone), Team.Friendly);
         enemy.AddComponent(new Behaviour(enemy).AddBehaviour(enemy.Glider(_distance)));
-        enemy.AddComponent(new DockableComponent(enemy, null));
+        enemy.AddComponent(new Dockable(enemy, null));
         return enemy;
     }
     IEnumerable<int> Miner()
@@ -4105,7 +4107,7 @@ public class Enemy : Entity
             {
                 furnaceItem = UI.FurnaceSlot.daughterItem;
             }
-            var dockableComponent = (GetComponent<DockableComponent>());
+            var dockableComponent = (GetComponent<Dockable>());
             if (furnaceItem != null)
             {
                 furnaceCooldown -= Engine.DeltaSeconds;
@@ -4147,7 +4149,7 @@ public class Enemy : Entity
 
             EventHandler.UpdateFurnaceUI(15f * tierBonus - furnaceCooldown, 15f * tierBonus, furnaceItem);
             EventHandler.UpdateCraftingUI(12f * tierBonus - craftingCooldown, 12f * tierBonus, untilNextTier);
-            if (!dockableComponent.Entity.isExpired && (dockableComponent as DockableComponent).IsDocked)
+            if (!dockableComponent.Entity.isExpired && (dockableComponent as Dockable).IsDocked)
             {
                 if (tier > 1 && Input.NewMouseState.LeftButton == ButtonState.Pressed && CD[0] <= 0 && !UIManager.LockMouseInput)
                 {
@@ -4194,7 +4196,7 @@ public class Enemy : Entity
     {
         Enemy enemy = new(position, velocity, angle, 500, Assets.Get(Sprites.Mothership), _team);
         enemy.AddComponent(new Behaviour(enemy).AddBehaviour(enemy.MakeshiftMothership()).AddBehaviour(enemy.EnemyDeath()));
-        enemy.AddComponent(new DockableComponent(enemy, UI.MothershipMenu));
+        enemy.AddComponent(new Dockable(enemy, UI.MothershipMenu));
         enemy.AddComponent(new KeyTag(enemy));
         return enemy;
     }
@@ -4590,7 +4592,7 @@ public class Enemy : Entity
     {
         Enemy enemy = new(_position, _velocity, _angle, 200, Assets.Get(Sprites.MassRelayOne), Team.Friendly);
         enemy.AddComponent(new Behaviour(enemy).AddBehaviour(enemy.MassRelay()));
-        enemy.AddComponent(new DockableComponent(enemy, UI.MothershipMenu));
+        enemy.AddComponent(new Dockable(enemy, UI.MothershipMenu));
         return enemy;
     }
     IEnumerable<int> MeshNetworkNode()
@@ -4628,7 +4630,7 @@ public class Enemy : Entity
     {
         var enemy = new Enemy(_position, _velocity, _angle, 1000, Assets.Get(Sprites.Mothership), Team.Hostile);
         enemy.AddComponent(new Behaviour(enemy).AddBehaviour(enemy.MeshNetworkNode()));
-        enemy.AddComponent(new DockableComponent(enemy, UI.HackMenu, false));
+        enemy.AddComponent(new Dockable(enemy, UI.HackMenu, false));
         return enemy;
     }
     IEnumerable<int> EnemySpawner()
@@ -4805,14 +4807,14 @@ public class Enemy : Entity
     {
         var enemy = new Enemy(_position, _velocity, _angle, 1000, Assets.Get(Sprites.Mothership), Team.Friendly);
         enemy.AddComponent(new Behaviour(enemy).AddBehaviour(enemy.CrashedShip()));
-        enemy.AddComponent(new DockableComponent(enemy, UI.MothershipMenu, true));
+        enemy.AddComponent(new Dockable(enemy, UI.MothershipMenu, true));
         return enemy;
     }
     #endregion
     public static Enemy NewTrader(Vector2 _position, Vector2 _velocity, float _angle)
     {
         var enemy = new Enemy(_position, _velocity, _angle, 400, Assets.Get(Sprites.Trader), Team.Friendly);
-        enemy.AddComponent(new DockableComponent(enemy, UI.UpgradeMenu, false));
+        enemy.AddComponent(new Dockable(enemy, UI.UpgradeMenu, false));
         return enemy;
     }
     public static Enemy NewScrambled(Vector2 _position, Vector2 _velocity, float _angle) //Just for fun!

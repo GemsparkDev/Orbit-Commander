@@ -140,8 +140,8 @@ public class Mission
         }
         Vector2 futurePosition = _startPosition;
         Vector2 futureVelocity = _startVelocity;
-        Vector2[] futurePlanetPositions = [.. planets.Select(planet => planet.position)];
-        Vector2[] futurePlanetVelocities = [.. planets.Select(planet => planet.velocity)];
+        Vector2[] futurePlanetPositions = [.. planets.Select(planet => planet.Position)];
+        Vector2[] futurePlanetVelocities = [.. planets.Select(planet => planet.Velocity)];
         int currentPlanet = 0;
         bool hasChanged = false;
         var emitter = new ParticleEmitter(Assets.Get(Sprites.Dot), Engine.DeltaSeconds, _startPosition, 0, 0, 0, 5f, Color.Cyan, EmitterType.EmissionOverDistance);
@@ -159,7 +159,7 @@ public class Mission
             }
             for (int i = 0; i < planets.Length; i++)
             {
-                if (planets[i].radius + _radius > Vector2.Distance(futurePlanetPositions[i], futurePosition))
+                if (planets[i].ColliderRadius + _radius > Vector2.Distance(futurePlanetPositions[i], futurePosition))
                 {
                     exit = true;
                     break;
@@ -197,7 +197,7 @@ public class Mission
                     float sphereOfInfluence = (i == 0) ? 9999 : (Vector2.Distance(futurePlanetPositions[i], futurePlanetPositions[0]) * (float)Math.Pow(planets[i].mass / planets[0].mass, 2 / 5) / 3);
                     if (Vector2.Distance(futurePosition, futurePlanetPositions[i]) < sphereOfInfluence)
                     {
-                        particlePos += planets[i].position - futurePlanetPositions[i];
+                        particlePos += planets[i].Position - futurePlanetPositions[i];
                         if (currentPlanet != i)
                         {
                             currentPlanet = i;
@@ -354,7 +354,7 @@ public class Mission
     public static Func<Conditional> SendPickup(Func<GameState> _scene = null)
     {
         return delegate{
-        return new Conditional([new EntityCondition(new LaunchConstructor(Enemy.NewPickupDrone, new Vector2(-2000, 2000), Engine.SaveGame.CurrentMission.Planet.radius * 1.25f), [Condition.CustomIncomplete])], 
+        return new Conditional([new EntityCondition(new LaunchConstructor(Enemy.NewPickupDrone, new Vector2(-2000, 2000), Engine.SaveGame.CurrentMission.Planet.ColliderRadius * 1.25f), [Condition.CustomIncomplete])], 
         Win(_scene));};
     }
     public static Func<Conditional> Win(Func<GameState> _scene = null)

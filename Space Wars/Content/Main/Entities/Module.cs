@@ -150,7 +150,7 @@ public class Shield() : Module(Modules.Shield)
         base.OnUpdate();
     }
 }
-public class Stealth() : Module(Modules.Stealth)
+public class StealthHull() : Module(Modules.Stealth)
 {
     public override int OnCollide(int _damage)
     {
@@ -1173,13 +1173,13 @@ public class SummonGrapplingHook() : Module(Modules.GrapplingHook)
                 {
                     foreach (var planet in comp.GetPlanets)
                     {
-                        var planetDir = Vector2.Normalize(mousePos + planet.position);
-                        if (Vector2.DistanceSquared(mousePos, planet.position + planetDir * planet.radius) < 1000)
+                        var planetDir = Vector2.Normalize(mousePos + planet.Position);
+                        if (Vector2.DistanceSquared(mousePos, planet.Position + planetDir * planet.ColliderRadius) < 1000)
                         {
-                            hook.Parent = new Enemy(planet.position + planetDir * planet.radius, Vector2.Zero, 0, 1, null, Team);
+                            hook.Parent = new Enemy(planet.Position + planetDir * planet.ColliderRadius, Vector2.Zero, 0, 1, null, Team);
                             hasHooked = true;
                             p = planet;
-                            offset = planetDir * planet.radius;
+                            offset = planetDir * planet.ColliderRadius;
                             break;
                         }
                     }   
@@ -1226,7 +1226,7 @@ public class SummonGrapplingHook() : Module(Modules.GrapplingHook)
         }
         if (p != null)
         {
-            hook.Parent.Position = p.position + offset;
+            hook.Parent.Position = p.Position + offset;
         }
         UI.PlayerAbility.SetInterval(1 - Cooldown / MaxCooldown, 1);
         base.OnUpdate();
