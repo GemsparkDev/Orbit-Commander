@@ -12,7 +12,7 @@ public class Planet : Entity, ICollider
     public float mass;
     public override float ColliderRadius { get; }
     private Texture2D atmosphere;
-    public bool isImmovable;
+    public bool isImmovable = false;
     private bool hasRing;
     private bool isSun = false;
     public bool EasterEgg { get; set; } = false;
@@ -25,7 +25,7 @@ public class Planet : Entity, ICollider
         : base(_position, _velocity, 0, 0)
     {
         AddComponent(new Temp(this));
-        AddComponent(new Emitter(this) { ParticleEmitter = new ParticleEmitter(Assets.Get(Sprites.Dot), 10, Position, 0, 0, 0, 10f, _color * 0.5f, EmitterType.EmissionOverDistance) { particleFadeToColor = Color.Transparent } });
+        AddComponent(new StationaryEmitter(this) { ParticleEmitter = new ParticleEmitter(Assets.Get(Sprites.Dot), 10, Position, 0, 0, 0, 10f, _color * 0.5f, EmitterType.EmissionOverDistance) { particleFadeToColor = Color.Transparent } });
         mass = _mass;
         ColliderRadius = _radius * 50;
         isImmovable = _isImmovable;
@@ -232,11 +232,11 @@ public class Planet : Entity, ICollider
         if (EasterEgg)
         {
             Color = new Color((MathF.Cos(Engine.Time) + 1) / 2, (MathF.Cos(Engine.Time + MathF.PI * 2 / 3) + 1) / 2, (MathF.Cos(Engine.Time - MathF.PI * 2 / 3) + 1) / 2);
-            GetComponent<Emitter>().ParticleEmitter.particleColor = Color;
+            GetComponent<FollowEmitter>().ParticleEmitter.particleColor = Color;
         }
         base.Update();
     }
-    public new void Draw(SpriteBatch _spriteBatch)
+    public override void Draw(SpriteBatch _spriteBatch)
     {
         float increment = MathF.Tau / ColliderRadius;
         int count = (int)Math.Truncate(ColliderRadius);

@@ -21,6 +21,7 @@ internal class Planets(Planet[] _planets) : IMissionComponent, IObstacle
                 planet.EasterEgg = true;
             }
         }
+        //TODO: Figure out why entity update and draw calls don't work on planets
         foreach(var p in _planets)
         {
             Engine.EntityManager.Add(p);
@@ -50,6 +51,10 @@ internal class Planets(Planet[] _planets) : IMissionComponent, IObstacle
                 }
             }
             planet1.AttractObject(Engine.SaveGame.Player);
+        }
+        foreach(var planet1 in _planets)
+        {
+            planet1.Update();
         }
         //Prevents players from losing important items
         Entity[] importantEntites = Engine.EntityManager.GetEntity<KeyTag>();
@@ -83,6 +88,10 @@ internal class Planets(Planet[] _planets) : IMissionComponent, IObstacle
         {
             _spriteBatch.Draw(Assets.Get(Sprites.Arrow), Engine.SaveGame.Player.Position - Vector2.Normalize(Engine.SaveGame.Player.Position) * 25, null, Engine.SaveGame.Player.Color, -Util.ToAngle(Engine.SaveGame.Player.Position), Assets.DimsOf(Sprites.Arrow) / 2, 1, 0, 0.2f);
             _spriteBatch.DrawString(Assets.TextFont, "Return to planet.", Engine.Camera.Position - new Vector2(Assets.TextFont.MeasureString("Return to planet.").X/2, 225), Color.Crimson);
+        }
+        foreach(var p in _planets)
+        {
+            p.Draw(_spriteBatch);
         }
     }
     public bool Collide(Entity _entity)

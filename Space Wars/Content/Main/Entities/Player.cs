@@ -262,12 +262,6 @@ public class Player : Entity
             smokeParticles.isEmitterActive = true;
             smokeParticles.speedOfEmission = 25f - currentHealth/4;
         }
-        var planet = Engine.SaveGame.CurrentMission.Planet;
-        if (Position.Length() >= 40 * 50 + planet.ColliderRadius * 2)
-        {
-            Velocity *= Util.FIED(0.1f);
-            Velocity += Vector2.Normalize(-Position) * (Position.Length() - (40 * 50 + planet.ColliderRadius*2)) * Engine.DeltaSeconds / 30;
-        }
         base.Update();
         if (dockedEntity != null)
         {

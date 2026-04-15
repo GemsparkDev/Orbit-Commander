@@ -42,7 +42,7 @@ public class Enemy : Entity
         while (Engine.SaveGame.CurrentMission.IsColliding(rand, Vector2.Zero, ColliderRadius, false, out float _) == null);
         return rand;
     }
-    public ParticleEmitter EnemyRange { get{ return GetComponent<Emitter>().ParticleEmitter; } }
+    public ParticleEmitter EnemyRange { get{ return GetComponent<FollowEmitter>().ParticleEmitter; } }
     public Enemy(Vector2 _position, Vector2 _velocity, float _angle, int _health, Texture2D _texture, Team _team = Team.Hostile)
         : base(_position, _velocity, _angle, 0)
     {
@@ -86,7 +86,7 @@ public class Enemy : Entity
             }
             return false;
         }));
-        AddComponent(new Emitter(this) { ParticleEmitter = new(Assets.Get(Sprites.Dot), Position, 0, Color.Red * 0.75f) });
+        AddComponent(new FollowEmitter(this) { ParticleEmitter = new(Assets.Get(Sprites.Dot), Position, 0, Color.Red * 0.75f) });
         AddComponent(new Cooldown(this));
         UpdateColor();
     }

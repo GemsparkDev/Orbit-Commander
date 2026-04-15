@@ -140,7 +140,7 @@ public class Pickup : Entity, IData
                 SoundManager.PlaySound(Assets.Get(Sound.PulseFire), Position);
                 cooldown = 1.5f;
             }
-            GetComponent<Emitter>().ParticleEmitter.isEmitterActive = SaveGame.DebugMode;
+            GetComponent<FollowEmitter>().ParticleEmitter.isEmitterActive = SaveGame.DebugMode;
             yield return 0;
         }
     }
@@ -180,7 +180,7 @@ public class Pickup : Entity, IData
                 SoundManager.PlaySound(Assets.Get(Sound.LMGFire), Position);
                 cooldown = 0.75f;
             }
-            GetComponent<Emitter>().ParticleEmitter.isEmitterActive = SaveGame.DebugMode;
+            GetComponent<FollowEmitter>().ParticleEmitter.isEmitterActive = SaveGame.DebugMode;
             yield return 0;
         }
     }
@@ -188,7 +188,7 @@ public class Pickup : Entity, IData
     {
         var construct = new Pickup(ItemFactory.itemData[Items.Trap], _position, _velocity, _angularVelocity, ItemFactory.itemData[ Items.Trap].Integrity);
         construct.AddComponent(new Behaviour(construct).AddBehaviour(construct.Trap()));
-        construct.AddComponent(new Emitter(construct) { ParticleEmitter = new ParticleEmitter(Assets.Get(Sprites.Dot), _position, 300, new Color(255, 0, 0)) });
+        construct.AddComponent(new FollowEmitter(construct) { ParticleEmitter = new ParticleEmitter(Assets.Get(Sprites.Dot), _position, 300, new Color(255, 0, 0)) });
         construct.Angle = _angle;
         construct.StealthAbility = _stealth;
         construct.Team = _team;
@@ -209,7 +209,7 @@ public class Pickup : Entity, IData
     {
         var construct = new Pickup(ItemFactory.itemData[Items.Bomb], _position, _velocity, _angularVelocity, ItemFactory.itemData[Items.Bomb].Integrity);
         construct.AddComponent(new Behaviour(construct).AddBehaviour(construct.Bomb()));
-        construct.AddComponent(new Emitter(construct) { ParticleEmitter = new ParticleEmitter(Assets.Get(Sprites.Dot), _position, 100, new Color(255, 0, 0)) });
+        construct.AddComponent(new FollowEmitter(construct) { ParticleEmitter = new ParticleEmitter(Assets.Get(Sprites.Dot), _position, 100, new Color(255, 0, 0)) });
         construct.Angle = _angle;
         construct.StealthAbility = _stealth;
         construct.Team = Team.Dead; //Allows getting hit by any team
@@ -272,7 +272,7 @@ public class Pickup : Entity, IData
     {
         var construct = new Pickup(ItemFactory.itemData[Items.Furnace], _position, _velocity, _angularVelocity, ItemFactory.itemData[Items.Furnace].Integrity);
         construct.AddComponent(new Behaviour(construct).AddBehaviour(construct.Bomb()));
-        construct.AddComponent(new Emitter(construct) { ParticleEmitter = new ParticleEmitter(Assets.Get(Sprites.Dot), _position, 100, new Color(255, 0, 0)) });
+        construct.AddComponent(new FollowEmitter(construct) { ParticleEmitter = new ParticleEmitter(Assets.Get(Sprites.Dot), _position, 100, new Color(255, 0, 0)) });
         construct.Angle = _angle;
         construct.StealthAbility = _stealth;
         construct.Team = _team;

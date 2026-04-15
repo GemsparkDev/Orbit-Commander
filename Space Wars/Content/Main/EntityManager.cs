@@ -32,6 +32,17 @@ public class EntityManager
     public int MissionLength => missions.Count;
     private readonly List<Mission> missions =
     [
+        //Enemy planet test
+        new([],
+        new Conditional([new EntityCondition(new EntityConstructor(
+            delegate(Vector2 _position, Vector2 _velocity, float angle) 
+            {
+                var p = new Planet(_position, _velocity, 10000, 8, true, Color.Red, false);
+                p.AddComponent(new Health(p) { CurrentHealth = 100, MaxHealth = 100 });
+                return p;
+            }, Vector2.Zero, Vector2.Zero, 0), [Condition.Kill])], Mission.SendPickup()),
+        "Enemy Planet Test", "", new DropSpawner(1500)),
+
         new([
             new Planets([new Planet(Vector2.Zero, Vector2.Zero, 10000, 8, true, Color.Cyan, false), new Planet(new Vector2(1000, 0), Planet.GetOrbitalVelocity(new Vector2(1000, 0), Vector2.Zero, 10000), 250, 1.5f, false, Color.Cyan)]),
             new IntroCutscene(RestartCutscene),

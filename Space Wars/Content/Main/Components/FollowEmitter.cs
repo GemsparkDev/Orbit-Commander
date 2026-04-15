@@ -7,13 +7,22 @@ using Space_Wars.Content.Main.Particles;
 using Space_Wars.Content.Main.Entities;
 
 namespace Space_Wars.Content.Main.Components;
-internal class Emitter(Entity _entity) : Component(_entity)
+internal class FollowEmitter(Entity _entity) : Component(_entity)
 {
     public ParticleEmitter ParticleEmitter { get; set; }
     public override void Update()
     {
         ParticleEmitter.position = Entity.Position;
         ParticleEmitter.offsetVelocity = Entity.Velocity;
+        ParticleEmitter.Update();
+    }
+}
+internal class StationaryEmitter(Entity _entity) : Component(_entity)
+{
+    public ParticleEmitter ParticleEmitter { get; set; }
+    public override void Update()
+    {
+        ParticleEmitter.position = Entity.Position;
         ParticleEmitter.Update();
     }
 }
