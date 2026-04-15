@@ -6,6 +6,7 @@ Lagrange Commander is a game made using C# in monogame. It is a 2D top down wave
 0.8.1.0 - 4/14/2026
  - Fixed an issue where planets were not properly rendering or updating.
  - Added an enemy planet test mission.
+ - Moved some code from the Planets class to the Planet update function.
 0.8.0.9 - 4/13/2026
  - Moved entity rendering code into the Sprite and Transform components.
  - Added the Stealth and Temp components.

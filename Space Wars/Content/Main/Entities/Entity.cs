@@ -154,7 +154,7 @@ public class Entity
                 Velocity += normalDirection * MathF.Sqrt(MathF.Abs(dot)) * MathF.Sign(dot) / 8;
                 Angle = Util.ToAngle(Velocity - nearestEnemy.Velocity);
             }
-            if (nearestEnemy != null && Vector2.Distance(nearestEnemy.Position, Position) < GetComponent<Sprite>().ColliderRadius + nearestEnemy.GetComponent<Sprite>().ColliderRadius)
+            if (nearestEnemy != null && Vector2.Distance(nearestEnemy.Position, Position) < ColliderRadius + nearestEnemy.ColliderRadius)
             {
                 nearestEnemy.Collide(GetComponent<Attack>().Damage);
                 Collide(1);

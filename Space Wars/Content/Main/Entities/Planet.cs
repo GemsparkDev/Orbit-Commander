@@ -1,9 +1,10 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Space_Wars.Content.Main.Components;
+using Space_Wars.Content.Main.MissionComponents;
 using Space_Wars.Content.Main.Particles;
 using System;
 using System.Linq;
-using Space_Wars.Content.Main.Components;
 
 namespace Space_Wars.Content.Main.Entities;
 
@@ -225,7 +226,26 @@ public class Planet : Entity, ICollider
     }
     public override void Update()
     {
-        if(isImmovable)
+        foreach (var entity in Engine.EntityManager.Entities)
+        {
+            if(entity == this)
+            {
+                continue;
+            }
+            AttractObject(entity);
+        }
+        foreach (var particle in ParticleManager.Particles)
+        {
+            if (particle.experienceGravity)
+            {
+                AttractObject(particle);
+            }
+        }
+        if(Engine.SaveGame != null)
+        {
+            AttractObject(Engine.SaveGame.Player);
+        }
+        if (isImmovable)
         {
             Velocity = Vector2.Zero;
         }

@@ -29,33 +29,6 @@ internal class Planets(Planet[] _planets) : IMissionComponent, IObstacle
     }
     public void Update()
     {
-        foreach (var planet1 in _planets)
-        {
-            foreach (var planet2 in _planets)
-            {
-                if (planet1 == planet2)
-                {
-                    continue;
-                }
-                planet1.AttractObject(planet2);
-            }
-            foreach(var entity in Engine.EntityManager.Entities)
-            {
-                planet1.AttractObject(entity);
-            }
-            foreach(var particle in ParticleManager.Particles)
-            {
-                if(particle.experienceGravity)
-                {
-                    planet1.AttractObject(particle);
-                }
-            }
-            planet1.AttractObject(Engine.SaveGame.Player);
-        }
-        foreach(var planet1 in _planets)
-        {
-            planet1.Update();
-        }
         //Prevents players from losing important items
         Entity[] importantEntites = Engine.EntityManager.GetEntity<KeyTag>();
         var planet = _planets[0];

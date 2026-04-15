@@ -39,6 +39,8 @@ public class EntityManager
             {
                 var p = new Planet(_position, _velocity, 10000, 8, true, Color.Red, false);
                 p.AddComponent(new Health(p) { CurrentHealth = 100, MaxHealth = 100 });
+                p.AddComponent(new Friendly(p) { Team = Team.Hostile });
+                p.AddComponent(new Stealth(p) { SensingAbility = 1, StealthAbility = 1 });
                 return p;
             }, Vector2.Zero, Vector2.Zero, 0), [Condition.Kill])], Mission.SendPickup()),
         "Enemy Planet Test", "", new DropSpawner(1500)),
