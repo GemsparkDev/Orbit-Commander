@@ -9,17 +9,13 @@ using System.Diagnostics;
 using Space_Wars.Content.Main.Story;
 using Space_Wars.Content.Main.Components;
 using Space_Wars.Content.Main.MissionComponents;
+using System.Security.Cryptography.X509Certificates;
 //using System.Numerics;
 
 namespace Space_Wars.Content.Main;
 public class Mission
 {
-    public string Name { get; }
-    public string Description { get; }
-    private int playerProgression = 3;
-    public int PlayerProgression { get { if (SaveGame.DebugMode) { return 99; } else { return playerProgression; } } set { playerProgression = value; } }
-    public bool relaunchable = false;
-    public int Wave {get; set;} = 0;
+    public int Wave { get; set; } = 0;
     //TODO: Add behavior for when there is no planet
     public Planet Planet { get { return GetComponent<Planets>().GetPlanets[0]; }}
     private Sound music;
@@ -48,8 +44,7 @@ public class Mission
         }
         return null;
     }
-    public Mission(List<IMissionComponent> _components, Conditional _objective, string _name, 
-    string _description, IPlayerSpawner _spawner, int _playerProgression = 3, Sound _music = Sound.main)
+    public Mission(List<IMissionComponent> _components, Conditional _objective, IPlayerSpawner _spawner, int _playerProgression = 3, Sound _music = Sound.main)
     {
         components = _components;
         foreach(var comp in _components)
@@ -59,18 +54,14 @@ public class Mission
                 obstacles.Add(comp as IObstacle);
             }
         }
-        Name = _name;
-        Description = _description;
         spawner = _spawner;
         objective = _objective;
-        playerProgression = _playerProgression;
         music = _music;
     }
     public void Initialize()
     {
         CurrentGameState.SwitchState(new PlayingGame());
         Engine.SaveGame.Player.dockedEntity = null;
-        Engine.SaveGame.Player.Progression = PlayerProgression;
         foreach(var comp in components)
         {
             comp.Initialize();
@@ -89,20 +80,40 @@ public class Mission
         {
             objective = objective.Update();    
         }
+        //Prevents players from losing important items
+        Entity[] importantEntites = Engine.EntityManager.GetEntity<KeyTag>();
+        float r = EntityManager.missions[Engine.SaveGame.CurrentMissionIndex].data.EdgeRadius;
+        foreach(var entity in importantEntites)
+        {
+            if (entity.Position.Length() >= r)
+            {
+                entity.Velocity *= 0.8f;
+                entity.Velocity += Vector2.Normalize(-entity.Position) * Engine.DeltaSeconds * (entity.Position.Length() - r);
+            }   
+        }
+        if (Engine.SaveGame.Player.Position.Length() >= r)
+        {
+            Engine.SaveGame.Player.Velocity *= 0.8f;
+            Engine.SaveGame.Player.Velocity += Vector2.Normalize(-Engine.SaveGame.Player.Position) * Engine.DeltaSeconds * (Engine.SaveGame.Player.Position.Length() - r);
+        }
     }
     public ICollider IsColliding(Vector2 _position, Vector2 _velocity, float _colliderRadius, bool _override, out float end)
     {
         end = _velocity.Length();
         ICollider returnObstacle = null;
-        foreach(var obstacle in obstacles)
+        foreach(var entity in Engine.EntityManager.Entities)
         {
-            var collider = obstacle.IsColliding(_position, _velocity, _colliderRadius, _override, out float _end);
-            if(collider != null)
+            if(entity is not ICollider)
+            {
+                continue;
+            }
+            var collided = (entity as ICollider).IsColliding(_position, _velocity, _colliderRadius, _override, out float _end);
+            if(collided)
             {
                 if(_end < end)
                 {
                     end = _end;
-                    returnObstacle = collider;
+                    returnObstacle = entity as ICollider;
                 }
             }
         }
@@ -111,10 +122,12 @@ public class Mission
     public float GetAtmospherePressure(Entity _entity)
     {
         float sum = 0;
-        var comp = GetComponent<Planets>();
-        if(comp != null)
+        foreach(var entity in Engine.EntityManager.Entities)
         {
-            sum = comp.GetAtmospherePressure(_entity);
+            if(entity is Planet)
+            {
+                sum += (entity as Planet).GetAtmosphereDensity(_entity);
+            }
         }
         return sum;
     }
@@ -238,15 +251,6 @@ public class Mission
         }
         return Vector2.Zero;
     }
-    public Mission Clone()
-    {
-        List<IMissionComponent> comps = [];
-        foreach(var component in components)
-        {
-            comps.Add(component.Clone());
-        }
-        return new Mission(comps, objective.Clone(), Name, Description, spawner, PlayerProgression, music);
-    }
     public Vector2 NewSpawnLocation()
     {
         Vector2 spawnLocation;
@@ -354,7 +358,7 @@ public class Mission
     public static Func<Conditional> SendPickup(Func<GameState> _scene = null)
     {
         return delegate{
-        return new Conditional([new EntityCondition(new LaunchConstructor(Enemy.NewPickupDrone, new Vector2(-2000, 2000), Engine.SaveGame.CurrentMission.Planet.ColliderRadius * 1.25f), [Condition.CustomIncomplete])], 
+        return new Conditional([new Custom(Enemy.NewPickupDrone(new Vector2(-2000, 2000), Engine.SaveGame.CurrentMission.Planet.ColliderRadius * 1.25f))], 
         Win(_scene));};
     }
     public static Func<Conditional> Win(Func<GameState> _scene = null)
@@ -370,116 +374,71 @@ public class Mission
         };
     }
 }
-public class EntityConstructor(Func<Vector2, Vector2, float, Entity> _constructor, Vector2 _position, Vector2 _velocity, float _angle) : IConstructor
+public class MissionData(string _name, string _description, float _distance, 
+    int[] _prerequisites, int _system, float _radius, int _playerProgression = 3, bool _isRelaunchable = false)
 {
-    public Entity Construct()
-    {
-        return _constructor(_position, _velocity, _angle);
-    }
+    public string Name => _name;
+    public string Description => _description;
+    public float Distance => _distance;
+    public int[] Prerequisites => _prerequisites;
+    public int System => _system;
+    public int PlayerProgression { get { if (SaveGame.DebugMode) { return 99; } else { return _playerProgression; } } }
+    public bool IsRelaunchable => _isRelaunchable;
+    public float EdgeRadius => _radius;
 }
-public class AdvancedConstructor(Func<Vector2, Vector2, float, Team, Entity> _constructor, Vector2 _position, Vector2 _velocity, float _angle, Team _team) : IConstructor
-{
-    public Entity Construct()
-    {
-        return _constructor(_position, _velocity, _angle, _team);
-    }
-}
-public class PickupConstructor(Func<Vector2, Vector2, float, Entity> _constructor, Vector2 _position, Vector2 _velocity, float _angularVelocity) : IConstructor
-{
-    public Entity Construct()
-    {
-        return _constructor(_position, _velocity, _angularVelocity);
-    }
-}
-public class LaunchConstructor(Func<Vector2, float, Entity> _constructor, Vector2 _position, float _distance) : IConstructor
-{
-    public Entity Construct()
-    {
-        return _constructor(_position, _distance);
-    }
-}
-public interface IConstructor : IMissionComponent
-{
-    public Entity Construct();
-    void IMissionComponent.Initialize()
-    {
-        Engine.EntityManager.Add(Construct());
-    }
-    void IMissionComponent.Update()
-    {
-        
-    }
-    void IMissionComponent.Draw(SpriteBatch _spriteBatch)
-    {
-        
-    }
-    //All constructors should be constant methods
-    IMissionComponent IMissionComponent.Clone()
-    {
-        return this;
-    }
-}
-public interface ICondition
-{
+public interface ICondition 
+{ 
     public bool IsComplete();
-    public void Initialize();
-    public ICondition Clone();
+    public virtual void Initialize() { } 
 }
-public class EntityCondition(IConstructor _constructor, Condition[] _conditions) : ICondition
+public class Kill(Entity[] _entity) : ICondition
 {
-    private Entity daughterEntity = null;
     public bool IsComplete()
     {
-        foreach (var condition in _conditions)
+        bool isComplete = true;
+        foreach(var entity in _entity)
         {
-            switch (condition)
-            {
-                case Condition.Protect:
-                    if (daughterEntity.isExpired)
-                    {
-                        Engine.SaveGame.CurrentMission.FailMission();
-                        return false;
-                    }
-                    break;
-                case Condition.Kill:
-                    if (!daughterEntity.isExpired)
-                    {
-                        return false;
-                    }
-                break;
-                case Condition.CustomIncomplete:
-                    return false;
-            }
+            isComplete &= entity.isExpired;   
         }
-        return true;
+        return isComplete;
     }
-    public void Initialize()
+}
+public class Protect(Entity[] _entity) : ICondition
+{
+    public bool IsComplete()
     {
-        daughterEntity = _constructor.Construct();
-        Engine.EntityManager.Add(daughterEntity);
-    }
-    public ICondition Clone()
-    {
-        return new EntityCondition(_constructor, (Condition[])_conditions.Clone());
-    }
-    public void CustomCompleteRule(Entity _entity)
-    {
-        if (daughterEntity == _entity && _conditions.Contains(Condition.CustomIncomplete))
+        bool isComplete = true;
+        foreach(var entity in _entity)
         {
-            _conditions[Array.IndexOf(_conditions, Condition.CustomIncomplete)] = Condition.CustomComplete;
+            isComplete &= !entity.isExpired;   
+        }
+        if(!isComplete)
+        {
+            Engine.SaveGame.CurrentMission.FailMission();
+        }
+        return isComplete;
+    }
+}
+public class Custom(Entity _entity) : ICondition
+{
+    private bool isDone;
+    public bool IsComplete()
+    {
+        return isDone;
+    }
+    public void CustomCompleteRule(Entity _targetEntity)
+    {
+        if(_entity == _targetEntity)
+        {
+            isDone = true;
         }
     }
 }
 public class WaveGoal(int _targetWave) : ICondition
 {
-    public void Initialize() { }
     public bool IsComplete() 
     {
         return Engine.SaveGame.CurrentMission.Wave > _targetWave;
-    }
-    public ICondition Clone()
-    {
-        return new WaveGoal(_targetWave);
     }
 }
 public class DialogueCondition(Dialogue[] _dialogues) : ICondition
@@ -496,9 +455,5 @@ public class DialogueCondition(Dialogue[] _dialogues) : ICondition
     public bool IsComplete()
     {
         return isComplete;
-    }
-    public ICondition Clone()
-    {
-        return new DialogueCondition(_dialogues);
     }
 }

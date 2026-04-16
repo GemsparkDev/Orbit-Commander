@@ -9,10 +9,7 @@ public class Conditional(ICondition[] _conditions, Func<Conditional> _result)
     private float restartTimer = -1;
     public void Initialize()
     {
-        foreach(var condition in _conditions)
-        {
-            condition.Initialize();
-        }
+        
     }
     public Conditional Update()
     {
@@ -41,19 +38,10 @@ public class Conditional(ICondition[] _conditions, Func<Conditional> _result)
     {
         foreach (var objective in _conditions)
         {
-            if (objective is EntityCondition)
+            if (objective is Custom)
             {
-                (objective as EntityCondition).CustomCompleteRule(_target);
+                (objective as Custom).CustomCompleteRule(_target);
             }
         }
-    }
-    public Conditional Clone()
-    {
-        List<ICondition> conds = [];
-        foreach(var condition in _conditions)
-        {
-            conds.Add(condition.Clone());
-        }
-        return new Conditional(conds.ToArray(), _result);
     }
 }

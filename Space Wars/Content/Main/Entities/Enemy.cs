@@ -4439,7 +4439,7 @@ public class Enemy : Entity
         while (true)
         {
             Velocity = Vector2.Zero;
-            if (Engine.SaveGame.CurrentMission.Name == "???")
+            if (EntityManager.missions[Engine.SaveGame.CurrentMissionIndex].data.Name == "???")
             {
                 if (CD[0] <= 0)
                 {

@@ -135,6 +135,8 @@ public class Engine : Game
         EventHandler.UpdateModulesStatus();
         SoundManager.PlayGlobalSound(Assets.Get(Sound.Interact));
         ScreenShakeFactor = 0;
+        SaveGame.Player.Progression = EntityManager.missions[SaveGame.CurrentMissionIndex]
+            .data.PlayerProgression;
         SaveGame.CurrentMission.Initialize();
     }
 

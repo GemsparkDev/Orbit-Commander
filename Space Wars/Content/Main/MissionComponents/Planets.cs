@@ -29,31 +29,7 @@ internal class Planets(Planet[] _planets) : IMissionComponent, IObstacle
     }
     public void Update()
     {
-        //Prevents players from losing important items
-        Entity[] importantEntites = Engine.EntityManager.GetEntity<KeyTag>();
-        var planet = _planets[0];
-        foreach(var entity in importantEntites)
-        {
-            if (entity.Position.Length() >= 40 * 50 + planet.ColliderRadius)
-            {
-                entity.Velocity *= 0.8f;
-                entity.Velocity += Vector2.Normalize(-entity.Position) * Engine.DeltaSeconds * (entity.Position.Length() - (40 * 50 + planet.ColliderRadius));
-            }   
-        }
-        if (Engine.SaveGame.Player.Position.Length() >= 40 * 50 + planet.ColliderRadius)
-        {
-            Engine.SaveGame.Player.Velocity *= 0.8f;
-            Engine.SaveGame.Player.Velocity += Vector2.Normalize(-Engine.SaveGame.Player.Position) * Engine.DeltaSeconds * (Engine.SaveGame.Player.Position.Length() - (40 * 50 + planet.ColliderRadius));
-        }  
-    }
-    public float GetAtmospherePressure(Entity _entity)
-    {
-        float sum = 0;
-        foreach (var planet in _planets)
-        {
-            sum += planet.GetAtmosphereDensity(_entity);
-        }
-        return sum;
+
     }
     public void Draw(SpriteBatch _spriteBatch)
     {

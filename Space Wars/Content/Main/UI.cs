@@ -309,7 +309,7 @@ public static class UI
         NextMission.AddBehaviour(delegate() { Engine.SaveGame.NextMission(); }); //Doing so causes exception due to null savegame
         SelectMission.AddBehaviour(delegate () 
         {
-            if ((Engine.SaveGame.CurrentMission.relaunchable || !Engine.SaveGame.CurrentMissionCompleted) && EventHandler.SyncModules()) 
+            if ((EntityManager.missions[Engine.SaveGame.CurrentMissionIndex].data.IsRelaunchable || !Engine.SaveGame.CurrentMissionCompleted) && EventHandler.SyncModules()) 
             { 
                 Startgame(); 
             } 

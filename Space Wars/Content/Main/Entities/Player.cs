@@ -425,7 +425,7 @@ public class Player : Entity
                         {
                             constructs.Add(("Req. 3 scrap, deployable garage. Use metal to upgrade.", Assets.Get(Sprites.Mothership)));
                         }
-                        if (Engine.SaveGame.CurrentMission.Name == "???")
+                        if (EntityManager.missions[Engine.SaveGame.CurrentMissionIndex].data.Name == "???")
                         {
                             constructs.Add(("1 scrap to construct. Be ready.", Assets.Get(Sprites.QuantumResonator)));
                         }
@@ -473,7 +473,7 @@ public class Player : Entity
                         {
                             types.Add("Mothership");
                         }
-                        if (Engine.SaveGame.CurrentMission.Name == "???")
+                        if (EntityManager.missions[Engine.SaveGame.CurrentMissionIndex].data.Name == "???")
                         {
                             types.Add("Resonator");
                         }

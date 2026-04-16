@@ -7,10 +7,11 @@ using System.Diagnostics;
 using Space_Wars.Content.Main.Particles;
 using System.Collections.Generic;
 using System.Linq;
+using Space_Wars.Content.Main.MissionComponents;
 
 namespace Space_Wars.Content.Main.Entities;
 
-public class Entity
+public class Entity : IMissionComponent
 {
     //TODO: Make sure to add null checks to all these!
     private Transform transform; //All game entities have transforms
@@ -62,6 +63,14 @@ public class Entity
     {
         Color = _color;
     }
+    public void Initialize()
+    {
+        Engine.EntityManager.Add(this);
+    }
+    public IMissionComponent Clone()
+    {
+        throw new NotImplementedException();
+    }
     public bool isExpired = false;
     private List<Component> components = [];
     public Entity(Vector2 _position, Vector2 _velocity, float _angle, float _angularVelocity)
@@ -89,9 +98,10 @@ public class Entity
         }
         return null;
     }
-    public void AddComponent(Component component)
+    public Entity AddComponent(Component component)
     {
         components.Add(component);
+        return this;
     }
     public bool Collide(int _damage, bool _ignoreImmunity = false)
     {
