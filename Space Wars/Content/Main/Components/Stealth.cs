@@ -8,8 +8,19 @@ using Space_Wars.Content.Main.Entities;
 namespace Space_Wars.Content.Main.Components;
 public class Stealth(Entity _entity) : Component(_entity)
 {
-    public int StealthAbility { get; set; }
-    public int SensingAbility { get; set; }
+    private int stealthAbility = 0;
+    public int TrueStealth => stealthAbility;
+    public int StealthAbility
+    {
+        get => (stealthAbility + (((RevealDuration > 0 || Entity.Health <= 0) ? -5 : 0) + Entity.StatusHolder.StealthChange));
+        set => stealthAbility = value;
+    }
+    private int sensingAbility = 0;
+    public int SensingAbility
+    {
+        get => (sensingAbility + Entity.StatusHolder.SensingChange);
+        set => sensingAbility = value;
+    }
     public float RevealDuration { get; set; } = 0;
     public override void Update()
     {

@@ -29,7 +29,6 @@ public class EntityManager
     public static float StealthRange { get; private set; } = 750;
     //Threshold of detection for enemies
     public static float StealthThreshold { get; private set; } = 0.75f;
-    public int MissionLength => missions.Count;
     public List<(float distance, List<int> prerequisites, int system)> Systems { get; } =
     [
          (170, [6], 1), (145, [7], 1), (130, [8], 1), (150, [9], 1),
@@ -257,10 +256,6 @@ public class EntityManager
     public Mission GetMission(int _index)
     {
         return missions[_index].instance();
-    }
-    public int Missions()
-    {
-        return missions.Count;
     }
     public void UpdateColor()
     {

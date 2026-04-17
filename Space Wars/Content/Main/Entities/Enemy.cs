@@ -13,25 +13,12 @@ using UILib.Content.Main;
 using Space_Wars.Content.Main.MissionComponents;
 
 namespace Space_Wars.Content.Main.Entities;
-
 public class Enemy : Entity
 {
     private float targetAngle = 0;
-    private int prevHealth;
-    private float healthCD = 0;
     private float mineTime = 0;
     private SoundEffect hitSound;
     public bool ChildEnemy { get; private set; }
-    public override int StealthAbility
-    {
-        get => (base.StealthAbility + (((RevealDuration > 0 || Health <= 0) ? -5 : 0) + StatusHolder.StealthChange));
-        protected set => base.StealthAbility = value;
-    }
-    public override int SensingAbility
-    {
-        get => (base.SensingAbility + StatusHolder.SensingChange);
-        protected set => base.SensingAbility = value;
-    }
     public Vector2 NewGoToLocation()
     {
         Vector2 rand;
@@ -42,7 +29,6 @@ public class Enemy : Entity
         while (Engine.SaveGame.CurrentMission.IsColliding(rand, Vector2.Zero, ColliderRadius, false, out float _) == null);
         return rand;
     }
-    public ParticleEmitter EnemyRange { get{ return GetComponent<FollowEmitter>().ParticleEmitter; } }
     public Enemy(Vector2 _position, Vector2 _velocity, float _angle, int _health, Texture2D _texture, Team _team = Team.Hostile)
         : base(_position, _velocity, _angle, 0)
     {
@@ -52,14 +38,12 @@ public class Enemy : Entity
         AddComponent(new Sprite(this) { Texture = _texture });
         AddComponent(new Friendly(this) { Team = _team });
         AddComponent(new Health(this) { CurrentHealth = _health, MaxHealth = _health });
-        prevHealth = _health;
         hitSound = Assets.Get(Sound.Hit);
         AddComponent(new Collide(this, delegate(int damage, bool _ignoreImmunity)
         {
             damage = StatusHolder.ModifyDamage(damage);
             if (damage > 0)
             {
-                healthCD = 0.5f;
                 if(Health > 0)
                 {
                     Flash(Color.White);
@@ -110,22 +94,6 @@ public class Enemy : Entity
             Engine.WriteLine("Velocity was NaN");
         }
         base.Update();
-        if(healthCD <= 0)
-        {
-            if(prevHealth > Health)
-            {
-                prevHealth -= 1 + MaxHealth / 20;
-                healthCD = 0.05f;
-            }
-            else
-            {
-                prevHealth = Health;
-            }
-        }
-        else
-        {
-            healthCD -= Engine.DeltaSeconds;
-        }
         float d = 1f;
         if(Health <= 0)
         {
@@ -193,23 +161,6 @@ public class Enemy : Entity
     }
     public override void Draw(SpriteBatch _spriteBatch)
     {
-        if (!ChildEnemy)
-        {
-            float val = (Engine.SaveGame.Player.SensingAbility > base.StealthAbility ? 1 : 0);
-            if (Engine.SaveGame.Player.SensingAbility <= base.StealthAbility)
-            {
-                val = Math.Clamp(val + RevealDuration, 0, 1);
-            }
-            if (GetComponent<Health>() != null && Health > 0)
-            {
-                //Health bar
-                Vector2 barPosition = Position + new Vector2(-Texture.Width * 2, Texture.Height) / 2;
-                Rectangle sourceRectangle = new(0, 0, Texture.Width * 2, 2);
-                _spriteBatch.Draw(Engine.Line, barPosition, sourceRectangle, new Color(0, 50, 25) * val);
-                _spriteBatch.Draw(Engine.Line, barPosition, new Rectangle(sourceRectangle.Location, new Point((int)(sourceRectangle.Width * (float)(prevHealth) / (float)(MaxHealth)), sourceRectangle.Height)), Color.White * val);
-                _spriteBatch.Draw(Engine.Line, barPosition, new Rectangle(sourceRectangle.Location, new Point((int)(sourceRectangle.Width * (float)(Health) / (float)(MaxHealth)), sourceRectangle.Height)), Color.Green * val);
-            }
-        }
         Vector2 halfSize = Engine.BackBuffer / 2;
         if (!ChildEnemy && IsFriendly(Engine.SaveGame.Player) &&
            (Position.X - Engine.Camera.Position.X + Size.X / 2 < -halfSize.X || Position.Y - Engine.Camera.Position.Y + Size.Y / 2 < -halfSize.Y

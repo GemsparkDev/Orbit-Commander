@@ -16,8 +16,6 @@ public class Pickup : Entity, IData
     protected ItemData itemData;
     public Window Tooltip { get; } = new Window(Vector2.Zero, Assets.Get(Sprites.WideButton));
     public String Name => itemData.Name;
-
-    public float InvincibilityCooldown { get { return GetComponent<Collide>().InvincibilityCooldown; } set { GetComponent<Collide>().InvincibilityCooldown = value; } }
     public int ID => itemData.ID;
     private Decal textbox;
     public Pickup(ItemData _itemData, Vector2 _position, Vector2 _velocity, float _angularVelocity, int _health = 3)

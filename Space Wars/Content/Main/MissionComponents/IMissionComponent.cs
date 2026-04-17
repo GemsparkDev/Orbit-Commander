@@ -11,6 +11,5 @@ public interface IMissionComponent
     public void Initialize();
     public void Update();
     public void Draw(SpriteBatch _spriteBatch);
-    public IMissionComponent Clone();
     
 }

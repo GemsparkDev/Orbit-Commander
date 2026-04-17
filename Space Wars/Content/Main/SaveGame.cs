@@ -27,7 +27,7 @@ public class SaveGame
     }
     public int CurrentMissionIndex { get; set; } = 0;
     private bool giveWeapon = true;
-    public bool[] CompletedMissions { get; } = new bool[Engine.EntityManager.MissionLength];
+    public bool[] CompletedMissions { get; } = new bool[EntityManager.missions.Count];
     public Player Player { get; } = new Player(Vector2.Zero, Vector2.Zero, 0);
     public Pickup[] Inventory { get; } = new Pickup[4];
     public Pickup[] MissionSelectInventory { get; } = new Pickup[4];
@@ -153,18 +153,18 @@ public class SaveGame
     }
     public void SetMission(int _count)
     {
-        CurrentMissionIndex = Math.Clamp(_count, 0, Engine.EntityManager.Missions() - 1);
+        CurrentMissionIndex = Math.Clamp(_count, 0, EntityManager.missions.Count - 1);
         currentMission = Engine.EntityManager.GetMission(CurrentMissionIndex);
         EventHandler.UpdateMissionText();
     }
     public void NextMission()
     {
-        CurrentMissionIndex = Math.Clamp(CurrentMissionIndex + 1, 0, Engine.EntityManager.Missions() - 1);
+        CurrentMissionIndex = Math.Clamp(CurrentMissionIndex + 1, 0, EntityManager.missions.Count - 1);
         EventHandler.UpdateMissionText();
     }
     public void PrevMission()
     {
-        CurrentMissionIndex = Math.Clamp(CurrentMissionIndex - 1, 0, Engine.EntityManager.Missions() - 1);
+        CurrentMissionIndex = Math.Clamp(CurrentMissionIndex - 1, 0, EntityManager.missions.Count - 1);
         EventHandler.UpdateMissionText();
     }
     public void CompleteMission(int _duration)

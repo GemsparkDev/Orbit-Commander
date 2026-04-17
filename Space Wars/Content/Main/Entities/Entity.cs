@@ -30,6 +30,8 @@ public class Entity : IMissionComponent
     public Team Team { get { return GetComponent<Friendly>().Team; } set { GetComponent<Friendly>().Team = value;} }
     public virtual int SensingAbility { get { return GetComponent<Stealth>().SensingAbility; } protected set { GetComponent<Stealth>().SensingAbility = value; } }
     public virtual int StealthAbility { get { return GetComponent<Stealth>().StealthAbility; } protected set { GetComponent<Stealth>().StealthAbility = value; } }
+    public float InvincibilityCooldown { get { return GetComponent<Collide>().InvincibilityCooldown; } set { GetComponent<Collide>().InvincibilityCooldown = value; } }
+    public ParticleEmitter EnemyRange => GetComponent<FollowEmitter>().ParticleEmitter;
     public Statuses StatusHolder => GetComponent<Statuses>();
     public Vector2 Size => GetComponent<Sprite>().Size;
     public virtual float ColliderRadius => GetComponent<Sprite>().ColliderRadius;
@@ -41,19 +43,11 @@ public class Entity : IMissionComponent
     }
     public void ApplyWork(float _q)
     {
-        var temp = GetComponent<Temp>();
-        if(temp != null)
-        {
-            temp.ApplyWork(_q);
-        }
+        GetComponent<Temp>()?.ApplyWork(_q);
     }
     public void ConductHeat(float _temp, float _rate)
     {
-        var temp = GetComponent<Temp>();
-        if(temp != null)
-        {
-            temp.ConductHeat(_temp, _rate);
-        }
+        GetComponent<Temp>()?.ConductHeat(_temp, _rate);
     }
     public virtual void UpdateColor()
     {
@@ -66,10 +60,6 @@ public class Entity : IMissionComponent
     public void Initialize()
     {
         Engine.EntityManager.Add(this);
-    }
-    public IMissionComponent Clone()
-    {
-        throw new NotImplementedException();
     }
     public bool isExpired = false;
     private List<Component> components = [];
@@ -243,7 +233,7 @@ public class Entity : IMissionComponent
         var activationRadius = new ParticleEmitter(Assets.Get(Sprites.Dot), Position, explosionRadius / 2, Color.Red * 0.25f);
         float time = 0;
         Color c = SaveGame.ColorScheme.TeamColors[Team];
-        Vector3 col = new Vector3(c.R, c.G, c.B);
+        var col = new Vector3(c.R, c.G, c.B);
         while(true)
         {
             time += Engine.DeltaSeconds;
