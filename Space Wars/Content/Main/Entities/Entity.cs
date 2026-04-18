@@ -68,6 +68,8 @@ public class Entity : IMissionComponent
         transform = new Transform(this) { Position = _position, Velocity = _velocity, Angle = _angle, AngularVelocity = _angularVelocity };
         AddComponent(transform);
     }
+    //Prevents implementing mission component update
+    void IMissionComponent.Update() { }
     public virtual void Update()
     {
         foreach (var comp in components)

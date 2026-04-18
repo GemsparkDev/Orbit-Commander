@@ -141,11 +141,7 @@ public class Mission
     }
     public void CalculateTrajectory(Vector2 _startPosition, Vector2 _startVelocity, float _radius)
     {
-        Planet[] planets = [];
-        if(GetComponent<Planets>() != null)
-        {
-            planets = GetComponent<Planets>().GetPlanets;
-        }
+        Entity[] planets = Engine.EntityManager.Entities.Where(x => x is Planet).ToArray();
         ICollider[] Colliders = [];
         if (GetComponent<Colliders>() != null)
         {
@@ -172,7 +168,8 @@ public class Mission
             }
             for (int i = 0; i < planets.Length; i++)
             {
-                if (planets[i].ColliderRadius + _radius > Vector2.Distance(futurePlanetPositions[i], futurePosition))
+                var planet = planets[i] as Planet;
+                if (planet.ColliderRadius + _radius > Vector2.Distance(futurePlanetPositions[i], futurePosition))
                 {
                     exit = true;
                     break;
@@ -188,13 +185,13 @@ public class Mission
                     {
                         relativePlanetPosition = Vector2.One;
                     }
-                    if (!planets[i].isImmovable)
+                    if (!planet.isImmovable)
                     {
-                        futurePlanetVelocities[i] += Vector2.Normalize(-relativePlanetPosition) * planets[j].mass / relativePlanetPosition.LengthSquared();
+                        futurePlanetVelocities[i] += Vector2.Normalize(-relativePlanetPosition) * (planets[j] as Planet).mass / relativePlanetPosition.LengthSquared();
                     }
                 }
                 Vector2 relativePosition = futurePosition - futurePlanetPositions[i];
-                futureVelocity += Vector2.Normalize(-relativePosition) * planets[i].mass / relativePosition.LengthSquared();
+                futureVelocity += Vector2.Normalize(-relativePosition) * planet.mass / relativePosition.LengthSquared();
             }
             for (int i = 0; i < planets.Length; i++)
             {
@@ -207,7 +204,8 @@ public class Mission
                 hasChanged = false;
                 for (int i = futurePlanetPositions.Length - 1; i >= 0; i--)
                 {
-                    float sphereOfInfluence = (i == 0) ? 9999 : (Vector2.Distance(futurePlanetPositions[i], futurePlanetPositions[0]) * (float)Math.Pow(planets[i].mass / planets[0].mass, 2 / 5) / 3);
+                    float sphereOfInfluence = (i == 0) ? 9999 : (Vector2.Distance(futurePlanetPositions[i], futurePlanetPositions[0])
+                        * (float)Math.Pow((planets[i] as Planet).mass / (planets[0] as Planet).mass, 2 / 5) / 3);
                     if (Vector2.Distance(futurePosition, futurePlanetPositions[i]) < sphereOfInfluence)
                     {
                         particlePos += planets[i].Position - futurePlanetPositions[i];

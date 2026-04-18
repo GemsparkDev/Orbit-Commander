@@ -12,13 +12,13 @@ public class Stealth(Entity _entity) : Component(_entity)
     public int TrueStealth => stealthAbility;
     public int StealthAbility
     {
-        get => (stealthAbility + (((RevealDuration > 0 || Entity.Health <= 0) ? -5 : 0) + Entity.StatusHolder.StealthChange));
+        get => (stealthAbility + (((RevealDuration > 0 || Entity.GetComponent<Health>()?.CurrentHealth <= 0) ? -5 : 0) + Entity.StatusHolder?.StealthChange ?? 0));
         set => stealthAbility = value;
     }
     private int sensingAbility = 0;
     public int SensingAbility
     {
-        get => (sensingAbility + Entity.StatusHolder.SensingChange);
+        get => (sensingAbility + Entity.StatusHolder?.SensingChange ?? 0);
         set => sensingAbility = value;
     }
     public float RevealDuration { get; set; } = 0;
