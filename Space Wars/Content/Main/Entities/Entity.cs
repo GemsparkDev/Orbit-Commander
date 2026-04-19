@@ -61,6 +61,17 @@ public class Entity : IMissionComponent
     {
         Engine.EntityManager.Add(this);
     }
+    public void CollideWith(Entity nearestEnemy)
+    {
+        if (nearestEnemy != null && Vector2.Distance(nearestEnemy.Position, Position) < ColliderRadius + nearestEnemy.ColliderRadius)
+        {
+            if(nearestEnemy.Collide(Damage))
+            {
+                ParticleManager.Add(new Particle(Assets.Get(Sprites.Glow), 0.33f, Position, Vector2.Zero, 0, 0, Color.Wheat, Color.Transparent));
+            }
+            Collide(1);
+        }
+    }
     public bool isExpired = false;
     private List<Component> components = [];
     public Entity(Vector2 _position, Vector2 _velocity, float _angle, float _angularVelocity)
@@ -156,11 +167,7 @@ public class Entity : IMissionComponent
                 Velocity += normalDirection * MathF.Sqrt(MathF.Abs(dot)) * MathF.Sign(dot) / 8;
                 Angle = Util.ToAngle(Velocity - nearestEnemy.Velocity);
             }
-            if (nearestEnemy != null && Vector2.Distance(nearestEnemy.Position, Position) < ColliderRadius + nearestEnemy.ColliderRadius)
-            {
-                nearestEnemy.Collide(GetComponent<Attack>().Damage);
-                Collide(1);
-            }
+            CollideWith(nearestEnemy);
             yield return 0;
         }
     }
@@ -181,8 +188,7 @@ public class Entity : IMissionComponent
             Vector2 posOffset = Util.ToUnitVector(Angle) * MathF.Cos(time * 8 + offset);
             Position += new Vector2(posOffset.Y, -posOffset.X);
             Entity nearestEnemy = Engine.EntityManager.NearestEnemy(this, true);
-            nearestEnemy.Collide(GetComponent<Attack>().Damage);
-            Collide(1);
+            CollideWith(nearestEnemy);
             yield return 0;
         }
     }
@@ -214,7 +220,10 @@ public class Entity : IMissionComponent
             beam.Update();
             if (nearestEnemy.Count > 0)
             {
-                nearestEnemy[0].Collide(GetComponent<Attack>().Damage);
+                if (nearestEnemy[0].Collide(Damage))
+                {
+                    ParticleManager.Add(new Particle(Assets.Get(Sprites.Glow), 0.33f, Position, Vector2.Zero, 0, 0, Color.Wheat, Color.Transparent));
+                }
                 Collide(1, false);
             }
             yield return 0;

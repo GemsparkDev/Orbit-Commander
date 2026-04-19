@@ -6,27 +6,28 @@ using System.Threading.Tasks;
 using Microsoft.Xna.Framework.Graphics;
 using Space_Wars.Content.Main.Entities;
 using Microsoft.Xna.Framework;
+using Space_Wars.Content.Main.Particles;
 
 namespace Space_Wars.Content.Main.Components;
 internal class Health(Entity _entity) : Component(_entity)
 {
     private int currentHealth;
     private int prevHealth;
-    public int CurrentHealth { get => currentHealth; set { prevHealth = currentHealth; healthCD = 0.5f; currentHealth = value; } }
+    public int CurrentHealth { get => currentHealth; set { if (prevHealth <= currentHealth) { prevHealth = currentHealth; } healthCD = 0.5f; currentHealth = value; } }
     public int MaxHealth { get; set; }
     private float healthCD = 0;
     public override void Update()
     {
         if (currentHealth > MaxHealth)
         {
-            CurrentHealth = MaxHealth;
+            currentHealth = MaxHealth;
         }
         if (healthCD <= 0)
         {
             if (prevHealth > currentHealth)
             {
-                prevHealth -= 1 + MaxHealth / 20;
-                healthCD = 0.05f;
+                prevHealth -= 1;
+                healthCD = 1/(float)(MaxHealth);
             }
             else
             {
@@ -37,6 +38,7 @@ internal class Health(Entity _entity) : Component(_entity)
         {
             healthCD -= Engine.DeltaSeconds;
         }
+        Engine.WriteLine(prevHealth);
     }
     public override void Draw(SpriteBatch _spriteBatch)
     {
@@ -53,10 +55,10 @@ internal class Health(Entity _entity) : Component(_entity)
         if (CurrentHealth > 0)
         {
             //Health bar
-            Vector2 barPosition = Entity.Position + new Vector2(-Entity.ColliderRadius, Entity.ColliderRadius / 2);
-            Rectangle sourceRectangle = new(0, 0, (int)(Entity.ColliderRadius * 2), 2);
+            Vector2 barPosition = Entity.Position + new Vector2(-Entity.ColliderRadius*0.875f, Entity.ColliderRadius * 1.1f);
+            Rectangle sourceRectangle = new(0, 0, (int)(Entity.ColliderRadius * 1.75f), 2);
             _spriteBatch.Draw(Engine.Line, barPosition, sourceRectangle, new Color(0, 50, 25) * val);
-            _spriteBatch.Draw(Engine.Line, barPosition, new Rectangle(sourceRectangle.Location, new Point((int)(sourceRectangle.Width * (float)(prevHealth) / (float)(MaxHealth)), sourceRectangle.Height)), Color.White * val);
+            _spriteBatch.Draw(Engine.Line, barPosition, new Rectangle(sourceRectangle.Location, new Point((int)(sourceRectangle.Width * ((float)(prevHealth) / (float)(MaxHealth))), sourceRectangle.Height)), Color.White * val);
             _spriteBatch.Draw(Engine.Line, barPosition, new Rectangle(sourceRectangle.Location, new Point((int)(sourceRectangle.Width * (float)(currentHealth) / (float)(MaxHealth)), sourceRectangle.Height)), Color.Green * val);
         }
     }

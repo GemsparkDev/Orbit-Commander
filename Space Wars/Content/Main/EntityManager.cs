@@ -40,9 +40,19 @@ public class EntityManager
         (new("Enemy Planet Test", "", 200, [], 0, 2000, 0),
         delegate(){Entity p = new Planet(Vector2.Zero, Vector2.Zero, 10000, 8, true, Color.Red, false); 
         return new([
-            p.AddComponent(new Health(p) { CurrentHealth = 100, MaxHealth = 100 })
+            p.AddComponent(new Health(p) { CurrentHealth = 1000, MaxHealth = 1000 })
              .AddComponent(new Friendly(p) { Team = Team.Hostile })
-             .AddComponent(new Stealth(p) { SensingAbility = 1, StealthAbility = 1 }),],
+             .AddComponent(new Stealth(p) { SensingAbility = 1, StealthAbility = 0 })
+             .AddComponent(new Collide(p, delegate(int damage, bool _ignoreImmunity)
+             {
+                 if (damage > 0)
+                 {
+                    SoundManager.PlaySound(Assets.Get(Sound.ShieldHit), p.Position);
+                    p.Health -= damage;
+                    Engine.ShakeScreen(10 / ((p.Position - Engine.Camera.Position).Length() + 200) * damage);
+                    ParticleManager.Add(new Particle(null, 1, p.Position + new Vector2(0, -1), new Vector2(0, -1.5f), 0, 0, Color.Orange, new Color(255, 0, 0, 0)) { drawText = $"{damage}" });                  }
+                 return damage > 0;
+            }))],
             new Conditional([new Kill([p])], Mission.SendPickup()),
             new DropSpawner(1500));}),
 
