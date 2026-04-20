@@ -29,11 +29,6 @@ public class EntityManager
     public static float StealthRange { get; private set; } = 750;
     //Threshold of detection for enemies
     public static float StealthThreshold { get; private set; } = 0.75f;
-    public List<(float distance, List<int> prerequisites, int system)> Systems { get; } =
-    [
-         (170, [6], 1), (145, [7], 1), (130, [8], 1), (150, [9], 1),
-        (200, [], 2), (150, [11], 2), (100, [12], 2), (80, [13], 2), (60, [14], 2), (0, [15], 2), (0, [], 2), (0, [], 2), (0, [], 2), (0, [], 2), (0, [], 2), (0, [], 2)
-    ];
     public static readonly List<(MissionData data, Func<Mission> instance)> missions =
     [
         //Enemy planet test
@@ -118,24 +113,26 @@ public class EntityManager
             a=Enemy.NewScrambled(new Vector2(0, -6*50), Vector2.Zero, 0),], 
             new Conditional([new Kill([a])], Mission.SendPickup()),
             new DropSpawner(1500));}),
-        /*
-        (new("Gas Giant", "", 10, [], 1,),
+
+        (new("Gas Giant", "", 10, [], 1, 2000),
         delegate(){return new([
             new Planets([new Planet(Vector2.Zero, Vector2.Zero, 16000, 4, true, new Color(167, 156, 134), true, 6, 500f, true),
             new Planet(new Vector2(900, 0), Planet.GetOrbitalVelocity(new Vector2(900, 0), Vector2.Zero, 16000), 100, 0.5f, false, Color.OldLace),
             new Planet(new Vector2(-1200, 0), Planet.GetOrbitalVelocity(new Vector2(-1200, 0), Vector2.Zero, 16000) * 1.05f, 100, 0.5f, false, Color.OldLace)]),
             new WaveSpawner(Mission.T1, 1f, false),
-            ], new Conditional([new WaveGoal(30)], Mission.SendPickup()), new GliderSpawner(new Vector2(-800, -1100), -900));},
+            ], new Conditional([new WaveGoal(30)], Mission.SendPickup()), new GliderSpawner(new Vector2(-800, -1100), -900));}),
 
-        delegate(){Entity a;return new([a=Enemy.NewWarpGate(Vector2.Zero, Vector2.Zero, 0)], new Conditional([new Custom(a)], Mission.Win()),
-            "Warp Gate", "Scans indicate that a large enemy fleet is coming our way after the loss of their prototype.\nRecommended action: Leave the system immediately.", new PlayerSpawner(new Vector2(0, 500)), 3, Sound.None);},
+        (new("Warp Gate", "Scans indicate that a large enemy fleet is coming our way after the loss of their prototype.\nRecommended action: Leave the system immediately.", 170, [6], 1, 2000, 3),
+        delegate(){Entity a;return new([a=Enemy.NewWarpGate(Vector2.Zero, Vector2.Zero, 0)], new Conditional([new Custom(a)], Mission.Win()), new PlayerSpawner(new Vector2(0, 500)), Sound.None);}),
 
+        (new("???", "Sensor data shows that this site has an unusually high temperature.\nInvestigate possible enemy interferance.", 145, [7], 1, 2000, 3, true),
         //Note: The player construct menu and the Quantum Resonator both use the name of this mission for their special behavior. When changing, make sure their name is updated as well.
         delegate(){return new([
             new Planets([new Planet(Vector2.Zero, Vector2.Zero, 50000, 12, true, new Color(255, 219, 0), true, 1.5f) { Temperature = 0.5f } ]),
             ], new Conditional([], Mission.SendPickup()),
-            "???", "Sensor data shows that this site has an unusually high temperature.\nInvestigate possible enemy interferance.", new PlayerSpawner(new Vector2(-2000, -2000)), 3, Sound.None) { relaunchable = true };},
+             new PlayerSpawner(new Vector2(-2000, -2000)), Sound.None);}),
 
+        (new("Base of Operations", "We have deployed several communication stations to this site.\nProtect the location for future development.", 130, [8], 1, 2000),
         delegate(){Entity a,b,c; return new([
             new Planets([new Planet(Vector2.Zero, Vector2.Zero, 30000, 10f, true, Color.HotPink, true) ]),
             new WaveSpawner(Mission.T2, 1, false),
@@ -143,8 +140,9 @@ public class EntityManager
             b=Enemy.NewCommunicator(new Vector2(MathF.Sin(2.7f), -MathF.Cos(2.7f)), Vector2.Zero, 2.7f, Team.Friendly),
             c=Enemy.NewCommunicator(new Vector2(MathF.Sin(5.33f), -MathF.Cos(5.33f)), Vector2.Zero, 5.33f, Team.Friendly),
             ], new Conditional([new Protect([a, b, c]), new WaveGoal(30),
-        ], Mission.SendPickup()), "Base of Operations", "We have deployed several communication stations to this site.\nProtect the location for future development.", new DropSpawner(500));},
+        ], Mission.SendPickup()), new DropSpawner(500));}),
 
+        (new("Assault", "It appears the enemy has improved their fleet, and has pushed the mothership to a non-ideal location.\nDefend the mothership and defeat the fortified miner base on this planet.", 150, [9], 1, 2000),
         delegate(){Entity a,b,c,d,e,f,g;return new([
             new Planet(Vector2.Zero, Vector2.Zero, 20000, 9f, true, Color.Cyan, false, 1.8f),
             new Planet(new Vector2(0, 1800), Planet.GetOrbitalVelocity(new Vector2(0, 1800), Vector2.Zero, 20000), 1500, 2f, false, Color.Cyan),
@@ -159,15 +157,17 @@ public class EntityManager
             new WaveSpawner(Mission.T2, 0.75f, true),
             new Tip("Press C to open the construct menu.\nEach construct requires one scrap to craft.", new Vector2(0, -9*50)),
             ], new Conditional([new Kill([a,b,c,d,e,f]), new Protect([g])], Mission.Win()),
-            "Assault", "It appears the enemy has improved their fleet, and has pushed the mothership to a non-ideal location.\nDefend the mothership and defeat the fortified miner base on this planet.", new CustomSpawner(new Vector2(0, 1650)));},
+             new CustomSpawner(new Vector2(0, 1650)));}),
 
+        (new("Extraction", "Our success has led us to deploying a miner on this deceptively dense planet.\nDefend it from the incoming enemy forces.", 200, [], 2, 2000),
         delegate(){Entity a;return new([
             new Planets([new Planet(Vector2.Zero, Vector2.Zero, 25000, 7f, true, Color.Cyan), new(new Vector2(800, 0), Planet.GetOrbitalVelocity(new Vector2(800, 0), Vector2.Zero, 25000), 150, 0.5f, false, Color.Cyan), ]),
             new WaveSpawner(Mission.T2, 1, true),
             a=Enemy.NewMiner(new Vector2(0, -7*50), Vector2.Zero, 0),
             ], new Conditional([new Protect([a]), new WaveGoal(30)], Mission.Win()), 
-            "Extraction", "Our success has led us to deploying a miner on this deceptively dense planet.\nDefend it from the incoming enemy forces.", new DropSpawner(1500));},
+             new DropSpawner(1500));}),
 
+        (new("Flight of the bumblebee.", "The enemy fleet's fastest fighter appears to have arrived to this planet and is blocking our path.\nDefeating it appears to be the only way forward.", 150, [11], 2, 2000),
         delegate(){Entity a; return new([
             new Planet(Vector2.Zero, Vector2.Zero, 5000, 4.5f, true, Color.Cyan),
             new Planet(new Vector2(600, 0), Planet.GetOrbitalVelocity(new Vector2(600, 0), Vector2.Zero, 5000), 240, 1f, false, Color.Cyan),
@@ -175,51 +175,58 @@ public class EntityManager
             new WaveSpawner(Mission.T2, 1.1f, false),
             a=Enemy.NewExodusBoss(new Vector2(0, -6*50), Vector2.Zero, 0, Team.Hostile),
             ], new Conditional([new Kill([a])], Mission.SendPickup()),
-            "Flight of the bumblebee.", "The enemy fleet's fastest fighter appears to have arrived to this planet and is blocking our path.\nDefeating it appears to be the only way forward.", new DropSpawner(1500));},
+            new DropSpawner(1500));}),
 
+        (new("Warp Gate", "The enemy fleet is still hot on our tail.", 100, [12], 2, 2000, 3, true),
         delegate(){Entity a;return new([
             new Planets([new Planet(Vector2.Zero, Vector2.Zero, 150, 3, true, Color.OldLace)]),
             new Tip("Press left shift to return to the previous system. Press right shift to enter the next system.", new Vector2(0, 3 * 50)),
             a=Enemy.NewWarpGate(new Vector2(0, 450), -Planet.GetOrbitalVelocity(new Vector2(0, 450), Vector2.Zero, 150), 0),
             ], new Conditional([new Custom(a)], Mission.Win()),
-            "Warp Gate", "The enemy fleet is still hot on our tail.", new PlayerSpawner(new Vector2(0, 500)), 3, Sound.None) { relaunchable = true };},
+            new PlayerSpawner(new Vector2(0, 500)), Sound.None);}),
 
+        (new("Trader", "This friendly trader invites us to upgrade our modules in exchange for resources", 80, [13], 2, 2000, 3, true),
         delegate(){return new([
             new Planet(Vector2.Zero, Vector2.Zero, 6000, 6, true, Color.Cyan, true, 0.8f),
             Enemy.NewTrader(new Vector2(0, 500), Planet.GetOrbitalVelocity(new Vector2(0, 500), Vector2.Zero, 6000), 0),], 
             Mission.SendPickup()(),
-            "Trader", "This friendly trader invites us to upgrade our modules in exchange for resources", new PlayerSpawner(new Vector2(-2000, -2000))){ relaunchable = true };},
+            new PlayerSpawner(new Vector2(-2000, -2000)));}),
 
+        (new("Clockwork creation", "A strange sentinal appears to be housed on this ancient planet.\nDismantling it may yield unusual resources.", 60, [14], 2, 2000),
         delegate(){Entity a;return new([
             new Planet(Vector2.Zero, Vector2.Zero, 4000, 3, true, Color.Wheat, false, 1.5f),
             new Planet(new Vector2(500, 0), Planet.GetOrbitalVelocity(new Vector2(500, 0), Vector2.Zero, 4000), 300, 1f, false, Color.Wheat),
             new WaveSpawner(Mission.T2, 1f, true),
             a=Enemy.NewClockworkBoss(new Vector2(0, -6*50), Vector2.Zero, 0, Team.Hostile)], 
             new Conditional([new Kill([a])], Mission.SendPickup()),
-            "Clockwork creation", "A strange sentinal appears to be housed on this ancient planet.\nDismantling it may yield unusual resources.", new DropSpawner(1500));},
+            new DropSpawner(1500));}),
 
+        (new("Ice giant", "The unusual conditions in this system have resulted in unique developments in the enemies technology.\nBe prepared for advanced enemy cloaking.", 0, [15], 2, 2000),
         delegate(){return new([
             new Planet(Vector2.Zero, Vector2.Zero, 10000, 3, true, new Color(41, 144, 181), false, 15f, 0, true) { Temperature = -20 },
             new WaveSpawner(Mission.T2, 1f, false),], 
             new Conditional([new WaveGoal(30)], Mission.SendPickup()),
-            "Ice giant", "The unusual conditions in this system have resulted in unique developments in the enemies technology.\nBe prepared for advanced enemy cloaking.", new GliderSpawner(new Vector2(-800, -1300), -1000));},
+            new GliderSpawner(new Vector2(-800, -1300), -1000));}),
 
+        (new("Binary system", "It seems plans for a mass relay have been abandoned here.\nConstruct it to recieve some advanced equipment from our previous stations.", 0, [15], 2, 2000),
         delegate(){Entity a;return new([
             new Planets([new(new Vector2(500, 0), new Vector2(0, 1.05f), 10000, 7, false, Color.Cyan) { Temperature = -5},
             new(new Vector2(-1000, 0), new Vector2(0, -2.1f), 5000, 4f, false, Color.Orange) { Temperature = 5 }]),
             new WaveSpawner(Mission.T3, 1, true),
             a=Enemy.MassRelay(Vector2.Zero, Vector2.Zero, 0)], 
             new Conditional([new Protect([a]), new Custom(a)], Mission.SendPickup()),
-            "Binary system", "It seems plans for a mass relay have been abandoned here.\nConstruct it to recieve some advanced equipment from our previous stations.", new DropSpawner(1500));},
+            new DropSpawner(1500));}),
 
+        (new("Veiled", "Sensors indicate that our actions have been spied on by the enemy.\nDestroy it.",  0, [15], 2, 2000),
         delegate(){Entity a;return new([
             new Planet(Vector2.Zero, Vector2.Zero, 4000, 4.5f, true, new Color(0.03f, 0.05f, 0.08f)),
             new Planet(new Vector2(600, 0), Planet.GetOrbitalVelocity(new Vector2(600, 0), Vector2.Zero, 4000) * 1.05f, 500, 1.5f, false, new Color(0.06f, 0.08f, 0.12f)),
             new WaveSpawner(Mission.T3, 1.1f, false),
             a=Enemy.NewVeilBoss(new Vector2(0, -6*50), Vector2.Zero, 0),
             ], new Conditional([new Kill([a])], Mission.SendPickup()),
-            "Veiled", "Sensors indicate that our actions have been spied on by the enemy.\nDestroy it.", new DropSpawner(1500));},
+            new DropSpawner(1500));}),
 
+        (new("Hack", "The enemy has set up a mesh node network for storing information.\nHack it to discover the location of their leader.", 0, [15], 2, 2000),
         delegate(){Entity a,b,c;return new([
             new Planet(Vector2.Zero, Vector2.Zero, 18000, 6f, true, Color.Cyan, false, 1.5f) { Temperature = -2 },
             new Planet(new Vector2(1100, 0), Planet.GetOrbitalVelocity(new Vector2(1100, 0), Vector2.Zero, 18000), 1500, 1.5f, false, Color.Cyan) { Temperature = -2 },
@@ -229,39 +236,41 @@ public class EntityManager
                 Vector2.Zero, 1500) + Planet.GetOrbitalVelocity(new Vector2(1100, 0), Vector2.Zero, 18000), 0),
             c=Enemy.NewMeshNetworkNode(new Vector2(-500, 0), -Planet.GetOrbitalVelocity(new Vector2(-500, 0), Vector2.Zero, 18000), 0)], 
             new Conditional([new Protect([a,b,c]), new Custom(a), new Custom(b), new Custom(c)], Mission.SendPickup()),
-            "Hack", "The enemy has set up a mesh node network for storing information.\nHack it to discover the location of their leader.", new DropSpawner(1500));},
+            new DropSpawner(1500));}),
 
+        (new("Inferno", "Your intel has led you here. Finish this.",  0, [15], 2, 2000),
         delegate(){Entity a; return new([
             new Planet(Vector2.Zero, Vector2.Zero, 160000, 6, true, new Color(0.9f, 1f, 0.75f), false, 50f, 0, true) { Temperature = 5 },
             new Planet(new Vector2(0, 2000), Planet.GetOrbitalVelocity(new Vector2(0, 2000) * 0.99f, Vector2.Zero, 16-000), 8000, 4, false, new Color(0.95f, 0.2f, 0.1f)),
             a=Enemy.NewEpitomeBoss(new Vector2(0, 2800), Vector2.Zero, 0)],
             new Conditional([new Kill([a])], Mission.SendPickup()),
-            "Inferno", "Your intel has led you here. Finish this.", new GliderSpawner(new Vector2(-1500, -2000), -1500), 3, Sound.None);},
+            new GliderSpawner(new Vector2(-1500, -2000), -1500), Sound.None);}),
 
+        (new("BEEG", "", 0, [15], 2, 2000),
         delegate(){return new([
             new Planets([new Planet(Vector2.Zero, Vector2.Zero, 8000000, 100, true, new Color(1f, 0.8f, 0.5f), false, 10f, 0, true) { Temperature = 5 }]),
             new Colliders(SolarStation),
             new WaveSpawner(Mission.T3, 1, false),], 
             new Conditional([new WaveGoal(10)], Mission.SendPickup()),
-            "BEEG", "", new GliderSpawner(new Vector2(-1000, -7000), -7000), 3, Sound.None);},
+            new GliderSpawner(new Vector2(-1000, -7000), -7000), Sound.None);}),
 
+        (new("Black Hole", "", 0, [15], 2, 2000),
         delegate(){return new Mission([
             new Planet(new Vector2(0, 500), Vector2.Zero, 5000, 0.1f, true, Color.Black, false, 0),
             new Colliders(BlackHoleStation),
             ItemFactory.NewScrap(new Vector2(0, -8*50), Vector2.Zero, -0.03f),
             Enemy.NewFighter(Vector2.Zero, Vector2.Zero, 0, Team.Hostile )], 
             new Conditional([new WaveGoal(10)], Mission.SendPickup()),
-            "Black Hole", "", new GliderSpawner(new Vector2(-1000, -700), -1000), 3, Sound.None);},
+            new GliderSpawner(new Vector2(-1000, -700), -1000), Sound.None);}),
 
-        (new("Last Stand", "Survive", 0, [], 0, 4),
+        (new("Last Stand", "Survive", 2000, [], 0, 4, 3, true),
         delegate(){return new Mission([
             new Planet(Vector2.Zero, Vector2.Zero, 20000, 9, true, Color.OrangeRed, true, 1.5f),
             new Planet(new Vector2(1200, 0), Planet.GetOrbitalVelocity(new Vector2(1200, 0), Vector2.Zero, 20000), 750, 2f, false, Color.Red),
             new Tip("You can now construct the makeshift mothership in the construct menu.\n Requires 3 scrap.", new Vector2(0, -10 * 50)),
             new WaveSpawner(Mission.All, 0.25f, true)], 
             new Conditional([new WaveGoal(1000)], Mission.SendPickup()),
-            new DropSpawner(1500)) { relaunchable = true }; }),
-            */
+            new DropSpawner(1500)); })
     ];
     public Mission GetMission(int _index)
     {

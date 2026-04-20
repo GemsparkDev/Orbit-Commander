@@ -44,7 +44,7 @@ public class Mission
         }
         return null;
     }
-    public Mission(List<IMissionComponent> _components, Conditional _objective, IPlayerSpawner _spawner, int _playerProgression = 3, Sound _music = Sound.main)
+    public Mission(List<IMissionComponent> _components, Conditional _objective, IPlayerSpawner _spawner, Sound _music = Sound.main)
     {
         components = _components;
         foreach(var comp in _components)
