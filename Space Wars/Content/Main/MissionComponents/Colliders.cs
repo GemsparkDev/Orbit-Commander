@@ -34,10 +34,10 @@ public class Colliders(Func<ICollider[]> _colliders) : IMissionComponent, IObsta
             {
                 collider.Collide(entity);
             }
-            foreach (var particle in ParticleManager.Particles)
-            {
+            //foreach (var particle in ParticleManager.Particles)
+            //{
                 //collider.Collide(particle);
-            }
+            //}
         }
     }
     public bool Collide(Entity _entity)

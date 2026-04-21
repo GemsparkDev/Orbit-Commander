@@ -23,7 +23,6 @@ public class EntityManager
     private List<Entity> addedEntities = [];
     private List<Entity> enemies = [];
     private List<Entity> projectiles = [];
-    private static float currentKarma = 0;
     private static Player Player => Engine.SaveGame.Player;
     //Maximum distance for any detection when sensing = stealth
     public static float StealthRange { get; private set; } = 750;
@@ -272,17 +271,6 @@ public class EntityManager
             new Conditional([new WaveGoal(1000)], Mission.SendPickup()),
             new DropSpawner(1500)); })
     ];
-    public Mission GetMission(int _index)
-    {
-        return missions[_index].instance();
-    }
-    public void UpdateColor()
-    {
-        foreach (var entity in entities)
-        {
-            entity.UpdateColor();
-        }
-    }
     public void Add(Entity entity)
     {
         if (!isUpdating)
@@ -560,18 +548,6 @@ public class EntityManager
     {
         Vector2 Target = _vectorTwo - _vectorOne;
         return Target.X * Target.X + Target.Y * Target.Y;
-    }
-
-    public static bool RandomWithKarma(float _rarity)
-    {
-        float karmaBonus = (_rarity - 1) / (_rarity + _rarity * MathF.Exp(-10 * currentKarma + 12.5f));
-        if (Util.Random.NextSingle() < (1 / _rarity) + karmaBonus)
-        {
-            currentKarma = 0;
-            return true;
-        }
-        currentKarma += (1 / _rarity);
-        return false;
     }
     public List<Entity> Hitscan(Vector2 _pos, Vector2 _dir, float _maxLength, bool _getAll, out Vector2 _end, Team[] _whitelist = null, bool _getProjectiles = false)
     {

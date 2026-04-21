@@ -40,7 +40,6 @@ public abstract class GameState
         //Disables rendering when disabled
         if(Engine.SaveGame != null && !Engine.SaveGame.Player.IsEnabled)
         {
-            Vector2 dims = Assets.DimsOf(Sprites.DeadFile);
             _spriteBatch.Draw(Assets.Get(Sprites.DeadFile), Engine.Camera.Position + Engine.MousePositionOffset, null, Color.White, 0, Assets.DimsOf(Sprites.DeadFile) / 2, UIManager.UIScale, 0, 0);
             return;
         }
@@ -186,16 +185,16 @@ public class MissionSelect : GameState
     public MissionSelect()
     {
         var center = new Vector2(Engine.ScreenSize.X/6, 0);
-        foreach (var (distance, _, system) in Engine.EntityManager.Systems)
+        foreach (var data in EntityManager.missions)
         {
-            var orbit = (system, new ParticleEmitter(Assets.Get(Sprites.Dot), center, distance, new Color(0, 255, 255)));
+            var orbit = (data.data.System, new ParticleEmitter(Assets.Get(Sprites.Dot), center, data.data.Distance, new Color(0, 255, 255)));
             missionOrbits.Add(orbit);
         }
-        var playerMission = Engine.EntityManager.Systems[Engine.SaveGame.CurrentMissionIndex];
-        if (playerMission.distance > 0)
+        var playerMission = EntityManager.missions[Engine.SaveGame.CurrentMissionIndex].data;
+        if (playerMission.Distance > 0)
         {
-            float freq = MathF.Sqrt(playerMission.distance * playerMission.distance * playerMission.distance) / 100;
-            playerPosition = new Vector2(Engine.ScreenSize.X / 6, 0) + new Vector2(MathF.Cos(time / freq), MathF.Sin(time / freq)) * playerMission.distance;
+            float freq = MathF.Sqrt(playerMission.Distance * playerMission.Distance * playerMission.Distance) / 100;
+            playerPosition = new Vector2(Engine.ScreenSize.X / 6, 0) + new Vector2(MathF.Cos(time / freq), MathF.Sin(time / freq)) * playerMission.Distance;
         }
         else
         {
@@ -226,13 +225,13 @@ public class MissionSelect : GameState
         ParticleManager.Update();
         var pos = new Vector2(Input.NewMouseState.Position.X, Input.NewMouseState.Position.Y);
         float distance = Vector2.Distance(pos, new Vector2(Engine.ScreenSize.X * 2 / 3, Engine.ScreenSize.Y/2));
-        for(int i = 0; i < Engine.EntityManager.Systems.Count; i++)
+        for(int i = 0; i < EntityManager.missions.Count; i++)
         {
-            var mission = Engine.EntityManager.Systems[i];
-            if (mission.distance > 0)
+            var mission = EntityManager.missions[i].data;
+            if (mission.Distance > 0)
             {
-                float freq = MathF.Sqrt(mission.distance * mission.distance * mission.distance) / 100;
-                pos = new Vector2(Engine.ScreenSize.X / 6, 0) + new Vector2(MathF.Cos(time / freq), MathF.Sin(time / freq)) * mission.distance;
+                float freq = MathF.Sqrt(mission.Distance * mission.Distance * mission.Distance) / 100;
+                pos = new Vector2(Engine.ScreenSize.X / 6, 0) + new Vector2(MathF.Cos(time / freq), MathF.Sin(time / freq)) * mission.Distance;
             }
             else
             {
@@ -242,19 +241,19 @@ public class MissionSelect : GameState
             {
                 playerPosition = playerPosition * 0.95f + pos * 0.05f;
             }
-            if (mission.system != Engine.SaveGame.System)
+            if (mission.System != Engine.SaveGame.System)
             {
                 continue;
             }
             var color = new Color(0, 255, 255);
-            if (Engine.SaveGame.FleetSystem > mission.system)
+            if (Engine.SaveGame.FleetSystem > mission.System)
             {
                 color = new Color(255, 127, 0);
             }
             bool canSelect = true;
             if (Engine.SaveGame.CompletedMissions[i])
             {
-                if(Engine.SaveGame.FleetSystem > mission.system)
+                if(Engine.SaveGame.FleetSystem > mission.System)
                 {
                     color = new Color(255, 255, 0);
                 }
@@ -263,7 +262,7 @@ public class MissionSelect : GameState
                     color = new Color(0, 255, 0);
                 }
             }
-            foreach (var prerequisite in mission.prerequisites)
+            foreach (var prerequisite in mission.Prerequisites)
             {
                 if (!Engine.SaveGame.CompletedMissions[prerequisite])
                 {
@@ -271,7 +270,7 @@ public class MissionSelect : GameState
                     canSelect = false;
                 }
             }
-            if (canSelect && Math.Abs(mission.distance - distance) < 10)
+            if (canSelect && Math.Abs(mission.Distance - distance) < 10)
             {
                 color = Color.White;
                 if (Input.NewMouseState.LeftButton == ButtonState.Released && Input.OldMouseState.LeftButton == ButtonState.Pressed)
@@ -282,7 +281,7 @@ public class MissionSelect : GameState
             
             missionOrbits[i].orbit.particleColor = color;
             var orbit = missionOrbits[i];
-            if (orbit.system == Engine.SaveGame.System && !(mission.distance <= 0 && !canSelect))
+            if (orbit.system == Engine.SaveGame.System && !(mission.Distance <= 0 && !canSelect))
             {
                 ParticleManager.Add(new Particle(Assets.Get(Sprites.Circle), pos, 0, color));
                 orbit.orbit.Update();
@@ -293,11 +292,11 @@ public class MissionSelect : GameState
     public override void Draw(SpriteBatch _spriteBatch) 
     {
         ParticleManager.Draw(_spriteBatch);
-        if (Engine.SaveGame.CurrentMissionIndex >= Engine.EntityManager.Systems.Count)
+        if (Engine.SaveGame.CurrentMissionIndex >= EntityManager.missions.Count)
         {
             Engine.SaveGame.PrevMission();
         }
-        if (Engine.SaveGame.System == Engine.EntityManager.Systems[Engine.SaveGame.CurrentMissionIndex].system)
+        if (Engine.SaveGame.System == EntityManager.missions[Engine.SaveGame.CurrentMissionIndex].data.System)
         {
             _spriteBatch.Draw(Assets.Get(Sprites.Miniplayer), playerPosition, null, new Color(0, 255, 0), 0, Vector2.Zero, 1, 0, 0);
         }

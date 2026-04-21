@@ -39,7 +39,7 @@ public class SaveGame
     { 
         get 
         { 
-            currentMission ??= Engine.EntityManager.GetMission(CurrentMissionIndex); 
+            currentMission ??= EntityManager.missions[CurrentMissionIndex].instance(); 
             return currentMission; 
         } 
         set 
@@ -154,7 +154,7 @@ public class SaveGame
     public void SetMission(int _count)
     {
         CurrentMissionIndex = Math.Clamp(_count, 0, EntityManager.missions.Count - 1);
-        currentMission = Engine.EntityManager.GetMission(CurrentMissionIndex);
+        currentMission = EntityManager.missions[CurrentMissionIndex].instance();
         EventHandler.UpdateMissionText();
     }
     public void NextMission()
