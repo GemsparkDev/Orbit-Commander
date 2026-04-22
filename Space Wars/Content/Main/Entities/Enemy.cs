@@ -976,7 +976,7 @@ public class Enemy : Entity
                 }
             }
             //Missile targetting
-            if (nearestEnemy.GetComponent<MissileTag>() != null && (Position - nearestEnemy.Position).Length() < 250)
+            if (nearestEnemy?.GetComponent<MissileTag>() != null && (Position - nearestEnemy.Position).Length() < 250)
             {
                 Vector2 playerIterativePosition = nearestEnemy.Position;
                 float timeToHit = MathF.Sqrt(EntityManager.DistanceSqr(Position, playerIterativePosition)) / 20;

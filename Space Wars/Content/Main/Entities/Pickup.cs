@@ -78,7 +78,7 @@ public class Pickup : Entity, IData
         int index = Player.leashedMaterials.IndexOf(this);
         if (index == -1)
         {
-            if (IsFriendly == Player.IsFriendly && EntityManager.DistanceSqr(Player, this) < 1375 && Player.leashedMaterials.Count < 3 && Player.canGatherResources)
+            if (Player.IsFriendly(this) && EntityManager.DistanceSqr(Player, this) < 1375 && Player.leashedMaterials.Count < 3 && Player.canGatherResources)
             {
                 Player.leashedMaterials.Add(this);
                 if (Player.leashedMaterials.Count < 3)

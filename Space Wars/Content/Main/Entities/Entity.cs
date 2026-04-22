@@ -117,6 +117,7 @@ public class Entity : IMissionComponent
         }
         return false;
     }
+    void IMissionComponent.Draw(SpriteBatch _spriteBatch) { }
     public virtual void Draw(SpriteBatch _spriteBatch) 
     { 
         foreach(var comp in components)

@@ -202,12 +202,14 @@ public class Mission
             if (SaveGame.PatchedConics)
             {
                 hasChanged = false;
-                for (int i = futurePlanetPositions.Length - 1; i >= 0; i--)
+                float smallestSOI = 999999;
+                for (int i = 0; i < futurePlanetPositions.Length; i++)
                 {
-                    float sphereOfInfluence = (i == 0) ? 9999 : (Vector2.Distance(futurePlanetPositions[i], futurePlanetPositions[0])
-                        * (float)Math.Pow((planets[i] as Planet).mass / (planets[0] as Planet).mass, 2 / 5) / 3);
-                    if (Vector2.Distance(futurePosition, futurePlanetPositions[i]) < sphereOfInfluence)
+                    var p = (planets[i] as Planet);
+                    float sphereOfInfluence = p.mass + p.ColliderRadius;
+                    if (Vector2.Distance(futurePosition, futurePlanetPositions[i]) < sphereOfInfluence && sphereOfInfluence < smallestSOI)
                     {
+                        smallestSOI = sphereOfInfluence;
                         particlePos += planets[i].Position - futurePlanetPositions[i];
                         if (currentPlanet != i)
                         {
