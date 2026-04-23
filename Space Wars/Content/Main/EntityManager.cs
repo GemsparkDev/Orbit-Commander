@@ -423,7 +423,8 @@ public class EntityManager
         Entity returnEnemy = null;
         foreach (Entity targetEnemy in enemies)
         {
-            if (entity.IsFriendly(targetEnemy) || targetEnemy.StealthAbility > entity.SensingAbility)
+            var comp = targetEnemy.GetComponent<Stealth>();
+            if (entity.IsFriendly(targetEnemy) || ((comp == null) ? comp.StealthAbility : 0) > entity.SensingAbility)
             {
                 continue;
             }

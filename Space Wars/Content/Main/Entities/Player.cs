@@ -117,7 +117,7 @@ public class Player : Entity
         var textures = new Texture2D[modules.Count];
         for(int i = 0; i < modules.Count; i++)
         {
-            textures[i] = modules[(ModuleType)i].Texture;
+            textures[i] = (modules[(ModuleType)i] as IData).Texture;
         }
         AddComponent(new Collide(this, PlayerCollide));
         EventHandler.SetFuseModuleDecals(textures);
@@ -879,7 +879,7 @@ public class Player : Entity
         var textures = new Texture2D[modules.Count];
         for (int i = 0; i < modules.Count; i++)
         {
-            textures[i] = modules[(ModuleType)i].Texture;
+            textures[i] = (modules[(ModuleType)i] as IData).Texture;
         }
         EventHandler.SetFuseModuleDecals(textures);
         EventHandler.UpdateFuseUI(moduleFuses, spareFuses);
