@@ -58,7 +58,6 @@ public class Enemy : Entity
                 Health -= damage;
                 Engine.ShakeScreen(10 / ((Position - Engine.Camera.Position).Length() + 200) * damage);
                 ParticleManager.Add(new Particle(null, 1, Position + new Vector2(0, -1), new Vector2(0, -1.5f), 0, 0, Color.Orange, new Color(255, 0, 0, 0)) { drawText = $"{damage}" });
-                ParticleManager.Add(new Particle(Assets.Get(Sprites.Glow), 0.33f, Position, Vector2.Zero, 0, 0, Color.Wheat, Color.Transparent));
                 RevealDuration = Math.Max(RevealDuration, 0.3f * MathF.Sqrt(damage));
                 return true;
             }
