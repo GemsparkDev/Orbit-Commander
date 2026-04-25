@@ -24,7 +24,7 @@ internal class Planets(Planet[] _planets) : IMissionComponent, IObstacle
         //TODO: Figure out why entity update and draw calls don't work on planets
         foreach(var p in _planets)
         {
-            Engine.EntityManager.Add(p);
+            Engine.SaveGame.CurrentMission.Add(p);
         }
     }
     public void Update()

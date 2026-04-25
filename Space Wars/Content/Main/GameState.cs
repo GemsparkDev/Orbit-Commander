@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using UILib.Content.Main;
 using System;
 using Space_Wars.Content.Main.Story;
+using Space_Wars.Content.Main.Components;
 
 namespace Space_Wars.Content.Main;
 
@@ -44,7 +45,6 @@ public abstract class GameState
             return;
         }
         Engine.SaveGame.CurrentMission.Draw(_spriteBatch);
-        Engine.EntityManager.Draw(_spriteBatch);
         ParticleManager.Draw(_spriteBatch);
         if (SaveGame.DebugMode)
         {
@@ -72,8 +72,9 @@ public abstract class GameState
 }
 public class MainMenu : GameState
 {
+    private float time = MathF.PI;
     private Planet menuPlanet = new(new Vector2(0, 750), Vector2.Zero, 5000, 9, true, Color.Cyan);
-    private Planet moonPlanet = new(new Vector2(0, 1750), Planet.GetOrbitalVelocity(new Vector2(0, 1750), new Vector2(0, 750), 5000), 250, 1.5f, false, Color.Cyan);
+    private Planet moonPlanet = new(new Vector2(0, 0), Vector2.Zero, 750, 1.5f, true, Color.Cyan);
     private ParticleEmitter smokeParticles = new(Assets.Get(Sprites.Circle), 1f, new Vector2(0, 300 - Assets.DimsOf(Sprites.Mothership).Y + 10), 0, MathF.PI/4, 1, 40, Color.Gray, EmitterType.EmissionOverTime) 
     { particleFadeToColor = new Color(169, 169, 169, 0), probability = 0.25f };
     public override void Initialize()
@@ -84,11 +85,15 @@ public class MainMenu : GameState
     }
     public override void Update()
     {
-        menuPlanet.Update();
-        moonPlanet.Velocity += menuPlanet.GetAcceleration(moonPlanet.Position);
-        moonPlanet.Update();
+        float d = 1000;
+        time += MathF.Sqrt(5000 / d) / d * Engine.DeltaSeconds * 60;
+        moonPlanet.Position = Util.ToUnitVector(time) * d + new Vector2(0, 750);
         smokeParticles.Update();
         ParticleManager.Update();
+        if(time > MathF.Tau)
+        {
+            time -= MathF.Tau;
+        }
     }
     public override void Draw(SpriteBatch _spriteBatch)
     {
@@ -106,7 +111,7 @@ public class PlayingGame : GameState
     }
     public override void Update()
     {
-        Engine.EntityManager.IngameUpdate();
+        Engine.SaveGame.CurrentMission.IngameUpdate();
         Engine.SaveGame.Player.RestrictedActions();
         Engine.DialogueManager.Update();
         ParticleManager.Update();
@@ -160,7 +165,7 @@ public class Garage : GameState
     }
     public override void Update()
     {
-        Engine.EntityManager.IngameUpdate();
+        Engine.SaveGame.CurrentMission.IngameUpdate();
         ParticleManager.Update();
         if (Input.OldState.IsKeyUp(Keys.Escape) && Input.NewState.IsKeyDown(Keys.Escape))
         {
@@ -185,12 +190,12 @@ public class MissionSelect : GameState
     public MissionSelect()
     {
         var center = new Vector2(Engine.ScreenSize.X/6, 0);
-        foreach (var data in EntityManager.missions)
+        foreach (var data in Mission.missions)
         {
             var orbit = (data.data.System, new ParticleEmitter(Assets.Get(Sprites.Dot), center, data.data.Distance, new Color(0, 255, 255)));
             missionOrbits.Add(orbit);
         }
-        var playerMission = EntityManager.missions[Engine.SaveGame.CurrentMissionIndex].data;
+        var playerMission = Mission.missions[Engine.SaveGame.CurrentMissionIndex].data;
         if (playerMission.Distance > 0)
         {
             float freq = MathF.Sqrt(playerMission.Distance * playerMission.Distance * playerMission.Distance) / 100;
@@ -225,9 +230,9 @@ public class MissionSelect : GameState
         ParticleManager.Update();
         var pos = new Vector2(Input.NewMouseState.Position.X, Input.NewMouseState.Position.Y);
         float distance = Vector2.Distance(pos, new Vector2(Engine.ScreenSize.X * 2 / 3, Engine.ScreenSize.Y/2));
-        for(int i = 0; i < EntityManager.missions.Count; i++)
+        for(int i = 0; i < Mission.missions.Count; i++)
         {
-            var mission = EntityManager.missions[i].data;
+            var mission = Mission.missions[i].data;
             if (mission.Distance > 0)
             {
                 float freq = MathF.Sqrt(mission.Distance * mission.Distance * mission.Distance) / 100;
@@ -292,11 +297,11 @@ public class MissionSelect : GameState
     public override void Draw(SpriteBatch _spriteBatch) 
     {
         ParticleManager.Draw(_spriteBatch);
-        if (Engine.SaveGame.CurrentMissionIndex >= EntityManager.missions.Count)
+        if (Engine.SaveGame.CurrentMissionIndex >= Mission.missions.Count)
         {
             Engine.SaveGame.PrevMission();
         }
-        if (Engine.SaveGame.System == EntityManager.missions[Engine.SaveGame.CurrentMissionIndex].data.System)
+        if (Engine.SaveGame.System == Mission.missions[Engine.SaveGame.CurrentMissionIndex].data.System)
         {
             _spriteBatch.Draw(Assets.Get(Sprites.Miniplayer), playerPosition, null, new Color(0, 255, 0), 0, Vector2.Zero, 1, 0, 0);
         }

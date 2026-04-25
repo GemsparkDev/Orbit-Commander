@@ -162,7 +162,7 @@ public class Planet : Entity, ICollider
                 if (strength > 2)
                 {
                     _entity.StatusHolder.ApplyStatus(new Pressure(Color.Red, isSun));
-                    if((_entity as Enemy) != null && (_entity as Enemy).Health <= 0)
+                    if(_entity.GetComponent<Health>() != null && _entity.Health <= 0)
                     {
                         _entity.isExpired = true;
                     }
@@ -226,7 +226,7 @@ public class Planet : Entity, ICollider
     }
     public override void Update()
     {
-        foreach (var entity in Engine.EntityManager.Entities)
+        foreach (var entity in Engine.SaveGame.CurrentMission.Entities)
         {
             if(entity == this)
             {

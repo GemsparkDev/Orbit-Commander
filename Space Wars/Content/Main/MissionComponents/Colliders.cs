@@ -30,7 +30,7 @@ public class Colliders(Func<ICollider[]> _colliders) : IMissionComponent, IObsta
     {
         foreach(var collider in GetColliders)
         {
-            foreach (var entity in Engine.EntityManager.Entities)
+            foreach (var entity in Engine.SaveGame.CurrentMission.Entities)
             {
                 collider.Collide(entity);
             }

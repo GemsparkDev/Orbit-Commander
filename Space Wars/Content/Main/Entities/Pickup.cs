@@ -21,7 +21,7 @@ public class Pickup : Entity, IData
     public Pickup(ItemData _itemData, Vector2 _position, Vector2 _velocity, float _angularVelocity, int _health = 3)
         : base(_position, _velocity, 0, _angularVelocity)
     {
-        AddComponent(new Sprite(this) { Texture = _itemData.VirtualSprite, Color = Color.Cyan });
+        AddComponent(new Sprite(this, Color.Cyan) { Texture = _itemData.VirtualSprite });
         itemData = _itemData;
         AddComponent(new Friendly(this) { Team = Team.Friendly });
         Tooltip.AddWidget(new Decal(new Vector2(-Tooltip.Size.X / 3, 0), _itemData.RealSprite));
@@ -40,7 +40,7 @@ public class Pickup : Entity, IData
                 InvincibilityCooldown = 0;
                 return false;
             }
-            Health-=_damage;
+            Health -= _damage;
             if (!_ignoreImmunity)
             {
                 InvincibilityCooldown = 1;
@@ -51,7 +51,6 @@ public class Pickup : Entity, IData
             }
             SoundManager.PlaySound(Assets.Get(Sound.Death), Position);
             Engine.ShakeScreen(10 / ((Position - Engine.Camera.Position).Length() + 150));
-            ParticleManager.Add(new Particle(null, 1, Position + new Vector2(0, -1), new Vector2(0, -1.5f), 0, 0, Color.Orange, new Color(255, 0, 0, 0)) { drawText = $"Integrity: {Math.Max(Health, 0)}" });
             return true;
         }));
         InvincibilityCooldown = 5;
@@ -61,13 +60,6 @@ public class Pickup : Entity, IData
         : base(default, default, 0, 0)
     {
         throw new NotImplementedException();
-        AddComponent(new Sprite(this) { Texture = _itemData.VirtualSprite, Color = Color.Cyan });
-        itemData = _itemData;
-        AddComponent(new Friendly(this){Team = Team.Friendly});
-        Tooltip.AddWidget(new Decal(new Vector2(-Tooltip.Size.X / 3, 0), _itemData.RealSprite));
-        textbox = new Decal(new Vector2(0, -5), Assets.TextFont, _itemData.Name, _itemData.TextColor, 5f);
-        Tooltip.AddWidget(textbox);
-        _logger.Try(delegate { Health = Int32.Parse(_disassembly[1]);}, 1);
     }
     public void Parse(List<string> _disassembly, LoadLogger _logger)
     {
@@ -78,7 +70,7 @@ public class Pickup : Entity, IData
         int index = Player.leashedMaterials.IndexOf(this);
         if (index == -1)
         {
-            if (Player.IsFriendly(this) && EntityManager.DistanceSqr(Player, this) < 1375 && Player.leashedMaterials.Count < 3 && Player.canGatherResources)
+            if (Player.IsFriendly(this) && Vector2.DistanceSquared(Player.Position, Position) < 1375 && Player.leashedMaterials.Count < 3 && Player.canGatherResources)
             {
                 Player.leashedMaterials.Add(this);
                 if (Player.leashedMaterials.Count < 3)
@@ -130,11 +122,11 @@ public class Pickup : Entity, IData
             }
             Velocity = Vector2.Zero;
             Angle = MathF.Atan2(Position.X, -Position.Y);
-            nearestEnemy = Engine.EntityManager.NearestEnemy(new Enemy(Position, Vector2.Zero, 0, 0, null, Team));
+            nearestEnemy = Engine.SaveGame.CurrentMission.NearestEnemy(NewEnemy(Position, Vector2.Zero, 0, 0, null, Team));
             if (cooldown <= 0 && nearestEnemy != null && Vector2.Distance(nearestEnemy.Position, Position) < 300)
             {
                 var dir = Vector2.Normalize(nearestEnemy.Position - Position);
-                Engine.EntityManager.Add(NewPulseShot(Position, dir * 10, MathF.Atan2(dir.X, -dir.Y), 0, Team, 5, true));
+                Engine.SaveGame.CurrentMission.Add(NewPulseShot(Position, dir * 10, MathF.Atan2(dir.X, -dir.Y), 0, Team, 5, true));
                 SoundManager.PlaySound(Assets.Get(Sound.PulseFire), Position);
                 cooldown = 1.5f;
             }
@@ -162,11 +154,11 @@ public class Pickup : Entity, IData
                 cooldown -= Engine.DeltaSeconds;
             }
             Velocity = Vector2.Zero;
-            nearestEnemy = Engine.EntityManager.NearestEnemy(new Enemy(Position, Vector2.Zero, 0, 0, null, Team));
+            nearestEnemy = Engine.SaveGame.CurrentMission.NearestEnemy(NewEnemy(Position, Vector2.Zero, 0, 0, null, Team));
             if (cooldown <= 0 && nearestEnemy != null && Vector2.Distance(nearestEnemy.Position, Position) < 800)
             {
                 var dir = Vector2.Normalize(nearestEnemy.Position - Position);
-                var enemies = Engine.EntityManager.Hitscan(Position, dir, 800, true, out Vector2 _end, Friendly.Blacklist(Team));
+                var enemies = Engine.SaveGame.CurrentMission.Hitscan(Position, dir, 800, true, out Vector2 _end, Friendly.Blacklist(Team));
                 foreach (var enemy in enemies)
                 {
                     enemy.Collide(10);
@@ -200,7 +192,7 @@ public class Pickup : Entity, IData
         }
         var tex = Assets.Get(Sprites.Explosion);
         ParticleManager.Add(new Particle(tex, 3, Position, Vector2.Zero, 0, 0, Color.White, Color.Transparent));
-        Engine.EntityManager.Explode(100, 100, Position);
+        Engine.SaveGame.CurrentMission.Explode(100, 100, Position);
         yield return 1;
     }
     public static Pickup NewBomb(Vector2 _position, Vector2 _velocity, float _angle, float _angularVelocity, int _stealth = 0)
@@ -223,7 +215,7 @@ public class Pickup : Entity, IData
                 cooldown -= Engine.DeltaSeconds;
             }
             Velocity *= Util.FIED(0.2f);
-            foreach (var enemy in Engine.EntityManager.Entities)
+            foreach (var enemy in Engine.SaveGame.CurrentMission.Entities)
             {
                 if (Vector2.DistanceSquared(enemy.Position, Position) < 3600)
                 {
@@ -232,7 +224,7 @@ public class Pickup : Entity, IData
             }
             Vector2 offset = Util.RotateVector2(new Vector2(Util.OneToNegOne(), Util.OneToNegOne()) * 5, Angle);
             ParticleManager.Add(new Particle(Assets.Get(Sprites.Dot), 1, Position + offset, Velocity, Angle, 0, Color.Orange, Color.Transparent));
-            var nearestPickup = Engine.EntityManager.NearestItem(this, true);
+            var nearestPickup = Engine.SaveGame.CurrentMission.NearestItem(this, true);
             if (nearestPickup == null)
             {
                 break;

@@ -108,9 +108,8 @@ public class Player : Entity
         AddComponent(new Stealth(this));
         AddComponent(new Temp(this));
         AddComponent(new Statuses(this));
-        AddComponent(new Sprite(this) { Texture = Assets.Get(Sprites.Player) });
         AddComponent(new Friendly(this) { Team = Team.Friendly });
-        UpdateColor();
+        AddComponent(new Sprite(this, SaveGame.ColorScheme.TeamColors[Team]) { Texture = Assets.Get(Sprites.Player)});
         smokeParticles.isEmitterActive = false;
         engineSounds = Assets.Get(Sound.FireEngines).CreateInstance();
         engineSounds.IsLooped = true;
@@ -126,10 +125,6 @@ public class Player : Entity
     public static Player NewPlayer(Vector2 _position, Vector2 _velocity, float _angle)
     {
         return new Player(_position, _velocity, _angle);
-    }
-    public override void UpdateColor()
-    {
-        Color = SaveGame.ColorScheme.TeamColors[Team];
     }
     public override void Update()
     {
@@ -425,7 +420,7 @@ public class Player : Entity
                         {
                             constructs.Add(("Req. 3 scrap, deployable garage. Use metal to upgrade.", Assets.Get(Sprites.Mothership)));
                         }
-                        if (EntityManager.missions[Engine.SaveGame.CurrentMissionIndex].data.Name == "???")
+                        if (Mission.missions[Engine.SaveGame.CurrentMissionIndex].data.Name == "???")
                         {
                             constructs.Add(("1 scrap to construct. Be ready.", Assets.Get(Sprites.QuantumResonator)));
                         }
@@ -473,7 +468,7 @@ public class Player : Entity
                         {
                             types.Add("Mothership");
                         }
-                        if (EntityManager.missions[Engine.SaveGame.CurrentMissionIndex].data.Name == "???")
+                        if (Mission.missions[Engine.SaveGame.CurrentMissionIndex].data.Name == "???")
                         {
                             types.Add("Resonator");
                         }
@@ -489,25 +484,25 @@ public class Player : Entity
                                         firstScrap.isExpired = true;
                                         var barricade = Pickup.NewBarricade(firstScrap.Position, firstScrap.Velocity, 0, 0);
                                         leashedMaterials.Add(barricade);
-                                        Engine.EntityManager.Add(barricade);
+                                        Engine.SaveGame.CurrentMission.Add(barricade);
                                         break;
                                     case "Trap":
                                         firstScrap.isExpired = true;
                                         var trap = Pickup.NewTrap(firstScrap.Position, firstScrap.Velocity, 0, 0);
                                         leashedMaterials.Add(trap);
-                                        Engine.EntityManager.Add(trap);
+                                        Engine.SaveGame.CurrentMission.Add(trap);
                                         break;
                                     case "Bomb":
                                         firstScrap.isExpired = true;
                                         var bomb = Pickup.NewBomb(firstScrap.Position, firstScrap.Velocity, 0, 0);
                                         leashedMaterials.Add(bomb);
-                                        Engine.EntityManager.Add(bomb);
+                                        Engine.SaveGame.CurrentMission.Add(bomb);
                                         break;
                                     case "Furnace":
                                         firstScrap.isExpired = true;
                                         var furnace = Pickup.NewFurnace(firstScrap.Position, firstScrap.Velocity, 0, 0);
                                         leashedMaterials.Add(furnace);
-                                        Engine.EntityManager.Add(furnace);
+                                        Engine.SaveGame.CurrentMission.Add(furnace);
                                         break;
                                     case "Mothership":
                                         if (scrapCount >= 3)
@@ -517,12 +512,12 @@ public class Player : Entity
                                                 pickup.isExpired = true;
                                             }
                                             leashedMaterials.Clear();
-                                            Engine.EntityManager.Add(Enemy.NewMakeshiftMothership(Position, Velocity, 0));
+                                            Engine.SaveGame.CurrentMission.Add(Entity.NewMakeshiftMothership(Position, Velocity, 0));
                                         }
                                         break;
                                     case "Resonator":
                                         //firstScrap.isExpired = true;
-                                        Engine.EntityManager.Add(Enemy.NewQuantumResonator(Position));
+                                        Engine.SaveGame.CurrentMission.Add(Entity.NewQuantumResonator(Position));
                                         break;
                                 }
                             }
@@ -535,8 +530,8 @@ public class Player : Entity
                     Vector2 targetDir = targetVector;
                     if(aimAssist)
                     {
-                        Entity nearestEnemy = Engine.EntityManager.NearestEnemy(this, true);
-                        if(nearestEnemy != null && (nearestEnemy as Enemy).Health <= 0)
+                        Entity nearestEnemy = Engine.SaveGame.CurrentMission.NearestEnemy(this, true);
+                        if(nearestEnemy != null && nearestEnemy.Health <= 0)
                         {
                             var relativePos = Vector2.Normalize(nearestEnemy.Position - Position);
                             if (Vector2.Dot(relativePos, targetVector) > 0.9f)
@@ -545,14 +540,10 @@ public class Player : Entity
                             }
                         }
                     }
-                    List<Entity> miningEnemies = Engine.EntityManager.Hitscan(Position, targetDir, 120, false, out Vector2 _end);
-                    Engine.WriteLine(_end.Length());
+                    List<Entity> miningEnemies = Engine.SaveGame.CurrentMission.Hitscan(Position, targetDir, 120, false, out Vector2 _end);
                     foreach(var entity in miningEnemies)
                     {
-                        if(entity as Enemy != null)
-                        {
-                            (entity as Enemy).Mine();
-                        }
+                        entity.Mine();
                     }
                     for (float i = 0; i < (_end - Position - targetVector * 8).Length() / 2; i++)
                     {
@@ -683,7 +674,7 @@ public class Player : Entity
     {
         if (dockedEntity == null)
         {
-            Dockable dockableEntity = Engine.EntityManager.NearestDockableEntity(this);
+            Dockable dockableEntity = Engine.SaveGame.CurrentMission.NearestDockableEntity(this);
             if (dockableEntity != null)
             {
                 if (dockableEntity.Dock(this, _withVelocity))
@@ -838,51 +829,6 @@ public class Player : Entity
     : base(Vector2.One, Vector2.One, 0, 0)
     {
         throw new NotImplementedException();
-        AddComponent(new Stealth(this));
-        AddComponent(new Temp(this));
-        AddComponent(new Statuses(this));
-        AddComponent(new Sprite(this) { Texture = Assets.Get(Sprites.Player)});
-        AddComponent(new Friendly(this) { Team = Team.Friendly });
-        List<string> disassembly = SaveGame.Disassemble(_serialization);
-
-        spareFuses = Int32.TryParse(disassembly[0], out int spares) ? spares : 1;
-        aimAssist = !Boolean.TryParse(disassembly[1], out bool assist) || assist;
-        var fuses = SaveGame.Disassemble(disassembly[2]);
-        for (int i = 0; i < moduleFuses.LongLength; i++)
-        {
-            if (Boolean.TryParse(fuses[i], out bool fuse))
-            {
-                moduleFuses[i / 4, i % 4] = fuse;
-            }
-        }
-        _logger.Try(delegate { modules[ModuleType.Hull] = (Module)(ItemFactory.TryDeserialize(disassembly[3], _logger)); }, 3);
-        _logger.Try(delegate { modules[ModuleType.Guns] = (Module)(ItemFactory.TryDeserialize(disassembly[4], _logger)); }, 4);
-        _logger.Try(delegate { modules[ModuleType.Engines] = (Module)(ItemFactory.TryDeserialize(disassembly[5], _logger)); }, 5);
-        _logger.Try(delegate { modules[ModuleType.Sensors] = (Module)(ItemFactory.TryDeserialize(disassembly[6], _logger)); }, 6);
-        _logger.Try(delegate { modules[ModuleType.Core] = (Module)(ItemFactory.TryDeserialize(disassembly[7], _logger)); }, 7);
-        _logger.Try(delegate 
-        {
-            if (disassembly[8] != "null")
-            {
-                SecondaryWeapon = (Module)(ItemFactory.TryDeserialize(disassembly[8], _logger));
-            }
-            else
-            {
-                SecondaryWeapon = null;
-            }
-        }, 8);
-
-        UpdateColor();
-        smokeParticles.isEmitterActive = false;
-        engineSounds = Assets.Get(Sound.FireEngines).CreateInstance();
-        engineSounds.IsLooped = true;
-        var textures = new Texture2D[modules.Count];
-        for (int i = 0; i < modules.Count; i++)
-        {
-            textures[i] = (modules[(ModuleType)i] as IData).Texture;
-        }
-        EventHandler.SetFuseModuleDecals(textures);
-        EventHandler.UpdateFuseUI(moduleFuses, spareFuses);
     }
     public string Serialize()
     {

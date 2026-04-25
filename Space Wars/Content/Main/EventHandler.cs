@@ -199,9 +199,9 @@ public static class EventHandler
     }
     public static void UpdateMissionText()
     {
-        var mission = EntityManager.missions[Engine.SaveGame.CurrentMissionIndex].data;
+        var mission = Mission.missions[Engine.SaveGame.CurrentMissionIndex].data;
         bool completed = Engine.SaveGame.CurrentMissionCompleted;
-        bool isDangerous = Engine.SaveGame.FleetSystem > EntityManager.missions[Engine.SaveGame.CurrentMissionIndex].data.System;
+        bool isDangerous = Engine.SaveGame.FleetSystem > Mission.missions[Engine.SaveGame.CurrentMissionIndex].data.System;
         UI.MissionName.text = mission.Name;
         UI.MissionDescription.text = mission.Description;
         UI.IsComplete.text = completed ? "Completed" : "Not Completed";

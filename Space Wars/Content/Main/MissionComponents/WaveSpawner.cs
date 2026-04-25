@@ -13,8 +13,8 @@ using static Space_Wars.Content.Main.Mission;
 namespace Space_Wars.Content.Main.MissionComponents;
 internal class WaveSpawner : IMissionComponent
 {
-    public WaveSpawner(List<(int cost, Func<Vector2, Vector2, float, Team, Enemy> enemy)> _enemyCreditValues, 
-    List<Func<Vector2, Vector2, float, Team, Enemy>> _bosses, float _timerModifier, bool _isAggressive)
+    public WaveSpawner(List<(int cost, Func<Vector2, Vector2, float, Team, Entity> enemy)> _enemyCreditValues, 
+    List<Func<Vector2, Vector2, float, Team, Entity>> _bosses, float _timerModifier, bool _isAggressive)
     {
         enemyCreditValues = _enemyCreditValues;
         bosses = _bosses;
@@ -22,8 +22,8 @@ internal class WaveSpawner : IMissionComponent
         currentBoss = Util.Random.Next(bosses.Count);
         isAggressive = _isAggressive;
     }
-    public WaveSpawner(Func<(List<(int, Func<Vector2, Vector2, float, Team, Enemy>)> _enemyCreditValues, 
-    List<Func<Vector2, Vector2, float, Team, Enemy>> _bosses)> _spawner, float _timerModifier, bool _isAggressive)
+    public WaveSpawner(Func<(List<(int, Func<Vector2, Vector2, float, Team, Entity>)> _enemyCreditValues, 
+    List<Func<Vector2, Vector2, float, Team, Entity>> _bosses)> _spawner, float _timerModifier, bool _isAggressive)
     {
         var spawns = _spawner();
         enemyCreditValues = spawns._enemyCreditValues;
@@ -32,9 +32,9 @@ internal class WaveSpawner : IMissionComponent
         currentBoss = Util.Random.Next(bosses.Count);
         isAggressive = _isAggressive;
     }
-    List<(int cost, Func<Vector2, Vector2, float, Team, Enemy> enemy)> enemyCreditValues;
-    List<Func<Vector2, Vector2, float, Team, Enemy>> bosses;
-    private List<Enemy> enemiesSpawned = [];
+    List<(int cost, Func<Vector2, Vector2, float, Team, Entity> enemy)> enemyCreditValues;
+    List<Func<Vector2, Vector2, float, Team, Entity>> bosses;
+    private List<Entity> enemiesSpawned = [];
     private bool currentWaveActive = false;
     private float waveTimer = 5;
     private float maxWaveTimer = 5;
@@ -67,7 +67,7 @@ internal class WaveSpawner : IMissionComponent
             {
                 foreach (var enemy in enemiesSpawned)
                 {
-                    Engine.EntityManager.Add(enemy);
+                    Engine.SaveGame.CurrentMission.Add(enemy);
                     float angle = MathF.Atan2(-enemy.Position.X, enemy.Position.Y);
                     float height = Assets.DimsOf(Sprites.Dot).X;
                     for (float i = 0; i < 500; i++)
@@ -112,7 +112,7 @@ internal class WaveSpawner : IMissionComponent
             waveTimer = 10f * TimerModifier;
             maxWaveTimer = waveTimer;
             Wave++;
-            Engine.EntityManager.DecayPickups();
+            Engine.SaveGame.CurrentMission.DecayPickups();
             if ((Wave - 1) % 20 == 0)
             {
                 SoundManager.ChangeTrack(Assets.Get(Sound.main));
@@ -122,10 +122,10 @@ internal class WaveSpawner : IMissionComponent
                 SoundManager.ChangeTrack(Assets.Get(Sound.boss));
             }
 
-            if (EntityManager.missions[Engine.SaveGame.CurrentMissionIndex].data.PlayerProgression > 1 && (Wave % 20 == 0))
+            if (missions[Engine.SaveGame.CurrentMissionIndex].data.PlayerProgression > 1 && (Wave % 20 == 0))
             {
                 var pos = Engine.SaveGame.CurrentMission.NewSpawnLocation();
-                Enemy boss = bosses[currentBoss](pos, Vector2.Zero, MathF.Atan2(-pos.X, pos.Y), Team.Hostile);
+                Entity boss = bosses[currentBoss](pos, Vector2.Zero, MathF.Atan2(-pos.X, pos.Y), Team.Hostile);
                 if (Wave == 40)
                 {
                     boss = bosses[2](pos, Vector2.Zero, 0, Team.Hostile);
@@ -147,7 +147,7 @@ internal class WaveSpawner : IMissionComponent
                 }
                 List<int> newCosts = [];
                 int availableEnemies = Math.Min(enemyCreditValues.Count, Wave / 10 + 1 + ((isAggressive) ? 1 : 0));
-                Enemy squadLeader = null;
+                Entity squadLeader = null;
                 int count = 0;
                 for (int i = 0; i < availableEnemies; i++)
                 {
@@ -193,7 +193,7 @@ internal class WaveSpawner : IMissionComponent
             }
             for (int i = 0; i < enemiesSpawned.Count / 4 + 1; i++)
             {
-                Enemy enemy = enemiesSpawned[Util.Random.Next(0, enemiesSpawned.Count)];
+                Entity enemy = enemiesSpawned[Util.Random.Next(0, enemiesSpawned.Count)];
                 var comp = enemy.GetComponent<Behaviour>();
                 if (comp != null)
                 {

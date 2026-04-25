@@ -16,12 +16,11 @@ namespace Space_Wars.Content.Main;
 
 public class Engine : Game
 {
-    private static readonly List<string> debugLog = [];
+    private static readonly List<(string log, Color color)> debugLog = [];
     private GraphicsDeviceManager graphics;
     private SpriteBatch spriteBatch;
     private RenderTarget2D renderTarget;
     public static UIManager UIManager { get; private set; }
-    public static EntityManager EntityManager { get; private set; }
     public static DialogueManager DialogueManager { get; private set; }
     public static SaveGame SaveGame { get; private set; }
     public static Camera Camera { get; private set; }
@@ -68,7 +67,6 @@ public class Engine : Game
 
         UIManager = new UIManager();
         UIManager.BackBuffer = BackBuffer;
-        EntityManager = new EntityManager();
         DialogueManager = new DialogueManager();
         AddUIElements();
         CurrentGameState.SwitchState(new MainMenu());
@@ -130,13 +128,12 @@ public class Engine : Game
     {
         UIManager.DisableAll();
         ParticleManager.Initialize();
-        EntityManager.Initialize();
+        SaveGame.CurrentMission = Mission.missions[SaveGame.CurrentMissionIndex].instance();
         SoundManager.Initialize();
         EventHandler.UpdateModulesStatus();
         SoundManager.PlayGlobalSound(Assets.Get(Sound.Interact));
         ScreenShakeFactor = 0;
-        SaveGame.Player.Progression = EntityManager.missions[SaveGame.CurrentMissionIndex]
-            .data.PlayerProgression;
+        SaveGame.Player.Progression = Mission.missions[SaveGame.CurrentMissionIndex].data.PlayerProgression;
         SaveGame.CurrentMission.Initialize();
     }
 
@@ -204,10 +201,14 @@ public class Engine : Game
     {
         return UIManager.MoveSelectedIcon() as Pickup;
     }
-    public static void WriteLine<T>(T arg)
+    public static void WriteLine<T>(T arg, Color _color = default)
     {
+        if(_color == default)
+        {
+            _color = Color.White;
+        }
         String stringLog = arg?.ToString();
-        debugLog.Insert(0, $"{stringLog}");
+        debugLog.Insert(0, ($"{stringLog}", _color));
     }
     public static void ShakeScreen(float _val)
     {
@@ -284,16 +285,18 @@ public class Engine : Game
         if (SaveGame.DebugMode)
         {
             int logCount = debugLog.Count;
+            int offset = 0;
             if (logCount > 10)
             {
                 logCount = 10;
             }
             for (int i = 0; i < logCount; i++)
             {
-                Vector2 textPosition = new(35, 20 + 15 * i * UIManager.UIScale);
+                Vector2 textPosition = new(35, 20 + 20 * offset * UIManager.UIScale);
                 try
                 {
-                    spriteBatch.DrawString(Assets.TextFont, $"{i + 1}: {debugLog[i]}", textPosition, Color.White, 0, Vector2.Zero, UIManager.UIScale, SpriteEffects.None, 0.45f);
+                    spriteBatch.DrawString(Assets.TextFont, $"{i + 1}: {debugLog[i].log}", textPosition, debugLog[i].color, 0, Vector2.Zero, UIManager.UIScale, SpriteEffects.None, 0.45f);
+                    offset += debugLog[i].log.Split('\n').Length;
                 }
                 catch (Exception e)
                 {
@@ -382,7 +385,7 @@ public static class Util
             Vector2 particleVelocity = new Vector2(MathF.Cos(angle), MathF.Sin(angle)) * (Util.Random.NextSingle() * 2 + 2);
             ParticleManager.Add(new Particle(Assets.Get(Sprites.Circle), 0.25f, _position - _velocity, particleVelocity + _velocity, angle, 0, Color.DarkSlateGray, Color.Transparent));
         }
-        Engine.EntityManager.Explode(_damage, _radius, _position);
+        Engine.SaveGame.CurrentMission.Explode(_damage, _radius, _position);
         Engine.ShakeScreen(150 / ((_position - Engine.Camera.Position).Length() + 300));
     }
     public static Vector2 PredictEnemy(Entity nearestEnemy, Entity shooter, float speed, float offset = 0)

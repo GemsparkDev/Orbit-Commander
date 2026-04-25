@@ -26,7 +26,7 @@ public class Dockable(Entity _parentEntity, Container _menu, bool hasInventory =
     public bool Dock(Player _player, bool _withVelocity)
     {
         EventHandler.DisableDockingMenus();
-        if (EntityManager.DistanceSqr(_player, Entity) > 1250)
+        if (Vector2.DistanceSquared(_player.Position, Entity.Position) > 1250)
         {
             return false;
         }
@@ -44,7 +44,7 @@ public class Dockable(Entity _parentEntity, Container _menu, bool hasInventory =
                 pickup.isExpired = false;
                 pickup.Position = Entity.Position;
                 _player.leashedMaterials.Add(pickup);
-                Engine.EntityManager.Add(pickup);
+                Engine.SaveGame.CurrentMission.Add(pickup);
             }
         }
         else

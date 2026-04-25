@@ -27,7 +27,7 @@ public class SaveGame
     }
     public int CurrentMissionIndex { get; set; } = 0;
     private bool giveWeapon = true;
-    public bool[] CompletedMissions { get; } = new bool[EntityManager.missions.Count];
+    public bool[] CompletedMissions { get; } = new bool[Mission.missions.Count];
     public Player Player { get; } = new Player(Vector2.Zero, Vector2.Zero, 0);
     public Pickup[] Inventory { get; } = new Pickup[4];
     public Pickup[] MissionSelectInventory { get; } = new Pickup[4];
@@ -39,7 +39,7 @@ public class SaveGame
     { 
         get 
         { 
-            currentMission ??= EntityManager.missions[CurrentMissionIndex].instance(); 
+            currentMission ??= Mission.missions[CurrentMissionIndex].instance(); 
             return currentMission; 
         } 
         set 
@@ -54,6 +54,7 @@ public class SaveGame
     public static bool PatchedConics { get; set; } = true;
     public static bool UseShader { get; set; } = true;
     public static ColorScheme ColorScheme { get; set; } = new StandardScheme();
+    
     public SaveGame() { }
     public SaveGame(string _serialization)
     {
@@ -153,18 +154,18 @@ public class SaveGame
     }
     public void SetMission(int _count)
     {
-        CurrentMissionIndex = Math.Clamp(_count, 0, EntityManager.missions.Count - 1);
-        currentMission = EntityManager.missions[CurrentMissionIndex].instance();
+        CurrentMissionIndex = Math.Clamp(_count, 0, Mission.missions.Count - 1);
+        currentMission = Mission.missions[CurrentMissionIndex].instance();
         EventHandler.UpdateMissionText();
     }
     public void NextMission()
     {
-        CurrentMissionIndex = Math.Clamp(CurrentMissionIndex + 1, 0, EntityManager.missions.Count - 1);
+        CurrentMissionIndex = Math.Clamp(CurrentMissionIndex + 1, 0, Mission.missions.Count - 1);
         EventHandler.UpdateMissionText();
     }
     public void PrevMission()
     {
-        CurrentMissionIndex = Math.Clamp(CurrentMissionIndex - 1, 0, EntityManager.missions.Count - 1);
+        CurrentMissionIndex = Math.Clamp(CurrentMissionIndex - 1, 0, Mission.missions.Count - 1);
         EventHandler.UpdateMissionText();
     }
     public void CompleteMission(int _duration)

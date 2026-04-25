@@ -10,7 +10,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace Space_Wars.Content.Main.Components;
-public class Sprite(Entity _entity) : Component(_entity)
+public class Sprite(Entity _entity, Color _color) : Component(_entity)
 {
     private Texture2D texture;
     private ParticleEmitter collider;
@@ -21,7 +21,8 @@ public class Sprite(Entity _entity) : Component(_entity)
             texture = value;
             collider = new ParticleEmitter(Assets.Get(Sprites.Dot), Entity.Position, ColliderRadius, Color.Yellow) { isEmitterActive = false };
         } }
-    public Color Color { get; set; } = Color.White;
+    public Color Color { get; set; } = _color;
+    public Color TargetColor { get; set; } = _color;
     public virtual float ColliderRadius
     {
         get { return Texture == null ? 0 : SaveGame.EnemyHitboxModifier * (Texture.Height + Texture.Width) / 4 + 1; }
@@ -36,6 +37,11 @@ public class Sprite(Entity _entity) : Component(_entity)
         collider.isEmitterActive = SaveGame.DebugMode;
         collider.particleVelocity = Entity.ColliderRadius;
         collider.Update();
+        if (Color != TargetColor)
+        {
+            float l = Util.FIED(0.025f);
+            Color = new Color((byte)(Entity.Color.R * l + TargetColor.R * (1f - l)), (byte)(Entity.Color.G * l + TargetColor.G * (1f - l)), (byte)(Entity.Color.B * l + TargetColor.B * (1f - l)), (byte)(TargetColor.A)); //Lerp towards ideal color
+        }
     }
     public override void Draw(SpriteBatch _spriteBatch)
     {
@@ -50,13 +56,13 @@ public class Sprite(Entity _entity) : Component(_entity)
         var sC = Entity.GetComponent<Stealth>();
         if(sC != null)
         {
-            var maxDistance = EntityManager.StealthRange * (float)Engine.SaveGame.Player.CountFuses(ModuleType.Sensors) / 4;
+            var maxDistance = Mission.StealthRange * (float)Engine.SaveGame.Player.CountFuses(ModuleType.Sensors) / 4;
             //Player has superior sensing to stealth -> full detection
             //Player has equal sensing to stealth -> partial detection when nearby
             //Player has inferior sensing to stealth -> no detection
             if (Engine.SaveGame.Player.SensingAbility == sC.StealthAbility)
             {
-                float distanceSqr = EntityManager.DistanceSqr(Engine.SaveGame.Player, Entity);
+                float distanceSqr = Vector2.DistanceSquared(Engine.SaveGame.Player.Position, Entity.Position);
                 if (distanceSqr > maxDistance * maxDistance)
                 {
                     stealth = 0;

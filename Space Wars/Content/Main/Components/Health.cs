@@ -7,6 +7,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Space_Wars.Content.Main.Entities;
 using Microsoft.Xna.Framework;
 using Space_Wars.Content.Main.Particles;
+using System.ComponentModel;
 
 namespace Space_Wars.Content.Main.Components;
 internal class Health(Entity _entity) : Component(_entity)
@@ -21,6 +22,11 @@ internal class Health(Entity _entity) : Component(_entity)
         if (currentHealth > MaxHealth)
         {
             currentHealth = MaxHealth;
+        }
+        var comp = Entity.GetComponent<FollowEmitter>();
+        if(comp != null && CurrentHealth > 0)
+        {
+            comp.ParticleEmitter.isEmitterActive = SaveGame.DebugMode;
         }
         if (healthCD <= 0)
         {
@@ -38,7 +44,16 @@ internal class Health(Entity _entity) : Component(_entity)
         {
             healthCD -= Engine.DeltaSeconds;
         }
-        Engine.WriteLine(prevHealth);
+        float d = 1f;
+        if(CurrentHealth <= 0)
+        {
+            Entity.Team = Team.Dead;
+            d = 0.67f;
+        }
+        if(Entity is not Pickup && Entity is not Planet)
+        {
+            Entity.GetComponent<Sprite>().TargetColor = SaveGame.ColorScheme.TeamColors[Entity.Team] * d; //Sets color based on friendlyness
+        }
     }
     public override void Draw(SpriteBatch _spriteBatch)
     {

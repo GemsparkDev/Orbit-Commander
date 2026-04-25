@@ -16,6 +16,16 @@ internal class Transform(Entity _entity) : Component(_entity)
     public float AngularVelocity { get; set; } = 0;
     public override void Update()
     {
+        if(float.IsNaN(Velocity.X + Velocity.Y))
+        {
+            Velocity = Vector2.Zero;
+            Engine.WriteLine("Velocity was NaN");
+        }
+        if(float.IsNaN(Position.X + Position.Y))
+        {
+            Velocity = Vector2.Zero;
+            Engine.WriteLine("Position was NaN");
+        }
         Position += Velocity * Engine.DeltaSeconds * 60;
         Angle += AngularVelocity * Engine.DeltaSeconds * 60;
     }
