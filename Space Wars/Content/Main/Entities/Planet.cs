@@ -161,7 +161,7 @@ public class Planet : Entity, ICollider
                 acceleration += relativePosition / distance * strength * mass / distance / distance / 5;
                 if (strength > 2)
                 {
-                    _entity.StatusHolder.ApplyStatus(new Pressure(Color.Red, isSun));
+                    _entity.StatusHolder?.ApplyStatus(new Pressure(Color.Red, isSun));
                     if(_entity.GetComponent<Health>() != null && _entity.Health <= 0)
                     {
                         _entity.isExpired = true;

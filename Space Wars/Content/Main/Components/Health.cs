@@ -67,7 +67,7 @@ internal class Health(Entity _entity) : Component(_entity)
                 val = Math.Clamp(val + stealth.RevealDuration, 0, 1);
             }
         }
-        if (CurrentHealth > 0)
+        if (CurrentHealth > 0 && !!(Entity.GetComponent<IsChild>()?.ChildEnemy??false))
         {
             //Health bar
             Vector2 barPosition = Entity.Position + new Vector2(-Entity.ColliderRadius*0.875f, Entity.ColliderRadius * 1.1f);

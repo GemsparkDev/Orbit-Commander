@@ -34,17 +34,15 @@ public class Entity : IMissionComponent
     public virtual int SensingAbility { get { return GetComponent<Stealth>().SensingAbility; } protected set { GetComponent<Stealth>().SensingAbility = value; } }
     public virtual int StealthAbility { get { return GetComponent<Stealth>().StealthAbility; } protected set { GetComponent<Stealth>().StealthAbility = value; } }
     public float InvincibilityCooldown { get { return GetComponent<Collide>().InvincibilityCooldown; } set { GetComponent<Collide>().InvincibilityCooldown = value; } }
-    public bool ChildEnemy { get {return GetComponent<ChildEnemyTag>().ChildEnemy;} set {GetComponent<ChildEnemyTag>().ChildEnemy = value;}}
+    public bool ChildEnemy { get {return GetComponent<IsChild>().ChildEnemy;} set {GetComponent<IsChild>().ChildEnemy = value;}}
     public ParticleEmitter EnemyRange => GetComponent<FollowEmitter>().ParticleEmitter;
     public Statuses StatusHolder => GetComponent<Statuses>();
     public Vector2 Size => GetComponent<Sprite>().Size;
     public virtual float ColliderRadius => GetComponent<Sprite>().ColliderRadius;
     public int Damage => GetComponent<Attack>().Damage;
     protected static Player Player => Engine.SaveGame.Player;
-    public bool IsFriendly(Entity _entity)
-    {
-        return _entity.GetComponent<Friendly>().Team == GetComponent<Friendly>().Team;
-    }
+    public bool IsFriendly(Entity _entity) => _entity.GetComponent<Friendly>().Team == GetComponent<Friendly>().Team;
+    
     public void ApplyWork(float _q)
     {
         GetComponent<Temp>()?.ApplyWork(_q);
@@ -57,10 +55,7 @@ public class Entity : IMissionComponent
     {
         Color = _color;
     }
-    public void Initialize()
-    {
-        
-    }
+    public void Initialize() { }
     public void CollideWith(Entity nearestEnemy)
     {
         if (nearestEnemy != null && Vector2.Distance(nearestEnemy.Position, Position) < ColliderRadius + nearestEnemy.ColliderRadius)
@@ -125,11 +120,7 @@ public class Entity : IMissionComponent
     }
     public void Mine()
     {
-        var comp = GetComponent<Mineable>();
-        if(comp != null)
-        {
-            comp.Mine(MaxHealth);
-        }
+        GetComponent<Mineable>()?.Mine(MaxHealth);
     }
     public void Explode(int _damage, float _radius)
     {
@@ -212,7 +203,7 @@ public class Entity : IMissionComponent
     }
     public static Entity NewEnemy(Vector2 _position, Vector2 _velocity, float _angle, int _health, Texture2D _texture, Team _team = Team.Hostile, SoundEffect _hitSound = null)
     {
-        Entity entity = new Entity(_position, _velocity, _angle, 0);
+        var entity = new Entity(_position, _velocity, _angle, 0);
         if(_hitSound == null)
         {
             _hitSound = Assets.Get(Sound.Hit);
@@ -224,37 +215,37 @@ public class Entity : IMissionComponent
             .AddComponent(new Sprite(entity, SaveGame.ColorScheme.TeamColors[entity.Team]) { Texture = _texture })
             .AddComponent(new Health(entity) { CurrentHealth = _health, MaxHealth = _health })
             .AddComponent(new Collide(entity, delegate(int damage, bool _ignoreImmunity)
-        {
-            damage = entity.StatusHolder.ModifyDamage(damage);
-            if (damage > 0)
             {
-                if(entity.Health > 0)
+                damage = entity.StatusHolder.ModifyDamage(damage);
+                if (damage > 0)
                 {
-                    entity.Flash(Color.White);
+                    if(entity.Health > 0)
+                    {
+                        entity.Flash(Color.White);
+                    }   
+                    else
+                    {
+                        entity.Velocity += new Vector2(Util.OneToNegOne(), Util.OneToNegOne()) + Vector2.Normalize(entity.Position - Player.Position) * 0.3f * (float)damage;
+                        entity.AngularVelocity += Util.OneToNegOne()*0.05f * (float)damage;
+                    }
+                    entity.ApplyWork(damage);
+                    entity.Health -= damage;
+                    Engine.ShakeScreen(10 / ((entity.Position - Engine.Camera.Position).Length() + 200) * damage);
+                    ParticleManager.Add(new Particle(null, 1, entity.Position + new Vector2(0, -1), new Vector2(0, -1.5f), 0, 0, Color.Orange, new Color(255, 0, 0, 0)) { drawText = $"{damage}" });
+                    entity.RevealDuration = Math.Max(entity.RevealDuration, 0.3f * MathF.Sqrt(damage));
+                    return true;
                 }
-                else
+                else if (damage < 0)
                 {
-                    entity.Velocity += new Vector2(Util.OneToNegOne(), Util.OneToNegOne()) + Vector2.Normalize(entity.Position - Player.Position) * 0.3f * (float)damage;
-                    entity.AngularVelocity += Util.OneToNegOne()*0.05f * (float)damage;
+                    SoundManager.PlaySound(Assets.Get(Sound.Full), entity.Position);
+                    entity.Health -= damage;
+                    ParticleManager.Add(new Particle(null, 1, entity.Position + new Vector2(0, -1), new Vector2(0, -1.5f), 0, 0, Color.Orange, new Color(0, 255, 0, 0)) { drawText = $"{-damage}" });
                 }
-                entity.ApplyWork(damage);
-                entity.Health -= damage;
-                Engine.ShakeScreen(10 / ((entity.Position - Engine.Camera.Position).Length() + 200) * damage);
-                ParticleManager.Add(new Particle(null, 1, entity.Position + new Vector2(0, -1), new Vector2(0, -1.5f), 0, 0, Color.Orange, new Color(255, 0, 0, 0)) { drawText = $"{damage}" });
-                entity.RevealDuration = Math.Max(entity.RevealDuration, 0.3f * MathF.Sqrt(damage));
-                return true;
-            }
-            else if (damage < 0)
-            {
-                SoundManager.PlaySound(Assets.Get(Sound.Full), entity.Position);
-                entity.Health -= damage;
-                ParticleManager.Add(new Particle(null, 1, entity.Position + new Vector2(0, -1), new Vector2(0, -1.5f), 0, 0, Color.Orange, new Color(0, 255, 0, 0)) { drawText = $"{-damage}" });
-            }
-            return false;
-        }) { HitSound = _hitSound })
+                return false;
+            }) { HitSound = _hitSound })
             .AddComponent(new FollowEmitter(entity) { ParticleEmitter = new(Assets.Get(Sprites.Dot), entity.Position, 0, Color.Red * 0.75f) })
             .AddComponent(new Cooldown(entity))
-            .AddComponent(new ChildEnemyTag(entity))
+            .AddComponent(new IsChild(entity))
             .AddComponent(new Mineable(entity));
         return entity;
     }
@@ -389,7 +380,7 @@ public class Entity : IMissionComponent
         float missileCount = 0;
         float bulletCount = 0;
         bool hasLaunchedAllies = false;
-        float targetAngle = Angle;
+        float targetAngle;
         while (true)
         {
             if (missileCooldown > 0)
@@ -680,7 +671,7 @@ public class Entity : IMissionComponent
         Entity tail1 = null;
         Entity tail2 = null;
         bool hasExploded = false;
-        float targetAngle = Angle;
+        float targetAngle;
         if (_parent == null)
         {
             tail1 = NewEnemy(Position, Velocity, Angle, 50, Assets.Get(Sprites.WyvernBoss), _parent.Team);
@@ -829,7 +820,7 @@ public class Entity : IMissionComponent
         Entity nearestPickup;
         int bulletOffset = 8;
         float laserWindup = 3;
-        float targetAngle = Angle;
+        float targetAngle;
         Func<Vector2, Vector2, float, Team, Entity>[][] waves =
         [
             [ NewFighter, NewFighter, ],
@@ -1013,7 +1004,7 @@ public class Entity : IMissionComponent
         col.A = 0;
         var engineParticles = new ParticleEmitter(Assets.Get(Sprites.Circle), 0.1f, Vector2.Zero, 0, MathF.PI / 2, 2,
             200f, Color.Yellow, EmitterType.EmissionOverTime) { particleFadeToColor = col };
-        float targetAngle = Angle;
+        float targetAngle;
         while (true)
         {
             var targetVector = Vector2.Normalize(Player.Position - Position);
@@ -1171,7 +1162,7 @@ public class Entity : IMissionComponent
         float detectionCooldown = 0;
         EnemyRange.particleVelocity = 450;
         Entity detectedEntity = null;
-        float targetAngle = Angle;
+        float targetAngle;
         while (true)
         {
             if (detectionCooldown <= 0)
@@ -1228,7 +1219,17 @@ public class Entity : IMissionComponent
             }
             else
             {
-                var planet = Engine.SaveGame.CurrentMission.Planet;
+                Planet planet = null;
+                float closestDistance = 99999;
+                foreach(var entity in Engine.SaveGame.CurrentMission.Entities)
+                {
+                    float distance = Vector2.Distance(entity.Position, Position);
+                    if(entity is Planet && closestDistance > distance)
+                    {
+                        closestDistance = distance;
+                        planet = entity as Planet;
+                    }
+                }
                 var relativePosition = Position - planet.Position;
                 var dir = Vector2.Normalize(relativePosition);
                 Velocity -= Vector2.Normalize(dir * (relativePosition.Length() - planet.ColliderRadius * 1.5f)) * Engine.DeltaSeconds * 4;
@@ -1296,7 +1297,7 @@ public class Entity : IMissionComponent
         float swapCooldown = 10;
         float time = 0;
         bool isDamaged = false;
-        float targetAngle = Angle;
+        float targetAngle;
         while (true)
         {
             if (swapCooldown > 0)
@@ -1389,7 +1390,7 @@ public class Entity : IMissionComponent
             1.5f, //Primary attack
             15, //Octoshot
         ];
-        float targetAngle = Angle;
+        float targetAngle;
         float shotCooldown = 0.75f;
         int shotCount = 0;
         bool isDamaged = false;
@@ -1683,7 +1684,7 @@ public class Entity : IMissionComponent
         int moveTowards = 1;
         int segmentKillCount = 0;
         Vector2 targetVector = Velocity;
-        float targetAngle = Angle;
+        float targetAngle;
         foreach (var enemy in segments)
         {
             Engine.SaveGame.CurrentMission.Add(enemy);
@@ -1860,7 +1861,7 @@ public class Entity : IMissionComponent
         int shotCount = 0;
         StealthAbility = 2;
         SensingAbility = 1;
-        float targetAngle = Angle;
+        float targetAngle;
         CD =
         [
             0, //Default
@@ -1963,7 +1964,7 @@ public class Entity : IMissionComponent
             {
                 if (Vector2.DistanceSquared(Position, randomPosition) < 1000)
                 {
-                    randomPosition = Util.ToUnitVector(Util.Random.NextSingle() * MathF.Tau) * (Engine.SaveGame.CurrentMission.Planet.ColliderRadius) * (1 + Util.Random.NextSingle() / 2);
+                    randomPosition = NewGoToLocation(); 
                 }
                 GoToPosition(randomPosition, 1);
             }
@@ -2007,7 +2008,7 @@ public class Entity : IMissionComponent
         Engine.SaveGame.CurrentMission.Add(_leftWing);
         Engine.SaveGame.CurrentMission.Add(_rightWing);
         float offset = 1;
-        float targetAngle = Angle;
+        float targetAngle;
         while (true)
         {
             var nearestEnemy = Engine.SaveGame.CurrentMission.NearestEnemy(this);
@@ -2158,7 +2159,7 @@ public class Entity : IMissionComponent
             0, //Gun 
             10 //Ability
         ];
-        float targetAngle = Angle;
+        float targetAngle;
         float bullets = 0;
         while (true)
         {
@@ -2244,7 +2245,7 @@ public class Entity : IMissionComponent
         Entity nearestEnemy = null;
         StealthAbility = 2;
         SensingAbility = 1;
-        float targetAngle = Angle;
+        float targetAngle;
         while(true)
         {
             if (Health <= 0)
@@ -2345,9 +2346,20 @@ public class Entity : IMissionComponent
                 }
                 else
                 {
-                    Vector2 relativePosition = Engine.SaveGame.CurrentMission.Planet.Position - Position;
+                    Planet planet = null;
+                    float closestDistance = float.MaxValue;
+                    foreach(var entity in Engine.SaveGame.CurrentMission.Entities)
+                    {
+                        float ds = Vector2.Distance(Position, entity.Position);
+                        if(closestDistance > ds && entity is Planet)
+                        {
+                            closestDistance = ds;
+                            planet = entity as Planet;
+                        }
+                    }
+                    Vector2 relativePosition = planet.Position - Position;
                     float distance = relativePosition.Length();
-                    Vector2 velocityOffset = relativePosition * (distance - Engine.SaveGame.CurrentMission.Planet.ColliderRadius) / distance;
+                    Vector2 velocityOffset = relativePosition * (distance - planet.ColliderRadius) / distance;
                     Velocity += (velocityOffset + Vector2.Normalize(new Vector2(relativePosition.Y, -relativePosition.X)) * 25 * direction) * Engine.DeltaSeconds;
                 }
                 if (CD[2] <= 0)
@@ -2389,7 +2401,7 @@ public class Entity : IMissionComponent
         int unitsPerShot = 0;
         int unitsPerAbility = 0;
         bool isFirst = true;
-        float targetAngle = Angle;
+        float targetAngle;
         while (true)
         {
             float frac;
@@ -2717,7 +2729,7 @@ public class Entity : IMissionComponent
     IEnumerable<int> Decoy()
     {
         int damage = 20;
-        float targetAngle = Angle;
+        float targetAngle;
         while (true)
         {
             Entity nearestEnemy = Engine.SaveGame.CurrentMission.NearestEnemy(this, false);
@@ -2756,7 +2768,7 @@ public class Entity : IMissionComponent
         {
             speed = 7;
         }
-        float targetAngle = Angle;
+        float targetAngle;
         while (Health > 0)
         {
             Velocity *= 0.8f;
@@ -2769,7 +2781,6 @@ public class Entity : IMissionComponent
                     GoToPosition(Player.Position,(speed + (Player.Position - Position).Length() / 100));
                 }
                 Vector2 targetVector = Player.Position - Position + (Player.Velocity - Velocity) * 8;
-                targetAngle = MathF.Atan2(targetVector.X, -targetVector.Y);
                 yield return 0;
                 continue;
             }
@@ -2807,7 +2818,7 @@ public class Entity : IMissionComponent
         int damage = 5;
         CD = [0];
         EnemyRange.particleVelocity = 500;
-        float targetAngle = Angle;
+        float targetAngle;
         while (Health > 0)
         {
             var nearestEnemy = Engine.SaveGame.CurrentMission.NearestEnemy(this);
@@ -2858,7 +2869,7 @@ public class Entity : IMissionComponent
         int damage = 8;
         CD = [0];
         EnemyRange.particleVelocity = 400;
-        float targetAngle = Angle;
+        float targetAngle;
         while (Health > 0)
         {
             var nearestEnemy = Engine.SaveGame.CurrentMission.NearestEnemy(this);
@@ -2908,7 +2919,7 @@ public class Entity : IMissionComponent
         EnemyRange.particleVelocity = 10;
         float fuel = 45;
         float deathCooldown = 2;
-        float targetAngle = Angle;
+        float targetAngle;
         GetComponent<Collide>().OnCollide = delegate(int _damage, bool _ignoreImmunity)
         {
             _damage = StatusHolder.ModifyDamage(_damage);
@@ -3033,7 +3044,7 @@ public class Entity : IMissionComponent
         Engine.SaveGame.CurrentMission.Add(shield);
         EnemyRange.particleVelocity = 200;
         CD = [0];
-        float targetAngle = Angle;
+        float targetAngle;
         while (Health > 0)
         {
             Vector2 targetVector = Player.Position - Position + (Player.Velocity - Velocity) * 8;
@@ -3123,7 +3134,7 @@ public class Entity : IMissionComponent
         EnemyRange.particleVelocity = 250;
         var col = Color.DarkRed;
         col.A = 0;
-        float targetAngle = Angle;
+        float targetAngle;
         ParticleEmitter engineParticles = new(Assets.Get(Sprites.Circle), 0.15f, Vector2.Zero, 0, MathF.PI/4, 2, 150f, Color.Yellow, EmitterType.EmissionOverTime) { particleFadeToColor = col };
         while (Health > 0)
         {
@@ -3219,7 +3230,7 @@ public class Entity : IMissionComponent
         Entity target = null;
         float trackTime = 0;
         Vector2 rand = Vector2.Zero;
-        float targetAngle = Angle;
+        float targetAngle;
         while (Health > 0)
         {
             Entity nearestEnemy = Engine.SaveGame.CurrentMission.NearestEnemy(this);
@@ -3331,7 +3342,7 @@ public class Entity : IMissionComponent
         Entity target = null;
         float trackTime = 0;
         Vector2 rand = Position;
-        float targetAngle = Angle;
+        float targetAngle;
         while (Health > 0)
         {
             Velocity += GetNormalizedAcceleration() * Engine.DeltaSeconds * 60;
@@ -3403,7 +3414,7 @@ public class Entity : IMissionComponent
         float trackTime = 0;
         float hookCooldown = 0;
         Vector2 rand = Position;
-        float targetAngle = Angle;
+        float targetAngle;
         while (Health > 0)
         {
             Velocity += GetNormalizedAcceleration() * Engine.DeltaSeconds * 60;
@@ -3592,7 +3603,7 @@ public class Entity : IMissionComponent
         bool constructing = false;
         Entity trackedEnemy = null;
         float enemyCooldown = 5;
-        float targetAngle = Angle;
+        float targetAngle;
         while (true)
         {
             var enemy = Engine.SaveGame.CurrentMission.NearestEnemy(this);
@@ -4065,7 +4076,18 @@ public class Entity : IMissionComponent
     IEnumerable<int> Glider(float _distance)
     {
         bool isDocked = true;
-        float xSpeed = Planet.GetOrbitalVelocity(new Vector2(0, _distance), Engine.SaveGame.CurrentMission.Planet.Position, Engine.SaveGame.CurrentMission.Planet.mass).X;
+        Planet planet = null;
+        float closestDistance = float.MaxValue;
+        foreach (var entity in Engine.SaveGame.CurrentMission.Entities)
+        {
+            float ds = Vector2.Distance(Vector2.Zero, entity.Position);
+            if (closestDistance > ds && entity is Planet)
+            {
+                closestDistance = ds;
+                planet = entity as Planet;
+            }
+        }
+        float xSpeed = Planet.GetOrbitalVelocity(new Vector2(0, _distance), planet.Position, planet.mass).X;
         while (true)
         {
             Velocity = new Vector2(xSpeed, xSpeed * 2 * (Position.Y - _distance) / Position.X);
@@ -4159,7 +4181,7 @@ public class Entity : IMissionComponent
         bool currentlyCrafting = false;
         int tier = 1;
         int untilNextTier = 1;
-        float targetAngle = Angle;
+        float targetAngle;
         while (Health > 0)
         {
             float tierBonus = 1 / MathF.Sqrt(tier);
@@ -4934,7 +4956,7 @@ public class Entity : IMissionComponent
         projectile.SensingAbility = 99;
         projectile.AddComponent(new ExpireTimer(projectile) { TimeLeft = 8 });
         projectile.AddComponent(new Attack(projectile) { Damage = _damage });
-        projectile.AddComponent(new ChildEnemyTag(projectile) { ChildEnemy = true });
+        projectile.AddComponent(new IsChild(projectile) { ChildEnemy = true });
         return projectile;
     }
     #region Projectiles

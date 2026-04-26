@@ -11,10 +11,8 @@ namespace Space_Wars.Content.Main.Particles
         public Vector2 Size => texture == null ? Vector2.Zero : new Vector2(texture.Width, texture.Height);
         public String drawText;
         private Texture2D texture;
-        private Vector2 position;
-        public Vector2 Position { get { return position; } set { velocity = value; } }
-        private Vector2 velocity;
-        public Vector2 Velocity { get { return velocity; } set { velocity = value; } }
+        public Vector2 Position;
+        public Vector2 Velocity;
         private Color color;
         private Color renderColor;
         private Color fadeToColor;
@@ -26,8 +24,8 @@ namespace Space_Wars.Content.Main.Particles
         {
             texture = _texture;
             timeLeft = _timeLeft;
-            position = _position;
-            velocity = _velocity;
+            Position = _position;
+            Velocity = _velocity;
             angle = _angle;
             angularVelocity = _angularVelocity;
             color = _color;
@@ -38,8 +36,8 @@ namespace Space_Wars.Content.Main.Particles
         {
             texture = _texture;
             timeLeft = float.Epsilon;
-            position = _position;
-            velocity = Vector2.Zero;
+            Position = _position;
+            Velocity = Vector2.Zero;
             angle = _angle;
             angularVelocity = 0;
             color = _color;
@@ -60,17 +58,17 @@ namespace Space_Wars.Content.Main.Particles
                 isExpired = true;
             }
             timeLeft -= Engine.DeltaSeconds;
-            position += velocity * Engine.DeltaSeconds * 60;
+            Position += Velocity * Engine.DeltaSeconds * 60;
             angle += angularVelocity * Engine.DeltaSeconds * 60;
         }
         public void Draw(SpriteBatch _spriteBatch)
         {
             if(drawText != null)
             {
-                _spriteBatch.DrawString(Assets.TextFont, drawText, position, renderColor * ((float)renderColor.A/255f), angle, Assets.TextFont.MeasureString(drawText) / 2, 0.75f, 0, 0.2f);
+                _spriteBatch.DrawString(Assets.TextFont, drawText, Position, renderColor * ((float)renderColor.A/255f), angle, Assets.TextFont.MeasureString(drawText) / 2, 0.75f, 0, 0.2f);
                 return;
             }
-            _spriteBatch.Draw(texture, position, null, renderColor * ((float)renderColor.A / 255f), angle, Size/2, 1f, 0, 0.2f);
+            _spriteBatch.Draw(texture, Position, null, renderColor * ((float)renderColor.A / 255f), angle, Size/2, 1f, 0, 0.2f);
         }
     }
 }
