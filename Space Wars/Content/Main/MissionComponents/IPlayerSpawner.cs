@@ -1,11 +1,5 @@
-﻿using Microsoft.VisualBasic;
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 using Space_Wars.Content.Main.Entities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Space_Wars.Content.Main.MissionComponents;
 public interface IPlayerSpawner
@@ -42,7 +36,7 @@ public class CustomSpawner(Vector2 _spawn) : IPlayerSpawner
 {
     public void Spawn()
     {
-        Engine.SaveGame.Player.Position = _spawn;    
+        Engine.SaveGame.Player.Position = _spawn;
         Engine.SaveGame.Player.Dock();
     }
 }

@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 using Space_Wars.Content.Main.Components;
+using System.Collections.Generic;
 
 namespace Space_Wars.Content.Main;
 public abstract class ColorScheme
@@ -35,6 +31,6 @@ public class FinaleScheme : ColorScheme
     {
         TeamColors.Add(Team.Friendly, Color.Black);
         TeamColors.Add(Team.Hostile, Color.Red);
-        TeamColors.Add(Team.Dead, Color.Gray);   
+        TeamColors.Add(Team.Dead, Color.Gray);
     }
 }

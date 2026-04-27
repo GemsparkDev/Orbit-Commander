@@ -1,11 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Space_Wars.Content.Main.Entities;
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Space_Wars.Content.Main.Entities;
+using System;
 
 namespace Space_Wars.Content.Main.Components;
 internal class Transform(Entity _entity) : Component(_entity)
@@ -16,12 +12,12 @@ internal class Transform(Entity _entity) : Component(_entity)
     public float AngularVelocity { get; set; } = 0;
     public override void Update()
     {
-        if(float.IsNaN(Velocity.X + Velocity.Y))
+        if (float.IsNaN(Velocity.X + Velocity.Y))
         {
             Velocity = Vector2.Zero;
             Engine.WriteLine("Velocity was NaN");
         }
-        if(float.IsNaN(Position.X + Position.Y))
+        if (float.IsNaN(Position.X + Position.Y))
         {
             Velocity = Vector2.Zero;
             Engine.WriteLine("Position was NaN");

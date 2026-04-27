@@ -1,22 +1,21 @@
-﻿using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Diagnostics;
 
 namespace Space_Wars.Content.Main.Story;
 public class Dialogue
 {
     public Dialogue(List<string> _text, Texture2D _icon)
     {
-        text=_text;
-        icon=_icon;
+        text = _text;
+        icon = _icon;
     }
     public Dialogue(string _text, Texture2D _icon)
     {
-        text=[_text];
-        icon=_icon;
+        text = [_text];
+        icon = _icon;
     }
     private List<string> text;
     private Texture2D icon;
@@ -28,7 +27,7 @@ public class Dialogue
     public void Update()
     {
         time += Engine.DeltaSeconds;
-        if(time > NextDialogueTime())
+        if (time > NextDialogueTime())
         {
             index++;
         }
@@ -39,16 +38,16 @@ public class Dialogue
     }
     public float GetLength()
     {
-        return text.Sum(t=>t.Length) * SPEED + WINDUP * 2 + 4*text.Count;
+        return text.Sum(t => t.Length) * SPEED + WINDUP * 2 + 4 * text.Count;
     }
     public float NextDialogueTime()
     {
-        if(time > GetLength() - WINDUP)
+        if (time > GetLength() - WINDUP)
         {
             return GetLength();
         }
         float t = WINDUP;
-        for(int i = 0; i < index+1; i++)
+        for (int i = 0; i < index + 1; i++)
         {
             t += (float)(text[i].Length) * SPEED + 4f;
         }
@@ -64,7 +63,7 @@ public class Dialogue
         }
         else if (end >= 0)
         {
-            size = 1 - MathF.Sqrt(end/WINDUP);
+            size = 1 - MathF.Sqrt(end / WINDUP);
         }
         var pos = new Vector2(Engine.ScreenSize.X / 2, Engine.ScreenSize.Y * 3 / 4);
         _spriteBatch.Draw(Assets.Get(Sprites.Textbox), pos, null, Color.White, 0, Assets.DimsOf(Sprites.Textbox) / 2, new Vector2(size, size), 0, 0);
@@ -72,7 +71,7 @@ public class Dialogue
         {
             _spriteBatch.Draw(icon, pos - new Vector2(30, 0), null, Color.White, 0, new Vector2(icon.Width, icon.Height) / 2 + new Vector2(Assets.Get(Sprites.WideButton).Width / 2 + 50, 0), new Vector2(size, size), 0, 0);
         }
-        int characters = text[index].Length - (int)Math.Clamp((NextDialogueTime() - time -4) / SPEED, 0, text[index].Length);
+        int characters = text[index].Length - (int)Math.Clamp((NextDialogueTime() - time - 4) / SPEED, 0, text[index].Length);
         if (characters != prevCharCount)
         {
             SoundManager.PlayGlobalSound(Assets.Get(Sound.Interact));

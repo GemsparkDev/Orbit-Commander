@@ -3,11 +3,10 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Space_Wars.Content.Main.Entities;
 using Space_Wars.Content.Main.Particles;
+using Space_Wars.Content.Main.Story;
+using System;
 using System.Collections.Generic;
 using UILib.Content.Main;
-using System;
-using Space_Wars.Content.Main.Story;
-using Space_Wars.Content.Main.Components;
 
 namespace Space_Wars.Content.Main;
 
@@ -39,7 +38,7 @@ public abstract class GameState
     protected static void RenderGamespace(SpriteBatch _spriteBatch)
     {
         //Disables rendering when disabled
-        if(Engine.SaveGame != null && !Engine.SaveGame.Player.IsEnabled)
+        if (Engine.SaveGame != null && !Engine.SaveGame.Player.IsEnabled)
         {
             _spriteBatch.Draw(Assets.Get(Sprites.DeadFile), Engine.Camera.Position + Engine.MousePositionOffset, null, Color.White, 0, Assets.DimsOf(Sprites.DeadFile) / 2, UIManager.UIScale, 0, 0);
             return;
@@ -63,7 +62,7 @@ public abstract class GameState
                     for (int x = (int)Math.Ceiling((cameraPos.X - Engine.ScreenSize.X / 2) / 500) * 10; x < (cameraPos.X + Engine.ScreenSize.X / 2) / 50; x += 10)
                     {
                         var text = $"{x},{y}";
-                        _spriteBatch.DrawString(Assets.TextFont, text, new Vector2(x * 50, y * 50), Color.White, 0, Assets.TextFont.MeasureString(text)/2, 1, 0, 0);
+                        _spriteBatch.DrawString(Assets.TextFont, text, new Vector2(x * 50, y * 50), Color.White, 0, Assets.TextFont.MeasureString(text) / 2, 1, 0, 0);
                     }
                 }
             }
@@ -75,7 +74,7 @@ public class MainMenu : GameState
     private float time = MathF.PI;
     private Planet menuPlanet = new(new Vector2(0, 750), Vector2.Zero, 5000, 9, true, Color.Cyan);
     private Planet moonPlanet = new(new Vector2(0, 0), Vector2.Zero, 750, 1.5f, true, Color.Cyan);
-    private ParticleEmitter smokeParticles = new(Assets.Get(Sprites.Circle), 1f, new Vector2(0, 300 - Assets.DimsOf(Sprites.Mothership).Y + 10), 0, MathF.PI/4, 1, 40, Color.Gray, EmitterType.EmissionOverTime) 
+    private ParticleEmitter smokeParticles = new(Assets.Get(Sprites.Circle), 1f, new Vector2(0, 300 - Assets.DimsOf(Sprites.Mothership).Y + 10), 0, MathF.PI / 4, 1, 40, Color.Gray, EmitterType.EmissionOverTime)
     { particleFadeToColor = new Color(169, 169, 169, 0), probability = 0.25f };
     public override void Initialize()
     {
@@ -90,7 +89,7 @@ public class MainMenu : GameState
         moonPlanet.Position = Util.ToUnitVector(time) * d + new Vector2(0, 750);
         smokeParticles.Update();
         ParticleManager.Update();
-        if(time > MathF.Tau)
+        if (time > MathF.Tau)
         {
             time -= MathF.Tau;
         }
@@ -141,7 +140,7 @@ public class PausedGame : GameState
     {
         if (Input.OldState.IsKeyUp(Keys.Escape) && Input.NewState.IsKeyDown(Keys.Escape))
         {
-            if(UI.SettingsMenu.enabled)
+            if (UI.SettingsMenu.enabled)
             {
                 UI.PauseMenuButton.ApplyBehaviours();
             }
@@ -186,10 +185,10 @@ public class MissionSelect : GameState
     private float time = Util.Random.NextSingle() * 1000f;
     private Vector2 playerPosition;
     private List<(int system, ParticleEmitter orbit)> missionOrbits = [];
-    private ParticleEmitter sun = new (Assets.Get(Sprites.Dot), new Vector2(Engine.ScreenSize.X / 6, 0), 20, new Color(255, 255, 0));
+    private ParticleEmitter sun = new(Assets.Get(Sprites.Dot), new Vector2(Engine.ScreenSize.X / 6, 0), 20, new Color(255, 255, 0));
     public MissionSelect()
     {
-        var center = new Vector2(Engine.ScreenSize.X/6, 0);
+        var center = new Vector2(Engine.ScreenSize.X / 6, 0);
         foreach (var data in Mission.missions)
         {
             var orbit = (data.data.System, new ParticleEmitter(Assets.Get(Sprites.Dot), center, data.data.Distance, new Color(0, 255, 255)));
@@ -217,7 +216,7 @@ public class MissionSelect : GameState
         EventHandler.UpdateInventoryUI();
         Engine.DialogueManager.Clear();
     }
-    public override void Update() 
+    public override void Update()
     {
         for (int i = 0; i < Engine.SaveGame.QueuedItems.Count; i++)
         {
@@ -229,8 +228,8 @@ public class MissionSelect : GameState
         time += Engine.DeltaSeconds;
         ParticleManager.Update();
         var pos = new Vector2(Input.NewMouseState.Position.X, Input.NewMouseState.Position.Y);
-        float distance = Vector2.Distance(pos, new Vector2(Engine.ScreenSize.X * 2 / 3, Engine.ScreenSize.Y/2));
-        for(int i = 0; i < Mission.missions.Count; i++)
+        float distance = Vector2.Distance(pos, new Vector2(Engine.ScreenSize.X * 2 / 3, Engine.ScreenSize.Y / 2));
+        for (int i = 0; i < Mission.missions.Count; i++)
         {
             var mission = Mission.missions[i].data;
             if (mission.Distance > 0)
@@ -258,7 +257,7 @@ public class MissionSelect : GameState
             bool canSelect = true;
             if (Engine.SaveGame.CompletedMissions[i])
             {
-                if(Engine.SaveGame.FleetSystem > mission.System)
+                if (Engine.SaveGame.FleetSystem > mission.System)
                 {
                     color = new Color(255, 255, 0);
                 }
@@ -283,7 +282,7 @@ public class MissionSelect : GameState
                     Engine.SaveGame.SetMission(i);
                 }
             }
-            
+
             missionOrbits[i].orbit.particleColor = color;
             var orbit = missionOrbits[i];
             if (orbit.system == Engine.SaveGame.System && !(mission.Distance <= 0 && !canSelect))
@@ -294,7 +293,7 @@ public class MissionSelect : GameState
         }
         sun.Update();
     }
-    public override void Draw(SpriteBatch _spriteBatch) 
+    public override void Draw(SpriteBatch _spriteBatch)
     {
         ParticleManager.Draw(_spriteBatch);
         if (Engine.SaveGame.CurrentMissionIndex >= Mission.missions.Count)
@@ -305,15 +304,15 @@ public class MissionSelect : GameState
         {
             _spriteBatch.Draw(Assets.Get(Sprites.Miniplayer), playerPosition, null, new Color(0, 255, 0), 0, Vector2.Zero, 1, 0, 0);
         }
-        for(int i = 0; i < Engine.SaveGame.QueuedItems.Count; i++)
+        for (int i = 0; i < Engine.SaveGame.QueuedItems.Count; i++)
         {
             var item = Engine.SaveGame.QueuedItems[i];
             var texture = item.Texture;
             var pos = (new Vector2(20, 20) + new Vector2(30, 0) * i) * UIManager.UIScale - Engine.ScreenSize / 2;
             _spriteBatch.Draw(texture, pos, null, Color.White, 0, new Vector2(texture.Width, texture.Height) / 2, UIManager.UIScale, 0, 0);
-            for (float j = 0; j <= MathF.Tau * ((float)item.Cost / (float)item.MaxCost) + float.Epsilon; j+= MathF.Tau/(3 * UIManager.UIScale * UIManager.UIScale))
+            for (float j = 0; j <= MathF.Tau * ((float)item.Cost / (float)item.MaxCost) + float.Epsilon; j += MathF.Tau / (3 * UIManager.UIScale * UIManager.UIScale))
             {
-                _spriteBatch.Draw(Assets.Get(Sprites.Dot), Util.ToUnitVector(j) * texture.Height / 1.5f * UIManager.UIScale + pos, null, Color.White, j, Assets.DimsOf(Sprites.Dot)/2, UIManager.UIScale, 0, 0);
+                _spriteBatch.Draw(Assets.Get(Sprites.Dot), Util.ToUnitVector(j) * texture.Height / 1.5f * UIManager.UIScale + pos, null, Color.White, j, Assets.DimsOf(Sprites.Dot) / 2, UIManager.UIScale, 0, 0);
             }
         }
     }
@@ -328,10 +327,10 @@ public class Victory : GameState
     public override void Draw(SpriteBatch _spriteBatch)
     {
         _spriteBatch.DrawString(Assets.TextFont, "You Win!", new Vector2(-12 * 8, -60) * UIManager.UIScale + Engine.Camera.Position, Color.Yellow, 0, Vector2.Zero, UIManager.UIScale * 2, SpriteEffects.None, 0);
-        _spriteBatch.DrawString(Assets.TextFont, $"Your Time: {Engine.IngameTime.DrawText}", new Vector2(-12 * 12 / 2, (12 * 4 - 60)) * UIManager.UIScale + Engine.Camera.Position, Color.White, 0, Vector2.Zero, UIManager.UIScale /2, SpriteEffects.None, 0);
+        _spriteBatch.DrawString(Assets.TextFont, $"Your Time: {Engine.IngameTime.DrawText}", new Vector2(-12 * 12 / 2, (12 * 4 - 60)) * UIManager.UIScale + Engine.Camera.Position, Color.White, 0, Vector2.Zero, UIManager.UIScale / 2, SpriteEffects.None, 0);
     }
 }
-public class Cutscene(List<IEvent> _events, List<IActor> _actors, GameState _nextGameState) : GameState 
+public class Cutscene(List<IEvent> _events, List<IActor> _actors, GameState _nextGameState) : GameState
 {
     private float time = 0;
     private float escapeTime = 0;
@@ -360,7 +359,7 @@ public class Cutscene(List<IEvent> _events, List<IActor> _actors, GameState _nex
         }
         ParticleManager.Update();
         Engine.DialogueManager.Update();
-        if(!IsPaused)
+        if (!IsPaused)
         {
             time += Engine.DeltaSeconds;
         }

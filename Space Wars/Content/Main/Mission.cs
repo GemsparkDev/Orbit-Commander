@@ -121,13 +121,13 @@ public class Mission
         (new("???", "Sensor data shows that this site has an unusually high temperature.\nInvestigate possible enemy interferance.", 145, [7], 1, 2000, 3, true),
         //Note: The player construct menu and the Quantum Resonator both use the name of this mission for their special behavior. When changing, make sure their name is updated as well.
         delegate(){return new([
-            new Planets([new Planet(Vector2.Zero, Vector2.Zero, 50000, 12, true, new Color(255, 219, 0), true, 1.5f) { Temperature = 0.5f } ]),
+            new Planet(Vector2.Zero, Vector2.Zero, 50000, 12, true, new Color(255, 219, 0), true, 1.5f) { Temperature = 0.5f },
             ], new Conditional([], Mission.SendPickup(2000)),
              new PlayerSpawner(new Vector2(-2000, -2000)), Sound.None);}),
 
         (new("Base of Operations", "We have deployed several communication stations to this site.\nProtect the location for future development.", 130, [8], 1, 2000),
         delegate(){Entity a,b,c; return new([
-            new Planets([new Planet(Vector2.Zero, Vector2.Zero, 30000, 10f, true, Color.HotPink, true) ]),
+            new Planet(Vector2.Zero, Vector2.Zero, 30000, 10f, true, Color.HotPink, true) ,
             new WaveSpawner(Mission.T2, 1, false),
             a=Entity.NewCommunicator(new Vector2(MathF.Sin(1.02f), -MathF.Cos(1.02f)), Vector2.Zero, 1.02f, Team.Friendly),
             b=Entity.NewCommunicator(new Vector2(MathF.Sin(2.7f), -MathF.Cos(2.7f)), Vector2.Zero, 2.7f, Team.Friendly),
@@ -154,7 +154,8 @@ public class Mission
 
         (new("Extraction", "Our success has led us to deploying a miner on this deceptively dense planet.\nDefend it from the incoming enemy forces.", 200, [], 2, 2000),
         delegate(){Entity a;return new([
-            new Planets([new Planet(Vector2.Zero, Vector2.Zero, 25000, 7f, true, Color.Cyan), new(new Vector2(800, 0), Planet.GetOrbitalVelocity(new Vector2(800, 0), Vector2.Zero, 25000), 150, 0.5f, false, Color.Cyan), ]),
+            new Planet(Vector2.Zero, Vector2.Zero, 25000, 7f, true, Color.Cyan), 
+            new Planet(new Vector2(800, 0), Planet.GetOrbitalVelocity(new Vector2(800, 0), Vector2.Zero, 25000), 150, 0.5f, false, Color.Cyan),
             new WaveSpawner(Mission.T2, 1, true),
             a=Entity.NewMiner(new Vector2(0, -7*50), Vector2.Zero, 0),
             ], new Conditional([new Protect([a]), new WaveGoal(30)], Mission.Win()), 
@@ -172,7 +173,7 @@ public class Mission
 
         (new("Warp Gate", "The enemy fleet is still hot on our tail.", 100, [12], 2, 2000, 3, true),
         delegate(){Entity a;return new([
-            new Planets([new Planet(Vector2.Zero, Vector2.Zero, 150, 3, true, Color.OldLace)]),
+            new Planet(Vector2.Zero, Vector2.Zero, 150, 3, true, Color.OldLace),
             new Tip("Press left shift to return to the previous system. Press right shift to enter the next system.", new Vector2(0, 3 * 50)),
             a=Entity.NewWarpGate(new Vector2(0, 450), -Planet.GetOrbitalVelocity(new Vector2(0, 450), Vector2.Zero, 150), 0),
             ], new Conditional([new Custom(a)], Mission.Win()),
@@ -203,8 +204,8 @@ public class Mission
 
         (new("Binary system", "It seems plans for a mass relay have been abandoned here.\nConstruct it to recieve some advanced equipment from our previous stations.", 0, [15], 2, 2000),
         delegate(){Entity a;return new([
-            new Planets([new(new Vector2(500, 0), new Vector2(0, 1.05f), 10000, 7, false, Color.Cyan) { Temperature = -5},
-            new(new Vector2(-1000, 0), new Vector2(0, -2.1f), 5000, 4f, false, Color.Orange) { Temperature = 5 }]),
+            new Planet(new Vector2(500, 0), new Vector2(0, 1.05f), 10000, 7, false, Color.Cyan) { Temperature = -5},
+            new Planet(new Vector2(-1000, 0), new Vector2(0, -2.1f), 5000, 4f, false, Color.Orange) { Temperature = 5 },
             new WaveSpawner(Mission.T3, 1, true),
             a=Entity.MassRelay(Vector2.Zero, Vector2.Zero, 0)], 
             new Conditional([new Protect([a]), new Custom(a)], Mission.SendPickup(2000)),
@@ -241,7 +242,7 @@ public class Mission
 
         (new("BEEG", "", 0, [15], 2, 2000),
         delegate(){return new([
-            new Planets([new Planet(Vector2.Zero, Vector2.Zero, 8000000, 100, true, new Color(1f, 0.8f, 0.5f), false, 10f, 0, true) { Temperature = 5 }]),
+            new Planet(Vector2.Zero, Vector2.Zero, 8000000, 100, true, new Color(1f, 0.8f, 0.5f), false, 10f, 0, true) { Temperature = 5 },
             new Colliders(SolarStation),
             new WaveSpawner(Mission.T3, 1, false),], 
             new Conditional([new WaveGoal(10)], Mission.SendPickup(2000)),
@@ -280,8 +281,7 @@ public class Mission
             {
                 obstacles.Add(comp as IObstacle);
             }
-            var entity = comp as Entity;
-            if(entity != null)
+            if (comp is Entity entity)
             {
                 Entities.Add(entity);
                 if (entity.GetComponent<Attack>() != null)
@@ -291,7 +291,7 @@ public class Mission
                 if (entity.GetComponent<Health>() != null || entity is Player)
                 {
                     enemies.Add(entity);
-                }   
+                }
             }
         }
         spawner = _spawner;
@@ -1076,7 +1076,7 @@ public class Mission
     }
     public void CalculateTrajectory(Vector2 _startPosition, Vector2 _startVelocity, float _radius)
     {
-        Entity[] planets = Engine.SaveGame.CurrentMission.Entities.Where(x => x is Planet).ToArray();
+        Entity[] planets = [.. Engine.SaveGame.CurrentMission.Entities.Where(x => x is Planet)];
         ICollider[] Colliders = [];
         if (GetComponent<Colliders>() != null)
         {
@@ -1174,17 +1174,15 @@ public class Mission
     }
     public Vector2 GetNormalizedAcceleration(Vector2 _position)
     {
-        var comp = GetComponent<Planets>();
-        if(comp != null)
+        Vector2 acceleration = Vector2.Zero;
+        foreach (var entity in Engine.SaveGame.CurrentMission.Entities)
         {
-            Vector2 acceleration = Vector2.Zero;
-            foreach (var planet in comp.GetPlanets)
+            if (entity is Planet planet)
             {
                 acceleration -= planet.GetAcceleration(_position);
             }
-            return acceleration;
         }
-        return Vector2.Zero;
+        return acceleration;
     }
     public Vector2 NewSpawnLocation()
     {
@@ -1205,6 +1203,11 @@ public class Mission
         foreach(var comp in components)
         {
             comp.Draw(_spriteBatch);
+        }
+        if (Engine.SaveGame.Player.Position.Length() > missions[Engine.SaveGame.CurrentMissionIndex].data.EdgeRadius)
+        {
+            _spriteBatch.Draw(Assets.Get(Sprites.Arrow), Engine.SaveGame.Player.Position - Vector2.Normalize(Engine.SaveGame.Player.Position) * 25, null, Engine.SaveGame.Player.Color, -Util.ToAngle(Engine.SaveGame.Player.Position), Assets.DimsOf(Sprites.Arrow) / 2, 1, 0, 0.2f);
+            _spriteBatch.DrawString(Assets.TextFont, "Return to planet.", Engine.Camera.Position - new Vector2(Assets.TextFont.MeasureString("Return to planet.").X / 2, 225), Color.Crimson);
         }
     }
     public static List<(int, Func<Vector2, Vector2, float, Team, Entity>)> TierOneEnemies()

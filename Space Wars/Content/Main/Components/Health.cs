@@ -1,13 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Space_Wars.Content.Main.Entities;
-using Microsoft.Xna.Framework;
-using Space_Wars.Content.Main.Particles;
-using System.ComponentModel;
+using System;
 
 namespace Space_Wars.Content.Main.Components;
 internal class Health(Entity _entity) : Component(_entity)
@@ -24,7 +18,7 @@ internal class Health(Entity _entity) : Component(_entity)
             currentHealth = MaxHealth;
         }
         var comp = Entity.GetComponent<FollowEmitter>();
-        if(comp != null && CurrentHealth > 0)
+        if (comp != null && CurrentHealth > 0)
         {
             comp.ParticleEmitter.isEmitterActive = SaveGame.DebugMode;
         }
@@ -33,7 +27,7 @@ internal class Health(Entity _entity) : Component(_entity)
             if (prevHealth > currentHealth)
             {
                 prevHealth -= 1;
-                healthCD = 1/(float)(MaxHealth);
+                healthCD = 1 / (float)(MaxHealth);
             }
             else
             {
@@ -45,12 +39,12 @@ internal class Health(Entity _entity) : Component(_entity)
             healthCD -= Engine.DeltaSeconds;
         }
         float d = 1f;
-        if(CurrentHealth <= 0)
+        if (CurrentHealth <= 0)
         {
             Entity.Team = Team.Dead;
             d = 0.67f;
         }
-        if(Entity is not Pickup && Entity is not Planet)
+        if (Entity is not Pickup and not Planet)
         {
             Entity.GetComponent<Sprite>().TargetColor = SaveGame.ColorScheme.TeamColors[Entity.Team] * d; //Sets color based on friendlyness
         }
@@ -59,7 +53,7 @@ internal class Health(Entity _entity) : Component(_entity)
     {
         var stealth = Entity.GetComponent<Stealth>();
         float val = 1;
-        if(stealth != null)
+        if (stealth != null)
         {
             val = (Engine.SaveGame.Player.SensingAbility > stealth.TrueStealth ? 1 : 0);
             if (Engine.SaveGame.Player.SensingAbility <= stealth.TrueStealth)
@@ -67,10 +61,10 @@ internal class Health(Entity _entity) : Component(_entity)
                 val = Math.Clamp(val + stealth.RevealDuration, 0, 1);
             }
         }
-        if (CurrentHealth > 0 && !!(Entity.GetComponent<IsChild>()?.ChildEnemy??false))
+        if (CurrentHealth > 0 && !(Entity.GetComponent<IsChild>()?.ChildEnemy ?? false))
         {
             //Health bar
-            Vector2 barPosition = Entity.Position + new Vector2(-Entity.ColliderRadius*0.875f, Entity.ColliderRadius * 1.1f);
+            Vector2 barPosition = Entity.Position + new Vector2(-Entity.ColliderRadius * 0.875f, Entity.ColliderRadius * 1.1f);
             Rectangle sourceRectangle = new(0, 0, (int)(Entity.ColliderRadius * 1.75f), 2);
             _spriteBatch.Draw(Engine.Line, barPosition, sourceRectangle, new Color(0, 50, 25) * val);
             _spriteBatch.Draw(Engine.Line, barPosition, new Rectangle(sourceRectangle.Location, new Point((int)(sourceRectangle.Width * ((float)(prevHealth) / (float)(MaxHealth))), sourceRectangle.Height)), Color.White * val);

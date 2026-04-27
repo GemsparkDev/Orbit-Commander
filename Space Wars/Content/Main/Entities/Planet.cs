@@ -1,10 +1,8 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Space_Wars.Content.Main.Components;
-using Space_Wars.Content.Main.MissionComponents;
 using Space_Wars.Content.Main.Particles;
 using System;
-using System.Linq;
 
 namespace Space_Wars.Content.Main.Entities;
 
@@ -34,11 +32,19 @@ public class Planet : Entity, ICollider
         hasRing = _hasRing;
         atmosphereStrength = _atmosphereStrength;
         isSun = _isSun;
-        if(_atmosphereStrength > 0)
+        if (_atmosphereStrength > 0)
         {
-            atmosphere = Engine.Self.RenderAtmosphere(AtmosphereRadius(), _atmosphereStrength, ColliderRadius, Color, this, _isSun);
+            atmosphere = Engine.Self.RenderAtmosphere(AtmosphereRadius(), _atmosphereStrength, ColliderRadius, Color, this);
         }
         RingOffset = _ringOffset;
+    }
+    public override void Initialize()
+    {
+        //TODO: Figure out how to synchronize this to all planets for a mission
+        if (Engine.SaveGame.CurrentMissionCompleted && Util.Random.Next(0, 10000) == 0)
+        {
+            EasterEgg = true;
+        }
     }
     public Vector2 GetAcceleration(Vector2 _position)
     {
@@ -64,7 +70,7 @@ public class Planet : Entity, ICollider
     public bool Collide(Entity _entity)
     {
         Vector2 relativePosition = _entity.Position - Position;
-        if(false)
+        if (false)
         {
             ParticleManager.Add(new Particle(Assets.Get(Sprites.Circle), _entity.Position + _entity.Velocity * Engine.DeltaSeconds, 0, Color.Red));
             var dir = Vector2.Normalize(_entity.Velocity);
@@ -75,9 +81,9 @@ public class Planet : Entity, ICollider
                 float discriminant = MathF.Sqrt(_entity.ColliderRadius * _entity.ColliderRadius - closestDistance * closestDistance);
                 _entity.Position += dir * (closestLength - discriminant);
                 _entity.Velocity = Vector2.Zero;
-            } 
+            }
         }
-        else if(relativePosition.Length() <= ColliderRadius + _entity.ColliderRadius)
+        else if (relativePosition.Length() <= ColliderRadius + _entity.ColliderRadius)
         {
             var normalVector = Vector2.Normalize(relativePosition);
             var frictionVector = new Vector2(normalVector.Y, -normalVector.X);
@@ -139,17 +145,18 @@ public class Planet : Entity, ICollider
                 Vector2 drag = relativeVelocity * strength / 40;
                 acceleration += drag;
                 float q = (drag * relativeVelocity * relativeVelocity).Length() / 15;
-                for(float i = 0; i < 5 * 60 * Engine.DeltaSeconds; i++)
+                for (float i = 0; i < 5 * 60 * Engine.DeltaSeconds; i++)
                 {
                     if (Util.Random.NextSingle() < q * q / 2)
                     {
                         Vector2 pos = Util.ToUnitVector(Util.Random.NextSingle() * MathF.Tau) * Util.Random.NextSingle() * 8;
                         ParticleManager.Add(new Particle(Assets.Get(Sprites.Circle), 0.5f + Util.Random.NextSingle() / 5, _entity.Position - _entity.Velocity + pos,
-                            (_entity.Velocity + Velocity) / 2, 0, 0, Color.Yellow * 0.5f, new Color(1f, 0.5f, 0f, 0f)){ experienceGravity = true });
+                            (_entity.Velocity + Velocity) / 2, 0, 0, Color.Yellow * 0.5f, new Color(1f, 0.5f, 0f, 0f))
+                        { experienceGravity = true });
                     }
                 }
                 _entity.ApplyWork(q);
-                if(isSun)
+                if (isSun)
                 {
                     _entity.ConductHeat(Temperature * strength, MathF.Tanh(strength));
                 }
@@ -157,12 +164,12 @@ public class Planet : Entity, ICollider
                 {
                     _entity.ConductHeat(Temperature, MathF.Tanh(strength));
                 }
-                    //Buoyancy
+                //Buoyancy
                 acceleration += relativePosition / distance * strength * mass / distance / distance / 5;
                 if (strength > 2)
                 {
-                    _entity.StatusHolder?.ApplyStatus(new Pressure(Color.Red, isSun));
-                    if(_entity.GetComponent<Health>() != null && _entity.Health <= 0)
+                    _entity.Statuses?.ApplyStatus(new Pressure(Color.Red, isSun));
+                    if (_entity.GetComponent<Health>() != null && _entity.Health <= 0)
                     {
                         _entity.isExpired = true;
                     }
@@ -228,7 +235,7 @@ public class Planet : Entity, ICollider
     {
         foreach (var entity in Engine.SaveGame.CurrentMission.Entities)
         {
-            if(entity == this)
+            if (entity == this)
             {
                 continue;
             }
@@ -241,7 +248,7 @@ public class Planet : Entity, ICollider
                 AttractObject(particle);
             }
         }
-        if(Engine.SaveGame != null)
+        if (Engine.SaveGame != null)
         {
             AttractObject(Engine.SaveGame.Player);
         }
@@ -268,7 +275,7 @@ public class Planet : Entity, ICollider
         {
             _spriteBatch.Draw(Assets.Get(Sprites.Dot), Position + Util.ToUnitVector(angle) * ColliderRadius, null, Color, angle, Assets.DimsOf(Sprites.Dot), 1, 0, 0);
         }
-        if(atmosphereStrength > 0)
+        if (atmosphereStrength > 0)
         {
             _spriteBatch.Draw(atmosphere, Position, null, Color.White, 0, new Vector2(atmosphere.Width / 2, atmosphere.Height / 2), 1, 0, 0);
         }
@@ -296,7 +303,7 @@ public class Planet : Entity, ICollider
     public float GetAtmosphereDensity(Entity _entity)
     {
         float distance = Vector2.Distance(_entity.Position, Position);
-        if(distance > AtmosphereRadius())
+        if (distance > AtmosphereRadius())
         {
             return 0;
         }
@@ -310,7 +317,7 @@ public class Planet : Entity, ICollider
     private float AtmosphereRadius()
     {
         float gravityForce = mass / ColliderRadius / ColliderRadius;
-        return MathF.Log2(0.1f/atmosphereStrength) * 4 * atmosphereStrength / (-gravityForce) + ColliderRadius;
+        return MathF.Log2(0.1f / atmosphereStrength) * 4 * atmosphereStrength / (-gravityForce) + ColliderRadius;
     }
     public Planet Copy()
     {

@@ -4,7 +4,6 @@ using Space_Wars.Content.Main.Components;
 using Space_Wars.Content.Main.Particles;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using UILib.Content.Main;
 
 namespace Space_Wars.Content.Main.Entities;
@@ -27,9 +26,9 @@ public class Pickup : Entity, IData
         Tooltip.AddWidget(new Decal(new Vector2(-Tooltip.Size.X / 3, 0), _itemData.RealSprite));
         textbox = new Decal(new Vector2(0, -5), Assets.TextFont, _itemData.Name, _itemData.TextColor, 5f);
         Tooltip.AddWidget(textbox);
-        AddComponent(new Health(this) { CurrentHealth = _health, MaxHealth = _health});
+        AddComponent(new Health(this) { CurrentHealth = _health, MaxHealth = _health });
         AddComponent(new KeyTag(this));
-        AddComponent(new Collide(this, delegate(int _damage, bool _ignoreImmunity)
+        AddComponent(new Collide(this, delegate (int _damage, bool _ignoreImmunity)
         {
             if (_damage <= 0)
             {
@@ -87,7 +86,7 @@ public class Pickup : Entity, IData
         else
         {
             Entity parent;
-            if(index == 0)
+            if (index == 0)
             {
                 parent = Player;
             }
@@ -176,7 +175,7 @@ public class Pickup : Entity, IData
     }
     public static Pickup NewTrap(Vector2 _position, Vector2 _velocity, float _angle, float _angularVelocity, int _stealth = 0, Team _team = Team.Friendly)
     {
-        var construct = new Pickup(ItemFactory.itemData[Items.Trap], _position, _velocity, _angularVelocity, ItemFactory.itemData[ Items.Trap].Integrity);
+        var construct = new Pickup(ItemFactory.itemData[Items.Trap], _position, _velocity, _angularVelocity, ItemFactory.itemData[Items.Trap].Integrity);
         construct.AddComponent(new Behaviour(construct).AddBehaviour(construct.Trap()));
         construct.AddComponent(new FollowEmitter(construct) { ParticleEmitter = new ParticleEmitter(Assets.Get(Sprites.Dot), _position, 300, new Color(255, 0, 0)) });
         construct.Angle = _angle;

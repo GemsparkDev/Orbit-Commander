@@ -7,7 +7,6 @@ using Space_Wars.Content.Main.MissionComponents;
 using Space_Wars.Content.Main.Particles;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
@@ -41,7 +40,7 @@ public class Player : Entity
     public Vector2 Direction => targetVector;
     public Dockable dockedEntity;
     public List<Pickup> leashedMaterials = [];
-    private ParticleEmitter smokeParticles = new(Assets.Get(Sprites.Circle), 1f, Vector2.Zero, 0, MathF.PI/4, 1, 0.5f, Color.Gray, EmitterType.EmissionOverTime) { isEmitterActive = false, particleFadeToColor = new Color(169, 169, 169, 0) };
+    private ParticleEmitter smokeParticles = new(Assets.Get(Sprites.Circle), 1f, Vector2.Zero, 0, MathF.PI / 4, 1, 0.5f, Color.Gray, EmitterType.EmissionOverTime) { isEmitterActive = false, particleFadeToColor = new Color(169, 169, 169, 0) };
     private SoundEffectInstance engineSounds;
     public float invincibilityCooldown = 0;
     public float cachedDamage = 0;
@@ -58,7 +57,7 @@ public class Player : Entity
     {
         get
         {
-            int sensing = 1 + StatusHolder.SensingChange;
+            int sensing = 1 + Statuses.SensingChange;
             if (modules[ModuleType.Sensors] == null)
             {
                 return -1;
@@ -77,7 +76,7 @@ public class Player : Entity
             {
                 return -10;
             }
-            int stealth = StatusHolder.StealthChange;
+            int stealth = Statuses.StealthChange;
             if (isEngineActive)
             {
                 stealth -= 1;
@@ -109,12 +108,12 @@ public class Player : Entity
         AddComponent(new Temp(this));
         AddComponent(new Statuses(this));
         AddComponent(new Friendly(this) { Team = Team.Friendly });
-        AddComponent(new Sprite(this, SaveGame.ColorScheme.TeamColors[Team]) { Texture = Assets.Get(Sprites.Player)});
+        AddComponent(new Sprite(this, SaveGame.ColorScheme.TeamColors[Team]) { Texture = Assets.Get(Sprites.Player) });
         smokeParticles.isEmitterActive = false;
         engineSounds = Assets.Get(Sound.FireEngines).CreateInstance();
         engineSounds.IsLooped = true;
         var textures = new Texture2D[modules.Count];
-        for(int i = 0; i < modules.Count; i++)
+        for (int i = 0; i < modules.Count; i++)
         {
             textures[i] = (modules[(ModuleType)i] as IData).Texture;
         }
@@ -164,7 +163,7 @@ public class Player : Entity
         {
             bool restartedModules = false;
             //Reverse order prioritizes most important modules first
-            for(int i = modules.Count-1; i >= 0; i--)
+            for (int i = modules.Count - 1; i >= 0; i--)
             {
                 var module = modules[(ModuleType)(i)];
                 if (restartedModules && module.isFailed)
@@ -236,7 +235,7 @@ public class Player : Entity
         UI.PlayerHealth.Colors[0] = new Color(colorVec.X, colorVec.Y, colorVec.Z);
 
         //Only displays if the player has abilities unlocked
-        if (Progression > 1 || SaveGame.DebugMode) 
+        if (Progression > 1 || SaveGame.DebugMode)
         {
             colorVec = new Vector3(0, 1, 1) * val + new Vector3(0.2f, 1, 0.8f) * (1f - val);
             UI.PlayerAbility.Colors[0] = new Color(colorVec.X, colorVec.Y, colorVec.Z);
@@ -255,7 +254,7 @@ public class Player : Entity
         else
         {
             smokeParticles.isEmitterActive = true;
-            smokeParticles.speedOfEmission = 25f - currentHealth/4;
+            smokeParticles.speedOfEmission = 25f - currentHealth / 4;
         }
         base.Update();
         if (dockedEntity != null)
@@ -279,7 +278,7 @@ public class Player : Entity
         }
         var mousePos = new Vector2(Input.NewMouseState.X, Input.NewMouseState.Y);
         //Ensures that target vector performs identically in all resolutions
-        Vector2 mouseCamPos = Engine.Camera.Position + mousePos - Engine.BackBuffer/2 + Engine.MousePositionOffset;
+        Vector2 mouseCamPos = Engine.Camera.Position + mousePos - Engine.BackBuffer / 2 + Engine.MousePositionOffset;
         //Testing
         //ParticleManager.Add(new Particle(Assets.Get(Sprite.Circle), mouseCamPos, 0, Color.White));
         //ParticleManager.Add(new Particle(Assets.Get(Sprite.Circle), position, 0, Color.White));
@@ -311,15 +310,15 @@ public class Player : Entity
     }
     public void RestrictedActions()
     {
-        if(SaveGame.DebugMode)
+        if (SaveGame.DebugMode)
         {
-            Vector2 mousePos = new Vector2(Input.NewMouseState.X, Input.NewMouseState.Y) + Engine.Camera.Position - Engine.BackBuffer/2;
-            mousePos = new Vector2(MathF.Round(mousePos.X/25), MathF.Round(mousePos.Y/25))*25;
+            Vector2 mousePos = new Vector2(Input.NewMouseState.X, Input.NewMouseState.Y) + Engine.Camera.Position - Engine.BackBuffer / 2;
+            mousePos = new Vector2(MathF.Round(mousePos.X / 25), MathF.Round(mousePos.Y / 25)) * 25;
             ParticleManager.Add(new Particle(Assets.Get(Sprites.Dot), mousePos, 0, Color.Red));
             if (startLocation != Vector2.Zero)
             {
                 float f = 1;
-                if(Input.NewState.IsKeyDown(Keys.LeftControl))
+                if (Input.NewState.IsKeyDown(Keys.LeftControl))
                 {
                     f = 0.5f;
                 }
@@ -327,35 +326,35 @@ public class Player : Entity
                 Vector2 dir = Util.ToUnitVector(angle);
                 for (float d = 0; d < (startLocation - mousePos).Length() / 4; d += 2)
                 {
-                    ParticleManager.Add(new Particle(Assets.Get(Sprites.Dot), startLocation + dir * d * 4, angle, Color.White*f));
+                    ParticleManager.Add(new Particle(Assets.Get(Sprites.Dot), startLocation + dir * d * 4, angle, Color.White * f));
                 }
             }
             var comp = Engine.SaveGame.CurrentMission.GetComponent<Colliders>();
-            if(Input.IsDown(Binding.WarpBackward) && comp.GetColliders.Length > 0)
+            if (Input.IsDown(Binding.WarpBackward) && comp.GetColliders.Length > 0)
             {
                 Vector2 newPos = new Vector2(Input.NewMouseState.X, Input.NewMouseState.Y) + Engine.Camera.Position - Engine.BackBuffer / 2;
                 Vector2 prevPos = new Vector2(Input.OldMouseState.X, Input.OldMouseState.Y) + Engine.Camera.Position - Engine.BackBuffer / 2;
-                comp.GetColliders = [.. comp.GetColliders.Where(x => !x.IsColliding(prevPos, newPos - prevPos, 10, true, out float _))];   
+                comp.GetColliders = [.. comp.GetColliders.Where(x => !x.IsColliding(prevPos, newPos - prevPos, 10, true, out float _))];
             }
-            if(Input.NewState.IsKeyDown(Keys.F) && Input.OldState.IsKeyUp(Keys.F))
+            if (Input.NewState.IsKeyDown(Keys.F) && Input.OldState.IsKeyUp(Keys.F))
             {
-                if(startLocation == Vector2.Zero)
+                if (startLocation == Vector2.Zero)
                 {
                     startLocation = mousePos;
                 }
                 else
                 {
-                    if(comp != null)
+                    if (comp != null)
                     {
                         comp.GetColliders =
                         [
                             .. comp.GetColliders,
                             new LineCollider(startLocation, mousePos,Input.NewState.IsKeyDown(Keys.LeftControl)),
-                        ];   
+                        ];
                     }
                     else
                     {
-                        comp = new Colliders(delegate() { return [new LineCollider(startLocation, mousePos)];});
+                        comp = new Colliders(delegate () { return [new LineCollider(startLocation, mousePos)]; });
                         Engine.SaveGame.CurrentMission.AddComponent(comp);
                     }
                     startLocation = Vector2.Zero;
@@ -363,12 +362,12 @@ public class Player : Entity
             }
             if (Input.NewState.IsKeyDown(Keys.Tab) && Input.OldState.IsKeyUp(Keys.Tab))
             {
-                if(comp != null)
+                if (comp != null)
                 {
-                    foreach(var collider in comp.GetColliders)
+                    foreach (var collider in comp.GetColliders)
                     {
                         Debug.WriteLine(collider.Print());
-                    }   
+                    }
                 }
             }
         }
@@ -414,7 +413,7 @@ public class Player : Entity
                         ("Req. 1 scrap, blocks enemy fire. 20 integrity.", Assets.Get(Sprites.Barricade)),
                         ("Req. 1 scrap, attacks enemies. 8 integrity.", Assets.Get(Sprites.Trap)),
                         ("Req. 1 scrap, 100 dmg to all in radius when destroyed. 3 integrity.", Assets.Get(Sprites.Bomb)),
-                        ("Req. 1 scrap, smelts all scrap within it", Assets.Get(Sprites.Furnace))                    
+                        ("Req. 1 scrap, smelts all scrap within it", Assets.Get(Sprites.Furnace))
                     };
                         if (Progression > 3)
                         {
@@ -528,10 +527,10 @@ public class Player : Entity
                 if (!UIManager.LockMouseInput && Input.NewMouseState.RightButton == ButtonState.Pressed)
                 {
                     Vector2 targetDir = targetVector;
-                    if(aimAssist)
+                    if (aimAssist)
                     {
                         Entity nearestEnemy = Engine.SaveGame.CurrentMission.NearestEnemy(this, true);
-                        if(nearestEnemy != null && nearestEnemy.Health <= 0)
+                        if (nearestEnemy != null && nearestEnemy.Health <= 0)
                         {
                             var relativePos = Vector2.Normalize(nearestEnemy.Position - Position);
                             if (Vector2.Dot(relativePos, targetVector) > 0.9f)
@@ -541,7 +540,7 @@ public class Player : Entity
                         }
                     }
                     List<Entity> miningEnemies = Engine.SaveGame.CurrentMission.Hitscan(Position, targetDir, 120, false, out Vector2 _end);
-                    foreach(var entity in miningEnemies)
+                    foreach (var entity in miningEnemies)
                     {
                         entity.Mine();
                     }
@@ -628,7 +627,7 @@ public class Player : Entity
         {
             if (dockedEntity != null)
             {
-                if(dockedEntity.Menu != null)
+                if (dockedEntity.Menu != null)
                 {
                     dockedEntity.Menu.enabled = !dockedEntity.Menu.enabled;
                 }
@@ -705,7 +704,7 @@ public class Player : Entity
                 _damage = module.Value.OnCollide(_damage);
             }
         }
-        _damage = StatusHolder.ModifyDamage(_damage);
+        _damage = Statuses.ModifyDamage(_damage);
         if (_damage > 0 && (invincibilityCooldown <= 0 || _ignoreImmunity))
         {
             Flash(Color.White);
@@ -714,7 +713,7 @@ public class Player : Entity
             //Player will never be one shot (unless they deserve it)
             cachedDamage += Math.Min(50, _damage);
             SoundManager.PlaySound(Assets.Get(Sound.Hit), Position);
-            if (!_ignoreImmunity) 
+            if (!_ignoreImmunity)
             {
                 invincibilityCooldown = 1;
             }
@@ -818,11 +817,11 @@ public class Player : Entity
         {
             return;
         }
-        if(dockedEntity != null)
+        if (dockedEntity != null)
         {
             return;
         }
-        StatusHolder.Draw(_spriteBatch, this);
+        Statuses.Draw(_spriteBatch, this);
         base.Draw(_spriteBatch);
     }
     public Player(string _serialization, LoadLogger _logger)

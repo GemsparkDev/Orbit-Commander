@@ -1,11 +1,8 @@
-﻿using Space_Wars.Content.Main.Entities;
+﻿using Microsoft.Xna.Framework;
+using Space_Wars.Content.Main.Components;
+using Space_Wars.Content.Main.Entities;
 using Space_Wars.Content.Main.Particles;
 using System;
-using Microsoft.Xna.Framework;
-using System.Collections.Generic;
-using System.Linq;
-using Microsoft.Xna.Framework.Graphics;
-using Space_Wars.Content.Main.Components;
 
 namespace Space_Wars.Content.Main;
 public abstract class Status(Sprites _icon)
@@ -41,7 +38,7 @@ public class Bomb() : Status(Sprites.Knob)
         {
             SoundManager.PlayGlobalSound(Assets.Get(Sound.Beep));
         }
-        ParticleManager.Add(new Particle(null, _parent.Position + _parent.Velocity + new Vector2(0, -15), 0, Color.Red) { drawText = (Math.Truncate((maxTime - time) * 100) / 100).ToString()});
+        ParticleManager.Add(new Particle(null, _parent.Position + _parent.Velocity + new Vector2(0, -15), 0, Color.Red) { drawText = (Math.Truncate((maxTime - time) * 100) / 100).ToString() });
         if (time > maxTime)
         {
             _parent.Collide(999);
@@ -72,7 +69,7 @@ public class Fire(float _duration, Color _color) : Status(Sprites.Knob)
         else
         {
             fireCooldown = 0.05f;
-            ParticleManager.Add(new Particle(Assets.Get(Sprites.Circle), 0.5f + Util.Random.NextSingle() / 10, _parent.Position, 
+            ParticleManager.Add(new Particle(Assets.Get(Sprites.Circle), 0.5f + Util.Random.NextSingle() / 10, _parent.Position,
                 _parent.Velocity + new Vector2(Util.OneToNegOne() / 3, -Util.Random.NextSingle() - 0.5f), 0, Util.OneToNegOne() / 5, _color, Color.Transparent));
         }
         if (attackCooldown > 0)
@@ -112,7 +109,7 @@ public class Frost(float _duration) : Status(Sprites.Knob)
 
     public override void Update(Entity _parent)
     {
-        if(fireCooldown > 0)
+        if (fireCooldown > 0)
         {
             fireCooldown -= Engine.DeltaSeconds;
         }
@@ -192,7 +189,7 @@ public class Berserk(float _timeLeft) : Status(Sprites.Knob)
 {
     private bool bonus = false;
     float timeLeft = _timeLeft;
-    private ParticleEmitter effect = new ParticleEmitter(Assets.Get(Sprites.Circle), Vector2.Zero, 28.3f, Color.Red * 0.5f) 
+    private ParticleEmitter effect = new ParticleEmitter(Assets.Get(Sprites.Circle), Vector2.Zero, 28.3f, Color.Red * 0.5f)
     { particleFadeToColor = Color.Transparent, particleTimeAlive = 0.5f, speedOfEmission = 0.25f };
 
     public override StatusType Type => StatusType.Berserk;
@@ -202,7 +199,7 @@ public class Berserk(float _timeLeft) : Status(Sprites.Knob)
         if (bonus)
         {
             var comp = _parent.GetComponent<Cooldown>();
-            if(comp != null)
+            if (comp != null)
             {
                 for (int i = 0; i < comp.Cooldowns.Count; i++)
                 {
@@ -212,7 +209,7 @@ public class Berserk(float _timeLeft) : Status(Sprites.Knob)
                     }
                 }
             }
-            if(_parent is Player)
+            if (_parent is Player)
             {
                 (_parent as Player).LowerCooldown();
             }
@@ -236,9 +233,9 @@ public class Berserk(float _timeLeft) : Status(Sprites.Knob)
         timeLeft = 10;
         bonus = true;
     }
-    public override int SensingChange() 
-    { 
-        return -1; 
+    public override int SensingChange()
+    {
+        return -1;
     }
     public override int StealthChange()
     {

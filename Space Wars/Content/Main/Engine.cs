@@ -1,5 +1,4 @@
 ﻿using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Space_Wars.Content.Main.Entities;
@@ -9,8 +8,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using UILib.Content.Main;
-using System.Diagnostics;
-using Space_Wars.Content.Main.Systems;
 
 namespace Space_Wars.Content.Main;
 
@@ -57,11 +54,11 @@ public class Engine : Game
 
         IsFixedTimeStep = true;
         TargetElapsedTime = TimeSpan.FromSeconds(1d / (double)(targetFramerate));
-        
+
         BackBuffer = new Vector2(graphics.PreferredBackBufferWidth, graphics.PreferredBackBufferHeight);
-        ScreenSize = new Vector2(1920 * BackBuffer.Y/1080,1080);
+        ScreenSize = new Vector2(1920 * BackBuffer.Y / 1080, 1080);
         Line = new Texture2D(graphics.GraphicsDevice, 1, 1, false, SurfaceFormat.Color);
-        Line.SetData([ Color.White ]);
+        Line.SetData([Color.White]);
 
         Camera = new Camera(Vector2.Zero, ScreenSize / 2, 1f, 0);
 
@@ -112,7 +109,7 @@ public class Engine : Game
             UIManager.UIScale = (i + 1f) * BackBuffer.X / ScreenSize.X;
             UI.UIScale.text = $"UI Scale: {Math.Truncate((i + 1) * 10) / 10}";
         });
-        UI.ApplyChanges.AddBehaviour(delegate()
+        UI.ApplyChanges.AddBehaviour(delegate ()
         {
             Self.Window.IsBorderless = UI.type == 1;
             Self.graphics.IsFullScreen = UI.type == 2;
@@ -169,7 +166,7 @@ public class Engine : Game
     }
     public void QueueShaderException(IActor _exception)
     {
-        if(!ShaderExceptions.Contains(_exception))
+        if (!ShaderExceptions.Contains(_exception))
         {
             ShaderExceptions.Add(_exception);
         }
@@ -185,7 +182,7 @@ public class Engine : Game
         CurrentGameState.Update();
 
         DeltaSeconds = (float)gameTime.ElapsedGameTime.TotalSeconds * timeScale;
-        if(ScreenShakeFactor > 0)
+        if (ScreenShakeFactor > 0)
         {
             ScreenShakeFactor -= DeltaSeconds;
         }
@@ -203,7 +200,7 @@ public class Engine : Game
     }
     public static void WriteLine<T>(T arg, Color _color = default)
     {
-        if(_color == default)
+        if (_color == default)
         {
             _color = Color.White;
         }
@@ -214,7 +211,7 @@ public class Engine : Game
     {
         ScreenShakeFactor = Math.Min(ScreenShakeFactor + _val * _val / (ScreenShakeFactor + _val), 1);
     }
-    public Texture2D RenderAtmosphere(float _atmosphereRadius, float _atmosphereStrength, float _planetRadius, Color _color, Planet _planet, bool _isSun)
+    public Texture2D RenderAtmosphere(float _atmosphereRadius, float _atmosphereStrength, float _planetRadius, Color _color, Planet _planet)
     {
         var renderTarget = new RenderTarget2D(GraphicsDevice, (int)(_atmosphereRadius * 2), (int)(_atmosphereRadius * 2));
         GraphicsDevice.SetRenderTarget(renderTarget);
@@ -223,7 +220,7 @@ public class Engine : Game
         float start = _planetRadius;
         if (_atmosphereStrength > 2)
         {
-            start = Math.Max(_planetRadius - Engine.BackBuffer.Length()/2, 0);
+            start = Math.Max(_planetRadius - Engine.BackBuffer.Length() / 2, 0);
         }
         for (float r = start; r < _atmosphereRadius; r += MathF.Sqrt(36 + 36 / MathF.Pow(_planet.GetAtmosphereDensity(r), 2)))
         {
@@ -235,7 +232,7 @@ public class Engine : Game
             }
             for (float t = MathF.Tau / MathF.Ceiling(iterations) / 2; t < MathF.Tau; t += MathF.Tau / MathF.Ceiling(iterations))
             {
-                spriteBatch.Draw(Assets.Get(Sprites.Circle), new Vector2(_atmosphereRadius, _atmosphereRadius) + Util.ToUnitVector(t) * r, null, _color * MathF.Tanh(_planet.GetAtmosphereDensity(r) / 4f) * offset, t, Assets.DimsOf(Sprites.Circle)/2, 1, 0, 0);
+                spriteBatch.Draw(Assets.Get(Sprites.Circle), new Vector2(_atmosphereRadius, _atmosphereRadius) + Util.ToUnitVector(t) * r, null, _color * MathF.Tanh(_planet.GetAtmosphereDensity(r) / 4f) * offset, t, Assets.DimsOf(Sprites.Circle) / 2, 1, 0, 0);
             }
         }
         spriteBatch.End();
@@ -244,7 +241,7 @@ public class Engine : Game
     }
     public static void DrawFilledLine(SpriteBatch _spriteBatch, Vector2 _position, Rectangle _sourceRectangle, float _percentFilled, Color _lowerColor, Color _higherColor)
     {
-        _spriteBatch.Draw(Line,_position,_sourceRectangle,_lowerColor);
+        _spriteBatch.Draw(Line, _position, _sourceRectangle, _lowerColor);
         _spriteBatch.Draw(Line, _position, new Rectangle(_sourceRectangle.Location, new Point((int)(_sourceRectangle.Width * _percentFilled), _sourceRectangle.Height)), _higherColor);
     }
     protected override void Draw(GameTime gameTime)
@@ -261,7 +258,7 @@ public class Engine : Game
         //Render renderTarget with custom bloom shader
         GraphicsDevice.SetRenderTarget(null);
         GraphicsDevice.Clear(new Color(50, 50, 50));
-        int renderCoord = (int)(BackBuffer.Y/0.5625f);
+        int renderCoord = (int)(BackBuffer.Y / 0.5625f);
         spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, null, null, Assets.GlobalShader);
         spriteBatch.Draw(renderTarget, new Rectangle((int)(BackBuffer.X - ScreenSize.X), 0, (int)(renderCoord), (int)(BackBuffer.Y)), Color.White);
         spriteBatch.End();
@@ -366,8 +363,9 @@ public static class Util
             ParticleManager.Add(new Particle(Assets.Get(Sprites.Circle), 0.25f, _position - _velocity, _velocity + _direction * 2
                 + new Vector2(OneToNegOne(), OneToNegOne()) / 2 + _direction * (OneToNegOne() - 0.25f) * 1.5f, 0, 0, color, new Color(0.3f, 0.2f, 0.1f, 0f)));
         }
-        ParticleManager.Add(new Particle(Assets.Get(Sprites.Dot), 60, _position - _velocity, _velocity 
-            + new Vector2(_direction.Y + OneToNegOne() / 2, -_direction.X + OneToNegOne() / 4), 0, OneToNegOne() / 5, Color.Yellow, Color.Transparent) { experienceGravity = true });
+        ParticleManager.Add(new Particle(Assets.Get(Sprites.Dot), 60, _position - _velocity, _velocity
+            + new Vector2(_direction.Y + OneToNegOne() / 2, -_direction.X + OneToNegOne() / 4), 0, OneToNegOne() / 5, Color.Yellow, Color.Transparent)
+        { experienceGravity = true });
     }
     public static void Explode(Vector2 _position, Vector2 _velocity, int _damage, float _radius)
     {

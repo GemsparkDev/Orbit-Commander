@@ -1,5 +1,4 @@
 ﻿using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
 
 namespace Space_Wars.Content.Main;
 
@@ -10,7 +9,7 @@ public class Camera(Vector2 _position, Vector2 _origin, float _zoom, float _rota
     {
         get
         {
-            return transform ??= 
+            return transform ??=
                 Matrix.CreateTranslation(-_position.X, -_position.Y, 0) *
                 Matrix.CreateRotationZ(_rotation) * Matrix.CreateScale(_zoom) *
                 Matrix.CreateTranslation(_origin.X, _origin.Y, 0);

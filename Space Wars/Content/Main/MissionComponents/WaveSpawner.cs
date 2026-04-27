@@ -6,14 +6,12 @@ using Space_Wars.Content.Main.Particles;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using static Space_Wars.Content.Main.Mission;
 
 namespace Space_Wars.Content.Main.MissionComponents;
 internal class WaveSpawner : IMissionComponent
 {
-    public WaveSpawner(List<(int cost, Func<Vector2, Vector2, float, Team, Entity> enemy)> _enemyCreditValues, 
+    public WaveSpawner(List<(int cost, Func<Vector2, Vector2, float, Team, Entity> enemy)> _enemyCreditValues,
     List<Func<Vector2, Vector2, float, Team, Entity>> _bosses, float _timerModifier, bool _isAggressive)
     {
         enemyCreditValues = _enemyCreditValues;
@@ -22,12 +20,12 @@ internal class WaveSpawner : IMissionComponent
         currentBoss = Util.Random.Next(bosses.Count);
         isAggressive = _isAggressive;
     }
-    public WaveSpawner(Func<(List<(int, Func<Vector2, Vector2, float, Team, Entity>)> _enemyCreditValues, 
+    public WaveSpawner(Func<(List<(int, Func<Vector2, Vector2, float, Team, Entity>)> _enemyCreditValues,
     List<Func<Vector2, Vector2, float, Team, Entity>> _bosses)> _spawner, float _timerModifier, bool _isAggressive)
     {
-        var spawns = _spawner();
-        enemyCreditValues = spawns._enemyCreditValues;
-        bosses = spawns._bosses;
+        var (_enemyCreditValues, _bosses) = _spawner();
+        enemyCreditValues = _enemyCreditValues;
+        bosses = _bosses;
         TimerModifier = _timerModifier;
         currentBoss = Util.Random.Next(bosses.Count);
         isAggressive = _isAggressive;
@@ -42,7 +40,7 @@ internal class WaveSpawner : IMissionComponent
     private int currentBoss;
     public float TimerModifier { get; set; }
     public int EnemiesSpawned { get; set; } = 0;
-    public int Wave {get{return Engine.SaveGame.CurrentMission.Wave;} set{Engine.SaveGame.CurrentMission.Wave = value;}}
+    public int Wave { get { return Engine.SaveGame.CurrentMission.Wave; } set { Engine.SaveGame.CurrentMission.Wave = value; } }
     public void Draw(SpriteBatch _spriteBatch)
     {
     }

@@ -1,13 +1,6 @@
-﻿using Microsoft.Xna.Framework.Graphics;
+﻿using Microsoft.Xna.Framework;
 using Space_Wars.Content.Main.Entities;
 using Space_Wars.Content.Main.Particles;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection.Metadata;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.Xna.Framework;
 
 namespace Space_Wars.Content.Main.Components;
 internal class ExpireTimer(Entity _entity) : Component(_entity)

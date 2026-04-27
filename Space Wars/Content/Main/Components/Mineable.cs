@@ -1,11 +1,7 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Microsoft.Xna.Framework;
 using Space_Wars.Content.Main.Entities;
 using Space_Wars.Content.Main.Particles;
-using Microsoft.Xna.Framework;
+using System;
 
 namespace Space_Wars.Content.Main.Components;
 public class Mineable(Entity _entity) : Component(_entity)

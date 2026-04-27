@@ -1,13 +1,7 @@
-﻿using Microsoft.Xna.Framework.Graphics;
-using Space_Wars.Content.Main;
+﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using Space_Wars.Content.Main.Entities;
-using Space_Wars.Content.Main.Particles;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.Xna.Framework;
 
 namespace Space_Wars.Content.Main.MissionComponents;
 public class Colliders(Func<ICollider[]> _colliders) : IMissionComponent, IObstacle
@@ -15,7 +9,7 @@ public class Colliders(Func<ICollider[]> _colliders) : IMissionComponent, IObsta
     public ICollider[] GetColliders { get; set; }
     public void Draw(SpriteBatch _spriteBatch)
     {
-        foreach(var collider in GetColliders)
+        foreach (var collider in GetColliders)
         {
             collider.Draw(_spriteBatch);
         }
@@ -28,7 +22,7 @@ public class Colliders(Func<ICollider[]> _colliders) : IMissionComponent, IObsta
 
     public void Update()
     {
-        foreach(var collider in GetColliders)
+        foreach (var collider in GetColliders)
         {
             foreach (var entity in Engine.SaveGame.CurrentMission.Entities)
             {
@@ -36,14 +30,14 @@ public class Colliders(Func<ICollider[]> _colliders) : IMissionComponent, IObsta
             }
             //foreach (var particle in ParticleManager.Particles)
             //{
-                //collider.Collide(particle);
+            //collider.Collide(particle);
             //}
         }
     }
     public bool Collide(Entity _entity)
     {
         bool IsColliding = false;
-        foreach(var collider in GetColliders)
+        foreach (var collider in GetColliders)
         {
             IsColliding = IsColliding || collider.Collide(_entity);
         }
@@ -53,11 +47,11 @@ public class Colliders(Func<ICollider[]> _colliders) : IMissionComponent, IObsta
     {
         end = _velocity.Length();
         ICollider returnCollider = null;
-        foreach(var collider in GetColliders)
+        foreach (var collider in GetColliders)
         {
-            if(collider.IsColliding(_position, _velocity, _colliderRadius, _override, out float _end))
+            if (collider.IsColliding(_position, _velocity, _colliderRadius, _override, out float _end))
             {
-                if(_end < end)
+                if (_end < end)
                 {
                     end = _end;
                     returnCollider = collider;

@@ -1,8 +1,8 @@
-using System.Collections.Generic;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Space_Wars.Content.Main.Entities;
-using Microsoft.Xna.Framework;
 using Space_Wars.Content.Main.Particles;
+using System.Collections.Generic;
 
 namespace Space_Wars.Content.Main.Components;
 public class Friendly(Entity _entity) : Component(_entity)
@@ -12,7 +12,7 @@ public class Friendly(Entity _entity) : Component(_entity)
     {
         List<Team> teams = [Team.Friendly, Team.Hostile, Team.Dead];
         teams.Remove(_team);
-        return teams.ToArray();
+        return [.. teams];
     }
     public override void Draw(SpriteBatch _spriteBatch)
     {

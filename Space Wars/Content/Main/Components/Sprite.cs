@@ -3,24 +3,22 @@ using Microsoft.Xna.Framework.Graphics;
 using Space_Wars.Content.Main.Entities;
 using Space_Wars.Content.Main.Particles;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 //using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Space_Wars.Content.Main.Components;
 public class Sprite(Entity _entity, Color _color) : Component(_entity)
 {
     private Texture2D texture;
     private ParticleEmitter collider;
-    public Texture2D Texture { 
-        get { return texture; } 
-        set 
+    public Texture2D Texture
+    {
+        get { return texture; }
+        set
         {
             texture = value;
             collider = new ParticleEmitter(Assets.Get(Sprites.Dot), Entity.Position, ColliderRadius, Color.Yellow) { isEmitterActive = false };
-        } }
+        }
+    }
     public Color Color { get; set; } = _color;
     public Color TargetColor { get; set; } = _color;
     public virtual float ColliderRadius
@@ -48,13 +46,13 @@ public class Sprite(Entity _entity, Color _color) : Component(_entity)
         Vector2 halfSize = (Engine.BackBuffer + Size) / 2;
         Vector2 pos = Engine.Camera.Position + Engine.MousePositionOffset;
         if (Entity.Position.X - pos.X < -halfSize.X || Entity.Position.Y - pos.Y < -halfSize.Y
-         || Entity.Position.X - pos.X >  halfSize.X || Entity.Position.Y - pos.Y >  halfSize.Y)
+         || Entity.Position.X - pos.X > halfSize.X || Entity.Position.Y - pos.Y > halfSize.Y)
         {
             return;
         }
         float stealth = Convert.ToSingle(Color.A) / 255;
         var sC = Entity.GetComponent<Stealth>();
-        if(sC != null)
+        if (sC != null)
         {
             var maxDistance = Mission.StealthRange * (float)Engine.SaveGame.Player.CountFuses(ModuleType.Sensors) / 4;
             //Player has superior sensing to stealth -> full detection
@@ -74,9 +72,9 @@ public class Sprite(Entity _entity, Color _color) : Component(_entity)
             }
             else if (Engine.SaveGame.Player.SensingAbility < sC.StealthAbility)
             {
-                stealth  = 0;
+                stealth = 0;
             }
-            stealth = MathF.Max(stealth, (float)Math.Clamp(sC.RevealDuration, 0f, 1f));   
+            stealth = MathF.Max(stealth, (float)Math.Clamp(sC.RevealDuration, 0f, 1f));
         }
         //Outline in atmosphere looks better
         if (Engine.SaveGame.CurrentMission.GetAtmospherePressure(Entity) > 0 || SaveGame.ColorScheme.IsOutlined())

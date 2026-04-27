@@ -1,8 +1,7 @@
-﻿using Microsoft.Xna.Framework.Graphics;
+﻿using Microsoft.Xna.Framework;
 using Space_Wars.Content.Main.Entities;
 using System;
 using System.Collections.Generic;
-using Microsoft.Xna.Framework;
 using System.IO;
 
 namespace Space_Wars.Content.Main;

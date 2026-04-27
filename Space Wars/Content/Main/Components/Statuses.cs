@@ -1,12 +1,8 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Space_Wars.Content.Main.Entities;
-using Space_Wars.Content.Main.Particles;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Space_Wars.Content.Main.Components;
 public class Statuses(Entity _entity) : Component(_entity)
@@ -58,7 +54,7 @@ public class Statuses(Entity _entity) : Component(_entity)
     public virtual int ModifyDamage(int _damage)
     {
         int damage = _damage;
-        foreach(var status in effects)
+        foreach (var status in effects)
         {
             damage = status.ModifyDamage(damage);
         }

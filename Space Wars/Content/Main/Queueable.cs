@@ -1,11 +1,8 @@
-﻿using System;
+﻿using Microsoft.Xna.Framework.Graphics;
+using Space_Wars.Content.Main.Entities;
+using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.Xna.Framework.Graphics;
-using Space_Wars.Content.Main.Entities;
 using UILib.Content.Main;
 
 namespace Space_Wars.Content.Main;
@@ -110,7 +107,7 @@ public class RepairQueue : Queueable
     }
     public override string Serialize()
     {
-        for(int i = 0; i < UI.MissionSelectSlots.Length; i++)
+        for (int i = 0; i < UI.MissionSelectSlots.Length; i++)
         {
             if (UI.MissionSelectSlots[i] == module)
             {

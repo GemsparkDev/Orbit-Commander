@@ -1,8 +1,4 @@
 ﻿using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Input;
-using Microsoft.Xna.Framework;
-using Space_Wars.Content.Main.Entities;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -42,12 +38,12 @@ namespace Space_Wars.Content.Main.Particles
             }
             if (Particles.Count >= 50000)
             {
-                for(int i = 0; i < Particles.Count - 50000; i++)
+                for (int i = 0; i < Particles.Count - 50000; i++)
                 {
                     Particles[i].isExpired = true;
                 }
             }
-            Particles = Particles.Where(x => !x.isExpired).ToList();
+            Particles = [.. Particles.Where(x => !x.isExpired)];
 
             isUpdating = false;
 

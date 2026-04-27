@@ -1,14 +1,14 @@
 ﻿
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using Space_Wars.Content.Main.Components;
 using Space_Wars.Content.Main.Entities;
 using Space_Wars.Content.Main.Particles;
-using UILib.Content.Main;
-using System.Collections.Generic;
-using System.Linq;
-using Microsoft.Xna.Framework.Graphics;
-using System.IO;
 using Space_Wars.Content.Main.UIElements;
-using Space_Wars.Content.Main.Components;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using UILib.Content.Main;
 
 namespace Space_Wars.Content.Main;
 
@@ -23,7 +23,7 @@ public static class EventHandler
     }
     public static bool SendMessage(Message _message)
     {
-        if(eventLog.Contains(_message))
+        if (eventLog.Contains(_message))
         {
             return false;
         }
@@ -39,7 +39,7 @@ public static class EventHandler
         UI.MainMenu.enabled = true;
         ParticleManager.Initialize();
         SoundManager.SetAllSounds(false);
-        SoundManager.Initialize();  
+        SoundManager.Initialize();
         SoundManager.PlayGlobalSound(Assets.Get(Sound.Interact));
         Engine.Camera.Position = Vector2.Zero;
         CurrentGameState.SwitchState(new MainMenu());
@@ -52,7 +52,7 @@ public static class EventHandler
             daughterModule = UI.RepairSlot.daughterItem;
         }
         else
-        { 
+        {
             SoundManager.PlayGlobalSound(Assets.Get(Sound.Fail));
             return;
         }
@@ -152,7 +152,7 @@ public static class EventHandler
     }
     public static void CraftItem()
     {
-        if(Engine.SaveGame.Scrap >= 1)
+        if (Engine.SaveGame.Scrap >= 1)
         {
             Engine.SaveGame.Scrap -= 1;
             SendMessage(Message.MothershipCraftItem);
@@ -217,7 +217,7 @@ public static class EventHandler
     {
         for (int i = 0; i < UI.StatusLights.Length; i++)
         {
-            if(!Engine.SaveGame.Player.IsEnabled)
+            if (!Engine.SaveGame.Player.IsEnabled)
             {
                 UI.StatusLights[i].color = Color.Transparent;
                 continue;
@@ -264,7 +264,7 @@ public static class EventHandler
         UI.FuseCounter.Count = _spareFuses;
         UI.FuseDial.Target = (float)(totalFuses) / 10 - 0.5f;
 
-        Color[] possibleColors = [ Color.Red, Color.Orange, Color.Yellow, Color.White, Color.Cyan ];
+        Color[] possibleColors = [Color.Red, Color.Orange, Color.Yellow, Color.White, Color.Cyan];
         for (int i = 0; i < 5; i++)
         {
             var decal = UI.ModuleIcons[i];
@@ -388,7 +388,7 @@ public static class EventHandler
     }
     public static void SetModules()
     {
-        for(int i = 0; i < 5; i++)
+        for (int i = 0; i < 5; i++)
         {
             UI.Module[i].text = ItemFactory.moduleData[UI.setModules[i]].Name;
         }

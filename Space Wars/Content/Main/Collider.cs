@@ -1,16 +1,10 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+//using System.Drawing;
+using Space_Wars.Content.Main.Components;
 using Space_Wars.Content.Main.Entities;
 using Space_Wars.Content.Main.Particles;
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-//using System.Drawing;
-using System.Linq;
-using System.Security.Cryptography.X509Certificates;
-using System.Text;
-using System.Threading.Tasks;
-using Space_Wars.Content.Main.Components;
 
 namespace Space_Wars.Content.Main;
 public interface ICollider
@@ -25,7 +19,7 @@ public interface ICollider
         Vector2 relativePosition = _entity.Position - _closestPoint + normalVector * _entity.ColliderRadius;
         Vector2 futurePosition = relativePosition + (_entity.Velocity - _velocity) - 2 * normalVector * _entity.ColliderRadius;
         bool cond = Vector2.Dot(normalVector, relativePosition) * Vector2.Dot(normalVector, futurePosition) < 0;
-        if(cond)
+        if (cond)
         {
             var frictionVector = new Vector2(normalVector.Y, -normalVector.X);
             var relativeVelocity = -_entity.Velocity; //Include velocity if colliders are moving in the future.
@@ -45,20 +39,20 @@ public class LineCollider(Vector2 _start, Vector2 _end, bool _isVisual = false) 
 {
     public bool Collide(Entity _entity)
     {
-        if(_isVisual)
+        if (_isVisual)
         {
             return false;
         }
         Vector2 length = _start - _end;
         float distanceBetween = Math.Clamp(Vector2.Dot((_start - _entity.Position), length) / length.LengthSquared(), 0, 1);
-        Vector2 closestPoint = _start-length * distanceBetween;
+        Vector2 closestPoint = _start - length * distanceBetween;
         float distance = Vector2.Distance(closestPoint, _entity.Position);
         return ICollider.ComputeCollisions(distance, closestPoint, Vector2.Zero, _entity);
     }
     public bool IsColliding(Vector2 _position, Vector2 _entityVelocity, float _radius, bool _override, out float end)
     {
         end = _entityVelocity.Length();
-        if(_isVisual && !_override)
+        if (_isVisual && !_override)
         {
             return false;
         }
@@ -69,7 +63,7 @@ public class LineCollider(Vector2 _start, Vector2 _end, bool _isVisual = false) 
         var normalVector = (_position - closestPoint) / distance;
         Vector2 relativePosition = _position - closestPoint + normalVector * _radius;
         Vector2 futurePosition = relativePosition + (_entityVelocity) - 2 * normalVector * _radius;
-        if(Vector2.Dot(normalVector, relativePosition) * Vector2.Dot(normalVector, futurePosition) < 0)
+        if (Vector2.Dot(normalVector, relativePosition) * Vector2.Dot(normalVector, futurePosition) < 0)
         {
             ParticleManager.Add(new Particle(Assets.Get(Sprites.Circle), closestPoint, 0, Color.Red));
         }
@@ -82,7 +76,7 @@ public class LineCollider(Vector2 _start, Vector2 _end, bool _isVisual = false) 
     }
     public void Rotate(float _rad)
     {
-        float angle = MathF.Atan2((_end.Y - _start.Y),(_end.X - _start.X)) + MathF.PI/2;
+        float angle = MathF.Atan2((_end.Y - _start.Y), (_end.X - _start.X)) + MathF.PI / 2;
         Vector2 com = (_end + _start) / 2;
         float length = (_end - com).Length();
         Vector2 dir = Util.ToUnitVector(angle + _rad);
@@ -91,16 +85,16 @@ public class LineCollider(Vector2 _start, Vector2 _end, bool _isVisual = false) 
     }
     public void Draw(SpriteBatch _spriteBatch)
     {
-        float angle = MathF.Atan2((_start.Y - _end.Y), (_start.X - _end.X)) - MathF.PI/2;
+        float angle = MathF.Atan2((_start.Y - _end.Y), (_start.X - _end.X)) - MathF.PI / 2;
         Vector2 dir = Util.ToUnitVector(angle);
         float f = 1;
-        if(_isVisual)
+        if (_isVisual)
         {
             f = 0.5f;
         }
         for (float d = 0; d < (_end - _start).Length() / 4; d += 2)
         {
-            _spriteBatch.Draw(Assets.Get(Sprites.Dot), _start + dir * d * 4, null, Color.White * f, angle, Assets.DimsOf(Sprites.Dot)/2, Vector2.One, 0, 0);
+            _spriteBatch.Draw(Assets.Get(Sprites.Dot), _start + dir * d * 4, null, Color.White * f, angle, Assets.DimsOf(Sprites.Dot) / 2, Vector2.One, 0, 0);
         }
     }
     public string Print()
@@ -129,12 +123,12 @@ public class ArcCollider : ICollider
     }
     public bool Collide(Entity _entity)
     {
-        if(isVisual)
+        if (isVisual)
         {
             return false;
         }
         Vector2 relativePosition = _entity.Position - position;
-        float relativeAngle = -Math.Clamp(MathF.Asin(Util.Cross(relativePosition, Util.ToUnitVector(sprayAngle)) / relativePosition.Length()), -sprayCone/2, sprayCone/2);
+        float relativeAngle = -Math.Clamp(MathF.Asin(Util.Cross(relativePosition, Util.ToUnitVector(sprayAngle)) / relativePosition.Length()), -sprayCone / 2, sprayCone / 2);
         Vector2 closestPoint = Util.ToUnitVector(sprayAngle + relativeAngle) * radius + position;
         float distance = Vector2.Distance(_entity.Position, closestPoint);
         return ICollider.ComputeCollisions(distance, closestPoint, Vector2.Zero, _entity);
@@ -142,7 +136,7 @@ public class ArcCollider : ICollider
     public bool IsColliding(Vector2 _position, Vector2 _velocity, float _radius, bool _override, out float end)
     {
         end = _velocity.Length();
-        if(isVisual && !_override)
+        if (isVisual && !_override)
         {
             return false;
         }
@@ -162,7 +156,7 @@ public class ArcCollider : ICollider
     public void Draw(SpriteBatch _spriteBatch)
     {
         float f = 1;
-        if(isVisual)
+        if (isVisual)
         {
             f = 0.5f;
         }
@@ -193,7 +187,7 @@ public class ArcCollider : ICollider
         void DrawParticle(float angle)
         {
             normalVector = Util.ToUnitVector(angle + sprayAngle) * radius;
-            _spriteBatch.Draw(Assets.Get(Sprites.Dot), position + normalVector, null, Color.White*f, angle, Assets.DimsOf(Sprites.Dot)/2, 1, 0, 0);
+            _spriteBatch.Draw(Assets.Get(Sprites.Dot), position + normalVector, null, Color.White * f, angle, Assets.DimsOf(Sprites.Dot) / 2, 1, 0, 0);
         }
     }
     public string Print()

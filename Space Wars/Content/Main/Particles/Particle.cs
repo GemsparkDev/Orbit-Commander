@@ -11,8 +11,8 @@ namespace Space_Wars.Content.Main.Particles
         public Vector2 Size => texture == null ? Vector2.Zero : new Vector2(texture.Width, texture.Height);
         public String drawText;
         private Texture2D texture;
-        public Vector2 Position;
-        public Vector2 Velocity;
+        public Vector2 Position { get; set; }
+        public Vector2 Velocity { get; set; }
         private Color color;
         private Color renderColor;
         private Color fadeToColor;
@@ -63,12 +63,12 @@ namespace Space_Wars.Content.Main.Particles
         }
         public void Draw(SpriteBatch _spriteBatch)
         {
-            if(drawText != null)
+            if (drawText != null)
             {
-                _spriteBatch.DrawString(Assets.TextFont, drawText, Position, renderColor * ((float)renderColor.A/255f), angle, Assets.TextFont.MeasureString(drawText) / 2, 0.75f, 0, 0.2f);
+                _spriteBatch.DrawString(Assets.TextFont, drawText, Position, renderColor * ((float)renderColor.A / 255f), angle, Assets.TextFont.MeasureString(drawText) / 2, 0.75f, 0, 0.2f);
                 return;
             }
-            _spriteBatch.Draw(texture, Position, null, renderColor * ((float)renderColor.A / 255f), angle, Size/2, 1f, 0, 0.2f);
+            _spriteBatch.Draw(texture, Position, null, renderColor * ((float)renderColor.A / 255f), angle, Size / 2, 1f, 0, 0.2f);
         }
     }
 }

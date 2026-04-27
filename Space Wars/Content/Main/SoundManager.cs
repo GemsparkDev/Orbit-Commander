@@ -1,11 +1,9 @@
-﻿using Microsoft.Xna.Framework.Audio;
+﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Audio;
+using Space_Wars.Content.Main.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using Microsoft.Xna.Framework;
-using Space_Wars.Content.Main.Entities;
-using System.Diagnostics;
 
 namespace Space_Wars.Content.Main;
 public static class SoundManager
@@ -14,7 +12,7 @@ public static class SoundManager
     private static List<SoundEffectInstance> loopedSounds = [];
     private static List<SoundEffectInstance> loopsToStop = [];
     private static Random random = new();
-    private static Player player => Engine.SaveGame.Player;
+    private static Player Player => Engine.SaveGame.Player;
     private static SoundEffectInstance currentTrack;
     private static SoundEffectInstance prevTrack;
     private static float soundTimer = -1;
@@ -60,7 +58,7 @@ public static class SoundManager
     }
     public static void PlaySound(SoundEffect _sound, Vector2 _playLocation)
     {
-        Vector2 listenerLocation = player.Position;
+        Vector2 listenerLocation = Player.Position;
         float distance = MathF.Sqrt(MathF.Pow(_playLocation.X - listenerLocation.X, 2) + MathF.Pow(_playLocation.Y - listenerLocation.Y, 2));
         float volume = MathF.Max(0, -(distance / 1000) + 1) * SFXVolume;
         //float pan = -(listenerLocation.X - playLocation.X) / (screenSize.X);
@@ -82,7 +80,7 @@ public static class SoundManager
     }
     public static void SetAllSounds(bool _playingSounds)
     {
-        if(_playingSounds)
+        if (_playingSounds)
         {
             foreach (var soundEffect in sounds)
             {

@@ -14,7 +14,7 @@ public static class Input
         NewState = Keyboard.GetState();
         OldMouseState = NewMouseState;
         NewMouseState = Mouse.GetState();
-        
+
         if (OldState.IsKeyUp(Keys.OemTilde) && NewState.IsKeyDown(Keys.OemTilde))
         {
             SaveGame.DebugMode = !SaveGame.DebugMode;
@@ -38,7 +38,7 @@ public static class Input
     {
         return OldState.IsKeyDown(Keybinds[binding]);
     }
-    public static Dictionary<Binding, Keys> Keybinds = new() 
+    public static Dictionary<Binding, Keys> Keybinds { get; } = new()
     {
         { Binding.Up, Keys.W },
         { Binding.Down, Keys.S },

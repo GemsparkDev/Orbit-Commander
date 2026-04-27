@@ -1,13 +1,11 @@
-﻿using System;
-using UILib.Content.Main;
+﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework;
-using Space_Wars.Content.Main.Entities;
-using static Space_Wars.Content.Main.Engine;
-using System.Collections.Generic;
 using Microsoft.Xna.Framework.Input;
-using System.Diagnostics;
+using Space_Wars.Content.Main.Entities;
 using Space_Wars.Content.Main.UIElements;
+using System;
+using UILib.Content.Main;
+using static Space_Wars.Content.Main.Engine;
 
 namespace Space_Wars.Content.Main;
 public static class UI
@@ -49,7 +47,7 @@ public static class UI
     public static Decal TitleName { get; } = new Decal(new Vector2(0, -MainMenu.Size.Y), Assets.Get(Sprites.Title));
     public static Button LoadButton { get; } = new Button(new Vector2(0, 0), Assets.Get(Sprites.WideButton), Assets.TextFont, "Load", Color.White);
     public static Decal WindowType { get; } = new Decal(new Vector2(-90, -15), null, Assets.TextFont, "Borderless Window", Color.White, 10);
-    public static Button NextWindowType { get; } = new Button(new Vector2(-130, 10), Assets.Get(Sprites.Button), Assets.TextFont, "Next", Color.White );
+    public static Button NextWindowType { get; } = new Button(new Vector2(-130, 10), Assets.Get(Sprites.Button), Assets.TextFont, "Next", Color.White);
     public static Decal Resolution { get; } = new Decal(new Vector2(-30, 45), null, Assets.TextFont, "1920 x 1080", Color.White, 10);
     public static Button NextResolution { get; } = new Button(new Vector2(-130, 45), Assets.Get(Sprites.Button), Assets.TextFont, "Next Resolution", Color.White);
     public static Button ApplyChanges { get; } = new Button(new Vector2(-40, 10), Assets.Get(Sprites.Button), Assets.TextFont, "Apply changes", Color.White);
@@ -126,7 +124,7 @@ public static class UI
     public static Slider PlayerAbility { get; } = new Slider(Line, new Vector2(5, 15), new Vector2(100, 10), true, [Color.Cyan, Color.DarkGray]);
 
     //Upgrade Menu
-    public static Decal TraderChat { get; } = new Decal(Vector2.Zero, Assets.TextFont, 
+    public static Decal TraderChat { get; } = new Decal(Vector2.Zero, Assets.TextFont,
         "Hey there!" +
         "\nIf you get me some rare materials, I can improve your sensors." +
         "\nI'm also willing to upgrade some of your other modules for 5 scrap and retool upgraded sensors for 1.", Color.White, 8);
@@ -143,7 +141,7 @@ public static class UI
     public static Decal[] StatusLights { get; } = new Decal[5];
     public static Slider RestartSwitch { get; } = new Slider(Line, new Vector2(15, 70), Assets.DimsOf(Sprites.SwitchOne) + new Vector2(2, 4), false, [Color.Transparent, Color.Transparent]);
     public static Decal Switch { get; } = new Decal(RestartSwitch.Offset / UILib.Content.Main.UIManager.UIScale, Assets.Get(Sprites.SwitchFive));
-    public static UIElements.Stack<Fuse> FuseCounter { get; } = new UIElements.Stack<Fuse>(new Vector2(-5, -70), Assets.Get(Sprites.Button), 1, Assets.Get(Sprites.Fuse), new Vector2(-Assets.Get(Sprites.Button).Width/2 * 4/5, 0), new Vector2(8,0), delegate () { return new Fuse(Color.White); });
+    public static UIElements.Stack<Fuse> FuseCounter { get; } = new UIElements.Stack<Fuse>(new Vector2(-5, -70), Assets.Get(Sprites.Button), 1, Assets.Get(Sprites.Fuse), new Vector2(-Assets.Get(Sprites.Button).Width / 2 * 4 / 5, 0), new Vector2(8, 0), delegate () { return new Fuse(Color.White); });
     public static ItemSlot<Fuse>[,] Fuses { get; } = new ItemSlot<Fuse>[4, 5];
     public static Decal[] ModuleIcons { get; } = new Decal[5];
     public static Decal FuseDetailing { get; } = new Decal(new Vector2(30, 0), Assets.Get(Sprites.FuseDetailing));
@@ -159,9 +157,9 @@ public static class UI
     public static ItemSlot<Module> SecondarySlot { get; private set; } = new ItemSlot<Module>(new Vector2(-GarageMenu.Size.X / 4 - 25, 50), Assets.Get(Sprites.EmptySlot), Engine.UIManager, (int)ModuleType.Guns);
 
     public static int type = 1;
-    public static Vector2[] resolutions = [ new Vector2(1920, 1080), new Vector2(640, 480) ];
+    public static readonly Vector2[] resolutions = [new Vector2(1920, 1080), new Vector2(640, 480)];
     public static int selectedResolution = 0;
-    public static Modules[] setModules = [ Modules.Ablative, Modules.Basic, Modules.Plasma, Modules.Sensors, Modules.GrapplingHook ];
+    public static readonly Modules[] setModules = [Modules.Ablative, Modules.Basic, Modules.Plasma, Modules.Sensors, Modules.GrapplingHook];
 
     //Hack menu
     public static Button HackButton { get; } = new Button(Vector2.Zero, Assets.Get(Sprites.Button), Assets.TextFont, "Hack", Color.Yellow);
@@ -193,14 +191,14 @@ public static class UI
             SoundManager.MusicVolume = Math.Clamp(MathF.Pow(10, i - 0.954242509439f) - 0.111111111111f, 0, 1);
             MusicVolume.text = $"Music: {Math.Round(i * 100)}%";
         });
-        NextWindowType.AddBehaviour(delegate() 
+        NextWindowType.AddBehaviour(delegate ()
         {
             type++;
-            if(type > 2)
+            if (type > 2)
             {
                 type -= 3;
             }
-            switch(type)
+            switch (type)
             {
                 case 0:
                     WindowType.text = "Windowed";
@@ -215,10 +213,10 @@ public static class UI
                     break;
             }
         }); //Write to config?
-        NextResolution.AddBehaviour(delegate () 
+        NextResolution.AddBehaviour(delegate ()
         {
             selectedResolution++;
-            if(selectedResolution >= resolutions.Length)
+            if (selectedResolution >= resolutions.Length)
             {
                 selectedResolution = 0;
             }
@@ -232,7 +230,7 @@ public static class UI
         MusicSlider.ApplyBehaviours();
         UIScaleSlider.ApplyBehaviours();
 
-        QuitToMissionButton.AddBehaviour(delegate(){EventHandler.MissionSelectTrigger(new MissionSelect());});
+        QuitToMissionButton.AddBehaviour(delegate () { EventHandler.MissionSelectTrigger(new MissionSelect()); });
         GarageButton.AddBehaviour(EventHandler.GarageTrigger);
         RepairButton.AddBehaviour(EventHandler.RepairModule);
         var tooltip = new Window(Vector2.Zero, wideButton);
@@ -245,9 +243,9 @@ public static class UI
         RepairSlot.AddBehaviour(EventHandler.UpdateRepairText);
         FurnaceSlot.AddBehaviour(EventHandler.UpdateFurnace);
         RestartSwitch.AddBehaviour(
-            delegate () 
+            delegate ()
             {
-                if(Engine.SaveGame.Player.IsRestarting)
+                if (Engine.SaveGame.Player.IsRestarting)
                 {
                     if (Input.OldMouseState.LeftButton == ButtonState.Released)
                     {
@@ -255,9 +253,9 @@ public static class UI
                     }
                     return;
                 }
-                if(RestartSwitch.Intervals[0] < 0.05f)
+                if (RestartSwitch.Intervals[0] < 0.05f)
                 {
-                    if(Engine.SaveGame.Player.IsEnabled)
+                    if (Engine.SaveGame.Player.IsEnabled)
                     {
                         EventHandler.SendMessage(Message.RestartModules);
                         SoundManager.PlayGlobalSound(Assets.Get(Sound.Undock));
@@ -290,11 +288,11 @@ public static class UI
                 }
             });
         RestartSwitch.SetInterval(1, 1);
-        FuseCounter.AddBehaviour(delegate() { Engine.SaveGame.Player.UpdateSpares(); });
+        FuseCounter.AddBehaviour(delegate () { Engine.SaveGame.Player.UpdateSpares(); });
 
-        GlobalSidePanelOpen.AddBehaviour(delegate() { EventHandler.ToggleDockingMenus(); });
-        GlobalFusePanelOpen.AddBehaviour(delegate () 
-        { 
+        GlobalSidePanelOpen.AddBehaviour(delegate () { EventHandler.ToggleDockingMenus(); });
+        GlobalFusePanelOpen.AddBehaviour(delegate ()
+        {
             SoundManager.PlayGlobalSound(Assets.Get(Sound.Interact));
             EventHandler.UpdateModulesStatus();
             FuseMenu.enabled = true;
@@ -306,16 +304,16 @@ public static class UI
             FuseMenu.enabled = false;
         });
         PrevMission.AddBehaviour(delegate () { Engine.SaveGame.PrevMission(); }); //Do not remove outer delegate
-        NextMission.AddBehaviour(delegate() { Engine.SaveGame.NextMission(); }); //Doing so causes exception due to null savegame
-        SelectMission.AddBehaviour(delegate () 
+        NextMission.AddBehaviour(delegate () { Engine.SaveGame.NextMission(); }); //Doing so causes exception due to null savegame
+        SelectMission.AddBehaviour(delegate ()
         {
-            if ((Mission.missions[Engine.SaveGame.CurrentMissionIndex].data.IsRelaunchable || !Engine.SaveGame.CurrentMissionCompleted) && EventHandler.SyncModules()) 
-            { 
-                Startgame(); 
-            } 
+            if ((Mission.missions[Engine.SaveGame.CurrentMissionIndex].data.IsRelaunchable || !Engine.SaveGame.CurrentMissionCompleted) && EventHandler.SyncModules())
+            {
+                Startgame();
+            }
         });
         LaunchButton.AddBehaviour(delegate () { EventHandler.SendMessage(Message.EscapeDroneLeave); });
-        SettingsButton.AddBehaviour(delegate() { PauseMenu.enabled = false; SettingsMenu.enabled = true; });
+        SettingsButton.AddBehaviour(delegate () { PauseMenu.enabled = false; SettingsMenu.enabled = true; });
         PauseMenuButton.AddBehaviour(delegate () { PauseMenu.enabled = true; SettingsMenu.enabled = false; });
         CreateFuse.AddBehaviour(delegate ()
         {
@@ -391,7 +389,7 @@ public static class UI
         tooltip = new Window(Vector2.Zero, wideButton);
         tooltip.AddWidget(new Decal(new Vector2(0, -3), Assets.TextFont, "Drag module over button to queue repair.\nRequired time: 20 waves. Requires no metal to repair.", Color.White, 3f));
         UpgradeHull.AddTooltip(tooltip);
-        UpgradeHull.AddBehaviour(delegate 
+        UpgradeHull.AddBehaviour(delegate
         {
             EventHandler.UpgradeModule(ModuleType.Hull, Engine.SaveGame.Player.modules[ModuleType.Hull]);
         });
@@ -430,13 +428,13 @@ public static class UI
         MainMenu.AddWidget(Resolution, 1);
         MainMenu.AddWidget(NextResolution, 1);
         MainMenu.AddWidget(ApplyChanges, 1);
-        for(int i = 0; i < Input.Keybinds.Count; i++)
+        for (int i = 0; i < Input.Keybinds.Count; i++)
         {
             var binding = (Binding)i; //Saving to a variable prevents delegate weirdness
             var key = Input.Keybinds[binding];
-            MainMenu.AddWidget(KeybindTexts[i] = new Decal(new Vector2(-140 + Assets.TextFont.MeasureString($"{binding}").X/2.55f, 12 * i-80), Assets.TextFont, $"{binding}", Color.White, 8), 3);
+            MainMenu.AddWidget(KeybindTexts[i] = new Decal(new Vector2(-140 + Assets.TextFont.MeasureString($"{binding}").X / 2.55f, 12 * i - 80), Assets.TextFont, $"{binding}", Color.White, 8), 3);
             var button = new Button(new Vector2(80, 12 * i - 80), Assets.TextFont, $"{key}", Color.White, 8);
-            button.AddBehaviour(delegate () 
+            button.AddBehaviour(delegate ()
             {
                 var keys = Input.NewState.GetPressedKeys();
                 if (keys.Length > 0)
@@ -448,7 +446,7 @@ public static class UI
             MainMenu.AddWidget(KeybindInputs[i] = button, 3);
         }
 
-        for(int i = 0; i < NextModule.Length; i++)
+        for (int i = 0; i < NextModule.Length; i++)
         {
             int module = i;
             MainMenu.AddWidget((NextModule[i] = new Button(new Vector2(60, 25 * i - 40), Assets.Get(Sprites.Button), Assets.TextFont, $"{i + 5}", Color.White)), 2);
@@ -599,7 +597,7 @@ public static class UI
                 //Not sure why this works, don't touch
                 int x = j + 2;
                 int y = i;
-                fuse.AddBehaviour(delegate () 
+                fuse.AddBehaviour(delegate ()
                 {
                     Engine.SaveGame.Player.ToggleFuse(x, y);
                 });

@@ -1,10 +1,9 @@
-﻿using Microsoft.Xna.Framework.Graphics;
+﻿using Microsoft.Xna.Framework;
 using Space_Wars.Content.Main.Entities;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using Microsoft.Xna.Framework;
 using System.Text;
 
 namespace Space_Wars.Content.Main;
@@ -13,17 +12,17 @@ public class SaveGame
     public string Name { get; set; } = "0";
     public int Scrap { get; set; }
     private int system = 0;
-    public int System 
-    { 
-        get 
-        { 
-            return system; 
-        } 
-        set 
-        { 
-            system = value; 
-            FleetSystem = Math.Max(FleetSystem, system); 
-        } 
+    public int System
+    {
+        get
+        {
+            return system;
+        }
+        set
+        {
+            system = value;
+            FleetSystem = Math.Max(FleetSystem, system);
+        }
     }
     public int CurrentMissionIndex { get; set; } = 0;
     private bool giveWeapon = true;
@@ -35,17 +34,17 @@ public class SaveGame
     public int FleetSystem { get; private set; } = 0;
 
     private Mission currentMission;
-    public Mission CurrentMission 
-    { 
-        get 
-        { 
-            currentMission ??= Mission.missions[CurrentMissionIndex].instance(); 
-            return currentMission; 
-        } 
-        set 
-        { 
-            currentMission = value; 
-        } 
+    public Mission CurrentMission
+    {
+        get
+        {
+            currentMission ??= Mission.missions[CurrentMissionIndex].instance();
+            return currentMission;
+        }
+        set
+        {
+            currentMission = value;
+        }
     }
     public bool CurrentMissionCompleted => CompletedMissions[CurrentMissionIndex];
     public bool GiveWeapon { get { giveWeapon = !giveWeapon; return !giveWeapon; } }
@@ -54,7 +53,7 @@ public class SaveGame
     public static bool PatchedConics { get; set; } = true;
     public static bool UseShader { get; set; } = true;
     public static ColorScheme ColorScheme { get; set; } = new StandardScheme();
-    
+
     public SaveGame() { }
     public SaveGame(string _serialization)
     {
@@ -80,7 +79,7 @@ public class SaveGame
         }
 
         Player player = null;
-        logger.Try(delegate{ player = new Player(disassembly[6], logger); }, 6);
+        logger.Try(delegate { player = new Player(disassembly[6], logger); }, 6);
         Player = (player ?? new Player(Vector2.Zero, Vector2.Zero, 0));
 
         array = [];
@@ -99,11 +98,11 @@ public class SaveGame
 
         array = [];
         logger.Try(delegate { array = Disassemble(disassembly[9]); }, 9);
-        if(Int32.TryParse(array[0], out int _i))
+        if (Int32.TryParse(array[0], out int _i))
         {
             for (int j = 0; j < _i; j++)
             {
-                logger.Try(delegate { QueuedItems.Add(Queueable.Deserialize(array[j + 1], logger)); }, j+1);
+                logger.Try(delegate { QueuedItems.Add(Queueable.Deserialize(array[j + 1], logger)); }, j + 1);
             }
         }
         FleetSystem = Int32.TryParse(disassembly[10], out int fleet) ? fleet : 0;
@@ -181,7 +180,7 @@ public class SaveGame
             }
         }
         QueuedItems = [.. from item in QueuedItems where !item.IsExpired select item];
-        Engine.SaveGame.Player.StatusHolder.Clear();
+        Engine.SaveGame.Player.Statuses.Clear();
         Engine.Autosave();
     }
     public string Serialize()
@@ -228,11 +227,11 @@ public class LoadLogger
     private List<(int index, Exception error)> exceptions = [];
     public void Try(Action _assignment, int _index)
     {
-        try 
-        { 
-            _assignment(); 
-        } 
-        catch (Exception error) 
+        try
+        {
+            _assignment();
+        }
+        catch (Exception error)
         {
             exceptions.Add((_index, error));
         }
