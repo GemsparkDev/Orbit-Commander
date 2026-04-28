@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using UILib.Content.Main;
+using Space_Wars.Content.Main.Components;
 
 namespace Space_Wars.Content.Main;
 
@@ -211,7 +212,7 @@ public class Engine : Game
     {
         ScreenShakeFactor = Math.Min(ScreenShakeFactor + _val * _val / (ScreenShakeFactor + _val), 1);
     }
-    public Texture2D RenderAtmosphere(float _atmosphereRadius, float _atmosphereStrength, float _planetRadius, Color _color, Planet _planet)
+    public Texture2D RenderAtmosphere(float _atmosphereRadius, float _atmosphereStrength, float _planetRadius, Color _color, Atmosphere _planet)
     {
         var renderTarget = new RenderTarget2D(GraphicsDevice, (int)(_atmosphereRadius * 2), (int)(_atmosphereRadius * 2));
         GraphicsDevice.SetRenderTarget(renderTarget);

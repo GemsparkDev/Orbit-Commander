@@ -17,7 +17,7 @@ public class Pickup : Entity, IData
     public String Name => itemData.Name;
     public int ID => itemData.ID;
     private Decal textbox;
-    public Pickup(ItemData _itemData, Vector2 _position, Vector2 _velocity, float _angularVelocity, int _health = 3)
+    public Pickup(ItemData _itemData, Vector2 _position, Vector2 _velocity, float _angularVelocity, int _health = 10)
         : base(_position, _velocity, 0, _angularVelocity)
     {
         AddComponent(new Sprite(this, Color.Cyan) { Texture = _itemData.VirtualSprite });

@@ -109,7 +109,7 @@ public class Mission
 
         (new("Gas Giant", "", 10, [], 1, 2000),
         delegate(){return new([
-            new Planet(Vector2.Zero, Vector2.Zero, 16000, 4, true, new Color(167, 156, 134), true, 6, 500f, true),
+            new Planet(Vector2.Zero, Vector2.Zero, 16000, 4, true, new Color(167, 156, 134), true, 500f).AddComponent(new Atmosphere(6, 16000) { IsSun = true }),
             new Planet(new Vector2(900, 0), Planet.GetOrbitalVelocity(new Vector2(900, 0), Vector2.Zero, 16000), 100, 0.5f, false, Color.OldLace),
             new Planet(new Vector2(-1200, 0), Planet.GetOrbitalVelocity(new Vector2(-1200, 0), Vector2.Zero, 16000) * 1.05f, 100, 0.5f, false, Color.OldLace),
             new WaveSpawner(Mission.T1, 1f, false),
@@ -121,13 +121,13 @@ public class Mission
         (new("???", "Sensor data shows that this site has an unusually high temperature.\nInvestigate possible enemy interferance.", 145, [7], 1, 2000, 3, true),
         //Note: The player construct menu and the Quantum Resonator both use the name of this mission for their special behavior. When changing, make sure their name is updated as well.
         delegate(){return new([
-            new Planet(Vector2.Zero, Vector2.Zero, 50000, 12, true, new Color(255, 219, 0), true, 1.5f) { Temperature = 0.5f },
+            (new Planet(Vector2.Zero, Vector2.Zero, 50000, 12, true, new Color(255, 219, 0), true) { Temperature = 0.5f }).AddComponent(new Atmosphere(1.5f, 50000)),
             ], new Conditional([], Mission.SendPickup(2000)),
              new PlayerSpawner(new Vector2(-2000, -2000)), Sound.None);}),
 
         (new("Base of Operations", "We have deployed several communication stations to this site.\nProtect the location for future development.", 130, [8], 1, 2000),
         delegate(){Entity a,b,c; return new([
-            new Planet(Vector2.Zero, Vector2.Zero, 30000, 10f, true, Color.HotPink, true) ,
+            new Planet(Vector2.Zero, Vector2.Zero, 30000, 10f, true, Color.HotPink, true),
             new WaveSpawner(Mission.T2, 1, false),
             a=Entity.NewCommunicator(new Vector2(MathF.Sin(1.02f), -MathF.Cos(1.02f)), Vector2.Zero, 1.02f, Team.Friendly),
             b=Entity.NewCommunicator(new Vector2(MathF.Sin(2.7f), -MathF.Cos(2.7f)), Vector2.Zero, 2.7f, Team.Friendly),
@@ -137,7 +137,7 @@ public class Mission
 
         (new("Assault", "It appears the enemy has improved their fleet, and has pushed the mothership to a non-ideal location.\nDefend the mothership and defeat the fortified miner base on this planet.", 150, [9], 1, 2000),
         delegate(){Entity a,b,c,d,e,f,g;return new([
-            new Planet(Vector2.Zero, Vector2.Zero, 20000, 9f, true, Color.Cyan, false, 1.8f),
+            new Planet(Vector2.Zero, Vector2.Zero, 20000, 9f, true, Color.Cyan, false).AddComponent(new Atmosphere(1.8f, 20000)),
             new Planet(new Vector2(0, 1800), Planet.GetOrbitalVelocity(new Vector2(0, 1800), Vector2.Zero, 20000), 1500, 2f, false, Color.Cyan),
             a=Entity.NewTurret(new Vector2(MathF.Sin(5.5f), -MathF.Cos(5.5f)) * 9 * 50, Vector2.Zero, 5.5f, Team.Hostile),
             b=Entity.NewTurret(new Vector2(MathF.Sin(3.2f), -MathF.Cos(3.2f)) * 9 * 50, Vector2.Zero, 3.2f, Team.Hostile),
@@ -181,14 +181,14 @@ public class Mission
 
         (new("Trader", "This friendly trader invites us to upgrade our modules in exchange for resources", 80, [13], 2, 2000, 3, true),
         delegate(){return new([
-            new Planet(Vector2.Zero, Vector2.Zero, 6000, 6, true, Color.Cyan, true, 0.8f),
+            new Planet(Vector2.Zero, Vector2.Zero, 6000, 6, true, Color.Cyan, true).AddComponent(new Atmosphere(0.8f, 6000)),
             Entity.NewTrader(new Vector2(0, 500), Planet.GetOrbitalVelocity(new Vector2(0, 500), Vector2.Zero, 6000), 0),], 
             Mission.SendPickup(2000)(),
             new PlayerSpawner(new Vector2(-2000, -2000)));}),
 
         (new("Clockwork creation", "A strange sentinal appears to be housed on this ancient planet.\nDismantling it may yield unusual resources.", 60, [14], 2, 2000),
         delegate(){Entity a;return new([
-            new Planet(Vector2.Zero, Vector2.Zero, 4000, 3, true, Color.Wheat, false, 1.5f),
+            new Planet(Vector2.Zero, Vector2.Zero, 4000, 3, true, Color.Wheat, false).AddComponent(new Atmosphere(1.5f, 4000)),
             new Planet(new Vector2(500, 0), Planet.GetOrbitalVelocity(new Vector2(500, 0), Vector2.Zero, 4000), 300, 1f, false, Color.Wheat),
             new WaveSpawner(Mission.T2, 1f, true),
             a=Entity.NewClockworkBoss(new Vector2(0, -6*50), Vector2.Zero, 0, Team.Hostile)], 
@@ -197,7 +197,7 @@ public class Mission
 
         (new("Ice giant", "The unusual conditions in this system have resulted in unique developments in the enemies technology.\nBe prepared for advanced enemy cloaking.", 0, [15], 2, 2000),
         delegate(){return new([
-            new Planet(Vector2.Zero, Vector2.Zero, 10000, 3, true, new Color(41, 144, 181), false, 15f, 0, true) { Temperature = -20 },
+            (new Planet(Vector2.Zero, Vector2.Zero, 10000, 3, true, new Color(41, 144, 181), false){ Temperature = -20 }).AddComponent(new Atmosphere(15, 10000) { IsSun = true }),
             new WaveSpawner(Mission.T2, 1f, false),], 
             new Conditional([new WaveGoal(30)], Mission.SendPickup(2000)),
             new GliderSpawner(new Vector2(-800, -1300), -1000));}),
@@ -222,7 +222,7 @@ public class Mission
 
         (new("Hack", "The enemy has set up a mesh node network for storing information.\nHack it to discover the location of their leader.", 0, [15], 2, 2000),
         delegate(){Entity a,b,c;return new([
-            new Planet(Vector2.Zero, Vector2.Zero, 18000, 6f, true, Color.Cyan, false, 1.5f) { Temperature = -2 },
+            (new Planet(Vector2.Zero, Vector2.Zero, 18000, 6f, true, Color.Cyan, false) { Temperature = -2 }).AddComponent(new Atmosphere(1.5f, 18000)),
             new Planet(new Vector2(1100, 0), Planet.GetOrbitalVelocity(new Vector2(1100, 0), Vector2.Zero, 18000), 1500, 1.5f, false, Color.Cyan) { Temperature = -2 },
             new WaveSpawner(Mission.T3, 0.8f, true),
             a=Entity.NewMeshNetworkNode(new Vector2(0, -1), Vector2.Zero, 0),
@@ -234,7 +234,7 @@ public class Mission
 
         (new("Inferno", "Your intel has led you here. Finish this.",  0, [15], 2, 2000),
         delegate(){Entity a; return new([
-            new Planet(Vector2.Zero, Vector2.Zero, 160000, 6, true, new Color(0.9f, 1f, 0.75f), false, 50f, 0, true) { Temperature = 5 },
+            (new Planet(Vector2.Zero, Vector2.Zero, 160000, 6, true, new Color(0.9f, 1f, 0.75f), false) { Temperature = 5 }).AddComponent(new Atmosphere(50, 160000) { IsSun = true }),
             new Planet(new Vector2(0, 2000), Planet.GetOrbitalVelocity(new Vector2(0, 2000) * 0.99f, Vector2.Zero, 16-000), 8000, 4, false, new Color(0.95f, 0.2f, 0.1f)),
             a=Entity.NewEpitomeBoss(new Vector2(0, 2800), Vector2.Zero, 0)],
             new Conditional([new Kill([a])], Mission.SendPickup(2000)),
@@ -242,7 +242,7 @@ public class Mission
 
         (new("BEEG", "", 0, [15], 2, 2000),
         delegate(){return new([
-            new Planet(Vector2.Zero, Vector2.Zero, 8000000, 100, true, new Color(1f, 0.8f, 0.5f), false, 10f, 0, true) { Temperature = 5 },
+            (new Planet(Vector2.Zero, Vector2.Zero, 8000000, 100, true, new Color(1f, 0.8f, 0.5f), false) { Temperature = 5 }).AddComponent(new Atmosphere(10, 8000000) { IsSun = true }),
             new Colliders(SolarStation),
             new WaveSpawner(Mission.T3, 1, false),], 
             new Conditional([new WaveGoal(10)], Mission.SendPickup(2000)),
@@ -462,9 +462,9 @@ public class Mission
     {
         foreach (var pickup in Entities)
         {
-            if (pickup is Pickup && Util.Random.NextSingle() > (0.4f + Engine.SaveGame.CurrentMission.GetAtmospherePressure(pickup))) //Update changelog when available
+            if (pickup is Pickup && Util.Random.NextSingle() > (0.4f + Engine.SaveGame.CurrentMission.GetAtmospherePressure(pickup)))
             {
-                pickup.Collide(1);
+                pickup.Collide(4);
             }
         }
     }
@@ -495,7 +495,7 @@ public class Mission
         foreach (Entity targetEnemy in enemies)
         {
             var comp = targetEnemy.GetComponent<Stealth>();
-            if (entity.IsFriendly(targetEnemy) || ((comp == null) ? comp.StealthAbility : 0) > entity.SensingAbility)
+            if (entity.IsFriendly(targetEnemy) || ((comp != null) ? comp.StealthAbility : 0) > entity.SensingAbility)
             {
                 continue;
             }
@@ -504,7 +504,7 @@ public class Mission
                 continue;
             }
             float distance = Vector2.DistanceSquared(entity.Position, targetEnemy.Position);
-            if (distance < nearestDistance && (targetEnemy.StealthAbility < entity.SensingAbility || (distance < maxDistSqr)))
+            if (distance < nearestDistance && ((targetEnemy.GetComponent<Stealth>()?.StealthAbility ?? 0) < entity.SensingAbility || (distance < maxDistSqr)))
             {
                 nearestDistance = distance;
                 returnEnemy = targetEnemy;
@@ -1059,9 +1059,10 @@ public class Mission
         float sum = 0;
         foreach(var entity in Engine.SaveGame.CurrentMission.Entities)
         {
-            if(entity is Planet)
+            var comp = entity.GetComponent<Atmosphere>();
+            if(comp != null)
             {
-                sum += (entity as Planet).GetAtmosphereDensity(_entity);
+                sum += comp.GetAtmosphereDensity(_entity);
             }
         }
         return sum;
