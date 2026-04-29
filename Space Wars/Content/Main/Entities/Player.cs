@@ -821,7 +821,23 @@ public class Player : Entity
         {
             return;
         }
+        if(Engine.SaveGame.CurrentMission.GetAtmospherePressure(this) > 1f)
+        {
+            ParticleManager.Add(new Particle(null, Position + new Vector2(0, 50), 0, Color.Red) { drawText = "Danger: Pressure Alert!"});
+        }
         Statuses.Draw(_spriteBatch, this);
+        for(int i = 0; i < leashedMaterials.Count; i++)
+        {
+            var prev = ((i == 0) ? this as Entity : leashedMaterials[i - 1]);
+            float d = Vector2.Distance(prev.Position, leashedMaterials[i].Position);
+            Vector2 relativePosition = leashedMaterials[i].Position - prev.Position;
+            Vector2 relativeVelocity = leashedMaterials[i].Velocity - prev.Velocity;
+            for (float f = prev.ColliderRadius/2; f < d-leashedMaterials[i].ColliderRadius/2; f += 6)
+            {
+                float lerp = f / d;
+                ParticleManager.Add(new Particle(Assets.Get(Sprites.Dot), prev.Position + relativePosition * lerp + MathF.Sqrt(d) * relativeVelocity * (1 - (2*lerp-1)* (2 * lerp - 1)), 0, Color.Cyan * 0.5f));
+            }
+        }
         base.Draw(_spriteBatch);
     }
     public Player(string _serialization, LoadLogger _logger)

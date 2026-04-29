@@ -181,7 +181,6 @@ public class Entity : IMissionComponent
     public Entity AddComponent(Component component)
     {
         components.Add(component);
-        component.Entity = this;
         return this;
     }
     public bool Collide(int _damage, bool _ignoreImmunity = false)

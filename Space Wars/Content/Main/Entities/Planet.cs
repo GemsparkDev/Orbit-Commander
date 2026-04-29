@@ -111,7 +111,12 @@ public class Planet : Entity, ICollider
             _entity.isExpired = true;
         }
         float distance = relativePosition.Length();
-        if (distance < ColliderRadius + _entity.ColliderRadius)
+        if (distance >= ColliderRadius + _entity.ColliderRadius)
+        {
+            Vector2 acceleration = Vector2.Normalize(-relativePosition) * mass / relativePosition.LengthSquared() * Engine.DeltaSeconds * 60;
+            _entity.Velocity += acceleration;
+        }
+        else
         {
             Collide(_entity);
         }
