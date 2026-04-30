@@ -247,6 +247,7 @@ public class Entity : IMissionComponent
             .AddComponent(new Mineable(entity));
         return entity;
     }
+    //Construct idea: Mace that can be swung around.
     #region Useful Behaviors
     IEnumerable<int> EnemyDeath()
     {

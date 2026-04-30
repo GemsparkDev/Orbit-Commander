@@ -251,9 +251,7 @@ public class Pressure(Color _color, bool _isFatal) : Status(Sprites.Knob)
     float duration = Engine.DeltaSeconds * 2;
     float fireCooldown = 0.05f;
     float attackCooldown = 0.1f;
-
     public override StatusType Type { get; } = StatusType.Fire;
-
     public override void Update(Entity _parent)
     {
         if (fireCooldown > 0)
