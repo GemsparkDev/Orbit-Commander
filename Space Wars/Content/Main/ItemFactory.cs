@@ -15,7 +15,8 @@ public static class ItemFactory
         { Items.Trap, new ItemData(Sprites.RealTrap, Sprites.Trap, "Trap", 1, Color.White,Color.White,8) },
         { Items.Bomb, new ItemData(Sprites.RealBomb, Sprites.Bomb, "Bomb", 1, Color.White,Color.White,3) },
         { Items.Furnace, new ItemData(Sprites.RealFurnace, Sprites.Furnace, "Furnace", 1, Color.White, Color.White,10) },
-        { Items.SpecializedParts, new ItemData(Sprites.RealSpecializedParts, Sprites.SpecializedParts, "Specialized Parts", 1, Color.White, Color.CornflowerBlue, 5) }
+        { Items.SpecializedParts, new ItemData(Sprites.RealSpecializedParts, Sprites.SpecializedParts, "Specialized Parts", 1, Color.White, Color.CornflowerBlue, 5) },
+        { Items.Mace, new ItemData(Sprites.RealSpecializedParts, Sprites.SpecializedParts, "Mace", 1, Color.White, Color.White, 50) }
     };
     public readonly static Dictionary<Modules, ModuleData> moduleData = new()
     {

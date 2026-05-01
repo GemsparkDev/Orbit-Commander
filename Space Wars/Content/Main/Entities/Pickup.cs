@@ -278,6 +278,27 @@ public class Pickup : Entity, IData
         construct.AddComponent(new SpecializedTag(construct));
         return construct;
     }
+    IEnumerable<int> Mace()
+    {
+        while(true)
+        {
+            var nearestEnemy = Engine.SaveGame.CurrentMission.NearestEnemy(this);
+            GetComponent<Attack>().Damage = (int)(Vector2.Distance(nearestEnemy.Velocity, Velocity));
+            yield return 0;
+        }
+    }
+    public static Pickup NewMace(Vector2 _position, Vector2 _velocity, float _angle, float _angularVelocity, int _stealth = 0, Team _team = Team.Friendly)
+    {
+        var construct = new Pickup(ItemFactory.itemData[Items.Mace], _position, _velocity, _angularVelocity, ItemFactory.itemData[Items.Mace].Integrity)
+        {
+            Angle = _angle,
+            StealthAbility = _stealth,
+            Team = _team
+        };
+        construct.AddComponent(new Attack(construct) { Damage = 5 });
+        construct.AddComponent(new Behaviour(construct).AddBehaviour(construct.Mace()));
+        return construct;
+    }
 }
 public class ItemData(Sprites _realSprite, Sprites _virtualSprite, String _name, int _id, Color _color, Color? _textColor = null, int _integrity = 3)
 {
@@ -297,5 +318,6 @@ public enum Items
     Trap,
     Bomb,
     SpecializedParts,
-    Furnace
+    Furnace,
+    Mace
 }
