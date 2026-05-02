@@ -1,14 +1,15 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using Space_Wars.Content.Main.Components;
 using Space_Wars.Content.Main.Entities;
 using Space_Wars.Content.Main.Particles;
 using Space_Wars.Content.Main.Story;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading.Tasks;
 using UILib.Content.Main;
-using Space_Wars.Content.Main.Components;
 
 namespace Space_Wars.Content.Main;
 
@@ -34,6 +35,8 @@ public class Engine : Game
     public static float ScreenShakeFactor { get; private set; } = 0;
     public static int SaveSlot { get; private set; } = 0;
     private List<IActor> ShaderExceptions { get; } = [];
+    private bool loadingDone = false;
+    public static string LoadText { get; set; } = "";
 
     public static float Time { get; private set; } = 0;
 
@@ -62,12 +65,6 @@ public class Engine : Game
         Line.SetData([Color.White]);
 
         Camera = new Camera(Vector2.Zero, ScreenSize / 2, 1f, 0);
-
-        UIManager = new UIManager();
-        UIManager.BackBuffer = BackBuffer;
-        DialogueManager = new DialogueManager();
-        AddUIElements();
-        CurrentGameState.SwitchState(new MainMenu());
         renderTarget = new RenderTarget2D(GraphicsDevice, 1920, 1080);
 
         IsMouseVisible = false;
@@ -139,7 +136,20 @@ public class Engine : Game
     protected override void LoadContent()
     {
         spriteBatch = new SpriteBatch(GraphicsDevice);
-        Assets.LoadAssets(Content);
+        var loading = Task.Factory.StartNew(() =>
+        {
+            Assets.LoadAssets(Content);
+
+            LoadText = "UI Elements";
+            UIManager = new UIManager();
+            AddUIElements();
+
+            LoadText = "Setting Up Gamespace";
+            UIManager.BackBuffer = BackBuffer;
+            DialogueManager = new DialogueManager();
+            CurrentGameState.SwitchState(new MainMenu());
+            loadingDone = true;
+        });
     }
     public static void Autosave()
     {
@@ -175,25 +185,28 @@ public class Engine : Game
     }
     protected override void Update(GameTime gameTime)
     {
-        Input.Update();
-        if (IsActive)
+        if(loadingDone)
         {
-            UIManager.Update();
-        }
-        SoundManager.Update();
-        CurrentGameState.Update();
+            Input.Update();
+            if (IsActive)
+            {
+                UIManager.Update();
+            }
+            SoundManager.Update();
+            CurrentGameState.Update();
 
-        DeltaSeconds = (float)gameTime.ElapsedGameTime.TotalSeconds * timeScale;
-        if (ScreenShakeFactor > 0)
-        {
-            ScreenShakeFactor -= DeltaSeconds;
+            DeltaSeconds = (float)gameTime.ElapsedGameTime.TotalSeconds * timeScale;
+            if (ScreenShakeFactor > 0)
+            {
+                ScreenShakeFactor -= DeltaSeconds;
+            }
+            else
+            {
+                ScreenShakeFactor = 0;
+            }
+            UI.Timer.text = $"{IngameTime.DrawText}";
+            Time += DeltaSeconds;
         }
-        else
-        {
-            ScreenShakeFactor = 0;
-        }
-        UI.Timer.text = $"{IngameTime.DrawText}";
-        Time += DeltaSeconds;
         base.Update(gameTime);
     }
     public static Pickup MoveSelectedPickup()
@@ -248,62 +261,72 @@ public class Engine : Game
     }
     protected override void Draw(GameTime gameTime)
     {
-        Camera.Origin = ScreenSize / 2 - MousePositionOffset;
+        if (loadingDone)
+        {
+            Camera.Origin = ScreenSize / 2 - MousePositionOffset;
 
-        //Render to renderTarget
-        GraphicsDevice.SetRenderTarget(renderTarget);
-        GraphicsDevice.Clear(SaveGame.ColorScheme.Background());
-        spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, null, null, null, transformMatrix: Camera.Transform);
-        CurrentGameState.Draw(spriteBatch);
-        spriteBatch.End();
+            //Render to renderTarget
+            GraphicsDevice.SetRenderTarget(renderTarget);
+            GraphicsDevice.Clear(SaveGame.ColorScheme.Background());
+            spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, null, null, null, transformMatrix: Camera.Transform);
+            CurrentGameState.Draw(spriteBatch);
+            spriteBatch.End();
 
-        //Render renderTarget with custom bloom shader
-        GraphicsDevice.SetRenderTarget(null);
-        GraphicsDevice.Clear(new Color(50, 50, 50));
-        int renderCoord = (int)(BackBuffer.Y / 0.5625f);
-        spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, null, null, Assets.GlobalShader);
-        spriteBatch.Draw(renderTarget, new Rectangle((int)(BackBuffer.X - ScreenSize.X), 0, (int)(renderCoord), (int)(BackBuffer.Y)), Color.White);
-        spriteBatch.End();
+            //Render renderTarget with custom bloom shader
+            GraphicsDevice.SetRenderTarget(null);
+            GraphicsDevice.Clear(new Color(50, 50, 50));
+            int renderCoord = (int)(BackBuffer.Y / 0.5625f);
+            spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, null, null, Assets.GlobalShader);
+            spriteBatch.Draw(renderTarget, new Rectangle((int)(BackBuffer.X - ScreenSize.X), 0, (int)(renderCoord), (int)(BackBuffer.Y)), Color.White);
+            spriteBatch.End();
 
-        spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, null, null, null);
-        DialogueManager.Draw(spriteBatch);
-        UIManager.Draw(spriteBatch);
-        foreach (var exception in ShaderExceptions)
-        {
-            exception.Draw(spriteBatch);
-        }
-        ShaderExceptions.Clear();
-        if ((Input.NewMouseState.LeftButton == ButtonState.Released))
-        {
-            spriteBatch.Draw(Assets.Get(Sprites.Cursor), new Vector2(Mouse.GetState().X, Mouse.GetState().Y), null, Color.White, 0, Vector2.Zero, UIManager.UIScale / 2, 0, 0.5f);
-        }
-        else
-        {
-            spriteBatch.Draw(Assets.Get(Sprites.ClickedCursor), new Vector2(Mouse.GetState().X, Mouse.GetState().Y), null, Color.White, 0, Vector2.Zero, UIManager.UIScale / 2, 0, 0.5f);
-        }
-        if (SaveGame.DebugMode)
-        {
-            int logCount = debugLog.Count;
-            int offset = 0;
-            if (logCount > 10)
+            spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, null, null, null);
+            DialogueManager.Draw(spriteBatch);
+            UIManager.Draw(spriteBatch);
+            foreach (var exception in ShaderExceptions)
             {
-                logCount = 10;
+                exception.Draw(spriteBatch);
             }
-            for (int i = 0; i < logCount; i++)
+            ShaderExceptions.Clear();
+            if ((Input.NewMouseState.LeftButton == ButtonState.Released))
             {
-                Vector2 textPosition = new(35, 20 + 20 * offset * UIManager.UIScale);
-                try
+                spriteBatch.Draw(Assets.Get(Sprites.Cursor), new Vector2(Mouse.GetState().X, Mouse.GetState().Y), null, Color.White, 0, Vector2.Zero, UIManager.UIScale / 2, 0, 0.5f);
+            }
+            else
+            {
+                spriteBatch.Draw(Assets.Get(Sprites.ClickedCursor), new Vector2(Mouse.GetState().X, Mouse.GetState().Y), null, Color.White, 0, Vector2.Zero, UIManager.UIScale / 2, 0, 0.5f);
+            }
+            if (SaveGame.DebugMode)
+            {
+                int logCount = debugLog.Count;
+                int offset = 0;
+                if (logCount > 10)
                 {
-                    spriteBatch.DrawString(Assets.TextFont, $"{i + 1}: {debugLog[i].log}", textPosition, debugLog[i].color, 0, Vector2.Zero, UIManager.UIScale, SpriteEffects.None, 0.45f);
-                    offset += debugLog[i].log.Split('\n').Length;
+                    logCount = 10;
                 }
-                catch (Exception e)
+                for (int i = 0; i < logCount; i++)
                 {
-                    spriteBatch.DrawString(Assets.TextFont, $"{i + 1}: {e.Message}", textPosition, Color.Red, 0, Vector2.Zero, UIManager.UIScale, SpriteEffects.None, 0.45f);
+                    Vector2 textPosition = new(35, 20 + 20 * offset * UIManager.UIScale);
+                    try
+                    {
+                        spriteBatch.DrawString(Assets.TextFont, $"{i + 1}: {debugLog[i].log}", textPosition, debugLog[i].color, 0, Vector2.Zero, UIManager.UIScale, SpriteEffects.None, 0.45f);
+                        offset += debugLog[i].log.Split('\n').Length;
+                    }
+                    catch (Exception e)
+                    {
+                        spriteBatch.DrawString(Assets.TextFont, $"{i + 1}: {e.Message}", textPosition, Color.Red, 0, Vector2.Zero, UIManager.UIScale, SpriteEffects.None, 0.45f);
+                    }
                 }
             }
+            spriteBatch.End();
         }
-        spriteBatch.End();
+        else if (Assets.TextFont != null)
+        {
+            GraphicsDevice.Clear(Color.Black);
+            spriteBatch.Begin();
+            spriteBatch.DrawString(Assets.TextFont, LoadText, BackBuffer / 2, Color.White, 0, Assets.TextFont.MeasureString(LoadText) / 2, 4, 0, 0);
+            spriteBatch.End();
+        }
         base.Draw(gameTime);
     }
 }
