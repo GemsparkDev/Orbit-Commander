@@ -180,6 +180,29 @@ public static class UI
         var selectedTabTexture = Assets.Get(Sprites.SelectedTab);
         var selectSound = Assets.Get(Sound.Interact);
 
+        PatchedConicsToggle.AddBehaviour(delegate
+        {
+            SaveGame.PatchedConics = !SaveGame.PatchedConics;
+            UI.PatchedConicsToggle.text = $"Patched Conics: {SaveGame.PatchedConics}";
+        });
+        ShaderToggle.AddBehaviour(delegate () 
+        { 
+            SaveGame.UseShader = !SaveGame.UseShader; 
+            ShaderToggle.text = $"Shader: {SaveGame.UseShader}"; 
+        });
+        SFXSlider.AddBehaviour(delegate ()
+        {
+            float i = SFXSlider.Intervals[0];
+            SoundManager.SFXVolume = i;
+            UILib.Content.Main.UIManager.SFXVolume = i;
+            SFXVolume.text = $"Sound: {Math.Round(i * 100)}%";
+        });
+        UIScaleSlider.AddBehaviour(delegate ()
+        {
+            float i = SFXSlider.Intervals[0];
+            UILib.Content.Main.UIManager.UIScale = (i + 1f) * BackBuffer.X / ScreenSize.X;
+            UIScale.text = $"UI Scale: {Math.Truncate((i + 1) * 10) / 10}";
+        });
         ExitButton.AddBehaviour(delegate ()
         {
             Self.Exit();
@@ -378,7 +401,7 @@ public static class UI
         LoadButton.AddBehaviour(delegate { MainMenu.enabled = false; LoadMenu.enabled = true; EventHandler.GetSave(); });
 
         Name.AddBehaviour(delegate { Engine.SaveGame.Name = Name.text; });
-        SaveToFile.AddBehaviour(Save);
+        SaveToFile.AddBehaviour(Util.Save);
         LoadFromFile.AddBehaviour(Load);
         SaveBack.AddBehaviour(delegate { MissionSelect.enabled = true; SaveMenu.enabled = false; });
         LoadBack.AddBehaviour(delegate { MainMenu.enabled = true; LoadMenu.enabled = false; });

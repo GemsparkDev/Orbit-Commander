@@ -181,7 +181,7 @@ public class SaveGame
         }
         QueuedItems = [.. from item in QueuedItems where !item.IsExpired select item];
         Engine.SaveGame.Player.Statuses.Clear();
-        Engine.Autosave();
+        Util.Autosave();
     }
     public string Serialize()
     {

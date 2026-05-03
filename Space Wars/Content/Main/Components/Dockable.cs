@@ -36,7 +36,7 @@ public class Dockable(Entity _parentEntity, Container _menu, bool hasInventory =
                 _player.Velocity += new Vector2(0, -2);
             }
             SoundManager.PlayGlobalSound(Assets.Get(Sound.Undock));
-            Pickup pickup = Engine.MoveSelectedPickup();
+            Pickup pickup = Engine.UIManager.MoveSelectedIcon() as Pickup;
             if (pickup != null)
             {
                 EventHandler.UpdateInventoryUI();
