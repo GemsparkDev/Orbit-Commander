@@ -36,10 +36,7 @@ public class Engine : Game
     public static float ScreenShakeFactor { get; private set; } = 0;
     public static int SaveSlot { get; private set; } = 0;
     private List<IActor> ShaderExceptions { get; } = [];
-    private bool loadingDone = false;
-    private static string loadText = "";
-    public static string LoadText { get { return loadText; } set { loadText = value; iterations++; } }
-    private static float iterations = 0;
+    private LoadingStage loadingStage = LoadingStage.Preload;
 
     public static float Time { get; private set; } = 0;
 
@@ -75,16 +72,15 @@ public class Engine : Game
             Line = new Texture2D(graphics.GraphicsDevice, 1, 1, false, SurfaceFormat.Color);
             Line.SetData([Color.White]);
 
-            Assets.LoadAssets(Content);
+            Assets.LoadStageOne(Content);
 
-            renderTarget = new RenderTarget2D(GraphicsDevice, 1920, 1080); LoadText = "Render Target";
-            UIManager = new UIManager(); LoadText = "Instantiating UI Manager";
+            UIManager = new UIManager();
             UIManager.BackBuffer = BackBuffer;
 
             //UI behaviors that need special permission
-            LoadText = "Adding UI Elements";
             UI.SingleplayerButton.AddBehaviour(delegate ()
             {
+                if (loadingStage != LoadingStage.Complete) { return; }
                 SaveGame = new();
                 EventHandler.UpdateModulesUI();
                 Startgame();
@@ -110,11 +106,14 @@ public class Engine : Game
                 Self.graphics.ApplyChanges();
             });
             UI.AddUIElements();
+            renderTarget = new RenderTarget2D(GraphicsDevice, 1920, 1080);
+            Camera = new Camera(Vector2.Zero, ScreenSize / 2, 1f, 0);
+            DialogueManager = new DialogueManager();
+            CurrentGameState.SwitchState(new MainMenu());
+            loadingStage = LoadingStage.MainMenu;
 
-            Camera = new Camera(Vector2.Zero, ScreenSize / 2, 1f, 0); LoadText = "Instanstiating Camera";
-            DialogueManager = new DialogueManager(); LoadText = "Instanstiating Dialogue Manager";
-            CurrentGameState.SwitchState(new MainMenu()); LoadText = "Setting Up Game Space";
-            loadingDone = true;
+            Assets.LoadFinal(Content);
+            loadingStage = LoadingStage.Complete;
         });
     }
     public static void Startgame()
@@ -132,6 +131,7 @@ public class Engine : Game
     }
     public static void Load()
     {
+        if(Self.loadingStage != LoadingStage.Complete) { return; }
         string filePath = Path.Combine(Directory.GetCurrentDirectory(), $"Content\\Saves\\Save_{SaveSlot}.txt");
         string text = "";
         using (var outputFile = new StreamReader(filePath))
@@ -152,7 +152,7 @@ public class Engine : Game
     protected override void Update(GameTime gameTime)
     {
         base.Update(gameTime);
-        if (!loadingDone)
+        if (loadingStage == LoadingStage.Preload)
         {
             return;
         }
@@ -220,18 +220,8 @@ public class Engine : Game
     protected override void Draw(GameTime gameTime)
     {
         base.Draw(gameTime);
-        if (!loadingDone)
+        if (loadingStage == LoadingStage.Preload)
         {
-            var offset = new Vector2(0, 40);
-            int width = 1000;
-            if (Assets.TextFont != null)
-            {
-                GraphicsDevice.Clear(Color.Black);
-                spriteBatch.Begin();
-                spriteBatch.DrawString(Assets.TextFont, LoadText, BackBuffer / 2 + offset, Color.White, 0, Assets.TextFont.MeasureString(LoadText) / 2, 4, 0, 0);
-                DrawFilledLine(spriteBatch, BackBuffer / 2 - offset - new Vector2(width / 2, 0), new Rectangle(0, 0, width, 20), iterations/203, Color.DarkGray, Color.LightCyan);
-                spriteBatch.End();
-            }
             return;
         }
 
@@ -252,6 +242,10 @@ public class Engine : Game
 
         //Rendering some components without the shader
         spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, null, null, null);
+        if (loadingStage != LoadingStage.Complete)
+        {
+            spriteBatch.DrawString(Assets.TextFont, "Loading...", new Vector2(BackBuffer.X - 20, 20), Color.White, 0, Assets.TextFont.MeasureString("Loading..."), 1, 0, 0);
+        }
         DialogueManager.Draw(spriteBatch);
         UIManager.Draw(spriteBatch);
         foreach (var exception in ShaderExceptions)

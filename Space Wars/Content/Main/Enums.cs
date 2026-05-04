@@ -281,3 +281,10 @@ public enum Binding
     WarpBackward,
     SkipCutscene
 }
+public enum LoadingStage
+{
+    Preload,
+    MainMenu,
+    MissionSelect,
+    Complete
+}

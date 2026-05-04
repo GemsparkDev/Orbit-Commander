@@ -283,6 +283,7 @@ public class Mission
     public int Wave { get; set; } = 0;
     public Mission(List<IMissionComponent> _components, Conditional _objective, IPlayerSpawner _spawner, Sound _music = Sound.main)
     {
+        EventHandler.SetModules();
         components = _components;
         foreach(var comp in _components)
         {

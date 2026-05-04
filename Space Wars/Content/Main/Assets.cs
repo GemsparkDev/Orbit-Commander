@@ -4,6 +4,7 @@ using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Space_Wars.Content.Main.Components;
 using System.Collections.Generic;
+using System;
 
 namespace Space_Wars.Content.Main;
 
@@ -14,9 +15,8 @@ public static class Assets
     public static SpriteFont TextFont { get; private set; }
     private static Effect effect;
     public static Effect GlobalShader => SaveGame.UseShader ? effect : null;
-    public static void LoadAssets(ContentManager Content)
+    public static void LoadFinal(ContentManager Content)
     {
-        TextFont = Content.Load<SpriteFont>("Fonts/RobotoMono");
 
         //
         //Sprites
@@ -29,7 +29,6 @@ public static class Assets
         Add(Main.Sprites.Cruiser, Content.Load<Texture2D>("Images/Entity_4"));
         Add(Main.Sprites.Shotgunner, Content.Load<Texture2D>("Images/Entity_5"));
         Add(Main.Sprites.ShotgunShield, Content.Load<Texture2D>("Images/Entity_5 Shield"));
-        Add(Main.Sprites.Mothership, Content.Load<Texture2D>("Images/Entity_6"));
         Add(Main.Sprites.Arrow, Content.Load<Texture2D>("Images/Entity_7"));
         Add(Main.Sprites.Sniper, Content.Load<Texture2D>("Images/Entity_8"));
         Add(Main.Sprites.Missile, Content.Load<Texture2D>("Images/Entity_9"));
@@ -156,54 +155,9 @@ public static class Assets
         Add(Main.Sprites.Explosive, Content.Load<Texture2D>("Images/Projectile_4"));
 
         //Particles
-        Add(Main.Sprites.Dot, Content.Load<Texture2D>("Images/Particle_0"));
         Add(Main.Sprites.Dollar, Content.Load<Texture2D>("Images/Particle_1"));
-        Add(Main.Sprites.Circle, Content.Load<Texture2D>("Images/Particle_2"));
         Add(Main.Sprites.Glow, Content.Load<Texture2D>("Images/Particle_3"));
 
-        //UI Elements
-        Add(Main.Sprites.PlayerUI, Content.Load<Texture2D>("Images/UI_1"));
-        Add(Main.Sprites.Title, Content.Load<Texture2D>("Images/UI_2"));
-        Add(Main.Sprites.Button, Content.Load<Texture2D>("Images/UI_3"));
-        Add(Main.Sprites.LargePanel, Content.Load<Texture2D>("Images/UI_8"));
-        Add(Main.Sprites.GargantuanPanel, Content.Load<Texture2D>("Images/UI_4"));
-        Add(Main.Sprites.EmptySlot, Content.Load<Texture2D>("Images/UI_6"));
-        Add(Main.Sprites.SelectedTab, Content.Load<Texture2D>("Images/UI_13"));
-        Add(Main.Sprites.Tab, Content.Load<Texture2D>("Images/UI_14"));
-        Add(Main.Sprites.Knob, Content.Load<Texture2D>("Images/UI_16"));
-        Add(Main.Sprites.WideButton, Content.Load<Texture2D>("Images/UI_18"));
-        Add(Main.Sprites.ToggleButton, Content.Load<Texture2D>("Images/UI_25"));
-        Add(Main.Sprites.Terminal, Content.Load<Texture2D>("Images/UI_26"));
-        Add(Main.Sprites.Miniplayer, Content.Load<Texture2D>("Images/miniship"));
-        Add(Main.Sprites.SwitchOne, Content.Load<Texture2D>("Images/UI_40-1"));
-        Add(Main.Sprites.SwitchTwo, Content.Load<Texture2D>("Images/UI_40-2"));
-        Add(Main.Sprites.SwitchThree, Content.Load<Texture2D>("Images/UI_40-3"));
-        Add(Main.Sprites.SwitchFour, Content.Load<Texture2D>("Images/UI_40-4"));
-        Add(Main.Sprites.SwitchFive, Content.Load<Texture2D>("Images/UI_40-5"));
-        Add(Main.Sprites.Overlay, Content.Load<Texture2D>("Images/UI_42"));
-        Add(Main.Sprites.Floppy, Content.Load<Texture2D>("Images/UI_44"));
-        Add(Main.Sprites.FloppyFlat, Content.Load<Texture2D>("Images/UI_45"));
-        Add(Main.Sprites.RightSideOpen, Content.Load<Texture2D>("Images/UI_46"));
-        Add(Main.Sprites.DeadFile, Content.Load<Texture2D>("Images/UI_47"));
-        Add(Main.Sprites.RightSidePanel, Content.Load<Texture2D>("Images/UI_48"));
-        Add(Main.Sprites.Dial, Content.Load<Texture2D>("Images/UI_49"));
-        Add(Main.Sprites.Indicator, Content.Load<Texture2D>("Images/UI_50"));
-        Add(Main.Sprites.LEDGlow, Content.Load<Texture2D>("Images/UI_51"));
-        Add(Main.Sprites.FuseDetailing, Content.Load<Texture2D>("Images/UI_52"));
-        Add(Main.Sprites.FuseSlot, Content.Load<Texture2D>("Images/UI_53"));
-        Add(Main.Sprites.Textbox, Content.Load<Texture2D>("Images/UI_36"));
-
-        Add(Main.Sprites.SmeltIcon, Content.Load<Texture2D>("Images/UI_19"));
-        Add(Main.Sprites.RepairIcon, Content.Load<Texture2D>("Images/UI_20"));
-        Add(Main.Sprites.VictoryIcon, Content.Load<Texture2D>("Images/UI_21"));
-        Add(Main.Sprites.PlayIcon, Content.Load<Texture2D>("Images/UI_22"));
-        Add(Main.Sprites.SettingsIcon, Content.Load<Texture2D>("Images/UI_23"));
-        Add(Main.Sprites.PlanetIcon, Content.Load<Texture2D>("Images/UI_24"));
-        Add(Main.Sprites.Fuse, Content.Load<Texture2D>("Images/UI_29"));
-
-        //Misc
-        Add(Main.Sprites.Cursor, Content.Load<Texture2D>("Images/Cursor_1"));
-        Add(Main.Sprites.ClickedCursor, Content.Load<Texture2D>("Images/Cursor_2"));
 
         //
         //Sound FX
@@ -231,6 +185,70 @@ public static class Assets
         Add(Sound.ComputerSounds, Content.Load<SoundEffect>("Sounds/Loop_2"));
         Add(Sound.Beep, Content.Load<SoundEffect>("Sounds/Timer"));
 
+        //UI Elements
+        Add(Main.Sprites.SwitchOne, Content.Load<Texture2D>("Images/UI_40-1"));
+        Add(Main.Sprites.SwitchTwo, Content.Load<Texture2D>("Images/UI_40-2"));
+        Add(Main.Sprites.SwitchThree, Content.Load<Texture2D>("Images/UI_40-3"));
+        Add(Main.Sprites.SwitchFour, Content.Load<Texture2D>("Images/UI_40-4"));
+        Add(Main.Sprites.Textbox, Content.Load<Texture2D>("Images/UI_36"));
+        Add(Main.Sprites.Miniplayer, Content.Load<Texture2D>("Images/miniship"));
+
+        Add(Sound.main, Content.Load<SoundEffect>("Sounds/main"));
+        Add(Sound.boss, Content.Load<SoundEffect>("Sounds/boss"));
+        Add(Sound.secretBoss, Content.Load<SoundEffect>("Sounds/secretBoss"));
+        Add(Sound.finalBoss, Content.Load<SoundEffect>("Sounds/finalBoss"));
+
+        Add(Sound.None, null);
+
+    }
+    public static void LoadStageOne(ContentManager Content)
+    {
+        //Assets used in the main menu
+        effect = Content.Load<Effect>("Shaders/BloomShader");
+        TextFont = Content.Load<SpriteFont>("Fonts/RobotoMono");
+
+        //UI Elements
+        Add(Main.Sprites.Title, Content.Load<Texture2D>("Images/UI_2"));
+        Add(Main.Sprites.Button, Content.Load<Texture2D>("Images/UI_3"));
+        Add(Main.Sprites.LargePanel, Content.Load<Texture2D>("Images/UI_8"));
+        Add(Main.Sprites.GargantuanPanel, Content.Load<Texture2D>("Images/UI_4"));
+        Add(Main.Sprites.SelectedTab, Content.Load<Texture2D>("Images/UI_13"));
+        Add(Main.Sprites.Tab, Content.Load<Texture2D>("Images/UI_14"));
+        Add(Main.Sprites.Knob, Content.Load<Texture2D>("Images/UI_16"));
+        Add(Main.Sprites.WideButton, Content.Load<Texture2D>("Images/UI_18"));
+        Add(Main.Sprites.ToggleButton, Content.Load<Texture2D>("Images/UI_25"));
+        Add(Main.Sprites.PlayerUI, Content.Load<Texture2D>("Images/UI_1"));
+        Add(Main.Sprites.EmptySlot, Content.Load<Texture2D>("Images/UI_6"));
+        Add(Main.Sprites.SwitchFive, Content.Load<Texture2D>("Images/UI_40-5"));
+        Add(Main.Sprites.DeadFile, Content.Load<Texture2D>("Images/UI_47"));
+        Add(Main.Sprites.LEDGlow, Content.Load<Texture2D>("Images/UI_51"));
+        Add(Main.Sprites.Floppy, Content.Load<Texture2D>("Images/UI_44"));
+        Add(Main.Sprites.FloppyFlat, Content.Load<Texture2D>("Images/UI_45"));
+        Add(Main.Sprites.RightSideOpen, Content.Load<Texture2D>("Images/UI_46"));
+        Add(Main.Sprites.RightSidePanel, Content.Load<Texture2D>("Images/UI_48"));
+        Add(Main.Sprites.Dial, Content.Load<Texture2D>("Images/UI_49"));
+        Add(Main.Sprites.Indicator, Content.Load<Texture2D>("Images/UI_50"));
+        Add(Main.Sprites.FuseDetailing, Content.Load<Texture2D>("Images/UI_52"));
+        Add(Main.Sprites.FuseSlot, Content.Load<Texture2D>("Images/UI_53"));
+        Add(Main.Sprites.Terminal, Content.Load<Texture2D>("Images/UI_26"));
+        Add(Main.Sprites.Overlay, Content.Load<Texture2D>("Images/UI_42"));
+        Add(Main.Sprites.SmeltIcon, Content.Load<Texture2D>("Images/UI_19"));
+        Add(Main.Sprites.RepairIcon, Content.Load<Texture2D>("Images/UI_20"));
+        Add(Main.Sprites.VictoryIcon, Content.Load<Texture2D>("Images/UI_21"));
+        Add(Main.Sprites.PlayIcon, Content.Load<Texture2D>("Images/UI_22"));
+        Add(Main.Sprites.SettingsIcon, Content.Load<Texture2D>("Images/UI_23"));
+        Add(Main.Sprites.PlanetIcon, Content.Load<Texture2D>("Images/UI_24"));
+        Add(Main.Sprites.Fuse, Content.Load<Texture2D>("Images/UI_29"));
+
+        Add(Main.Sprites.Dot, Content.Load<Texture2D>("Images/Particle_0"));
+        Add(Main.Sprites.Circle, Content.Load<Texture2D>("Images/Particle_2"));
+
+        Add(Main.Sprites.Mothership, Content.Load<Texture2D>("Images/Entity_6"));
+
+        //Misc
+        Add(Main.Sprites.Cursor, Content.Load<Texture2D>("Images/Cursor_1"));
+        Add(Main.Sprites.ClickedCursor, Content.Load<Texture2D>("Images/Cursor_2"));
+
         //Menu Sounds
         Add(Sound.OpenMenu, Content.Load<SoundEffect>("Sounds/OpenMenu"));
         Add(Sound.CloseMenu, Content.Load<SoundEffect>("Sounds/CloseMenu"));
@@ -238,25 +256,15 @@ public static class Assets
         Add(Sound.Click, Content.Load<SoundEffect>("Sounds/Interact_1"));
         Add(Sound.Fail, Content.Load<SoundEffect>("Sounds/Interact_2"));
 
-        Add(Sound.main, Content.Load<SoundEffect>("Sounds/main"));
         Add(Sound.menu, Content.Load<SoundEffect>("Sounds/menu"));
-        Add(Sound.boss, Content.Load<SoundEffect>("Sounds/boss"));
-        Add(Sound.secretBoss, Content.Load<SoundEffect>("Sounds/secretBoss"));
-        Add(Sound.finalBoss, Content.Load<SoundEffect>("Sounds/finalBoss"));
-
-        Add(Sound.None, null);
-
-        effect = Content.Load<Effect>("Shaders/BloomShader");
     }
     private static void Add(Main.Sprites _sprite, Texture2D _texture2D)
     {
         Sprites.Add(_sprite, _texture2D);
-        Engine.LoadText = _sprite.ToString();
     }
     private static void Add(Sound _sound, SoundEffect _soundEffect)
     {
         SoundFX.Add(_sound, _soundEffect);
-        Engine.LoadText = _sound.ToString();
     }
     public static Texture2D Get(Sprites sprite)
     {
