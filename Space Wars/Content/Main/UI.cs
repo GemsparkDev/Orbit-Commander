@@ -402,7 +402,11 @@ public static class UI
 
         Name.AddBehaviour(delegate { Engine.SaveGame.Name = Name.text; });
         SaveToFile.AddBehaviour(Util.Save);
-        LoadFromFile.AddBehaviour(Load);
+        LoadFromFile.AddBehaviour(delegate() 
+        {
+            Engine.UIManager.DisableAll();
+            CurrentGameState.SwitchState(new Loading(Load, LoadingStage.Complete)); 
+        });
         SaveBack.AddBehaviour(delegate { MissionSelect.enabled = true; SaveMenu.enabled = false; });
         LoadBack.AddBehaviour(delegate { MainMenu.enabled = true; LoadMenu.enabled = false; });
 

@@ -36,7 +36,7 @@ public class Engine : Game
     public static float ScreenShakeFactor { get; private set; } = 0;
     public static int SaveSlot { get; private set; } = 0;
     private List<IActor> ShaderExceptions { get; } = [];
-    private LoadingStage loadingStage = LoadingStage.Preload;
+    public LoadingStage LoadingStage { get; private set; } = LoadingStage.Preload;
 
     public static float Time { get; private set; } = 0;
 
@@ -78,12 +78,15 @@ public class Engine : Game
             UIManager.BackBuffer = BackBuffer;
 
             //UI behaviors that need special permission
-            UI.SingleplayerButton.AddBehaviour(delegate ()
+            UI.SingleplayerButton.AddBehaviour(delegate()
             {
-                if (loadingStage != LoadingStage.Complete) { return; }
-                SaveGame = new();
-                EventHandler.UpdateModulesUI();
-                Startgame();
+                UIManager.DisableAll();
+                CurrentGameState.SwitchState(new Loading(delegate ()
+                {
+                    SaveGame = new();
+                    EventHandler.UpdateModulesUI();
+                    Startgame();
+                }, LoadingStage.Complete));
             });
             UI.PrevSave.AddBehaviour(delegate
             {
@@ -110,10 +113,10 @@ public class Engine : Game
             Camera = new Camera(Vector2.Zero, ScreenSize / 2, 1f, 0);
             DialogueManager = new DialogueManager();
             CurrentGameState.SwitchState(new MainMenu());
-            loadingStage = LoadingStage.MainMenu;
+            LoadingStage = LoadingStage.MainMenu;
 
             Assets.LoadFinal(Content);
-            loadingStage = LoadingStage.Complete;
+            LoadingStage = LoadingStage.Complete;
         });
     }
     public static void Startgame()
@@ -131,7 +134,7 @@ public class Engine : Game
     }
     public static void Load()
     {
-        if(Self.loadingStage != LoadingStage.Complete) { return; }
+        if(Self.LoadingStage != LoadingStage.Complete) { return; }
         string filePath = Path.Combine(Directory.GetCurrentDirectory(), $"Content\\Saves\\Save_{SaveSlot}.txt");
         string text = "";
         using (var outputFile = new StreamReader(filePath))
@@ -152,7 +155,7 @@ public class Engine : Game
     protected override void Update(GameTime gameTime)
     {
         base.Update(gameTime);
-        if (loadingStage == LoadingStage.Preload)
+        if (LoadingStage == LoadingStage.Preload)
         {
             return;
         }
@@ -220,7 +223,7 @@ public class Engine : Game
     protected override void Draw(GameTime gameTime)
     {
         base.Draw(gameTime);
-        if (loadingStage == LoadingStage.Preload)
+        if (LoadingStage == LoadingStage.Preload)
         {
             return;
         }
@@ -242,10 +245,6 @@ public class Engine : Game
 
         //Rendering some components without the shader
         spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, null, null, null);
-        if (loadingStage != LoadingStage.Complete)
-        {
-            spriteBatch.DrawString(Assets.TextFont, "Loading...", new Vector2(BackBuffer.X - 20, 20), Color.White, 0, Assets.TextFont.MeasureString("Loading..."), 1, 0, 0);
-        }
         DialogueManager.Draw(spriteBatch);
         UIManager.Draw(spriteBatch);
         foreach (var exception in ShaderExceptions)

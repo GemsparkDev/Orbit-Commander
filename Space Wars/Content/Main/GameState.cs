@@ -385,4 +385,19 @@ public class Cutscene(List<IEvent> _events, List<IActor> _actors, GameState _nex
         _spriteBatch.DrawString(Assets.TextFont, $"{Input.Keybinds[Binding.SkipCutscene]} to skip", Engine.Camera.Position + Engine.ScreenSize / 2 - Assets.TextFont.MeasureString($"{Input.Keybinds[Binding.SkipCutscene]} to skip") / 2 - new Vector2(100, 100), Color.White * (0.5f + escapeTime * 0.5f));
     }
 }
+public class Loading(Action _function, LoadingStage _stage) : GameState
+{
+    public override void Draw(SpriteBatch _spriteBatch)
+    {
+        _spriteBatch.DrawString(Assets.TextFont, "Loading...", Vector2.Zero, Color.White, 0, Assets.TextFont.MeasureString("Loading...")/2, 4, 0, 0);
+    }
+
+    public override void Update()
+    {
+        if(_stage <= Engine.Self.LoadingStage)
+        {
+            _function();
+        }
+    }
+}
 
