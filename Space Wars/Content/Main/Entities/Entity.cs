@@ -41,7 +41,6 @@ public class Entity : IMissionComponent
     public int Damage => GetComponent<Attack>().Damage;
     protected static Player Player => Engine.SaveGame.Player;
     public bool IsFriendly(Entity _entity) => _entity.GetComponent<Friendly>().Team == GetComponent<Friendly>().Team;
-
     public void ApplyWork(float _q)
     {
         GetComponent<Temp>()?.ApplyWork(_q);

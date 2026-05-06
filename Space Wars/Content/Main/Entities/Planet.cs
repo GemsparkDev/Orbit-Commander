@@ -11,31 +11,19 @@ public class Planet : Entity, ICollider
     public float mass;
     public override float ColliderRadius { get; }
     public bool isImmovable = false;
-    private bool hasRing;
     public bool EasterEgg { get; set; } = false;
     public override Color Color { get; set; }
-    public float RingOffset { get; set; } = 0;
 
-    //Remember to update the clone function too!
-    public Planet(Vector2 _position, Vector2 _velocity, float _mass, float _radius, bool _isImmovable, Color _color, bool _hasRing = false, float _ringOffset = 0)
+    public Planet(Vector2 _position, Vector2 _velocity, float _mass, float _radius, bool _isImmovable, Color _color)
         : base(_position, _velocity, 0, 0)
     {
-        AddComponent(new Temp(this));
-        AddComponent(new StationaryEmitter(this) { ParticleEmitter = new ParticleEmitter(Assets.Get(Sprites.Dot), 10, Position, 0, 0, 0, 10f, _color * 0.5f, EmitterType.EmissionOverDistance) { particleFadeToColor = Color.Transparent } });
         mass = _mass;
         ColliderRadius = _radius * 50;
         isImmovable = _isImmovable;
         Color = _color;
-        hasRing = _hasRing;
-        RingOffset = _ringOffset;
-    }
-    public override void Initialize()
-    {
-        //TODO: Figure out how to synchronize this to all planets for a mission
-        if (Engine.SaveGame.CurrentMissionCompleted && Util.Random.Next(0, 10000) == 0)
-        {
-            EasterEgg = true;
-        }
+        AddComponent(new Temp(this));
+        AddComponent(new StationaryEmitter(this) { ParticleEmitter = new ParticleEmitter(Assets.Get(Sprites.Dot), 10, Position, 0, 0, 0, 10f, _color * 0.5f, EmitterType.EmissionOverDistance) { particleFadeToColor = Color.Transparent } });
+        AddComponent(new FollowEmitter(this) { ParticleEmitter = new ParticleEmitter(Assets.Get(Sprites.Dot), 0, Position, 0, MathF.Tau, ColliderRadius, 0, Color, EmitterType.Circle) });
     }
     public Vector2 GetAcceleration(Vector2 _position)
     {
@@ -175,38 +163,5 @@ public class Planet : Entity, ICollider
             GetComponent<FollowEmitter>().ParticleEmitter.particleColor = Color;
         }
         base.Update();
-    }
-    public override void Draw(SpriteBatch _spriteBatch)
-    {
-        float increment = MathF.Tau / ColliderRadius;
-        int count = (int)Math.Truncate(ColliderRadius);
-        if (count == 0)
-        {
-            return;
-        }
-        for (float angle = increment / 2; angle < MathF.Tau; angle += increment)
-        {
-            _spriteBatch.Draw(Assets.Get(Sprites.Dot), Position + Util.ToUnitVector(angle) * ColliderRadius, null, Color, angle, Assets.DimsOf(Sprites.Dot), 1, 0, 0);
-        }
-        if (hasRing)
-        {
-            int randomAngle = 3;
-            float r = ColliderRadius + RingOffset;
-            for (float i = 0; i < 2 * r; i++)
-            {
-                float j = i - r;
-                float distance = r * 1.25f + j * j * j / (r * r * 2) + r / 2 + i / 2;
-                float speed = MathF.Sqrt(mass / distance) * 60;
-                //Simple deterministic random number generator
-                randomAngle = (randomAngle * 65535 + 997) % 628;
-                float particleAngle = (i + (float)(randomAngle) / 628 + Engine.Time * speed / distance) % MathF.Tau;
-                Vector2 particlePosition = new Vector2(MathF.Cos(particleAngle), MathF.Sin(particleAngle) * 0.25f) * distance;
-                if (particlePosition.LengthSquared() > ColliderRadius * ColliderRadius || particlePosition.Y > 0)
-                {
-                    _spriteBatch.Draw(Assets.Get(Sprites.Dot), Position + particlePosition, null, Color * 0.75f, particleAngle, Assets.DimsOf(Sprites.Dot), 1, 0, 0);
-                }
-            }
-        }
-        base.Draw(_spriteBatch);
     }
 }

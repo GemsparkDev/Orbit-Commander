@@ -205,6 +205,10 @@ public class MissionSelect : GameState
             playerPosition = new Vector2(Engine.ScreenSize.X / 6, 0);
         }
     }
+    public static MissionSelect New()
+    {
+        return new MissionSelect();
+    }
     public override void Initialize()
     {
         Engine.UIManager.ScreenWindow.enabled = false;
