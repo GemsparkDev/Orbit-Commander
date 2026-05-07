@@ -1,6 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using Space_Wars.Content.Main.Components;
 using Space_Wars.Content.Main.Entities;
 using Space_Wars.Content.Main.Particles;
 using Space_Wars.Content.Main.Story;
@@ -87,6 +88,8 @@ public class MainMenu : GameState
         float d = 1000;
         time += MathF.Sqrt(5000 / d) / d * Engine.DeltaSeconds * 60;
         moonPlanet.Position = Util.ToUnitVector(time) * d + new Vector2(0, 750);
+        menuPlanet.GetComponent<FollowEmitter>().Update();
+        moonPlanet.GetComponent<FollowEmitter>().Update();
         smokeParticles.Update();
         ParticleManager.Update();
         if (time > MathF.Tau)

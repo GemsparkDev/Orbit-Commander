@@ -5,8 +5,14 @@ namespace Space_Wars.Content.Main.Components;
 internal class FollowEmitter(Entity _entity) : Component(_entity)
 {
     public ParticleEmitter ParticleEmitter { get; set; }
+    public bool IsDebug { get; set; } = true;
     public override void Update()
     {
+        var comp = Entity.GetComponent<Health>();
+        if (IsDebug && comp != null && comp.CurrentHealth > 0)
+        {
+            ParticleEmitter.isEmitterActive = SaveGame.DebugMode;
+        }
         ParticleEmitter.position = Entity.Position;
         ParticleEmitter.offsetVelocity = Entity.Velocity;
         ParticleEmitter.Update();

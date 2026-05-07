@@ -17,11 +17,6 @@ internal class Health(Entity _entity) : Component(_entity)
         {
             currentHealth = MaxHealth;
         }
-        var comp = Entity.GetComponent<FollowEmitter>();
-        if (comp != null && CurrentHealth > 0)
-        {
-            comp.ParticleEmitter.isEmitterActive = SaveGame.DebugMode;
-        }
         if (healthCD <= 0)
         {
             if (prevHealth > currentHealth)

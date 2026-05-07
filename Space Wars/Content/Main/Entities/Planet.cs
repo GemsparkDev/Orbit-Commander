@@ -23,7 +23,7 @@ public class Planet : Entity, ICollider
         Color = _color;
         AddComponent(new Temp(this));
         AddComponent(new StationaryEmitter(this) { ParticleEmitter = new ParticleEmitter(Assets.Get(Sprites.Dot), 10, Position, 0, 0, 0, 10f, _color * 0.5f, EmitterType.EmissionOverDistance) { particleFadeToColor = Color.Transparent } });
-        AddComponent(new FollowEmitter(this) { ParticleEmitter = new ParticleEmitter(Assets.Get(Sprites.Dot), 0, Position, 0, MathF.Tau, ColliderRadius, 0, Color, EmitterType.Circle) });
+        AddComponent(new FollowEmitter(this) { IsDebug = false, ParticleEmitter = new ParticleEmitter(Assets.Get(Sprites.Dot), Position, ColliderRadius, Color) }); 
     }
     public Vector2 GetAcceleration(Vector2 _position)
     {
@@ -134,23 +134,23 @@ public class Planet : Entity, ICollider
     }
     public override void Update()
     {
-        foreach (var entity in Engine.SaveGame.CurrentMission.Entities)
-        {
-            if (entity == this)
-            {
-                continue;
-            }
-            AttractObject(entity);
-        }
-        foreach (var particle in ParticleManager.Particles)
-        {
-            if (particle.experienceGravity)
-            {
-                AttractObject(particle);
-            }
-        }
         if (Engine.SaveGame != null)
         {
+            foreach (var entity in Engine.SaveGame.CurrentMission.Entities)
+            {
+                if (entity == this)
+                {
+                    continue;
+                }
+                AttractObject(entity);
+            }
+            foreach (var particle in ParticleManager.Particles)
+            {
+                if (particle.experienceGravity)
+                {
+                    AttractObject(particle);
+                }
+            }
             AttractObject(Engine.SaveGame.Player);
         }
         if (isImmovable)
