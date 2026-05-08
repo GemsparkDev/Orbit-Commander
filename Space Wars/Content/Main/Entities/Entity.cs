@@ -5201,24 +5201,19 @@ public class GrapplingHook : Entity
         public bool IsExpired { get; }
         public void ApplyForce(Vector2 _force);
     }
-    internal class LatchedEntity(Entity _entity) : ILatchable
+    internal class LatchedEntity(Entity _entity, Vector2 _position) : ILatchable
     {
-        public Vector2 Position => _entity.Position;
+        public Vector2 Position => _entity.Position + _position;
         public bool IsExpired => _entity.isExpired;
 
         public void ApplyForce(Vector2 _force)
         {
+            if(_entity is Planet)
+            {
+                return;
+            }
             _entity.Velocity -= _force;
         }
-    }
-    internal class LatchedPlanet(Planet _planet, Vector2 _position) : ILatchable
-    {
-        private Vector2 offset = Vector2.Normalize(_position - _planet.Position) * _planet.ColliderRadius;
-        public Vector2 Position => _planet.Position + offset;
-        public bool IsExpired => false;
-
-        //Prevents deorbiting planets
-        public void ApplyForce(Vector2 _force) { }
     }
     internal class GenericLatch(Vector2 _position) : ILatchable
     {
@@ -5272,7 +5267,6 @@ public class GrapplingHook : Entity
             {
                 isExpired = true;
             }
-            //TODO: Get the grappling hook to work for moving colliders
             var collider = Engine.SaveGame.CurrentMission.IsColliding(Position, Velocity, ColliderRadius, false, out float _);
             if (collider != null)
             {
@@ -5280,12 +5274,11 @@ public class GrapplingHook : Entity
                 SoundManager.PlaySound(Assets.Get(Sound.ShieldHit), Position);
                 maxDistance = Vector2.Distance(Position, Parent.Position);
             }
-            List<Entity> entities = [Engine.SaveGame.CurrentMission.NearestEnemy(this), Engine.SaveGame.CurrentMission.NearestAlly(this), Engine.SaveGame.CurrentMission.NearestItem(this, true)];
-            foreach (var entity in entities)
+            foreach (var entity in Engine.SaveGame.CurrentMission.Entities)
             {
-                if (entity != null && Vector2.Distance(Position, entity.Position) < (entity.ColliderRadius + ColliderRadius) * 2)
+                if (entity != null && Vector2.Distance(Position, entity.Position) < (entity.ColliderRadius + ColliderRadius * 2))
                 {
-                    target = new LatchedEntity(entity);
+                    target = new LatchedEntity(entity, Position - entity.Position);
                     SoundManager.PlaySound(Assets.Get(Sound.ShieldHit), Position);
                     maxDistance = distance;
                 }

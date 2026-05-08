@@ -1157,25 +1157,19 @@ public class SummonGrapplingHook() : Module(Modules.GrapplingHook)
     {
         if (hook != null)
         {
-            bool hasHooked = false;
-            if (hook.Parent == Player)
+            var mousePos = new Vector2(Input.NewMouseState.X, Input.NewMouseState.Y) + Engine.Camera.Position - Engine.BackBuffer / 2 + Engine.MousePositionOffset;
+            if (Vector2.Distance(mousePos, Player.Position) < 100)
             {
-                var mousePos = new Vector2(Input.NewMouseState.X, Input.NewMouseState.Y) + Engine.Camera.Position - Engine.BackBuffer / 2 + Engine.MousePositionOffset;
-                if (Vector2.Distance(mousePos, Player.Position) > 100)
-                {
-                    return;
-                }
                 foreach (var entity in Engine.SaveGame.CurrentMission.Entities)
                 {
                     if (Vector2.DistanceSquared(mousePos, entity.Position) < 1000)
                     {
                         hook.Parent = entity;
-                        hasHooked = true;
                         break;
                     }
                 }
             }
-            if (!hasHooked)
+            else
             {
                 Cooldown /= 2;
                 hook.isExpired = true;
