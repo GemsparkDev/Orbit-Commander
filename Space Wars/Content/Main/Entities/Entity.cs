@@ -16,11 +16,11 @@ namespace Space_Wars.Content.Main.Entities;
 public class Entity : IMissionComponent
 {
     //TODO: Make sure to add null checks to all these!
-    private Transform transform; //All game entities have transforms
-    public Vector2 Position { get { return transform.Position; } set { transform.Position = value; } }
-    public Vector2 Velocity { get { return transform.Velocity; } set { transform.Velocity = value; } }
-    public float Angle { get { return transform.Angle; } set { transform.Angle = value; } }
-    public float AngularVelocity { get { return transform.AngularVelocity; } set { transform.AngularVelocity = value; } }
+    public Transform Transform { get; private set; } //All game entities have transforms
+    public Vector2 Position { get { return Transform.Position; } set { Transform.Position = value; } }
+    public Vector2 Velocity { get { return Transform.Velocity; } set { Transform.Velocity = value; } }
+    public float Angle { get { return Transform.Angle; } set { Transform.Angle = value; } }
+    public float AngularVelocity { get { return Transform.AngularVelocity; } set { Transform.AngularVelocity = value; } }
     public float TimeLeft { get { return GetComponent<ExpireTimer>().TimeLeft; } set { GetComponent<ExpireTimer>().TimeLeft = value; } }
     public int Health { get { return GetComponent<Health>().CurrentHealth; } set { GetComponent<Health>().CurrentHealth = value; } }
     public int MaxHealth { get { return GetComponent<Health>().MaxHealth; } set { GetComponent<Health>().MaxHealth = value; } }
@@ -69,8 +69,8 @@ public class Entity : IMissionComponent
     private List<Component> components = [];
     public Entity(Vector2 _position, Vector2 _velocity, float _angle, float _angularVelocity)
     {
-        transform = new Transform(this) { Position = _position, Velocity = _velocity, Angle = _angle, AngularVelocity = _angularVelocity };
-        AddComponent(transform);
+        Transform = new Transform(this) { Position = _position, Velocity = _velocity, Angle = _angle, AngularVelocity = _angularVelocity };
+        AddComponent(Transform);
     }
     public void RotateTowards(float _angle, float _maxSpeed = 0.05f)
     {
@@ -3768,9 +3768,9 @@ public class Entity : IMissionComponent
         Pickup furnaceItem = null;
         bool currentlyCrafting = false;
         bool alert = false;
+        Transform.IsImmovable = true;
         while (true)
         {
-            Velocity = Vector2.Zero;
             if (EventHandler.AcknowledgeMessage(Message.MothershipCraftItem))
             {
                 currentlyCrafting = true;
@@ -4302,9 +4302,9 @@ public class Entity : IMissionComponent
         {
             Engine.SaveGame.CurrentMission.Add(arm);
         }
+        Transform.IsImmovable = true;
         while (true)
         {
-            Velocity = Vector2.Zero;
             for (int i = 0; i < 2; i++)
             {
                 var entity = arms[i];
@@ -4398,9 +4398,9 @@ public class Entity : IMissionComponent
         Vector2 initialPos = Position - _parent.Position;
         Vector2 dir = Util.ToUnitVector(Angle);
         bool createSparks = true;
+        Transform.IsImmovable = true;
         while (true)
         {
-            Velocity = Vector2.Zero;
             pos += Engine.DeltaSeconds;
             if (pos < 3.75f)
             {
@@ -4520,9 +4520,9 @@ public class Entity : IMissionComponent
         CD = [5];
         AngularVelocity = 0.01f;
         int waveCount = 0;
+        Transform.IsImmovable = true;
         while (true)
         {
-            Velocity = Vector2.Zero;
             if (Mission.missions[Engine.SaveGame.CurrentMissionIndex].data.Name == "???")
             {
                 if (CD[0] <= 0)
@@ -4612,9 +4612,9 @@ public class Entity : IMissionComponent
             Assets.Get(Sprites.MassRelayThree),
             Assets.Get(Sprites.MassRelayFour),
         ];
+        Transform.IsImmovable = true;
         while (true)
         {
-            Velocity = Vector2.Zero;
             if (EventHandler.AcknowledgeMessage(Message.MothershipCraftItem))
             {
                 currentlyCrafting = true;
@@ -5267,16 +5267,14 @@ public class GrapplingHook : Entity
             {
                 isExpired = true;
             }
-            var collider = Engine.SaveGame.CurrentMission.IsColliding(Position, Velocity, ColliderRadius, false, out float _);
-            if (collider != null)
-            {
-                target = new GenericLatch(Position);
-                SoundManager.PlaySound(Assets.Get(Sound.ShieldHit), Position);
-                maxDistance = Vector2.Distance(Position, Parent.Position);
-            }
+            //TODO: Collider grappling
             foreach (var entity in Engine.SaveGame.CurrentMission.Entities)
             {
-                if (entity != null && Vector2.Distance(Position, entity.Position) < (entity.ColliderRadius + ColliderRadius * 2))
+                if(entity == this || entity == Parent)
+                {
+                    continue;
+                }
+                if (Vector2.Distance(Position, entity.Position) < (entity.ColliderRadius + ColliderRadius))
                 {
                     target = new LatchedEntity(entity, Position - entity.Position);
                     SoundManager.PlaySound(Assets.Get(Sound.ShieldHit), Position);

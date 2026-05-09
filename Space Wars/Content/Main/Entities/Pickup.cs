@@ -113,13 +113,13 @@ public class Pickup : Entity, IData
     {
         float cooldown = 0;
         Entity nearestEnemy;
+        Transform.IsImmovable = true;
         while (true)
         {
             if (cooldown > 0)
             {
                 cooldown -= Engine.DeltaSeconds;
             }
-            Velocity = Vector2.Zero;
             Angle = MathF.Atan2(Position.X, -Position.Y);
             nearestEnemy = Engine.SaveGame.CurrentMission.NearestEnemy(NewEnemy(Position, Vector2.Zero, 0, 0, null, Team));
             if (cooldown <= 0 && nearestEnemy != null && Vector2.Distance(nearestEnemy.Position, Position) < 300)
@@ -146,13 +146,13 @@ public class Pickup : Entity, IData
     {
         float cooldown = 0;
         Entity nearestEnemy;
+        Transform.IsImmovable = true;
         while (true)
         {
             if (cooldown > 0)
             {
                 cooldown -= Engine.DeltaSeconds;
             }
-            Velocity = Vector2.Zero;
             nearestEnemy = Engine.SaveGame.CurrentMission.NearestEnemy(NewEnemy(Position, Vector2.Zero, 0, 0, null, Team));
             if (cooldown <= 0 && nearestEnemy != null && Vector2.Distance(nearestEnemy.Position, Position) < 800)
             {

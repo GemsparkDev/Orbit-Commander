@@ -4,8 +4,9 @@ using Space_Wars.Content.Main.Entities;
 using System;
 
 namespace Space_Wars.Content.Main.Components;
-internal class Transform(Entity _entity) : Component(_entity)
+public class Transform(Entity _entity) : Component(_entity)
 {
+    public bool IsImmovable = false;
     public Vector2 Position { get; set; } = Vector2.Zero;
     public Vector2 Velocity { get; set; } = Vector2.Zero;
     public float Angle { get; set; } = 0;
@@ -22,8 +23,16 @@ internal class Transform(Entity _entity) : Component(_entity)
             Velocity = Vector2.Zero;
             Engine.WriteLine("Position was NaN");
         }
-        Position += Velocity * Engine.DeltaSeconds * 60;
-        Angle += AngularVelocity * Engine.DeltaSeconds * 60;
+        if(!IsImmovable)
+        {
+            Position += Velocity * Engine.DeltaSeconds * 60;
+            Angle += AngularVelocity * Engine.DeltaSeconds * 60;
+        }
+        else
+        {
+            Velocity = Vector2.Zero;
+            AngularVelocity = 0;
+        }
     }
     public override void Draw(SpriteBatch _spriteBatch)
     {

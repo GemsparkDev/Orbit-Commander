@@ -1422,14 +1422,11 @@ public class Expose() : Module(Modules.Expose)
         {
             Engine.SaveGame.CurrentMission.Add(aura = new FlameBolt(Player.Position + new Vector2(Input.NewMouseState.X, Input.NewMouseState.Y) + Engine.MousePositionOffset - Engine.BackBuffer / 2, Vector2.Zero, Team, 0, new ParticleEmitter(Assets.Get(Sprites.Dot), Player.Position, 0, Color.Cyan * 0.75f) { speedOfEmission = 0.5f }, 10, 2, -20));
         }
+        aura.Transform.IsImmovable = true;
         Cooldown = 15;
     }
     public override void OnUpdate()
     {
-        if (aura != null)
-        {
-            aura.Velocity = Vector2.Zero;
-        }
         UI.PlayerAbility.SetInterval(1 - Cooldown / MaxCooldown, 1);
         base.OnUpdate();
     }

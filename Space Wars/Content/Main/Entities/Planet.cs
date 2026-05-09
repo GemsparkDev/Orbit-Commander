@@ -10,7 +10,6 @@ public class Planet : Entity, ICollider
 {
     public float mass;
     public override float ColliderRadius { get; }
-    public bool isImmovable = false;
     public bool EasterEgg { get; set; } = false;
     public override Color Color { get; set; }
 
@@ -19,7 +18,7 @@ public class Planet : Entity, ICollider
     {
         mass = _mass;
         ColliderRadius = _radius * 50;
-        isImmovable = _isImmovable;
+        Transform.IsImmovable = _isImmovable;
         Color = _color;
         AddComponent(new Temp(this));
         AddComponent(new StationaryEmitter(this) { ParticleEmitter = new ParticleEmitter(Assets.Get(Sprites.Dot), 10, Position, 0, 0, 0, 10f, _color * 0.5f, EmitterType.EmissionOverDistance) { particleFadeToColor = Color.Transparent } });
@@ -152,10 +151,6 @@ public class Planet : Entity, ICollider
                 }
             }
             AttractObject(Engine.SaveGame.Player);
-        }
-        if (isImmovable)
-        {
-            Velocity = Vector2.Zero;
         }
         if (EasterEgg)
         {
