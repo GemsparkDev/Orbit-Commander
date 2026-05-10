@@ -26,8 +26,14 @@ public class Mission
     [
         //Enemy planet test
         (new("Enemy Planet Test", "", 200, [], 0, 2000, 0),
-        delegate(){Entity p = new Planet(Vector2.Zero, Vector2.Zero, 10000, 8, true, Color.Red); 
+        delegate(){
+            Entity p = new Planet(Vector2.Zero, Vector2.Zero, 10000, 8, true, Color.Red);
+            Entity l = new Entity(new Vector2(0, 1000), Vector2.Zero, 0, 0);
+            Entity k = ItemFactory.NewScrap(new Vector2(0, -1000), Vector2.Zero, 0);
         return new([
+            k,
+            l.AddComponent(new Sprite(l, Color.White) { Texture = Assets.Get(Sprites.MetalScrap) })
+            .AddComponent(new Lock(l) { Key = k }),
             p.AddComponent(new Health(p) { CurrentHealth = 1000, MaxHealth = 1000 })
              .AddComponent(new Friendly(p) { Team = Team.Hostile })
              .AddComponent(new Stealth(p) { SensingAbility = 1, StealthAbility = 0 })
@@ -42,7 +48,7 @@ public class Mission
                  return damage > 0;
             }))],
             new Conditional([new Kill([p])], Mission.SendPickup(2000)),
-            new DropSpawner(1500));}),
+            new DropSpawner(1500)); }),
 
         (new("Crash Landing","The crash landing site. Objective: Explore the system.",160,[0],0, 2000, 1),
         delegate(){Entity m; return new([
@@ -1146,7 +1152,7 @@ public class Mission
                     {
                         relativePlanetPosition = Vector2.One;
                     }
-                    if (!planet.isImmovable)
+                    if (!planet.Transform.IsImmovable)
                     {
                         futurePlanetVelocities[i] += Vector2.Normalize(-relativePlanetPosition) * (planets[j] as Planet).mass / relativePlanetPosition.LengthSquared();
                     }
