@@ -436,7 +436,7 @@ public class Mission
             objective = objective.Update();    
         }
         //Prevents players from losing important items
-        Entity[] importantEntites = Engine.SaveGame.CurrentMission.GetEntity<KeyTag>();
+        Entity[] importantEntites = Engine.SaveGame.CurrentMission.GetEntities<KeyTag>();
         float r = missions[Engine.SaveGame.CurrentMissionIndex].data.EdgeRadius;
         foreach(var entity in importantEntites)
         {
@@ -501,39 +501,17 @@ public class Mission
     }
     public Dockable NearestDockableEntity(Entity _entity)
     {
-        float nearestDistance = float.MaxValue;
-        Dockable returnEntity = null;
-        foreach (Entity entity in Entities)
-        {
-            var component = entity.GetComponent<Dockable>();
-            if (!(component == null) && !component.Entity.isExpired)
-            {
-                float distanceSqr = Vector2.DistanceSquared(entity.Position, _entity.Position);
-                if (distanceSqr < nearestDistance)
-                {
-                    nearestDistance = distanceSqr;
-                    returnEntity = component as Dockable;
-                }
-            }
-        }
-        return returnEntity;
+        return Util.Nearest(_entity.Position, GetEntities<Dockable>(), out float _).GetComponent<Dockable>();
     }
     public Entity NearestEnemy(Entity entity, bool _getDeadEnemies = false)
     {
+        Entity[] entities = Entities.Where(x => !IsEligible(x)).ToArray();
         float maxDistSqr = StealthRange * StealthRange * StealthThreshold * StealthThreshold;
         float nearestDistance = float.MaxValue;
         Entity returnEnemy = null;
-        foreach (Entity targetEnemy in enemies)
+        foreach (var targetEnemy in entities)
         {
             var comp = targetEnemy.GetComponent<Stealth>();
-            if (entity.IsFriendly(targetEnemy) || ((comp != null) ? comp.StealthAbility : 0) > entity.SensingAbility)
-            {
-                continue;
-            }
-            if(!_getDeadEnemies && targetEnemy.GetComponent<Health>() != null && targetEnemy.Health <= 0)
-            {
-                continue;
-            }
             float distance = Vector2.DistanceSquared(entity.Position, targetEnemy.Position);
             if (distance < nearestDistance && ((targetEnemy.GetComponent<Stealth>()?.StealthAbility ?? 0) < entity.SensingAbility || (distance < maxDistSqr)))
             {
@@ -555,28 +533,16 @@ public class Mission
             }
         }
         return returnEnemy;
+        bool IsEligible(Entity targetEnemy)
+        {
+            var comp = targetEnemy.GetComponent<Stealth>();
+            return !((!_getDeadEnemies && targetEnemy.GetComponent<Health>() != null && targetEnemy.Health <= 0) || (entity.IsFriendly(targetEnemy) || ((comp != null) ? comp.StealthAbility : 0) > entity.SensingAbility));
+        }
     }
     public Entity NearestAlly(Entity entity)
     {
-        float nearestDistance = float.MaxValue;
-        Entity returnEnemy = null;
-        foreach (Entity targetEnemy in enemies)
-        {
-            if (!entity.IsFriendly(targetEnemy) || targetEnemy == entity)
-            {
-                continue;
-            }
-            if (targetEnemy.GetComponent<IsChild>()?.ChildEnemy ?? false)
-            {
-                continue;
-            }
-            float distance = Vector2.DistanceSquared(entity.Position, targetEnemy.Position);
-            if (distance < nearestDistance)
-            {
-                nearestDistance = distance;
-                returnEnemy = targetEnemy;
-            }
-        }
+        Entity[] entities = Entities.Where(x => IsEligible(x)).ToArray();
+        Entity returnEnemy = Util.Nearest(entity.Position, entities, out float nearestDistance);
         if (entity.IsFriendly(Engine.SaveGame.Player))
         {
             float distance = Vector2.DistanceSquared(entity.Position, Player.Position);
@@ -586,29 +552,19 @@ public class Mission
             }
         }
         return returnEnemy;
+        bool IsEligible(Entity targetEnemy)
+        {
+            return !((!entity.IsFriendly(targetEnemy) || targetEnemy == entity) || (targetEnemy.GetComponent<IsChild>()?.ChildEnemy ?? false));
+        }
     }
     public Entity NearestItem(Entity entity, bool _findAll)
     {
-        float nearestDistance = float.MaxValue;
-        Entity returnItem = null;
-        foreach (Entity targetEntity in Entities)
+        Entity[] entities = Entities.Where(x => IsEligible(x)).ToArray();
+        return Util.Nearest(entity.Position, entities, out float nearestDistance);
+        bool IsEligible(Entity targetEntity)
         {
-            if (targetEntity is not Pickup || targetEntity == entity)
-            {
-                continue;
-            }
-            if (!_findAll && (targetEntity is Module || targetEntity.GetComponent<SpecializedTag>() != null || targetEntity.GetComponent<Behaviour> != null))
-            {
-                continue;
-            }
-            float distance = Vector2.DistanceSquared(entity.Position, targetEntity.Position);
-            if (distance < nearestDistance)
-            {
-                nearestDistance = distance;
-                returnItem = targetEntity;
-            }
+            return !((targetEntity is not Pickup || targetEntity == entity) || (!_findAll && (targetEntity is Module || targetEntity.GetComponent<SpecializedTag>() != null || targetEntity.GetComponent<Behaviour> != null)));
         }
-        return returnItem;
     }
     public Entity NearestProjectile(Vector2 _position, int _sensingAbility, Team _team)
     {
@@ -626,17 +582,9 @@ public class Mission
         }
         return returnProjectile;
     }
-    public Entity[] GetEntity<T>() where T : Component
+    public Entity[] GetEntities<T>() where T : Component
     {
-        List<Entity> selectedEntities = [];
-        foreach(var entity in Entities)
-        {
-            if(entity.GetComponent<T>() != null)
-            {
-                selectedEntities.Add(entity);
-            }
-        }
-        return [.. selectedEntities];
+        return Entities.Where(x => x.GetComponent<T>() != null).ToArray();
     }
     public List<Entity> Hitscan(Vector2 _pos, Vector2 _dir, float _maxLength, bool _getAll, out Vector2 _end, Team[] _whitelist = null, bool _getProjectiles = false)
     {

@@ -7,10 +7,12 @@ using Space_Wars.Content.Main.Particles;
 using Space_Wars.Content.Main.Story;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
 using UILib.Content.Main;
-using System.Diagnostics;
+using System.Linq;
 
 namespace Space_Wars.Content.Main;
 
@@ -327,6 +329,21 @@ public static class Util
     public static float Cross(Vector2 v1, Vector2 v2)
     {
         return v1.X * v2.Y - v1.Y * v2.X;
+    }
+    public static Entity Nearest(Vector2 _position, Entity[] _entities, out float nearestDistance)
+    {
+        nearestDistance = float.MaxValue;
+        Entity returnEntity = null;
+        foreach (var entity in _entities)
+        {
+            float distanceSqr = Vector2.DistanceSquared(entity.Position, entity.Position);
+            if (distanceSqr < nearestDistance)
+            {
+                nearestDistance = distanceSqr;
+                returnEntity = entity;
+            }
+        }
+        return returnEntity;
     }
     public static void FiringParticles(Vector2 _position, Vector2 _velocity, Vector2 _direction)
     {
