@@ -330,20 +330,9 @@ public static class Util
     {
         return v1.X * v2.Y - v1.Y * v2.X;
     }
-    public static Entity Nearest(Vector2 _position, Entity[] _entities, out float nearestDistance)
+    public static Entity Nearest(Vector2 _position, Entity[] _entities)
     {
-        nearestDistance = float.MaxValue;
-        Entity returnEntity = null;
-        foreach (var entity in _entities)
-        {
-            float distanceSqr = Vector2.DistanceSquared(entity.Position, entity.Position);
-            if (distanceSqr < nearestDistance)
-            {
-                nearestDistance = distanceSqr;
-                returnEntity = entity;
-            }
-        }
-        return returnEntity;
+        return _entities.MinBy(x => Vector2.DistanceSquared(x.Position, _position));
     }
     public static void FiringParticles(Vector2 _position, Vector2 _velocity, Vector2 _direction)
     {

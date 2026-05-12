@@ -157,6 +157,7 @@ public enum Sprites
     Ablative, RealAblative,
     Orion, RealOrion,
     Reflective, RealReflective,
+    Work, RealWork,
 
     SpiralShot,
     PulseShot,

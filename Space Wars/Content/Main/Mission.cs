@@ -27,9 +27,9 @@ public class Mission
         //Enemy planet test
         (new("Enemy Planet Test", "", 200, [], 0, 2000, 0),
         delegate(){
-            Entity p = new Planet(Vector2.Zero, Vector2.Zero, 10000, 8, true, Color.Red);
-            Entity l = new Entity(new Vector2(0, 1000), Vector2.Zero, 0, 0);
-            Entity k = ItemFactory.NewScrap(new Vector2(0, -1000), Vector2.Zero, 0);
+            var p = new Planet(Vector2.Zero, Vector2.Zero, 10000, 8, true, Color.Red);
+            var l = new Entity(new Vector2(0, 1000), Vector2.Zero, 0, 0);
+            var k = ItemFactory.NewScrap(new Vector2(0, -1000), Vector2.Zero, 0);
         return new([
             k,
             l.AddComponent(new Sprite(l, Color.White) { Texture = Assets.Get(Sprites.MetalScrap) })
@@ -114,7 +114,7 @@ public class Mission
             new DropSpawner(1500));}),
 
         (new("Gas Giant", "", 10, [], 1, 2000),
-        delegate(){Entity p = new Planet(Vector2.Zero, Vector2.Zero, 16000, 4, true, new Color(167, 156, 134));
+        delegate(){var p = new Planet(Vector2.Zero, Vector2.Zero, 16000, 4, true, new Color(167, 156, 134));
             return new([
             p.AddComponent(new Atmosphere(p, 6, 16000) { IsSun = true })
              .AddComponent(new Ring(p) { Offset = 500, Mass = 16000 }),
@@ -128,7 +128,7 @@ public class Mission
 
         (new("???", "Sensor data shows that this site has an unusually high temperature.\nInvestigate possible enemy interferance.", 145, [7], 1, 2000, 3, true),
         //Note: The player construct menu and the Quantum Resonator both use the name of this mission for their special behavior. When changing, make sure their name is updated as well.
-        delegate(){Entity p = (new Planet(Vector2.Zero, Vector2.Zero, 50000, 12, true, new Color(255, 219, 0)) { Temperature = 0.5f });
+        delegate(){var p = (new Planet(Vector2.Zero, Vector2.Zero, 50000, 12, true, new Color(255, 219, 0)) { Temperature = 0.5f });
             return new([
             p.AddComponent(new Atmosphere(p, 1.5f, 50000))
              .AddComponent(new Ring(p) { Mass = 50000 }),], 
@@ -146,7 +146,7 @@ public class Mission
         ], Mission.SendPickup(2000)), new DropSpawner(500));}),
 
         (new("Assault", "It appears the enemy has improved their fleet, and has pushed the mothership to a non-ideal location.\nDefend the mothership and defeat the fortified miner base on this planet.", 150, [9], 1, 2000),
-        delegate(){Entity p = new Planet(Vector2.Zero, Vector2.Zero, 20000, 9f, true, Color.Cyan);
+        delegate(){var p = new Planet(Vector2.Zero, Vector2.Zero, 20000, 9f, true, Color.Cyan);
             Entity a,b,c,d,e,f,g;return new([
             p.AddComponent(new Atmosphere(p, 1.8f, 20000)),
             new Planet(new Vector2(0, 1800), Planet.GetOrbitalVelocity(new Vector2(0, 1800), Vector2.Zero, 20000), 1500, 2f, false, Color.Cyan),
@@ -191,7 +191,7 @@ public class Mission
             new PlayerSpawner(new Vector2(0, 500)), Sound.None);}),
 
         (new("Trader", "This friendly trader invites us to upgrade our modules in exchange for resources", 80, [13], 2, 2000, 3, true),
-        delegate(){Entity p = new Planet(Vector2.Zero, Vector2.Zero, 6000, 6, true, Color.Cyan);
+        delegate(){var p = new Planet(Vector2.Zero, Vector2.Zero, 6000, 6, true, Color.Cyan);
             return new([
             p.AddComponent(new Atmosphere(p, 0.8f, 6000))
              .AddComponent(new Ring(p) { Mass = 6000 }),
@@ -200,7 +200,7 @@ public class Mission
             new PlayerSpawner(new Vector2(-2000, -2000)));}),
 
         (new("Clockwork creation", "A strange sentinal appears to be housed on this ancient planet.\nDismantling it may yield unusual resources.", 60, [14], 2, 2000),
-        delegate(){Entity p = new Planet(Vector2.Zero, Vector2.Zero, 4000, 3, true, Color.Wheat);
+        delegate(){var p = new Planet(Vector2.Zero, Vector2.Zero, 4000, 3, true, Color.Wheat);
             Entity a;return new([
             p.AddComponent(new Atmosphere(p, 1.5f, 4000)),
             new Planet(new Vector2(500, 0), Planet.GetOrbitalVelocity(new Vector2(500, 0), Vector2.Zero, 4000), 300, 1f, false, Color.Wheat),
@@ -210,7 +210,7 @@ public class Mission
             new DropSpawner(1500));}),
 
         (new("Ice giant", "The unusual conditions in this system have resulted in unique developments in the enemies technology.\nBe prepared for advanced enemy cloaking.", 0, [15], 2, 2000),
-        delegate(){Entity p = (new Planet(Vector2.Zero, Vector2.Zero, 10000, 3, true, new Color(41, 144, 181)){ Temperature = -20 });
+        delegate(){var p = (new Planet(Vector2.Zero, Vector2.Zero, 10000, 3, true, new Color(41, 144, 181)){ Temperature = -20 });
             return new([
             p.AddComponent(new Atmosphere(p, 15, 10000) { IsSun = true }),
             new WaveSpawner(Mission.T2, 1f, false),], 
@@ -236,7 +236,7 @@ public class Mission
             new DropSpawner(1500));}),
 
         (new("Hack", "The enemy has set up a mesh node network for storing information.\nHack it to discover the location of their leader.", 0, [15], 2, 2000),
-        delegate(){Entity p = (new Planet(Vector2.Zero, Vector2.Zero, 18000, 6f, true, Color.Cyan) { Temperature = -2 });
+        delegate(){var p = (new Planet(Vector2.Zero, Vector2.Zero, 18000, 6f, true, Color.Cyan) { Temperature = -2 });
             Entity a,b,c;return new([
             p.AddComponent(new Atmosphere(p, 1.5f, 18000)),
             new Planet(new Vector2(1100, 0), Planet.GetOrbitalVelocity(new Vector2(1100, 0), Vector2.Zero, 18000), 1500, 1.5f, false, Color.Cyan) { Temperature = -2 },
@@ -249,7 +249,7 @@ public class Mission
             new DropSpawner(1500));}),
 
         (new("Inferno", "Your intel has led you here. Finish this.",  0, [15], 2, 2000),
-        delegate(){Entity p = (new Planet(Vector2.Zero, Vector2.Zero, 160000, 6, true, new Color(0.9f, 1f, 0.75f)) { Temperature = 5 });
+        delegate(){var p = (new Planet(Vector2.Zero, Vector2.Zero, 160000, 6, true, new Color(0.9f, 1f, 0.75f)) { Temperature = 5 });
             Entity a; return new([
             p.AddComponent(new Atmosphere(p, 50, 160000) { IsSun = true }),
             new Planet(new Vector2(0, 2000), Planet.GetOrbitalVelocity(new Vector2(0, 2000) * 0.99f, Vector2.Zero, 16-000), 8000, 4, false, new Color(0.95f, 0.2f, 0.1f)),
@@ -258,7 +258,7 @@ public class Mission
             new GliderSpawner(new Vector2(-1500, -2000), -1500), Sound.None);}),
 
         (new("BEEG", "", 0, [15], 2, 2000),
-        delegate(){Entity p = (new Planet(Vector2.Zero, Vector2.Zero, 8000000, 100, true, new Color(1f, 0.8f, 0.5f)) { Temperature = 5 });
+        delegate(){var p = (new Planet(Vector2.Zero, Vector2.Zero, 8000000, 100, true, new Color(1f, 0.8f, 0.5f)) { Temperature = 5 });
             return new([
             p.AddComponent(new Atmosphere(p, 10, 8000000) { IsSun = true }),
             new Colliders(SolarStation),
@@ -501,11 +501,11 @@ public class Mission
     }
     public Dockable NearestDockableEntity(Entity _entity)
     {
-        return Util.Nearest(_entity.Position, GetEntities<Dockable>(), out float _).GetComponent<Dockable>();
+        return Util.Nearest(_entity.Position, GetEntities<Dockable>()).GetComponent<Dockable>();
     }
     public Entity NearestEnemy(Entity entity, bool _getDeadEnemies = false)
     {
-        Entity[] entities = Entities.Where(x => !IsEligible(x)).ToArray();
+        Entity[] entities = [.. Entities.Where(x => !IsEligible(x))];
         float maxDistSqr = StealthRange * StealthRange * StealthThreshold * StealthThreshold;
         float nearestDistance = float.MaxValue;
         Entity returnEnemy = null;
@@ -541,8 +541,9 @@ public class Mission
     }
     public Entity NearestAlly(Entity entity)
     {
-        Entity[] entities = Entities.Where(x => IsEligible(x)).ToArray();
-        Entity returnEnemy = Util.Nearest(entity.Position, entities, out float nearestDistance);
+        Entity[] entities = Entities.Where(IsEligible).ToArray();
+        var returnEnemy = Util.Nearest(entity.Position, entities);
+        float nearestDistance = Vector2.DistanceSquared(entity.Position, returnEnemy.Position);
         if (entity.IsFriendly(Engine.SaveGame.Player))
         {
             float distance = Vector2.DistanceSquared(entity.Position, Player.Position);
@@ -559,8 +560,8 @@ public class Mission
     }
     public Entity NearestItem(Entity entity, bool _findAll)
     {
-        Entity[] entities = Entities.Where(x => IsEligible(x)).ToArray();
-        return Util.Nearest(entity.Position, entities, out float nearestDistance);
+        Entity[] entities = Entities.Where(IsEligible).ToArray();
+        return Util.Nearest(entity.Position, entities);
         bool IsEligible(Entity targetEntity)
         {
             return !((targetEntity is not Pickup || targetEntity == entity) || (!_findAll && (targetEntity is Module || targetEntity.GetComponent<SpecializedTag>() != null || targetEntity.GetComponent<Behaviour> != null)));
