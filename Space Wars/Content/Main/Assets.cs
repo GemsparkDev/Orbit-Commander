@@ -148,6 +148,8 @@ public static class Assets
         Add(Main.Sprites.RealFurnace, Content.Load<Texture2D>("Images/Items/Item_30-1"));
         Add(Main.Sprites.Work, Content.Load<Texture2D>("Images/Items/Item_31"));
         Add(Main.Sprites.RealWork, Content.Load<Texture2D>("Images/Items/Item_31-1"));
+        Add(Main.Sprites.Plasma, Content.Load<Texture2D>("Images/Items/Item_32"));
+        Add(Main.Sprites.RealPlasma, Content.Load<Texture2D>("Images/Items/Item_32-1"));
 
         //Projectiles
         Add(Main.Sprites.SpiralShot, Content.Load<Texture2D>("Images/Projectile_0"));

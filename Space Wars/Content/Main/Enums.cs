@@ -158,6 +158,7 @@ public enum Sprites
     Orion, RealOrion,
     Reflective, RealReflective,
     Work, RealWork,
+    Plasma, RealPlasma,
 
     SpiralShot,
     PulseShot,

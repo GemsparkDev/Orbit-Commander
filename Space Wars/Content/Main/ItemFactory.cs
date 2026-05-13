@@ -52,7 +52,7 @@ public static class ItemFactory
         { Modules.GuidedRound, new ModuleData(Sprites.RealTorch,Sprites.Torch, "Guided Round", (int)ModuleType.Guns, 20, typeof(GuidedRound), Color.White) },
 
         { Modules.Engines, new ModuleData(Sprites.RealEngines, Sprites.Engines, "Engines", (int)ModuleType.Engines, 20, typeof(StandardEngine)) },
-        { Modules.Plasma, new ModuleData(Sprites.RealEngines, Sprites.Engines, "Plasma", (int)ModuleType.Engines, 15, typeof(PlasmaEngine)) },
+        { Modules.Plasma, new ModuleData(Sprites.RealPlasma, Sprites.Plasma, "Plasma", (int)ModuleType.Engines, 15, typeof(PlasmaEngine)) },
         { Modules.Work, new ModuleData(Sprites.RealWork, Sprites.Work, "Work", (int)ModuleType.Engines, 25, typeof(WorkEngine)) },
         { Modules.Orion, new ModuleData(Sprites.RealOrion, Sprites.Orion, "Orion", (int)ModuleType.Engines, 20, typeof(OrionEngine)) },
 
