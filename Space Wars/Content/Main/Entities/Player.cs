@@ -413,8 +413,9 @@ public class Player : Entity
                         ("Req. 1 scrap, blocks enemy fire. 20 integrity.", Assets.Get(Sprites.Barricade)),
                         ("Req. 1 scrap, attacks enemies. 8 integrity.", Assets.Get(Sprites.Trap)),
                         ("Req. 1 scrap, 100 dmg to all in radius when destroyed. 3 integrity.", Assets.Get(Sprites.Bomb)),
-                        ("Req. 1 scrap, smelts all scrap within it", Assets.Get(Sprites.Furnace))
-                    };
+                        ("Req. 1 scrap, smelts all scrap within it", Assets.Get(Sprites.Furnace)),
+                        ("Req. 1 scrap, throw at enemies to do damage.", Assets.Get(Sprites.Explosive))
+                        };
                         if (Progression > 3)
                         {
                             constructs.Add(("Req. 3 scrap, deployable garage. Use metal to upgrade.", Assets.Get(Sprites.Mothership)));
@@ -461,7 +462,8 @@ public class Player : Entity
                             "Barricade",
                             "Trap",
                             "Bomb",
-                            "Furnace"
+                            "Furnace",
+                            "Mace"
                         };
                         if (Progression > 3)
                         {
@@ -515,8 +517,16 @@ public class Player : Entity
                                         }
                                         break;
                                     case "Resonator":
-                                        //firstScrap.isExpired = true;
+                                        firstScrap.isExpired = true;
                                         Engine.SaveGame.CurrentMission.Add(Entity.NewQuantumResonator(Position));
+                                        break;
+                                    case "Mace":
+                                        firstScrap.isExpired = true;
+                                        var mace = Pickup.NewMace(firstScrap.Position, firstScrap.Velocity, 0, 0);
+                                        leashedMaterials.Add(mace);
+                                        Engine.SaveGame.CurrentMission.Add(mace);
+                                        break;
+                                    default:
                                         break;
                                 }
                             }
