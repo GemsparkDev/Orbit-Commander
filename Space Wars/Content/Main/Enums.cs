@@ -159,6 +159,7 @@ public enum Sprites
     Reflective, RealReflective,
     Work, RealWork,
     Plasma, RealPlasma,
+    Mace, RealMace,
 
     SpiralShot,
     PulseShot,
