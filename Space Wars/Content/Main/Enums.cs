@@ -160,6 +160,7 @@ public enum Sprites
     Work, RealWork,
     Plasma, RealPlasma,
     Mace, RealMace,
+    Dash, RealDash,
 
     SpiralShot,
     PulseShot,

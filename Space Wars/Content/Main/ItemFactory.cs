@@ -62,7 +62,7 @@ public static class ItemFactory
         { Modules.PulseEmitter, new ModuleData(Sprites.RealPulseEmitter,Sprites.PulseEmitter, "Pulse Emitter", (int)ModuleType.Sensors, 20, typeof(PulseEmitter), Color.Yellow) },
 
         { Modules.Assault, new ModuleData(Sprites.RealAssault, Sprites.Assault, "Assault", (int)ModuleType.Core, 20, typeof(Assault)) },
-        { Modules.Dash, new ModuleData(Sprites.RealCore,Sprites.Core, "Dash Core", (int)ModuleType.Core, 20, typeof(Dash)) },
+        { Modules.Dash, new ModuleData(Sprites.RealDash,Sprites.Dash, "Dash Core", (int)ModuleType.Core, 20, typeof(Dash)) },
         { Modules.GrapplingHook, new ModuleData(Sprites.RealGrapplingHook, Sprites.GrapplingHook, "Grapple Core", (int)ModuleType.Core, 20, typeof(SummonGrapplingHook)) },
         { Modules.SummonShield, new ModuleData(Sprites.RealCore, Sprites.Core, "Shield Core", (int)ModuleType.Core, 20, typeof(SummonShield)) },
         { Modules.Nanomachines, new ModuleData(Sprites.RealNanomachines, Sprites.Nanomachines, "Nanomachines", (int)ModuleType.Core, 20, typeof(Nanomachines)) },
