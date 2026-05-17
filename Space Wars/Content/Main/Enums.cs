@@ -161,6 +161,7 @@ public enum Sprites
     Plasma, RealPlasma,
     Mace, RealMace,
     Dash, RealDash,
+    Adaptive, RealAdaptive,
 
     SpiralShot,
     PulseShot,

@@ -154,6 +154,8 @@ public static class Assets
         Add(Main.Sprites.RealPlasma, Content.Load<Texture2D>("Images/Items/Item_33-1"));
         Add(Main.Sprites.Dash, Content.Load<Texture2D>("Images/Items/Item_34"));
         Add(Main.Sprites.RealDash, Content.Load<Texture2D>("Images/Items/Item_34-1"));
+        Add(Main.Sprites.Adaptive, Content.Load<Texture2D>("Images/Items/Item_35"));
+        Add(Main.Sprites.RealAdaptive, Content.Load<Texture2D>("Images/Items/Item_35-1"));
 
         //Projectiles
         Add(Main.Sprites.SpiralShot, Content.Load<Texture2D>("Images/Projectile_0"));
