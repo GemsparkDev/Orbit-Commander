@@ -162,6 +162,7 @@ public enum Sprites
     Mace, RealMace,
     Dash, RealDash,
     Adaptive, RealAdaptive,
+    MicroLauncher, RealMicroLauncher,
 
     SpiralShot,
     PulseShot,
