@@ -4983,6 +4983,7 @@ public class Entity : IMissionComponent
         var behaviour = new Behaviour(shot);
         behaviour.AddBehaviour(shot.PulseShot(_isHoming));
         shot.AddComponent(behaviour);
+        shot.AddComponent(new FollowEmitter(shot) { ParticleEmitter = new ParticleEmitter(Assets.Get(Sprites.Circle), 1, shot.Position, 0, 0, 0, 10, shot.Color, EmitterType.EmissionOverDistance) { particlesShrink = true } });
         return shot;
     }
     IEnumerable<int> SpiralShot(float offset)

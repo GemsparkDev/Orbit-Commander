@@ -27,6 +27,7 @@ namespace Space_Wars.Content.Main.Particles
         public float speedOfEmission;
         public bool isEmitterActive = true;
         public bool particlesExperienceGravity = false;
+        public bool particlesShrink = false;
         public float probability = 1;
         public EmitterType EmitterType { get; }
         float cooldown = 0;
@@ -100,7 +101,7 @@ namespace Space_Wars.Content.Main.Particles
                     normalVector = Util.ToUnitVector(particleAngle);
                     Particle particle = new(particleTexture, particleTimeAlive, position - normalVector * i / speedOfEmission * particleVelocity, normalVector * particleVelocity + offsetVelocity,
                         particleAngle, particleAngularVelocity, particleColor, particleFadeToColor)
-                    { experienceGravity = particlesExperienceGravity };
+                    { experienceGravity = particlesExperienceGravity, isShrinking = particlesShrink };
                     ParticleManager.Add(particle);
                 }
                 cooldown = 1 / speedOfEmission;
@@ -125,7 +126,7 @@ namespace Space_Wars.Content.Main.Particles
                 randomAngle = Util.Random.NextSingle() * sprayCone - sprayCone / 2 + sprayAngle - Util.ToAngle(positionDifference);
                 ParticleManager.Add(new Particle(particleTexture, particleTimeAlive, position - normalVector * (cachedDistance - increment), Util.ToUnitVector(randomAngle) * particleVelocity + offsetVelocity,
                     randomAngle, particleAngularVelocity, particleColor, particleFadeToColor)
-                { experienceGravity = particlesExperienceGravity });
+                { experienceGravity = particlesExperienceGravity, isShrinking = particlesShrink });
             }
         }
         private void DrawCircle()

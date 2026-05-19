@@ -7,6 +7,7 @@ namespace Space_Wars.Content.Main.Particles
     public class Particle
     {
         public bool isExpired = false;
+        public bool isShrinking = false;
         public bool experienceGravity = false;
         public Vector2 Size => texture == null ? Vector2.Zero : new Vector2(texture.Width, texture.Height);
         public String drawText;
@@ -63,12 +64,17 @@ namespace Space_Wars.Content.Main.Particles
         }
         public void Draw(SpriteBatch _spriteBatch)
         {
+            float size = 1;
+            if(isShrinking)
+            {
+                size = timeLeft / originalTimeLeft;
+            }
             if (drawText != null)
             {
-                _spriteBatch.DrawString(Assets.TextFont, drawText, Position, renderColor * ((float)renderColor.A / 255f), angle, Assets.TextFont.MeasureString(drawText) / 2, 0.75f, 0, 0.2f);
+                _spriteBatch.DrawString(Assets.TextFont, drawText, Position, renderColor * ((float)renderColor.A / 255f), angle, Assets.TextFont.MeasureString(drawText) / 2, 0.75f * size, 0, 0.2f);
                 return;
             }
-            _spriteBatch.Draw(texture, Position, null, renderColor * ((float)renderColor.A / 255f), angle, Size / 2, 1f, 0, 0.2f);
+            _spriteBatch.Draw(texture, Position, null, renderColor * ((float)renderColor.A / 255f), angle, Size / 2, size, 0, 0.2f);
         }
     }
 }

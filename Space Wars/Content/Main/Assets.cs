@@ -150,8 +150,8 @@ public static class Assets
         Add(Main.Sprites.RealWork, Content.Load<Texture2D>("Images/Items/Item_31-1"));
         Add(Main.Sprites.Plasma, Content.Load<Texture2D>("Images/Items/Item_32"));
         Add(Main.Sprites.RealPlasma, Content.Load<Texture2D>("Images/Items/Item_32-1"));
-        Add(Main.Sprites.Plasma, Content.Load<Texture2D>("Images/Items/Item_33"));
-        Add(Main.Sprites.RealPlasma, Content.Load<Texture2D>("Images/Items/Item_33-1"));
+        Add(Main.Sprites.Mace, Content.Load<Texture2D>("Images/Items/Item_33"));
+        Add(Main.Sprites.RealMace, Content.Load<Texture2D>("Images/Items/Item_33-1"));
         Add(Main.Sprites.Dash, Content.Load<Texture2D>("Images/Items/Item_34"));
         Add(Main.Sprites.RealDash, Content.Load<Texture2D>("Images/Items/Item_34-1"));
         Add(Main.Sprites.Adaptive, Content.Load<Texture2D>("Images/Items/Item_35"));
