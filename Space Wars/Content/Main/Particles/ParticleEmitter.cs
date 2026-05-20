@@ -118,13 +118,13 @@ namespace Space_Wars.Content.Main.Particles
                 return;
             }
             float randomAngle;
-            Vector2 positionDifference = position - prevPosition;
+            Vector2 positionDifference = position - prevPosition - offsetVelocity;
             var normalVector = Vector2.Normalize(positionDifference);
             float increment = 100 / (speedOfEmission);
             for (cachedDistance += positionDifference.Length(); cachedDistance > increment; cachedDistance -= increment)
             {
                 randomAngle = Util.Random.NextSingle() * sprayCone - sprayCone / 2 + sprayAngle - Util.ToAngle(positionDifference);
-                ParticleManager.Add(new Particle(particleTexture, particleTimeAlive, position - normalVector * (cachedDistance - increment), Util.ToUnitVector(randomAngle) * particleVelocity + offsetVelocity,
+                ParticleManager.Add(new Particle(particleTexture, particleTimeAlive, position - (normalVector) * (cachedDistance - increment) - offsetVelocity, Util.ToUnitVector(randomAngle) * particleVelocity + offsetVelocity,
                     randomAngle, particleAngularVelocity, particleColor, particleFadeToColor)
                 { experienceGravity = particlesExperienceGravity, isShrinking = particlesShrink });
             }

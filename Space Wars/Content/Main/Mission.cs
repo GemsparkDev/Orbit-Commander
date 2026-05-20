@@ -501,11 +501,11 @@ public class Mission
     }
     public Dockable NearestDockableEntity(Entity _entity)
     {
-        return Util.Nearest(_entity.Position, GetEntities<Dockable>()).GetComponent<Dockable>();
+        return Util.Nearest(_entity.Position, GetEntities<Dockable>())?.GetComponent<Dockable>();
     }
     public Entity NearestEnemy(Entity entity, bool _getDeadEnemies = false)
     {
-        Entity[] entities = [.. Entities.Where(x => !IsEligible(x))];
+        Entity[] entities = [.. Entities.Where(x => IsEligible(x))];
         float maxDistSqr = StealthRange * StealthRange * StealthThreshold * StealthThreshold;
         float nearestDistance = float.MaxValue;
         Entity returnEnemy = null;
@@ -535,13 +535,17 @@ public class Mission
         return returnEnemy;
         bool IsEligible(Entity targetEnemy)
         {
+            if(targetEnemy == null)
+            {
+                return false;
+            }
             var comp = targetEnemy.GetComponent<Stealth>();
             return !((!_getDeadEnemies && targetEnemy.GetComponent<Health>() != null && targetEnemy.Health <= 0) || (entity.IsFriendly(targetEnemy) || ((comp != null) ? comp.StealthAbility : 0) > entity.SensingAbility));
         }
     }
     public Entity NearestAlly(Entity entity)
     {
-        Entity[] entities = Entities.Where(IsEligible).ToArray();
+        Entity[] entities = [.. Entities.Where(IsEligible)];
         var returnEnemy = Util.Nearest(entity.Position, entities);
         float nearestDistance = Vector2.DistanceSquared(entity.Position, returnEnemy.Position);
         if (entity.IsFriendly(Engine.SaveGame.Player))
@@ -560,7 +564,7 @@ public class Mission
     }
     public Entity NearestItem(Entity entity, bool _findAll)
     {
-        Entity[] entities = Entities.Where(IsEligible).ToArray();
+        Entity[] entities = [.. Entities.Where(IsEligible)];
         return Util.Nearest(entity.Position, entities);
         bool IsEligible(Entity targetEntity)
         {
@@ -585,7 +589,7 @@ public class Mission
     }
     public Entity[] GetEntities<T>() where T : Component
     {
-        return Entities.Where(x => x.GetComponent<T>() != null).ToArray();
+        return [.. Entities.Where(x => x.GetComponent<T>() != null)];
     }
     public List<Entity> Hitscan(Vector2 _pos, Vector2 _dir, float _maxLength, bool _getAll, out Vector2 _end, Team[] _whitelist = null, bool _getProjectiles = false)
     {

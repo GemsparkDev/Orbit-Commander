@@ -40,7 +40,7 @@ public class Entity : IMissionComponent
     public virtual float ColliderRadius => GetComponent<Sprite>().ColliderRadius;
     public int Damage => GetComponent<Attack>().Damage;
     protected static Player Player => Engine.SaveGame.Player;
-    public bool IsFriendly(Entity _entity) => _entity.GetComponent<Friendly>().Team == GetComponent<Friendly>().Team;
+    public bool IsFriendly(Entity _entity) => _entity.GetComponent<Friendly>()?.Team == GetComponent<Friendly>().Team;
     public void ApplyWork(float _q)
     {
         GetComponent<Temp>()?.ApplyWork(_q);
@@ -149,7 +149,7 @@ public class Entity : IMissionComponent
         {
             Engine.WriteLine(e, Color.Red);
             Engine.WriteLine(compLog);
-            isExpired = true; // Deletes the invalid entity
+            isExpired = true; //Entity is likely invalid
         }
     }
     public T GetComponent<T>() where T : Component
@@ -4979,15 +4979,15 @@ public class Entity : IMissionComponent
     }
     public static Entity NewPulseShot(Vector2 _position, Vector2 _velocity, float _angle, float _angularVelocity, Team _team, int _damage, bool _isHoming = false, int _stealth = 0)
     {
-        var shot = NewProjectile(Assets.Get(Sprites.PulseShot), _position, _velocity, _angle, _angularVelocity, _team, _damage, _stealth);
+        var shot = NewProjectile(Assets.Get(Sprites.Circle), _position, _velocity, _angle, _angularVelocity, _team, _damage, _stealth);
         var behaviour = new Behaviour(shot);
         behaviour.AddBehaviour(shot.PulseShot(_isHoming));
         shot.AddComponent(behaviour);
-        shot.AddComponent(new FollowEmitter(shot) { ParticleEmitter = new ParticleEmitter(Assets.Get(Sprites.Circle), 1, shot.Position, 0, 0, 0, 10, shot.Color, EmitterType.EmissionOverDistance) { particlesShrink = true } });
+        shot.AddComponent(new StationaryEmitter(shot) { ParticleEmitter = new ParticleEmitter(Assets.Get(Sprites.Circle), 0.25f, shot.Position, 0, 0, 0, 10, shot.Color, EmitterType.EmissionOverDistance) { particleFadeToColor = Color.Transparent, particlesShrink = true } });
         return shot;
     }
     IEnumerable<int> SpiralShot(float offset)
-    {
+    {  
         float time = 0;
         while (true)
         {
