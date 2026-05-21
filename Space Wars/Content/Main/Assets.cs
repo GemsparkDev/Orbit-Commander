@@ -169,7 +169,7 @@ public static class Assets
         //Particles
         Add(Main.Sprites.Dollar, Content.Load<Texture2D>("Images/Particle_1"));
         Add(Main.Sprites.Glow, Content.Load<Texture2D>("Images/Particle_3"));
-
+        Add(Main.Sprites.Trail, Content.Load<Texture2D>("Images/Particle_4"));
 
         //
         //Sound FX

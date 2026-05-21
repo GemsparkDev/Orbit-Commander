@@ -303,11 +303,11 @@ public class Mission
             if (comp is Entity entity)
             {
                 Entities.Add(entity);
-                if (entity.GetComponent<Attack>() != null)
+                if (entity.HasComponent<Attack>())
                 {
                     projectiles.Add(entity);
                 }
-                if (entity.GetComponent<Health>() != null || entity is Player)
+                if (entity.HasComponent<Health>() || entity is Player)
                 {
                     enemies.Add(entity);
                 }
@@ -329,11 +329,11 @@ public class Mission
             components.Add(entity);
             //Checks the entity type, and adds it to the corresponding list for each type
             Entities.Add(entity);
-            if (entity.GetComponent<Attack>() != null)
+            if (entity.HasComponent<Attack>())
             {
                 projectiles.Add(entity);
             }
-            if (entity.GetComponent<Health>() != null || entity is Player)
+            if (entity.HasComponent<Health>()|| entity is Player)
             {
                 enemies.Add(entity);
             }
@@ -505,15 +505,15 @@ public class Mission
     }
     public Entity NearestEnemy(Entity entity, bool _getDeadEnemies = false)
     {
-        Entity[] entities = [.. Entities.Where(x => IsEligible(x))];
+        Entity[] entities = [.. enemies.Where(x => IsEligible(x))];
         float maxDistSqr = StealthRange * StealthRange * StealthThreshold * StealthThreshold;
         float nearestDistance = float.MaxValue;
         Entity returnEnemy = null;
         foreach (var targetEnemy in entities)
         {
-            var comp = targetEnemy.GetComponent<Stealth>();
+            float stealth = targetEnemy.GetComponent<Stealth>()?.StealthAbility ?? 0;
             float distance = Vector2.DistanceSquared(entity.Position, targetEnemy.Position);
-            if (distance < nearestDistance && ((targetEnemy.GetComponent<Stealth>()?.StealthAbility ?? 0) < entity.SensingAbility || (distance < maxDistSqr)))
+            if (distance < nearestDistance && (stealth < entity.SensingAbility || (distance < maxDistSqr)))
             {
                 nearestDistance = distance;
                 returnEnemy = targetEnemy;
@@ -535,19 +535,22 @@ public class Mission
         return returnEnemy;
         bool IsEligible(Entity targetEnemy)
         {
-            if(targetEnemy == null)
+            if(targetEnemy == null || targetEnemy.IsFriendly(entity))
             {
                 return false;
             }
-            var comp = targetEnemy.GetComponent<Stealth>();
-            return !((!_getDeadEnemies && targetEnemy.GetComponent<Health>() != null && targetEnemy.Health <= 0) || (entity.IsFriendly(targetEnemy) || ((comp != null) ? comp.StealthAbility : 0) > entity.SensingAbility));
+            return _getDeadEnemies || targetEnemy.Health > 0;
         }
     }
     public Entity NearestAlly(Entity entity)
     {
         Entity[] entities = [.. Entities.Where(IsEligible)];
         var returnEnemy = Util.Nearest(entity.Position, entities);
-        float nearestDistance = Vector2.DistanceSquared(entity.Position, returnEnemy.Position);
+        float nearestDistance = float.MaxValue;
+        if(returnEnemy != null)
+        {
+            nearestDistance = Vector2.DistanceSquared(entity.Position, returnEnemy.Position);
+        }
         if (entity.IsFriendly(Engine.SaveGame.Player))
         {
             float distance = Vector2.DistanceSquared(entity.Position, Player.Position);
@@ -564,11 +567,10 @@ public class Mission
     }
     public Entity NearestItem(Entity entity, bool _findAll)
     {
-        Entity[] entities = [.. Entities.Where(IsEligible)];
-        return Util.Nearest(entity.Position, entities);
+        return Util.Nearest(entity.Position, [.. Entities.Where(IsEligible)]);
         bool IsEligible(Entity targetEntity)
         {
-            return !((targetEntity is not Pickup || targetEntity == entity) || (!_findAll && (targetEntity is Module || targetEntity.GetComponent<SpecializedTag>() != null || targetEntity.GetComponent<Behaviour> != null)));
+            return !((targetEntity is not Pickup || targetEntity == entity) || (!_findAll && (targetEntity is Module || targetEntity.HasComponent<SpecializedTag>() || targetEntity.HasComponent<Behaviour>())));
         }
     }
     public Entity NearestProjectile(Vector2 _position, int _sensingAbility, Team _team)
@@ -579,7 +581,7 @@ public class Mission
         {
             float distance = Vector2.DistanceSquared(targetProjectile.Position, _position);
             if (distance < nearestDistance && _team != targetProjectile.Team
-                && (targetProjectile.StealthAbility < _sensingAbility || (targetProjectile.StealthAbility == _sensingAbility && distance < StealthRange * StealthThreshold)))
+                && (targetProjectile.StealthAbility < _sensingAbility || (targetProjectile.StealthAbility == _sensingAbility && distance < StealthRange * StealthRange * StealthThreshold * StealthThreshold)))
             {
                 nearestDistance = distance;
                 returnProjectile = targetProjectile;
@@ -589,7 +591,7 @@ public class Mission
     }
     public Entity[] GetEntities<T>() where T : Component
     {
-        return [.. Entities.Where(x => x.GetComponent<T>() != null)];
+        return [.. Entities.Where(x => x.HasComponent<T>())];
     }
     public List<Entity> Hitscan(Vector2 _pos, Vector2 _dir, float _maxLength, bool _getAll, out Vector2 _end, Team[] _whitelist = null, bool _getProjectiles = false)
     {
@@ -600,7 +602,7 @@ public class Mission
         Engine.SaveGame.CurrentMission.IsColliding(_pos, dir * dist, 1, false, out float maxDist);
         foreach (var entity in Entities)
         {
-            if(_getProjectiles || entity.GetComponent<Health>() != null)
+            if(_getProjectiles || entity.HasComponent<Health>())
             {
                 CalculateIntersection(entity);
             }
@@ -1063,9 +1065,10 @@ public class Mission
     {
         Entity[] planets = [.. Engine.SaveGame.CurrentMission.Entities.Where(x => x is Planet)];
         ICollider[] Colliders = [];
-        if (GetComponent<Colliders>() != null)
+        var comp = GetComponent<Colliders>();
+        if (comp != null)
         {
-            Colliders = GetComponent<Colliders>().GetColliders;
+            Colliders = comp.GetColliders;
         }
         Vector2 futurePosition = _startPosition;
         Vector2 futureVelocity = _startVelocity;
@@ -1190,7 +1193,7 @@ public class Mission
         }
         if (Engine.SaveGame.Player.Position.Length() > missions[Engine.SaveGame.CurrentMissionIndex].data.EdgeRadius)
         {
-            _spriteBatch.Draw(Assets.Get(Sprites.Arrow), Engine.SaveGame.Player.Position - Vector2.Normalize(Engine.SaveGame.Player.Position) * 25, null, Engine.SaveGame.Player.Color, -Util.ToAngle(Engine.SaveGame.Player.Position), Assets.DimsOf(Sprites.Arrow) / 2, 1, 0, 0.2f);
+            _spriteBatch.Draw(Assets.Get(Sprites.Arrow), Engine.SaveGame.Player.Position - Vector2.Normalize(Engine.SaveGame.Player.Position) * 25, null, Engine.SaveGame.Player.Color, Util.ToAngle(-Engine.SaveGame.Player.Position), Assets.DimsOf(Sprites.Arrow) / 2, 1, 0, 0.2f);
             _spriteBatch.DrawString(Assets.TextFont, "Return to planet.", Engine.Camera.Position - new Vector2(Assets.TextFont.MeasureString("Return to planet.").X / 2, 225), Color.Crimson);
         }
         Player.Draw(_spriteBatch);

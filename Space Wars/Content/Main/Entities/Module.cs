@@ -470,7 +470,6 @@ public class Railgun() : Module(Modules.Antimaterial)
 public class Spiral() : Module(Modules.Spiral)
 {
     ReloadSystem ammo = new ReloadSystem(10, 2);
-    float offset = 0;
     public override void OnShoot()
     {
         if (Cooldown > 0)
@@ -480,8 +479,11 @@ public class Spiral() : Module(Modules.Spiral)
         if (ammo.Fire())
         {
             Vector2 speed = Player.IdealSpeedWithVelocity(12);
-            Engine.SaveGame.CurrentMission.Add(NewSpiralShot(Player.Position, speed, Util.ToAngle(Player.Direction), 0, Team, 5, offset, 1));
-            Engine.SaveGame.CurrentMission.Add(NewSpiralShot(Player.Position, speed, Util.ToAngle(Player.Direction), 0, Team, 5, MathF.PI + offset, 1));
+            for(int i = 0; i < Util.Random.Next(3, 5); i++)
+            {
+                Engine.SaveGame.CurrentMission.Add(NewSpiralShot(Player.Position, speed, Util.ToAngle(Player.Direction), 0, Team, 5, Util.OneToNegOne() * MathF.PI, 1));
+            }
+
             SoundManager.PlaySound(Assets.Get(Sound.PulseFire), Player.Position);
             Cooldown = 0.5f;
             Engine.ShakeScreen(0.4f);
@@ -491,11 +493,6 @@ public class Spiral() : Module(Modules.Spiral)
             ParticleManager.Add(new Particle(Assets.Get(Sprites.Dot), 60, Player.Position - Player.Velocity, Player.Velocity
                 + new Vector2(-Player.Direction.Y + Util.OneToNegOne() / 2, Player.Direction.X + Util.OneToNegOne() / 4), 0, Util.OneToNegOne() / 5, Color.Yellow, Color.Transparent)
             { experienceGravity = true });
-            offset += MathF.PI / 8;
-            if (offset > MathF.Tau)
-            {
-                offset -= MathF.Tau;
-            }
         }
     }
     public override void OnUpdate()

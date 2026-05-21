@@ -539,7 +539,7 @@ public class Player : Entity
                     Vector2 targetDir = targetVector;
                     if (aimAssist)
                     {
-                        Entity nearestEnemy = Engine.SaveGame.CurrentMission.NearestEnemy(this, true);
+                        Entity nearestEnemy = Util.Nearest(Position, Engine.SaveGame.CurrentMission.GetEntities<Health>());
                         if (nearestEnemy != null && nearestEnemy.Health <= 0)
                         {
                             var relativePos = Vector2.Normalize(nearestEnemy.Position - Position);

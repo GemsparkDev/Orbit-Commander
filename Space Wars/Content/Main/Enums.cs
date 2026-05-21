@@ -174,6 +174,7 @@ public enum Sprites
     Dollar,
     Circle,
     Glow,
+    Trail,
 
     PlayerUI,
     Title,

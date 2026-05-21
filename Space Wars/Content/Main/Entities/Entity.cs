@@ -53,6 +53,35 @@ public class Entity : IMissionComponent
     {
         Color = _color;
     }
+    private void UpdateTrail()
+    {
+        var stealthComp = GetComponent<Stealth>();
+        var stationaryEmitter = GetComponent<StationaryEmitter>();
+        if (stealthComp == null || stationaryEmitter == null)
+        {
+            return;
+        }
+        float stealth = 1;
+        var maxDistance = Mission.StealthRange * (float)Engine.SaveGame.Player.CountFuses(ModuleType.Sensors) / 4;
+        if (Engine.SaveGame.Player.SensingAbility == stealthComp.StealthAbility)
+        {
+            float distanceSqr = Vector2.DistanceSquared(Engine.SaveGame.Player.Position, Position);
+            if (distanceSqr > maxDistance * maxDistance)
+            {
+                stealth = 0;
+            }
+            else
+            {
+                stealth = MathF.Sqrt(maxDistance - MathF.Sqrt(distanceSqr)) / MathF.Sqrt(maxDistance);
+            }
+        }
+        else if (Engine.SaveGame.Player.SensingAbility < stealthComp.StealthAbility)
+        {
+            stealth = 0;
+        }
+        stealth = MathF.Max(stealth, (float)Math.Clamp(stealthComp.RevealDuration, 0f, 1f));
+        stationaryEmitter.ParticleEmitter.particleColor = Color * stealth;
+    }
     public virtual void Initialize() { }
     public void CollideWith(Entity nearestEnemy)
     {
@@ -66,7 +95,7 @@ public class Entity : IMissionComponent
         }
     }
     public bool isExpired = false;
-    private List<Component> components = [];
+    private Dictionary<Type, Component> components = [];
     public Entity(Vector2 _position, Vector2 _velocity, float _angle, float _angularVelocity)
     {
         Transform = new Transform(this) { Position = _position, Velocity = _velocity, Angle = _angle, AngularVelocity = _angularVelocity };
@@ -141,8 +170,8 @@ public class Entity : IMissionComponent
         {
             foreach (var comp in components)
             {
-                compLog = comp;
-                comp.Update();
+                compLog = comp.Value;
+                comp.Value.Update();
             }
         }
         catch (Exception e)
@@ -152,34 +181,22 @@ public class Entity : IMissionComponent
             isExpired = true; //Entity is likely invalid
         }
     }
+    public bool HasComponent<T>() where T : Component
+    {
+        return components.ContainsKey(typeof(T));
+    }
     public T GetComponent<T>() where T : Component
     {
-        T comp;
-        foreach (Component component in components)
-        {
-            comp = component as T;
-            if (comp != null)
-            {
-                return comp;
-            }
-        }
-        return null;
+        components.TryGetValue(typeof(T), out Component comp);
+        return (T)comp;
     }
     public bool RemoveComponent<T>() where T : Component
     {
-        Component component = null;
-        foreach (var comp in components)
-        {
-            if (comp is T)
-            {
-                component = comp;
-            }
-        }
-        return components.Remove(component);
+        return components.Remove(typeof(T));
     }
-    public Entity AddComponent(Component component)
+    public Entity AddComponent<T>(T component) where T : Component
     {
-        components.Add(component);
+        components.Add(typeof(T), component);
         return this;
     }
     public bool Collide(int _damage, bool _ignoreImmunity = false)
@@ -197,7 +214,7 @@ public class Entity : IMissionComponent
     {
         foreach (var comp in components)
         {
-            comp.Draw(_spriteBatch);
+            comp.Value.Draw(_spriteBatch);
         }
     }
     public static Entity NewEnemy(Vector2 _position, Vector2 _velocity, float _angle, int _health, Texture2D _texture, Team _team = Team.Hostile, SoundEffect _hitSound = null)
@@ -835,7 +852,7 @@ public class Entity : IMissionComponent
             if (Health >= MaxHealth / 2 || CD[1] > 0)
             {
                 var nearestExpiredAlly = Engine.SaveGame.CurrentMission.NearestAlly(this);
-                if (nearestExpiredAlly.GetComponent<Health>() != null)
+                if (nearestExpiredAlly.HasComponent<Health>())
                 {
                     float distance = Vector2.Distance(Position, nearestExpiredAlly.Position);
                     if (nearestExpiredAlly.Health <= 0 && distance < 300)
@@ -3138,29 +3155,55 @@ public class Entity : IMissionComponent
         while (Health > 0)
         {
             Entity nearestEnemy = Engine.SaveGame.CurrentMission.NearestEnemy(this);
-            Vector2 relativePosition = Position - nearestEnemy.Position;
+            Vector2 targetAcceleration = Vector2.Zero;
             Vector2 normalizedAcceleration = GetNormalizedAcceleration() * 2;
-            Vector2 Offset = Vector2.Normalize(Engine.SaveGame.CurrentMission.GetNormalizedAcceleration(nearestEnemy.Position)) * 100;
-            Vector2 targetLocation = relativePosition - Offset;
-            Vector2 targetAcceleration;
-            if (Vector2.Distance(nearestEnemy.Position + Offset, Position) < 50)
+            if (nearestEnemy != null)
             {
-                if (cooldown > 0)
+                Vector2 Offset = Vector2.Normalize(Engine.SaveGame.CurrentMission.GetNormalizedAcceleration(nearestEnemy.Position)) * 100;
+                Vector2 relativePosition = Position - nearestEnemy.Position;
+                Vector2 targetLocation = relativePosition - Offset;
+                if (Vector2.Distance(nearestEnemy.Position + Offset, Position) < 50)
                 {
-                    cooldown -= Engine.DeltaSeconds;
+                    if (cooldown > 0)
+                    {
+                        cooldown -= Engine.DeltaSeconds;
+                    }
+                    else
+                    {
+                        cooldown = 1;
+                        randomPos = new Vector2(Util.Random.NextSingle() * 50 - 25, Util.Random.NextSingle() * 50 - 25);
+                    }
+                    targetAcceleration = Velocity - nearestEnemy.Velocity - normalizedAcceleration * 10 + (randomPos + targetLocation) * Engine.DeltaSeconds;
                 }
                 else
                 {
-                    cooldown = 1;
-                    randomPos = new Vector2(Util.Random.NextSingle() * 50 - 25, Util.Random.NextSingle() * 50 - 25);
+                    targetAcceleration = Velocity - nearestEnemy.Velocity + targetLocation * Engine.DeltaSeconds - normalizedAcceleration * normalizedAcceleration.Length() * targetLocation.Length() / 10;
                 }
-                targetAcceleration = Velocity - nearestEnemy.Velocity - normalizedAcceleration * 10 + (randomPos + targetLocation) * Engine.DeltaSeconds;
+                targetAcceleration -= (nearestEnemy.Velocity - Velocity) / 10;
+                if (Vector2.Distance(Position, nearestEnemy.Position) < EnemyRange.particleVelocity)
+                {
+                    if (weaponCooldown > 0)
+                    {
+                        weaponCooldown -= Engine.DeltaSeconds;
+                    }
+                    else
+                    {
+                        Engine.SaveGame.CurrentMission.Add(NewPulseShot(Position, -Vector2.Normalize(relativePosition) * 8 + nearestEnemy.Velocity, MathF.Atan2(relativePosition.Y, relativePosition.X) - MathF.PI / 2, 0, Team, damage, false));
+                        SoundManager.PlaySound(Assets.Get(Sound.PulseFire), Position);
+                        shots++;
+                        if (shots == 3)
+                        {
+                            shots = 0;
+                            weaponCooldown = 2;
+                        }
+                        else
+                        {
+                            weaponCooldown = 0.1f;
+                        }
+
+                    }
+                }
             }
-            else
-            {
-                targetAcceleration = Velocity - nearestEnemy.Velocity + targetLocation * Engine.DeltaSeconds - normalizedAcceleration * normalizedAcceleration.Length() * targetLocation.Length() / 10;
-            }
-            targetAcceleration -= (nearestEnemy.Velocity - Velocity) / 10;
             targetAngle = MathF.Atan2(targetAcceleration.Y, targetAcceleration.X) - MathF.PI / 2;
             thrust = MathF.Min(3 + normalizedAcceleration.Length() * 10, (1 - MathF.Abs(targetAngle - Angle) / MathF.PI) * (targetAcceleration.Length()));
             Entity nearestProjectile = Engine.SaveGame.CurrentMission.NearestProjectile(Position, SensingAbility, Team);
@@ -3177,29 +3220,6 @@ public class Entity : IMissionComponent
                     }
                     targetAngle += MathF.PI / 2 * sign;
                     thrust = 20;
-                }
-            }
-            if (Vector2.Distance(Position, nearestEnemy.Position) < EnemyRange.particleVelocity)
-            {
-                if (weaponCooldown > 0)
-                {
-                    weaponCooldown -= Engine.DeltaSeconds;
-                }
-                else
-                {
-                    Engine.SaveGame.CurrentMission.Add(NewPulseShot(Position, -Vector2.Normalize(relativePosition) * 8 + nearestEnemy.Velocity, MathF.Atan2(relativePosition.Y, relativePosition.X) - MathF.PI / 2, 0, Team, damage, false));
-                    SoundManager.PlaySound(Assets.Get(Sound.PulseFire), Position);
-                    shots++;
-                    if (shots == 3)
-                    {
-                        shots = 0;
-                        weaponCooldown = 2;
-                    }
-                    else
-                    {
-                        weaponCooldown = 0.1f;
-                    }
-
                 }
             }
             RotateTowards(targetAngle, 0.05f);
@@ -4974,16 +4994,20 @@ public class Entity : IMissionComponent
                 Angle = Util.ToAngle(Velocity - nearestEnemy.Velocity);
             }
             CollideWith(nearestEnemy);
+            Angle = Util.ToAngle(Velocity);
+            AngularVelocity = 0;
+            UpdateTrail();
             yield return 0;
         }
     }
     public static Entity NewPulseShot(Vector2 _position, Vector2 _velocity, float _angle, float _angularVelocity, Team _team, int _damage, bool _isHoming = false, int _stealth = 0)
     {
-        var shot = NewProjectile(Assets.Get(Sprites.Circle), _position, _velocity, _angle, _angularVelocity, _team, _damage, _stealth);
+        var shot = NewProjectile(Assets.Get(Sprites.PulseShot), _position, _velocity, _angle, _angularVelocity, _team, _damage, _stealth);
         var behaviour = new Behaviour(shot);
         behaviour.AddBehaviour(shot.PulseShot(_isHoming));
         shot.AddComponent(behaviour);
-        shot.AddComponent(new StationaryEmitter(shot) { ParticleEmitter = new ParticleEmitter(Assets.Get(Sprites.Circle), 0.25f, shot.Position, 0, 0, 0, 10, shot.Color, EmitterType.EmissionOverDistance) { particleFadeToColor = Color.Transparent, particlesShrink = true } });
+        shot.AddComponent(new StationaryEmitter(shot) { ParticleEmitter = new ParticleEmitter(Assets.Get(Sprites.Trail), 0.1f, shot.Position, 0, 0, 0, 10, shot.Color, EmitterType.EmissionOverDistance) 
+        { particleFadeToColor = Color.Transparent, particleTargetSize = new Vector2(0.5f, 1) } });
         return shot;
     }
     IEnumerable<int> SpiralShot(float offset)
@@ -4992,39 +5016,36 @@ public class Entity : IMissionComponent
         while (true)
         {
             time += Engine.DeltaSeconds;
-            Vector2 posOffset = Util.ToUnitVector(Angle) * MathF.Cos(time * 8 + offset);
+            Vector2 posOffset = Vector2.Normalize(Velocity) * MathF.Cos(time * 8 + offset) * time * 10;
             Position += new Vector2(posOffset.Y, -posOffset.X);
             Entity nearestEnemy = Engine.SaveGame.CurrentMission.NearestEnemy(this, true);
             CollideWith(nearestEnemy);
+            Angle = Util.ToAngle(Velocity + new Vector2(posOffset.Y, -posOffset.X));
+            AngularVelocity = 0;
+            UpdateTrail();
             yield return 0;
         }
     }
     public static Entity NewSpiralShot(Vector2 _position, Vector2 _velocity, float _angle, float _angularVelocity, Team _team, int _damage, float _offset, int _stealth = 0)
     {
-        var shot = NewProjectile(Assets.Get(Sprites.SpiralShot), _position, _velocity, _angle, _angularVelocity, _team, _damage, _stealth);
+        var shot = NewProjectile(Assets.Get(Sprites.PulseShot), _position, _velocity, _angle, _angularVelocity, _team, _damage, _stealth);
         var behaviour = new Behaviour(shot);
         behaviour.AddBehaviour(shot.SpiralShot(_offset));
         shot.AddComponent(behaviour);
+        shot.AddComponent(new StationaryEmitter(shot)
+        {
+            ParticleEmitter = new ParticleEmitter(Assets.Get(Sprites.Trail), 0.1f, shot.Position, 0, 0, 0, 10, shot.Color, EmitterType.EmissionOverDistance)
+            { particleFadeToColor = Color.Transparent, particleTargetSize = new Vector2(0.5f, 1) }
+        });
         return shot;
     }
     IEnumerable<int> AssassinShot()
     {
         TimeLeft = 3;
-        ParticleEmitter beam = null;
         while (true)
         {
-            //Fixes edge cases with position editing
-            //Change position to getter setter for a better solution
-            if (beam == null)
-            {
-                var col = Color.Gold;
-                col.A = 0;
-                beam = new(Assets.Get(Sprites.Dot), 0.5f, Position, Angle, 0, 0, 50f, Color, EmitterType.EmissionOverDistance) { particleFadeToColor = col };
-            }
             var nearestEnemy = Engine.SaveGame.CurrentMission.Hitscan(Position, Velocity, Velocity.Length() * Engine.DeltaSeconds * 60, false, out Vector2 end, Friendly.Blacklist(Team));
             Position = end;
-            beam.position = Position;
-            beam.Update();
             if (nearestEnemy.Count > 0)
             {
                 if (nearestEnemy[0].Collide(Damage))
@@ -5033,6 +5054,8 @@ public class Entity : IMissionComponent
                 }
                 Collide(1, false);
             }
+            Angle = Util.ToAngle(Velocity);
+            AngularVelocity = 0;
             yield return 0;
         }
     }
@@ -5042,6 +5065,9 @@ public class Entity : IMissionComponent
         var behaviour = new Behaviour(shot);
         behaviour.AddBehaviour(shot.AssassinShot());
         shot.AddComponent(behaviour);
+        var color = Color.Gold;
+        color.A = 0;
+        shot.AddComponent(new StationaryEmitter(shot) { ParticleEmitter = new ParticleEmitter(Assets.Get(Sprites.Dot), 0.5f, shot.Position, shot.Angle, 0, 0, 50f, shot.Color, EmitterType.EmissionOverDistance) { particleFadeToColor = color } });
         return shot;
     }
     IEnumerable<int> Explosive(float explosionRadius)
