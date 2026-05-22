@@ -3279,23 +3279,19 @@ public class Entity : IMissionComponent
                     {
                         if (tripleCooldown <= 0)
                         {
-                            Texture2D tex = Assets.Get(Sprites.SpiralShot);
                             if (shotCount == 0)
                             {
                                 SoundManager.PlaySound(Assets.Get(Sound.LMGFire), Position);
                                 var p1 = NewPulseShot(Position, Util.ToUnitVector(Angle) * 8, Angle, 0, Team, damage, false);
-                                p1.Texture = tex;
                                 p1.GetComponent<ExpireTimer>().TimeLeft = 3;
                                 Engine.SaveGame.CurrentMission.Add(p1);
                             }
                             else
                             {
                                 var p1 = NewSpiralShot(Position, Util.ToUnitVector(Angle) * 8, Angle, 0, Team, damage, 0);
-                                p1.Texture = tex;
                                 p1.TimeLeft = 3;
                                 Engine.SaveGame.CurrentMission.Add(p1);
                                 p1 = NewSpiralShot(Position, Util.ToUnitVector(Angle) * 8, Angle, 0, Team, damage, MathF.PI);
-                                p1.Texture = tex;
                                 p1.TimeLeft = 3;
                                 Engine.SaveGame.CurrentMission.Add(p1);
                             }

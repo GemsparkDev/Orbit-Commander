@@ -68,7 +68,7 @@ public static class ItemFactory
         { Modules.Nanomachines, new ModuleData(Sprites.RealNanomachines, Sprites.Nanomachines, "Nanomachines", (int)ModuleType.Core, 20, typeof(Nanomachines)) },
         { Modules.CreateFighter, new ModuleData(Sprites.RealCore, Sprites.Core, "Construct fighter", (int)ModuleType.Core, 20, typeof(CreateFighter)) },
         { Modules.Expose, new ModuleData(Sprites.RealExpose, Sprites.Expose, "Exposure", (int)ModuleType.Core, 20, typeof(Expose)) },
-        { Modules.Decoy, new ModuleData(Sprites.RealTorch,Sprites.Torch, "Decoy", (int)ModuleType.Guns, 20, typeof(Decoy))},
+        { Modules.Decoy, new ModuleData(Sprites.RealTorch,Sprites.Torch, "Decoy", (int)ModuleType.Core, 20, typeof(Decoy))},
 
     };
     public static Pickup NewScrap(Vector2 _position = default, Vector2 _velocity = default, float _angularVelocity = 0)

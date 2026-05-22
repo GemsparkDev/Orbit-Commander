@@ -118,6 +118,7 @@ public class Engine : Game
             LoadingStage = LoadingStage.MainMenu;
 
             Assets.LoadFinal(Content);
+            EventHandler.SetModules();
             LoadingStage = LoadingStage.Complete;
         });
     }

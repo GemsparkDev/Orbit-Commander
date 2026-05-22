@@ -269,8 +269,6 @@ public class Player : Entity
                 dockedEntity = null;
             }
         }
-        UI.PlayerSpecialHealth.Colors[0] = Color.Transparent;
-        UI.PlayerSpecialHealth.Colors[1] = Color.Transparent;
 
         if (Progression < 0)
         {

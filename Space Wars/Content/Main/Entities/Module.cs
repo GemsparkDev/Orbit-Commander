@@ -118,9 +118,10 @@ public class ModuleData(Sprites _realSprite, Sprites _virtualSprite, String _nam
 }
 public class Hull() : Module(Modules.Hull)
 {
-    public override int OnCollide(int _damage)
+    public override void OnUpdate()
     {
-        return _damage / 2;
+        UI.PlayerSpecialHealth.Colors[0] = Color.Transparent;
+        UI.PlayerSpecialHealth.Colors[1] = Color.Transparent;
     }
 }
 public class Shield() : Module(Modules.Shield)
@@ -150,7 +151,12 @@ public class StealthHull() : Module(Modules.Stealth)
 {
     public override int OnCollide(int _damage)
     {
-        return (int)(_damage / 1.75f);
+        return (int)(_damage * 1.15f);
+    }
+    public override void OnUpdate()
+    {
+        UI.PlayerSpecialHealth.Colors[0] = Color.Transparent;
+        UI.PlayerSpecialHealth.Colors[1] = Color.Transparent;
     }
 }
 public class Reflective() : Module(Modules.Reflective)
@@ -165,7 +171,12 @@ public class Reflective() : Module(Modules.Reflective)
             }
             return 0;
         }
-        return _damage;
+        return _damage * 2;
+    }
+    public override void OnUpdate()
+    {
+        UI.PlayerSpecialHealth.Colors[0] = Color.Transparent;
+        UI.PlayerSpecialHealth.Colors[1] = Color.Transparent;
     }
 }
 public class Turtle() : Module(Modules.Turtle)
@@ -175,7 +186,7 @@ public class Turtle() : Module(Modules.Turtle)
     ParticleEmitter effect = new ParticleEmitter(Assets.Get(Sprites.Dot), Vector2.Zero, 10, Color.Orange) { sprayAngle = MathF.PI / 2 };
     public override int OnCollide(int _damage)
     {
-        float dr = 0.5f * ((1 - Cooldown / 5) * (1 - Cooldown / 5) + 0.5f);
+        float dr = (0.75f * (1 - Cooldown / 5) * (1 - Cooldown / 5) + 0.25f);
         Cooldown = 5;
         Engine.SaveGame.Player.RevealDuration = 1;
         return (int)(_damage * dr);
@@ -221,7 +232,7 @@ public class Ablative() : Module(Modules.Ablative)
             return 0;
         }
         buffer = 0;
-        return _damage - (int)Math.Round(buffer);
+        return (_damage - (int)Math.Round(buffer)) * 2;
     }
     public override void OnUpdate()
     {
@@ -241,9 +252,9 @@ public class Adaptive() : Module(Modules.Adaptive)
         if (Health > 0)
         {
             Player.Statuses.ApplyStatus(new Berserk(_damage));
-            return _damage * 2 / 3;
+            return _damage * 4 / 3;
         }
-        return _damage / 2;
+        return _damage;
     }
 
 }
@@ -253,12 +264,14 @@ public class ThermalShield() : Module(Modules.ThermalShield)
     {
         if (Player.Temperature is > 1 or < (-1))
         {
-            return _damage * 2 / 3;
+            return _damage * 4 / 3;
         }
-        return _damage / 2;
+        return _damage;
     }
     public override void OnUpdate()
     {
+        UI.PlayerSpecialHealth.Colors[0] = Color.Transparent;
+        UI.PlayerSpecialHealth.Colors[1] = Color.Transparent;
         Player.ApplyWork(Math.Sign(-Player.Temperature));
         base.OnUpdate();
     }

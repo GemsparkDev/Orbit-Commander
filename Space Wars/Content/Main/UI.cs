@@ -6,6 +6,7 @@ using Space_Wars.Content.Main.UIElements;
 using System;
 using UILib.Content.Main;
 using static Space_Wars.Content.Main.Engine;
+using System.Diagnostics;
 
 namespace Space_Wars.Content.Main;
 public static class UI
@@ -159,7 +160,7 @@ public static class UI
     public static int type = 1;
     public static readonly Vector2[] resolutions = [new Vector2(1920, 1080), new Vector2(640, 480)];
     public static int selectedResolution = 0;
-    public static readonly Modules[] setModules = [Modules.Ablative, Modules.Spiral, Modules.Plasma, Modules.Sensors, Modules.GrapplingHook];
+    public static readonly Modules[] setModules = [Modules.Ablative, Modules.Basic, Modules.Plasma, Modules.Sensors, Modules.GrapplingHook];
 
     //Hack menu
     public static Button HackButton { get; } = new Button(Vector2.Zero, Assets.Get(Sprites.Button), Assets.TextFont, "Hack", Color.Yellow);
@@ -476,11 +477,37 @@ public static class UI
         for (int i = 0; i < NextModule.Length; i++)
         {
             int module = i;
-            MainMenu.AddWidget((NextModule[i] = new Button(new Vector2(60, 25 * i - 40), Assets.Get(Sprites.Button), Assets.TextFont, $"{i + 5}", Color.White)), 2);
-            NextModule[i].AddBehaviour(delegate () { setModules[module] = (Modules)Math.Clamp((int)(setModules[module] + 1), 0, (int)(Modules.End - 1)); EventHandler.SetModules(); });
-            MainMenu.AddWidget((PrevModule[i] = new Button(new Vector2(-60, 25 * i - 40), Assets.Get(Sprites.Button), Assets.TextFont, $"{i}", Color.White)), 2);
-            PrevModule[i].AddBehaviour(delegate () { setModules[module] = (Modules)Math.Clamp((int)(setModules[module] - 1), 0, (int)(Modules.End - 1)); EventHandler.SetModules(); });
-            MainMenu.AddWidget(Module[i] = new Decal(new Vector2(0, 25 * i - 40), Assets.TextFont, "", Color.White, 10), 2);
+            MainMenu.AddWidget((NextModule[i] = new Button(new Vector2(120, 25 * i - 40), Assets.Get(Sprites.Button), Assets.TextFont, $"Next", Color.White)), 2);
+            int index = i;
+            NextModule[i].AddBehaviour(
+                delegate () 
+                {
+                    if (Self.LoadingStage != LoadingStage.Complete)
+                    {
+                        return;
+                    }
+                    var nextModule = (Modules)Math.Clamp((int)(setModules[module] + 1), 0, (int)(Modules.End - 1)); EventHandler.SetModules();
+                    if (ItemFactory.moduleData[nextModule].ID == index)
+                    {
+                        setModules[module] = nextModule;
+                    }
+                });
+            MainMenu.AddWidget((PrevModule[i] = new Button(new Vector2(-120, 25 * i - 40), Assets.Get(Sprites.Button), Assets.TextFont, $"Prev", Color.White)), 2);
+            PrevModule[i].AddBehaviour(
+                delegate () 
+                {
+                    if(Self.LoadingStage != LoadingStage.Complete)
+                    {
+                        return;
+                    }
+                    var nextModule = (Modules)Math.Clamp((int)(setModules[module] - 1), 0, (int)(Modules.End - 1));
+                    if (ItemFactory.moduleData[nextModule].ID == index)
+                    {
+                        setModules[module] = nextModule;
+                    }
+                    EventHandler.SetModules(); 
+                });
+            MainMenu.AddWidget(Module[i] = new Decal(new Vector2(0, 25 * i - 40), Assets.TextFont, "Loading...", Color.White, 10), 2);
         }
 
         PauseMenu.AddWidget(QuitToMissionButton);
