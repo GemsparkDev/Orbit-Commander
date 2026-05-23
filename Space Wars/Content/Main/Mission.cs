@@ -600,6 +600,7 @@ public class Mission
         float dist = _maxLength;
         Entity nearestEnemy = null;
         Engine.SaveGame.CurrentMission.IsColliding(_pos, dir * dist, 1, false, out float maxDist);
+        maxDist += 1; //Makes hitting planets possible
         foreach (var entity in Entities)
         {
             if(_getProjectiles || entity.HasComponent<Health>())
@@ -626,16 +627,20 @@ public class Mission
             }
             Vector2 relativePos = _entity.Position - _pos;
             float closestLength = (relativePos.X * dir.X + relativePos.Y * dir.Y);
-            float closestDistance = Vector2.Distance((dir * closestLength + _pos), _entity.Position);
-            if (closestLength > 0 && closestLength < maxDist && closestDistance < _entity.ColliderRadius)
+            float closestDistance = Vector2.Distance((dir * closestLength + _pos), _entity.Position);            
+            if (closestLength > 0 && closestDistance < _entity.ColliderRadius)
             {
+                float discriminant = MathF.Sqrt(_entity.ColliderRadius * _entity.ColliderRadius - closestDistance * closestDistance);
+                if(closestLength - discriminant > maxDist)
+                {
+                    return;
+                }
                 if (_getAll)
                 {
                     list.Add(_entity);
                 }
                 else
                 {
-                    float discriminant = MathF.Sqrt(_entity.ColliderRadius * _entity.ColliderRadius - closestDistance * closestDistance);
                     if (dist > closestLength - discriminant)
                     {
                         dist = closestLength - discriminant;

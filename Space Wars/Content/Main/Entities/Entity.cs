@@ -10,6 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UILib.Content.Main;
+using System.Diagnostics;
 
 namespace Space_Wars.Content.Main.Entities;
 
@@ -36,7 +37,7 @@ public class Entity : IMissionComponent
     public bool ChildEnemy { get { return GetComponent<IsChild>().ChildEnemy; } set { GetComponent<IsChild>().ChildEnemy = value; } }
     public ParticleEmitter EnemyRange => GetComponent<FollowEmitter>().ParticleEmitter;
     public Statuses Statuses => GetComponent<Statuses>();
-    public Vector2 Size => GetComponent<Sprite>().Size;
+    public Vector2 Size => (GetComponent<Sprite>()?.Size)??Vector2.Zero;
     public virtual float ColliderRadius => GetComponent<Sprite>().ColliderRadius;
     public int Damage => GetComponent<Attack>().Damage;
     protected static Player Player => Engine.SaveGame.Player;
@@ -5343,6 +5344,7 @@ public class FlameBolt : Entity
     float maxTimeLeft;
     float temp;
     private ParticleEmitter emitter;
+    private ParticleEmitter collider = new ParticleEmitter(Assets.Get(Sprites.Dot), Vector2.Zero, 0, Color.Yellow) { isEmitterActive = false };
     private List<(Entity entity, float cd)> struckEntities = [];
     public override float ColliderRadius
     {
@@ -5357,7 +5359,7 @@ public class FlameBolt : Entity
             {
                 return emitter.particleVelocity;
             }
-            return Math.Min((maxTimeLeft - TimeLeft) * emitter.particleVelocity, emitter.particleVelocity * emitter.particleTimeAlive) * 60;
+            return Math.Min(maxTimeLeft - TimeLeft, emitter.particleTimeAlive) * 60 * emitter.particleVelocity;
         }
     }
     public FlameBolt(Vector2 _position, Vector2 _velocity, Team _team, int _damage, float _timeLeft = 0.7f, float _particleVelocity = 1, int _stealth = 0, float _temp = 10)
@@ -5381,9 +5383,8 @@ public class FlameBolt : Entity
     public FlameBolt(Vector2 _position, Vector2 _velocity, Team _team, int _damage, ParticleEmitter _emitter, float _timeLeft = 0.7f, int _stealth = 0, float _temp = 10)
         : base(_position, _velocity, 0, 0)
     {
-        AddComponent(new Stealth(this) { SensingAbility = 99 });
+        AddComponent(new Stealth(this) { SensingAbility = 99, StealthAbility = _stealth });
         AddComponent(new Temp(this));
-        StealthAbility = _stealth;
         AddComponent(new Friendly(this) { Team = _team });
         AddComponent(new ExpireTimer(this) { TimeLeft = _timeLeft });
         AddComponent(new Attack(this) { Damage = _damage });
@@ -5398,6 +5399,10 @@ public class FlameBolt : Entity
     }
     public override void Update()
     {
+        collider.position = Position;
+        collider.isEmitterActive = SaveGame.DebugMode;
+        collider.particleVelocity = ColliderRadius;
+        collider.Update();
         base.Update();
         emitter.position = Position;
         emitter.offsetVelocity = Velocity;
@@ -5418,7 +5423,7 @@ public class FlameBolt : Entity
         struckEntities = [.. struckEntities.Where(x => x.cd > 0)];
         foreach (var nearestEnemy in Engine.SaveGame.CurrentMission.Entities)
         {
-            if (!(nearestEnemy.GetComponent<Health>() != null || nearestEnemy is Player) || IsFriendly == nearestEnemy.IsFriendly)
+            if (!(nearestEnemy.HasComponent<Health>() || nearestEnemy is Player) || nearestEnemy.IsFriendly(this))
             {
                 continue;
             }

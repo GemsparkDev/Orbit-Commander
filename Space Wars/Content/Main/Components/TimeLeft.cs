@@ -11,6 +11,7 @@ internal class ExpireTimer(Entity _entity) : Component(_entity)
         TimeLeft -= Engine.DeltaSeconds;
         if (TimeLeft <= 0)
         {
+            TimeLeft = 0;
             Sprite sprite = Entity.GetComponent<Sprite>();
             Transform transform = Entity.GetComponent<Transform>();
             if (sprite != null && transform != null)

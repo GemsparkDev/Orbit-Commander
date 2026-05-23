@@ -160,7 +160,7 @@ public static class UI
     public static int type = 1;
     public static readonly Vector2[] resolutions = [new Vector2(1920, 1080), new Vector2(640, 480)];
     public static int selectedResolution = 0;
-    public static readonly Modules[] setModules = [Modules.Ablative, Modules.Basic, Modules.Plasma, Modules.Sensors, Modules.GrapplingHook];
+    public static readonly Modules[] setModules = [Modules.Ablative, Modules.Flamethrower, Modules.Plasma, Modules.Sensors, Modules.GrapplingHook];
 
     //Hack menu
     public static Button HackButton { get; } = new Button(Vector2.Zero, Assets.Get(Sprites.Button), Assets.TextFont, "Hack", Color.Yellow);
@@ -168,7 +168,6 @@ public static class UI
 
     //Restart Terminal
     public static Decal DeadFile { get; } = new Decal(new Vector2(-10, 0), Assets.Get(Sprites.DeadFile));
-
     public static Button EscapeButton { get; } = new Button(Vector2.Zero, Assets.Get(Sprites.Button), Assets.TextFont, "Escape!", Color.White);
 
     public static void AddUIElements()
@@ -491,12 +490,13 @@ public static class UI
                     {
                         setModules[module] = nextModule;
                     }
+                    EventHandler.SetModules();
                 });
             MainMenu.AddWidget((PrevModule[i] = new Button(new Vector2(-120, 25 * i - 40), Assets.Get(Sprites.Button), Assets.TextFont, $"Prev", Color.White)), 2);
             PrevModule[i].AddBehaviour(
                 delegate () 
                 {
-                    if(Self.LoadingStage != LoadingStage.Complete)
+                    if (Self.LoadingStage != LoadingStage.Complete)
                     {
                         return;
                     }
