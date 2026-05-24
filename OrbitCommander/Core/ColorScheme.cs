@@ -1,0 +1,36 @@
+﻿using Microsoft.Xna.Framework;
+using OrbitCommander.Components;
+using System.Collections.Generic;
+
+namespace OrbitCommander.Core;
+public abstract class ColorScheme
+{
+    public abstract Color Background();
+    public Dictionary<Team, Color> TeamColors { get; protected set; } = [];
+    public abstract Color Environment();
+    public abstract bool IsOutlined();
+}
+public class StandardScheme : ColorScheme
+{
+    public override Color Background() { return Color.Black; }
+    public override Color Environment() { return Color.Cyan; }
+    public override bool IsOutlined() { return false; }
+    public StandardScheme()
+    {
+        TeamColors.Add(Team.Friendly, new Color(0f, 1f, 0f));
+        TeamColors.Add(Team.Hostile, Color.Red);
+        TeamColors.Add(Team.Dead, Color.Gray);
+    }
+}
+public class FinaleScheme : ColorScheme
+{
+    public override Color Background() { return Color.White; }
+    public override Color Environment() { return Color.Gray; }
+    public override bool IsOutlined() { return true; }
+    public FinaleScheme()
+    {
+        TeamColors.Add(Team.Friendly, Color.Black);
+        TeamColors.Add(Team.Hostile, Color.Red);
+        TeamColors.Add(Team.Dead, Color.Gray);
+    }
+}
