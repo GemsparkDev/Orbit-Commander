@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using OrbitCommander.Core;
 
 namespace OrbitCommander.Components;
-public class Friendly(Entity _entity) : Component()
+public class Friendly(Entity _entity) : IComponent
 {
     public Team Team { get; set; }
     public static Team[] Blacklist(Team _team)
@@ -15,7 +15,7 @@ public class Friendly(Entity _entity) : Component()
         teams.Remove(_team);
         return [.. teams];
     }
-    public override void Draw(SpriteBatch _spriteBatch)
+    public void Draw(SpriteBatch _spriteBatch)
     {
         Vector2 halfSize = Engine.BackBuffer / 2;
         if (!_entity.HasComponent<IsChild>() && Engine.SaveGame.Player.Team == Team &&

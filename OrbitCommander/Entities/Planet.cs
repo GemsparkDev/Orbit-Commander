@@ -12,6 +12,14 @@ public class Planet : Entity, ICollider
     public override float ColliderRadius { get; }
     public bool EasterEgg { get; set; } = false;
     public override Color Color { get; set; }
+    public override void ApplyWork(float _q)
+    {
+        return;
+    }
+    public override void ConductHeat(float _temp, float _rate)
+    {
+        return;
+    }
 
     public Planet(Vector2 _position, Vector2 _velocity, float _mass, float _radius, bool _isImmovable, Color _color)
         : base(_position, _velocity, 0, 0)
@@ -22,7 +30,7 @@ public class Planet : Entity, ICollider
         Color = _color;
         AddComponent(new Temp());
         AddComponent(new StationaryEmitter(this) { ParticleEmitter = new ParticleEmitter(Assets.Get(Sprites.Dot), 10, Position, 0, 0, 0, 10f, _color * 0.5f, EmitterType.EmissionOverDistance) { particleFadeToColor = Color.Transparent } });
-        AddComponent(new FollowEmitter(this) { IsDebug = false, ParticleEmitter = new ParticleEmitter(Assets.Get(Sprites.Dot), Position, ColliderRadius, Color) });
+        AddComponent(new Circle(this, ColliderRadius));
     }
     public Vector2 GetAcceleration(Vector2 _position)
     {
@@ -54,7 +62,7 @@ public class Planet : Entity, ICollider
             var frictionVector = new Vector2(normalVector.Y, -normalVector.X);
             var relativeVelocity = Velocity - _entity.Velocity;
             int collisionForce = (int)Math.Floor(relativeVelocity.Length() / 2);
-            if (_entity as Pickup == null && (collisionForce > 5 || _entity.GetComponent<Attack>() != null))
+            if (_entity as Pickup == null && (collisionForce > 5 || _entity.HasComponent<Attack>()))
             {
                 _entity.Collide(collisionForce);
             }

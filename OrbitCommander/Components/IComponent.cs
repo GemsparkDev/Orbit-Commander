@@ -2,7 +2,7 @@
 
 namespace OrbitCommander.Components;
 
-public abstract class Component()
+public interface IComponent
 {
     public virtual void Update() { }
     public virtual void Draw(SpriteBatch _spriteBatch) { }

@@ -1,5 +1,5 @@
 namespace OrbitCommander.Components;
-internal class IsChild() : Component
+internal class IsChild() : IComponent
 {
     public bool ChildEnemy { get; set; } = false;
 }

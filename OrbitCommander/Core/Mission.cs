@@ -210,7 +210,7 @@ public class Mission
             new DropSpawner(1500));}),
 
         (new("Ice giant", "The unusual conditions in this system have resulted in unique developments in the enemies technology.\nBe prepared for advanced enemy cloaking.", 0, [15], 2, 2000),
-        delegate(){var p = new Planet(Vector2.Zero, Vector2.Zero, 10000, 3, true, new Color(41, 144, 181)){ Temperature = -20 };
+        delegate(){var p = new Planet(Vector2.Zero, Vector2.Zero, 10000, 3, true, new Color(41, 144, 181)) { Temperature = -20 };
             return new([
             p.AddComponent(new Atmosphere(p, 15, 10000) { IsSun = true }),
             new WaveSpawner(T2, 1f, false),], 
@@ -589,7 +589,7 @@ public class Mission
         }
         return returnProjectile;
     }
-    public Entity[] GetEntities<T>() where T : Component
+    public Entity[] GetEntities<T>() where T : IComponent
     {
         return [.. Entities.Where(x => x.HasComponent<T>())];
     }

@@ -5,7 +5,7 @@ using System;
 using OrbitCommander.Core;
 
 namespace OrbitCommander.Components;
-public class Mineable(Entity _entity) : Component()
+public class Mineable(Entity _entity) : IComponent
 {
     public float MineTime { get; set; } = 0;
     public void Mine(float _maxHealth)

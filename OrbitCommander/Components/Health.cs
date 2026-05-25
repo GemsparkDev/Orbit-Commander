@@ -5,14 +5,14 @@ using System;
 using OrbitCommander.Core;
 
 namespace OrbitCommander.Components;
-internal class Health(Entity _entity) : Component()
+internal class Health(Entity _entity) : IComponent
 {
     private int currentHealth;
     private int prevHealth;
     public int CurrentHealth { get => currentHealth; set { if (prevHealth <= currentHealth) { prevHealth = currentHealth; } healthCD = 0.5f; currentHealth = value; } }
     public int MaxHealth { get; set; }
     private float healthCD = 0;
-    public override void Update()
+    public void Update()
     {
         if (currentHealth > MaxHealth)
         {
@@ -45,7 +45,7 @@ internal class Health(Entity _entity) : Component()
             _entity.GetComponent<Sprite>().TargetColor = SaveGame.ColorScheme.TeamColors[_entity.Team] * d; //Sets color based on friendlyness
         }
     }
-    public override void Draw(SpriteBatch _spriteBatch)
+    public void Draw(SpriteBatch _spriteBatch)
     {
         var stealth = _entity.GetComponent<Stealth>();
         float val = 1;

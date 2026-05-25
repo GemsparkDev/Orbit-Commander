@@ -10,7 +10,6 @@ using System.Collections.Generic;
 using UILib.Content;
 
 namespace OrbitCommander.Core;
-
 public static class CurrentGameState
 {
     private static GameState currentGameState;
@@ -74,8 +73,8 @@ public abstract class GameState
 public class MainMenu : GameState
 {
     private float time = MathF.PI;
-    private Planet menuPlanet = new(new Vector2(0, 750), Vector2.Zero, 5000, 9, true, Color.Cyan);
-    private Planet moonPlanet = new(new Vector2(0, 0), Vector2.Zero, 750, 1.5f, true, Color.Cyan);
+    private Planet menuPlanet = new Planet(new Vector2(0, 750), Vector2.Zero, 5000, 9, true, Color.Cyan);
+    private Planet moonPlanet = new Planet(new Vector2(0, 1750), Vector2.Zero, 750, 1.5f, true, Color.Cyan);
     private ParticleEmitter smokeParticles = new(Assets.Get(Sprites.Circle), 1f, new Vector2(0, 300 - Assets.DimsOf(Sprites.Mothership).Y + 10), 0, MathF.PI / 4, 1, 40, Color.Gray, EmitterType.EmissionOverTime)
     { particleFadeToColor = new Color(169, 169, 169, 0), probability = 0.25f };
     public override void Initialize()
@@ -89,8 +88,7 @@ public class MainMenu : GameState
         float d = 1000;
         time += MathF.Sqrt(5000 / d) / d * Engine.DeltaSeconds * 60;
         moonPlanet.Position = Util.ToUnitVector(time) * d + new Vector2(0, 750);
-        menuPlanet.GetComponent<FollowEmitter>().Update();
-        moonPlanet.GetComponent<FollowEmitter>().Update();
+        moonPlanet.GetComponent<StationaryEmitter>().Update();
         smokeParticles.Update();
         ParticleManager.Update();
         if (time > MathF.Tau)

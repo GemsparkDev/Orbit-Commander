@@ -7,7 +7,7 @@ using OrbitCommander.Core;
 //using System.Numerics;
 
 namespace OrbitCommander.Components;
-public class Sprite(Entity _entity, Color _color) : Component
+public class Sprite(Entity _entity, Color _color) : IComponent
 {
     private Texture2D texture;
     private ParticleEmitter collider;
@@ -30,7 +30,7 @@ public class Sprite(Entity _entity, Color _color) : Component
     {
         get { return Texture == null ? Vector2.Zero : new Vector2(Texture.Width, Texture.Height); }
     }
-    public override void Update()
+    public void Update()
     {
         collider.position = _entity.Position;
         collider.isEmitterActive = SaveGame.DebugMode;
@@ -42,7 +42,7 @@ public class Sprite(Entity _entity, Color _color) : Component
             Color = new Color((byte)(_entity.Color.R * l + TargetColor.R * (1f - l)), (byte)(_entity.Color.G * l + TargetColor.G * (1f - l)), (byte)(_entity.Color.B * l + TargetColor.B * (1f - l)), TargetColor.A); //Lerp towards ideal color
         }
     }
-    public override void Draw(SpriteBatch _spriteBatch)
+    public void Draw(SpriteBatch _spriteBatch)
     {
         Vector2 halfSize = (Engine.BackBuffer + Size) / 2;
         Vector2 pos = Engine.Camera.Position + Engine.MousePositionOffset;

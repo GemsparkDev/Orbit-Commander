@@ -3,11 +3,11 @@ using OrbitCommander.Particles;
 using OrbitCommander.Core;
 
 namespace OrbitCommander.Components;
-internal class FollowEmitter(Entity _entity) : Component()
+internal class FollowEmitter(Entity _entity) : IComponent
 {
     public ParticleEmitter ParticleEmitter { get; set; }
     public bool IsDebug { get; set; } = true;
-    public override void Update()
+    public void Update()
     {
         var comp = _entity.GetComponent<Health>();
         if (IsDebug && comp != null && comp.CurrentHealth > 0)
@@ -19,10 +19,10 @@ internal class FollowEmitter(Entity _entity) : Component()
         ParticleEmitter.Update();
     }
 }
-internal class StationaryEmitter(Entity _entity) : Component()
+internal class StationaryEmitter(Entity _entity) : IComponent
 {
     public ParticleEmitter ParticleEmitter { get; set; }
-    public override void Update()
+    public void Update()
     {
         ParticleEmitter.position = _entity.Position;
         ParticleEmitter.Update();

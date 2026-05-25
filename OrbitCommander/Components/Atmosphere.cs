@@ -6,7 +6,7 @@ using OrbitCommander.Particles;
 using System;
 
 namespace OrbitCommander.Components;
-public class Atmosphere : Component
+public class Atmosphere : IComponent
 {
     private Texture2D atmosphere;
     private float atmosphereStrength;
@@ -20,7 +20,7 @@ public class Atmosphere : Component
         Entity = _entity;
         atmosphere = Engine.Self.RenderAtmosphere(AtmosphereRadius(), _atmosphereStrength, Entity.ColliderRadius, Entity.Color, this);
     }
-    public override void Update()
+    public void Update()
     {
         foreach (var _entity in Engine.SaveGame.CurrentMission.Entities)
         {
@@ -77,7 +77,7 @@ public class Atmosphere : Component
         }
         _entity.Velocity += acceleration * Engine.DeltaSeconds * 60;
     }
-    public override void Draw(SpriteBatch _spriteBatch)
+    public void Draw(SpriteBatch _spriteBatch)
     {
         _spriteBatch.Draw(atmosphere, Entity.Position, null, Color.White, 0, new Vector2(atmosphere.Width / 2, atmosphere.Height / 2), 1, 0, 0);
     }

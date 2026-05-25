@@ -5,11 +5,11 @@ using System;
 using OrbitCommander.Core;
 
 namespace OrbitCommander.Components;
-public class Ring(Entity _entity) : Component
+public class Ring(Entity _entity) : IComponent
 {
     public float Offset { get; set; }
     public float Mass { get; set; }
-    public override void Draw(SpriteBatch _spriteBatch)
+    public void Draw(SpriteBatch _spriteBatch)
     {
         int randomAngle = 3;
         float r = _entity.ColliderRadius + Offset;

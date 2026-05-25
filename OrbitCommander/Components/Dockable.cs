@@ -4,7 +4,7 @@ using UILib.Content;
 using OrbitCommander.Core;
 
 namespace OrbitCommander.Components;
-public class Dockable(Entity _entity, Container _menu, bool hasInventory = true) : Component()
+public class Dockable(Entity _entity, Container _menu, bool hasInventory = true) : IComponent
 {
     public bool IsDocked { get; private set; } = false;
     public Container Menu { get; private set; } = _menu;

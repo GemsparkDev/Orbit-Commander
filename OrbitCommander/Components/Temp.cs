@@ -1,6 +1,6 @@
 using OrbitCommander.Core;
 namespace OrbitCommander.Components;
-internal class Temp() : Component()
+public class Temp : IComponent
 {
     public float Temperature { get; set; } = 0; //-1: Freeze, 0: Neutral, 1: Burn
     public void ApplyWork(float _q)

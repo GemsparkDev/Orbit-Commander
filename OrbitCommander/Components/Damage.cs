@@ -1,6 +1,6 @@
 ﻿namespace OrbitCommander.Components;
 //Currently used as a projectile tag standin
-internal class Attack() : Component()
+internal class Attack : IComponent
 {
     public int Damage { get; set; }
 }

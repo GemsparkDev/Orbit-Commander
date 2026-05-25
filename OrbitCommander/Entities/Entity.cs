@@ -42,11 +42,11 @@ public class Entity : IMissionComponent
     public int Damage => GetComponent<Attack>().Damage;
     protected static Player Player => Engine.SaveGame.Player;
     public bool IsFriendly(Entity _entity) => _entity.GetComponent<Friendly>()?.Team == GetComponent<Friendly>().Team;
-    public void ApplyWork(float _q)
+    public virtual void ApplyWork(float _q)
     {
         GetComponent<Temp>()?.ApplyWork(_q);
     }
-    public void ConductHeat(float _temp, float _rate)
+    public virtual void ConductHeat(float _temp, float _rate)
     {
         GetComponent<Temp>()?.ConductHeat(_temp, _rate);
     }
@@ -96,7 +96,7 @@ public class Entity : IMissionComponent
         }
     }
     public bool isExpired = false;
-    private Dictionary<Type, Component> components = [];
+    private Dictionary<Type, IComponent> components = [];
     public Entity(Vector2 _position, Vector2 _velocity, float _angle, float _angularVelocity)
     {
         Transform = new Transform() { Position = _position, Velocity = _velocity, Angle = _angle, AngularVelocity = _angularVelocity };
@@ -166,7 +166,7 @@ public class Entity : IMissionComponent
     }
     public virtual void Update()
     {
-        Component compLog = null;
+        IComponent compLog = null;
         try
         {
             foreach (var comp in components)
@@ -182,20 +182,20 @@ public class Entity : IMissionComponent
             isExpired = true; //Entity is likely invalid
         }
     }
-    public bool HasComponent<T>() where T : Component
+    public bool HasComponent<T>() where T : IComponent
     {
         return components.ContainsKey(typeof(T));
     }
-    public T GetComponent<T>() where T : Component
+    public T GetComponent<T>() where T : IComponent
     {
-        components.TryGetValue(typeof(T), out Component comp);
+        components.TryGetValue(typeof(T), out IComponent comp);
         return (T)comp;
     }
-    public bool RemoveComponent<T>() where T : Component
+    public bool RemoveComponent<T>() where T : IComponent
     {
         return components.Remove(typeof(T));
     }
-    public Entity AddComponent<T>(T component) where T : Component
+    public Entity AddComponent<T>(T component) where T : IComponent
     {
         components.Add(typeof(T), component);
         return this;
@@ -5352,6 +5352,11 @@ public class FlameBolt : Entity
             particlesExperienceGravity = true,
             offsetVelocity = Velocity
         };
+        AddComponent(new Collide(this, delegate (int _damage, bool _ignoreImmunity)
+        {
+            isExpired = true;
+            return true;
+        }));
         maxTimeLeft = _timeLeft;
         temp = _temp;
     }

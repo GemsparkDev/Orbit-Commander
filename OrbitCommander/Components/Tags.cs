@@ -1,4 +1,4 @@
 ﻿namespace OrbitCommander.Components;
-public class SpecializedTag() : Component { }
-internal class KeyTag() : Component { }
-internal class MissileTag : Component { }
+public class SpecializedTag : IComponent { }
+internal class KeyTag : IComponent { }
+internal class MissileTag : IComponent { }

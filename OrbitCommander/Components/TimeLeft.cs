@@ -4,10 +4,10 @@ using OrbitCommander.Particles;
 using OrbitCommander.Core;
 
 namespace OrbitCommander.Components;
-internal class ExpireTimer(Entity _entity) : Component()
+internal class ExpireTimer(Entity _entity) : IComponent
 {
     public float TimeLeft { get; set; }
-    public override void Update()
+    public void Update()
     {
         TimeLeft -= Engine.DeltaSeconds;
         if (TimeLeft <= 0)

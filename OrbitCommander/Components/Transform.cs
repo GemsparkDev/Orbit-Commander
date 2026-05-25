@@ -4,14 +4,14 @@ using System;
 using OrbitCommander.Core;
 
 namespace OrbitCommander.Components;
-public class Transform : Component
+public class Transform : IComponent
 {
     public bool IsImmovable = false;
     public Vector2 Position { get; set; } = Vector2.Zero;
     public Vector2 Velocity { get; set; } = Vector2.Zero;
     public float Angle { get; set; } = 0;
     public float AngularVelocity { get; set; } = 0;
-    public override void Update()
+    public void Update()
     {
         if (float.IsNaN(Velocity.X + Velocity.Y))
         {
@@ -34,7 +34,7 @@ public class Transform : Component
             AngularVelocity = 0;
         }
     }
-    public override void Draw(SpriteBatch _spriteBatch)
+    public void Draw(SpriteBatch _spriteBatch)
     {
         if (SaveGame.DebugMode)
         {

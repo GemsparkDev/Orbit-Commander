@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 
 namespace OrbitCommander.Components;
-internal class Behaviour() : Component()
+internal class Behaviour : IComponent
 {
     private List<IEnumerator<int>> behaviours = [];
     public Behaviour AddBehaviour(IEnumerable<int> behaviour)
@@ -9,7 +9,7 @@ internal class Behaviour() : Component()
         behaviours.Add(behaviour.GetEnumerator());
         return this;
     }
-    public override void Update()
+    public void Update()
     {
         for (int i = 0; i < behaviours.Count; i++)
         {

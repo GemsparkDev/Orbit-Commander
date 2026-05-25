@@ -6,12 +6,12 @@ using System.Linq;
 using OrbitCommander.Core;
 
 namespace OrbitCommander.Components;
-public class Statuses(Entity _entity) : Component()
+public class Statuses(Entity _entity) : IComponent
 {
     List<Status> effects = [];
     public int StealthChange { get; private set; }
     public int SensingChange { get; private set; }
-    public override void Update()
+    public void Update()
     {
         StealthChange = 0;
         SensingChange = 0;

@@ -2,7 +2,7 @@
 using OrbitCommander.Core;
 
 namespace OrbitCommander.Components;
-public class Stealth(Entity _entity) : Component
+public class Stealth(Entity _entity) : IComponent
 {
     private int stealthAbility = 0;
     public int TrueStealth => stealthAbility;
@@ -18,7 +18,7 @@ public class Stealth(Entity _entity) : Component
         set => sensingAbility = value;
     }
     public float RevealDuration { get; set; } = 0;
-    public override void Update()
+    public void Update()
     {
         if (RevealDuration > 0)
         {

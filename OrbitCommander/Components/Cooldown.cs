@@ -2,10 +2,10 @@
 using OrbitCommander.Core;
 
 namespace OrbitCommander.Components;
-internal class Cooldown() : Component()
+internal class Cooldown : IComponent
 {
     public List<float> Cooldowns { get; set; } = [];
-    public override void Update()
+    public void Update()
     {
         for (int i = 0; i < Cooldowns.Count; i++)
         {
