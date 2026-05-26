@@ -354,7 +354,7 @@ public class Player : Entity
                     else
                     {
                         comp = new Colliders(delegate () { return [new LineCollider(startLocation, mousePos)]; });
-                        Engine.SaveGame.CurrentMission.AddComponent(comp);
+                        Engine.SaveGame.CurrentMission.Add(comp);
                     }
                     startLocation = Vector2.Zero;
                 }

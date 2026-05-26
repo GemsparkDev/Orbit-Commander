@@ -214,7 +214,6 @@ public class MissionSelect : GameState
     public override void Initialize()
     {
         Engine.UIManager.ScreenWindow.enabled = false;
-        Engine.Camera.Position = Vector2.Zero;
         Engine.MousePositionOffset = Vector2.Zero;
         ParticleManager.Initialize();
         Events.UpdateModulesUI();

@@ -132,10 +132,12 @@ public class Planet : Entity, ICollider
         }
         else
         {
-            if (Util.Random.NextSingle() > Util.FIED(0.0002f))
-            {
-                _particle.Velocity = Velocity;
-            }
+            float hash = (float)(_particle.GetHashCode()) / 10000;
+            float min = 0.5f;
+            float max = 0.95f;
+            float lerp = MathF.Sqrt(hash - MathF.Truncate(hash)) * (max - min) + min;
+            _particle.Velocity = Velocity * (1 - lerp) + _particle.Velocity * (lerp);
+            _particle.AngularVelocity = _particle.AngularVelocity * lerp;
             return Vector2.Zero;
         }
     }

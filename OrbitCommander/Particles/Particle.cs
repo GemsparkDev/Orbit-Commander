@@ -15,13 +15,13 @@ namespace OrbitCommander.Particles
         private Texture2D texture;
         public Vector2 Position { get; set; }
         public Vector2 Velocity { get; set; }
+        private float angle;
+        public float AngularVelocity { get; set; }
         private Color color;
         private Color renderColor;
         private Color fadeToColor;
         private float timeLeft;
         private float originalTimeLeft;
-        private float angle;
-        private float angularVelocity;
         public Particle(Texture2D _texture, float _timeLeft, Vector2 _position, Vector2 _velocity, float _angle, float _angularVelocity, Color _color, Color _fadeToColor)
         {
             texture = _texture;
@@ -29,7 +29,7 @@ namespace OrbitCommander.Particles
             Position = _position;
             Velocity = _velocity;
             angle = _angle;
-            angularVelocity = _angularVelocity;
+            AngularVelocity = _angularVelocity;
             color = _color;
             fadeToColor = _fadeToColor;
             originalTimeLeft = _timeLeft;
@@ -41,7 +41,7 @@ namespace OrbitCommander.Particles
             Position = _position;
             Velocity = Vector2.Zero;
             angle = _angle;
-            angularVelocity = 0;
+            AngularVelocity = 0;
             color = _color;
             fadeToColor = Color.White;
             originalTimeLeft = timeLeft;
@@ -61,7 +61,7 @@ namespace OrbitCommander.Particles
             }
             timeLeft -= Engine.DeltaSeconds;
             Position += Velocity * Engine.DeltaSeconds * 60;
-            angle += angularVelocity * Engine.DeltaSeconds * 60;
+            angle += AngularVelocity * Engine.DeltaSeconds * 60;
         }
         public void Draw(SpriteBatch _spriteBatch)
         {

@@ -3,6 +3,14 @@
 Lagrange Commander is a game made using C# in monogame. It is a 2D top down wave based shooter where you must repair and upgrade your ship by salvaging from enemies you defeat. It features realistic N-Body gravitation, which affects all entities and projectiles.
   
 # Changelog
+0.8.5.1 - 5/25/2026
+ - Fixed entities without health components showing on the radar.
+ - Fixed the camera not starting on the player.
+ - Fixed a crash caused by adding components while iterating for the mission.
+ - Fixed planets not stopping particle angular rotation.
+ - Fixed the player taking damage when in the drop pod.
+ - Moved a variety of static functions to their own file to save space.
+ - Tweaked planet particle stopping to be smoother.
 0.8.5.0 - 5/24/2026
  - Fixed the flamethrower not properly expiring when damaging enemy planets.
  - Fixed planets changing their temperature improperly.
@@ -12,22 +20,22 @@ Lagrange Commander is a game made using C# in monogame. It is a 2D top down wave
  - Overhauled file locations and namespaces.
  - Added the Smelt component.
  - Pickups without a smelt component cannot be smelted.
- - Fixed an issue where particles persisted between game states.
+ - Fixed particles persisting between game states.
 0.8.4.8 - 5/22/2026
- - Fixed an issue where the module selector didn't properly update.
- - Fixed an issue where raycast weapons didn't hit planet enemies.
- - Fixed an issue where flamethrowers hit everything on the map.
+ - Fixed the module selector not properly updating.
+ - Fixed raycast weapons not hitting planet enemies.
+ - Fixed flamethrowers hitting everything on the map.
 0.8.4.7 - 5/21/2026
- - Fixed an issue where damaged hull modules with special UI flickered.
+ - Fixed damaged hull modules flickering special UI.
 0.8.4.6 - 5/20/2026
  - The Spiral weapon is now a shotgun.
  - Spiral shots now have a trail.
- - Fixed an issue where planets had an extra pip on their surface.
+ - Fixed planet having an extra pip on their surface.
  - Tweaked the Pulse Shot trail slightly.
  - Optimized component lookup speed.
 0.8.4.5 - 5/19/2026
  - Pulse shot now has a trail.
- - Fixed an issue with EmitterOverDistance combined with orthogonal offsetVelocity.
+ - Fixed EmitterOverDistance combined with orthogonal offsetVelocity.
 0.8.4.4 - 5/18/2026
  - Added shrinking particles.
 0.8.4.3 - 5/17/2026
@@ -55,7 +63,7 @@ Lagrange Commander is a game made using C# in monogame. It is a 2D top down wave
  - Fixed an issue where grappling hooks didn't properly disable.
  - Begun work on fixing grappling hooks not following planets.
 0.8.3.2 - 5/6/2026
- - Fixed an issue where planets only rendered when debug mode was enabled.
+ - Fixed planets only rendering when debug mode was enabled.
 0.8.3.1 - 5/5/2026
  - Added a ring component.
 0.8.3.0 - 5/4/2026

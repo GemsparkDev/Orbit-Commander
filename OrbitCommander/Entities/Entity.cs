@@ -3855,7 +3855,7 @@ public class Entity : IMissionComponent
                 SoundManager.PlaySound(Assets.Get(Sound.Beep), Position);
                 ParticleManager.Add(new Particle(null, 5, Position + new Vector2(0, -30), Velocity, Angle, 0, Color.Red, Color.Transparent) { drawText = "Alert: Enemies detected.\nDefend the mothership." });
                 var comp = new WaveSpawner(Mission.T1, 1, false);
-                Engine.SaveGame.CurrentMission.AddComponent(comp);
+                Engine.SaveGame.CurrentMission.Add(comp);
                 comp.Initialize();
                 alert = true;
             }
@@ -4074,11 +4074,12 @@ public class Entity : IMissionComponent
         enemy.AddComponent(new Dockable(enemy, null));
         enemy.GetComponent<Collide>().OnCollide = delegate (int _damage, bool _override)
         {
-            if (_damage > 0)
-            {
-                enemy.isExpired = true;
-            }
-            return enemy.isExpired;
+            enemy.Velocity = Vector2.Zero;
+            Util.Explode(enemy.Position, enemy.Velocity, 0, 0);
+            enemy.GetComponent<Dockable>().Dock(Engine.SaveGame.Player, false);
+            Engine.SaveGame.Player.Velocity = Vector2.Zero;
+            enemy.isExpired = true;
+            return true;
         };
         return enemy;
     }

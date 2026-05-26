@@ -111,7 +111,13 @@ internal class WaveSpawner : IMissionComponent
             waveTimer = 10f * TimerModifier;
             maxWaveTimer = waveTimer;
             Wave++;
-            Engine.SaveGame.CurrentMission.DecayPickups();
+            foreach (var pickup in Engine.SaveGame.CurrentMission.Entities)
+            {
+                if (pickup is Pickup && Util.Random.NextSingle() > 0.4f + Engine.SaveGame.CurrentMission.GetAtmospherePressure(pickup))
+                {
+                    pickup.Collide(4);
+                }
+            }
             if ((Wave - 1) % 20 == 0)
             {
                 SoundManager.ChangeTrack(Assets.Get(Sound.main));

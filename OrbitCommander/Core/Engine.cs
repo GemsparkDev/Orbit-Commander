@@ -1,18 +1,18 @@
 ﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using OrbitCommander.Components;
+using OrbitCommander.Entities;
+using OrbitCommander.MissionComponents;
+using OrbitCommander.Particles;
+using OrbitCommander.Story;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Diagnostics;
 using System.IO;
-using System.Threading.Tasks;
 using System.Linq;
-using OrbitCommander.Story;
+using System.Threading.Tasks;
 using UILib.Content;
-using OrbitCommander.Particles;
-using OrbitCommander.Entities;
-using OrbitCommander.Components;
 
 namespace OrbitCommander.Core;
 
@@ -295,102 +295,4 @@ public struct Timespan
     public readonly float Minutes => (int)(Duration / 60) % 60;
     public readonly float Hours => (int)(Duration / 3600);
     public readonly string DrawText => $"{Hours:00}:{Minutes:00}:{Seconds:00.00}";
-}
-public static class Util
-{
-    public static Random Random { get; } = new();
-    public static Vector2 ToUnitVector(float _angle)
-    {
-        return new Vector2(MathF.Sin(_angle), -MathF.Cos(_angle));
-    }
-    public static float Lerp(float _valueOne, float _valueTwo, float _length)
-    {
-        return _valueOne * (1 - _length) + _valueTwo * _length;
-    }
-    public static float ToAngle(Vector2 _direction)
-    {
-        //Rotated 90 degrees due to asset rotation
-        return MathF.Atan2(_direction.X, -_direction.Y);
-    }
-    public static float OneToNegOne()
-    {
-        return Random.NextSingle() * 2 - 1f;
-    }
-    //Frame independent exponential decay 
-    public static float FIED(float _decayPerSecond)
-    {
-        return MathF.Pow(_decayPerSecond, Engine.DeltaSeconds);
-    }
-    public static Vector2 RotateVector2(Vector2 v, float a)
-    {
-        float cos = MathF.Cos(a);
-        float sin = MathF.Sin(a);
-        return new Vector2(v.X * cos - v.Y * sin, v.X * sin + v.Y * cos);
-    }
-    public static float Cross(Vector2 v1, Vector2 v2)
-    {
-        return v1.X * v2.Y - v1.Y * v2.X;
-    }
-    public static Entity Nearest(Vector2 _position, Entity[] _entities)
-    {
-        return _entities.MinBy(x => Vector2.DistanceSquared(x.Position, _position));
-    }
-    public static void FiringParticles(Vector2 _position, Vector2 _velocity, Vector2 _direction)
-    {
-        for (int i = 0; i < 5; i++)
-        {
-            var color = Random.Next(0, 4) switch
-            {
-                0 => Color.Yellow,
-                1 => new Color(0.2f, 0.2f, 0.2f),
-                2 => Color.Wheat,
-                3 => Color.Orange,
-                _ => Color.White,
-            };
-            ParticleManager.Add(new Particle(Assets.Get(Sprites.Circle), 0.25f, _position - _velocity, _velocity + _direction * 2
-                + new Vector2(OneToNegOne(), OneToNegOne()) / 2 + _direction * (OneToNegOne() - 0.25f) * 1.5f, 0, 0, color, new Color(0.3f, 0.2f, 0.1f, 0f)));
-        }
-        ParticleManager.Add(new Particle(Assets.Get(Sprites.Dot), 60, _position - _velocity, _velocity
-            + new Vector2(_direction.Y + OneToNegOne() / 2, -_direction.X + OneToNegOne() / 4), 0, OneToNegOne() / 5, Color.Yellow, Color.Transparent)
-        { experienceGravity = true });
-    }
-    public static void Explode(Vector2 _position, Vector2 _velocity, int _damage, float _radius)
-    {
-        int particles = Random.Next(15, 25);
-        for (int i = 0; i < particles; i++)
-        {
-            float angle = Random.NextSingle() * MathF.PI * 2;
-            Vector2 particleVelocity = new Vector2(MathF.Cos(angle), MathF.Sin(angle)) * (Random.NextSingle() * 2 + 2);
-            ParticleManager.Add(new Particle(Assets.Get(Sprites.Dot), 0.25f, _position - _velocity, particleVelocity + _velocity, angle, 0, Color.Yellow, new Color(255, 0, 0, 0)));
-        }
-        particles = Random.Next(8, 16);
-        for (int i = 0; i < particles; i++)
-        {
-            float angle = Random.NextSingle() * MathF.PI * 2;
-            Vector2 particleVelocity = new Vector2(MathF.Cos(angle), MathF.Sin(angle)) * (Random.NextSingle() * 2 + 2);
-            ParticleManager.Add(new Particle(Assets.Get(Sprites.Circle), 0.25f, _position - _velocity, particleVelocity + _velocity, angle, 0, Color.DarkSlateGray, Color.Transparent));
-        }
-        Engine.SaveGame.CurrentMission.Explode(_damage, _radius, _position);
-        Engine.ShakeScreen(150 / ((_position - Engine.Camera.Position).Length() + 300));
-    }
-    public static Vector2 PredictEnemy(Entity nearestEnemy, Entity shooter, float speed, float offset = 0)
-    {
-        Vector2 d = nearestEnemy.Position - shooter.Position;
-        Vector2 v = nearestEnemy.Velocity - shooter.Velocity;
-        float cross = d.X * v.Y - d.Y * v.X;
-        float sinTheta = Math.Clamp(cross / (d.Length() * speed), -1, 1);
-        Vector2 vel = ToUnitVector(offset + ToAngle(d) + MathF.Asin(sinTheta));
-        return shooter.Velocity + vel * 12;
-    }
-    public static void Autosave()
-    {
-        string filePath = Path.Combine(Directory.GetCurrentDirectory(), $"Content\\Saves\\Save_{Engine.SaveSlot}.txt");
-        using var outputFile = new StreamWriter(filePath);
-        outputFile.WriteLine(Engine.SaveGame.Serialize());
-    }
-    public static void Save()
-    {
-        Autosave();
-        Events.QuitToMenu();
-    }
 }
