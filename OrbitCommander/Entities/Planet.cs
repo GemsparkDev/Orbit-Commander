@@ -137,7 +137,7 @@ public class Planet : Entity, ICollider
             float max = 0.95f;
             float lerp = MathF.Sqrt(hash - MathF.Truncate(hash)) * (max - min) + min;
             _particle.Velocity = Velocity * (1 - lerp) + _particle.Velocity * (lerp);
-            _particle.AngularVelocity = _particle.AngularVelocity * lerp;
+            _particle.AngularVelocity *= lerp;
             return Vector2.Zero;
         }
     }

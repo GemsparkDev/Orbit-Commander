@@ -267,7 +267,7 @@ public static class UI
         RepairSlot.AddBehaviour(Events.UpdateRepairText);
         FurnaceSlot.AddBehaviour(delegate()
         {
-            if(!FurnaceSlot.daughterItem.HasComponent<Smelt>())
+            if(FurnaceSlot.daughterItem != null && !FurnaceSlot.daughterItem.HasComponent<Smelt>())
             {
                 (FurnaceSlot.daughterItem, Engine.UIManager.selectedIcon) = (Engine.UIManager.selectedIcon as Pickup, FurnaceSlot.daughterItem as IData);
                 return;
@@ -334,6 +334,12 @@ public static class UI
         {
             SoundManager.PlayGlobalSound(Assets.Get(Sound.Interact));
             FuseMenu.enabled = false;
+            if(Engine.UIManager.selectedIcon is Fuse)
+            {
+                Engine.UIManager.selectedIcon = null;
+                FuseCounter.Count++;
+                Engine.SaveGame.Player.UpdateSpares();
+            }
         });
         PrevMission.AddBehaviour(delegate () { Engine.SaveGame.PrevMission(); }); //Do not remove outer delegate
         NextMission.AddBehaviour(delegate () { Engine.SaveGame.NextMission(); }); //Doing so causes exception due to null savegame

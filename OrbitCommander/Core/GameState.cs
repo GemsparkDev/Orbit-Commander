@@ -16,7 +16,10 @@ public static class CurrentGameState
     public static void SwitchState(GameState _gameState)
     {
         SoundManager.SetAllSounds(false);
-        ParticleManager.Initialize();
+        if(!_gameState.PersistentParticles)
+        {
+            ParticleManager.Initialize();
+        }
         currentGameState = _gameState;
         currentGameState.Initialize();
     }
@@ -32,6 +35,7 @@ public static class CurrentGameState
 }
 public abstract class GameState
 {
+    public virtual bool PersistentParticles { get; } = false;
     public virtual void Initialize() { }
     public abstract void Update();
     public abstract void Draw(SpriteBatch _spriteBatch);
@@ -106,6 +110,7 @@ public class MainMenu : GameState
 }
 public class PlayingGame : GameState
 {
+    public override bool PersistentParticles { get; } = true;
     public override void Initialize()
     {
         Engine.UIManager.ScreenWindow.enabled = true;
@@ -138,6 +143,7 @@ public class PlayingGame : GameState
 }
 public class PausedGame : GameState
 {
+    public override bool PersistentParticles { get; } = true;
     public override void Update()
     {
         if (Input.OldState.IsKeyUp(Keys.Escape) && Input.NewState.IsKeyDown(Keys.Escape))
@@ -162,7 +168,7 @@ public class Garage : GameState
     public override void Initialize()
     {
         Events.UpdateModulesUI();
-        Engine.UIManager.ScreenWindow.enabled = true;
+        Engine.UIManager.ScreenWindow.enabled = false;
     }
     public override void Update()
     {
@@ -220,6 +226,7 @@ public class MissionSelect : GameState
         Events.UpdateMissionText();
         Events.UpdateInventoryUI();
         Engine.DialogueManager.Clear();
+        Engine.Camera.Position = Vector2.Zero;
     }
     public override void Update()
     {
@@ -327,6 +334,7 @@ public class Victory : GameState
     public override void Initialize()
     {
         Engine.UIManager.ScreenWindow.enabled = false;
+        Engine.Camera.Position = Vector2.Zero;
     }
     public override void Update() { }
     public override void Draw(SpriteBatch _spriteBatch)
@@ -344,6 +352,7 @@ public class Cutscene(List<IEvent> _events, List<IActor> _actors, GameState _nex
     {
         time = 0;
         Engine.UIManager.ScreenWindow.enabled = false;
+        Engine.Camera.Position = Vector2.Zero;
     }
     public override void Update()
     {

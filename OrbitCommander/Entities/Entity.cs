@@ -3854,7 +3854,7 @@ public class Entity : IMissionComponent
             {
                 SoundManager.PlaySound(Assets.Get(Sound.Beep), Position);
                 ParticleManager.Add(new Particle(null, 5, Position + new Vector2(0, -30), Velocity, Angle, 0, Color.Red, Color.Transparent) { drawText = "Alert: Enemies detected.\nDefend the mothership." });
-                var comp = new WaveSpawner(Mission.T1, 1, false);
+                var comp = new WaveSpawner(Util.T1, 1, false);
                 Engine.SaveGame.CurrentMission.Add(comp);
                 comp.Initialize();
                 alert = true;
@@ -4076,7 +4076,7 @@ public class Entity : IMissionComponent
         {
             enemy.Velocity = Vector2.Zero;
             Util.Explode(enemy.Position, enemy.Velocity, 0, 0);
-            enemy.GetComponent<Dockable>().Dock(Engine.SaveGame.Player, false);
+            Engine.SaveGame.Player.Dock(false);
             Engine.SaveGame.Player.Velocity = Vector2.Zero;
             enemy.isExpired = true;
             return true;
@@ -4203,7 +4203,6 @@ public class Entity : IMissionComponent
             {
                 furnaceItem = UI.FurnaceSlot.daughterItem;
             }
-            var dockableComponent = GetComponent<Dockable>();
             if (furnaceItem != null)
             {
                 furnaceCooldown -= Engine.DeltaSeconds;
@@ -4238,9 +4237,9 @@ public class Entity : IMissionComponent
 
             Events.UpdateFurnaceUI(15f * tierBonus - furnaceCooldown, 15f * tierBonus, furnaceItem);
             Events.UpdateCraftingUI(12f * tierBonus - craftingCooldown, 12f * tierBonus, untilNextTier);
-            if (!dockableComponent.Entity.isExpired && dockableComponent.IsDocked)
+            if (Engine.SaveGame.Player.IsDocked)
             {
-                if (tier > 1 && Input.NewMouseState.LeftButton == ButtonState.Pressed && CD[0] <= 0 && !UIManager.LockMouseInput)
+                if (tier > 1 && Input.NewMouseState.LeftButton == ButtonState.Pressed && CD[0] <= 0)
                 {
                     var targetVector = Vector2.Normalize(new Vector2(Mouse.GetState().X, Mouse.GetState().Y) - Engine.BackBuffer / 2 - Position + Engine.Camera.Position);
                     targetAngle = MathF.Atan2(targetVector.X, -targetVector.Y);

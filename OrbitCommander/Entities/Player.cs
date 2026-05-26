@@ -40,6 +40,7 @@ public class Player : Entity
     private Vector2 startLocation = Vector2.Zero;
     public Vector2 Direction => targetVector;
     public Dockable dockedEntity;
+    public bool IsDocked => dockedEntity != null;
     public List<Pickup> leashedMaterials = [];
     private ParticleEmitter smokeParticles = new(Assets.Get(Sprites.Circle), 1f, Vector2.Zero, 0, MathF.PI / 4, 1, 0.5f, Color.Gray, EmitterType.EmissionOverTime) { isEmitterActive = false, particleFadeToColor = new Color(169, 169, 169, 0) };
     private SoundEffectInstance engineSounds;
@@ -260,7 +261,7 @@ public class Player : Entity
         base.Update();
         if (dockedEntity != null)
         {
-            if (!(dockedEntity == null) && !dockedEntity.Entity.isExpired)
+            if (IsDocked && !dockedEntity.Entity.isExpired)
             {
                 Position = dockedEntity.Entity.GetComponent<Transform>().Position;
                 Velocity = dockedEntity.Entity.GetComponent<Transform>().Velocity;
@@ -533,7 +534,7 @@ public class Player : Entity
                         }
                     }
                 }
-                if (!UIManager.LockMouseInput && Input.NewMouseState.RightButton == ButtonState.Pressed)
+                if (Input.NewMouseState.RightButton == ButtonState.Pressed)
                 {
                     Vector2 targetDir = targetVector;
                     if (aimAssist)
@@ -565,7 +566,7 @@ public class Player : Entity
                         SoundManager.PlayGlobalSound(Assets.Get(Sound.OpenMenu));
                     }
                 }
-                if (Input.NewMouseState.RightButton == ButtonState.Released && Input.OldMouseState.RightButton == ButtonState.Pressed && !UIManager.LockMouseInput)
+                if (Input.NewMouseState.RightButton == ButtonState.Released && Input.OldMouseState.RightButton == ButtonState.Pressed)
                 {
                     SoundManager.PlayGlobalSound(Assets.Get(Sound.CloseMenu));
                     canGatherResources = false;
@@ -614,7 +615,7 @@ public class Player : Entity
                 {
                     Angle = Angle * 0.5f + Util.ToAngle(targetVector) * 0.5f;
                 }
-                if (Input.NewMouseState.LeftButton == ButtonState.Pressed && !UIManager.LockMouseInput)
+                if (Input.NewMouseState.LeftButton == ButtonState.Pressed)
                 {
                     foreach (var module in modules)
                     {
@@ -678,25 +679,67 @@ public class Player : Entity
         }
         return targetVector * _speed + Velocity;
     }
-    public void Dock(bool _withVelocity = true)
+    public bool Dock(bool _withVelocity = true)
     {
-        if (dockedEntity == null)
+        Dockable dockableEntity = Engine.SaveGame.CurrentMission.NearestDockableEntity(this);
+        if (dockableEntity == null || Vector2.DistanceSquared(Position, dockableEntity.Entity.Position) > 1250)
         {
-            Dockable dockableEntity = Engine.SaveGame.CurrentMission.NearestDockableEntity(this);
-            if (dockableEntity != null)
-            {
-                if (dockableEntity.Dock(this, _withVelocity))
-                {
-                    dockedEntity = dockableEntity;
-                    isEngineActive = false;
-                }
-            }
+            return false;
         }
-        else if (dockedEntity.Dock(this, _withVelocity))
+        Events.DisableDockingMenus();
+        if (dockedEntity != null)
         {
             dockedEntity = null;
             isEngineActive = false;
+            if (_withVelocity)
+            {
+                Velocity += new Vector2(0, -2);
+            }
+            SoundManager.PlayGlobalSound(Assets.Get(Sound.Undock));
+            if (Engine.UIManager.selectedIcon is Pickup pickup)
+            {
+                Engine.UIManager.selectedIcon = null;
+                Events.UpdateInventoryUI();
+                pickup.isExpired = false;
+                pickup.Position = dockableEntity.Entity.Position;
+                leashedMaterials.Add(pickup);
+                Engine.SaveGame.CurrentMission.Add(pickup);
+            }
         }
+        else
+        {
+            dockedEntity = dockableEntity;
+            isEngineActive = false;
+            Events.ToggleDockingMenus();
+            SoundManager.PlayGlobalSound(Assets.Get(Sound.Dock));
+            if (dockedEntity.HasInventory)
+            {
+                for (int i = 0; i < leashedMaterials.Count; i++)
+                {
+                    //Launches the leashed material away if the docking module cannot store it
+                    leashedMaterials[i].Velocity += Engine.SaveGame.CurrentMission.GetNormalizedAcceleration(leashedMaterials[i].Position) * 15;
+                    bool isFull = true;
+                    for (int j = 0; j < Engine.SaveGame.Inventory.Length; j++)
+                    {
+                        if (Engine.SaveGame.Inventory[j] == null)
+                        {
+                            isFull = false;
+                            break;
+                        }
+                    }
+                    if (isFull)
+                    {
+                        continue;
+                    }
+                    Dockable.AddItem(leashedMaterials[i]);
+                    leashedMaterials[i].isExpired = true;
+                }
+                leashedMaterials.Clear();
+                Events.UpdateScrapText();
+            }
+        }
+        Engine.ShakeScreen(0.35f);
+        return true;
     }
     public bool PlayerCollide(int _damage, bool _ignoreImmunity = false)
     {

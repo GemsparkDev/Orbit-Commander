@@ -340,8 +340,7 @@ public static class Util
         {
             foreach (var actor in actors)
             {
-                TextActor text;
-                if ((text = actor as TextActor) != null)
+                if (actor is TextActor text)
                 {
                     text.Position += new Vector2(0, -20) * 3;
                 }

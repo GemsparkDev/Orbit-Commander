@@ -1,5 +1,4 @@
-﻿
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using OrbitCommander.Components;
 using OrbitCommander.UIElements;
@@ -11,7 +10,6 @@ using System.Linq;
 using UILib.Content;
 
 namespace OrbitCommander.Core;
-
 public static class Events
 {
     private static Player Player => Engine.SaveGame.Player;
@@ -75,7 +73,7 @@ public static class Events
         Module daughterModule = UI.RepairSlot.daughterItem;
         if (daughterModule != null)
         {
-            UI.RepairText.text = $"{daughterModule.Health}/20";
+            UI.RepairText.text = $"{daughterModule.Health}/{daughterModule.MaxHealth}";
         }
         else
         {
