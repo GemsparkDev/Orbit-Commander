@@ -30,7 +30,7 @@ public class Entity : IMissionComponent
     public virtual Color Color { get { return GetComponent<Sprite>().Color; } set { GetComponent<Sprite>().Color = value; } }
     public float RevealDuration { get { return GetComponent<Stealth>().RevealDuration; } set { GetComponent<Stealth>().RevealDuration = value; } }
     public float Temperature { get { return GetComponent<Temp>().Temperature; } set { GetComponent<Temp>().Temperature = value; } }
-    public Team Team { get { return GetComponent<Friendly>().Team; } set { GetComponent<Friendly>().Team = value; } }
+    public Team Team { get => FriendlyComp.Team; set => FriendlyComp.Team = value; }
     public virtual int SensingAbility { get { return GetComponent<Stealth>().SensingAbility; } protected set { GetComponent<Stealth>().SensingAbility = value; } }
     public virtual int StealthAbility { get { return GetComponent<Stealth>().StealthAbility; } protected set { GetComponent<Stealth>().StealthAbility = value; } }
     public float InvincibilityCooldown { get { return GetComponent<Collide>().InvincibilityCooldown; } set { GetComponent<Collide>().InvincibilityCooldown = value; } }
@@ -41,7 +41,8 @@ public class Entity : IMissionComponent
     public virtual float ColliderRadius => GetComponent<Sprite>().ColliderRadius;
     public int Damage => GetComponent<Attack>().Damage;
     protected static Player Player => Engine.SaveGame.Player;
-    public bool IsFriendly(Entity _entity) => _entity.GetComponent<Friendly>()?.Team == GetComponent<Friendly>().Team;
+    private Friendly FriendlyComp { get; set; }
+    public bool IsFriendly(Entity _entity) => _entity.Team == Team;
     public virtual void ApplyWork(float _q)
     {
         GetComponent<Temp>()?.ApplyWork(_q);
@@ -193,11 +194,19 @@ public class Entity : IMissionComponent
     }
     public bool RemoveComponent<T>() where T : IComponent
     {
+        if(typeof(T) == typeof(Friendly))
+        {
+            FriendlyComp = null;
+        }
         return components.Remove(typeof(T));
     }
     public Entity AddComponent<T>(T component) where T : IComponent
     {
         components.Add(typeof(T), component);
+        if (component is Friendly friendly)
+        {
+            FriendlyComp = friendly;
+        }
         return this;
     }
     public bool Collide(int _damage, bool _ignoreImmunity = false)
