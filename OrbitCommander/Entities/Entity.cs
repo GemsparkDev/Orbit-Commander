@@ -9,7 +9,7 @@ using OrbitCommander.Story;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using UILib.Content;
+using System.Diagnostics;
 using OrbitCommander.Core;
 
 namespace OrbitCommander.Entities;
@@ -34,7 +34,6 @@ public class Entity : IMissionComponent
     public virtual int SensingAbility { get { return GetComponent<Stealth>().SensingAbility; } protected set { GetComponent<Stealth>().SensingAbility = value; } }
     public virtual int StealthAbility { get { return GetComponent<Stealth>().StealthAbility; } protected set { GetComponent<Stealth>().StealthAbility = value; } }
     public float InvincibilityCooldown { get { return GetComponent<Collide>().InvincibilityCooldown; } set { GetComponent<Collide>().InvincibilityCooldown = value; } }
-    public bool ChildEnemy { get { return GetComponent<IsChild>().ChildEnemy; } set { GetComponent<IsChild>().ChildEnemy = value; } }
     public ParticleEmitter EnemyRange => GetComponent<FollowEmitter>().ParticleEmitter;
     public Statuses Statuses => GetComponent<Statuses>();
     public Vector2 Size => (GetComponent<Sprite>()?.Size) ?? Vector2.Zero;
@@ -42,7 +41,26 @@ public class Entity : IMissionComponent
     public int Damage => GetComponent<Attack>().Damage;
     protected static Player Player => Engine.SaveGame.Player;
     private Friendly FriendlyComp { get; set; }
-    public bool IsFriendly(Entity _entity) => _entity.Team == Team;
+    private Tags Tags { get; set; }
+    public bool HasTag(Tags _tag) => Tags.HasFlag(_tag);
+    public Entity AddTag(Tags _tag)
+    {
+        Tags |= _tag;
+        return this;
+    }
+    public Entity RemoveTag(Tags _tag)
+    {
+        Tags &= ~_tag;
+        return this;
+    }
+    public bool IsFriendly(Entity _entity)
+    {
+        if(FriendlyComp == null || _entity.FriendlyComp == null)
+        {
+            return true;
+        }
+        return _entity.Team == Team;
+    }
     public virtual void ApplyWork(float _q)
     {
         GetComponent<Temp>()?.ApplyWork(_q);
@@ -269,11 +287,9 @@ public class Entity : IMissionComponent
             { HitSound = _hitSound })
             .AddComponent(new FollowEmitter(entity) { ParticleEmitter = new(Assets.Get(Sprites.Dot), entity.Position, 0, Color.Red * 0.75f) })
             .AddComponent(new Cooldown())
-            .AddComponent(new IsChild())
             .AddComponent(new Mineable(entity));
         return entity;
     }
-    //Construct idea: Mace that can be swung around.
     #region Useful Behaviors
     IEnumerable<int> EnemyDeath()
     {
@@ -357,7 +373,7 @@ public class Entity : IMissionComponent
     //Use the SpawnWorm behavior on the head for proper functioning
     IEnumerable<int> FollowNextSegment(Entity parent)
     {
-        ChildEnemy = true;
+        AddTag(Tags.IsChild);
         while (Health > 0 && parent != null)
         {
             Velocity = Vector2.Zero;
@@ -366,7 +382,7 @@ public class Entity : IMissionComponent
                 if (parent.Health <= 0)
                 {
                     parent = null;
-                    ChildEnemy = false;
+                    RemoveTag(Tags.IsChild);
                 }
                 else
                 {
@@ -711,7 +727,7 @@ public class Entity : IMissionComponent
         while (true)
         {
             Velocity *= 0.8f;
-            ChildEnemy = parent != null;
+            var _ = (parent != null) ? AddTag(Tags.IsChild) : RemoveTag(Tags.IsChild);
             Vector2 normalizedAcceleration = GetNormalizedAcceleration();
             if (Health <= 0)
             {
@@ -1087,7 +1103,7 @@ public class Entity : IMissionComponent
                 }
             }
             //Missile targetting
-            if (nearestEnemy?.GetComponent<MissileTag>() != null && (Position - nearestEnemy.Position).Length() < 250)
+            if (nearestEnemy?.Tags.HasFlag(Tags.IsMissile) ?? false && (Position - nearestEnemy.Position).Length() < 250)
             {
                 Vector2 playerIterativePosition = nearestEnemy.Position;
                 float timeToHit = MathF.Sqrt(Vector2.DistanceSquared(Position, playerIterativePosition)) / 20;
@@ -1704,7 +1720,7 @@ public class Entity : IMissionComponent
             0, //Tail destruction
             10, //Charge cooldown
         ];
-        ChildEnemy = true;
+        AddTag(Tags.IsChild);
         var tail = segments[^1];
         bool hasSet = false;
         int moveTowards = 1;
@@ -1727,7 +1743,7 @@ public class Entity : IMissionComponent
             if (tail.Health > 0)
             {
                 Health = MaxHealth;
-                tail.ChildEnemy = false;
+                tail.RemoveTag(Tags.IsChild);
                 GoToPosition(Engine.SaveGame.Player.Position + new Vector2(relativePosition.Y, -relativePosition.X), speed);
             }
             else
@@ -1759,7 +1775,7 @@ public class Entity : IMissionComponent
                 if (!hasSet)
                 {
                     hasSet = true;
-                    ChildEnemy = false;
+                    RemoveTag(Tags.IsChild);
                     GetComponent<Collide>().HitSound = Assets.Get(Sound.Hit);
                     CD[2] = 2;
                 }
@@ -2112,7 +2128,7 @@ public class Entity : IMissionComponent
     IEnumerable<int> Wing(Entity _parent, float _offset)
     {
         int damage = 8;
-        ChildEnemy = true;
+        AddTag(Tags.IsChild);
         CD =
         [
             _offset > 0 ? 0 : 0.2f, //Weapon
@@ -2423,7 +2439,7 @@ public class Entity : IMissionComponent
             0, //Cog timer
             0, //Ability timer
         ];
-        ChildEnemy = true;
+        AddTag(Tags.IsChild);
         int unitsPerShot = 0;
         int unitsPerAbility = 0;
         bool isFirst = true;
@@ -2441,7 +2457,7 @@ public class Entity : IMissionComponent
             {
                 if (isFirst)
                 {
-                    ChildEnemy = false;
+                    RemoveTag(Tags.IsChild);
                     GetComponent<Collide>().HitSound = Assets.Get(Sound.Hit);
                     isFirst = false;
                 }
@@ -3050,7 +3066,7 @@ public class Entity : IMissionComponent
         var enemy = NewEnemy(position, velocity, angle, _health, Assets.Get(Sprites.Missile), _team);
         enemy.SensingAbility = _sensingAbility;
         enemy.AddComponent(new Behaviour().AddBehaviour(enemy.Missile()).AddBehaviour(enemy.AvoidNearbyAllies()));
-        enemy.AddComponent(new MissileTag());
+        enemy.AddTag(Tags.IsMissile);
         enemy.AddComponent(new Attack() { Damage = _damage });
         return enemy;
     }
@@ -3059,7 +3075,7 @@ public class Entity : IMissionComponent
         var enemy = NewEnemy(position, velocity, angle, 10, Assets.Get(Sprites.Missile), _team);
         enemy.SensingAbility = _sensingAbility;
         enemy.AddComponent(new Behaviour().AddBehaviour(enemy.Missile()).AddBehaviour(enemy.AvoidNearbyAllies()));
-        enemy.AddComponent(new MissileTag());
+        enemy.Tags |= Tags.IsMissile;
         enemy.AddComponent(new Attack() { Damage = 8 });
         return enemy;
     }
@@ -3115,7 +3131,7 @@ public class Entity : IMissionComponent
     }
     IEnumerable<int> Shield(Entity parent, float distance, float theta)
     {
-        ChildEnemy = true;
+        AddTag(Tags.IsChild);
         while (true)
         {
             Angle = parent.Angle + theta;
@@ -3926,7 +3942,7 @@ public class Entity : IMissionComponent
         CD = [0];
         float bulletOffset = 4;
         EnemyRange.particleVelocity = 400;
-        ChildEnemy = true;
+        AddTag(Tags.IsChild);
         while (true)
         {
             Velocity *= 0;
@@ -4294,7 +4310,7 @@ public class Entity : IMissionComponent
         var enemy = NewEnemy(position, velocity, angle, 500, Assets.Get(Sprites.Mothership), _team);
         enemy.AddComponent(new Behaviour().AddBehaviour(enemy.MakeshiftMothership()).AddBehaviour(enemy.EnemyDeath()));
         enemy.AddComponent(new Dockable(enemy, UI.MothershipMenu));
-        enemy.AddComponent(new KeyTag());
+        enemy.AddTag(Tags.IsImportant);
         return enemy;
     }
     IEnumerable<int> LargeMiner()
@@ -4951,9 +4967,10 @@ public class Entity : IMissionComponent
         }));
         projectile.StealthAbility = _stealth;
         projectile.SensingAbility = 99;
-        projectile.AddComponent(new ExpireTimer(projectile) { TimeLeft = 8 });
-        projectile.AddComponent(new Attack() { Damage = _damage });
-        projectile.AddComponent(new IsChild() { ChildEnemy = true });
+        projectile
+        .AddComponent(new ExpireTimer(projectile) { TimeLeft = 8 })
+        .AddComponent(new Attack() { Damage = _damage })
+        .AddTag(Tags.IsChild);
         return projectile;
     }
     #region Projectiles

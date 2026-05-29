@@ -325,7 +325,7 @@ public static class Events
         ItemSlot<Pickup> slot = null;
         foreach (var item in UI.MissionSelectSlots)
         {
-            if (item.daughterItem.HasComponent<SpecializedTag>())
+            if (item.daughterItem.HasTag(Tags.IsSpecialized))
             {
                 firstScrap = item.daughterItem;
                 slot = item;
@@ -336,7 +336,7 @@ public static class Events
         {
             foreach (var item in UI.InventorySlots)
             {
-                if (item.daughterItem.HasComponent<SpecializedTag>())
+                if (item.daughterItem.HasTag(Tags.IsSpecialized))
                 {
                     firstScrap = item.daughterItem;
                     slot = item;

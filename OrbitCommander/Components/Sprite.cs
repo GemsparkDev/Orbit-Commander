@@ -78,13 +78,10 @@ public class Sprite(Entity _entity, Color _color) : IComponent
             stealth = MathF.Max(stealth, (float)Math.Clamp(sC.RevealDuration, 0f, 1f));
         }
         //Outline in atmosphere looks better
-        if (Engine.SaveGame.CurrentMission.GetAtmospherePressure(_entity) > 0 || SaveGame.ColorScheme.IsOutlined())
-        {
-            _spriteBatch.Draw(Texture, _entity.Position + new Vector2(0, 1), null, Color.Black, _entity.Angle, Size / 2, 1, 0, 0);
-            _spriteBatch.Draw(Texture, _entity.Position + new Vector2(0, -1), null, Color.Black, _entity.Angle, Size / 2, 1, 0, 0);
-            _spriteBatch.Draw(Texture, _entity.Position + new Vector2(1, 0), null, Color.Black, _entity.Angle, Size / 2, 1, 0, 0);
-            _spriteBatch.Draw(Texture, _entity.Position + new Vector2(-1, 0), null, Color.Black, _entity.Angle, Size / 2, 1, 0, 0);
-        }
+        _spriteBatch.Draw(Texture, _entity.Position + new Vector2(0, 1), null, Color.Black, _entity.Angle, Size / 2, 1, 0, 0);
+        _spriteBatch.Draw(Texture, _entity.Position + new Vector2(0, -1), null, Color.Black, _entity.Angle, Size / 2, 1, 0, 0);
+        _spriteBatch.Draw(Texture, _entity.Position + new Vector2(1, 0), null, Color.Black, _entity.Angle, Size / 2, 1, 0, 0);
+        _spriteBatch.Draw(Texture, _entity.Position + new Vector2(-1, 0), null, Color.Black, _entity.Angle, Size / 2, 1, 0, 0);
         _spriteBatch.Draw(Texture, _entity.Position, null, Color * stealth, _entity.Angle, Size / 2, 1, 0, 0);
     }
 }

@@ -1,5 +1,6 @@
-﻿namespace OrbitCommander.Core;
+﻿using System;
 
+namespace OrbitCommander.Core;
 public enum ModuleType
 {
     Hull,
@@ -294,4 +295,13 @@ public enum LoadingStage
     MainMenu,
     MissionSelect,
     Complete
+}
+[Flags]
+public enum Tags
+{
+    None = 0,
+    IsSpecialized = 1,
+    IsMissile = 2,
+    IsImportant = 4,
+    IsChild = 8,
 }

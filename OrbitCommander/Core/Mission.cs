@@ -9,6 +9,7 @@ using OrbitCommander.Particles;
 using OrbitCommander.MissionComponents;
 using OrbitCommander.Entities;
 using OrbitCommander.Components;
+using System.Diagnostics;
 using static OrbitCommander.Core.Util;
 //using System.Numerics;
 
@@ -438,7 +439,7 @@ public class Mission
             objective = objective.Update();    
         }
         //Prevents players from losing important items
-        Entity[] importantEntites = Engine.SaveGame.CurrentMission.GetEntities<KeyTag>();
+        Entity[] importantEntites = Engine.SaveGame.CurrentMission.Entities.Where(x => x.HasTag(Tags.IsImportant)).ToArray();
         float r = missions[Engine.SaveGame.CurrentMissionIndex].data.EdgeRadius;
         foreach(var entity in importantEntites)
         {
@@ -538,9 +539,9 @@ public class Mission
     public Entity NearestAlly(Entity entity)
     {
         Entity[] entities = [.. Entities.Where(IsEligible)];
-        var returnEnemy = Util.Nearest(entity.Position, entities);
+        var returnEnemy = Nearest(entity.Position, entities);
         float nearestDistance = float.MaxValue;
-        if(returnEnemy != null)
+        if (returnEnemy != null)
         {
             nearestDistance = Vector2.DistanceSquared(entity.Position, returnEnemy.Position);
         }
@@ -555,7 +556,7 @@ public class Mission
         return returnEnemy;
         bool IsEligible(Entity targetEnemy)
         {
-            return !(!entity.IsFriendly(targetEnemy) || targetEnemy == entity || (targetEnemy.GetComponent<IsChild>()?.ChildEnemy ?? false));
+            return (entity.IsFriendly(targetEnemy)) && (targetEnemy != entity) && !(targetEnemy.HasTag(Tags.IsChild));
         }
     }
     public Entity NearestItem(Entity entity, bool _findAll)
@@ -563,7 +564,7 @@ public class Mission
         return Util.Nearest(entity.Position, [.. Entities.Where(IsEligible)]);
         bool IsEligible(Entity targetEntity)
         {
-            return !(targetEntity is not Pickup || targetEntity == entity || !_findAll && (targetEntity is Module || targetEntity.HasComponent<SpecializedTag>() || targetEntity.HasComponent<Behaviour>()));
+            return !(targetEntity is not Pickup || targetEntity == entity || !_findAll && (targetEntity is Module || targetEntity.HasTag(Tags.IsSpecialized) || targetEntity.HasComponent<Behaviour>()));
         }
     }
     public Entity NearestProjectile(Vector2 _position, int _sensingAbility, Team _team)

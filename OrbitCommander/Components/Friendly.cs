@@ -18,7 +18,7 @@ public class Friendly(Entity _entity) : IComponent
     public void Draw(SpriteBatch _spriteBatch)
     {
         Vector2 halfSize = Engine.BackBuffer / 2;
-        if (_entity.HasComponent<Health>() && !(_entity.GetComponent<IsChild>()?.ChildEnemy ?? false) && Engine.SaveGame.Player.Team == Team &&
+        if (_entity.HasComponent<Health>() && !(_entity.HasTag(Tags.IsChild)) && Engine.SaveGame.Player.Team == Team &&
            (_entity.Position.X - Engine.Camera.Position.X + _entity.Size.X / 2 < -halfSize.X || _entity.Position.Y - Engine.Camera.Position.Y + _entity.Size.Y / 2 < -halfSize.Y
          || _entity.Position.X - Engine.Camera.Position.X - _entity.Size.X / 2 > halfSize.X || _entity.Position.Y - Engine.Camera.Position.Y - _entity.Size.Y / 2 > halfSize.Y))
         {

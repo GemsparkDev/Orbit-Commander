@@ -28,7 +28,7 @@ public class Pickup : Entity, IData
         textbox = new Decal(new Vector2(0, -5), Assets.TextFont, _itemData.Name, _itemData.TextColor, 5f);
         Tooltip.AddWidget(textbox);
         AddComponent(new Health(this) { CurrentHealth = _health, MaxHealth = _health });
-        AddComponent(new KeyTag());
+        AddTag(Tags.IsImportant);
         AddComponent(new Collide(this, delegate (int _damage, bool _ignoreImmunity)
         {
             if (_damage <= 0)
@@ -280,7 +280,7 @@ public class Pickup : Entity, IData
             StealthAbility = _stealth,
             Team = _team
         };
-        construct.AddComponent(new SpecializedTag());
+        construct.AddTag(Tags.IsSpecialized);
         return construct;
     }
     IEnumerable<int> Mace()
