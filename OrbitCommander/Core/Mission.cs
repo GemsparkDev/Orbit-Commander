@@ -290,8 +290,8 @@ public class Mission
             new DropSpawner(1500)); }),
     ];
     public List<Entity> Entities { get; private set; } = [];
-    private List<Entity> enemies = [];
-    private List<Entity> projectiles = [];
+    public List<Entity> enemies = [];
+    public List<Entity> projectiles = [];
     public int Wave { get; set; } = 0;
     public Mission(List<IMissionComponent> _components, Conditional _objective, IPlayerSpawner _spawner, Sound _music = Sound.main)
     {

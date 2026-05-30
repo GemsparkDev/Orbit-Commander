@@ -30,7 +30,7 @@ public class Entity : IMissionComponent
     public virtual Color Color { get { return GetComponent<Sprite>().Color; } set { GetComponent<Sprite>().Color = value; } }
     public float RevealDuration { get { return GetComponent<Stealth>().RevealDuration; } set { GetComponent<Stealth>().RevealDuration = value; } }
     public float Temperature { get { return GetComponent<Temp>().Temperature; } set { GetComponent<Temp>().Temperature = value; } }
-    public Team Team { get => FriendlyComp.Team; set => FriendlyComp.Team = value; }
+    public Team Team { get { return FriendlyComp.Team; } set { FriendlyComp.Team = value; } }
     public virtual int SensingAbility { get { return GetComponent<Stealth>().SensingAbility; } protected set { GetComponent<Stealth>().SensingAbility = value; } }
     public virtual int StealthAbility { get { return GetComponent<Stealth>().StealthAbility; } protected set { GetComponent<Stealth>().StealthAbility = value; } }
     public float InvincibilityCooldown { get { return GetComponent<Collide>().InvincibilityCooldown; } set { GetComponent<Collide>().InvincibilityCooldown = value; } }
@@ -40,8 +40,8 @@ public class Entity : IMissionComponent
     public virtual float ColliderRadius => GetComponent<Sprite>().ColliderRadius;
     public int Damage => GetComponent<Attack>().Damage;
     protected static Player Player => Engine.SaveGame.Player;
-    private Friendly FriendlyComp { get; set; }
-    private Tags Tags { get; set; }
+    public Friendly FriendlyComp { get; private set; }
+    private Tags Tags { get; set; } = Tags.None;
     public bool HasTag(Tags _tag) => Tags.HasFlag(_tag);
     public Entity AddTag(Tags _tag)
     {
@@ -329,7 +329,7 @@ public class Entity : IMissionComponent
             yield return 0;
         }
     }
-    IEnumerable<int> AvoidNearbyAllies()
+    IEnumerable<int> AvoidNearbyAllies(float strength = 1)
     {
         while (Health > 0)
         {
@@ -341,7 +341,7 @@ public class Entity : IMissionComponent
                     Position += new Vector2(0, 0.1f);
                 }
                 Vector2 relativePosition = nearestAlly.Position - Position;
-                Position -= Size.Length() * Vector2.Normalize(relativePosition) / MathF.Sqrt(relativePosition.Length()) / 10;
+                Position -= Size.Length() * strength * Vector2.Normalize(relativePosition) / MathF.Sqrt(relativePosition.Length()) / 10;
             }
             yield return 0;
         }
@@ -2851,7 +2851,48 @@ public class Entity : IMissionComponent
     public static Entity NewFighter(Vector2 position, Vector2 velocity, float angle, Team _team = Team.Hostile)
     {
         var enemy = NewEnemy(position, velocity, angle, 8, Assets.Get(Sprites.Fighter), _team);
-        enemy.AddComponent(new Behaviour().AddBehaviour(enemy.Fighter()).AddBehaviour(enemy.AvoidNearbyAllies()).AddBehaviour(enemy.EnemyDeath()));
+        enemy.AddComponent(new Behaviour().AddBehaviour(enemy.Fighter()).AddBehaviour(enemy.AvoidNearbyAllies(2)).AddBehaviour(enemy.AvoidProjectiles(1)).AddBehaviour(enemy.EnemyDeath()));
+        return enemy;
+    }
+    IEnumerable<int> Scrapper()
+    {
+        EnemyRange.particleVelocity = 60;
+        float targetAngle;
+        while (Health > 0)
+        {
+            Velocity *= 0.8f;
+            Vector2 normalizedAcceleration = GetNormalizedAcceleration();
+            Entity nearestEnemy = Util.Nearest(Position, Engine.SaveGame.CurrentMission.enemies.Where(x => x.Health <= 0).ToArray());
+            if (nearestEnemy != null)
+            {
+                Vector2 targetVector = nearestEnemy.Position - Position + (nearestEnemy.Velocity - Velocity) * 8;
+                targetAngle = MathF.Atan2(targetVector.X, -targetVector.Y);
+                RotateTowards(targetAngle);
+                if (Vector2.DistanceSquared(Position, nearestEnemy.Position) > 60 * 60)
+                {
+                    GoToPosition(nearestEnemy.Position, 5);
+                }
+                else
+                {
+                    Velocity += normalizedAcceleration * Engine.DeltaSeconds * 60;
+                    nearestEnemy.Mine();
+                    Vector2 targetDir = Vector2.Normalize(nearestEnemy.Position - Position);
+                    float length = (nearestEnemy.Position - Position).Length();
+                    for (float i = 0; i < length; i+=2)
+                    {
+                        float lerp = i / 60;
+                        Vector3 color = new Vector3(1, 1, 0) * (1 - lerp) + new Vector3(1, 0, 0) * lerp;
+                        ParticleManager.Add(new Particle(Assets.Get(Sprites.Dot), targetDir * (i + 4f) + Position + new Vector2(targetDir.Y, -targetDir.X) * MathF.Sin(i / 2 - Engine.Time * 5) / 2, Util.ToAngle(targetDir), new Color(color.X, color.Y, color.Z) * (1 - lerp)));
+                    }
+                }
+            }
+            yield return 0;
+        }
+    }
+    public static Entity NewScrapper(Vector2 position, Vector2 velocity, float angle, Team _team = Team.Hostile)
+    {
+        var enemy = NewEnemy(position, velocity, angle, 15, Assets.Get(Sprites.PlayerGun), _team);
+        enemy.AddComponent(new Behaviour().AddBehaviour(enemy.Scrapper()).AddBehaviour(enemy.AvoidNearbyAllies()).AddBehaviour(enemy.EnemyDeath()));
         return enemy;
     }
     IEnumerable<int> Carrier()
@@ -4744,10 +4785,13 @@ public class Entity : IMissionComponent
         {
             if (CD[0] <= 0)
             {
-                int enemyType = Util.Random.Next(1, 4);
+                int enemyType = Util.Random.Next(0, 4);
                 CD[0] = enemyType * 3;
                 switch (enemyType)
                 {
+                    case 0:
+                        Engine.SaveGame.CurrentMission.Add(NewScrapper(Position + new Vector2(Util.OneToNegOne(), Util.OneToNegOne()) * 10, Velocity, Angle, Team));
+                        break;
                     case 1:
                         for (int i = 0; i < 2; i++)
                         {
