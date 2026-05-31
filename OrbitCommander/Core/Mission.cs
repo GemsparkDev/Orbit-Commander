@@ -25,7 +25,7 @@ public class Mission
     [
         //T1
 
-        (new MissionData("Crash Landing","The crash landing site. Objective: Explore the system.",160, [], 0, 2000, 1),
+        (new MissionData("Crash Landing","The crash landing site. Objective: Explore the system.", 160, [], 0, 2000, 1),
         delegate(){Entity m; 
         return new Mission([
             new Planet(new Vector2(1000, 0), Planet.GetOrbitalVelocity(new Vector2(1000, 0), Vector2.Zero, 10000), 250, 1.5f, false, Color.Cyan),
@@ -36,10 +36,10 @@ public class Mission
             ItemFactory.NewScrap(new Vector2(0, -8*50), new Vector2(-8, -4), -0.03f),
             m = Entity.NewMothership(new Vector2(0, -8*50 - Assets.DimsOf(Sprites.Mothership).Y / 2), Vector2.Zero, 0f),],
             new Conditional([new Protect([m]), new Custom(m)], Win(DayOneLog)),
-            new CustomSpawner(new Vector2(0, -8*50 - Assets.DimsOf(Sprites.Mothership).Y / 2)));}),
+            new CustomSpawner(new Vector2(0, -8*50 - Assets.DimsOf(Sprites.Mothership).Y / 2)), Sound.None);}),
 
         //TODO: Add custom "Humanlike" enemies
-        (new MissionData("Crossfire", "Sensors indicate a group fighting against the same hostiles encountered during our crash landing.\nAiding them could gain us a powerful ally.", 140, [0], 0, 2000, 1),
+        (new MissionData("Crossfire", "Sensors indicate a group fighting against the same hostiles encountered during our crash landing.\nAiding them could gain us a powerful ally.", 140, [0], 0, 3000, 2),
         delegate(){var p = new Planet(Vector2.Zero, Vector2.Zero, 15000, 12, true, Color.White); Entity e; return new([
             p.AddComponent(new Ring(p) { Mass = 15000 }),
             Entity.NewEnemySpawner(new Vector2(1200, 0), Planet.GetOrbitalVelocity(new Vector2(1200, 0), Vector2.Zero, 20000), 0, Team.Friendly),
@@ -92,7 +92,7 @@ public class Mission
         (new("Gas Giant", "", 10, [4], 1, 2000),
         delegate(){var p = new Planet(Vector2.Zero, Vector2.Zero, 16000, 4, true, new Color(167, 156, 134));
             return new([
-            p.AddComponent(new Atmosphere(p, 6, 16000) { IsSun = true })
+            p.AddComponent(new Atmosphere(p, 6, 16000))
              .AddComponent(new Ring(p) { Offset = 500, Mass = 16000 }),
             new Planet(new Vector2(900, 0), Planet.GetOrbitalVelocity(new Vector2(900, 0), Vector2.Zero, 16000), 100, 0.5f, false, Color.OldLace),
             new Planet(new Vector2(-1200, 0), Planet.GetOrbitalVelocity(new Vector2(-1200, 0), Vector2.Zero, 16000) * 1.05f, 100, 0.5f, false, Color.OldLace),
@@ -145,11 +145,12 @@ public class Mission
             ], new Conditional([new Kill([a])], SendPickup(2000)),
             new DropSpawner(1500));}),
 
-        (new("Inferno", "Your intel has led you here. Finish this.",  0, [10], 2, 2000),
-        delegate(){var p = new Planet(Vector2.Zero, Vector2.Zero, 160000, 6, true, new Color(0.9f, 1f, 0.75f)) { Temperature = 5 };
+        (new("Inferno", "Your intel has led you here. Finish this.",  0, [10], 2, 4000),
+        delegate(){
+            var p = new Planet(Vector2.Zero, Vector2.Zero, 160000, 6, true, new Color(0.9f, 1f, 0.75f)) { Temperature = 5 };
             Entity a; return new([
             p.AddComponent(new Atmosphere(p, 50, 160000) { IsSun = true }),
-            new Planet(new Vector2(0, 2000), Planet.GetOrbitalVelocity(new Vector2(0, 2000) * 0.99f, Vector2.Zero, 16-000), 8000, 4, false, new Color(0.95f, 0.2f, 0.1f)),
+            new Planet(new Vector2(0, 2000), Planet.GetOrbitalVelocity(new Vector2(0, 2000), Vector2.Zero, 160000) * 0.99f, 8000, 4, false, new Color(0.95f, 0.2f, 0.1f)) { Temperature = 2 },
             a=Entity.NewEpitomeBoss(new Vector2(0, 2800), Vector2.Zero, 0)],
             new Conditional([new Kill([a])], SendPickup(2000)),
             new GliderSpawner(new Vector2(-1500, -2000), -1500), Sound.None);}),

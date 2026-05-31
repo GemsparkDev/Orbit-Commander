@@ -127,14 +127,10 @@ internal class WaveSpawner : IMissionComponent
                 SoundManager.ChangeTrack(Assets.Get(Sound.boss));
             }
 
-            if (missions[Engine.SaveGame.CurrentMissionIndex].data.PlayerProgression > 1 && Wave % 20 == 0)
+            if (Wave % 15 == 0)
             {
                 var pos = Engine.SaveGame.CurrentMission.NewSpawnLocation();
                 Entity boss = bosses[currentBoss](pos, Vector2.Zero, MathF.Atan2(-pos.X, pos.Y), Team.Hostile);
-                if (Wave == 40)
-                {
-                    boss = bosses[2](pos, Vector2.Zero, 0, Team.Hostile);
-                }
                 enemiesSpawned.Add(boss);
                 EnemiesSpawned = 1;
                 currentBoss = (currentBoss + 1) % bosses.Count;
@@ -151,7 +147,7 @@ internal class WaveSpawner : IMissionComponent
                     difficulty = (int)((Wave + 1) * MathF.Log(Wave + 1, MathF.E) - Wave) + 1;
                 }
                 List<int> newCosts = [];
-                int availableEnemies = Math.Min(enemyCreditValues.Count, Wave / 10 + 1 + (isAggressive ? 1 : 0));
+                int availableEnemies = Math.Min(enemyCreditValues.Count, Wave / 5 + 1 + (isAggressive ? 1 : 0));
                 Entity squadLeader = null;
                 int count = 0;
                 for (int i = 0; i < availableEnemies; i++)

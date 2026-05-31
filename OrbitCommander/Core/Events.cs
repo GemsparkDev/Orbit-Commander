@@ -238,21 +238,19 @@ public static class Events
             for (int j = 0; j < 4; j++)
             {
                 //Active fuse is white, no fuse is gray, disabled fuse is red
-                Color color;
                 if (!_fuses[i, j])
                 {
-                    continue;
+                    UI.Fuses[j, i].daughterItem = null;
                 }
                 else if (!_fuses[(int)ModuleType.Core, j])
                 {
-                    color = Color.Red;
+                    UI.Fuses[j, i].daughterItem = new Fuse(Color.Red);
                 }
                 else
                 {
-                    color = Color.White;
+                    UI.Fuses[j, i].daughterItem = new Fuse(Color.White);
                     totalFuses++;
                 }
-                UI.Fuses[j, i].daughterItem = new Fuse(color);
             }
         }
         UI.FuseCounter.Count = _spareFuses;

@@ -3,6 +3,19 @@
 Lagrange Commander is a game made using C# in monogame. It is a 2D top down wave based shooter where you must repair and upgrade your ship by salvaging from enemies you defeat. It features realistic N-Body gravitation, which affects all entities and projectiles.
   
 # Changelog
+0.8.5.6 - 5/30/2026
+ - The mothership furnace now has a cooldown of 8 and repair of 20.
+ - Suns now passively heat entities near it.
+ - De-noised the Epitome boss sprites.
+ - Increased the mine speed to 8x, from 5x.
+ - Reduced the rate of temperature loss.
+ - Added the thermometer UI element.
+ - Bosses now spawn every 15 waves and new enemes every 5.
+ - Damage changes: Fighter - 6, Carrier - 4, Sniper - 7, Shotgunner - 3
+ - Fixed the fuse slots not updating when losing a fuse.
+ - Fixed the Inferno planet falling into the sun.
+ - Fixed some misalignment issues for some statuses.
+ - Fixed some modules not updating their health decal.
 0.8.5.5 - 5/29/2026
  - Added the Scrapper enemy type.
  - Tweaked the fighter sprite.

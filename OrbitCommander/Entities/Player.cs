@@ -248,6 +248,19 @@ public class Player : Entity
             UI.PlayerAbility.Colors[0] = Color.Transparent;
             UI.PlayerAbility.Colors[1] = Color.Transparent;
         }
+        var temp = Temperature;
+        if(temp > 0)
+        {
+            UI.Thermometer.Colors[1] = Color.Orange * temp;
+            UI.Thermometer.SetInterval(0.5f, 1, 0);
+            UI.Thermometer.SetInterval(temp/2 + 0.5f, 1, 1);
+        }
+        else
+        {
+            UI.Thermometer.Colors[1] = Color.Cyan * -temp;
+            UI.Thermometer.SetInterval((1+temp)/2, 1, 0);
+            UI.Thermometer.SetInterval(0.5f, 1, 1);
+        }
         LowerCooldown();
         if (currentHealth > 50)
         {
@@ -307,6 +320,11 @@ public class Player : Entity
                 module.OnUpdate();
             }
         }
+    }
+    public Entity ModifyProjectile(Entity _projectile)
+    {
+        _projectile.Temperature = Temperature;
+        return _projectile;
     }
     public void RestrictedActions()
     {
@@ -759,6 +777,7 @@ public class Player : Entity
         _damage = Statuses.ModifyDamage(_damage);
         if (_damage > 0 && (invincibilityCooldown <= 0 || _ignoreImmunity))
         {
+            ApplyWork(_damage);
             Flash(Color.White);
             Engine.ShakeScreen(0.08f * _damage);
             //Helps to cushion huge hits

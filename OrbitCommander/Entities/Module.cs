@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UILib.Content;
+using System.Diagnostics;
 
 namespace OrbitCommander.Entities;
 
@@ -20,6 +21,7 @@ public abstract class Module : Pickup, IData
     Color IData.Color => isFailed ? Color.Red : Color.White;
     private Decal healthDecal;
     public float Cooldown { get; protected set; } = 0;
+    private Health health;
 
     public Module(Modules _type, Vector2 _position = default, Vector2 _velocity = default, float _angularVelocity = 0)
         : base(ItemFactory.moduleData[_type], _position, _velocity, _angularVelocity, ItemFactory.moduleData[_type].MaxHealth)
@@ -28,10 +30,11 @@ public abstract class Module : Pickup, IData
         healthDecal = new Decal(new Vector2(0, 5), Assets.TextFont, $"{Health} / {MaxHealth}", Color.Pink, 5f);
         Tooltip.AddWidget(healthDecal);
         AddComponent(new Smelt() { Value = 3 });
+        health = GetComponent<Health>();
     }
     private void UpdateHealth()
     {
-        healthDecal.text = $"{Health} / {MaxHealth}";
+        healthDecal.text = $"{health.CurrentHealth} / {health.MaxHealth}";
     }
 
     public virtual int OnCollide(int _damage) { return _damage; }
@@ -124,6 +127,7 @@ public class Hull() : Module(Modules.Hull)
     {
         UI.PlayerSpecialHealth.Colors[0] = Color.Transparent;
         UI.PlayerSpecialHealth.Colors[1] = Color.Transparent;
+        base.OnUpdate();
     }
 }
 public class Shield() : Module(Modules.Shield)
@@ -159,6 +163,7 @@ public class StealthHull() : Module(Modules.Stealth)
     {
         UI.PlayerSpecialHealth.Colors[0] = Color.Transparent;
         UI.PlayerSpecialHealth.Colors[1] = Color.Transparent;
+        base.OnUpdate();
     }
 }
 public class Reflective() : Module(Modules.Reflective)
@@ -179,6 +184,7 @@ public class Reflective() : Module(Modules.Reflective)
     {
         UI.PlayerSpecialHealth.Colors[0] = Color.Transparent;
         UI.PlayerSpecialHealth.Colors[1] = Color.Transparent;
+        base.OnUpdate();
     }
 }
 public class Turtle() : Module(Modules.Turtle)
@@ -258,17 +264,12 @@ public class Adaptive() : Module(Modules.Adaptive)
         }
         return _damage;
     }
-
 }
 public class ThermalShield() : Module(Modules.ThermalShield)
 {
     public override int OnCollide(int _damage)
     {
-        if (Player.Temperature is > 1 or < (-1))
-        {
-            return _damage * 4 / 3;
-        }
-        return _damage;
+        return _damage * 5 / 4;
     }
     public override void OnUpdate()
     {
@@ -304,6 +305,7 @@ public class StandardEngine() : Module(Modules.Engines)
         {
             engineTime -= Engine.DeltaSeconds;
         }
+        base.OnUpdate();
     }
 }
 public class PlasmaEngine() : Module(Modules.Plasma)
@@ -341,6 +343,7 @@ public class PlasmaEngine() : Module(Modules.Plasma)
         {
             burstTime -= Engine.DeltaSeconds * 2;
         }
+        base.OnUpdate();
     }
 }
 public class WorkEngine() : Module(Modules.Work)
@@ -369,6 +372,7 @@ public class WorkEngine() : Module(Modules.Work)
         {
             engineTime -= Engine.DeltaSeconds;
         }
+        base.OnUpdate();
     }
 }
 public class OrionEngine() : Module(Modules.Orion)
@@ -1414,6 +1418,7 @@ public class Expose() : Module(Modules.Expose)
 {
     const float MaxCooldown = 15;
     FlameBolt aura = null;
+    private bool isFire = false;
     public override void OnAbility()
     {
         if (Cooldown > 0)
@@ -1429,10 +1434,12 @@ public class Expose() : Module(Modules.Expose)
         if (Input.NewState.IsKeyDown(Keys.LeftShift))
         {
             Engine.SaveGame.CurrentMission.Add(aura = new FlameBolt(Player.Position + new Vector2(Input.NewMouseState.X, Input.NewMouseState.Y) + Engine.MousePositionOffset - Engine.BackBuffer / 2, Vector2.Zero, Team, 0, new ParticleEmitter(Assets.Get(Sprites.Dot), Player.Position, 0, Color.Orange * 0.75f) { speedOfEmission = 0.5f }, 10, 2, 20));
+            isFire = true;        
         }
         else
         {
             Engine.SaveGame.CurrentMission.Add(aura = new FlameBolt(Player.Position + new Vector2(Input.NewMouseState.X, Input.NewMouseState.Y) + Engine.MousePositionOffset - Engine.BackBuffer / 2, Vector2.Zero, Team, 0, new ParticleEmitter(Assets.Get(Sprites.Dot), Player.Position, 0, Color.Cyan * 0.75f) { speedOfEmission = 0.5f }, 10, 2, -20));
+            isFire = false;
         }
         aura.Transform.IsImmovable = true;
         Cooldown = 15;
@@ -1440,6 +1447,18 @@ public class Expose() : Module(Modules.Expose)
     public override void OnUpdate()
     {
         UI.PlayerAbility.SetInterval(1 - Cooldown / MaxCooldown, 1);
+        //Helps the player with temperature control
+        if(aura != null)
+        {
+            if(isFire)
+            {
+                Engine.SaveGame.Player.ConductHeat(-1, 0.1f);
+            }
+            else
+            {
+                Engine.SaveGame.Player.ConductHeat(1, 0.1f);
+            }
+        }
         base.OnUpdate();
     }
 }

@@ -124,6 +124,7 @@ public static class UI
     public static Slider PlayerSpecialHealth { get; } = new Slider(Line, new Vector2(5, 5), new Vector2(150, 15), true, [Color.Transparent, Color.Transparent]);
     public static Slider PlayerAmmo { get; } = new Slider(Line, new Vector2(5, 15), new Vector2(100, 2), true, [Color.Yellow, Color.DarkGray]);
     public static Slider PlayerAbility { get; } = new Slider(Line, new Vector2(5, 15), new Vector2(100, 10), true, [Color.Cyan, Color.DarkGray]);
+    public static Slider Thermometer { get; } = new Slider(Line, new Vector2(0, 15), new Vector2(100, 10), true, [new Color(25, 25, 25), Color.Transparent, new Color(25, 25, 25)]);
 
     //Upgrade Menu
     public static Decal TraderChat { get; } = new Decal(Vector2.Zero, Assets.TextFont,
@@ -161,7 +162,7 @@ public static class UI
     public static int type = 1;
     public static readonly Vector2[] resolutions = [new Vector2(1920, 1080), new Vector2(640, 480)];
     public static int selectedResolution = 0;
-    public static readonly Modules[] setModules = [Modules.Ablative, Modules.Flamethrower, Modules.Plasma, Modules.Sensors, Modules.GrapplingHook];
+    public static readonly Modules[] setModules = [Modules.Hull, Modules.Basic, Modules.Engines, Modules.Sensors, Modules.Assault];
 
     //Hack menu
     public static Button HackButton { get; } = new Button(Vector2.Zero, Assets.Get(Sprites.Button), Assets.TextFont, "Hack", Color.Yellow);
@@ -618,6 +619,7 @@ public static class UI
         GlobalMenu.AddWidget(PlayerSpecialHealth, (int)Alignment.TopLeft);
         GlobalMenu.AddWidget(PlayerAbility, (int)Alignment.TopLeft);
         GlobalMenu.AddWidget(PlayerAmmo, (int)Alignment.TopLeft);
+        GlobalMenu.AddWidget(Thermometer, (int)Alignment.Top);
         PlayerSpecialHealth.SetInterval(1, 1);
         PlayerHealth.Intervals = [1, 1];
 

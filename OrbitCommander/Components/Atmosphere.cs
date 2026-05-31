@@ -24,15 +24,20 @@ public class Atmosphere : IComponent
     {
         foreach (var _entity in Engine.SaveGame.CurrentMission.Entities)
         {
-            AttractEntity(_entity);
+            CheckEntity(_entity);
         }
-        AttractEntity(Engine.SaveGame.Player);
+        CheckEntity(Engine.SaveGame.Player);
     }
-    private void AttractEntity(Entity _entity)
+    private void CheckEntity(Entity _entity)
     {
         if (_entity == Entity)
         {
             return;
+        }
+        if (IsSun)
+        {
+            //Brings all entities right up to melting temperature
+            _entity.ConductHeat(1, 0.1f);
         }
         Vector2 relativePosition = _entity.Position - Entity.Position;
         float distance = relativePosition.Length();

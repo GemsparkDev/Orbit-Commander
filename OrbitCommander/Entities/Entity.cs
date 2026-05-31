@@ -109,6 +109,7 @@ public class Entity : IMissionComponent
         {
             if (nearestEnemy.Collide(Damage))
             {
+                nearestEnemy.ApplyWork(Temperature);
                 ParticleManager.Add(new Particle(Assets.Get(Sprites.Glow), 0.33f, Position, Vector2.Zero, 0, 0, Color.Wheat, Color.Transparent));
             }
             Collide(1);
@@ -143,12 +144,12 @@ public class Entity : IMissionComponent
     }
     public void GoToPosition(Vector2 _position, float speed)
     {
-        var collider = Engine.SaveGame.CurrentMission.IsColliding(Position, _position - Position, ColliderRadius, false, out float _);
+        //var collider = Engine.SaveGame.CurrentMission.IsColliding(Position, _position - Position, ColliderRadius, false, out float _);
         //TODO: Implement A# algorithm
-        if (collider != null)
-        {
-            return;
-        }
+        //if (collider != null)
+        //{
+            //return;
+        //}
         var targetVector = Vector2.Normalize(Vector2.Normalize(_position - Position) + GetNormalizedAcceleration() * 20f);
         Velocity += targetVector * speed * Engine.DeltaSeconds * 10;
     }
@@ -2227,9 +2228,9 @@ public class Entity : IMissionComponent
                 {
                     float cooldown = 1.5f - 0.25f * bullets;
                     Engine.SaveGame.CurrentMission.Add(NewSplitter(Position, Velocity + Util.ToUnitVector(Angle + 0.1f * bullets) * 8, Angle + 0.1f * bullets, Team, 6,
-                        [NewAssassinShot(default, default, 0, 0, Team, damage)], cooldown, 0, true));
+                        [NewAssassinShot(Vector2.Zero, Vector2.Zero, 0, 0, Team, damage)], cooldown, 0, true));
                     Engine.SaveGame.CurrentMission.Add(NewSplitter(Position, Velocity + Util.ToUnitVector(Angle - 0.1f * bullets) * 8, Angle - 0.1f * bullets, Team, 6,
-                        [NewAssassinShot(default, default, 0, 0, Team, damage)], cooldown, 0, true));
+                        [NewAssassinShot(Vector2.Zero, Vector2.Zero, 0, 0, Team, damage)], cooldown, 0, true));
                     SoundManager.PlaySound(Assets.Get(Sound.PulseFire), Position);
                     CD[1] = 0.25f;
                     CD[0] = 1;
@@ -2850,8 +2851,8 @@ public class Entity : IMissionComponent
     }
     public static Entity NewFighter(Vector2 position, Vector2 velocity, float angle, Team _team = Team.Hostile)
     {
-        var enemy = NewEnemy(position, velocity, angle, 8, Assets.Get(Sprites.Fighter), _team);
-        enemy.AddComponent(new Behaviour().AddBehaviour(enemy.Fighter()).AddBehaviour(enemy.AvoidNearbyAllies(2)).AddBehaviour(enemy.AvoidProjectiles(1)).AddBehaviour(enemy.EnemyDeath()));
+        var enemy = NewEnemy(position, velocity, angle, 6, Assets.Get(Sprites.Fighter), _team);
+        enemy.AddComponent(new Behaviour().AddBehaviour(enemy.Fighter()).AddBehaviour(enemy.AvoidNearbyAllies()).AddBehaviour(enemy.EnemyDeath()));
         return enemy;
     }
     IEnumerable<int> Scrapper()
@@ -2892,13 +2893,13 @@ public class Entity : IMissionComponent
     public static Entity NewScrapper(Vector2 position, Vector2 velocity, float angle, Team _team = Team.Hostile)
     {
         var enemy = NewEnemy(position, velocity, angle, 15, Assets.Get(Sprites.PlayerGun), _team);
-        enemy.AddComponent(new Behaviour().AddBehaviour(enemy.Scrapper()).AddBehaviour(enemy.AvoidNearbyAllies()).AddBehaviour(enemy.EnemyDeath()));
+        enemy.AddComponent(new Behaviour().AddBehaviour(enemy.Scrapper()).AddBehaviour(enemy.AvoidNearbyAllies(2)).AddBehaviour(enemy.AvoidProjectiles(1)).AddBehaviour(enemy.EnemyDeath()));
         return enemy;
     }
     IEnumerable<int> Carrier()
     {
-        int damage = 5;
-        CD = [0];
+        int damage = 4;
+        CD = [0, 0];
         EnemyRange.particleVelocity = 500;
         float targetAngle;
         while (Health > 0)
@@ -2917,11 +2918,11 @@ public class Entity : IMissionComponent
                 else if (distSqr < 75 * 75)
                 {
                     GoToPosition(nearestEnemy.Position, -1);
-                    if (CD[0] <= 0)
+                    if (CD[1] <= 0)
                     {
                         Engine.SaveGame.CurrentMission.Add(NewPulseShot(Position, Util.ToUnitVector(Angle) * 8, Angle, 0, Team, damage));
                         SoundManager.PlaySound(Assets.Get(Sound.PulseFire), Position);
-                        CD[0] = 0.25f;
+                        CD[1] = 0.25f;
                     }
                 }
                 else
@@ -2948,7 +2949,7 @@ public class Entity : IMissionComponent
     }
     IEnumerable<int> Sniper()
     {
-        int damage = 8;
+        int damage = 7;
         CD = [0];
         EnemyRange.particleVelocity = 400;
         float targetAngle;
@@ -3122,7 +3123,7 @@ public class Entity : IMissionComponent
     }
     IEnumerable<int> Shotgunner()
     {
-        int damage = 5;
+        int damage = 3;
         var shield = NewShield(this, 3, 25, 0, 0, Team);
         Engine.SaveGame.CurrentMission.Add(shield);
         EnemyRange.particleVelocity = 200;
@@ -3845,9 +3846,9 @@ public class Entity : IMissionComponent
         int damage = 8;
         CD = [0];
         EnemyRange.particleVelocity = 300;
-        float furnaceCooldown = 15;
-        float craftingCooldown = 12;
-        int requiredCraftsLeft = 20;
+        float furnaceCooldown = 8;
+        float craftingCooldown = 20;
+        int requiredCraftsLeft = 10;
         Pickup furnaceItem = null;
         bool currentlyCrafting = false;
         bool alert = false;
@@ -3879,22 +3880,22 @@ public class Entity : IMissionComponent
             }
             else
             {
-                furnaceCooldown = 15;
+                furnaceCooldown = 8;
             }
             if (currentlyCrafting)
             {
                 craftingCooldown -= Engine.DeltaSeconds;
                 if (craftingCooldown <= 0)
                 {
-                    craftingCooldown = 12;
+                    craftingCooldown = 20;
                     requiredCraftsLeft -= 1;
                     Collide(-100);
                     currentlyCrafting = false;
                 }
             }
 
-            Events.UpdateFurnaceUI(15 - furnaceCooldown, 15, furnaceItem);
-            Events.UpdateCraftingUI(12 - craftingCooldown, 12, requiredCraftsLeft);
+            Events.UpdateFurnaceUI(8 - furnaceCooldown, 8, furnaceItem);
+            Events.UpdateCraftingUI(20 - craftingCooldown, 20, requiredCraftsLeft);
             if (requiredCraftsLeft <= 5)
             {
                 if (CD[0] <= 0)
@@ -3905,7 +3906,7 @@ public class Entity : IMissionComponent
                         Vector2 relativePosition = Position - nearestEnemy.Position;
                         if (relativePosition.Length() < EnemyRange.particleVelocity)
                         {
-                            Engine.SaveGame.CurrentMission.Add(NewAssassinShot(Position, -Vector2.Normalize(relativePosition) * 100 + nearestEnemy.Velocity, MathF.Atan2(relativePosition.Y, relativePosition.X) - MathF.PI / 2, 0, Team, damage));
+                            Engine.SaveGame.CurrentMission.Add(NewAssassinShot(Position, -Vector2.Normalize(relativePosition) * 100 + nearestEnemy.Velocity * relativePosition.Length() / 100, MathF.Atan2(relativePosition.Y, relativePosition.X) - MathF.PI / 2, 0, Team, damage));
                             SoundManager.PlaySound(Assets.Get(Sound.MissileFire), Position);
                             CD[0] = 3;
                         }

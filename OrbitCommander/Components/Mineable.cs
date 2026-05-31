@@ -12,7 +12,7 @@ public class Mineable(Entity _entity) : IComponent
     {
         if (_entity.Health <= 0)
         {
-            MineTime += Engine.DeltaSeconds * 5 / _maxHealth;
+            MineTime += Engine.DeltaSeconds * 8 / _maxHealth;
             ParticleManager.Add(new Particle(Assets.Get(Sprites.Dot), 0.5f, _entity.Position, new Vector2(Util.OneToNegOne(), Util.OneToNegOne()), Util.OneToNegOne() * MathF.PI, Util.OneToNegOne() / 2, Color.Yellow, Color.Transparent));
         }
     }

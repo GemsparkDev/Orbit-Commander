@@ -38,7 +38,7 @@ public class Bomb() : Status(Sprites.Knob)
         {
             SoundManager.PlayGlobalSound(Assets.Get(Sound.Beep));
         }
-        ParticleManager.Add(new Particle(null, _parent.Position + _parent.Velocity + new Vector2(0, -15), 0, Color.Red) { drawText = (Math.Truncate((maxTime - time) * 100) / 100).ToString() });
+        ParticleManager.Add(new Particle(null, _parent.Position + new Vector2(0, -15), 0, Color.Red) { drawText = (Math.Truncate((maxTime - time) * 100) / 100).ToString() });
         if (time > maxTime)
         {
             _parent.Collide(999);
@@ -69,7 +69,7 @@ public class Fire(float _duration, Color _color) : Status(Sprites.Knob)
         else
         {
             fireCooldown = 0.05f;
-            ParticleManager.Add(new Particle(Assets.Get(Sprites.Circle), 0.5f + Util.Random.NextSingle() / 10, _parent.Position,
+            ParticleManager.Add(new Particle(Assets.Get(Sprites.Circle), 0.5f + Util.Random.NextSingle() / 10, _parent.Position - _parent.Velocity,
                 _parent.Velocity + new Vector2(Util.OneToNegOne() / 3, -Util.Random.NextSingle() - 0.5f), 0, Util.OneToNegOne() / 5, _color, Color.Transparent));
         }
         if (attackCooldown > 0)
