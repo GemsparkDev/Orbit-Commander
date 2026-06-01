@@ -716,8 +716,8 @@ public class Entity : IMissionComponent
         float targetAngle;
         if (_parent == null)
         {
-            tail1 = NewEnemy(Position, Velocity, Angle, 50, Assets.Get(Sprites.WyvernBoss), _parent.Team);
-            tail2 = NewEnemy(Position, Velocity, Angle, 75, Assets.Get(Sprites.WyvernBoss), _parent.Team);
+            tail1 = NewEnemy(Position, Velocity, Angle, 50, Assets.Get(Sprites.WyvernBoss), Team);
+            tail2 = NewEnemy(Position, Velocity, Angle, 75, Assets.Get(Sprites.WyvernBoss), Team);
             tail1.AddComponent(new Behaviour().AddBehaviour(tail1.WyvernBoss(this, 15)));
             tail2.AddComponent(new Behaviour().AddBehaviour(tail2.WyvernBoss(tail1, 4)));
             Engine.SaveGame.CurrentMission.Add(tail1);
@@ -2859,11 +2859,19 @@ public class Entity : IMissionComponent
     {
         EnemyRange.particleVelocity = 60;
         float targetAngle;
+        Entity nearestEnemy = null;
         while (Health > 0)
         {
             Velocity *= 0.8f;
             Vector2 normalizedAcceleration = GetNormalizedAcceleration();
-            Entity nearestEnemy = Util.Nearest(Position, Engine.SaveGame.CurrentMission.enemies.Where(x => x.Health <= 0).ToArray());
+            if(nearestEnemy == null || nearestEnemy.isExpired)
+            {
+                var entities = Engine.SaveGame.CurrentMission.enemies.Where(x => x.Health <= 0).ToArray();
+                if(entities.Length > 0)
+                {
+                    nearestEnemy = entities[Util.Random.Next(0, entities.Length)];
+                }
+            }
             if (nearestEnemy != null)
             {
                 Vector2 targetVector = nearestEnemy.Position - Position + (nearestEnemy.Velocity - Velocity) * 8;
@@ -2877,7 +2885,7 @@ public class Entity : IMissionComponent
                 {
                     Velocity += normalizedAcceleration * Engine.DeltaSeconds * 60;
                     nearestEnemy.Mine();
-                    Vector2 targetDir = Vector2.Normalize(nearestEnemy.Position - Position);
+                    var targetDir = Vector2.Normalize(nearestEnemy.Position - Position);
                     float length = (nearestEnemy.Position - Position).Length();
                     for (float i = 0; i < length; i+=2)
                     {
@@ -3942,8 +3950,12 @@ public class Entity : IMissionComponent
         Engine.SaveGame.CurrentMission.Add(turretCannon);
         while (true)
         {
-            Velocity *= 0;
+            Velocity *= Util.FIED(0.1f);
             turretCannon.Position = Position + new Vector2(8 * MathF.Sin(Angle), -8 * MathF.Cos(Angle));
+            //Equalizes temperature
+            float turretTemperature = turretCannon.Temperature;
+            turretCannon.ConductHeat(Temperature, 0.1f);
+            ConductHeat(turretTemperature, 0.1f);
             Entity nearestPickup = Engine.SaveGame.CurrentMission.NearestItem(this, false);
             if (nearestPickup != null)
             {

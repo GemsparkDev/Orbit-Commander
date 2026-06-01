@@ -25,7 +25,7 @@ public class Mission
     [
         //T1
 
-        (new MissionData("Crash Landing","The crash landing site. Objective: Explore the system.", 160, [], 0, 2000, 1),
+        (new MissionData("Crash Landing","The crash landing site. Objective: Explore the system.", 160, [], 0, 2000, 0),
         delegate(){Entity m; 
         return new Mission([
             new Planet(new Vector2(1000, 0), Planet.GetOrbitalVelocity(new Vector2(1000, 0), Vector2.Zero, 10000), 250, 1.5f, false, Color.Cyan),

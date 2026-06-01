@@ -127,7 +127,8 @@ internal class WaveSpawner : IMissionComponent
                 SoundManager.ChangeTrack(Assets.Get(Sound.boss));
             }
 
-            if (Wave % 15 == 0)
+            //First mission should not spawn bosses
+            if (Wave % 15 == 0 && missions[Engine.SaveGame.CurrentMissionIndex].data.PlayerProgression > 1)
             {
                 var pos = Engine.SaveGame.CurrentMission.NewSpawnLocation();
                 Entity boss = bosses[currentBoss](pos, Vector2.Zero, MathF.Atan2(-pos.X, pos.Y), Team.Hostile);
