@@ -3928,7 +3928,7 @@ public class Entity : IMissionComponent
             if (!alert && requiredCraftsLeft == 19)
             {
                 SoundManager.PlaySound(Assets.Get(Sound.Beep), Position);
-                ParticleManager.Add(new Particle(null, 5, Position + new Vector2(0, -30), Velocity, Angle, 0, Color.Red, Color.Transparent) { drawText = "Alert: Enemies detected.\nDefend the mothership." });
+                ParticleManager.Add(new Particle(null, 5, Position + new Vector2(0, -80), Velocity, Angle, 0, Color.Red, Color.Transparent) { drawText = "Alert: Enemies detected.\nDefend the mothership." });
                 var comp = new WaveSpawner(Util.T1, 1, false);
                 Engine.SaveGame.CurrentMission.Add(comp);
                 comp.Initialize();

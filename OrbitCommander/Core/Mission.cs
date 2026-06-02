@@ -31,7 +31,7 @@ public class Mission
             new Planet(new Vector2(1000, 0), Planet.GetOrbitalVelocity(new Vector2(1000, 0), Vector2.Zero, 10000), 250, 1.5f, false, Color.Cyan),
             new Planet(Vector2.Zero, Vector2.Zero, 10000, 8, true, Color.Cyan),
             new IntroCutscene(RestartCutscene),
-            new Tip("WASD to move, Space to dock and undock.\nRmb to collect scrap, Lmb to shoot.", new Vector2(0, 9*50)),
+            new Tip("WASD to move, Space to dock and undock.\nRmb to collect scrap, Lmb to shoot.", new Vector2(0, -500)),
             ItemFactory.NewScrap(new Vector2(0, -8*50), new Vector2(10, -10), 0.07f),
             ItemFactory.NewScrap(new Vector2(0, -8*50), new Vector2(-8, -4), -0.03f),
             m = Entity.NewMothership(new Vector2(0, -8*50 - Assets.DimsOf(Sprites.Mothership).Y / 2), Vector2.Zero, 0f),],
@@ -51,6 +51,7 @@ public class Mission
             Entity.NewTurret(new Vector2(MathF.Sin(-0.3f), -MathF.Cos(-0.3f)) * 12 * 50, Vector2.Zero, -0.3f, Team.Friendly),
             e = Entity.NewCrashedShip(new Vector2(-6000, -6640), Vector2.Zero, -MathF.PI * 3 / 8),
             new WaveSpawner(T1, 0.18f, true),
+            new Tip("Press Q to use your ability. Fuse count empowers or weakens modules.\nRestart failed modules to preserve fuses.", new Vector2(0, -13*50)),
             new IntroCutscene(QueueCrossfireDialogue),
         ], new Conditional([new Protect([e]), new Custom(e)], SendPickup(2000, RepairCrashedShip)),
         new DropSpawner(4000));}),
@@ -85,13 +86,14 @@ public class Mission
             g=Entity.NewOrbiter(new Vector2(0, 1650), Planet.GetOrbitalVelocity(new Vector2(0, 1650), new Vector2(0, 1800), 1500)
                 + Planet.GetOrbitalVelocity(new Vector2(0, 1800), Vector2.Zero, 20000), 0),
             new WaveSpawner(T2, 0.75f, true),
-            new Tip("Press C to open the construct menu.\nEach construct requires one scrap to craft.", new Vector2(0, -9*50)),
+            new Tip("Entering atmospheres heat you up when moving quickly.\nExtreme temperatures inflict dangerous debuffs.", new Vector2(0, -1700)),
             ], new Conditional([new Kill([a,b,c,d,e,f]), new Protect([g])], Win()),
              new CustomSpawner(new Vector2(0, 1650)));}),
 
         (new("Gas Giant", "", 10, [4], 1, 2000),
         delegate(){var p = new Planet(Vector2.Zero, Vector2.Zero, 16000, 4, true, new Color(167, 156, 134));
             return new([
+            new Tip("Press C to access the construct menu.\nEach construct costs one scrap.", new Vector2(0, -500)),
             p.AddComponent(new Atmosphere(p, 6, 16000))
              .AddComponent(new Ring(p) { Offset = 500, Mass = 16000 }),
             new Planet(new Vector2(900, 0), Planet.GetOrbitalVelocity(new Vector2(900, 0), Vector2.Zero, 16000), 100, 0.5f, false, Color.OldLace),
