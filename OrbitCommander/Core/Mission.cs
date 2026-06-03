@@ -158,6 +158,14 @@ public class Mission
             new GliderSpawner(new Vector2(-1500, -2000), -1500), Sound.None);}),
 
         //Epilogue
+        (new("Boss Rush", "",
+        100, [], 3, 2000, 1),
+        delegate(){ Entity b;return new([
+            new Planet(Vector2.Zero, Vector2.Zero, 3500, 4, true, Color.Cyan),
+            new BossRush(),
+            b=Entity.NewOrbiter(new Vector2(400, 0), Planet.GetOrbitalVelocity(new Vector2(400, 0), Vector2.Zero, 3500), 0),
+        ], new Conditional([new Protect([b])], SendPickup(2000)),
+         new DropSpawner(1500));} ),
 
         (new("Sentry Defense", "We've been assigned to defend this small planet.\n *Repair will not be available for this mission*",
         100, [], 3, 2000, 1),
@@ -442,7 +450,7 @@ public class Mission
             objective = objective.Update();    
         }
         //Prevents players from losing important items
-        Entity[] importantEntites = Engine.SaveGame.CurrentMission.Entities.Where(x => x.HasTag(Tags.IsImportant)).ToArray();
+        Entity[] importantEntites = [.. Engine.SaveGame.CurrentMission.Entities.Where(x => x.HasTag(Tags.IsImportant))];
         float r = missions[Engine.SaveGame.CurrentMissionIndex].data.EdgeRadius;
         foreach(var entity in importantEntites)
         {

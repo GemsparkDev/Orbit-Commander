@@ -103,7 +103,7 @@ public class Entity : IMissionComponent
         stationaryEmitter.ParticleEmitter.particleColor = Color * stealth;
     }
     public virtual void Initialize() { }
-    public void CollideWith(Entity nearestEnemy)
+    public bool CollideWith(Entity nearestEnemy)
     {
         if (nearestEnemy != null && Vector2.Distance(nearestEnemy.Position, Position) < ColliderRadius + nearestEnemy.ColliderRadius)
         {
@@ -113,7 +113,9 @@ public class Entity : IMissionComponent
                 ParticleManager.Add(new Particle(Assets.Get(Sprites.Glow), 0.33f, Position, Vector2.Zero, 0, 0, Color.Wheat, Color.Transparent));
             }
             Collide(1);
+            return true;
         }
+        return false;
     }
     public bool isExpired = false;
     private Dictionary<Type, IComponent> components = [];
@@ -411,7 +413,7 @@ public class Entity : IMissionComponent
     #region Bosses
     IEnumerable<int> SymmetryBoss()
     {
-        int damage = 6;
+        int damage = 5;
         EnemyRange.particleVelocity = 500;
         CD =
         [
@@ -423,6 +425,7 @@ public class Entity : IMissionComponent
         float bulletCount = 0;
         bool hasLaunchedAllies = false;
         float targetAngle;
+        Team team = Team;
         while (true)
         {
             if (missileCooldown > 0)
@@ -514,7 +517,7 @@ public class Entity : IMissionComponent
                 }
                 isExpired = true;
                 SoundManager.PlaySound(Assets.Get(Sound.Death), Position);
-                if (Team == Team.Hostile)
+                if (team == Team.Hostile)
                 {
                     if (Engine.SaveGame.GiveWeapon)
                     {
@@ -718,7 +721,7 @@ public class Entity : IMissionComponent
         {
             tail1 = NewEnemy(Position, Velocity, Angle, 50, Assets.Get(Sprites.WyvernBoss), Team);
             tail2 = NewEnemy(Position, Velocity, Angle, 75, Assets.Get(Sprites.WyvernBoss), Team);
-            tail1.AddComponent(new Behaviour().AddBehaviour(tail1.WyvernBoss(this, 15)));
+            tail1.AddComponent(new Behaviour().AddBehaviour(tail1.WyvernBoss(this, 8)));
             tail2.AddComponent(new Behaviour().AddBehaviour(tail2.WyvernBoss(tail1, 4)));
             Engine.SaveGame.CurrentMission.Add(tail1);
             Engine.SaveGame.CurrentMission.Add(tail2);
@@ -845,7 +848,7 @@ public class Entity : IMissionComponent
     public static Entity NewWyvernBoss(Vector2 position, Vector2 velocity, float angle, Team _team = Team.Hostile)
     {
         var enemy = NewEnemy(position, velocity, angle, 100, Assets.Get(Sprites.WyvernBoss), _team);
-        enemy.AddComponent(new Behaviour().AddBehaviour(enemy.WyvernBoss(null, 8)));
+        enemy.AddComponent(new Behaviour().AddBehaviour(enemy.WyvernBoss(null, 6)));
         return enemy;
     }
     IEnumerable<int> ExcursionBoss()
@@ -2151,10 +2154,10 @@ public class Entity : IMissionComponent
                 {
                     if (CD[0] <= 0)
                     {
-                        List<Entity> bullets = [];
+                        List<Func<Vector2, Vector2, float, Entity>> bullets = [];
                         for (int i = 0; i < 3; i++)
                         {
-                            bullets.Add(NewPulseShot(Vector2.Zero, Vector2.Zero, 0, 0, Team, damage, true, 0));
+                            bullets.Add(delegate (Vector2 _position, Vector2 _velocity, float _angle) { return NewPulseShot(_position, _velocity, _angle, 0, Team, damage, true, 0); });
                         }
                         Engine.SaveGame.CurrentMission.Add(NewSplitter(Position, Velocity + dir * 10 + new Vector2(Util.OneToNegOne(), Util.OneToNegOne()) * 2, Angle, Team, damage, bullets, 0.25f));
                         SoundManager.PlaySound(Assets.Get(Sound.PulseFire), Position);
@@ -2220,7 +2223,7 @@ public class Entity : IMissionComponent
                 if (CD[0] <= 0)
                 {
                     Engine.SaveGame.CurrentMission.Add(NewSplitter(Position, Velocity + Util.ToUnitVector(Angle) * 8, Angle, Team, 6,
-                        [NewAssassinShot(default, default, 0, 0, Team, damage)], 0.5f, 0, true));
+                        [delegate(Vector2 _position, Vector2 _velocity, float _angle) { return NewAssassinShot(_position, _velocity, _angle, 0, Team, damage); }], 0.5f, 0, true));
                     SoundManager.PlaySound(Assets.Get(Sound.PulseFire), Position);
                     CD[0] = 1;
                 }
@@ -2228,9 +2231,9 @@ public class Entity : IMissionComponent
                 {
                     float cooldown = 1.5f - 0.25f * bullets;
                     Engine.SaveGame.CurrentMission.Add(NewSplitter(Position, Velocity + Util.ToUnitVector(Angle + 0.1f * bullets) * 8, Angle + 0.1f * bullets, Team, 6,
-                        [NewAssassinShot(Vector2.Zero, Vector2.Zero, 0, 0, Team, damage)], cooldown, 0, true));
+                        [delegate (Vector2 _position, Vector2 _velocity, float _angle) { return NewAssassinShot(_position, _velocity, _angle, 0, Team, damage); }], cooldown, 0, true));
                     Engine.SaveGame.CurrentMission.Add(NewSplitter(Position, Velocity + Util.ToUnitVector(Angle - 0.1f * bullets) * 8, Angle - 0.1f * bullets, Team, 6,
-                        [NewAssassinShot(Vector2.Zero, Vector2.Zero, 0, 0, Team, damage)], cooldown, 0, true));
+                        [delegate (Vector2 _position, Vector2 _velocity, float _angle) { return NewAssassinShot(_position, _velocity, _angle, 0, Team, damage); }], cooldown, 0, true));
                     SoundManager.PlaySound(Assets.Get(Sound.PulseFire), Position);
                     CD[1] = 0.25f;
                     CD[0] = 1;
@@ -2343,15 +2346,15 @@ public class Entity : IMissionComponent
                     Velocity += (velocityOffset + GetNormalizedAcceleration() * 60 + Vector2.Normalize(new Vector2(relativePosition.Y, -relativePosition.X)) * 25 * direction) * Engine.DeltaSeconds;
                     if (CD[0] <= 0)
                     {
-                        List<Entity> splitters = [];
+                        List<Func<Vector2, Vector2, float, Entity>> splitters = [];
                         for (int i = 0; i < 3; i++)
                         {
-                            List<Entity> finalBullets = [];
+                            List<Func<Vector2, Vector2, float, Entity>> finalBullets = [];
                             for (int j = 0; j < 3; j++)
                             {
-                                finalBullets.Add(NewPulseShot(Position, Velocity, 0, 0, Team, damage, false, 1));
+                                finalBullets.Add(delegate (Vector2 _position, Vector2 _velocity, float _angle) { return NewPulseShot(_position, _velocity, _angle, 0, Team, damage, false, 1); });
                             }
-                            splitters.Add(NewSplitter(Position, Velocity, 0, Player.Team, (int)(damage * 1.5f), finalBullets, 0.05f, 1));
+                            splitters.Add(delegate (Vector2 _position, Vector2 _velocity, float _angle) { return NewSplitter(_position, _velocity, _angle, Player.Team, (int)(damage * 1.5f), finalBullets, 0.05f, 1); });
                         }
                         var dir = Vector2.Normalize(relativePosition);
                         Engine.SaveGame.CurrentMission.Add(NewSplitter(Position, nearestEnemy.Velocity + dir * 8, Util.ToAngle(dir), Team, damage * 2, splitters, 0.05f));
@@ -2361,15 +2364,15 @@ public class Entity : IMissionComponent
                     }
                     if (CD[3] <= 0 && CD[4] <= 0f)
                     {
-                        List<Entity> splitters = [];
+                        List<Func<Vector2, Vector2, float, Entity>> splitters = [];
                         for (int i = 0; i < 3; i++)
                         {
-                            List<Entity> finalBullets = [];
+                            List<Func<Vector2, Vector2, float, Entity>> finalBullets = [];
                             for (int j = 0; j < 3; j++)
                             {
-                                finalBullets.Add(NewAssassinShot(Position, Velocity, 0, 0, Team, damage));
+                                finalBullets.Add(delegate (Vector2 _position, Vector2 _velocity, float _angle) { return NewAssassinShot(_position, _velocity, _angle, 0, Team, damage); });
                             }
-                            splitters.Add(NewSplitter(Position, Velocity, 0, Player.Team, (int)(damage * 1.5f), finalBullets, 0.2f, 1, true));
+                            splitters.Add(delegate (Vector2 _position, Vector2 _velocity, float _angle) { return NewSplitter(_position, _velocity, _angle, Player.Team, (int)(damage * 1.5f), finalBullets, 0.2f, 1, true); });
                         }
                         var dir = Vector2.Normalize(relativePosition);
                         Engine.SaveGame.CurrentMission.Add(NewSplitter(Position, nearestEnemy.Velocity + dir * 4, Util.ToAngle(dir), Team, damage * 2, splitters, 0.2f));
@@ -5215,28 +5218,24 @@ public class Entity : IMissionComponent
         shot.AddComponent(behaviour);
         return shot;
     }
-    IEnumerable<int> Splitter(float cooldown, List<Entity> splits, bool targetting)
+    IEnumerable<int> Splitter(float cooldown, List<Func<Vector2, Vector2, float, Entity>> splits, bool targetting)
     {
         while (true)
         {
             Entity nearestEnemy = Engine.SaveGame.CurrentMission.NearestEnemy(this);
-            nearestEnemy.Collide(GetComponent<Attack>().Damage);
-            Collide(1);
+            CollideWith(nearestEnemy);
             if (cooldown < 0)
             {
                 if (targetting && nearestEnemy != null)
                 {
                     for (int i = 0; i < splits.Count; i++)
                     {
-                        splits[i].Position = Position;
                         float a = 0;
                         if (splits.Count != 1)
                         {
                             a = -MathF.PI / 4 + MathF.PI / splits.Count * i / 2;
                         }
-                        splits[i].Angle = Angle + a;
-                        splits[i].Velocity = Util.PredictEnemy(nearestEnemy, this, 12, a);
-                        Engine.SaveGame.CurrentMission.Add(splits[i]);
+                        Engine.SaveGame.CurrentMission.Add(splits[i](Position, Util.PredictEnemy(nearestEnemy, this, 12, a), Angle + a));
                     }
                 }
                 else
@@ -5255,16 +5254,13 @@ public class Entity : IMissionComponent
                 {
                     float a = Angle + MathF.Tau / splits.Count * i;
                     Vector2 vel = Util.ToUnitVector(a);
-                    splits[i].Position = Position + vel * 5;
-                    splits[i].Velocity = vel * 2 + Velocity;
-                    splits[i].Angle = a;
-                    Engine.SaveGame.CurrentMission.Add(splits[i]);
+                    Engine.SaveGame.CurrentMission.Add(splits[i](Position + vel * 5, vel * 2 + Velocity, a));
                 }
             }
             yield return 0;
         }
     }
-    public static Entity NewSplitter(Vector2 _position, Vector2 _velocity, float _angle, Team _team, int _damage, List<Entity> _splits, float _cooldown = 1, int _stealth = 0, bool _targetting = false)
+    public static Entity NewSplitter(Vector2 _position, Vector2 _velocity, float _angle, Team _team, int _damage, List<Func<Vector2, Vector2, float, Entity>> _splits, float _cooldown = 1, int _stealth = 0, bool _targetting = false)
     {
         var shot = NewProjectile(Assets.Get(Sprites.Explosive), _position, _velocity, _angle, 0, _team, _damage, _stealth);
         var behaviour = new Behaviour();

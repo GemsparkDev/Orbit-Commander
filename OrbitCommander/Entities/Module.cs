@@ -909,10 +909,10 @@ public class SplitterModule() : Module(Modules.SplitterModule)
         }
         if (ammo.Fire())
         {
-            List<Entity> missiles = [];
+            List<Func<Vector2, Vector2, float, Entity>> missiles = [];
             for (int i = 0; i < 3; i++)
             {
-                missiles.Add(NewMissile(Position, Velocity, 0, Team, 1));
+                missiles.Add(delegate(Vector2 _position, Vector2 _velocity, float _angle) { return NewMissile(_position, _velocity, _angle, Team, 1); });
             }
             Engine.SaveGame.CurrentMission.Add(NewSplitter(Player.Position, Player.IdealSpeedWithVelocity(8), Util.ToAngle(Player.Direction), Team, 8, missiles, 0.5f));
             SoundManager.PlaySound(Assets.Get(Sound.PulseFire), Player.Position);
@@ -941,17 +941,15 @@ public class Fractal() : Module(Modules.Fractal)
         }
         if (ammo.Fire())
         {
-            List<Entity> splitters = [];
+            List<Func<Vector2, Vector2, float, Entity>> splitters = [];
             for (int i = 0; i < 3; i++)
             {
-                List<Entity> finalBullets = [];
+                List<Func<Vector2, Vector2, float, Entity>> finalBullets = [];
                 for (int j = 0; j < 8; j++)
                 {
-                    finalBullets.Add(NewPulseShot(Position, Velocity, 0, 0, Team, 3, false, 1));
+                    finalBullets.Add(delegate (Vector2 _position, Vector2 _velocity, float _angle) { return NewPulseShot(_position, _velocity, _angle, 0, Team, 3, false, 1); });
                 }
-                var p2 = NewSplitter(Position, Velocity, 0, Team, 5, finalBullets, 0.2f, 1);
-                p2.Texture = Assets.Get(Sprites.Glow);
-                splitters.Add(p2);
+                splitters.Add(delegate (Vector2 _position, Vector2 _velocity, float _angle) { var p2 = NewSplitter(_position, _velocity, _angle, Team, 5, finalBullets, 0.2f, 1); p2.Texture = Assets.Get(Sprites.Glow); return p2; });
             }
             var p1 = NewSplitter(Player.Position, Player.IdealSpeedWithVelocity(6), Util.ToAngle(Player.Direction), Team, 8, splitters, 0.2f);
             p1.Texture = Assets.Get(Sprites.Glow);
@@ -982,7 +980,7 @@ public class CrackShot() : Module(Modules.CrackShot)
         }
         if (ammo.Fire())
         {
-            Engine.SaveGame.CurrentMission.Add(NewSplitter(Player.Position, Player.IdealSpeedWithVelocity(8), Util.ToAngle(Player.Direction), Team, 3, [NewAssassinShot(Position, default, 0, 0, Team, 3, 0)], 0.2f, 0, true));
+            Engine.SaveGame.CurrentMission.Add(NewSplitter(Player.Position, Player.IdealSpeedWithVelocity(8), Util.ToAngle(Player.Direction), Team, 3, [delegate (Vector2 _position, Vector2 _velocity, float _angle) { return NewAssassinShot(_position, _velocity, _angle, 0, Team, 3, 0); }], 0.2f, 0, true));
             SoundManager.PlaySound(Assets.Get(Sound.PulseFire), Player.Position);
             Engine.ShakeScreen(0.3f);
             Player.Velocity -= Player.Direction / 2;

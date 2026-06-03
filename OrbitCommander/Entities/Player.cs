@@ -775,6 +775,10 @@ public class Player : Entity
             }
         }
         _damage = Statuses.ModifyDamage(_damage);
+        if(IsRestarting)
+        {
+            _damage = (int)(_damage*0.5f);
+        }
         if (_damage > 0 && (invincibilityCooldown <= 0 || _ignoreImmunity))
         {
             ApplyWork(_damage);
@@ -790,7 +794,7 @@ public class Player : Entity
             }
             ParticleManager.Add(new Particle(null, 1, Position + new Vector2(0, -1), new Vector2(0, -1.5f), 0, 0, Color.Red, Color.Transparent) { drawText = $"{_damage}" });
             //Part and Fuse Failure
-            if (Progression > 0)
+            if (Progression > 0 && !IsRestarting)
             {
                 //If a module is failed, further collisions damage fuses
                 var targetFuse = new Vector2(Util.Random.Next(0, moduleFuses.GetLength(0)), Util.Random.Next(0, moduleFuses.GetLength(1)));
@@ -803,7 +807,7 @@ public class Player : Entity
                     SoundManager.PlaySound(Assets.Get(Sound.Beep), Position);
                     Events.UpdateFuseUI(moduleFuses, spareFuses);
                 }
-                else if (Util.Random.Next(0, 5) == 0 && modules[failedPart].Health < modules[failedPart].MaxHealth / 2)
+                else if (Util.Random.Next(0, 8) == 0)
                 {
                     if (modules[failedPart].isFailed)
                     {

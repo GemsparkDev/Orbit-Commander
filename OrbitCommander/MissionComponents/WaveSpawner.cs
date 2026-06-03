@@ -69,9 +69,9 @@ internal class WaveSpawner : IMissionComponent
                     Engine.SaveGame.CurrentMission.Add(enemy);
                     float angle = MathF.Atan2(-enemy.Position.X, enemy.Position.Y);
                     float height = Assets.DimsOf(Sprites.Dot).X;
+                    var dir = Vector2.Normalize(enemy.Position);
                     for (float i = 0; i < 500; i++)
                     {
-                        var dir = Vector2.Normalize(enemy.Position);
                         float pow = (500 - i) / 500;
                         ParticleManager.Add(new Particle(Assets.Get(Sprites.Dot), 0.5f, enemy.Position + dir * i * height, Vector2.Zero, angle, 0, new Color(255, 0, 0), Color.Transparent));
                     }
@@ -122,7 +122,7 @@ internal class WaveSpawner : IMissionComponent
             {
                 SoundManager.ChangeTrack(Assets.Get(Sound.main));
             }
-            if (Wave % 20 == 0)
+            if (Wave % 15 == 0)
             {
                 SoundManager.ChangeTrack(Assets.Get(Sound.boss));
             }
@@ -209,9 +209,5 @@ internal class WaveSpawner : IMissionComponent
         }
         UI.EnemiesLeft.text = (currentWaveActive ? enemiesSpawned.Where(x => x.Health > 0).Count() : 0).ToString();
         Events.UpdateEnemyCountdownUI(waveTimer, maxWaveTimer, Wave);
-    }
-    public IMissionComponent Clone()
-    {
-        return new WaveSpawner(enemyCreditValues, bosses, TimerModifier, isAggressive);
     }
 }
