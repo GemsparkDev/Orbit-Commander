@@ -43,7 +43,7 @@ internal class BossRush : IMissionComponent
         if (isReady)
         {
             currentWaveActive = false;
-            waveTimer = 10f;
+            waveTimer = 30f;
             maxWaveTimer = waveTimer;
             Engine.SaveGame.CurrentMission.Wave++;
             var pos = Engine.SaveGame.CurrentMission.NewSpawnLocation();

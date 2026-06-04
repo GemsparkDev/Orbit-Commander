@@ -735,13 +735,6 @@ public class Entity : IMissionComponent
             Vector2 normalizedAcceleration = GetNormalizedAcceleration();
             if (Health <= 0)
             {
-                if (GetComponent<Collide>().WasHit && Util.Random.Next(0, 10) == 0)
-                {
-                    for (float angle = 0; angle < MathF.Tau; angle += MathF.PI / 3)
-                    {
-                        Engine.SaveGame.CurrentMission.Add(NewAssassinShot(Position, Util.ToUnitVector(angle) * 8, angle, 0, Team, 6, 1));
-                    }
-                }
                 if (!hasExploded)
                 {
                     Explode(6, ColliderRadius);
@@ -753,7 +746,7 @@ public class Entity : IMissionComponent
                     else
                     {
                         hasExploded = true;
-                        Position = new Vector2(10000, 10000);
+                        Position = tail2.Position;
                         if (Engine.SaveGame.GiveWeapon)
                         {
                             Engine.SaveGame.CurrentMission.Add(new LMG() { Position = Position, Velocity = normalizedAcceleration * 10, AngularVelocity = AngularVelocity });
@@ -770,6 +763,13 @@ public class Entity : IMissionComponent
                     {
                         isExpired = tail1.isExpired && tail2.isExpired;
                     }
+                }
+            }
+            if (GetComponent<Collide>().WasHit && Util.Random.Next(0, 5) == 0)
+            {
+                for (float angle = 0; angle < MathF.Tau; angle += MathF.PI / 3)
+                {
+                    Engine.SaveGame.CurrentMission.Add(NewAssassinShot(Position, Util.ToUnitVector(angle) * 8, angle, 0, Team, 6, 1));
                 }
             }
             if (parent != null)
@@ -1622,7 +1622,6 @@ public class Entity : IMissionComponent
     {
         int vision = 75;
         CD = [Util.Random.NextSingle() * 3, 0];
-        var nearestEnemy = Engine.SaveGame.CurrentMission.NearestEnemy(this);
         while (true)
         {
             Velocity *= 0.95f;
@@ -1633,7 +1632,7 @@ public class Entity : IMissionComponent
             }
             Vector2 acceleration = Vector2.Zero;
             bool goToParent = false;
-            if (_parent.GetComponent<Health>() == null || !(_parent.Health <= 0))
+            if (_parent.GetComponent<Health>() == null || _parent.Health > 0)
             {
                 goToParent = CD[0] > 0;
             }
@@ -1665,6 +1664,7 @@ public class Entity : IMissionComponent
             {
                 acceleration += (velocitySum / totalBirds - Velocity) / 4;
             }
+            var nearestEnemy = Engine.SaveGame.CurrentMission.NearestEnemy(this);
             if (nearestEnemy != null)
             {
                 acceleration += Vector2.Normalize(nearestEnemy.Position - Position) * 5 * (!goToParent ? 10 : 1);

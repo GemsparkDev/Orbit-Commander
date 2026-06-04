@@ -3,6 +3,11 @@
 Lagrange Commander is a game made using C# in monogame. It is a 2D top down wave based shooter where you must repair and upgrade your ship by salvaging from enemies you defeat. It features realistic N-Body gravitation, which affects all entities and projectiles.
   
 # Changelog
+0.8.6.0 - 6/3/2026
+ - Fixed the Wyvern reflection only happening on death.
+ - Fixed WasHit sometimes being false when it's true.
+ - Fixed the Wyvern boss dropping scrap in the middle of nowhere.
+ - Increased the boss rush timer to 30 seconds.
 0.8.5.9 - 6/2/2026
  - Increased the rate of heat loss.
  - Reduced the damage of the Wyvern and Symmetry bosses.

@@ -159,7 +159,7 @@ public class Mission
 
         //Epilogue
         (new("Boss Rush", "",
-        100, [], 3, 2000, 1),
+        100, [], 3, 2000, 4),
         delegate(){ Entity b;return new([
             new Planet(Vector2.Zero, Vector2.Zero, 3500, 4, true, Color.Cyan),
             new BossRush(),
