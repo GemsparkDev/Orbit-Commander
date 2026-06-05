@@ -1550,6 +1550,7 @@ public class Entity : IMissionComponent
         }
         while (true)
         {
+            var direction = Vector2.Normalize(Engine.SaveGame.Player.Position - Position);
             if (children.Count <= 0)
             {
                 if (Health <= 0)
@@ -1567,21 +1568,15 @@ public class Entity : IMissionComponent
                 }
                 else
                 {
-                    Velocity += (Engine.SaveGame.Player.Position - Position) * 30 * Engine.DeltaSeconds;
-                    if (Velocity.Length() > 12)
-                    {
-                        Velocity = Vector2.Normalize(Velocity) * 12;
-                    }
-                    if (Velocity.Length() < 1)
-                    {
-                        Velocity += Util.ToUnitVector(Angle) * 30 * Engine.DeltaSeconds;
-                    }
+                    Velocity = Vector2.Normalize(Velocity) * Math.Clamp(Velocity.Length(), 1, 12);
+                    Velocity += direction * MathF.Min((Engine.SaveGame.Player.Position - Position).Length(), 100) / 3 * Engine.DeltaSeconds + GetNormalizedAcceleration() * Velocity.Length() * 60 * Engine.DeltaSeconds;
                     if (CD[0] <= 0 && Vector2.Distance(Engine.SaveGame.Player.Position, Position) < 450 && Vector2.Dot(Velocity, Engine.SaveGame.Player.Position - Position) / (Velocity.Length() * (Engine.SaveGame.Player.Position - Position).Length()) > 0.75f)
                     {
                         CD[0] = 0.8f;
-                        Vector2 dir = Util.ToUnitVector(Angle) * 12;
-                        Engine.SaveGame.CurrentMission.Add(NewSpiralShot(Position, dir, Angle, 0, Team, damage, 0));
-                        Engine.SaveGame.CurrentMission.Add(NewSpiralShot(Position, dir, Angle, 0, Team, damage, MathF.PI));
+                        for (int i = 0; i < Util.Random.Next(2, 5); i++)
+                        {
+                            Engine.SaveGame.CurrentMission.Add(NewSpiralShot(Position, Util.ToUnitVector(Angle) * 12 + new Vector2(Util.OneToNegOne(), Util.OneToNegOne()), Angle, 0, Team, damage, 0));
+                        }
                     }
                     Angle = Util.ToAngle(Velocity);
                 }
@@ -1590,19 +1585,15 @@ public class Entity : IMissionComponent
             {
                 if (Health > 0)
                 {
-                    Velocity += (Engine.SaveGame.Player.Position - Position * 12) * Engine.DeltaSeconds;
-                    if (Velocity.Length() > 10)
-                    {
-                        Velocity = Vector2.Normalize(Velocity) * 10;
-                    }
-                    if (Velocity.Length() < 1)
-                    {
-                        Velocity += Util.ToUnitVector(Angle) * 300 * Engine.DeltaSeconds;
-                    }
+                    Velocity = Vector2.Normalize(Velocity) * Math.Clamp(Velocity.Length(), 1, 8);
+                    Velocity += direction * MathF.Min((Engine.SaveGame.Player.Position - Position).Length(), 100) / 8 * Engine.DeltaSeconds + GetNormalizedAcceleration() * Velocity.Length() * 60 * Engine.DeltaSeconds;
                     if (CD[0] <= 0 && Vector2.Distance(Engine.SaveGame.Player.Position, Position) < 300 && Vector2.Dot(Velocity, Engine.SaveGame.Player.Position - Position) / (Velocity.Length() * (Engine.SaveGame.Player.Position - Position).Length()) > 0.75f)
                     {
                         CD[0] = 1f;
-                        Engine.SaveGame.CurrentMission.Add(NewSpiralShot(Position, Util.ToUnitVector(Angle) * 8, Angle, 0, Team, damage, 0));
+                        for(int i = 0; i < Util.Random.Next(1, 3); i++)
+                        {
+                            Engine.SaveGame.CurrentMission.Add(NewSpiralShot(Position, Util.ToUnitVector(Angle) * 8 + new Vector2(Util.OneToNegOne(), Util.OneToNegOne()), Angle, 0, Team, damage, 0));
+                        }
                     }
                     Angle = Util.ToAngle(Velocity);
                 }
@@ -1624,7 +1615,7 @@ public class Entity : IMissionComponent
         CD = [Util.Random.NextSingle() * 3, 0];
         while (true)
         {
-            Velocity *= 0.95f;
+            Velocity *= Util.FIED(0.5f);
             if (Health <= 0)
             {
                 isExpired = true;
@@ -1632,7 +1623,8 @@ public class Entity : IMissionComponent
             }
             Vector2 acceleration = Vector2.Zero;
             bool goToParent = false;
-            if (_parent.GetComponent<Health>() == null || _parent.Health > 0)
+            bool parentAlive = _parent.GetComponent<Health>() == null || _parent.Health > 0;
+            if (parentAlive)
             {
                 goToParent = CD[0] > 0;
             }
@@ -1669,12 +1661,16 @@ public class Entity : IMissionComponent
             {
                 acceleration += Vector2.Normalize(nearestEnemy.Position - Position) * 5 * (!goToParent ? 10 : 1);
             }
-            float speed = (Velocity - _parent.Velocity).Length();
-            if (speed < 1)
+            float speed = Vector2.Dot(Velocity, _parent.Velocity) / (_parent.Velocity.Length());
+            if (speed < -1)
             {
                 acceleration += Util.ToUnitVector(Angle) * 30;
             }
-            if (speed > 6)
+            if (speed > 15)
+            {
+                acceleration -= Util.ToUnitVector(Angle) * 30;
+            }
+            if(MathF.Abs(Util.Cross(Velocity, _parent.Velocity) / _parent.Velocity.Length()) > 3)
             {
                 acceleration -= Util.ToUnitVector(Angle) * 30;
             }
@@ -1689,7 +1685,7 @@ public class Entity : IMissionComponent
                 acceleration = Vector2.Normalize(acceleration) * 25;
             }
             Velocity += acceleration * Engine.DeltaSeconds;
-            Angle = Util.ToAngle(acceleration);
+            Angle = Util.ToAngle(Velocity);
             if (nearestEnemy != null)
             {
                 var relPos = nearestEnemy.Position - Position;
@@ -1697,9 +1693,16 @@ public class Entity : IMissionComponent
                 var relativePosition = Vector2.Normalize(relPos + (nearestEnemy.Velocity - Velocity) * relPos.Length() / bulletSpeed);
                 if (CD[0] <= 0 && relPos.Length() < 250 && Vector2.Dot(Util.ToUnitVector(Angle), relativePosition) > 0.85f)
                 {
-                    Engine.SaveGame.CurrentMission.Add(NewPulseShot(Position, Util.ToUnitVector(Angle) * bulletSpeed + Velocity, Angle, 0, Team, 3));
+                    Engine.SaveGame.CurrentMission.Add(NewPulseShot(Position, Util.PredictEnemy(nearestEnemy, this, bulletSpeed), Angle, 0, Team, 3));
                     SoundManager.PlaySound(Assets.Get(Sound.LMGFire), Position);
-                    CD[0] = Util.Random.NextSingle() * 8 + 5;
+                    if(parentAlive)
+                    {
+                        CD[0] = Util.Random.NextSingle() * 8 + 5;
+                    }
+                    else
+                    {
+                        CD[0] = Util.Random.NextSingle() * 6 + 3;
+                    }
                 }
             }
             if (IsFriendly(Engine.SaveGame.Player) && Health < MaxHealth && CD[1] <= 0)

@@ -99,7 +99,7 @@ public static class Util
         float cross = d.X * v.Y - d.Y * v.X;
         float sinTheta = Math.Clamp(cross / (d.Length() * speed), -1, 1);
         Vector2 vel = ToUnitVector(offset + ToAngle(d) + MathF.Asin(sinTheta));
-        return shooter.Velocity + vel * 12;
+        return shooter.Velocity + vel * speed;
     }
     public static void Autosave()
     {
@@ -498,6 +498,7 @@ public static class Util
     {
         return
         [
+            Entity.NewSurgeBoss,
             Entity.NewSymmetryBoss,
             Entity.NewWyvernBoss,
             Entity.NewDeadeyeBoss,
@@ -517,7 +518,6 @@ public static class Util
         return
         [
             Entity.NewOverloadBoss,
-            Entity.NewSurgeBoss,
             Entity.NewStreamlineBoss
         ];
     }
