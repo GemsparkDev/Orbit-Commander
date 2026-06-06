@@ -1346,6 +1346,7 @@ public class Entity : IMissionComponent
         float targetAngle;
         while (true)
         {
+            AngularVelocity = 0;
             if (swapCooldown > 0)
             {
                 swapCooldown -= Engine.DeltaSeconds;
@@ -1357,6 +1358,12 @@ public class Entity : IMissionComponent
             }
             //If the first to die, reduce attack power
             //If the second to die, increase attack power
+            if (Health <= 0 && !isDamaged)
+            {
+                isDamaged = true;
+                SoundManager.PlaySound(Assets.Get(Sound.ShieldHit), Position);
+                Explode(0, 0);
+            }
             if (isDamaged)
             {
                 rangeFactor = 0.75f;
@@ -1381,9 +1388,9 @@ public class Entity : IMissionComponent
             RotateTowards(targetAngle + MathF.Sin(time * 3) / 3, rotationSpeed);
 
             Vector2 velocityChange = relativeVelocity + relativeTargetPosition / 12 - Velocity;
-            if (velocityChange.Length() > 60)
+            if (velocityChange.Length() > 45)
             {
-                velocityChange = Vector2.Normalize(velocityChange) * 60;
+                velocityChange = Vector2.Normalize(velocityChange) * 45;
             }
             Velocity += velocityChange * Engine.DeltaSeconds;
             if (CD[0] <= 0 && Vector2.Distance(Player.Position, Position) < 400 * rangeFactor)
@@ -1391,12 +1398,6 @@ public class Entity : IMissionComponent
                 Engine.SaveGame.CurrentMission.Add(new FlameBolt(Position, Velocity + Util.ToUnitVector(Angle) * 12 * rangeFactor + new Vector2(Util.OneToNegOne(), Util.OneToNegOne()) / 4, Team, damage, 0.3f * rangeFactor, 2f));
                 SoundManager.PlaySound(Assets.Get(Sound.LMGFire), Position);
                 CD[0] = 0.08f;
-            }
-            if (Health <= 0 && !isDamaged)
-            {
-                isDamaged = true;
-                SoundManager.PlaySound(Assets.Get(Sound.ShieldHit), Position);
-                Explode(0, 0);
             }
             if (Health <= 0 && flare.Health <= 0)
             {
@@ -1442,7 +1443,19 @@ public class Entity : IMissionComponent
         bool isDamaged = false;
         while (true)
         {
-            float cdMod = (isDamaged ? 2 : 1) * (_inferno.Health <= 0 ? 0.5f : 1);
+            AngularVelocity = 0;
+            if (Health <= 0 && !isDamaged)
+            {
+                isDamaged = true;
+                SoundManager.PlaySound(Assets.Get(Sound.ShieldHit), Position);
+                Explode(0, 0);
+            }
+            float cdMod = 1;
+            if(isDamaged)
+            {
+                cdMod = 2;
+            }    
+            cdMod *= (_inferno.Health <= 0 ? 0.5f : 1);
 
             Vector2 relativeVelocity = Player.Velocity - Velocity;
             Vector2 relativePosition = Player.Position - Position;
@@ -1455,9 +1468,9 @@ public class Entity : IMissionComponent
             RotateTowards(targetAngle);
 
             Vector2 velocityChange = relativeVelocity + relativeTargetPosition / 15 - Velocity;
-            if (velocityChange.Length() > 60)
+            if (velocityChange.Length() > 45)
             {
-                velocityChange = Vector2.Normalize(velocityChange) * 60;
+                velocityChange = Vector2.Normalize(velocityChange) * 45;
             }
             Velocity += velocityChange * Engine.DeltaSeconds;
             if (CD[1] <= 0)
@@ -1499,12 +1512,6 @@ public class Entity : IMissionComponent
                     CD[0] = 0.8f * cdMod;
                 }
                 DrawLine(Angle, CD[0], 0.8f);
-            }
-            if (Health <= 0 && !isDamaged)
-            {
-                isDamaged = true;
-                SoundManager.PlaySound(Assets.Get(Sound.ShieldHit), Position);
-                Explode(0, 0);
             }
             if (Health <= 0 && _inferno.Health <= 0)
             {
@@ -5483,13 +5490,32 @@ public class FlameBolt : Entity
             struckEntities[i] = (struckEntities[i].entity, struckEntities[i].cd - Engine.DeltaSeconds);
         }
         struckEntities = [.. struckEntities.Where(x => x.cd > 0)];
-        foreach (var nearestEnemy in Engine.SaveGame.CurrentMission.Entities)
+
+        float combinedRadius = ColliderRadius + Player.ColliderRadius;
+        if (Vector2.DistanceSquared(Position, Player.Position) <= combinedRadius * combinedRadius)
         {
-            if (!(nearestEnemy.HasComponent<Health>() || nearestEnemy is Player) || nearestEnemy.IsFriendly(this))
+            bool skip = false;
+            foreach (var (entity, cd) in struckEntities)
+            {
+                if (entity == Player)
+                {
+                    skip = true;
+                }
+            }
+            if (!skip)
+            {
+                struckEntities.Add((Player, 0.1f));
+                Player.Collide(Damage);
+                Player.ApplyWork(temp);
+            }
+        }
+        foreach (var nearestEnemy in Engine.SaveGame.CurrentMission.enemies)
+        {
+            if (nearestEnemy.IsFriendly(this))
             {
                 continue;
             }
-            float combinedRadius = ColliderRadius + nearestEnemy.ColliderRadius;
+            combinedRadius = ColliderRadius + nearestEnemy.ColliderRadius;
             if (Vector2.DistanceSquared(Position, nearestEnemy.Position) > combinedRadius * combinedRadius)
             {
                 continue;

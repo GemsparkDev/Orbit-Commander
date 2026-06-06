@@ -1,6 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Audio;
-using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using OrbitCommander.Components;
 using OrbitCommander.Entities;
@@ -11,8 +10,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
 using UILib.Content;
+using System.Diagnostics;
 
 namespace OrbitCommander.Core;
 public static class Util
@@ -484,7 +483,8 @@ public static class Util
     public static ICollider[] SolarStation() => [
             new LineCollider(new Vector2(-1000, -5800), new Vector2(1000, -5800)),
     ];
-    public static List<(int, Func<Vector2, Vector2, float, Team, Entity>)> TierOneEnemies()
+    public delegate Entity CreateEntity(Vector2 _position, Vector2 _velocity, float _angle, Team _team);
+    public static List<(int, CreateEntity)> TierOneEnemies()
     {
         return
         [
@@ -494,17 +494,16 @@ public static class Util
             (4, Entity.NewCarrier),
         ];
     }
-    public static List<Func<Vector2, Vector2, float, Team, Entity>> TierOneBosses()
+    public static List<CreateEntity> TierOneBosses()
     {
         return
         [
-            Entity.NewSurgeBoss,
             Entity.NewSymmetryBoss,
             Entity.NewWyvernBoss,
             Entity.NewDeadeyeBoss,
         ];
     }
-    public static List<(int, Func<Vector2, Vector2, float, Team, Entity>)> TierTwoEnemies()
+    public static List<(int, CreateEntity)> TierTwoEnemies()
     {
         return
         [
@@ -513,15 +512,16 @@ public static class Util
             (2, Entity.NewHealer),
         ];
     }
-    public static List<Func<Vector2, Vector2, float, Team, Entity>> TierTwoBosses()
+    public static List<CreateEntity> TierTwoBosses()
     {
         return
         [
+            Entity.NewSurgeBoss,
             Entity.NewOverloadBoss,
             Entity.NewStreamlineBoss
         ];
     }
-    public static List<(int, Func<Vector2, Vector2, float, Team, Entity>)> TierThreeEnemies()
+    public static List<(int, CreateEntity)> TierThreeEnemies()
     {
         return
         [
@@ -530,7 +530,7 @@ public static class Util
             (3, Entity.NewEngineer),
         ];
     }
-    public static List<Func<Vector2, Vector2, float, Team, Entity>> TierThreeBosses()
+    public static List<CreateEntity> TierThreeBosses()
     {
         return
         [
@@ -538,31 +538,28 @@ public static class Util
             Entity.NewContinuumBoss,
         ];
     }
-    public static List<(int, Func<Vector2, Vector2, float, Team, Entity>)> AllEnemies()
+    public static List<(int, CreateEntity)> AllEnemies()
     {
         return [.. TierOneEnemies(), .. TierTwoEnemies(), .. TierThreeEnemies()];
     }
-    public static List<Func<Vector2, Vector2, float, Team, Entity>> AllBosses()
+    public static List<CreateEntity> AllBosses()
     {
         return [.. TierOneBosses(), .. TierTwoBosses(), .. TierThreeBosses()];
     }
-    public static (List<(int, Func<Vector2, Vector2, float, Team, Entity>)>,
-    List<Func<Vector2, Vector2, float, Team, Entity>>) T1()
+    public static (List<(int, CreateEntity)>, List<CreateEntity>) T1()
     {
         return (TierOneEnemies(), TierOneBosses());
     }
-    public static (List<(int, Func<Vector2, Vector2, float, Team, Entity>)>,
-    List<Func<Vector2, Vector2, float, Team, Entity>>) T2()
+    public static (List<(int, CreateEntity)>, List<CreateEntity>) T2()
     {
         return (TierTwoEnemies(), TierTwoBosses());
     }
-    public static (List<(int, Func<Vector2, Vector2, float, Team, Entity>)>,
-    List<Func<Vector2, Vector2, float, Team, Entity>>) T3()
+    public static (List<(int, CreateEntity)>, List<CreateEntity>) T3()
     {
         return (TierThreeEnemies(), TierThreeBosses());
     }
-    public static (List<(int, Func<Vector2, Vector2, float, Team, Entity>)>,
-    List<Func<Vector2, Vector2, float, Team, Entity>>) All()
+    public static (List<(int, CreateEntity)>,
+    List<CreateEntity>) All()
     {
         return (AllEnemies(), AllBosses());
     }
@@ -571,8 +568,9 @@ public static class Util
     public static Func<Conditional> SendPickup(float _distance, Func<GameState> _scene = null)
     {
         return delegate {
-            return new Conditional([new Custom(Entity.NewPickupDrone(new Vector2(-2000, 2000), _distance))],
-            Win(_scene));
+            var entity = Entity.NewPickupDrone(new Vector2(-2000, -2000), _distance);
+            Engine.SaveGame.CurrentMission.Add(entity);
+            return new Conditional([new Custom(entity)], Win(_scene));
         };
     }
     public static Func<Conditional> Win(Func<GameState> _scene = null)

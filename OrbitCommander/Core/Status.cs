@@ -15,6 +15,7 @@ public abstract class Status(Sprites _icon)
     public virtual int StealthChange() { return 0; }
     public virtual int SensingChange() { return 0; }
     public virtual int ModifyDamage(int _damage) { return _damage; }
+    public virtual bool IsImmunable { get => false; }
     public enum StatusType
     {
         Bomb,
@@ -57,9 +58,8 @@ public class Fire(float _duration, Color _color) : Status(Sprites.Knob)
     float duration = _duration;
     float fireCooldown = 0.05f;
     float attackCooldown = 0.5f;
-
     public override StatusType Type { get; } = StatusType.Fire;
-
+    public override bool IsImmunable { get => true; }
     public override void Update(Entity _parent)
     {
         if (fireCooldown > 0)
@@ -104,9 +104,8 @@ public class Frost(float _duration) : Status(Sprites.Knob)
     float initialDuration = _duration;
     float duration = _duration;
     float fireCooldown = 0.25f;
-
     public override StatusType Type { get; } = StatusType.Frost;
-
+    public override bool IsImmunable { get => true; }
     public override void Update(Entity _parent)
     {
         if (fireCooldown > 0)
@@ -191,7 +190,6 @@ public class Berserk(float _timeLeft) : Status(Sprites.Knob)
     float timeLeft = _timeLeft;
     private ParticleEmitter effect = new ParticleEmitter(Assets.Get(Sprites.Circle), Vector2.Zero, 28.3f, Color.Red * 0.5f)
     { particleFadeToColor = Color.Transparent, particleTimeAlive = 0.5f, speedOfEmission = 0.25f };
-
     public override StatusType Type => StatusType.Berserk;
 
     public override void Update(Entity _parent)
@@ -252,6 +250,7 @@ public class Pressure(Color _color, bool _isFatal) : Status(Sprites.Knob)
     float fireCooldown = 0.05f;
     float attackCooldown = 0.1f;
     public override StatusType Type { get; } = StatusType.Fire;
+    public override bool IsImmunable { get => true; }
     public override void Update(Entity _parent)
     {
         if (fireCooldown > 0)

@@ -189,13 +189,13 @@ public class Mission
         ], new Conditional([new Kill([a])],SendPickup(2000)), 
         new DropSpawner(1500));}),
 
-        (new("???", "Sensor data shows that this site has an unusually high temperature.\nInvestigate possible enemy interferance.", 145, [], 3, 2000, 3, true),
+        (new("???", "Sensor data shows that this site has an unusually high temperature.\nInvestigate possible enemy interferance.", 145, [], 3, 4000, 3, true),
         //Note: The player construct menu and the Quantum Resonator both use the name of this mission for their special behavior. When changing, make sure their name is updated as well.
         delegate(){var p = new Planet(Vector2.Zero, Vector2.Zero, 50000, 12, true, new Color(255, 219, 0)) { Temperature = 0.5f };
             return new([
             p.AddComponent(new Atmosphere(p, 1.5f, 50000))
-            .AddComponent(new Ring(p) { Mass = 50000 }),], 
-            new Conditional([], SendPickup(2000)),
+            .AddComponent(new Ring(p) { Mass = 50000 }),],
+            new Conditional([], SendPickup(1000)),
             new PlayerSpawner(new Vector2(-2000, -2000)), Sound.None);}),
 
         (new("Base of Operations", "We have deployed several communication stations to this site.\nProtect the location for future development.", 130, [], 3, 2000),
@@ -883,7 +883,7 @@ public class Protect(Entity[] _entity) : ICondition
 }
 public class Custom(Entity _entity) : ICondition
 {
-    private bool isDone;
+    private bool isDone = false;
     public bool IsComplete()
     {
         return isDone;

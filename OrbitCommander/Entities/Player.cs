@@ -47,6 +47,7 @@ public class Player : Entity
     public float invincibilityCooldown = 0;
     public float cachedDamage = 0;
     private float restartCooldown = 0;
+    private float swapCooldown = float.NegativeInfinity;
     public bool IsRestarting { get; private set; } = false;
     public bool isEngineActive = false;
     public bool canGatherResources = false;
@@ -139,7 +140,7 @@ public class Player : Entity
         {
             isExpired = true;
             engineSounds.Stop();
-            Assets.Get(Sound.Death).Play();
+            SoundManager.PlayGlobalSound(Assets.Get(Sound.Death));
             return;
         }
         smokeParticles.position = Position;
@@ -195,6 +196,17 @@ public class Player : Entity
         if (invincibilityCooldown > 0)
         {
             invincibilityCooldown -= Engine.DeltaSeconds;
+        }
+        if(swapCooldown > 0)
+        {
+            swapCooldown -= Engine.DeltaSeconds;
+        }
+        else if(swapCooldown > -10000)
+        {
+            SoundManager.PlayGlobalSound(Assets.Get(Sound.Click));
+            (modules[ModuleType.Guns], SecondaryWeapon) = (SecondaryWeapon, modules[ModuleType.Guns]);
+            Events.UpdateModulesUI();
+            swapCooldown = float.NegativeInfinity;
         }
         if (cachedDamageCooldown <= 0)
         {
@@ -400,9 +412,7 @@ public class Player : Entity
             {
                 if (SecondaryWeapon != null)
                 {
-                    SoundManager.PlayGlobalSound(Assets.Get(Sound.Click));
-                    (modules[ModuleType.Guns], SecondaryWeapon) = (SecondaryWeapon, modules[ModuleType.Guns]);
-                    Events.UpdateModulesUI();
+                    swapCooldown = 0.5f;
                 }
                 else
                 {
@@ -502,24 +512,40 @@ public class Player : Entity
                                     case "Barricade":
                                         firstScrap.isExpired = true;
                                         var barricade = Pickup.NewBarricade(firstScrap.Position, firstScrap.Velocity, 0, 0);
+                                        if (modules[ModuleType.Engines] is WorkEngine)
+                                        {
+                                            barricade.AddTag(Tags.IsImmune);
+                                        }
                                         leashedMaterials.Add(barricade);
                                         Engine.SaveGame.CurrentMission.Add(barricade);
                                         break;
                                     case "Trap":
                                         firstScrap.isExpired = true;
                                         var trap = Pickup.NewTrap(firstScrap.Position, firstScrap.Velocity, 0, 0);
+                                        if (modules[ModuleType.Engines] is WorkEngine)
+                                        {
+                                            trap.AddTag(Tags.IsImmune);
+                                        }
                                         leashedMaterials.Add(trap);
                                         Engine.SaveGame.CurrentMission.Add(trap);
                                         break;
                                     case "Bomb":
                                         firstScrap.isExpired = true;
                                         var bomb = Pickup.NewBomb(firstScrap.Position, firstScrap.Velocity, 0, 0);
+                                        if (modules[ModuleType.Engines] is WorkEngine)
+                                        {
+                                            bomb.AddTag(Tags.IsImmune);
+                                        }
                                         leashedMaterials.Add(bomb);
                                         Engine.SaveGame.CurrentMission.Add(bomb);
                                         break;
                                     case "Furnace":
                                         firstScrap.isExpired = true;
                                         var furnace = Pickup.NewFurnace(firstScrap.Position, firstScrap.Velocity, 0, 0);
+                                        if (modules[ModuleType.Engines] is WorkEngine)
+                                        {
+                                            furnace.AddTag(Tags.IsImmune);
+                                        }
                                         leashedMaterials.Add(furnace);
                                         Engine.SaveGame.CurrentMission.Add(furnace);
                                         break;
@@ -541,6 +567,10 @@ public class Player : Entity
                                     case "Mace":
                                         firstScrap.isExpired = true;
                                         var mace = Pickup.NewMace(firstScrap.Position, firstScrap.Velocity, 0, 0);
+                                        if (modules[ModuleType.Engines] is WorkEngine)
+                                        {
+                                            mace.AddTag(Tags.IsImmune);
+                                        }
                                         leashedMaterials.Add(mace);
                                         Engine.SaveGame.CurrentMission.Add(mace);
                                         break;
@@ -633,7 +663,7 @@ public class Player : Entity
                 {
                     Angle = Angle * 0.5f + Util.ToAngle(targetVector) * 0.5f;
                 }
-                if (Input.NewMouseState.LeftButton == ButtonState.Pressed)
+                if (Input.NewMouseState.LeftButton == ButtonState.Pressed && swapCooldown <= 0)
                 {
                     foreach (var module in modules)
                     {
@@ -807,7 +837,7 @@ public class Player : Entity
                     SoundManager.PlaySound(Assets.Get(Sound.Beep), Position);
                     Events.UpdateFuseUI(moduleFuses, spareFuses);
                 }
-                else if (Util.Random.Next(0, 8) == 0)
+                else if (Util.Random.Next(0, 12) == 0)
                 {
                     if (modules[failedPart].isFailed)
                     {
@@ -895,6 +925,14 @@ public class Player : Entity
         if (dockedEntity != null)
         {
             return;
+        }
+        if(swapCooldown > 0)
+        {
+            for(float i = 0; i < (0.5f - swapCooldown) * 200; i++)
+            {
+                float angle = i / 100 * MathF.Tau;
+                _spriteBatch.Draw(Assets.Get(Sprites.Dot), Util.ToUnitVector(angle) * 30 + Position, null, Color.Green, angle, Assets.DimsOf(Sprites.Dot), 1, 0, 0);
+            }
         }
         if (Engine.SaveGame.CurrentMission.GetAtmospherePressure(this) > 1f)
         {

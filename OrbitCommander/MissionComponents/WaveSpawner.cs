@@ -12,8 +12,8 @@ using static OrbitCommander.Core.Mission;
 namespace OrbitCommander.MissionComponents;
 internal class WaveSpawner : IMissionComponent
 {
-    public WaveSpawner(List<(int cost, Func<Vector2, Vector2, float, Team, Entity> enemy)> _enemyCreditValues,
-    List<Func<Vector2, Vector2, float, Team, Entity>> _bosses, float _timerModifier, bool _isAggressive)
+    public WaveSpawner(List<(int cost, Util.CreateEntity enemy)> _enemyCreditValues,
+    List<Util.CreateEntity> _bosses, float _timerModifier, bool _isAggressive)
     {
         enemyCreditValues = _enemyCreditValues;
         bosses = _bosses;
@@ -21,8 +21,8 @@ internal class WaveSpawner : IMissionComponent
         currentBoss = Util.Random.Next(bosses.Count);
         isAggressive = _isAggressive;
     }
-    public WaveSpawner(Func<(List<(int, Func<Vector2, Vector2, float, Team, Entity>)> _enemyCreditValues,
-    List<Func<Vector2, Vector2, float, Team, Entity>> _bosses)> _spawner, float _timerModifier, bool _isAggressive)
+    public WaveSpawner(Func<(List<(int, Util.CreateEntity)> _enemyCreditValues,
+    List<Util.CreateEntity> _bosses)> _spawner, float _timerModifier, bool _isAggressive)
     {
         var (_enemyCreditValues, _bosses) = _spawner();
         enemyCreditValues = _enemyCreditValues;
@@ -31,8 +31,8 @@ internal class WaveSpawner : IMissionComponent
         currentBoss = Util.Random.Next(bosses.Count);
         isAggressive = _isAggressive;
     }
-    List<(int cost, Func<Vector2, Vector2, float, Team, Entity> enemy)> enemyCreditValues;
-    List<Func<Vector2, Vector2, float, Team, Entity>> bosses;
+    List<(int cost, Util.CreateEntity enemy)> enemyCreditValues;
+    List<Util.CreateEntity> bosses;
     private List<Entity> enemiesSpawned = [];
     private bool currentWaveActive = false;
     private float waveTimer = 5;
@@ -45,11 +45,9 @@ internal class WaveSpawner : IMissionComponent
     public void Draw(SpriteBatch _spriteBatch)
     {
     }
-
     public void Initialize()
     {
     }
-
     public void Update()
     {
         var isReady = true;
@@ -111,7 +109,7 @@ internal class WaveSpawner : IMissionComponent
             waveTimer = 10f * TimerModifier;
             maxWaveTimer = waveTimer;
             Wave++;
-            foreach (var pickup in Engine.SaveGame.CurrentMission.Entities)
+            foreach (var pickup in Engine.SaveGame.CurrentMission.Entities.Where(x => !x.HasTag(Tags.IsImmune)))
             {
                 if (pickup is Pickup && Util.Random.NextSingle() > 0.4f + Engine.SaveGame.CurrentMission.GetAtmospherePressure(pickup))
                 {

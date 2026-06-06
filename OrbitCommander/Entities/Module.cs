@@ -133,24 +133,40 @@ public class Hull() : Module(Modules.Hull)
 public class Shield() : Module(Modules.Shield)
 {
     private ParticleEmitter shieldEffect = new(Assets.Get(Sprites.Dot), Vector2.Zero, 10, Color.Violet) { particleAngularVelocity = 0.1f };
-    public override int OnCollide(int _damage)
-    {
-        if (Cooldown <= 0)
-        {
-            Cooldown = 8;
-            return 0;
-        }
-        return (int)(_damage * 1.5f);
-    }
+    private float max = 1;
     public override void OnUpdate()
     {
         if (Cooldown <= 0)
         {
             shieldEffect.position = Player.Position;
+            shieldEffect.offsetVelocity = Player.Velocity;
             shieldEffect.Update();
-            UI.PlayerSpecialHealth.Colors[0] = Color.Yellow;
         }
+        UI.PlayerSpecialHealth.SetInterval(max-Cooldown, max);
+        UI.PlayerSpecialHealth.Colors[0] = Color.Yellow;
+        UI.PlayerSpecialHealth.Colors[1] = Color.Transparent;
         base.OnUpdate();
+    }
+    public override int OnCollide(int _damage)
+    {
+        if (Cooldown <= 0)
+        {
+            Cooldown = _damage;
+            max = _damage;
+            var entity = Util.Nearest(Player.Position, [.. Engine.SaveGame.CurrentMission.enemies.Where(x => !x.HasTag(Tags.IsMissile)).Where(x => !x.IsFriendly(Player))]);
+            if(entity != null)
+            {
+                var vel = Util.PredictEnemy(entity, Player, 6 + _damage / 2);
+                Engine.SaveGame.CurrentMission.Add(NewAssassinShot(Player.Position, vel, Util.ToAngle(vel), 0, Team, _damage, 1));
+            }
+            else
+            {
+                var vel = Player.IdealSpeedWithVelocity(6 + _damage / 2);
+                Engine.SaveGame.CurrentMission.Add(NewAssassinShot(Player.Position, vel, Util.ToAngle(vel), 0, Team, _damage, 1));
+            }
+            return 0;
+        }
+        return (int)(_damage * 1.5f);
     }
 }
 public class StealthHull() : Module(Modules.Stealth)
@@ -168,41 +184,37 @@ public class StealthHull() : Module(Modules.Stealth)
 }
 public class Reflective() : Module(Modules.Reflective)
 {
-    public override int OnCollide(int _damage)
-    {
-        if (Util.Random.Next(0, 2) == 0)
-        {
-            for (float angle = 0; angle < MathF.Tau; angle += MathF.PI / 3)
-            {
-                Engine.SaveGame.CurrentMission.Add(NewAssassinShot(Player.Position, Util.ToUnitVector(angle) * 8, angle, 0, Team, 6, 1));
-            }
-            return 0;
-        }
-        return _damage * 2;
-    }
     public override void OnUpdate()
     {
-        UI.PlayerSpecialHealth.Colors[0] = Color.Transparent;
-        UI.PlayerSpecialHealth.Colors[1] = Color.Transparent;
-        base.OnUpdate();
+        throw new NotImplementedException();
     }
 }
 public class Turtle() : Module(Modules.Turtle)
 {
     float time = 0;
     int flipped = 1;
+    float dr = 1.5f;
     ParticleEmitter effect = new ParticleEmitter(Assets.Get(Sprites.Dot), Vector2.Zero, 10, Color.Orange) { sprayAngle = MathF.PI / 2 };
     public override int OnCollide(int _damage)
     {
-        float dr = 0.75f * (1 - Cooldown / 5) * (1 - Cooldown / 5) + 0.25f;
-        Cooldown = 5;
-        Engine.SaveGame.Player.RevealDuration = 1;
+        Player.RevealDuration = 1;
         return (int)(_damage * dr);
     }
     public override void OnUpdate()
     {
-        UI.PlayerSpecialHealth.Colors[0] = Color.Orange;
-        UI.PlayerSpecialHealth.SetInterval(1 - (1 - Cooldown / 5) * (1 - Cooldown / 5), 1);
+        var entity = Util.Nearest(Player.Position, [.. Engine.SaveGame.CurrentMission.enemies.Where(x => !x.HasTag(Tags.IsMissile)).Where(x => !x.IsFriendly(Player))]);
+        if (entity == null)
+        {
+            dr = 1.5f;
+        }
+        else
+        {
+            var distance = MathF.Tanh(Vector2.Distance(Player.Position, entity.Position) / 300);
+            dr = 0.5f + distance * distance;
+        }
+
+        UI.PlayerSpecialHealth.Colors[0] = Color.Orange * 0.5f;
+        UI.PlayerSpecialHealth.SetInterval(1.5f - dr, 1);
         time += Engine.DeltaSeconds;
         if (time > 1)
         {
@@ -215,6 +227,7 @@ public class Turtle() : Module(Modules.Turtle)
             }
         }
         effect.position = Player.Position;
+        effect.offsetVelocity = Player.Velocity;
         if (flipped == 1)
         {
             effect.sprayCone = MathF.Tau * time;
@@ -223,7 +236,7 @@ public class Turtle() : Module(Modules.Turtle)
         {
             effect.sprayCone = MathF.Tau * (1 - time);
         }
-        effect.particleColor = Color.Orange * (1 - (1 - Cooldown / 5) * (1 - Cooldown / 5));
+        effect.particleColor = Color.Orange * (1.5f - dr);
         effect.Update();
         base.OnUpdate();
     }
@@ -269,13 +282,13 @@ public class ThermalShield() : Module(Modules.ThermalShield)
 {
     public override int OnCollide(int _damage)
     {
-        return _damage * 5 / 4;
+        return (int)(_damage * 5 / 4 * Math.Clamp(1 - MathF.Abs(Player.Temperature), 0, 1));
     }
     public override void OnUpdate()
     {
         UI.PlayerSpecialHealth.Colors[0] = Color.Transparent;
         UI.PlayerSpecialHealth.Colors[1] = Color.Transparent;
-        Player.ApplyWork(Math.Sign(-Player.Temperature));
+        Player.ApplyWork(0.33f * (float)Math.Sign(-Player.Temperature));
         base.OnUpdate();
     }
 }
@@ -1114,14 +1127,15 @@ public class Dash() : Module(Modules.Dash)
             return;
         }
         Player.invincibilityCooldown = 0.5f;
-        for (int i = 0; i < 200; i++)
+        Player.Velocity += Player.Direction * 10;
+        for (int i = 0; i < 300; i++)
         {
-            float timeLeft = (float)i / 200;
+            float timeLeft = (float)i / 300;
             var col = Color.SlateBlue;
             col.A = 0;
             ParticleManager.Add(new Particle(Assets.Get(Sprites.Dot), timeLeft, Player.Position + Player.Direction * i, Player.Velocity * timeLeft, Util.ToAngle(Player.Direction), 0, Color.Cyan, col));
         }
-        Player.Position += Player.Direction * 200;
+        Player.Position += Player.Direction * 300;
         Cooldown = MaxCooldown;
     }
     public override void OnUpdate()

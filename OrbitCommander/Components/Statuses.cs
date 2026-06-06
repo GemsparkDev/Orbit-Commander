@@ -34,7 +34,7 @@ public class Statuses(Entity _entity) : IComponent
     }
     public void ApplyStatus(Status _status)
     {
-        if (_status == null)
+        if (_status == null || (_status.IsImmunable && _entity.HasTag(Tags.IsImmune)))
         {
             return;
         }

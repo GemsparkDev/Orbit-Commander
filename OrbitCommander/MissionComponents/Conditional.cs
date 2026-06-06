@@ -1,11 +1,12 @@
 using OrbitCommander.Entities;
 using System;
 using OrbitCommander.Core;
+using System.Diagnostics;
 
 namespace OrbitCommander.MissionComponents;
 public class Conditional(ICondition[] _conditions, Func<Conditional> _result)
 {
-    private float restartTimer = -1;
+    private float restartTimer = float.NegativeInfinity;
     public void Initialize() { }
     public Conditional Update()
     {
@@ -14,9 +15,9 @@ public class Conditional(ICondition[] _conditions, Func<Conditional> _result)
         {
             allCompleted &= objective.IsComplete();
         }
-        if (allCompleted)
+        if (allCompleted && restartTimer < -100000)
         {
-            restartTimer = 5;
+            restartTimer = 3;
         }
         if (restartTimer > 0)
         {
@@ -24,7 +25,7 @@ public class Conditional(ICondition[] _conditions, Func<Conditional> _result)
             if (restartTimer <= 0)
             {
                 var conditional = _result();
-                conditional.Initialize();
+                conditional?.Initialize();
                 return conditional;
             }
         }

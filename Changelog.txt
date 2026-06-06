@@ -3,6 +3,18 @@
 Lagrange Commander is a game made using C# in monogame. It is a 2D top down wave based shooter where you must repair and upgrade your ship by salvaging from enemies you defeat. It features realistic N-Body gravitation, which affects all entities and projectiles.
   
 # Changelog
+0.8.6.2 - 6/5/2026
+ - Added the IsImmune tag.
+ - Made the restart switch easier to switch.
+ - Reduced the maximum acceleration of the Inferno and Flare boss.
+ - Fixed Flamebolts not hitting the player properly.
+ - The Shield module now deflects bullets toward nearby enemies.
+ - The Turtle module now stops more damage when closer to enemies.
+ - The Thermal Shield is slower, and stops more damage when hot or cold.
+ - Increased the dash distance, and the dash gives some speed.
+ - Added a weapon switch cooldown.
+ - Reduced the chance of module failure.
+ - The Boss Rush now randomizes the list of bosses.
 0.8.6.1 - 6/4/2026
  - Fixed the Surge boss from aggressively ramming into the planet.
  - Surge children now attack faster without a parent, and track.

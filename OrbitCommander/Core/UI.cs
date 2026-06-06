@@ -162,7 +162,7 @@ public static class UI
     public static int type = 1;
     public static readonly Vector2[] resolutions = [new Vector2(1920, 1080), new Vector2(640, 480)];
     public static int selectedResolution = 0;
-    public static readonly Modules[] setModules = [Modules.Hull, Modules.Basic, Modules.Engines, Modules.Sensors, Modules.Assault];
+    public static readonly Modules[] setModules = [Modules.Hull, Modules.AdaptiveShotgun, Modules.Engines, Modules.Sensors, Modules.Assault];
 
     //Hack menu
     public static Button HackButton { get; } = new Button(Vector2.Zero, Assets.Get(Sprites.Button), Assets.TextFont, "Hack", Color.Yellow);
@@ -286,7 +286,7 @@ public static class UI
                     }
                     return;
                 }
-                if (RestartSwitch.Intervals[0] < 0.05f)
+                if (RestartSwitch.Intervals[0] < 0.2f)
                 {
                     if (Engine.SaveGame.Player.IsEnabled)
                     {
@@ -297,19 +297,19 @@ public static class UI
                     }
                     Switch.Texture = Assets.Get(Sprites.SwitchOne);
                 }
-                if (RestartSwitch.Intervals[0] is > 0.05f and < 0.3f)
+                if (RestartSwitch.Intervals[0] is > 0.2f and < 0.4f)
                 {
                     Switch.Texture = Assets.Get(Sprites.SwitchTwo);
                 }
-                if (RestartSwitch.Intervals[0] is > 0.3f and < 0.7f)
+                if (RestartSwitch.Intervals[0] is > 0.4f and < 0.6f)
                 {
                     Switch.Texture = Assets.Get(Sprites.SwitchThree);
                 }
-                if (RestartSwitch.Intervals[0] is > 0.7f and < 0.95f)
+                if (RestartSwitch.Intervals[0] is > 0.6f and < 0.8f)
                 {
                     Switch.Texture = Assets.Get(Sprites.SwitchFour);
                 }
-                if (RestartSwitch.Intervals[0] > 0.95f)
+                if (RestartSwitch.Intervals[0] > 0.8f)
                 {
                     Switch.Texture = Assets.Get(Sprites.SwitchFive);
                     if (!Engine.SaveGame.Player.IsEnabled)

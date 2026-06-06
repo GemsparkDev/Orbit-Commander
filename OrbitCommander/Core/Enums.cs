@@ -304,4 +304,5 @@ public enum Tags
     IsMissile = 2,
     IsImportant = 4,
     IsChild = 8,
+    IsImmune = 16,
 }

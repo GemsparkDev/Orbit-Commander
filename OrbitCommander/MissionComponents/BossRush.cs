@@ -14,11 +14,18 @@ internal class BossRush : IMissionComponent
 {
     public BossRush()
     {
-        bosses = Util.TierOneBosses();
-        bosses.AddRange(Util.TierTwoBosses());
-        bosses.AddRange(Util.TierThreeBosses());
+        bosses = Shuffle(Util.TierOneBosses());
+        bosses.AddRange(Shuffle(Util.TierTwoBosses()));
+        bosses.AddRange(Shuffle(Util.TierThreeBosses()));
+
+        var pos = Engine.SaveGame.CurrentMission.NewSpawnLocation();
+        currentBoss = bosses[index](pos, Vector2.Zero, Util.ToAngle(pos), Team.Hostile);
     }
-    List<Func<Vector2, Vector2, float, Team, Entity>> bosses;
+    private List<T> Shuffle<T>(IList<T> _list)
+    {
+        return [.. _list.OrderBy(item => Util.Random.Next())];
+    }
+    List<Util.CreateEntity> bosses;
     private Entity currentBoss;
     private bool currentWaveActive = false;
     private float waveTimer = 0;
@@ -27,12 +34,10 @@ internal class BossRush : IMissionComponent
     public void Draw(SpriteBatch _spriteBatch)
     {
     }
-
     public void Initialize()
     {
         SoundManager.ChangeTrack(Assets.Get(Sound.boss));
     }
-
     public void Update()
     {
         var isReady = true;
@@ -43,7 +48,7 @@ internal class BossRush : IMissionComponent
         if (isReady)
         {
             currentWaveActive = false;
-            waveTimer = 5f;
+            waveTimer = 30f;
             maxWaveTimer = waveTimer;
             Engine.SaveGame.CurrentMission.Wave++;
             var pos = Engine.SaveGame.CurrentMission.NewSpawnLocation();
