@@ -20,6 +20,7 @@ internal class BossRush : IMissionComponent
 
         var pos = Engine.SaveGame.CurrentMission.NewSpawnLocation();
         currentBoss = bosses[index](pos, Vector2.Zero, Util.ToAngle(pos), Team.Hostile);
+        index++;
     }
     private List<T> Shuffle<T>(IList<T> _list)
     {
@@ -28,7 +29,7 @@ internal class BossRush : IMissionComponent
     List<Util.CreateEntity> bosses;
     private Entity currentBoss;
     private bool currentWaveActive = false;
-    private float waveTimer = 0;
+    private float waveTimer = 5;
     private float maxWaveTimer = 5;
     private int index = 0;
     public void Draw(SpriteBatch _spriteBatch)

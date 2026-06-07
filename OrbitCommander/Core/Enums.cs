@@ -20,16 +20,7 @@ public enum Modules
     Ablative,
     Adaptive,
     ThermalShield,
-    //Engines
-    Engines,
-    Plasma,
-    Work,
-    Orion,
-    //Sensors
-    Sensors,
-    Lidar,
-    Radar,
-    PulseEmitter,
+
     //Weapons
     Basic,
     Spiral,
@@ -46,13 +37,25 @@ public enum Modules
     PrismArray,
     MatrixLauncher,
     Torch,
-    Decoy,
     SplitterModule,
     Fractal,
     CrackShot,
     MicroRocketLauncher,
     AdaptiveShotgun,
     GuidedRound,
+
+    //Engines
+    Engines,
+    Plasma,
+    Work,
+    Orion,
+
+    //Sensors
+    Sensors,
+    Lidar,
+    Radar,
+    PulseEmitter,
+
     //Cores
     Dash,
     GrapplingHook,
@@ -61,6 +64,7 @@ public enum Modules
     CreateFighter,
     Assault,
     Expose,
+    Decoy,
 
     End, //Used for enumeration
 }

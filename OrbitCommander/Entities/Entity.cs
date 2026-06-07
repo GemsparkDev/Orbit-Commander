@@ -261,8 +261,9 @@ public class Entity : IMissionComponent
             .AddComponent(new Collide(entity, delegate (int damage, bool _ignoreImmunity)
             {
                 damage = entity.Statuses.ModifyDamage(damage);
-                if (damage > 0)
+                if (damage > 0 && entity.InvincibilityCooldown <= 0)
                 {
+                    entity.InvincibilityCooldown = 0.1f;
                     if (entity.Health > 0)
                     {
                         entity.Flash(Color.White);
@@ -2232,7 +2233,7 @@ public class Entity : IMissionComponent
                 Velocity += velocityOffset * Engine.DeltaSeconds + GetNormalizedAcceleration() * 2;
                 if (CD[0] <= 0)
                 {
-                    Engine.SaveGame.CurrentMission.Add(NewSplitter(Position, Velocity + Util.ToUnitVector(Angle) * 8, Angle, Team, 6,
+                    Engine.SaveGame.CurrentMission.Add(NewSplitter(Position, Velocity + Util.ToUnitVector(Angle) * 7, Angle, Team, 6, 
                         [delegate(Vector2 _position, Vector2 _velocity, float _angle) { return NewAssassinShot(_position, _velocity, _angle, 0, Team, damage); }], 0.5f, 0, true));
                     SoundManager.PlaySound(Assets.Get(Sound.PulseFire), Position);
                     CD[0] = 1;
@@ -5409,7 +5410,6 @@ public class FlameBolt : Entity
     float temp;
     private ParticleEmitter emitter;
     private ParticleEmitter collider = new ParticleEmitter(Assets.Get(Sprites.Dot), Vector2.Zero, 0, Color.Yellow) { isEmitterActive = false };
-    private List<(Entity entity, float cd)> struckEntities = [];
     public override float ColliderRadius
     {
         get
@@ -5485,28 +5485,15 @@ public class FlameBolt : Entity
             emitter.particleTimeAlive = Math.Min(1, MathF.Sqrt(TimeLeft));
         }
 
-        for (int i = 0; i < struckEntities.Count; i++)
-        {
-            struckEntities[i] = (struckEntities[i].entity, struckEntities[i].cd - Engine.DeltaSeconds);
-        }
-        struckEntities = [.. struckEntities.Where(x => x.cd > 0)];
-
         float combinedRadius = ColliderRadius + Player.ColliderRadius;
         if (Vector2.DistanceSquared(Position, Player.Position) <= combinedRadius * combinedRadius)
         {
-            bool skip = false;
-            foreach (var (entity, cd) in struckEntities)
+            if (!Player.IsFriendly(this))
             {
-                if (entity == Player)
+                if(Player.Collide(Damage))
                 {
-                    skip = true;
+                    Player.ApplyWork(temp);
                 }
-            }
-            if (!skip)
-            {
-                struckEntities.Add((Player, 0.1f));
-                Player.Collide(Damage);
-                Player.ApplyWork(temp);
             }
         }
         foreach (var nearestEnemy in Engine.SaveGame.CurrentMission.enemies)
@@ -5520,19 +5507,10 @@ public class FlameBolt : Entity
             {
                 continue;
             }
-            bool skip = false;
-            foreach (var (entity, cd) in struckEntities)
+            if(nearestEnemy.Collide(GetComponent<Attack>().Damage))
             {
-                if (entity == nearestEnemy)
-                {
-                    skip = true;
-                }
+                nearestEnemy.ApplyWork(temp);
             }
-            if (skip) { continue; }
-            struckEntities.Add((nearestEnemy, 0.1f));
-            nearestEnemy.Collide(GetComponent<Attack>().Damage);
-            //Always apply effect even if no damage hit
-            nearestEnemy.ApplyWork(temp);
         }
     }
 }

@@ -94,9 +94,9 @@ public static class Util
     public static Vector2 PredictEnemy(Entity nearestEnemy, Entity shooter, float speed, float offset = 0)
     {
         Vector2 d = nearestEnemy.Position - shooter.Position;
-        Vector2 v = nearestEnemy.Velocity - shooter.Velocity;
-        float cross = d.X * v.Y - d.Y * v.X;
-        float sinTheta = Math.Clamp(cross / (d.Length() * speed), -1, 1);
+        //Why does multiplying nearestEnemy by 0.5 make it more accurate?
+        Vector2 v = nearestEnemy.Velocity * 0.5f - shooter.Velocity;
+        float sinTheta = Math.Clamp(Cross(d, v) / (d.Length() * speed), -1, 1);
         Vector2 vel = ToUnitVector(offset + ToAngle(d) + MathF.Asin(sinTheta));
         return shooter.Velocity + vel * speed;
     }
