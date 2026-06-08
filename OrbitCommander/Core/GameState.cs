@@ -27,7 +27,6 @@ public static class CurrentGameState
     {
         currentGameState.Update();
     }
-
     public static void Draw(SpriteBatch _spriteBatch)
     {
         currentGameState.Draw(_spriteBatch);
@@ -86,6 +85,8 @@ public class MainMenu : GameState
         smokeParticles.isEmitterActive = true;
         Engine.UIManager.ScreenWindow.enabled = false;
         SoundManager.ChangeTrack(Assets.Get(Sound.menu));
+        Engine.Camera.Position = Vector2.Zero;
+        Engine.Camera.Zoom = 1;
     }
     public override void Update()
     {
@@ -227,6 +228,7 @@ public class MissionSelect : GameState
         Events.UpdateInventoryUI();
         Engine.DialogueManager.Clear();
         Engine.Camera.Position = Vector2.Zero;
+        Engine.Camera.Zoom = 1;
     }
     public override void Update()
     {
@@ -335,6 +337,7 @@ public class Victory : GameState
     {
         Engine.UIManager.ScreenWindow.enabled = false;
         Engine.Camera.Position = Vector2.Zero;
+        Engine.Camera.Zoom = 1;
     }
     public override void Update() { }
     public override void Draw(SpriteBatch _spriteBatch)
@@ -353,6 +356,7 @@ public class Cutscene(List<IEvent> _events, List<IActor> _actors, GameState _nex
         time = 0;
         Engine.UIManager.ScreenWindow.enabled = false;
         Engine.Camera.Position = Vector2.Zero;
+        Engine.Camera.Zoom = 1;
     }
     public override void Update()
     {

@@ -34,28 +34,32 @@ struct VertexShaderOutput
 float4 HorizontalBlur(VertexShaderOutput input) : COLOR
 {
     float dist = 1 - ((input.TextureCoordinates.x - 0.5) * (input.TextureCoordinates.x - 0.5) + (input.TextureCoordinates.y - 0.5) * (input.TextureCoordinates.y - 0.5)) * 2;
-    float gaussian[5][5]  =
-	{
-        { 0.003, 0.013, 0.022, 0.013, 0.003 },
-        { 0.013, 0.062, 0.102, 0.062, 0.013 },
-        { 0.022, 0.102, dist, 0.102, 0.022 },
-        { 0.013, 0.062, 0.102, 0.062, 0.013 },
-        { 0.003, 0.013, 0.022, 0.013, 0.003 },
-    };
-    float2 screenSize = float2(1920, 1080);
-    float2 div = float2(1, 1) / (screenSize);
-    float2 tanh2x6 = 5.78416548045;
-    float3 col = float3(0, 0, 0);
-    for (int x = 0; x < 5; x++)
+    //One up          , Two up
+    //One up one left , Two up one left
+    //One up two left , Two up Two left
+    float gaussian[3][2]  =
     {
-        for (int y = 0; y < 5; y++)
+        { 0.33975863, 0.10331259 },
+        { 0.22847118, 0.0694727 },
+        { 0.0694727, 0.021125011 },
+    };
+    //Screensize = 1920, 1080
+    float2 div = float2(0.000520833333333, 0.000925925925926); //One over the screensize
+    float2 tanh2x6 = 5.78416548045;
+    float3 col = tex2D(s0, input.TextureCoordinates).rgb * 0.5;
+    for (int x = 0; x < 3; x++)
+    {
+        for (int y = 0; y < 2; y++)
         {
-            float2 texCoord = input.TextureCoordinates + float2((x - 2) * div.x, (y - 2) * div.y);
-            float3 s = tex2D(s0, texCoord).rgb;
-            col += s * gaussian[x][y];
+	    float g = gaussian[x][y] / 3;
+            col += g * (
+		tex2D(s0, input.TextureCoordinates + float2(x * div.x, (y+1) * div.y)).rgb +
+		tex2D(s0, input.TextureCoordinates + float2((y+1) * div.x, -x * div.y)).rgb +
+		tex2D(s0, input.TextureCoordinates + float2(-x * div.x, (-y-1) * div.y)).rgb +
+		tex2D(s0, input.TextureCoordinates + float2((-y-1) * div.x, x * div.y)).rgb);
         }
     }
-    float scanline = tanh(2 * sin(screenSize.y * 1.5 * input.TextureCoordinates.y)) / tanh2x6 + 0.8333;
+    float scanline = tanh(2 * sin(1620 * input.TextureCoordinates.y)) / tanh2x6 + 0.8333;
     col = float3(min(1, col.r), min(1, col.g), min(1, col.b)) * scanline;
     //col = float3(min(1, col.r), min(1, col.g), min(1, col.b));
     return float4(col.rgb, 1);

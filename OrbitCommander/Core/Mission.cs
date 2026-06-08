@@ -421,6 +421,13 @@ public class Mission
         //Tanh prevents frac from going above 1
         float frac = MathF.Tanh(Vector2.Distance(Player.Position, Engine.Camera.Position) / 750);
         Engine.Camera.Position = Player.Position * frac + Engine.Camera.Position * (1 - frac);
+        var planet = (Engine.SaveGame.CurrentMission.Entities.Where(x => x is Planet).ToArray());
+        float sum = 0.75f;
+        foreach(var p in planet)
+        {
+            sum += p.ColliderRadius / (Vector2.Distance(p.Position, Player.Position)) / 2;
+        }
+        Engine.Camera.Zoom = sum;
         var time = Engine.IngameTime;
         time.Duration += Engine.DeltaSeconds;
         Engine.IngameTime = time;
@@ -817,7 +824,7 @@ public class Mission
             float angle = (Util.Random.NextSingle() - 0.5f) * MathF.Tau;
             float distanceMultiplier = 1 + (Util.Random.NextSingle() - 0.5f) / 4;
             float distance = (Engine.ScreenSize.X + Engine.ScreenSize.Y) * distanceMultiplier / 3;
-            spawnLocation = Util.ToUnitVector(angle) * distance + Engine.SaveGame.Player.Position;
+            spawnLocation = ToUnitVector(angle) * distance + Engine.SaveGame.Player.Position;
         }
         while(IsColliding(spawnLocation, Vector2.Zero, 10, false, out float _) != null);
         return spawnLocation;
