@@ -39,6 +39,7 @@ public abstract class Module : Pickup, IData
 
     public virtual int OnCollide(int _damage) { return _damage; }
     public virtual void OnShoot() { }
+    public virtual void OnEnemyDeath(Entity _entity) { }
     public virtual void OnUpdate()
     {
         if (Cooldown > 0)
@@ -173,7 +174,7 @@ public class StealthHull() : Module(Modules.Stealth)
 {
     public override int OnCollide(int _damage)
     {
-        return (int)(_damage * 1.15f);
+        return (int)(_damage * 1.1f);
     }
     public override void OnUpdate()
     {

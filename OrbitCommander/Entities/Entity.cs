@@ -237,6 +237,11 @@ public class Entity : IMissionComponent
         {
             bool wasHit = comp.OnCollide(_damage, _ignoreImmunity);
             comp.WasHit = comp.WasHit || wasHit;
+            //All hostile deaths are attributed to the player, even if they didn't kill the enemy
+            if(IsFriendly(Player) && HasComponent<Health>() && isExpired)
+            {
+                Player.OnEnemyDeath(this);
+            }
             return wasHit;
         }
         return false;

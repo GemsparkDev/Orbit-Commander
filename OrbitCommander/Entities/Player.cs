@@ -26,7 +26,7 @@ public class Player : Entity
         { true, true, true, false },
         { true, true, true, false },
         { true, true, true, false },
-        { true, true, true, false }
+        { true, true, true, false },
     };
     public Dictionary<ModuleType, Module> modules = new()
     {
@@ -331,6 +331,13 @@ public class Player : Entity
             {
                 module.OnUpdate();
             }
+        }
+    }
+    public void OnEnemyDeath(Entity _entity)
+    {
+        foreach(var module in modules)
+        {
+            module.Value.OnEnemyDeath(_entity);
         }
     }
     public Entity ModifyProjectile(Entity _projectile)
