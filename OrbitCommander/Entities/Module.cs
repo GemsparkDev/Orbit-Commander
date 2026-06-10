@@ -39,7 +39,7 @@ public abstract class Module : Pickup, IData
 
     public virtual int OnCollide(int _damage) { return _damage; }
     public virtual void OnShoot() { }
-    public virtual void OnEnemyDeath(Entity _entity) { }
+    public virtual void OnEnemyHit(Entity _entity, int _damage) { }
     public virtual void OnUpdate()
     {
         if (Cooldown > 0)
@@ -124,11 +124,29 @@ public class ModuleData(Sprites _realSprite, Sprites _virtualSprite, string _nam
 }
 public class Hull() : Module(Modules.Hull)
 {
+    private float resistanceTime = 0;
+    public override int OnCollide(int _damage)
+    {
+        return (int)(_damage * (1.1f - Math.Clamp(resistanceTime, 0, 0.5f)));
+    }
+    //TODO: Make sure to fix the update function, since fewer fuses makes this module better.
     public override void OnUpdate()
     {
-        UI.PlayerSpecialHealth.Colors[0] = Color.Transparent;
+        UI.PlayerSpecialHealth.Colors[0] = Color.Orange * 0.5f;
+        UI.PlayerSpecialHealth.SetInterval(Math.Clamp(resistanceTime, 0, 0.5f), 0.5f);
         UI.PlayerSpecialHealth.Colors[1] = Color.Transparent;
+        if(resistanceTime > 0)
+        {
+            resistanceTime -= Engine.DeltaSeconds;
+        }
         base.OnUpdate();
+    }
+    public override void OnEnemyHit(Entity _entity, int _damage)
+    {
+        if(_entity.isExpired)
+        {
+            resistanceTime += 1;
+        }
     }
 }
 public class Shield() : Module(Modules.Shield)

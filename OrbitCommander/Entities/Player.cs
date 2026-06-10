@@ -333,11 +333,11 @@ public class Player : Entity
             }
         }
     }
-    public void OnEnemyDeath(Entity _entity)
+    public void OnEnemyHit(Entity _entity, int _damage)
     {
         foreach(var module in modules)
         {
-            module.Value.OnEnemyDeath(_entity);
+            module.Value.OnEnemyHit(_entity, _damage);
         }
     }
     public Entity ModifyProjectile(Entity _projectile)
@@ -796,13 +796,13 @@ public class Player : Entity
         Engine.ShakeScreen(0.35f);
         return true;
     }
-    public bool PlayerCollide(int _damage, bool _ignoreImmunity = false)
+    public int PlayerCollide(int _damage, bool _ignoreImmunity = false)
     {
         if (dockedEntity != null)
         {
             //Note: applied statuses will NOT apply to the docked entity
             dockedEntity.Collide(_damage);
-            return false;
+            return 0;
         }
         if (!_ignoreImmunity)
         {
@@ -851,7 +851,7 @@ public class Player : Entity
                         failedPart = ModuleType.Core;
                         if (modules[ModuleType.Core].isFailed)
                         {
-                            return true;
+                            return _damage;
                         }
                     }
                     modules[failedPart].isFailed = true;
@@ -860,7 +860,7 @@ public class Player : Entity
                     Events.UpdateModulesStatus();
                 }
             }
-            return true;
+            return _damage;
         }
         else if (_damage < 0)
         {
@@ -877,9 +877,8 @@ public class Player : Entity
             }
             SoundManager.PlaySound(Assets.Get(Sound.Full), Position);
             ParticleManager.Add(new Particle(null, 1, Position + new Vector2(0, -1), new Vector2(0, -1.5f), 0, 0, Color.Green, Color.Transparent) { drawText = $"{healed}" });
-            return true;
         }
-        return false;
+        return 0;
     }
     public void ToggleFuse(int x, int y)
     {

@@ -4,13 +4,13 @@ using System;
 using OrbitCommander.Core;
 
 namespace OrbitCommander.Components;
-internal class Collide(Entity _entity, Func<int, bool, bool> _onCollide) : IComponent
+internal class Collide(Entity _entity, Func<int, bool, int> _onCollide) : IComponent
 {
     private bool prev = false;
     public bool WasHit { get; set; } = false;
     public SoundEffect HitSound { get; set; }
     public float InvincibilityCooldown { get; set; } = 0;
-    public Func<int, bool, bool> OnCollide { get; set; } = _onCollide;
+    public Func<int, bool, int> OnCollide { get; set; } = _onCollide;
     public void Update()
     {
         if(prev)

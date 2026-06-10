@@ -295,7 +295,7 @@ public class Mission
                    p.Health -= damage;
                    Engine.ShakeScreen(10 / ((p.Position - Engine.Camera.Position).Length() + 200) * damage);
                    ParticleManager.Add(new Particle(null, 1, p.Position + new Vector2(0, -1), new Vector2(0, -1.5f), 0, 0, Color.Orange, new Color(255, 0, 0, 0)) { drawText = $"{damage}" });                  }
-                return damage > 0;
+                return damage;
             }))],
             new Conditional([new Kill([p])], SendPickup(2000)),
             new DropSpawner(1500)); }),

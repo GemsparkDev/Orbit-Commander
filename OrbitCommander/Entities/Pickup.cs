@@ -33,12 +33,12 @@ public class Pickup : Entity, IData
         {
             if (_damage <= 0)
             {
-                return false;
+                return 0;
             }
             if (InvincibilityCooldown > 0 && !_ignoreImmunity)
             {
                 InvincibilityCooldown = 0;
-                return false;
+                return 0;
             }
             Health -= _damage;
             if (!_ignoreImmunity)
@@ -51,7 +51,7 @@ public class Pickup : Entity, IData
             }
             SoundManager.PlaySound(Assets.Get(Sound.Death), Position);
             Engine.ShakeScreen(10 / ((Position - Engine.Camera.Position).Length() + 150));
-            return true;
+            return _damage;
         }));
         InvincibilityCooldown = 5;
     }

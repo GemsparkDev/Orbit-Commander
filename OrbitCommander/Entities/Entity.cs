@@ -235,12 +235,13 @@ public class Entity : IMissionComponent
         var comp = GetComponent<Collide>();
         if (comp != null)
         {
-            bool wasHit = comp.OnCollide(_damage, _ignoreImmunity);
+            int damage = comp.OnCollide(_damage, _ignoreImmunity);
+            bool wasHit = damage > 0;
             comp.WasHit = comp.WasHit || wasHit;
             //All hostile deaths are attributed to the player, even if they didn't kill the enemy
-            if(IsFriendly(Player) && HasComponent<Health>() && isExpired)
+            if(!IsFriendly(Player) && HasComponent<Health>())
             {
-                Player.OnEnemyDeath(this);
+                Player.OnEnemyHit(this, damage);
             }
             return wasHit;
         }
@@ -283,7 +284,7 @@ public class Entity : IMissionComponent
                     Engine.ShakeScreen(10 / ((entity.Position - Engine.Camera.Position).Length() + 200) * damage);
                     ParticleManager.Add(new Particle(null, 1, entity.Position + new Vector2(0, -1), new Vector2(0, -1.5f), 0, 0, Color.Orange, new Color(255, 0, 0, 0)) { drawText = $"{damage}" });
                     entity.RevealDuration = Math.Max(entity.RevealDuration, 0.3f * MathF.Sqrt(damage));
-                    return true;
+                    return damage;
                 }
                 else if (damage < 0)
                 {
@@ -291,7 +292,7 @@ public class Entity : IMissionComponent
                     entity.Health -= damage;
                     ParticleManager.Add(new Particle(null, 1, entity.Position + new Vector2(0, -1), new Vector2(0, -1.5f), 0, 0, Color.Orange, new Color(0, 255, 0, 0)) { drawText = $"{-damage}" });
                 }
-                return false;
+                return 0;
             })
             { HitSound = _hitSound })
             .AddComponent(new FollowEmitter(entity) { ParticleEmitter = new(Assets.Get(Sprites.Dot), entity.Position, 0, Color.Red * 0.75f) })
@@ -3036,9 +3037,9 @@ public class Entity : IMissionComponent
             if (_damage >= 0)
             {
                 Health = 0;
-                return true;
+                return _damage;
             }
-            return false;
+            return 0;
         };
         var col = Color.DarkRed;
         col.A = 0;
@@ -4177,7 +4178,7 @@ public class Entity : IMissionComponent
             Engine.SaveGame.Player.Dock(false);
             Engine.SaveGame.Player.Velocity = Vector2.Zero;
             enemy.isExpired = true;
-            return true;
+            return _damage;
         };
         return enemy;
     }
@@ -5039,7 +5040,7 @@ public class Entity : IMissionComponent
             //Shaking is too intense with high fire rate weapons
             //Engine.ShakeScreen(100f * (float)damage / ((position - Engine.camera.Position).Length() + 1000f));
             projectile.isExpired = true;
-            return true;
+            return _damage;
         }));
         projectile.StealthAbility = _stealth;
         projectile.SensingAbility = 99;
@@ -5449,7 +5450,7 @@ public class FlameBolt : Entity
         AddComponent(new Collide(this, delegate (int _damage, bool _ignoreImmunity)
         {
             isExpired = true;
-            return true;
+            return _damage;
         }));
         maxTimeLeft = _timeLeft;
         temp = _temp;
@@ -5468,7 +5469,7 @@ public class FlameBolt : Entity
         AddComponent(new Collide(this, delegate (int _damage, bool _ignoreImmunity)
         {
             isExpired = true;
-            return true;
+            return _damage;
         }));
     }
     public override void Update()
