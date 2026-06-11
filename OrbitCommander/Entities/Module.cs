@@ -40,6 +40,8 @@ public abstract class Module : Pickup, IData
     public virtual int OnCollide(int _damage) { return _damage; }
     public virtual void OnShoot() { }
     public virtual void OnEnemyHit(Entity _entity, int _damage) { }
+    public virtual int SensingChange() { return 0; }
+    public virtual int StealthChange() { return 0; }
     public virtual void OnUpdate()
     {
         if (Cooldown > 0)
@@ -133,7 +135,7 @@ public class Hull() : Module(Modules.Hull)
     public override void OnUpdate()
     {
         UI.PlayerSpecialHealth.Colors[0] = Color.Orange * 0.5f;
-        UI.PlayerSpecialHealth.SetInterval(Math.Clamp(resistanceTime, 0, 0.5f), 0.5f);
+        UI.PlayerSpecialHealth.SetInterval(resistanceTime, 2f);
         UI.PlayerSpecialHealth.Colors[1] = Color.Transparent;
         if(resistanceTime > 0)
         {
@@ -143,9 +145,9 @@ public class Hull() : Module(Modules.Hull)
     }
     public override void OnEnemyHit(Entity _entity, int _damage)
     {
-        if(_entity.isExpired)
+        if(_entity.Health <= 0)
         {
-            resistanceTime += 1;
+            resistanceTime = Math.Min(resistanceTime + 1, 2);
         }
     }
 }
@@ -199,6 +201,10 @@ public class StealthHull() : Module(Modules.Stealth)
         UI.PlayerSpecialHealth.Colors[0] = Color.Transparent;
         UI.PlayerSpecialHealth.Colors[1] = Color.Transparent;
         base.OnUpdate();
+    }
+    public override int StealthChange()
+    {
+        return 2;
     }
 }
 public class Reflective() : Module(Modules.Reflective)
@@ -258,6 +264,10 @@ public class Turtle() : Module(Modules.Turtle)
         effect.particleColor = Color.Orange * (1.5f - dr);
         effect.Update();
         base.OnUpdate();
+    }
+    public override int StealthChange()
+    {
+        return 1;
     }
 }
 public class Ablative() : Module(Modules.Ablative)
@@ -323,11 +333,11 @@ public class StandardEngine() : Module(Modules.Engines)
         float engineTimeModifier = 1 - (1 - engineTime) * (1 - engineTime);
         float fuseRatio = (float)Player.CountFuses(ModuleType.Engines) / 3;
         engineParticles.speedOfEmission = Math.Max(450f * fuseRatio * engineTimeModifier, 10);
-        if (Player.direction != Vector2.Zero)
+        if (Player.EngineDirection != Vector2.Zero)
         {
-            Player.Velocity += Vector2.Normalize(Player.direction) * 24 * Engine.DeltaSeconds * engineTimeModifier * fuseRatio / (Player.leashedMaterials.Count + 2);
-            engineParticles.position = Player.Position - Vector2.Normalize(Player.direction) * 8 - Player.Velocity;
-            engineParticles.sprayAngle = Util.ToAngle(Player.direction) + MathF.PI;
+            Player.Velocity += Vector2.Normalize(Player.EngineDirection) * 24 * Engine.DeltaSeconds * engineTimeModifier * fuseRatio / (Player.leashedMaterials.Count + 2);
+            engineParticles.position = Player.Position - Vector2.Normalize(Player.EngineDirection) * 8 - Player.Velocity;
+            engineParticles.sprayAngle = Util.ToAngle(Player.EngineDirection) + MathF.PI;
         }
         engineParticles.Update();
     }
@@ -349,16 +359,16 @@ public class PlasmaEngine() : Module(Modules.Plasma)
         engineTime = Math.Clamp(engineTime + Engine.DeltaSeconds * 3, 0, 1);
         float engineTimeModifier = 1 - (1 - engineTime) * (1 - engineTime);
         float fuseRatio = (float)Player.CountFuses(ModuleType.Engines) / 3;
-        var dir = Vector2.Normalize(-Player.direction + new Vector2(Util.OneToNegOne(), Util.OneToNegOne()) / 10);
+        var dir = Vector2.Normalize(-Player.EngineDirection + new Vector2(Util.OneToNegOne(), Util.OneToNegOne()) / 10);
         for (float i = 0; i < 5 * fuseRatio * engineTimeModifier; i++)
         {
             float lerp = i / (5 * fuseRatio * engineTimeModifier);
             Vector3 color = new Vector3(0, 1, 1) * (1 - lerp) + new Vector3(1, 0.5f, 0) * lerp;
             ParticleManager.Add(new Particle(Assets.Get(Sprites.Circle), Player.Position + dir * (i + 2.5f) * 4, Player.Angle, new Color(color.X, color.Y, color.Z) * (1 - lerp)));
         }
-        if (Player.direction != Vector2.Zero)
+        if (Player.EngineDirection != Vector2.Zero)
         {
-            Player.Velocity += Vector2.Normalize(Player.direction) * 20 * Engine.DeltaSeconds * engineTimeModifier * fuseRatio * (0.75f - MathF.Tanh((burstTime - 5) / 2) / 4) / (Player.leashedMaterials.Count + 1);
+            Player.Velocity += Vector2.Normalize(Player.EngineDirection) * 20 * Engine.DeltaSeconds * engineTimeModifier * fuseRatio * (0.75f - MathF.Tanh((burstTime - 5) / 2) / 4) / (Player.leashedMaterials.Count + 1);
         }
         if (burstTime < 6)
         {
@@ -377,6 +387,14 @@ public class PlasmaEngine() : Module(Modules.Plasma)
         }
         base.OnUpdate();
     }
+    public override int StealthChange()
+    {
+        if(!Player.isEngineActive)
+        {
+            return 0;
+        }
+        return -1;
+    }
 }
 public class WorkEngine() : Module(Modules.Work)
 {
@@ -390,11 +408,11 @@ public class WorkEngine() : Module(Modules.Work)
         float engineTimeModifier = 1 - (1 - engineTime) * (1 - engineTime);
         float fuseRatio = (float)Player.CountFuses(ModuleType.Engines) / 3;
         engineParticles.speedOfEmission = Math.Max(450f * fuseRatio * engineTimeModifier, 10);
-        if (Player.direction != Vector2.Zero)
+        if (Player.EngineDirection != Vector2.Zero)
         {
-            Player.Velocity += Vector2.Normalize(Player.direction) * 14 * Engine.DeltaSeconds * engineTimeModifier * fuseRatio;
-            engineParticles.position = Player.Position - Vector2.Normalize(Player.direction) * 8 - Player.Velocity;
-            engineParticles.sprayAngle = Util.ToAngle(Player.direction) + MathF.PI;
+            Player.Velocity += Vector2.Normalize(Player.EngineDirection) * 14 * Engine.DeltaSeconds * engineTimeModifier * fuseRatio;
+            engineParticles.position = Player.Position - Vector2.Normalize(Player.EngineDirection) * 8 - Player.Velocity;
+            engineParticles.sprayAngle = Util.ToAngle(Player.EngineDirection) + MathF.PI;
         }
         engineParticles.Update();
     }
@@ -416,8 +434,8 @@ public class OrionEngine() : Module(Modules.Orion)
             return;
         }
         Cooldown = 0.5f;
-        var dir = Vector2.Normalize(Player.direction);
-        if (Player.direction != Vector2.Zero)
+        var dir = Vector2.Normalize(Player.EngineDirection);
+        if (Player.EngineDirection != Vector2.Zero)
         {
             Player.Velocity += dir * 4 / (Player.leashedMaterials.Count + 1);
             Util.Explode(Player.Position - dir * 30, Player.Velocity, 10, 28);
@@ -1145,7 +1163,7 @@ public class Dash() : Module(Modules.Dash)
         {
             return;
         }
-        Player.invincibilityCooldown = 0.5f;
+        Player.invincibilityCd = 0.5f;
         Player.Velocity += Player.Direction * 10;
         for (int i = 0; i < 300; i++)
         {

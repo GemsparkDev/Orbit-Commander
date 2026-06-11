@@ -37,38 +37,39 @@ public class Player : Entity
         { ModuleType.Core, ItemFactory.moduleData[UI.setModules[4]].Retrieve() }
     };
     public Module SecondaryWeapon { get; set; } = null;
-    private Vector2 startLocation = Vector2.Zero;
-    public Vector2 Direction => targetVector;
+
     public Dockable dockedEntity;
-    public bool IsDocked => dockedEntity != null;
     public List<Pickup> leashedMaterials = [];
     private ParticleEmitter smokeParticles = new(Assets.Get(Sprites.Circle), 1f, Vector2.Zero, 0, MathF.PI / 4, 1, 0.5f, Color.Gray, EmitterType.EmissionOverTime) { isEmitterActive = false, particleFadeToColor = new Color(169, 169, 169, 0) };
+    private float swapCd, cachedDamageCd = 0;
+    public float invincibilityCd, restartCd = 0;
+    public int cachedDamage = 0;
+    public Vector2 Direction { get; private set; }
     private SoundEffectInstance engineSounds;
-    public float invincibilityCooldown = 0;
-    public float cachedDamage = 0;
-    private float restartCooldown = 0;
-    private float swapCooldown = float.NegativeInfinity;
-    public bool IsRestarting { get; private set; } = false;
+    //IsEnabled manages dead file sprite
+    public bool IsEnabled { get; set; } = true;
+    public bool IsDocked => dockedEntity != null;
     public bool isEngineActive = false;
     public bool canGatherResources = false;
-    private Vector2 targetVector;
-    public Vector2 direction;
-    private float cachedDamageCooldown = 0;
+    public Vector2 EngineDirection { get; private set; }
+    private Vector2 startLocation = Vector2.Zero;
     public int Progression { get; set; } = 3;
-    public bool IsEnabled { get; set; } = true;
     public override int SensingAbility
     {
         get
         {
-            int sensing = 1 + Statuses.SensingChange;
             if (modules[ModuleType.Sensors] == null)
             {
                 return -1;
             }
+            int sensing = 1 + Statuses.SensingChange;
+            foreach(var module in modules)
+            {
+                sensing += module.Value.SensingChange();
+            }
             float x = (float)CountFuses(ModuleType.Sensors) - 2;
             //Fuse modifiers: 0 = -2, 1 = -1, 2 or 3 = 0, 4 = +1
-            sensing += (int)Math.Floor(x * x * x / 5);
-            return sensing;
+            return sensing + (int)Math.Floor(x * x * x / 5);
         }
     }
     public override int StealthAbility
@@ -77,29 +78,20 @@ public class Player : Entity
         {
             if (RevealDuration > 0)
             {
-                return -10;
+                return -99;
             }
             int stealth = Statuses.StealthChange;
+            foreach (var module in modules)
+            {
+                stealth += module.Value.StealthChange();
+            }
             if (isEngineActive)
             {
                 stealth -= 1;
-                if (modules[ModuleType.Engines].Type == Modules.Plasma)
-                {
-                    stealth -= 1;
-                    ParticleManager.Add(new Particle(Assets.Get(Sprites.Circle), Position, 0, Color.Red));
-                }
             }
             if (modules[ModuleType.Guns].Cooldown > 0)
             {
                 stealth -= 1;
-            }
-            if (modules[ModuleType.Hull].Type is Modules.Stealth)
-            {
-                stealth += 2;
-            }
-            if (modules[ModuleType.Hull].Type is Modules.Turtle)
-            {
-                stealth += 1;
             }
             return stealth;
         }
@@ -124,18 +116,9 @@ public class Player : Entity
         Events.SetFuseModuleDecals(textures);
         Events.UpdateFuseUI(moduleFuses, spareFuses);
     }
-    public static Player NewPlayer(Vector2 _position, Vector2 _velocity, float _angle)
-    {
-        return new Player(_position, _velocity, _angle);
-    }
     public override void Update()
     {
-        Color c = SaveGame.ColorScheme.TeamColors[Team];
-        if (Color != c)
-        {
-            float l = Util.FIED(0.025f);
-            Color = new Color((byte)(Color.R * l + c.R * (1f - l)), (byte)(Color.G * l + c.G * (1f - l)), (byte)(Color.B * l + c.B * (1f - l)));
-        }
+        GetComponent<Sprite>().TargetColor = SaveGame.ColorScheme.TeamColors[Team];
         if (modules[ModuleType.Core].Health <= 0)
         {
             isExpired = true;
@@ -143,115 +126,87 @@ public class Player : Entity
             SoundManager.PlayGlobalSound(Assets.Get(Sound.Death));
             return;
         }
-        smokeParticles.position = Position;
         leashedMaterials = [.. leashedMaterials.Where(x => !x.isExpired)];
-        float restart = 1.5f;
-        if (Events.AcknowledgeMessage(Message.RestartModules))
+        if(restartCd <= 0 && Events.AcknowledgeMessage(Message.RestartModules) && modules.Any(x => x.Value.isFailed))
         {
-            foreach (var module in modules.Values)
+            restartCd = 1.5f;
+        }
+        else if(restartCd > 0)
+        {
+            restartCd -= Engine.DeltaSeconds;
+            if(restartCd <= 0)
             {
-                if (module.isFailed)
+                var module = modules.Values.Last(x => x.isFailed);
+                module.isFailed = false;
+                //Small bonus to module health to keep players alive in firefights
+                module.Health = Math.Min(module.MaxHealth, module.Health + Util.Random.Next(1, 4));
+                if (modules.Any(x => x.Value.isFailed))
                 {
-                    restartCooldown = restart;
-                    break;
-                }
-            }
-            if (restartCooldown > 0)
-            {
-                IsRestarting = true;
-                SoundManager.PlaySound(Assets.Get(Sound.Interact), Position);
-            }
-        }
-        if (IsRestarting && restartCooldown <= 0)
-        {
-            bool restartedModules = false;
-            //Reverse order prioritizes most important modules first
-            for (int i = modules.Count - 1; i >= 0; i--)
-            {
-                var module = modules[(ModuleType)i];
-                if (restartedModules && module.isFailed)
-                {
-                    restartCooldown = restart;
-                    restartedModules = false;
-                    break;
-                }
-                else if (module.isFailed)
-                {
-                    module.isFailed = false;
-                    //Small bonus to module health to keep players alive in firefights
-                    module.Health = Math.Min(module.MaxHealth, module.Health + Util.Random.Next(1, 4));
-                    restartedModules = true;
-                }
-            }
-            if (restartedModules)
-            {
-                IsRestarting = false;
-                SoundManager.PlaySound(Assets.Get(Sound.Full), Position);
-            }
-        }
-        else if (IsRestarting)
-        {
-            restartCooldown -= Engine.DeltaSeconds;
-        }
-        if (invincibilityCooldown > 0)
-        {
-            invincibilityCooldown -= Engine.DeltaSeconds;
-        }
-        if(swapCooldown > 0)
-        {
-            swapCooldown -= Engine.DeltaSeconds;
-        }
-        else if(swapCooldown > -10000)
-        {
-            SoundManager.PlayGlobalSound(Assets.Get(Sound.Click));
-            (modules[ModuleType.Guns], SecondaryWeapon) = (SecondaryWeapon, modules[ModuleType.Guns]);
-            Events.UpdateModulesUI();
-            swapCooldown = float.NegativeInfinity;
-        }
-        if (cachedDamageCooldown <= 0)
-        {
-            if (cachedDamage > 0)
-            {
-                int randomNumber = Util.Random.Next(1, 4);
-                if (modules[ModuleType.Hull].Health > 0)
-                {
-                    modules[ModuleType.Hull].Health--;
-                }
-                else if (modules.ElementAt(randomNumber).Value.Health > 0)
-                {
-                    modules.ElementAt(randomNumber).Value.Health--;
+                    restartCd = 1.5f;
+                    SoundManager.PlaySound(Assets.Get(Sound.Interact), Position);
                 }
                 else
                 {
-                    modules[ModuleType.Core].Health--;
-                }
-                cachedDamage--;
-                cachedDamageCooldown = 0.05f;
-                //Guaranteed death sped along
-                if (cachedDamage > 100)
-                {
-                    cachedDamageCooldown = 0;
+                    SoundManager.PlaySound(Assets.Get(Sound.Full), Position);
                 }
             }
         }
-        else
+        if (invincibilityCd > 0)
         {
-            cachedDamageCooldown -= Engine.DeltaSeconds;
+            invincibilityCd -= Engine.DeltaSeconds;
         }
-        float currentHealth = modules[ModuleType.Hull].Health + modules[ModuleType.Guns].Health + modules[ModuleType.Engines].Health + modules[ModuleType.Sensors].Health + modules[ModuleType.Core].Health;
-        float maxHealth = modules[ModuleType.Hull].MaxHealth + modules[ModuleType.Guns].MaxHealth + modules[ModuleType.Engines].MaxHealth + modules[ModuleType.Sensors].MaxHealth + modules[ModuleType.Core].MaxHealth;
+        if(swapCd > 0)
+        {
+            swapCd -= Engine.DeltaSeconds;
+            if(swapCd <= 0)
+            {
+                SoundManager.PlayGlobalSound(Assets.Get(Sound.Click));
+                (modules[ModuleType.Guns], SecondaryWeapon) = (SecondaryWeapon, modules[ModuleType.Guns]);
+                Events.UpdateModulesUI();
+                swapCd = 0;
+            }
+        }
+        if(cachedDamageCd > 0)
+        {
+            cachedDamageCd -= Engine.DeltaSeconds;
+        }
+        else if(cachedDamage > 0)
+        {
+            int randomNumber = Util.Random.Next(1, 4);
+            if (modules[ModuleType.Hull].Health > 0)
+            {
+                modules[ModuleType.Hull].Health--;
+            }
+            else if (modules.ElementAt(randomNumber).Value.Health > 0)
+            {
+                modules.ElementAt(randomNumber).Value.Health--;
+            }
+            else
+            {
+                modules[ModuleType.Core].Health--;
+            }
+            cachedDamage--;
+            cachedDamageCd = 0.05f;
+            //Guaranteed death sped along
+            if (cachedDamage > 100)
+            {
+                cachedDamageCd = 0.0166f;
+            }
+        }
 
+        float currentHealth = modules.Values.Sum(x => x.Health);
+        float maxHealth = modules.Values.Sum(x => x.MaxHealth);
         UI.PlayerHealth.SetInterval(currentHealth - cachedDamage, maxHealth, 0);
-        UI.PlayerHealth.SetInterval(currentHealth + cachedDamageCooldown / 0.05f, maxHealth, 1);
-        Vector3 colorVec;
-        float val = (MathF.Sin(Engine.Time) + 1f) / 2;
-        colorVec = new Vector3(1, 0, 0) * val + new Vector3(1, 0.2f, 0.2f) * (1f - val);
+        UI.PlayerHealth.SetInterval(currentHealth + cachedDamageCd / 0.05f, maxHealth, 1);
+
+        float lerp = (MathF.Sin(Engine.Time) + 1f) / 2;
+        Vector3 colorVec = new Vector3(1, 0, 0) * lerp + new Vector3(1, 0.2f, 0.2f) * (1f - lerp);
         UI.PlayerHealth.Colors[0] = new Color(colorVec.X, colorVec.Y, colorVec.Z);
 
         //Only displays if the player has abilities unlocked
         if (Progression > 1 || SaveGame.DebugMode)
         {
-            colorVec = new Vector3(0, 1, 1) * val + new Vector3(0.2f, 1, 0.8f) * (1f - val);
+            colorVec = new Vector3(0, 1, 1) * lerp + new Vector3(0.2f, 1, 0.8f) * (1f - lerp);
             UI.PlayerAbility.Colors[0] = new Color(colorVec.X, colorVec.Y, colorVec.Z);
             UI.PlayerAbility.Colors[1] = Color.DarkGray;
         }
@@ -307,7 +262,7 @@ public class Player : Entity
         //Testing
         //ParticleManager.Add(new Particle(Assets.Get(Sprite.Circle), mouseCamPos, 0, Color.White));
         //ParticleManager.Add(new Particle(Assets.Get(Sprite.Circle), position, 0, Color.White));
-        targetVector = Vector2.Normalize(mouseCamPos - Position);
+        Direction = Vector2.Normalize(mouseCamPos - Position);
     }
     public void LowerCooldown()
     {
@@ -419,7 +374,7 @@ public class Player : Entity
             {
                 if (SecondaryWeapon != null)
                 {
-                    swapCooldown = 0.5f;
+                    swapCd = 0.5f;
                 }
                 else
                 {
@@ -464,7 +419,7 @@ public class Player : Entity
                         for (float i = 0; i < constructs.Count; i++)
                         {
                             Vector2 dir = Util.ToUnitVector(angle);
-                            Vector2 mouseDir = targetVector;
+                            Vector2 mouseDir = Direction;
                             if (dir.X * mouseDir.X + dir.Y * mouseDir.Y > 1f - 0.9f / constructs.Count && dist > 300)
                             {
                                 color = Color.White;
@@ -511,8 +466,7 @@ public class Player : Entity
                         for (int i = 0; i < types.Count; i++)
                         {
                             Vector2 dir = Util.ToUnitVector(angle);
-                            Vector2 mouseDir = targetVector;
-                            if (dir.X * mouseDir.X + dir.Y * mouseDir.Y > 1f - 0.9f / types.Count && dist > 300 && firstScrap != null)
+                            if (dir.X * Direction.X + dir.Y * Direction.Y > 1f - 0.9f / types.Count && dist > 300 && firstScrap != null)
                             {
                                 switch (types[i])
                                 {
@@ -591,14 +545,14 @@ public class Player : Entity
                 }
                 if (Input.NewMouseState.RightButton == ButtonState.Pressed)
                 {
-                    Vector2 targetDir = targetVector;
+                    Vector2 targetDir = Direction;
                     if (aimAssist)
                     {
                         Entity nearestEnemy = Util.Nearest(Position, Engine.SaveGame.CurrentMission.GetEntities<Health>());
                         if (nearestEnemy != null && nearestEnemy.Health <= 0)
                         {
                             var relativePos = Vector2.Normalize(nearestEnemy.Position - Position);
-                            if (Vector2.Dot(relativePos, targetVector) > 0.9f)
+                            if (Vector2.Dot(relativePos, Direction) > 0.9f)
                             {
                                 targetDir = relativePos;
                             }
@@ -609,7 +563,7 @@ public class Player : Entity
                     {
                         entity.Mine();
                     }
-                    for (float i = 0; i < (_end - Position - targetVector * 8).Length() / 2; i++)
+                    for (float i = 0; i < (_end - Position - Direction * 8).Length() / 2; i++)
                     {
                         float lerp = i / 60;
                         Vector3 color = new Vector3(1, 1, 0) * (1 - lerp) + new Vector3(1, 0, 0) * lerp;
@@ -638,7 +592,7 @@ public class Player : Entity
                     }
                 }
                 Keys[] pressedKey = Input.NewState.GetPressedKeys();
-                direction = Vector2.Zero;
+                EngineDirection = Vector2.Zero;
                 isEngineActive = false;
                 var directions = new Dictionary<Binding, Vector2>
                 {
@@ -651,10 +605,10 @@ public class Player : Entity
                 {
                     if (Input.IsDown(pair.Key))
                     {
-                        direction += pair.Value;
+                        EngineDirection += pair.Value;
                     }
                 }
-                isEngineActive = direction.X != 0 || direction.Y != 0;
+                isEngineActive = EngineDirection.X != 0 || EngineDirection.Y != 0;
                 if (isEngineActive)
                 {
                     foreach (var module in modules)
@@ -664,13 +618,13 @@ public class Player : Entity
                 }
                 if (isEngineActive)
                 {
-                    Angle = Angle * 0.5f + Util.ToAngle(targetVector) * 0.5f; //Better shield aiming
+                    Angle = Angle * 0.5f + Util.ToAngle(Direction) * 0.5f; //Better shield aiming
                 }
                 else
                 {
-                    Angle = Angle * 0.5f + Util.ToAngle(targetVector) * 0.5f;
+                    Angle = Angle * 0.5f + Util.ToAngle(Direction) * 0.5f;
                 }
-                if (Input.NewMouseState.LeftButton == ButtonState.Pressed && swapCooldown <= 0)
+                if (Input.NewMouseState.LeftButton == ButtonState.Pressed && swapCd <= 0)
                 {
                     foreach (var module in modules)
                     {
@@ -682,6 +636,7 @@ public class Player : Entity
             {
                 Dock();
             }
+            smokeParticles.position = Position;
             smokeParticles.offsetVelocity = Velocity;
             if (Util.Random.Next(0, 2) == 0)
             {
@@ -718,9 +673,9 @@ public class Player : Entity
 
         if (aimAssist)
         {
-            Vector2 acc = Engine.SaveGame.CurrentMission.GetNormalizedAcceleration(Position + targetVector * _speed * 3) * 180 / _speed;
+            Vector2 acc = Engine.SaveGame.CurrentMission.GetNormalizedAcceleration(Position + Direction * _speed * 3) * 180 / _speed;
             Vector2 vel = Velocity - acc;
-            float b = targetVector.X * vel.X + targetVector.Y * vel.Y;
+            float b = Direction.X * vel.X + Direction.Y * vel.Y;
             float c = vel.X * vel.X + vel.Y * vel.Y - _speed * _speed;
             float disc = b * b - c;
             if (disc >= 0)
@@ -728,13 +683,13 @@ public class Player : Entity
                 float t = b + MathF.Sqrt(disc);
                 if (t > 0)
                 {
-                    return targetVector * t + acc;
+                    return Direction * t + acc;
                 }
             }
         }
-        return targetVector * _speed + Velocity;
+        return Direction * _speed + Velocity;
     }
-    public bool Dock(bool _withVelocity = true)
+    public bool Dock(bool _withVelocity = true, bool _silent = false)
     {
         Dockable dockableEntity = Engine.SaveGame.CurrentMission.NearestDockableEntity(this);
         if (dockableEntity == null || Vector2.DistanceSquared(Position, dockableEntity.Entity.Position) > 1250)
@@ -750,7 +705,10 @@ public class Player : Entity
             {
                 Velocity += new Vector2(0, -2);
             }
-            SoundManager.PlayGlobalSound(Assets.Get(Sound.Undock));
+            if(!_silent)
+            {
+                SoundManager.PlayGlobalSound(Assets.Get(Sound.Undock));
+            }
             if (Engine.UIManager.selectedIcon is Pickup pickup)
             {
                 Engine.UIManager.selectedIcon = null;
@@ -765,8 +723,11 @@ public class Player : Entity
         {
             dockedEntity = dockableEntity;
             isEngineActive = false;
-            Events.ToggleDockingMenus();
-            SoundManager.PlayGlobalSound(Assets.Get(Sound.Dock));
+            if(!_silent)
+            {
+                Events.ToggleDockingMenus();
+                SoundManager.PlayGlobalSound(Assets.Get(Sound.Dock));
+            }
             if (dockedEntity.HasInventory)
             {
                 for (int i = 0; i < leashedMaterials.Count; i++)
@@ -812,26 +773,26 @@ public class Player : Entity
             }
         }
         _damage = Statuses.ModifyDamage(_damage);
-        if(IsRestarting)
+        if(restartCd > 0)
         {
             _damage = (int)(_damage*0.5f);
         }
-        if (_damage > 0 && (invincibilityCooldown <= 0 || _ignoreImmunity))
+        if (_damage > 0 && (invincibilityCd <= 0 || _ignoreImmunity))
         {
             ApplyWork(_damage);
             Flash(Color.White);
             Engine.ShakeScreen(0.08f * _damage);
             //Helps to cushion huge hits
-            //Player will never be one shot (unless they deserve it)
+            //Player will never be one shot when at high health
             cachedDamage += Math.Min(50, _damage);
             SoundManager.PlaySound(Assets.Get(Sound.Hit), Position);
             if (!_ignoreImmunity)
             {
-                invincibilityCooldown = 1;
+                invincibilityCd = 1;
             }
             ParticleManager.Add(new Particle(null, 1, Position + new Vector2(0, -1), new Vector2(0, -1.5f), 0, 0, Color.Red, Color.Transparent) { drawText = $"{_damage}" });
             //Part and Fuse Failure
-            if (Progression > 0 && !IsRestarting)
+            if (Progression > 0 && restartCd <= 0)
             {
                 //If a module is failed, further collisions damage fuses
                 var targetFuse = new Vector2(Util.Random.Next(0, moduleFuses.GetLength(0)), Util.Random.Next(0, moduleFuses.GetLength(1)));
@@ -932,9 +893,9 @@ public class Player : Entity
         {
             return;
         }
-        if(swapCooldown > 0)
+        if(swapCd > 0)
         {
-            for(float i = 0; i < (0.5f - swapCooldown) * 200; i++)
+            for(float i = 0; i < (0.5f - swapCd) * 200; i++)
             {
                 float angle = i / 100 * MathF.Tau;
                 _spriteBatch.Draw(Assets.Get(Sprites.Dot), Util.ToUnitVector(angle) * 30 + Position, null, Color.Green, angle, Assets.DimsOf(Sprites.Dot), 1, 0, 0);

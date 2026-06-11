@@ -52,18 +52,19 @@ public abstract class GameState
         if (SaveGame.DebugMode)
         {
             Vector2 cameraPos = Engine.Camera.Position + Engine.MousePositionOffset;
-            for (int x = (int)Math.Ceiling((cameraPos.X - Engine.ScreenSize.X / 2) / 50); x < (cameraPos.X + Engine.ScreenSize.X / 2) / 50; x++)
+            Vector2 sz = Engine.ScreenSize / 2 / Engine.Camera.Zoom;
+            for (int x = (int)Math.Ceiling((cameraPos.X - sz.X) / 50); x < (cameraPos.X + sz.X) / 50; x++)
             {
                 Color col = x % 10 == 0 ? new Color(0.2f, 0.2f, 0.2f) : new Color(0.1f, 0.1f, 0.1f);
-                _spriteBatch.Draw(Engine.Line, new Vector2(x * 50, cameraPos.Y - Engine.ScreenSize.Y / 2), new Rectangle(x * 50, 0, 1, (int)Engine.ScreenSize.Y), col, 0, Vector2.Zero, 1, 0, 0);
+                _spriteBatch.Draw(Engine.Line, new Vector2(x * 50, cameraPos.Y - sz.Y), new Rectangle(x * 50, 0, 1, (int)(2 * sz.Y)), col, 0, Vector2.Zero, 1, 0, 0);
             }
-            for (int y = (int)Math.Ceiling((cameraPos.Y - Engine.ScreenSize.Y / 2) / 50); y < (cameraPos.Y + Engine.ScreenSize.Y / 2) / 50; y++)
+            for (int y = (int)Math.Ceiling((cameraPos.Y - sz.Y) / 50); y < (cameraPos.Y + sz.Y) / 50; y++)
             {
                 Color col = y % 10 == 0 ? new Color(0.2f, 0.2f, 0.2f) : new Color(0.1f, 0.1f, 0.1f);
-                _spriteBatch.Draw(Engine.Line, new Vector2(cameraPos.X - Engine.ScreenSize.X / 2, y * 50), new Rectangle(0, y * 50, (int)Engine.ScreenSize.X, 1), col, 0, Vector2.Zero, 1, 0, 0);
+                _spriteBatch.Draw(Engine.Line, new Vector2(cameraPos.X - sz.X, y * 50), new Rectangle(0, y * 50, (int)(2 * sz.X), 1), col, 0, Vector2.Zero, 1, 0, 0);
                 if (y % 10 == 0)
                 {
-                    for (int x = (int)Math.Ceiling((cameraPos.X - Engine.ScreenSize.X / 2) / 500) * 10; x < (cameraPos.X + Engine.ScreenSize.X / 2) / 50; x += 10)
+                    for (int x = (int)Math.Ceiling((cameraPos.X - sz.X) / 500) * 10; x < (cameraPos.X + sz.X) / 50; x += 10)
                     {
                         var text = $"{x},{y}";
                         _spriteBatch.DrawString(Assets.TextFont, text, new Vector2(x * 50, y * 50), Color.White, 0, Assets.TextFont.MeasureString(text) / 2, 1, 0, 0);

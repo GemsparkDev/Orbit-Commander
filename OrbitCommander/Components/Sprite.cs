@@ -44,7 +44,7 @@ public class Sprite(Entity _entity, Color _color) : IComponent
     }
     public void Draw(SpriteBatch _spriteBatch)
     {
-        Vector2 halfSize = (Engine.BackBuffer + Size) / 2;
+        Vector2 halfSize = (Engine.BackBuffer / Engine.Camera.Zoom + Size) / 2;
         Vector2 pos = Engine.Camera.Position + Engine.MousePositionOffset;
         if (_entity.Position.X - pos.X < -halfSize.X || _entity.Position.Y - pos.Y < -halfSize.Y
          || _entity.Position.X - pos.X > halfSize.X || _entity.Position.Y - pos.Y > halfSize.Y)

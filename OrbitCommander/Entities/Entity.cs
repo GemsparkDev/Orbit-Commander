@@ -107,7 +107,7 @@ public class Entity : IMissionComponent
     {
         if (nearestEnemy != null && Vector2.Distance(nearestEnemy.Position, Position) < ColliderRadius + nearestEnemy.ColliderRadius)
         {
-            if (nearestEnemy.Collide(Damage))
+            if (nearestEnemy.Collide(Damage) > 0)
             {
                 nearestEnemy.ApplyWork(Temperature);
                 ParticleManager.Add(new Particle(Assets.Get(Sprites.Glow), 0.33f, Position, Vector2.Zero, 0, 0, Color.Wheat, Color.Transparent));
@@ -230,22 +230,21 @@ public class Entity : IMissionComponent
         }
         return this;
     }
-    public bool Collide(int _damage, bool _ignoreImmunity = false)
+    public int Collide(int _damage, bool _ignoreImmunity = false)
     {
         var comp = GetComponent<Collide>();
         if (comp != null)
         {
             int damage = comp.OnCollide(_damage, _ignoreImmunity);
-            bool wasHit = damage > 0;
-            comp.WasHit = comp.WasHit || wasHit;
+            comp.WasHit = comp.WasHit || damage > 0;
             //All hostile deaths are attributed to the player, even if they didn't kill the enemy
-            if(!IsFriendly(Player) && HasComponent<Health>())
+            if(Team != Team.Dead && Team != Player.Team && HasComponent<Health>())
             {
                 Player.OnEnemyHit(this, damage);
             }
-            return wasHit;
+            return damage;
         }
-        return false;
+        return 0;
     }
     public virtual void Draw(SpriteBatch _spriteBatch)
     {
@@ -267,9 +266,13 @@ public class Entity : IMissionComponent
             .AddComponent(new Collide(entity, delegate (int damage, bool _ignoreImmunity)
             {
                 damage = entity.Statuses.ModifyDamage(damage);
-                if (damage > 0 && entity.InvincibilityCooldown <= 0)
+                if(!_ignoreImmunity)
                 {
-                    entity.InvincibilityCooldown = 0.1f;
+                    damage = (int)(Math.Round((float)damage * (1 - Math.Clamp(entity.InvincibilityCooldown, 0, 1))));
+                }
+                if (damage > 0)
+                {
+                    entity.InvincibilityCooldown = Math.Min(entity.InvincibilityCooldown + 0.1f, 1);
                     if (entity.Health > 0)
                     {
                         entity.Flash(Color.White);
@@ -1841,7 +1844,7 @@ public class Entity : IMissionComponent
             }
             if (distSqr < (Engine.SaveGame.Player.ColliderRadius + ColliderRadius + 25) * (Engine.SaveGame.Player.ColliderRadius + ColliderRadius + 10))
             {
-                if (Engine.SaveGame.Player.Collide(damage))
+                if (Engine.SaveGame.Player.Collide(damage) > 0)
                 {
                     for (float angle = MathF.PI / 30; angle < MathF.Tau; angle += MathF.PI / 30)
                     {
@@ -3824,7 +3827,7 @@ public class Entity : IMissionComponent
                     Velocity += acceleration * Engine.DeltaSeconds;
                     if (Vector2.DistanceSquared(enemy.Position, Position) < (enemy.ColliderRadius + ColliderRadius + 25) * (enemy.ColliderRadius + ColliderRadius + 10))
                     {
-                        if (enemy.Collide(damage))
+                        if (enemy.Collide(damage) > 0)
                         {
                             for (float angle = MathF.PI / 30; angle < MathF.Tau; angle += MathF.PI / 30)
                             {
@@ -3945,7 +3948,7 @@ public class Entity : IMissionComponent
             {
                 Engine.SaveGame.CurrentMission.CompleteCustomRule(this);
             }
-            if (!alert && requiredCraftsLeft == 19)
+            if (!alert && requiredCraftsLeft == 9)
             {
                 SoundManager.PlaySound(Assets.Get(Sound.Beep), Position);
                 ParticleManager.Add(new Particle(null, 5, Position + new Vector2(0, -80), Velocity, Angle, 0, Color.Red, Color.Transparent) { drawText = "Alert: Enemies detected.\nDefend the mothership." });
@@ -4184,7 +4187,6 @@ public class Entity : IMissionComponent
     }
     IEnumerable<int> Glider(float _distance)
     {
-        bool isDocked = true;
         Planet planet = null;
         float closestDistance = float.MaxValue;
         foreach (var entity in Engine.SaveGame.CurrentMission.Entities)
@@ -4200,10 +4202,9 @@ public class Entity : IMissionComponent
         while (true)
         {
             Velocity = new Vector2(xSpeed, xSpeed * 2 * (Position.Y - _distance) / Position.X);
-            if (Position.X > 0 && isDocked)
+            if (Position.X > 0 && Engine.SaveGame.Player.dockedEntity == GetComponent<Dockable>())
             {
                 Engine.SaveGame.Player.Dock(false);
-                isDocked = false;
             }
             if (Position.X > 1000)
             {
@@ -5123,7 +5124,7 @@ public class Entity : IMissionComponent
             Position = end;
             if (nearestEnemy.Count > 0)
             {
-                if (nearestEnemy[0].Collide(Damage))
+                if (nearestEnemy[0].Collide(Damage) > 0)
                 {
                     ParticleManager.Add(new Particle(Assets.Get(Sprites.Glow), 0.33f, Position, Vector2.Zero, 0, 0, Color.Wheat, Color.Transparent));
                 }
@@ -5300,7 +5301,6 @@ public class GrapplingHook : Entity
     {
         public Vector2 Position => _entity.Position + _position;
         public bool IsExpired => _entity.isExpired;
-
         public void ApplyForce(Vector2 _force)
         {
             if (_entity is Planet)
@@ -5496,7 +5496,7 @@ public class FlameBolt : Entity
         {
             if (!Player.IsFriendly(this))
             {
-                if(Player.Collide(Damage))
+                if(Player.Collide(Damage) > 0)
                 {
                     Player.ApplyWork(temp);
                 }
@@ -5513,7 +5513,7 @@ public class FlameBolt : Entity
             {
                 continue;
             }
-            if(nearestEnemy.Collide(GetComponent<Attack>().Damage))
+            if(nearestEnemy.Collide(Damage) > 0)
             {
                 nearestEnemy.ApplyWork(temp);
             }

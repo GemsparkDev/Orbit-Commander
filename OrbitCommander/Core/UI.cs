@@ -278,7 +278,7 @@ public static class UI
         RestartSwitch.AddBehaviour(
             delegate ()
             {
-                if (Engine.SaveGame.Player.IsRestarting)
+                if (Engine.SaveGame.Player.restartCd > 0)
                 {
                     if (Input.OldMouseState.LeftButton == ButtonState.Released)
                     {
