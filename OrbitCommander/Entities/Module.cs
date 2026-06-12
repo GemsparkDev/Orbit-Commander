@@ -192,19 +192,32 @@ public class Shield() : Module(Modules.Shield)
 }
 public class StealthHull() : Module(Modules.Stealth)
 {
+    private float stealthCd = 0;
     public override int OnCollide(int _damage)
     {
         return (int)(_damage * 1.1f);
     }
     public override void OnUpdate()
     {
+        if(stealthCd > 0)
+        {
+            stealthCd -= Engine.DeltaSeconds;
+        }
         UI.PlayerSpecialHealth.Colors[0] = Color.Transparent;
         UI.PlayerSpecialHealth.Colors[1] = Color.Transparent;
         base.OnUpdate();
     }
     public override int StealthChange()
     {
-        return 2;
+        if(stealthCd > 0)
+        {
+            return 2;
+        }
+        return 1;
+    }
+    public override void OnEnemyHit(Entity _entity, int _damage)
+    {
+        stealthCd += MathF.Sqrt(_damage)/3;
     }
 }
 public class Reflective() : Module(Modules.Reflective)
