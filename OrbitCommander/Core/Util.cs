@@ -88,6 +88,10 @@ public static class Util
             Vector2 particleVelocity = new Vector2(MathF.Cos(angle), MathF.Sin(angle)) * (Random.NextSingle() * 2 + 2);
             ParticleManager.Add(new Particle(Assets.Get(Sprites.Circle), 0.25f, _position - _velocity, particleVelocity + _velocity, angle, 0, Color.DarkSlateGray, Color.Transparent));
         }
+        for(int i = 0; i < 16; i++)
+        {
+            ParticleManager.Add(new Particle(Assets.Get(Sprites.Dot), 1f, _position + ToUnitVector((float)i * MathF.PI / 4) * _radius, Vector2.Zero, 0, 0, Color.White, Color.Transparent));
+        }
         Engine.SaveGame.CurrentMission.Explode(_damage, _radius, _position);
         Engine.ShakeScreen(150 / ((_position - Engine.Camera.Position).Length() + 300));
     }

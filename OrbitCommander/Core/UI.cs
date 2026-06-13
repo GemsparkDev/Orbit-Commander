@@ -162,7 +162,7 @@ public static class UI
     public static int type = 1;
     public static readonly Vector2[] resolutions = [new Vector2(1920, 1080), new Vector2(640, 480)];
     public static int selectedResolution = 0;
-    public static readonly Modules[] setModules = [Modules.Hull, Modules.AdaptiveShotgun, Modules.Engines, Modules.Sensors, Modules.Assault];
+    public static readonly Modules[] setModules = [Modules.Hull, Modules.Antimaterial, Modules.Orion, Modules.Sensors, Modules.Assault];
 
     //Hack menu
     public static Button HackButton { get; } = new Button(Vector2.Zero, Assets.Get(Sprites.Button), Assets.TextFont, "Hack", Color.Yellow);

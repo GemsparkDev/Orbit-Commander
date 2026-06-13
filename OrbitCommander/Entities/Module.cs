@@ -440,19 +440,36 @@ public class WorkEngine() : Module(Modules.Work)
 }
 public class OrionEngine() : Module(Modules.Orion)
 {
+    private float explosionTime = 0;
     public override void OnEngine()
     {
         if (Cooldown > 0)
         {
             return;
         }
-        Cooldown = 0.5f;
+        Cooldown = 0.33f;
         var dir = Vector2.Normalize(Player.EngineDirection);
         if (Player.EngineDirection != Vector2.Zero)
         {
             Player.Velocity += dir * 4 / (Player.leashedMaterials.Count + 1);
             Util.Explode(Player.Position - dir * 30, Player.Velocity, 10, 28);
             SoundManager.PlaySound(Assets.Get(Sound.ShieldHit), Player.Position);
+        }
+    }
+    public override void OnUpdate()
+    {
+        if(explosionTime > 0)
+        {
+            explosionTime -= Engine.DeltaSeconds;
+        }
+        base.OnUpdate();
+    }
+    public override void OnEnemyHit(Entity _entity, int _damage)
+    {
+        if(_damage > 3 && explosionTime <= 0)
+        {
+            explosionTime = (float)(_damage) / 100;
+            Util.Explode(_entity.Position, _entity.Velocity, _damage / 3, MathF.Sqrt(_damage) * 20);
         }
     }
 }
