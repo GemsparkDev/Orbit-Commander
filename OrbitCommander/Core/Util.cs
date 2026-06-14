@@ -72,7 +72,7 @@ public static class Util
             + new Vector2(_direction.Y + OneToNegOne() / 2, -_direction.X + OneToNegOne() / 4), 0, OneToNegOne() / 5, Color.Yellow, Color.Transparent)
         { experienceGravity = true });
     }
-    public static void Explode(Vector2 _position, Vector2 _velocity, int _damage, float _radius)
+    public static void Explode(Vector2 _position, Vector2 _velocity, int _damage, float _radius, Team[] _blacklist = null)
     {
         int particles = Random.Next(15, 25);
         for (int i = 0; i < particles; i++)
@@ -88,11 +88,7 @@ public static class Util
             Vector2 particleVelocity = new Vector2(MathF.Cos(angle), MathF.Sin(angle)) * (Random.NextSingle() * 2 + 2);
             ParticleManager.Add(new Particle(Assets.Get(Sprites.Circle), 0.25f, _position - _velocity, particleVelocity + _velocity, angle, 0, Color.DarkSlateGray, Color.Transparent));
         }
-        for(int i = 0; i < 16; i++)
-        {
-            ParticleManager.Add(new Particle(Assets.Get(Sprites.Dot), 1f, _position + ToUnitVector((float)i * MathF.PI / 4) * _radius, Vector2.Zero, 0, 0, Color.White, Color.Transparent));
-        }
-        Engine.SaveGame.CurrentMission.Explode(_damage, _radius, _position);
+        Engine.SaveGame.CurrentMission.Explode(_damage, _radius, _position, _blacklist);
         Engine.ShakeScreen(150 / ((_position - Engine.Camera.Position).Length() + 300));
     }
     public static Vector2 PredictEnemy(Entity nearestEnemy, Entity shooter, float speed, float offset = 0)

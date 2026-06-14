@@ -493,10 +493,11 @@ public class Mission
         }
         addedComponents.Clear();
     }
-    public void Explode(int _damage, float _radius, Vector2 _position)
+    public void Explode(int _damage, float _radius, Vector2 _position, Team[] _blacklist = null)
     {
+        _blacklist ??= [];
         float dist;
-        foreach (var entity in Entities)
+        foreach (var entity in Entities.Where(x => !x.HasComponent<Friendly>() || !_blacklist.Contains(x.Team)))
         {
             dist = Vector2.Distance(_position, entity.Position);
             if (dist < _radius + entity.ColliderRadius && dist > float.Epsilon)

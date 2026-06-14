@@ -1,15 +1,14 @@
-﻿using Microsoft.Xna.Framework;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using OrbitCommander.Components;
 using OrbitCommander.Core;
 using OrbitCommander.Particles;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using UILib.Content;
-using System.Diagnostics;
 
 namespace OrbitCommander.Entities;
 
@@ -139,7 +138,7 @@ public class Hull() : Module(Modules.Hull)
         UI.PlayerSpecialHealth.Colors[1] = Color.Transparent;
         if(resistanceTime > 0)
         {
-            resistanceTime -= Engine.DeltaSeconds;
+            resistanceTime -= Engine.DeltaSeconds * 0.33f;
         }
         base.OnUpdate();
     }
@@ -147,7 +146,7 @@ public class Hull() : Module(Modules.Hull)
     {
         if(_entity.Health <= 0)
         {
-            resistanceTime = Math.Min(resistanceTime + 1, 2);
+            resistanceTime = Math.Min(resistanceTime + 0.5f, 2);
         }
     }
 }
@@ -452,7 +451,7 @@ public class OrionEngine() : Module(Modules.Orion)
         if (Player.EngineDirection != Vector2.Zero)
         {
             Player.Velocity += dir * 4 / (Player.leashedMaterials.Count + 1);
-            Util.Explode(Player.Position - dir * 30, Player.Velocity, 10, 28);
+            Util.Explode(Player.Position - dir * 45, Player.Velocity, 25, 42, [Player.Team]);
             SoundManager.PlaySound(Assets.Get(Sound.ShieldHit), Player.Position);
         }
     }
@@ -469,7 +468,7 @@ public class OrionEngine() : Module(Modules.Orion)
         if(_damage > 3 && explosionTime <= 0)
         {
             explosionTime = (float)(_damage) / 100;
-            Util.Explode(_entity.Position, _entity.Velocity, _damage / 3, MathF.Sqrt(_damage) * 20);
+            Util.Explode(_entity.Position, _entity.Velocity, _damage / 3, MathF.Sqrt(_damage) * 20, [Player.Team]);
         }
     }
 }
