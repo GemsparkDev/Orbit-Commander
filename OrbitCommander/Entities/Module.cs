@@ -41,11 +41,11 @@ public abstract class Module : Pickup, IData
     public virtual void OnEnemyHit(Entity _entity, int _damage) { }
     public virtual int SensingChange() { return 0; }
     public virtual int StealthChange() { return 0; }
-    public virtual void OnUpdate()
+    public virtual void OnUpdate(float _fuseRatio)
     {
         if (Cooldown > 0)
         {
-            Cooldown -= Engine.DeltaSeconds;
+            Cooldown -= Engine.DeltaSeconds * _fuseRatio;
         }
         UpdateHealth();
     }
@@ -130,17 +130,17 @@ public class Hull() : Module(Modules.Hull)
     {
         return (int)(_damage * (1.1f - Math.Clamp(resistanceTime, 0, 0.5f)));
     }
-    //TODO: Make sure to fix the update function, since fewer fuses makes this module better.
-    public override void OnUpdate()
+    //TODO: Make sure to update all the modules to use _fuseRatio. Also, make sure it works with the berserk status.
+    public override void OnUpdate(float _fuseRatio)
     {
         UI.PlayerSpecialHealth.Colors[0] = Color.Orange * 0.5f;
         UI.PlayerSpecialHealth.SetInterval(resistanceTime, 2f);
         UI.PlayerSpecialHealth.Colors[1] = Color.Transparent;
         if(resistanceTime > 0)
         {
-            resistanceTime -= Engine.DeltaSeconds * 0.33f;
+            resistanceTime -= Engine.DeltaSeconds * 0.33f / _fuseRatio;
         }
-        base.OnUpdate();
+        base.OnUpdate(_fuseRatio);
     }
     public override void OnEnemyHit(Entity _entity, int _damage)
     {
@@ -154,7 +154,7 @@ public class Shield() : Module(Modules.Shield)
 {
     private ParticleEmitter shieldEffect = new(Assets.Get(Sprites.Dot), Vector2.Zero, 10, Color.Violet) { particleAngularVelocity = 0.1f };
     private float max = 1;
-    public override void OnUpdate()
+    public override void OnUpdate(float _fuseRatio)
     {
         if (Cooldown <= 0)
         {
@@ -165,7 +165,7 @@ public class Shield() : Module(Modules.Shield)
         UI.PlayerSpecialHealth.SetInterval(max-Cooldown, max);
         UI.PlayerSpecialHealth.Colors[0] = Color.Yellow;
         UI.PlayerSpecialHealth.Colors[1] = Color.Transparent;
-        base.OnUpdate();
+        base.OnUpdate(_fuseRatio);
     }
     public override int OnCollide(int _damage)
     {
@@ -196,15 +196,15 @@ public class StealthHull() : Module(Modules.Stealth)
     {
         return (int)(_damage * 1.1f);
     }
-    public override void OnUpdate()
+    public override void OnUpdate(float _fuseRatio)
     {
         if(stealthCd > 0)
         {
-            stealthCd -= Engine.DeltaSeconds;
+            stealthCd -= Engine.DeltaSeconds / _fuseRatio;
         }
         UI.PlayerSpecialHealth.Colors[0] = Color.Transparent;
         UI.PlayerSpecialHealth.Colors[1] = Color.Transparent;
-        base.OnUpdate();
+        base.OnUpdate(_fuseRatio);
     }
     public override int StealthChange()
     {
@@ -221,7 +221,7 @@ public class StealthHull() : Module(Modules.Stealth)
 }
 public class Reflective() : Module(Modules.Reflective)
 {
-    public override void OnUpdate()
+    public override void OnUpdate(float _fuseRatio)
     {
         throw new NotImplementedException();
     }
@@ -237,7 +237,7 @@ public class Turtle() : Module(Modules.Turtle)
         Player.RevealDuration = 1;
         return (int)(_damage * dr);
     }
-    public override void OnUpdate()
+    public override void OnUpdate(float _fuseRatio)
     {
         var entity = Util.Nearest(Player.Position, [.. Engine.SaveGame.CurrentMission.enemies.Where(x => !x.HasTag(Tags.IsMissile)).Where(x => !x.IsFriendly(Player))]);
         if (entity == null)
@@ -275,7 +275,7 @@ public class Turtle() : Module(Modules.Turtle)
         }
         effect.particleColor = Color.Orange * (1.5f - dr);
         effect.Update();
-        base.OnUpdate();
+        base.OnUpdate(_fuseRatio);
     }
     public override int StealthChange()
     {
@@ -296,7 +296,7 @@ public class Ablative() : Module(Modules.Ablative)
         buffer = 0;
         return (_damage - (int)Math.Round(buffer)) * 2;
     }
-    public override void OnUpdate()
+    public override void OnUpdate(float _fuseRatio)
     {
         UI.PlayerSpecialHealth.Colors[0] = Color.Cyan;
         UI.PlayerSpecialHealth.SetInterval(buffer, 25f);
@@ -304,7 +304,7 @@ public class Ablative() : Module(Modules.Ablative)
         {
             buffer += Engine.DeltaSeconds * 10;
         }
-        base.OnUpdate();
+        base.OnUpdate(_fuseRatio);
     }
 }
 public class Adaptive() : Module(Modules.Adaptive)
@@ -325,12 +325,12 @@ public class ThermalShield() : Module(Modules.ThermalShield)
     {
         return (int)(_damage * 5 / 4 * Math.Clamp(1 - MathF.Abs(Player.Temperature), 0, 1));
     }
-    public override void OnUpdate()
+    public override void OnUpdate(float _fuseRatio)
     {
         UI.PlayerSpecialHealth.Colors[0] = Color.Transparent;
         UI.PlayerSpecialHealth.Colors[1] = Color.Transparent;
         Player.ApplyWork(0.33f * (float)Math.Sign(-Player.Temperature));
-        base.OnUpdate();
+        base.OnUpdate(_fuseRatio);
     }
 }
 public class StandardEngine() : Module(Modules.Engines)
@@ -353,13 +353,13 @@ public class StandardEngine() : Module(Modules.Engines)
         }
         engineParticles.Update();
     }
-    public override void OnUpdate()
+    public override void OnUpdate(float _fuseRatio)
     {
         if (!Player.isEngineActive && engineTime > 0)
         {
-            engineTime -= Engine.DeltaSeconds;
+            engineTime -= Engine.DeltaSeconds / _fuseRatio;
         }
-        base.OnUpdate();
+        base.OnUpdate(_fuseRatio);
     }
 }
 public class PlasmaEngine() : Module(Modules.Plasma)
@@ -387,7 +387,7 @@ public class PlasmaEngine() : Module(Modules.Plasma)
             burstTime += Engine.DeltaSeconds * 3;
         }
     }
-    public override void OnUpdate()
+    public override void OnUpdate(float _fuseRatio)
     {
         if (!Player.isEngineActive && engineTime > 0)
         {
@@ -397,7 +397,7 @@ public class PlasmaEngine() : Module(Modules.Plasma)
         {
             burstTime -= Engine.DeltaSeconds * 2;
         }
-        base.OnUpdate();
+        base.OnUpdate(_fuseRatio);
     }
     public override int StealthChange()
     {
@@ -428,13 +428,13 @@ public class WorkEngine() : Module(Modules.Work)
         }
         engineParticles.Update();
     }
-    public override void OnUpdate()
+    public override void OnUpdate(float _fuseRatio)
     {
         if (!Player.isEngineActive && engineTime > 0)
         {
             engineTime -= Engine.DeltaSeconds;
         }
-        base.OnUpdate();
+        base.OnUpdate(_fuseRatio);
     }
 }
 public class OrionEngine() : Module(Modules.Orion)
@@ -455,13 +455,13 @@ public class OrionEngine() : Module(Modules.Orion)
             SoundManager.PlaySound(Assets.Get(Sound.ShieldHit), Player.Position);
         }
     }
-    public override void OnUpdate()
+    public override void OnUpdate(float _fuseRatio)
     {
         if(explosionTime > 0)
         {
             explosionTime -= Engine.DeltaSeconds;
         }
-        base.OnUpdate();
+        base.OnUpdate(_fuseRatio);
     }
     public override void OnEnemyHit(Entity _entity, int _damage)
     {
@@ -494,10 +494,10 @@ public class Basic() : Module(Modules.Basic)
             Player.Flash(Color.BurlyWood);
         }
     }
-    public override void OnUpdate()
+    public override void OnUpdate(float _fuseRatio)
     {
         ammo.Update(this);
-        base.OnUpdate();
+        base.OnUpdate(_fuseRatio);
     }
 }
 public class Antimaterial() : Module(Modules.Sniper)
@@ -523,10 +523,10 @@ public class Antimaterial() : Module(Modules.Sniper)
             Player.Flash(Color.BurlyWood);
         }
     }
-    public override void OnUpdate()
+    public override void OnUpdate(float _fuseRatio)
     {
         ammo.Update(this);
-        base.OnUpdate();
+        base.OnUpdate(_fuseRatio);
     }
 }
 public class Railgun() : Module(Modules.Antimaterial)
@@ -559,10 +559,10 @@ public class Railgun() : Module(Modules.Antimaterial)
             Player.Flash(Color.BurlyWood);
         }
     }
-    public override void OnUpdate()
+    public override void OnUpdate(float _fuseRatio)
     {
         ammo.Update(this);
-        base.OnUpdate();
+        base.OnUpdate(_fuseRatio);
     }
 }
 public class Spiral() : Module(Modules.Spiral)
@@ -593,10 +593,10 @@ public class Spiral() : Module(Modules.Spiral)
             { experienceGravity = true });
         }
     }
-    public override void OnUpdate()
+    public override void OnUpdate(float _fuseRatio)
     {
         ammo.Update(this);
-        base.OnUpdate();
+        base.OnUpdate(_fuseRatio);
     }
 }
 public class Shotgun() : Module(Modules.Shotgun)
@@ -628,10 +628,10 @@ public class Shotgun() : Module(Modules.Shotgun)
             Player.Flash(Color.BurlyWood);
         }
     }
-    public override void OnUpdate()
+    public override void OnUpdate(float _fuseRatio)
     {
         ammo.Update(this);
-        base.OnUpdate();
+        base.OnUpdate(_fuseRatio);
     }
 }
 public class Missile() : Module(Modules.Missile)
@@ -651,14 +651,14 @@ public class Missile() : Module(Modules.Missile)
             Engine.ShakeScreen(0.5f);
         }
     }
-    public override void OnUpdate()
+    public override void OnUpdate(float _fuseRatio)
     {
         if (Util.Random.NextSingle() > 0.33f)
         {
             ParticleManager.Add(new Particle(Assets.Get(Sprites.Circle), Cooldown, Player.Position - Player.Direction * 8 - Player.Velocity, Player.Velocity - Player.Direction * Cooldown * 2 + new Vector2(Util.OneToNegOne(), Util.OneToNegOne()) * Cooldown / 2, 0, 0, Color.Gray * (1 - (1 - Cooldown * 2) * (1 - Cooldown * 2)), Color.Transparent));
         }
         ammo.Update(this);
-        base.OnUpdate();
+        base.OnUpdate(_fuseRatio);
     }
 }
 public class LMG() : Module(Modules.LMG)
@@ -687,10 +687,10 @@ public class LMG() : Module(Modules.LMG)
             Player.Flash(Color.BurlyWood);
         }
     }
-    public override void OnUpdate()
+    public override void OnUpdate(float _fuseRatio)
     {
         ammo.Update(this);
-        base.OnUpdate();
+        base.OnUpdate(_fuseRatio);
     }
 }
 public class Crossbow() : Module(Modules.Crossbow)
@@ -710,10 +710,10 @@ public class Crossbow() : Module(Modules.Crossbow)
             Player.Velocity -= Player.Direction / 4;
         }
     }
-    public override void OnUpdate()
+    public override void OnUpdate(float _fuseRatio)
     {
         ammo.Update(this);
-        base.OnUpdate();
+        base.OnUpdate(_fuseRatio);
     }
 }
 public class Flamethrower() : Module(Modules.Flamethrower)
@@ -736,10 +736,10 @@ public class Flamethrower() : Module(Modules.Flamethrower)
             Player.Flash(Color.Orange);
         }
     }
-    public override void OnUpdate()
+    public override void OnUpdate(float _fuseRatio)
     {
         ammo.Update(this);
-        base.OnUpdate();
+        base.OnUpdate(_fuseRatio);
     }
 }
 public class Fireball() : Module(Modules.Fireball)
@@ -760,10 +760,10 @@ public class Fireball() : Module(Modules.Fireball)
             Player.Flash(Color.Orange);
         }
     }
-    public override void OnUpdate()
+    public override void OnUpdate(float _fuseRatio)
     {
         ammo.Update(this);
-        base.OnUpdate();
+        base.OnUpdate(_fuseRatio);
     }
 }
 public class GrenadeLauncher() : Module(Modules.GrenadeLauncher)
@@ -787,10 +787,10 @@ public class GrenadeLauncher() : Module(Modules.GrenadeLauncher)
             Player.Flash(Color.BurlyWood);
         }
     }
-    public override void OnUpdate()
+    public override void OnUpdate(float _fuseRatio)
     {
         ammo.Update(this);
-        base.OnUpdate();
+        base.OnUpdate(_fuseRatio);
     }
 }
 public class SpewerModule() : Module(Modules.Spewer)
@@ -814,10 +814,10 @@ public class SpewerModule() : Module(Modules.Spewer)
             Player.Flash(Color.BurlyWood);
         }
     }
-    public override void OnUpdate()
+    public override void OnUpdate(float _fuseRatio)
     {
         ammo.Update(this);
-        base.OnUpdate();
+        base.OnUpdate(_fuseRatio);
     }
 }
 public class PrismArray() : Module(Modules.PrismArray)
@@ -863,7 +863,7 @@ public class PrismArray() : Module(Modules.PrismArray)
             }
         }
     }
-    public override void OnUpdate()
+    public override void OnUpdate(float _fuseRatio)
     {
         if (isFiring)
         {
@@ -897,7 +897,7 @@ public class PrismArray() : Module(Modules.PrismArray)
             beamBlend?.Pause();
         }
         time += Engine.DeltaSeconds;
-        base.OnUpdate();
+        base.OnUpdate(_fuseRatio);
         isFiring = false;
     }
 }
@@ -922,10 +922,10 @@ public class MatrixLauncher() : Module(Modules.MatrixLauncher)
             Player.Flash(Color.Cyan);
         }
     }
-    public override void OnUpdate()
+    public override void OnUpdate(float _fuseRatio)
     {
         ammo.Update(this);
-        base.OnUpdate();
+        base.OnUpdate(_fuseRatio);
     }
 }
 public class Torch() : Module(Modules.Torch)
@@ -944,7 +944,7 @@ public class Torch() : Module(Modules.Torch)
             count++;
         }
     }
-    public override void OnUpdate()
+    public override void OnUpdate(float _fuseRatio)
     {
         if (count > 0)
         {
@@ -974,7 +974,7 @@ public class Torch() : Module(Modules.Torch)
             }
         }
         ammo.Update(this);
-        base.OnUpdate();
+        base.OnUpdate(_fuseRatio);
     }
 }
 public class SplitterModule() : Module(Modules.SplitterModule)
@@ -1003,10 +1003,10 @@ public class SplitterModule() : Module(Modules.SplitterModule)
             Player.Flash(Color.BurlyWood);
         }
     }
-    public override void OnUpdate()
+    public override void OnUpdate(float _fuseRatio)
     {
         ammo.Update(this);
-        base.OnUpdate();
+        base.OnUpdate(_fuseRatio);
     }
 }
 public class Fractal() : Module(Modules.Fractal)
@@ -1042,10 +1042,10 @@ public class Fractal() : Module(Modules.Fractal)
             Player.Flash(Color.BurlyWood);
         }
     }
-    public override void OnUpdate()
+    public override void OnUpdate(float _fuseRatio)
     {
         ammo.Update(this);
-        base.OnUpdate();
+        base.OnUpdate(_fuseRatio);
     }
 }
 public class CrackShot() : Module(Modules.CrackShot)
@@ -1069,10 +1069,10 @@ public class CrackShot() : Module(Modules.CrackShot)
             Player.Flash(Color.BurlyWood);
         }
     }
-    public override void OnUpdate()
+    public override void OnUpdate(float _fuseRatio)
     {
         ammo.Update(this);
-        base.OnUpdate();
+        base.OnUpdate(_fuseRatio);
     }
 }
 public class MicroRocketLauncher() : Module(Modules.MicroRocketLauncher)
@@ -1098,10 +1098,10 @@ public class MicroRocketLauncher() : Module(Modules.MicroRocketLauncher)
         }
 
     }
-    public override void OnUpdate()
+    public override void OnUpdate(float _fuseRatio)
     {
         ammo.Update(this);
-        base.OnUpdate();
+        base.OnUpdate(_fuseRatio);
     }
 }
 public class AdaptiveShotgun() : Module(Modules.AdaptiveShotgun)
@@ -1136,10 +1136,10 @@ public class AdaptiveShotgun() : Module(Modules.AdaptiveShotgun)
             Player.Flash(Color.BurlyWood);
         }
     }
-    public override void OnUpdate()
+    public override void OnUpdate(float _fuseRatio)
     {
         ammo.Update(this);
-        base.OnUpdate();
+        base.OnUpdate(_fuseRatio);
     }
 }
 public class GuidedRound() : Module(Modules.GuidedRound)
@@ -1176,11 +1176,11 @@ public class GuidedRound() : Module(Modules.GuidedRound)
             Player.Flash(Color.BurlyWood);
         }
     }
-    public override void OnUpdate()
+    public override void OnUpdate(float _fuseRatio)
     {
         rounds = [.. rounds.Where(x => !x.isExpired)];
         ammo.Update(this);
-        base.OnUpdate();
+        base.OnUpdate(_fuseRatio);
     }
 }
 public class Dash() : Module(Modules.Dash)
@@ -1204,10 +1204,10 @@ public class Dash() : Module(Modules.Dash)
         Player.Position += Player.Direction * 300;
         Cooldown = MaxCooldown;
     }
-    public override void OnUpdate()
+    public override void OnUpdate(float _fuseRatio)
     {
         UI.PlayerAbility.SetInterval(1 - Cooldown / MaxCooldown, 1);
-        base.OnUpdate();
+        base.OnUpdate(_fuseRatio);
     }
 }
 public class SummonShield() : Module(Modules.SummonShield)
@@ -1227,7 +1227,7 @@ public class SummonShield() : Module(Modules.SummonShield)
         Engine.SaveGame.CurrentMission.Add(shield2);
         Cooldown = MaxCooldown;
     }
-    public override void OnUpdate()
+    public override void OnUpdate(float _fuseRatio)
     {
         if (shield1 != null && shield1.isExpired)
         {
@@ -1238,7 +1238,7 @@ public class SummonShield() : Module(Modules.SummonShield)
             shield2 = null;
         }
         UI.PlayerAbility.SetInterval(1 - Cooldown / MaxCooldown, 1);
-        base.OnUpdate();
+        base.OnUpdate(_fuseRatio);
     }
 }
 public class SummonGrapplingHook() : Module(Modules.GrapplingHook)
@@ -1286,7 +1286,7 @@ public class SummonGrapplingHook() : Module(Modules.GrapplingHook)
             Cooldown = MaxCooldown;
         }
     }
-    public override void OnUpdate()
+    public override void OnUpdate(float _fuseRatio)
     {
         if (hook != null && hook.isExpired)
         {
@@ -1298,7 +1298,7 @@ public class SummonGrapplingHook() : Module(Modules.GrapplingHook)
             hook.Parent.Position = p.Position + offset;
         }
         UI.PlayerAbility.SetInterval(1 - Cooldown / MaxCooldown, 1);
-        base.OnUpdate();
+        base.OnUpdate(_fuseRatio);
     }
 }
 public class Nanomachines() : Module(Modules.Nanomachines)
@@ -1321,10 +1321,10 @@ public class Nanomachines() : Module(Modules.Nanomachines)
             }
         }
     }
-    public override void OnUpdate()
+    public override void OnUpdate(float _fuseRatio)
     {
         UI.PlayerAbility.SetInterval(1 - Cooldown / MaxCooldown, 1);
-        base.OnUpdate();
+        base.OnUpdate(_fuseRatio);
     }
 }
 public class CreateFighter() : Module(Modules.CreateFighter)
@@ -1355,11 +1355,11 @@ public class CreateFighter() : Module(Modules.CreateFighter)
             }
         }
     }
-    public override void OnUpdate()
+    public override void OnUpdate(float _fuseRatio)
     {
         UI.PlayerAbility.SetInterval(1 - Cooldown / MaxCooldown, 1);
         allies = [.. allies.Where(x => !x.isExpired)];
-        base.OnUpdate();
+        base.OnUpdate(_fuseRatio);
     }
 }
 public class Assault() : Module(Modules.Assault)
@@ -1392,7 +1392,7 @@ public class Assault() : Module(Modules.Assault)
         }
         return _damage;
     }
-    public override void OnUpdate()
+    public override void OnUpdate(float _fuseRatio)
     {
         if (resistanceCooldown > 0)
         {
@@ -1412,7 +1412,7 @@ public class Assault() : Module(Modules.Assault)
             }
         }
         UI.PlayerAbility.SetInterval(1 - Cooldown / MaxCooldown, 1);
-        base.OnUpdate();
+        base.OnUpdate(_fuseRatio);
     }
 }
 public class Decoy() : Module(Modules.Decoy)
@@ -1447,7 +1447,7 @@ public class Lidar() : Module(Modules.Lidar)
 public class Radar() : Module(Modules.Radar)
 {
     float time = 0;
-    public override void OnUpdate()
+    public override void OnUpdate(float _fuseRatio)
     {
         time += Engine.DeltaSeconds;
         base.Update();
@@ -1471,7 +1471,7 @@ public class Radar() : Module(Modules.Radar)
 }
 public class PulseEmitter() : Module(Modules.PulseEmitter)
 {
-    public override void OnUpdate()
+    public override void OnUpdate(float _fuseRatio)
     {
         base.Update();
         if (Cooldown > 0)
@@ -1522,7 +1522,7 @@ public class Expose() : Module(Modules.Expose)
         aura.Transform.IsImmovable = true;
         Cooldown = 15;
     }
-    public override void OnUpdate()
+    public override void OnUpdate(float _fuseRatio)
     {
         UI.PlayerAbility.SetInterval(1 - Cooldown / MaxCooldown, 1);
         //Helps the player with temperature control
@@ -1537,7 +1537,7 @@ public class Expose() : Module(Modules.Expose)
                 Engine.SaveGame.Player.ConductHeat(1, 0.1f);
             }
         }
-        base.OnUpdate();
+        base.OnUpdate(_fuseRatio);
     }
 }
 

@@ -268,24 +268,14 @@ public class Player : Entity
     {
         if (SecondaryWeapon != null && Util.Random.NextSingle() < 0.25f)
         {
-            SecondaryWeapon.OnUpdate();
+            SecondaryWeapon.OnUpdate(1);
         }
         for (int i = 0; i < modules.Count; i++)
         {
             var module = modules[(ModuleType)i];
             //Square root of the ratio reduces impact with additional fuse (especially with weapon dps)
             float fuseRatio = MathF.Sqrt((float)CountFuses((ModuleType)i) / 3);
-            if (fuseRatio - 1 > float.Epsilon)
-            {
-                //Bonus for 4 fuses
-                module.OnUpdate();
-                //Allows for easy random check in all cases
-                fuseRatio -= 1f;
-            }
-            if (Util.Random.NextSingle() < fuseRatio)
-            {
-                module.OnUpdate();
-            }
+            module.OnUpdate(fuseRatio);
         }
     }
     public void OnEnemyHit(Entity _entity, int _damage)
