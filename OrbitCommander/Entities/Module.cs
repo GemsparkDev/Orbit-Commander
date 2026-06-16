@@ -69,11 +69,11 @@ public class ReloadSystem(int _magazineSize, float _reloadSpeed, Action _reloadC
     private int rounds = _magazineSize;
     private int magazineSize = _magazineSize;
     float reloadCD = 0;
-    public void Update(Module _module)
+    public void Update(Module _module, float _fuseRatio)
     {
         if (reloadCD > 0)
         {
-            reloadCD -= Engine.DeltaSeconds;
+            reloadCD -= Engine.DeltaSeconds * _fuseRatio;
             if (reloadCD < 0)
             {
                 rounds = magazineSize;
@@ -391,7 +391,7 @@ public class PlasmaEngine() : Module(Modules.Plasma)
     {
         if (!Player.isEngineActive && engineTime > 0)
         {
-            engineTime -= Engine.DeltaSeconds;
+            engineTime -= Engine.DeltaSeconds / _fuseRatio;
         }
         if (burstTime > 0)
         {
@@ -432,7 +432,7 @@ public class WorkEngine() : Module(Modules.Work)
     {
         if (!Player.isEngineActive && engineTime > 0)
         {
-            engineTime -= Engine.DeltaSeconds;
+            engineTime -= Engine.DeltaSeconds / _fuseRatio;
         }
         base.OnUpdate(_fuseRatio);
     }
@@ -459,7 +459,7 @@ public class OrionEngine() : Module(Modules.Orion)
     {
         if(explosionTime > 0)
         {
-            explosionTime -= Engine.DeltaSeconds;
+            explosionTime -= Engine.DeltaSeconds * _fuseRatio;
         }
         base.OnUpdate(_fuseRatio);
     }
@@ -496,7 +496,7 @@ public class Basic() : Module(Modules.Basic)
     }
     public override void OnUpdate(float _fuseRatio)
     {
-        ammo.Update(this);
+        ammo.Update(this, _fuseRatio);
         base.OnUpdate(_fuseRatio);
     }
 }
@@ -525,7 +525,7 @@ public class Antimaterial() : Module(Modules.Sniper)
     }
     public override void OnUpdate(float _fuseRatio)
     {
-        ammo.Update(this);
+        ammo.Update(this, _fuseRatio);
         base.OnUpdate(_fuseRatio);
     }
 }
@@ -561,7 +561,7 @@ public class Railgun() : Module(Modules.Antimaterial)
     }
     public override void OnUpdate(float _fuseRatio)
     {
-        ammo.Update(this);
+        ammo.Update(this, _fuseRatio);
         base.OnUpdate(_fuseRatio);
     }
 }
@@ -595,7 +595,7 @@ public class Spiral() : Module(Modules.Spiral)
     }
     public override void OnUpdate(float _fuseRatio)
     {
-        ammo.Update(this);
+        ammo.Update(this, _fuseRatio);
         base.OnUpdate(_fuseRatio);
     }
 }
@@ -630,7 +630,7 @@ public class Shotgun() : Module(Modules.Shotgun)
     }
     public override void OnUpdate(float _fuseRatio)
     {
-        ammo.Update(this);
+        ammo.Update(this, _fuseRatio);
         base.OnUpdate(_fuseRatio);
     }
 }
@@ -657,7 +657,7 @@ public class Missile() : Module(Modules.Missile)
         {
             ParticleManager.Add(new Particle(Assets.Get(Sprites.Circle), Cooldown, Player.Position - Player.Direction * 8 - Player.Velocity, Player.Velocity - Player.Direction * Cooldown * 2 + new Vector2(Util.OneToNegOne(), Util.OneToNegOne()) * Cooldown / 2, 0, 0, Color.Gray * (1 - (1 - Cooldown * 2) * (1 - Cooldown * 2)), Color.Transparent));
         }
-        ammo.Update(this);
+        ammo.Update(this, _fuseRatio);
         base.OnUpdate(_fuseRatio);
     }
 }
@@ -689,7 +689,7 @@ public class LMG() : Module(Modules.LMG)
     }
     public override void OnUpdate(float _fuseRatio)
     {
-        ammo.Update(this);
+        ammo.Update(this, _fuseRatio);
         base.OnUpdate(_fuseRatio);
     }
 }
@@ -712,7 +712,7 @@ public class Crossbow() : Module(Modules.Crossbow)
     }
     public override void OnUpdate(float _fuseRatio)
     {
-        ammo.Update(this);
+        ammo.Update(this, _fuseRatio);
         base.OnUpdate(_fuseRatio);
     }
 }
@@ -738,7 +738,7 @@ public class Flamethrower() : Module(Modules.Flamethrower)
     }
     public override void OnUpdate(float _fuseRatio)
     {
-        ammo.Update(this);
+        ammo.Update(this, _fuseRatio);
         base.OnUpdate(_fuseRatio);
     }
 }
@@ -762,7 +762,7 @@ public class Fireball() : Module(Modules.Fireball)
     }
     public override void OnUpdate(float _fuseRatio)
     {
-        ammo.Update(this);
+        ammo.Update(this, _fuseRatio);
         base.OnUpdate(_fuseRatio);
     }
 }
@@ -789,7 +789,7 @@ public class GrenadeLauncher() : Module(Modules.GrenadeLauncher)
     }
     public override void OnUpdate(float _fuseRatio)
     {
-        ammo.Update(this);
+        ammo.Update(this, _fuseRatio);
         base.OnUpdate(_fuseRatio);
     }
 }
@@ -816,7 +816,7 @@ public class SpewerModule() : Module(Modules.Spewer)
     }
     public override void OnUpdate(float _fuseRatio)
     {
-        ammo.Update(this);
+        ammo.Update(this, _fuseRatio);
         base.OnUpdate(_fuseRatio);
     }
 }
@@ -924,7 +924,7 @@ public class MatrixLauncher() : Module(Modules.MatrixLauncher)
     }
     public override void OnUpdate(float _fuseRatio)
     {
-        ammo.Update(this);
+        ammo.Update(this, _fuseRatio);
         base.OnUpdate(_fuseRatio);
     }
 }
@@ -973,7 +973,7 @@ public class Torch() : Module(Modules.Torch)
                 Cooldown = 0.25f;
             }
         }
-        ammo.Update(this);
+        ammo.Update(this, _fuseRatio);
         base.OnUpdate(_fuseRatio);
     }
 }
@@ -1005,7 +1005,7 @@ public class SplitterModule() : Module(Modules.SplitterModule)
     }
     public override void OnUpdate(float _fuseRatio)
     {
-        ammo.Update(this);
+        ammo.Update(this, _fuseRatio);
         base.OnUpdate(_fuseRatio);
     }
 }
@@ -1044,7 +1044,7 @@ public class Fractal() : Module(Modules.Fractal)
     }
     public override void OnUpdate(float _fuseRatio)
     {
-        ammo.Update(this);
+        ammo.Update(this, _fuseRatio);
         base.OnUpdate(_fuseRatio);
     }
 }
@@ -1071,7 +1071,7 @@ public class CrackShot() : Module(Modules.CrackShot)
     }
     public override void OnUpdate(float _fuseRatio)
     {
-        ammo.Update(this);
+        ammo.Update(this, _fuseRatio);
         base.OnUpdate(_fuseRatio);
     }
 }
@@ -1100,7 +1100,7 @@ public class MicroRocketLauncher() : Module(Modules.MicroRocketLauncher)
     }
     public override void OnUpdate(float _fuseRatio)
     {
-        ammo.Update(this);
+        ammo.Update(this, _fuseRatio);
         base.OnUpdate(_fuseRatio);
     }
 }
@@ -1138,7 +1138,7 @@ public class AdaptiveShotgun() : Module(Modules.AdaptiveShotgun)
     }
     public override void OnUpdate(float _fuseRatio)
     {
-        ammo.Update(this);
+        ammo.Update(this, _fuseRatio);
         base.OnUpdate(_fuseRatio);
     }
 }
@@ -1179,7 +1179,7 @@ public class GuidedRound() : Module(Modules.GuidedRound)
     public override void OnUpdate(float _fuseRatio)
     {
         rounds = [.. rounds.Where(x => !x.isExpired)];
-        ammo.Update(this);
+        ammo.Update(this, _fuseRatio);
         base.OnUpdate(_fuseRatio);
     }
 }
@@ -1449,7 +1449,7 @@ public class Radar() : Module(Modules.Radar)
     float time = 0;
     public override void OnUpdate(float _fuseRatio)
     {
-        time += Engine.DeltaSeconds;
+        time += Engine.DeltaSeconds * _fuseRatio;
         base.Update();
         if (Cooldown > 0)
         {

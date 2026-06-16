@@ -852,7 +852,7 @@ public class Player : Entity
     }
     public int CountFuses(ModuleType _module)
     {
-        int count = 0;
+        int count = Statuses.FuseBonus;
         //Fuses only count if the corresponding core fuse is also active
         for (int i = 0; i < 4; i++)
         {

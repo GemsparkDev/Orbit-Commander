@@ -14,6 +14,7 @@ public abstract class Status(Sprites _icon)
     public abstract void Reset();
     public virtual int StealthChange() { return 0; }
     public virtual int SensingChange() { return 0; }
+    public virtual int FuseBonus() { return 0; }
     public virtual int ModifyDamage(int _damage) { return _damage; }
     public virtual bool IsImmunable { get => false; }
     public enum StatusType
@@ -238,6 +239,10 @@ public class Berserk(float _timeLeft) : Status(Sprites.Knob)
     public override int StealthChange()
     {
         return -1;
+    }
+    public override int FuseBonus()
+    {
+        return 1;
     }
     public override int ModifyDamage(int _damage)
     {
