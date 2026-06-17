@@ -130,7 +130,6 @@ public class Hull() : Module(Modules.Hull)
     {
         return (int)(_damage * (1.1f - Math.Clamp(resistanceTime, 0, 0.5f)));
     }
-    //TODO: Make sure to update all the modules to use _fuseRatio. Also, make sure it works with the berserk status.
     public override void OnUpdate(float _fuseRatio)
     {
         UI.PlayerSpecialHealth.Colors[0] = Color.Orange * 0.5f;

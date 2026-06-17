@@ -55,15 +55,55 @@ public class Pickup : Entity, IData
         }));
         InvincibilityCooldown = 5;
     }
-    //TODO: Review all serialization!
     public Pickup(ItemData _itemData, List<string> _disassembly, LoadLogger _logger)
         : base(default, default, 0, 0)
     {
-        throw new NotImplementedException();
+        AddComponent(new Sprite(this, Color.Cyan) { Texture = _itemData.VirtualSprite });
+        itemData = _itemData;
+        AddComponent(new Friendly(this) { Team = Team.Friendly });
+        Tooltip.AddWidget(new Decal(new Vector2(-Tooltip.Size.X / 3, 0), _itemData.RealSprite));
+        textbox = new Decal(new Vector2(0, -5), Assets.TextFont, _itemData.Name, _itemData.TextColor, 5f);
+        Tooltip.AddWidget(textbox);
+        if(!int.TryParse(_disassembly[1], out int _health))
+        {
+            _health = 10;
+        }
+        AddComponent(new Health(this) { CurrentHealth = _health, MaxHealth = _health });
+        AddTag(Tags.IsImportant);
+        AddComponent(new Collide(this, delegate (int _damage, bool _ignoreImmunity)
+        {
+            if (_damage <= 0)
+            {
+                return 0;
+            }
+            if (InvincibilityCooldown > 0 && !_ignoreImmunity)
+            {
+                InvincibilityCooldown = 0;
+                return 0;
+            }
+            Health -= _damage;
+            if (!_ignoreImmunity)
+            {
+                InvincibilityCooldown = 1;
+            }
+            if (Health <= 0)
+            {
+                isExpired = true;
+            }
+            SoundManager.PlaySound(Assets.Get(Sound.Death), Position);
+            Engine.ShakeScreen(10 / ((Position - Engine.Camera.Position).Length() + 150));
+            return _damage;
+        }));
+        InvincibilityCooldown = 5;
     }
     public void Parse(List<string> _disassembly, LoadLogger _logger)
     {
-        _logger.Try(delegate { Health = int.Parse(_disassembly[1]); }, 1);
+        _logger.Try(delegate 
+        {
+            int val = int.Parse(_disassembly[1]);
+            Health = val;
+            MaxHealth = val; 
+        }, 1);
     }
     public override void Update()
     {
