@@ -168,6 +168,7 @@ public enum Sprites
     Dash, RealDash,
     Adaptive, RealAdaptive,
     MicroLauncher, RealMicroLauncher,
+    Decoy, RealDecoy,
 
     SpiralShot,
     PulseShot,

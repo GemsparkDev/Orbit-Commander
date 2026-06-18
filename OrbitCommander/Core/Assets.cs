@@ -158,6 +158,8 @@ public static class Assets
         Add(Core.Sprites.RealAdaptive, Content.Load<Texture2D>("Images/Items/Item_35-1"));
         Add(Core.Sprites.MicroLauncher, Content.Load<Texture2D>("Images/Items/Item_36"));
         Add(Core.Sprites.RealMicroLauncher, Content.Load<Texture2D>("Images/Items/Item_36-1"));
+        Add(Core.Sprites.Decoy, Content.Load<Texture2D>("Images/Items/Item_37"));
+        Add(Core.Sprites.RealDecoy, Content.Load<Texture2D>("Images/Items/Item_37-1"));
 
         //Projectiles
         Add(Core.Sprites.SpiralShot, Content.Load<Texture2D>("Images/Projectile_0"));
