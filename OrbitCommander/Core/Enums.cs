@@ -13,9 +13,8 @@ public enum Modules
 {
     //Hulls
     Hull,
-    Shield,
-    Stealth,
     Reflective,
+    Stealth,
     Turtle,
     Ablative,
     Adaptive,
@@ -149,7 +148,7 @@ public enum Sprites
     Torch, RealTorch,
     Assault, RealAssault,
     Furnace, RealFurnace,
-    Shield, RealShield,
+    SummonShield, RealSummonShield,
     Lidar, RealLidar,
     Nanomachines, RealNanomachines,
     Expose, RealExpose,
@@ -169,6 +168,7 @@ public enum Sprites
     Adaptive, RealAdaptive,
     MicroLauncher, RealMicroLauncher,
     Decoy, RealDecoy,
+    ConstructFighter, RealConstructFighter,
 
     SpiralShot,
     PulseShot,

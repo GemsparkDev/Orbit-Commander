@@ -104,8 +104,8 @@ public static class Assets
         Add(Core.Sprites.RealTorch, Content.Load<Texture2D>("Images/Items/Item_8-1"));
         Add(Core.Sprites.Assault, Content.Load<Texture2D>("Images/Items/Item_9"));
         Add(Core.Sprites.RealAssault, Content.Load<Texture2D>("Images/Items/Item_9-1"));
-        Add(Core.Sprites.Shield, Content.Load<Texture2D>("Images/Items/Item_10"));
-        Add(Core.Sprites.RealShield, Content.Load<Texture2D>("Images/Items/Item_10-1"));
+        Add(Core.Sprites.SummonShield, Content.Load<Texture2D>("Images/Items/Item_10"));
+        Add(Core.Sprites.RealSummonShield, Content.Load<Texture2D>("Images/Items/Item_10-1"));
         Add(Core.Sprites.Lidar, Content.Load<Texture2D>("Images/Items/Item_11"));
         Add(Core.Sprites.RealLidar, Content.Load<Texture2D>("Images/Items/Item_11-1"));
         Add(Core.Sprites.Nanomachines, Content.Load<Texture2D>("Images/Items/Item_12"));
@@ -160,6 +160,8 @@ public static class Assets
         Add(Core.Sprites.RealMicroLauncher, Content.Load<Texture2D>("Images/Items/Item_36-1"));
         Add(Core.Sprites.Decoy, Content.Load<Texture2D>("Images/Items/Item_37"));
         Add(Core.Sprites.RealDecoy, Content.Load<Texture2D>("Images/Items/Item_37-1"));
+        Add(Core.Sprites.ConstructFighter, Content.Load<Texture2D>("Images/Items/Item_38"));
+        Add(Core.Sprites.RealConstructFighter, Content.Load<Texture2D>("Images/Items/Item_38-1"));
 
         //Projectiles
         Add(Core.Sprites.SpiralShot, Content.Load<Texture2D>("Images/Projectile_0"));

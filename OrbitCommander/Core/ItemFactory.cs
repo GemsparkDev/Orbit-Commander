@@ -22,9 +22,8 @@ public static class ItemFactory
     public readonly static Dictionary<Modules, ModuleData> moduleData = new()
     {
         { Modules.Hull, new ModuleData(Sprites.RealHull, Sprites.Hull, "Hull", (int)ModuleType.Hull, 20, typeof(Hull)) },
-        { Modules.Shield, new ModuleData(Sprites.RealShield, Sprites.Shield, "Shield", (int)ModuleType.Hull, 16, typeof(Shield)) },
+        { Modules.Reflective, new ModuleData(Sprites.RealReflective, Sprites.Reflective, "Reflective", (int)ModuleType.Hull, 16, typeof(Reflective)) },
         { Modules.Stealth, new ModuleData(Sprites.RealStealth, Sprites.Stealth, "Stealth", (int)ModuleType.Hull, 18, typeof(StealthHull)) },
-        { Modules.Reflective, new ModuleData(Sprites.RealReflective, Sprites.Reflective, "Reflective", (int)ModuleType.Hull, 18, typeof(Reflective)) },
         { Modules.Turtle, new ModuleData(Sprites.RealHull, Sprites.Hull, "Turtle", (int)ModuleType.Hull, 22, typeof(Turtle)) },
         { Modules.Ablative, new ModuleData(Sprites.RealAblative, Sprites.Ablative, "Ablative", (int)ModuleType.Hull, 17, typeof(Ablative)) },
         { Modules.Adaptive, new ModuleData(Sprites.RealAdaptive, Sprites.Adaptive, "Ablative", (int)ModuleType.Hull, 20, typeof(Adaptive)) },
@@ -65,9 +64,9 @@ public static class ItemFactory
         { Modules.Assault, new ModuleData(Sprites.RealAssault, Sprites.Assault, "Assault", (int)ModuleType.Core, 20, typeof(Assault)) },
         { Modules.Dash, new ModuleData(Sprites.RealDash,Sprites.Dash, "Dash Core", (int)ModuleType.Core, 20, typeof(Dash)) },
         { Modules.GrapplingHook, new ModuleData(Sprites.RealGrapplingHook, Sprites.GrapplingHook, "Grapple Core", (int)ModuleType.Core, 20, typeof(SummonGrapplingHook)) },
-        { Modules.SummonShield, new ModuleData(Sprites.RealCore, Sprites.Core, "Shield Core", (int)ModuleType.Core, 20, typeof(SummonShield)) },
+        { Modules.SummonShield, new ModuleData(Sprites.RealSummonShield, Sprites.SummonShield, "Shield Core", (int)ModuleType.Core, 20, typeof(SummonShield)) },
         { Modules.Nanomachines, new ModuleData(Sprites.RealNanomachines, Sprites.Nanomachines, "Nanomachines", (int)ModuleType.Core, 20, typeof(Nanomachines)) },
-        { Modules.CreateFighter, new ModuleData(Sprites.RealCore, Sprites.Core, "Construct fighter", (int)ModuleType.Core, 20, typeof(CreateFighter)) },
+        { Modules.CreateFighter, new ModuleData(Sprites.RealConstructFighter, Sprites.ConstructFighter, "Construct fighter", (int)ModuleType.Core, 20, typeof(CreateFighter)) },
         { Modules.Expose, new ModuleData(Sprites.RealExpose, Sprites.Expose, "Exposure", (int)ModuleType.Core, 20, typeof(Expose)) },
         { Modules.Decoy, new ModuleData(Sprites.RealDecoy,Sprites.Decoy, "Decoy", (int)ModuleType.Core, 20, typeof(Decoy))},
 

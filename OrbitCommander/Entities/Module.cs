@@ -149,7 +149,7 @@ public class Hull() : Module(Modules.Hull)
         }
     }
 }
-public class Shield() : Module(Modules.Shield)
+public class Reflective() : Module(Modules.Reflective)
 {
     private ParticleEmitter shieldEffect = new(Assets.Get(Sprites.Dot), Vector2.Zero, 10, Color.Violet) { particleAngularVelocity = 0.1f };
     private float max = 1;
@@ -216,13 +216,6 @@ public class StealthHull() : Module(Modules.Stealth)
     public override void OnEnemyHit(Entity _entity, int _damage)
     {
         stealthCd += MathF.Sqrt(_damage)/3;
-    }
-}
-public class Reflective() : Module(Modules.Reflective)
-{
-    public override void OnUpdate(float _fuseRatio)
-    {
-        throw new NotImplementedException();
     }
 }
 public class Turtle() : Module(Modules.Turtle)
