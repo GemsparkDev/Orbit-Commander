@@ -49,6 +49,14 @@ public abstract class Module : Pickup, IData
         }
         UpdateHealth();
     }
+    protected int GunStealthChange()
+    {
+        if(Cooldown > 0)
+        {
+            return -1;
+        }
+        return 0;
+    }
     public virtual void OnEngine() { }
     public virtual void OnAbility() { }
     //Override to provide custom serialization for modules
@@ -491,6 +499,7 @@ public class Basic() : Module(Modules.Basic)
         ammo.Update(this, _fuseRatio);
         base.OnUpdate(_fuseRatio);
     }
+    public override int StealthChange() => GunStealthChange();
 }
 public class Antimaterial() : Module(Modules.Sniper)
 {
@@ -520,6 +529,7 @@ public class Antimaterial() : Module(Modules.Sniper)
         ammo.Update(this, _fuseRatio);
         base.OnUpdate(_fuseRatio);
     }
+    public override int StealthChange() => GunStealthChange();
 }
 public class Railgun() : Module(Modules.Antimaterial)
 {
@@ -556,6 +566,7 @@ public class Railgun() : Module(Modules.Antimaterial)
         ammo.Update(this, _fuseRatio);
         base.OnUpdate(_fuseRatio);
     }
+    public override int StealthChange() => GunStealthChange();
 }
 public class Spiral() : Module(Modules.Spiral)
 {
@@ -590,6 +601,7 @@ public class Spiral() : Module(Modules.Spiral)
         ammo.Update(this, _fuseRatio);
         base.OnUpdate(_fuseRatio);
     }
+    public override int StealthChange() => GunStealthChange();
 }
 public class Shotgun() : Module(Modules.Shotgun)
 {
@@ -625,6 +637,7 @@ public class Shotgun() : Module(Modules.Shotgun)
         ammo.Update(this, _fuseRatio);
         base.OnUpdate(_fuseRatio);
     }
+    public override int StealthChange() => GunStealthChange();
 }
 public class Missile() : Module(Modules.Missile)
 {
@@ -652,6 +665,7 @@ public class Missile() : Module(Modules.Missile)
         ammo.Update(this, _fuseRatio);
         base.OnUpdate(_fuseRatio);
     }
+    public override int StealthChange() => GunStealthChange();
 }
 public class LMG() : Module(Modules.LMG)
 {
@@ -684,6 +698,7 @@ public class LMG() : Module(Modules.LMG)
         ammo.Update(this, _fuseRatio);
         base.OnUpdate(_fuseRatio);
     }
+    public override int StealthChange() => GunStealthChange();
 }
 public class Crossbow() : Module(Modules.Crossbow)
 {
@@ -733,6 +748,7 @@ public class Flamethrower() : Module(Modules.Flamethrower)
         ammo.Update(this, _fuseRatio);
         base.OnUpdate(_fuseRatio);
     }
+    public override int StealthChange() => GunStealthChange();
 }
 public class Fireball() : Module(Modules.Fireball)
 {
@@ -757,6 +773,7 @@ public class Fireball() : Module(Modules.Fireball)
         ammo.Update(this, _fuseRatio);
         base.OnUpdate(_fuseRatio);
     }
+    public override int StealthChange() => GunStealthChange();
 }
 public class GrenadeLauncher() : Module(Modules.GrenadeLauncher)
 {
@@ -811,6 +828,7 @@ public class SpewerModule() : Module(Modules.Spewer)
         ammo.Update(this, _fuseRatio);
         base.OnUpdate(_fuseRatio);
     }
+    public override int StealthChange() => GunStealthChange();
 }
 public class PrismArray() : Module(Modules.PrismArray)
 {
@@ -892,6 +910,7 @@ public class PrismArray() : Module(Modules.PrismArray)
         base.OnUpdate(_fuseRatio);
         isFiring = false;
     }
+    public override int StealthChange() => GunStealthChange();
 }
 public class MatrixLauncher() : Module(Modules.MatrixLauncher)
 {
@@ -919,6 +938,7 @@ public class MatrixLauncher() : Module(Modules.MatrixLauncher)
         ammo.Update(this, _fuseRatio);
         base.OnUpdate(_fuseRatio);
     }
+    public override int StealthChange() => GunStealthChange();
 }
 public class Torch() : Module(Modules.Torch)
 {
@@ -968,6 +988,7 @@ public class Torch() : Module(Modules.Torch)
         ammo.Update(this, _fuseRatio);
         base.OnUpdate(_fuseRatio);
     }
+    public override int StealthChange() => GunStealthChange();
 }
 public class SplitterModule() : Module(Modules.SplitterModule)
 {
@@ -1000,6 +1021,7 @@ public class SplitterModule() : Module(Modules.SplitterModule)
         ammo.Update(this, _fuseRatio);
         base.OnUpdate(_fuseRatio);
     }
+    public override int StealthChange() => GunStealthChange();
 }
 public class Fractal() : Module(Modules.Fractal)
 {
@@ -1039,6 +1061,7 @@ public class Fractal() : Module(Modules.Fractal)
         ammo.Update(this, _fuseRatio);
         base.OnUpdate(_fuseRatio);
     }
+    public override int StealthChange() => GunStealthChange();
 }
 public class CrackShot() : Module(Modules.CrackShot)
 {
@@ -1066,6 +1089,7 @@ public class CrackShot() : Module(Modules.CrackShot)
         ammo.Update(this, _fuseRatio);
         base.OnUpdate(_fuseRatio);
     }
+    public override int StealthChange() => GunStealthChange();
 }
 public class MicroRocketLauncher() : Module(Modules.MicroRocketLauncher)
 {
@@ -1095,6 +1119,7 @@ public class MicroRocketLauncher() : Module(Modules.MicroRocketLauncher)
         ammo.Update(this, _fuseRatio);
         base.OnUpdate(_fuseRatio);
     }
+    public override int StealthChange() => GunStealthChange();
 }
 public class AdaptiveShotgun() : Module(Modules.AdaptiveShotgun)
 {
@@ -1133,6 +1158,7 @@ public class AdaptiveShotgun() : Module(Modules.AdaptiveShotgun)
         ammo.Update(this, _fuseRatio);
         base.OnUpdate(_fuseRatio);
     }
+    public override int StealthChange() => GunStealthChange();
 }
 public class GuidedRound() : Module(Modules.GuidedRound)
 {
@@ -1174,6 +1200,7 @@ public class GuidedRound() : Module(Modules.GuidedRound)
         ammo.Update(this, _fuseRatio);
         base.OnUpdate(_fuseRatio);
     }
+    public override int StealthChange() => GunStealthChange();
 }
 public class Dash() : Module(Modules.Dash)
 {

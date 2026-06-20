@@ -89,10 +89,6 @@ public class Player : Entity
             {
                 stealth -= 1;
             }
-            if (modules[ModuleType.Guns].Cooldown > 0)
-            {
-                stealth -= 1;
-            }
             return stealth;
         }
     }
