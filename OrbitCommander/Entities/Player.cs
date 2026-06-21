@@ -112,6 +112,47 @@ public class Player : Entity
         Events.SetFuseModuleDecals(textures);
         Events.UpdateFuseUI(moduleFuses, spareFuses);
     }
+    public Player(string _serialization, LoadLogger _logger)
+        : base(Vector2.One, Vector2.One, 0, 0)
+    {
+        
+        AddComponent(new Stealth(this));
+        AddComponent(new Temp());
+        AddComponent(new Statuses(this));
+        AddComponent(new Friendly(this) { Team = Team.Friendly });
+        AddComponent(new Sprite(this, SaveGame.ColorScheme.TeamColors[Team]) { Texture = Assets.Get(Sprites.Player) });
+        smokeParticles.isEmitterActive = false;
+        engineSounds = Assets.Get(Sound.FireEngines).CreateInstance();
+        engineSounds.IsLooped = true;
+        var textures = new Texture2D[modules.Count];
+        for (int i = 0; i < modules.Count; i++)
+        {
+            textures[i] = (modules[(ModuleType)i] as IData).Texture;
+        }
+        AddComponent(new Collide(this, PlayerCollide));
+        Events.SetFuseModuleDecals(textures);
+        Events.UpdateFuseUI(moduleFuses, spareFuses);
+        for(int i = 0; i < 4; i++)
+        {
+            for(int j = 0; j < 5; j++)
+            {
+                moduleFuses[i, j] = (bool)(_serialization[i * 5 + j]);
+            }
+        }
+        for(int i = 0; i < 5; i++)
+        {
+            modules[i].Value = ItemFactory.TryDeserialize(_serialization[i + ]);
+            modules.Append($"{module.Value.Serialize()},");
+        }
+        //if (SecondaryWeapon != null)
+        //{
+        //    modules.Append($"{SecondaryWeapon.Serialize()}");
+        //}
+        //else
+        //{
+        //    modules.Append("null");
+        //}
+    }
     public override void Update()
     {
         GetComponent<Sprite>().TargetColor = SaveGame.ColorScheme.TeamColors[Team];
@@ -905,11 +946,6 @@ public class Player : Entity
             }
         }
         base.Draw(_spriteBatch);
-    }
-    public Player(string _serialization, LoadLogger _logger)
-    : base(Vector2.One, Vector2.One, 0, 0)
-    {
-        throw new NotImplementedException();
     }
     public string Serialize()
     {
