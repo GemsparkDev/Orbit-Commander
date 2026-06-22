@@ -100,7 +100,7 @@ public class Pickup : Entity, IData
     {
         _logger.Try(delegate 
         {
-            int val = int.Parse(_disassembly[1]);
+            int val = int.Parse(_disassembly[0]);
             Health = val;
             MaxHealth = val; 
         }, 1);

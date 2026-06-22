@@ -115,7 +115,7 @@ public class Player : Entity
     public Player(string _serialization, LoadLogger _logger)
         : base(Vector2.One, Vector2.One, 0, 0)
     {
-        
+        var serialization = SaveGame.Disassemble(_serialization);
         AddComponent(new Stealth(this));
         AddComponent(new Temp());
         AddComponent(new Statuses(this));
@@ -124,34 +124,38 @@ public class Player : Entity
         smokeParticles.isEmitterActive = false;
         engineSounds = Assets.Get(Sound.FireEngines).CreateInstance();
         engineSounds.IsLooped = true;
+        AddComponent(new Collide(this, PlayerCollide));
+        Int32.TryParse(serialization[0], out int _fuses);
+        spareFuses = _fuses;
+        bool.TryParse(serialization[1], out bool _assist);
+        aimAssist = _assist;
+        var fuses = SaveGame.Disassemble(serialization[2]);
+        for(int i = 0; i < 5; i++)
+        {
+            for(int j = 0; j < 4; j++)
+            {
+                if(bool.TryParse(fuses[i * 4 + j], out bool _result))
+                {
+                    moduleFuses[i, j] = _result;
+                }
+                else
+                {
+                    throw new ArgumentException("Player loading failed: Invalid fuses");
+                }
+            }
+        }
+        for(int i = 0; i < 5; i++)
+        {
+            modules[(ModuleType)i] = (Module)ItemFactory.TryDeserialize(serialization[i + 3], _logger);
+        }
+        SecondaryWeapon = (Module)ItemFactory.TryDeserialize(serialization[8], _logger);
         var textures = new Texture2D[modules.Count];
         for (int i = 0; i < modules.Count; i++)
         {
             textures[i] = (modules[(ModuleType)i] as IData).Texture;
         }
-        AddComponent(new Collide(this, PlayerCollide));
         Events.SetFuseModuleDecals(textures);
         Events.UpdateFuseUI(moduleFuses, spareFuses);
-        for(int i = 0; i < 4; i++)
-        {
-            for(int j = 0; j < 5; j++)
-            {
-                moduleFuses[i, j] = (bool)(_serialization[i * 5 + j]);
-            }
-        }
-        for(int i = 0; i < 5; i++)
-        {
-            modules[i].Value = ItemFactory.TryDeserialize(_serialization[i + ]);
-            modules.Append($"{module.Value.Serialize()},");
-        }
-        //if (SecondaryWeapon != null)
-        //{
-        //    modules.Append($"{SecondaryWeapon.Serialize()}");
-        //}
-        //else
-        //{
-        //    modules.Append("null");
-        //}
     }
     public override void Update()
     {
