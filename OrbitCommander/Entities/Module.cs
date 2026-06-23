@@ -276,10 +276,6 @@ public class Turtle() : Module(Modules.Turtle)
         effect.Update();
         base.OnUpdate(_fuseRatio);
     }
-    public override int StealthChange()
-    {
-        return 1;
-    }
 }
 public class Ablative() : Module(Modules.Ablative)
 {
@@ -1444,6 +1440,13 @@ public class Decoy() : Module(Modules.Decoy)
         Engine.SaveGame.CurrentMission.Add(NewDecoy(Engine.SaveGame.Player.Position, Vector2.Zero, Engine.SaveGame.Player.Angle, Sprites.Player, Team));
         Cooldown = 15f;
     }
+    public override int StealthChange()
+    {
+        if(Cooldown > 0)
+        {
+            return 1;
+        }
+        return 0;
 }
 public class Sensors() : Module(Modules.Sensors)
 {
