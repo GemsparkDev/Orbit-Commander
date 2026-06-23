@@ -80,7 +80,7 @@ public static class ItemFactory
     public static Pickup TryDeserialize(string _data, LoadLogger _logger)
     {
         List<string> disassembly = SaveGame.Disassemble(_data);
-        if (disassembly[0] == "")
+        if (disassembly[0] == "" || disassembly[0] == "null")
         {
             return null;
         }

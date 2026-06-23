@@ -62,14 +62,13 @@ public abstract class Module : Pickup, IData
     //Override to provide custom serialization for modules
     public virtual void Parse(Modules _type, List<string> _disassembly, LoadLogger _logger)
     {
-        _logger.Try(delegate { Health = int.Parse(_disassembly[2]); }, 2);
-        _logger.Try(delegate { isFailed = bool.Parse(_disassembly[3]); }, 3);
+        _logger.Try(delegate { isFailed = bool.Parse(_disassembly[2]); }, 2);
         UpdateHealth();
         Parse(_disassembly, _logger);
     }
     public override string Serialize()
     {
-        return $"{{{Type},{SerializeAttributes()},{Health},{isFailed}}}";
+        return $"{{{Type},{SerializeAttributes()},{isFailed}}}";
     }
 }
 public class ReloadSystem(int _magazineSize, float _reloadSpeed, Action _reloadCallback = null)
