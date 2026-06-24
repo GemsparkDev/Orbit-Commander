@@ -183,7 +183,7 @@ public class Entity : IMissionComponent
         {
             rand = new Vector2((Util.Random.NextSingle() * 2 - 1) * 8 * 50 * 3, (Util.Random.NextSingle() * 2 - 1) * 8 * 50 * 3);
         }
-        while (Engine.SaveGame.CurrentMission.IsColliding(rand, Vector2.Zero, ColliderRadius, false, out float _) == null);
+        while (Engine.SaveGame.CurrentMission.IsColliding(rand, Vector2.Zero, ColliderRadius, false, out float _) != null);
         return rand;
     }
     public virtual void Update()

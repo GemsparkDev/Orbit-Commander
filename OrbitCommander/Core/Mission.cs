@@ -18,7 +18,7 @@ public class Mission
 {
     private static Player Player => Engine.SaveGame.Player;
     //Maximum distance for any detection when sensing = stealth
-    public static float StealthRange { get; private set; } = 750;
+    public static float StealthRange { get; private set; } = 1000;
     //Threshold of detection for enemies
     public static float StealthThreshold { get; private set; } = 0.75f;
     public static readonly List<(MissionData data, Func<Mission> instance)> missions =

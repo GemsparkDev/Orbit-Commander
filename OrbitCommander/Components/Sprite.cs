@@ -36,22 +36,7 @@ public class Sprite(Entity _entity, Color _color) : IComponent
         collider.isEmitterActive = SaveGame.DebugMode;
         collider.particleVelocity = _entity.ColliderRadius;
         collider.Update();
-        if (Color != TargetColor)
-        {
-            float l = Util.FIED(0.025f);
-            Color = new Color((byte)(_entity.Color.R * l + TargetColor.R * (1f - l)), (byte)(_entity.Color.G * l + TargetColor.G * (1f - l)), (byte)(_entity.Color.B * l + TargetColor.B * (1f - l)), TargetColor.A); //Lerp towards ideal color
-        }
-    }
-    public void Draw(SpriteBatch _spriteBatch)
-    {
-        Vector2 halfSize = (Engine.BackBuffer / Engine.Camera.Zoom + Size) / 2;
-        Vector2 pos = Engine.Camera.Position + Engine.MousePositionOffset;
-        if (_entity.Position.X - pos.X < -halfSize.X || _entity.Position.Y - pos.Y < -halfSize.Y
-         || _entity.Position.X - pos.X > halfSize.X || _entity.Position.Y - pos.Y > halfSize.Y)
-        {
-            return;
-        }
-        float stealth = Convert.ToSingle(Color.A) / 255;
+        float stealth = 1;
         var sC = _entity.GetComponent<Stealth>();
         if (sC != null)
         {
@@ -77,11 +62,27 @@ public class Sprite(Entity _entity, Color _color) : IComponent
             }
             stealth = MathF.Max(stealth, (float)Math.Clamp(sC.RevealDuration, 0f, 1f));
         }
+        var tc = TargetColor * stealth;
+        if (Color != tc)
+        {
+            float l = Util.FIED(0.025f);
+            Color = new Color((byte)(_entity.Color.R * l + tc.R * (1f - l)), (byte)(_entity.Color.G * l + tc.G * (1f - l)), (byte)(_entity.Color.B * l + tc.B * (1f - l)), tc.A); //Lerp towards ideal color
+        }
+    }
+    public void Draw(SpriteBatch _spriteBatch)
+    {
+        Vector2 halfSize = (Engine.BackBuffer / Engine.Camera.Zoom + Size) / 2;
+        Vector2 pos = Engine.Camera.Position + Engine.MousePositionOffset;
+        if (_entity.Position.X - pos.X < -halfSize.X || _entity.Position.Y - pos.Y < -halfSize.Y
+         || _entity.Position.X - pos.X > halfSize.X || _entity.Position.Y - pos.Y > halfSize.Y)
+        {
+            return;
+        }
         //Outline in atmosphere looks better
         _spriteBatch.Draw(Texture, _entity.Position + new Vector2(0, 1), null, Color.Black, _entity.Angle, Size / 2, 1, 0, 0);
         _spriteBatch.Draw(Texture, _entity.Position + new Vector2(0, -1), null, Color.Black, _entity.Angle, Size / 2, 1, 0, 0);
         _spriteBatch.Draw(Texture, _entity.Position + new Vector2(1, 0), null, Color.Black, _entity.Angle, Size / 2, 1, 0, 0);
         _spriteBatch.Draw(Texture, _entity.Position + new Vector2(-1, 0), null, Color.Black, _entity.Angle, Size / 2, 1, 0, 0);
-        _spriteBatch.Draw(Texture, _entity.Position, null, Color * stealth, _entity.Angle, Size / 2, 1, 0, 0);
+        _spriteBatch.Draw(Texture, _entity.Position, null, Color, _entity.Angle, Size / 2, 1, 0, 0);
     }
 }

@@ -1442,11 +1442,12 @@ public class Decoy() : Module(Modules.Decoy)
     }
     public override int StealthChange()
     {
-        if(Cooldown > 0)
+        if (Cooldown > 0)
         {
             return 1;
         }
         return 0;
+    }
 }
 public class Sensors() : Module(Modules.Sensors)
 {
@@ -1454,15 +1455,18 @@ public class Sensors() : Module(Modules.Sensors)
 }
 public class Lidar() : Module(Modules.Lidar)
 {
-    public override void OnAbility()
+    public override void OnUpdate(float _fuseRatio)
     {
         if (Cooldown > 0)
         {
             return;
         }
-        Vector2 dir = Player.Direction + new Vector2(Util.OneToNegOne(), Util.OneToNegOne()) / 5;
-        Engine.SaveGame.CurrentMission.Hitscan(Player.Position, dir, 1000, false, out Vector2 end);
-        ParticleManager.Add(new Particle(Assets.Get(Sprites.Dot), 1f, end, Vector2.Zero, 0, 0, Color.White, Color.Transparent));
+        for(int i = 0; i < 3 * _fuseRatio; i++)
+        {
+            Vector2 dir = Player.Direction + new Vector2(Util.OneToNegOne(), Util.OneToNegOne()) / 3;
+            Engine.SaveGame.CurrentMission.Hitscan(Player.Position, dir, 1000, false, out Vector2 end);
+            ParticleManager.Add(new Particle(Assets.Get(Sprites.Dot), 1f, end, Vector2.Zero, 0, 0, Color.White, Color.Transparent));
+        }
     }
 }
 public class Radar() : Module(Modules.Radar)
