@@ -612,7 +612,7 @@ public class Mission
         var list = new List<Entity>();
         float dist = _maxLength;
         Entity nearestEnemy = null;
-        Engine.SaveGame.CurrentMission.IsColliding(_pos, dir * dist, 1, false, out float maxDist);
+        var collider = Engine.SaveGame.CurrentMission.IsColliding(_pos, dir * dist, 1, false, out float maxDist);
         maxDist += 1; //Makes hitting planets possible
         foreach (var entity in Entities)
         {
@@ -631,6 +631,13 @@ public class Mission
             list.Add(nearestEnemy);
         }
         _end = _pos + dir * maxDist;
+        if (collider as Entity != null)
+        {
+            if(_getAll || list.Count == 0)
+            {
+                list.Add(collider as Entity);
+            }
+        }
         return list;
         void CalculateIntersection(Entity _entity)
         {

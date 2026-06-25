@@ -3,6 +3,11 @@
 Lagrange Commander is a game made using C# in monogame. It is a 2D top down wave based shooter where you must repair and upgrade your ship by salvaging from enemies you defeat. It features realistic N-Body gravitation, which affects all entities and projectiles.
   
 # Changelog
+0.8.8.1 - 6/25/2026
+ - Explosive projectiles now blacklist friendly enemies.
+ - Hitscans now include planets in the output.
+ - Reduced the stats of the Veil boss's reveal duration and explosion radius.
+ - Lidar now matches entity color and velocity.
 0.8.8.0 - 6/24/2026
  - Stealth color changes now fade in for revealing.
  - Increased the StealthRange variable to 1000, from 750.

@@ -1463,9 +1463,26 @@ public class Lidar() : Module(Modules.Lidar)
         }
         for(int i = 0; i < 3 * _fuseRatio; i++)
         {
-            Vector2 dir = Player.Direction + new Vector2(Util.OneToNegOne(), Util.OneToNegOne()) / 3;
-            Engine.SaveGame.CurrentMission.Hitscan(Player.Position, dir, 1000, false, out Vector2 end);
-            ParticleManager.Add(new Particle(Assets.Get(Sprites.Dot), 1f, end, Vector2.Zero, 0, 0, Color.White, Color.Transparent));
+            Vector2 dir = Util.ToUnitVector(Util.ToAngle(Player.Direction) + Util.OneToNegOne() * Util.Random.NextSingle());
+            var entity = Engine.SaveGame.CurrentMission.Hitscan(Player.Position, dir, 2000, false, out Vector2 end);
+            var vel = Vector2.Zero;
+            var col = Color.White;
+            if(entity.Count > 0)
+            {
+                vel = entity[0].Velocity;
+                col = entity[0].Color;
+                Vector3 color = new Vector3(col.R, col.G, col.B) / 255f;
+                if(color != Vector3.Zero)
+                {
+                    color.Normalize();
+                }
+                else
+                {
+                    color = Vector3.One;
+                }
+                col = new Color(color.X, color.Y, color.Z, 1f);
+            }
+            ParticleManager.Add(new Particle(Assets.Get(Sprites.Dot), 1f, end, vel, 0, 0, col, Color.Transparent));
         }
     }
 }

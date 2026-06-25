@@ -172,9 +172,9 @@ public class Entity : IMissionComponent
     {
         GetComponent<Mineable>()?.Mine(MaxHealth);
     }
-    public void Explode(int _damage, float _radius)
+    public void Explode(int _damage, float _radius, Team[] blacklist = null)
     {
-        Util.Explode(Position, Velocity, _damage, _radius);
+        Util.Explode(Position, Velocity, _damage, _radius, blacklist);
     }
     public Vector2 NewGoToLocation()
     {
@@ -1264,8 +1264,8 @@ public class Entity : IMissionComponent
                 if (CD[0] <= 0)
                 {
                     CD[0] = 0.25f;
-                    RevealDuration += 0.2f;
-                    Engine.SaveGame.CurrentMission.Add(NewExplosive(Position, Velocity + targetVector * 10 + new Vector2(Util.OneToNegOne(), Util.OneToNegOne()) * 5, Util.OneToNegOne() * MathF.PI, Util.OneToNegOne(), Team, damage / 2, 40, 1));
+                    RevealDuration += 0.1f;
+                    Engine.SaveGame.CurrentMission.Add(NewExplosive(Position, Velocity + targetVector * 10 + new Vector2(Util.OneToNegOne(), Util.OneToNegOne()) * 5, Util.OneToNegOne() * MathF.PI, Util.OneToNegOne(), Team, damage / 2, 30, 1));
                     SoundManager.PlaySound(Assets.Get(Sound.LMGFire), Position);
                 }
                 if (relativePosition.Length() < 100)
@@ -1297,8 +1297,8 @@ public class Entity : IMissionComponent
                 if (CD[0] <= 0)
                 {
                     CD[0] = 1;
-                    RevealDuration += 0.5f;
-                    var p1 = NewExplosive(Position, Velocity + GetNormalizedAcceleration() * 160, Util.OneToNegOne() * MathF.PI, Util.OneToNegOne(), Team, damage, 200, 1);
+                    RevealDuration += 0.1f;
+                    var p1 = NewExplosive(Position, Velocity + GetNormalizedAcceleration() * 160, Util.OneToNegOne() * MathF.PI, Util.OneToNegOne(), Team, damage, 100, 2);
                     p1.TimeLeft = 10;
                     Engine.SaveGame.CurrentMission.Add(p1);
                     SoundManager.PlaySound(Assets.Get(Sound.LMGFire), Position);
@@ -5174,28 +5174,10 @@ public class Entity : IMissionComponent
                 GetComponent<Sprite>().TargetColor = new Color(col.X * val + (1 - val), col.Y * val + (1 - val), col.Z * val + (1 - val));
                 if (explosionRadius > Vector2.Distance(nearestEnemy.Position, Position))
                 {
+                    Explode(GetComponent<Attack>().Damage, explosionRadius, [Team]);
+                    SoundManager.PlaySound(Assets.Get(Sound.Death), Position);
                     isExpired = true;
                 }
-            }
-            if (isExpired)
-            {
-                int particles = Util.Random.Next(15, 25);
-                for (int i = 0; i < particles; i++)
-                {
-                    float angle = Util.Random.NextSingle() * MathF.PI * 2;
-                    Vector2 particleVelocity = new Vector2(MathF.Cos(angle), MathF.Sin(angle)) * (Util.Random.NextSingle() * 2 + 2);
-                    ParticleManager.Add(new Particle(Assets.Get(Sprites.Dot), 0.25f, Position, particleVelocity + Velocity, angle, 0, Color.Yellow, new Color(255, 0, 0, 0)));
-                }
-                particles = Util.Random.Next(8, 16);
-                for (int i = 0; i < particles; i++)
-                {
-                    float angle = Util.Random.NextSingle() * MathF.PI * 2;
-                    Vector2 particleVelocity = new Vector2(MathF.Cos(angle), MathF.Sin(angle)) * (Util.Random.NextSingle() * 2 + 2);
-                    ParticleManager.Add(new Particle(Assets.Get(Sprites.Circle), 0.25f, Position, particleVelocity + Velocity, angle, 0, Color.DarkSlateGray, Color.Transparent));
-                }
-                Engine.SaveGame.CurrentMission.Explode(GetComponent<Attack>().Damage, explosionRadius, Position);
-                Engine.ShakeScreen(150 / ((Position - Engine.Camera.Position).Length() + 300));
-                SoundManager.PlaySound(Assets.Get(Sound.Death), Position);
             }
             yield return 0;
         }
