@@ -14,7 +14,7 @@ public abstract class Status(Sprites _icon)
     public abstract void Reset();
     public virtual int StealthChange() { return 0; }
     public virtual int SensingChange() { return 0; }
-    public virtual int FuseBonus() { return 0; }
+    public virtual int FuseChange() { return 0; }
     public virtual int ModifyDamage(int _damage) { return _damage; }
     public virtual bool IsImmunable { get => false; }
     public enum StatusType
@@ -80,7 +80,7 @@ public class Fire(float _duration, Color _color) : Status(Sprites.Knob)
         else
         {
             attackCooldown = 1f;
-            _parent.Collide(3, true);
+            _parent.Collide(2, true);
         }
         if (duration > 0)
         {
@@ -94,6 +94,10 @@ public class Fire(float _duration, Color _color) : Status(Sprites.Knob)
     public override int StealthChange()
     {
         return -10;
+    }
+    public override int FuseChange()
+    {
+        return 1;
     }
     public override void Reset()
     {
@@ -132,6 +136,14 @@ public class Frost(float _duration) : Status(Sprites.Knob)
     public override int ModifyDamage(int _damage)
     {
         return _damage * 2;
+    }
+    public override int StealthChange()
+    {
+        return 1;
+    }
+    public override int SensingChange()
+    {
+        return 1;
     }
     public override void Reset()
     {
@@ -240,7 +252,7 @@ public class Berserk(float _timeLeft) : Status(Sprites.Knob)
     {
         return -1;
     }
-    public override int FuseBonus()
+    public override int FuseChange()
     {
         return 1;
     }

@@ -17,7 +17,7 @@ public static class ItemFactory
         { Items.Bomb, new ItemData(Sprites.RealBomb, Sprites.Bomb, "Bomb", 1, Color.White,Color.White,3) },
         { Items.Furnace, new ItemData(Sprites.RealFurnace, Sprites.Furnace, "Furnace", 1, Color.White, Color.White,10) },
         { Items.SpecializedParts, new ItemData(Sprites.RealSpecializedParts, Sprites.SpecializedParts, "Specialized Parts", 1, Color.White, Color.CornflowerBlue, 5) },
-        { Items.Mace, new ItemData(Sprites.RealMace, Sprites.Mace, "Mace", 1, Color.White, Color.White, 50) }
+        { Items.Cryomace, new ItemData(Sprites.RealMace, Sprites.Mace, "Cryomace", 1, Color.White, Color.White, 50) }
     };
     public readonly static Dictionary<Modules, ModuleData> moduleData = new()
     {
@@ -74,7 +74,7 @@ public static class ItemFactory
     public static Pickup NewScrap(Vector2 _position = default, Vector2 _velocity = default, float _angularVelocity = 0)
     {
         var p = new Pickup(itemData[0], _position, _velocity, _angularVelocity);
-        p.AddComponent<Smelt>(new Smelt() { Value = 1 });
+        p.AddComponent(new Smelt() { Value = 1 });
         return p;
     }
     public static Pickup TryDeserialize(string _data, LoadLogger _logger)

@@ -23,7 +23,7 @@ public class Statuses(Entity _entity) : IComponent
             effect.Update(_entity);
             StealthChange += effect.StealthChange();
             SensingChange += effect.SensingChange();
-            FuseBonus += effect.FuseBonus();
+            FuseBonus += effect.FuseChange();
         }
         _entity.Temperature *= Util.FIED(0.90f); //Radiative
         if (_entity.Temperature > 1)

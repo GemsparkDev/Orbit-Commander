@@ -558,7 +558,7 @@ public class Player : Entity
                                         break;
                                     case "Mace":
                                         firstScrap.isExpired = true;
-                                        var mace = Pickup.NewMace(firstScrap.Position, firstScrap.Velocity, 0, 0);
+                                        var mace = Pickup.NewCryomace(firstScrap.Position, firstScrap.Velocity, 0, 0);
                                         if (modules[ModuleType.Engines] is WorkEngine)
                                         {
                                             mace.AddTag(Tags.IsImmune);

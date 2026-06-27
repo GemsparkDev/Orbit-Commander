@@ -259,7 +259,8 @@ public class Pickup : Entity, IData
             Velocity *= Util.FIED(0.2f);
             foreach (var enemy in Engine.SaveGame.CurrentMission.Entities)
             {
-                if (Vector2.DistanceSquared(enemy.Position, Position) < 3600)
+                float distSqr = Vector2.DistanceSquared(enemy.Position, Position);
+                if (distSqr < 3600)
                 {
                     enemy.ApplyWork(5);
                 }
@@ -303,9 +304,9 @@ public class Pickup : Entity, IData
     public static Pickup NewFurnace(Vector2 _position, Vector2 _velocity, float _angle, float _angularVelocity, int _stealth = 0, Team _team = Team.Friendly)
     {
         var construct = new Pickup(ItemFactory.itemData[Items.Furnace], _position, _velocity, _angularVelocity, ItemFactory.itemData[Items.Furnace].Integrity);
-        construct.AddComponent(new Behaviour().AddBehaviour(construct.Bomb()));
+        construct.AddComponent(new Behaviour().AddBehaviour(construct.Furnace()));
         construct.AddComponent(new FollowEmitter(construct) { ParticleEmitter = new ParticleEmitter(Assets.Get(Sprites.Dot), _position, 100, new Color(255, 0, 0)) });
-        construct.AddComponent<Smelt>(new Smelt() { Value = 1 });
+        construct.AddComponent(new Smelt() { Value = 1 });
         construct.Angle = _angle;
         construct.StealthAbility = _stealth;
         construct.Team = _team;
@@ -322,26 +323,41 @@ public class Pickup : Entity, IData
         construct.AddTag(Tags.IsSpecialized);
         return construct;
     }
-    IEnumerable<int> Mace()
+    IEnumerable<int> Cryomace()
     {
         while (true)
         {
             var nearestEnemy = Engine.SaveGame.CurrentMission.NearestEnemy(this);
+            foreach(var enemy in Engine.SaveGame.CurrentMission.Entities)
+            {
+                float distSqr = Vector2.DistanceSquared(enemy.Position, Position);
+                if (distSqr < 3600)
+                {
+                    enemy.ApplyWork(-5);
+                }
+                if(distSqr < (ColliderRadius + enemy.ColliderRadius) * (ColliderRadius + enemy.ColliderRadius) && enemy.HasComponent<Health>())
+                {
+                    //Mace sticks to enemies and has mass equal to maximum health div by 2
+                    float lerp = MaxHealth / 2 / (enemy.MaxHealth + MaxHealth / 2);
+                    Velocity = Velocity * lerp + enemy.Velocity * (1 - lerp);
+                    enemy.Velocity = Velocity;
+                }
+            }
             GetComponent<Attack>().Damage = (int)Vector2.Distance(nearestEnemy.Velocity, Velocity);
             yield return 0;
         }
     }
-    public static Pickup NewMace(Vector2 _position, Vector2 _velocity, float _angle, float _angularVelocity, int _stealth = 0, Team _team = Team.Friendly)
+    public static Pickup NewCryomace(Vector2 _position, Vector2 _velocity, float _angle, float _angularVelocity, int _stealth = 0, Team _team = Team.Friendly)
     {
-        var construct = new Pickup(ItemFactory.itemData[Items.Mace], _position, _velocity, _angularVelocity, ItemFactory.itemData[Items.Mace].Integrity)
+        var construct = new Pickup(ItemFactory.itemData[Items.Cryomace], _position, _velocity, _angularVelocity, ItemFactory.itemData[Items.Cryomace].Integrity)
         {
             Angle = _angle,
             StealthAbility = _stealth,
             Team = _team
         };
-        construct.AddComponent<Smelt>(new Smelt() { Value = 1 });
+        construct.AddComponent(new Smelt() { Value = 1 });
         construct.AddComponent(new Attack() { Damage = 5 });
-        construct.AddComponent(new Behaviour().AddBehaviour(construct.Mace()));
+        construct.AddComponent(new Behaviour().AddBehaviour(construct.Cryomace()));
         return construct;
     }
 }
@@ -364,5 +380,5 @@ public enum Items
     Bomb,
     SpecializedParts,
     Furnace,
-    Mace
+    Cryomace
 }
