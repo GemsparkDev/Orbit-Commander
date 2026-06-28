@@ -4162,8 +4162,11 @@ public class Entity : IMissionComponent
             if (Position.Y > -_distance)
             {
                 isExpired = true;
-                Engine.SaveGame.Player.Velocity = new Vector2(0, -1f);
-                Engine.SaveGame.Player.Dock();
+                if(Engine.SaveGame.Player.dockedEntity == this.GetComponent<Dockable>())
+                {
+                    Engine.SaveGame.Player.Velocity = new Vector2(0, -1f);
+                    Engine.SaveGame.Player.Dock();
+                }
                 SoundManager.PlaySound(Assets.Get(Sound.Explosion), Position);
             }
             yield return 0;

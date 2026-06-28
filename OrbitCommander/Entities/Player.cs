@@ -424,13 +424,13 @@ public class Player : Entity
             }
             if (dockedEntity == null)
             {
-                if (Progression > 2)
+                if (Progression > 2 || SaveGame.DebugMode)
                 {
                     if (Input.IsDown(Binding.Construct))
                     {
                         float dist = (new Vector2(Input.NewMouseState.X, Input.NewMouseState.Y) - Engine.BackBuffer / 2).Length();
                         var constructs = new List<(string description, Texture2D sprite)>()
-                    {
+                        {
                         ("Req. 1 scrap, blocks enemy fire. 20 integrity.", Assets.Get(Sprites.Barricade)),
                         ("Req. 1 scrap, attacks enemies. 8 integrity.", Assets.Get(Sprites.Trap)),
                         ("Req. 1 scrap, 100 dmg to all in radius when destroyed. 3 integrity.", Assets.Get(Sprites.Bomb)),

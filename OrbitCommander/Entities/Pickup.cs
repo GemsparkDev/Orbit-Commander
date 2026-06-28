@@ -22,6 +22,7 @@ public class Pickup : Entity, IData
         : base(_position, _velocity, 0, _angularVelocity)
     {
         AddComponent(new Sprite(this, Color.Cyan) { Texture = _itemData.VirtualSprite });
+        AddComponent(new Stealth(this) { StealthAbility = 0, SensingAbility = 0 });
         itemData = _itemData;
         AddComponent(new Friendly(this) { Team = Team.Friendly });
         Tooltip.AddWidget(new Decal(new Vector2(-Tooltip.Size.X / 3, 0), _itemData.RealSprite));
@@ -262,8 +263,12 @@ public class Pickup : Entity, IData
                 float distSqr = Vector2.DistanceSquared(enemy.Position, Position);
                 if (distSqr < 3600)
                 {
-                    enemy.ApplyWork(5);
+                    enemy.ApplyWork(0.5f);
                 }
+            }
+            if (Vector2.DistanceSquared(Position, Player.Position) < 2000)
+            {
+                Player.ApplyWork(0.33f);
             }
             Vector2 offset = Util.RotateVector2(new Vector2(Util.OneToNegOne(), Util.OneToNegOne()) * 5, Angle);
             ParticleManager.Add(new Particle(Assets.Get(Sprites.Dot), 1, Position + offset, Velocity, Angle, 0, Color.Orange, Color.Transparent));
@@ -287,14 +292,7 @@ public class Pickup : Entity, IData
                 {
                     nearestPickup.isExpired = true;
                     cooldown = 0;
-                    if (nearestPickup is Module)
-                    {
-                        Engine.SaveGame.Scrap += 3;
-                    }
-                    else
-                    {
-                        Engine.SaveGame.Scrap++;
-                    }
+                    Engine.SaveGame.Scrap += nearestPickup.GetComponent<Smelt>().Value;
                     SoundManager.PlaySound(Assets.Get(Sound.Full), Position);
                 }
             }
@@ -327,23 +325,36 @@ public class Pickup : Entity, IData
     {
         while (true)
         {
-            var nearestEnemy = Engine.SaveGame.CurrentMission.NearestEnemy(this);
-            foreach(var enemy in Engine.SaveGame.CurrentMission.Entities)
+            foreach(var enemy in Engine.SaveGame.CurrentMission.enemies)
             {
                 float distSqr = Vector2.DistanceSquared(enemy.Position, Position);
                 if (distSqr < 3600)
                 {
-                    enemy.ApplyWork(-5);
+                    enemy.ApplyWork(-0.5f);
                 }
-                if(distSqr < (ColliderRadius + enemy.ColliderRadius) * (ColliderRadius + enemy.ColliderRadius) && enemy.HasComponent<Health>())
+                if (IsFriendly(enemy))
+                {
+                    continue;
+                }
+                if (distSqr < 100000)
+                {
+                    Vector2 dir = (enemy.Position - Position) / (distSqr + 50) * 1000  * Engine.DeltaSeconds;
+                    float lerp = MaxHealth / 2 / (enemy.MaxHealth + MaxHealth / 2);
+                    Velocity += dir * lerp;
+                    enemy.Velocity -= dir * (1 - lerp);
+                }
+                if (distSqr < (ColliderRadius + enemy.ColliderRadius) * (ColliderRadius + enemy.ColliderRadius) && enemy.HasComponent<Health>())
                 {
                     //Mace sticks to enemies and has mass equal to maximum health div by 2
                     float lerp = MaxHealth / 2 / (enemy.MaxHealth + MaxHealth / 2);
-                    Velocity = Velocity * lerp + enemy.Velocity * (1 - lerp);
+                    Velocity = Velocity * (1 - lerp) + enemy.Velocity * lerp;
                     enemy.Velocity = Velocity;
                 }
             }
-            GetComponent<Attack>().Damage = (int)Vector2.Distance(nearestEnemy.Velocity, Velocity);
+            if(Vector2.DistanceSquared(Position, Player.Position) < 1600)
+            {
+                Player.ApplyWork(-0.33f);
+            }
             yield return 0;
         }
     }
@@ -356,7 +367,6 @@ public class Pickup : Entity, IData
             Team = _team
         };
         construct.AddComponent(new Smelt() { Value = 1 });
-        construct.AddComponent(new Attack() { Damage = 5 });
         construct.AddComponent(new Behaviour().AddBehaviour(construct.Cryomace()));
         return construct;
     }
