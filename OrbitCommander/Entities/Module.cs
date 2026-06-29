@@ -1522,17 +1522,16 @@ public class PulseEmitter() : Module(Modules.PulseEmitter)
         }
         foreach(var entity in Engine.SaveGame.CurrentMission.Entities)
         {
-            if(Vector2.Distance(entity.Position, Player.Position) < 2500 && entity.HasComponent<Stealth>())
+            if(Vector2.Distance(entity.Position, Player.Position) < 250 / _fuseRatio && entity.HasComponent<Stealth>())
             {
                 entity.RevealDuration += 0.5f;
             }
         }
-        for (float angle = MathF.PI / 60; angle < MathF.Tau; angle += MathF.PI / 60)
+        for (float angle = 0; angle < MathF.Tau; angle += MathF.PI / 60)
         {
-            ParticleManager.Add(new Particle(Assets.Get(Sprites.Dot), 1f, Player.Position, Util.ToUnitVector(Player.Angle) * 2, angle, 0, Color.Cyan, Color.Transparent));
+            ParticleManager.Add(new Particle(Assets.Get(Sprites.Dot), 1f, Player.Position, Util.ToUnitVector(angle) * 2 / _fuseRatio + Player.Velocity, angle, 0, Color.Cyan, Color.Transparent));
         }
         Cooldown = 2 * _fuseRatio;
-        SoundManager.PlayGlobalSound(Assets.Get(Sound.Beep));
     }
 }
 public class Expose() : Module(Modules.Expose)
