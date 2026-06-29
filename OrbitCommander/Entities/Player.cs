@@ -315,7 +315,7 @@ public class Player : Entity
         {
             var module = modules[(ModuleType)i];
             //Square root of the ratio reduces impact with additional fuse (especially with weapon dps)
-            float fuseRatio = MathF.Sqrt((float)CountFuses((ModuleType)i) / 3);
+            float fuseRatio = MathF.ReciprocalSqrtEstimate((float)CountFuses((ModuleType)i) / 3);
             module.OnUpdate(fuseRatio);
         }
     }

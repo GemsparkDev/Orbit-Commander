@@ -1464,7 +1464,7 @@ public class Lidar() : Module(Modules.Lidar)
         for(int i = 0; i < 3 * _fuseRatio; i++)
         {
             Vector2 dir = Util.ToUnitVector(Util.ToAngle(Player.Direction) + Util.OneToNegOne() * Util.Random.NextSingle());
-            var entity = Engine.SaveGame.CurrentMission.Hitscan(Player.Position, dir, 2000, false, out Vector2 end);
+            var entity = Engine.SaveGame.CurrentMission.Hitscan(Player.Position, dir, 2000, false, out Vector2 end, null, true);
             var vel = Vector2.Zero;
             var col = Color.White;
             if(entity.Count > 0)
@@ -1491,7 +1491,7 @@ public class Radar() : Module(Modules.Radar)
     float time = 0;
     public override void OnUpdate(float _fuseRatio)
     {
-        time += Engine.DeltaSeconds * _fuseRatio;
+        time += Engine.DeltaSeconds / _fuseRatio;
         base.Update();
         if (Cooldown > 0)
         {
@@ -1499,14 +1499,14 @@ public class Radar() : Module(Modules.Radar)
         }
         int fuses = Player.CountFuses(ModuleType.Sensors);
         Vector2 dir = Util.ToUnitVector(time * fuses / 3);
-        List<Entity> revealedEntities = Engine.SaveGame.CurrentMission.Hitscan(Player.Position, dir, 2000, true, out Vector2 end, null);
+        var revealedEntities = Engine.SaveGame.CurrentMission.Hitscan(Player.Position, dir, 2000, true, out Vector2 end, null).Where(x => x.HasComponent<Stealth>());
         foreach (var entity in revealedEntities)
         {
             entity.RevealDuration = 2f;
         }
-        for (int i = 0; i < 10; i++)
+        for (int i = 0; i < 12; i++)
         {
-            ParticleManager.Add(new Particle(Assets.Get(Sprites.Dot), Player.Position + dir * 10 * i, 0, Color.Green * (1 - (float)i / 10)));
+            ParticleManager.Add(new Particle(Assets.Get(Sprites.Dot), Player.Position + dir * 2 * (i + 4) + Player.Velocity, 0, Color.Green * (1 - (float)i / 12)));
         }
         ParticleManager.Add(new Particle(Assets.Get(Sprites.Dot), end, 0, Color.White));
     }
@@ -1515,22 +1515,23 @@ public class PulseEmitter() : Module(Modules.PulseEmitter)
 {
     public override void OnUpdate(float _fuseRatio)
     {
-        base.Update();
+        base.OnUpdate(_fuseRatio);
         if (Cooldown > 0)
         {
             return;
         }
-        var enemy = Engine.SaveGame.CurrentMission.NearestEnemy(this);
-        if (enemy != null)
+        foreach(var entity in Engine.SaveGame.CurrentMission.Entities)
         {
-            enemy.RevealDuration = 1;
+            if(Vector2.Distance(entity.Position, Player.Position) < 2500 && entity.HasComponent<Stealth>())
+            {
+                entity.RevealDuration += 0.5f;
+            }
         }
-        var proj = Engine.SaveGame.CurrentMission.NearestProjectile(Position, SensingAbility, Team);
-        if (proj != null)
+        for (float angle = MathF.PI / 60; angle < MathF.Tau; angle += MathF.PI / 60)
         {
-            proj.RevealDuration = 1;
+            ParticleManager.Add(new Particle(Assets.Get(Sprites.Dot), 1f, Player.Position, Util.ToUnitVector(Player.Angle) * 2, angle, 0, Color.Cyan, Color.Transparent));
         }
-        Cooldown = 2;
+        Cooldown = 2 * _fuseRatio;
         SoundManager.PlayGlobalSound(Assets.Get(Sound.Beep));
     }
 }
