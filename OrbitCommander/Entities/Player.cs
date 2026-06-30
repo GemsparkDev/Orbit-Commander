@@ -33,7 +33,7 @@ public class Player : Entity
         { ModuleType.Hull, ItemFactory.moduleData[UI.setModules[0]].Retrieve()},
         { ModuleType.Guns, ItemFactory.moduleData[UI.setModules[1]].Retrieve() },
         { ModuleType.Engines, ItemFactory.moduleData[UI.setModules[2]].Retrieve() },
-        { ModuleType.Sensors, ItemFactory.moduleData[UI.setModules[3]].Retrieve() },
+        { ModuleType.Sensors, ItemFactory.moduleData[UI.setModules[3]].Retrieve() }, // Swap sensors to weapon augment module
         { ModuleType.Core, ItemFactory.moduleData[UI.setModules[4]].Retrieve() }
     };
     public Module SecondaryWeapon { get; set; } = null;
@@ -51,6 +51,8 @@ public class Player : Entity
     public bool IsDocked => dockedEntity != null;
     public bool isEngineActive = false;
     public bool canGatherResources = false;
+    private bool isSensorActive = true;
+    public SensorType sensorType = SensorType.Basic;
     public Vector2 EngineDirection { get; private set; }
     private Vector2 startLocation = Vector2.Zero;
     public int Progression { get; set; } = 3;
@@ -317,6 +319,32 @@ public class Player : Entity
             //Square root of the ratio reduces impact with additional fuse (especially with weapon dps)
             float fuseRatio = MathF.ReciprocalSqrtEstimate((float)CountFuses((ModuleType)i) / 3);
             module.OnUpdate(fuseRatio);
+            if(isSensorActive && i == (int)Modules.Sensors && modules[ModuleType.Sensors].Cooldown <= 0)
+            {
+                switch (sensorType)
+                {
+                    case SensorType.Lidar:
+
+                    break;
+                    case SensorType.Radar:
+
+                    break;
+                    case SensorType.PulseEmitter:
+                        foreach (var entity in Engine.SaveGame.CurrentMission.Entities)
+                        {
+                            if (Vector2.Distance(entity.Position, Player.Position) < 250 / fuseRatio && entity.HasComponent<Stealth>())
+                            {
+                                entity.RevealDuration += 0.5f;
+                            }
+                        }
+                        for (float angle = 0; angle < MathF.Tau; angle += MathF.PI / 60)
+                        {
+                            ParticleManager.Add(new Particle(Assets.Get(Sprites.Dot), 1f, Player.Position, Util.ToUnitVector(angle) * 2 / fuseRatio + Player.Velocity, angle, 0, Color.Cyan, Color.Transparent));
+                        }
+                        modules[ModuleType.Sensors].Cooldown = 2 * fuseRatio;
+                        break;
+                }
+            }
         }
     }
     public void OnEnemyHit(Entity _entity, int _damage)

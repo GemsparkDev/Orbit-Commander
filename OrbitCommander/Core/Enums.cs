@@ -301,6 +301,13 @@ public enum LoadingStage
     MissionSelect,
     Complete
 }
+public enum SensorType
+{
+    Basic,
+    Lidar,
+    Radar,
+    PulseEmitter,
+}
 [Flags]
 public enum Tags
 {
