@@ -57,9 +57,9 @@ public static class ItemFactory
         { Modules.Orion, new ModuleData(Sprites.RealOrion, Sprites.Orion, "Orion", (int)ModuleType.Engines, 20, typeof(OrionEngine)) },
 
         { Modules.Sensors, new ModuleData(Sprites.RealSensors,Sprites.Sensors, "Sensors", (int)ModuleType.Sensors, 20, typeof(Sensors), Color.CornflowerBlue) },
-        { Modules.Lidar, new ModuleData(Sprites.RealLidar,Sprites.Lidar, "Lidar", (int)ModuleType.Sensors, 20, typeof(Lidar), Color.Yellow) },
-        { Modules.Radar, new ModuleData(Sprites.RealRadar,Sprites.Radar, "Radar", (int)ModuleType.Sensors, 20, typeof(Radar), Color.Yellow) },
-        { Modules.PulseEmitter, new ModuleData(Sprites.RealPulseEmitter,Sprites.PulseEmitter, "Pulse Emitter", (int)ModuleType.Sensors, 20, typeof(PulseEmitter), Color.Yellow) },
+        //{ Modules.Lidar, new ModuleData(Sprites.RealLidar,Sprites.Lidar, "Lidar", (int)ModuleType.Sensors, 20, typeof(Lidar), Color.Yellow) },
+        //{ Modules.Radar, new ModuleData(Sprites.RealRadar,Sprites.Radar, "Radar", (int)ModuleType.Sensors, 20, typeof(Radar), Color.Yellow) },
+        //{ Modules.PulseEmitter, new ModuleData(Sprites.RealPulseEmitter,Sprites.PulseEmitter, "Pulse Emitter", (int)ModuleType.Sensors, 20, typeof(PulseEmitter), Color.Yellow) },
 
         { Modules.Assault, new ModuleData(Sprites.RealAssault, Sprites.Assault, "Assault", (int)ModuleType.Core, 20, typeof(Assault)) },
         { Modules.Dash, new ModuleData(Sprites.RealDash,Sprites.Dash, "Dash Core", (int)ModuleType.Core, 20, typeof(Dash)) },
@@ -80,7 +80,7 @@ public static class ItemFactory
     public static Pickup TryDeserialize(string _data, LoadLogger _logger)
     {
         List<string> disassembly = SaveGame.Disassemble(_data);
-        if (disassembly[0] == "" || disassembly[0] == "null")
+        if (disassembly[0] is "" or "null")
         {
             return null;
         }

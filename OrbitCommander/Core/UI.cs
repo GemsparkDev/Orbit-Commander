@@ -426,9 +426,9 @@ public static class UI
         SaveBack.AddBehaviour(delegate { MissionSelect.enabled = true; SaveMenu.enabled = false; });
         LoadBack.AddBehaviour(delegate { MainMenu.enabled = true; LoadMenu.enabled = false; });
 
-        LidarUpgrade.AddBehaviour(delegate { Events.UpgradeSensors(new Lidar()); });
-        RadarUpgrade.AddBehaviour(delegate { Events.UpgradeSensors(new Radar()); });
-        PulseEmitterUpgrade.AddBehaviour(delegate { Events.UpgradeSensors(new PulseEmitter()); });
+        LidarUpgrade.AddBehaviour(delegate { Events.UpgradeSensors(SensorType.Lidar); });
+        RadarUpgrade.AddBehaviour(delegate { Events.UpgradeSensors(SensorType.Radar); });
+        PulseEmitterUpgrade.AddBehaviour(delegate { Events.UpgradeSensors(SensorType.PulseEmitter); });
         tooltip = new Window(Vector2.Zero, wideButton);
         tooltip.AddWidget(new Decal(new Vector2(0, -3), Assets.TextFont, "Drag module over button to queue repair.\nRequired time: 20 waves. Requires no metal to repair.", Color.White, 3f));
         UpgradeHull.AddTooltip(tooltip);

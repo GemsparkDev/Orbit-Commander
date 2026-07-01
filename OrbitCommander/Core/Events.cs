@@ -304,15 +304,16 @@ public static class Events
         string filePath = Path.Combine(Directory.GetCurrentDirectory(), $"Content\\Saves\\Save_{Engine.SaveSlot}.txt");
         File.Delete(filePath);
     }
-    public static void UpgradeSensors(Module _module)
+    public static void UpgradeSensors(SensorType _sensorType)
     {
         //Only need one specialized parts
-        if (Engine.SaveGame.Player.modules[ModuleType.Sensors] is not Sensors)
+        if (Player.sensorType != SensorType.Basic)
         {
             if (Engine.SaveGame.Scrap > 1)
             {
                 Engine.SaveGame.Scrap--;
-                Engine.SaveGame.Player.modules[ModuleType.Sensors] = _module;
+                Player.sensorType = _sensorType;
+                return;
             }
             else
             {
@@ -321,7 +322,7 @@ public static class Events
         }
         Pickup firstScrap = null;
         ItemSlot<Pickup> slot = null;
-        foreach (var item in UI.MissionSelectSlots)
+        foreach (var item in UI.MissionSelectSlots.Concat(UI.InventorySlots))
         {
             if (item.daughterItem.HasTag(Tags.IsSpecialized))
             {
@@ -332,21 +333,9 @@ public static class Events
         }
         if (firstScrap != null)
         {
-            foreach (var item in UI.InventorySlots)
-            {
-                if (item.daughterItem.HasTag(Tags.IsSpecialized))
-                {
-                    firstScrap = item.daughterItem;
-                    slot = item;
-                    break;
-                }
-            }
-        }
-        if (firstScrap != null)
-        {
             slot.daughterItem = null;
             firstScrap.isExpired = true;
-            Engine.SaveGame.Player.modules[ModuleType.Sensors] = _module;
+            Player.sensorType = _sensorType;
         }
     }
     public static void UpgradeModule(ModuleType _slot, Module _moduleType)
