@@ -57,9 +57,9 @@ public static class ItemFactory
         { Modules.Orion, new ModuleData(Sprites.RealOrion, Sprites.Orion, "Orion", (int)ModuleType.Engines, 20, typeof(OrionEngine)) },
 
         { Modules.Sensors, new ModuleData(Sprites.RealSensors,Sprites.Sensors, "Sensors", (int)ModuleType.Sensors, 20, typeof(Sensors), Color.CornflowerBlue) },
-        //{ Modules.Lidar, new ModuleData(Sprites.RealLidar,Sprites.Lidar, "Lidar", (int)ModuleType.Sensors, 20, typeof(Lidar), Color.Yellow) },
+        { Modules.ProjectingModifier, new ModuleData(Sprites.RealProjectingModifier,Sprites.ProjectingModifier, "Lidar", (int)ModuleType.Sensors, 20, typeof(ProjectingModifier), Color.Yellow) },
         //{ Modules.Radar, new ModuleData(Sprites.RealRadar,Sprites.Radar, "Radar", (int)ModuleType.Sensors, 20, typeof(Radar), Color.Yellow) },
-        //{ Modules.PulseEmitter, new ModuleData(Sprites.RealPulseEmitter,Sprites.PulseEmitter, "Pulse Emitter", (int)ModuleType.Sensors, 20, typeof(PulseEmitter), Color.Yellow) },
+        { Modules.CloakingModifier, new ModuleData(Sprites.RealCloakingModifier,Sprites.CloakingModifier, "Pulse Emitter", (int)ModuleType.Sensors, 20, typeof(CloakingModifier), Color.Yellow) },
 
         { Modules.Assault, new ModuleData(Sprites.RealAssault, Sprites.Assault, "Assault", (int)ModuleType.Core, 20, typeof(Assault)) },
         { Modules.Dash, new ModuleData(Sprites.RealDash,Sprites.Dash, "Dash Core", (int)ModuleType.Core, 20, typeof(Dash)) },

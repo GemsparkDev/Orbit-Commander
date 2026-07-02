@@ -106,8 +106,8 @@ public static class Assets
         Add(Core.Sprites.RealAssault, Content.Load<Texture2D>("Images/Items/Item_9-1"));
         Add(Core.Sprites.SummonShield, Content.Load<Texture2D>("Images/Items/Item_10"));
         Add(Core.Sprites.RealSummonShield, Content.Load<Texture2D>("Images/Items/Item_10-1"));
-        Add(Core.Sprites.Lidar, Content.Load<Texture2D>("Images/Items/Item_11"));
-        Add(Core.Sprites.RealLidar, Content.Load<Texture2D>("Images/Items/Item_11-1"));
+        Add(Core.Sprites.ProjectingModifier, Content.Load<Texture2D>("Images/Items/Item_11"));
+        Add(Core.Sprites.RealProjectingModifier, Content.Load<Texture2D>("Images/Items/Item_11-1"));
         Add(Core.Sprites.Nanomachines, Content.Load<Texture2D>("Images/Items/Item_12"));
         Add(Core.Sprites.RealNanomachines, Content.Load<Texture2D>("Images/Items/Item_12-1"));
         Add(Core.Sprites.Expose, Content.Load<Texture2D>("Images/Items/Item_13"));
@@ -122,8 +122,8 @@ public static class Assets
         Add(Core.Sprites.RealFireball, Content.Load<Texture2D>("Images/Items/Item_17-1"));
         Add(Core.Sprites.PrismArray, Content.Load<Texture2D>("Images/Items/Item_18"));
         Add(Core.Sprites.RealPrismArray, Content.Load<Texture2D>("Images/Items/Item_18-1"));
-        Add(Core.Sprites.PulseEmitter, Content.Load<Texture2D>("Images/Items/Item_19"));
-        Add(Core.Sprites.RealPulseEmitter, Content.Load<Texture2D>("Images/Items/Item_19-1"));
+        Add(Core.Sprites.CloakingModifier, Content.Load<Texture2D>("Images/Items/Item_19"));
+        Add(Core.Sprites.RealCloakingModifier, Content.Load<Texture2D>("Images/Items/Item_19-1"));
         Add(Core.Sprites.Ablative, Content.Load<Texture2D>("Images/Items/Item_20"));
         Add(Core.Sprites.RealAblative, Content.Load<Texture2D>("Images/Items/Item_20-1"));
         Add(Core.Sprites.Orion, Content.Load<Texture2D>("Images/Items/Item_21"));

@@ -410,10 +410,6 @@ public class Mission
     public void IngameUpdate()
     {
         Player.Update();
-        if (!Player.IsDocked && Player.Progression > -1)
-        {
-            Engine.SaveGame.CurrentMission.CalculateTrajectory(Player.Position, Player.Velocity, Player.ColliderRadius);
-        }
         Engine.MousePositionOffset = new Vector2(Mouse.GetState().X, Mouse.GetState().Y) / 10 - Engine.BackBuffer / 20
         + Engine.ScreenShakeFactor * Engine.ScreenShakeFactor * new Vector2(Util.Random.NextSingle() - 0.5f, Util.Random.NextSingle() - 0.5f) * 50;
         Engine.Camera.Rotation = Engine.ScreenShakeFactor * Engine.ScreenShakeFactor * (Util.Random.NextSingle() - 0.5f) * 0.15f;
@@ -773,6 +769,12 @@ public class Mission
                 futurePlanetPositions[i] += futurePlanetVelocities[i];
             }
             futurePosition += futureVelocity;
+            //Stops trajectory when it goes too far to prevent particle lag
+            Vector2 diff = futurePosition - _startPosition;
+            if(MathF.Abs(diff.X) > 2000 || MathF.Abs(diff.Y) > 1500)
+            {
+                return;
+            }
             Vector2 particlePos = futurePosition;
             if (SaveGame.PatchedConics)
             {

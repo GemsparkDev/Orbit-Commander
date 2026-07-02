@@ -31,8 +31,8 @@ public class Entity : IMissionComponent
     public float RevealDuration { get { return GetComponent<Stealth>().RevealDuration; } set { GetComponent<Stealth>().RevealDuration = value; } }
     public float Temperature { get { return GetComponent<Temp>().Temperature; } set { GetComponent<Temp>().Temperature = value; } }
     public Team Team { get { return FriendlyComp.Team; } set { FriendlyComp.Team = value; } }
-    public virtual int SensingAbility { get { return GetComponent<Stealth>().SensingAbility; } protected set { GetComponent<Stealth>().SensingAbility = value; } }
-    public virtual int StealthAbility { get { return GetComponent<Stealth>().StealthAbility; } protected set { GetComponent<Stealth>().StealthAbility = value; } }
+    public virtual int SensingAbility { get { return GetComponent<Stealth>().SensingAbility; } set { GetComponent<Stealth>().SensingAbility = value; } }
+    public virtual int StealthAbility { get { return GetComponent<Stealth>().StealthAbility; } set { GetComponent<Stealth>().StealthAbility = value; } }
     public float InvincibilityCooldown { get { return GetComponent<Collide>().InvincibilityCooldown; } set { GetComponent<Collide>().InvincibilityCooldown = value; } }
     public ParticleEmitter EnemyRange => GetComponent<FollowEmitter>().ParticleEmitter;
     public Statuses Statuses => GetComponent<Statuses>();
@@ -81,26 +81,7 @@ public class Entity : IMissionComponent
         {
             return;
         }
-        float stealth = 1;
-        var maxDistance = Mission.StealthRange * Engine.SaveGame.Player.CountFuses(ModuleType.Sensors) / 4;
-        if (Engine.SaveGame.Player.SensingAbility == stealthComp.StealthAbility)
-        {
-            float distanceSqr = Vector2.DistanceSquared(Engine.SaveGame.Player.Position, Position);
-            if (distanceSqr > maxDistance * maxDistance)
-            {
-                stealth = 0;
-            }
-            else
-            {
-                stealth = MathF.Sqrt(maxDistance - MathF.Sqrt(distanceSqr)) / MathF.Sqrt(maxDistance);
-            }
-        }
-        else if (Engine.SaveGame.Player.SensingAbility < stealthComp.StealthAbility)
-        {
-            stealth = 0;
-        }
-        stealth = MathF.Max(stealth, (float)Math.Clamp(stealthComp.RevealDuration, 0f, 1f));
-        stationaryEmitter.ParticleEmitter.particleColor = Color * stealth;
+        stationaryEmitter.ParticleEmitter.particleColor = Color * stealthComp.StealthTransparency();
     }
     public virtual void Initialize() { }
     public bool CollideWith(Entity nearestEnemy)

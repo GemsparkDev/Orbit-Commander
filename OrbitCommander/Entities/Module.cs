@@ -59,6 +59,8 @@ public abstract class Module : Pickup, IData
     }
     public virtual void OnEngine() { }
     public virtual void OnAbility() { }
+    public virtual float Speed { get { throw new InvalidOperationException("This module does not fire projectiles."); } }
+    public virtual Entity ModifyProjectile(Entity _projectile) { return _projectile; }
     //Override to provide custom serialization for modules
     public virtual void Parse(Modules _type, List<string> _disassembly, LoadLogger _logger)
     {
@@ -183,12 +185,12 @@ public class Reflective() : Module(Modules.Reflective)
             if(entity != null)
             {
                 var vel = Util.PredictEnemy(entity, Player, 6 + _damage / 2);
-                Engine.SaveGame.CurrentMission.Add(NewAssassinShot(Player.Position, vel, Util.ToAngle(vel), 0, Team, _damage, 1));
+                Player.Shoot(NewAssassinShot(Player.Position, vel, Util.ToAngle(vel), 0, Team, _damage, 1));
             }
             else
             {
                 var vel = Player.IdealSpeedWithVelocity(6 + _damage / 2);
-                Engine.SaveGame.CurrentMission.Add(NewAssassinShot(Player.Position, vel, Util.ToAngle(vel), 0, Team, _damage, 1));
+                Player.Shoot(NewAssassinShot(Player.Position, vel, Util.ToAngle(vel), 0, Team, _damage, 1));
             }
             return 0;
         }
@@ -470,6 +472,7 @@ public class OrionEngine() : Module(Modules.Orion)
 public class Basic() : Module(Modules.Basic)
 {
     private ReloadSystem ammo = new ReloadSystem(18, 2);
+    public override float Speed => 9;
     public override void OnShoot()
     {
         if (Cooldown > 0)
@@ -478,14 +481,14 @@ public class Basic() : Module(Modules.Basic)
         }
         if (ammo.Fire())
         {
-            Vector2 vel = Player.IdealSpeedWithVelocity(9) + new Vector2(Util.OneToNegOne(), Util.OneToNegOne()) / 2;
-            Engine.SaveGame.CurrentMission.Add(NewPulseShot(Player.Position, vel, Util.ToAngle(vel - Player.Velocity), 0, Team, 3));
+            Vector2 vel = Player.IdealSpeedWithVelocity(Speed) + new Vector2(Util.OneToNegOne(), Util.OneToNegOne()) / 2;
+            Player.Shoot(NewPulseShot(Player.Position, vel, Util.ToAngle(vel - Player.Velocity), 0, Team, 3));
             SoundManager.PlaySound(Assets.Get(Sound.PulseFire), Player.Position);
             Cooldown = 0.2f;
             Engine.ShakeScreen(0.3f);
-            Engine.Camera.Position += Player.Direction * 8 + new Vector2(Util.OneToNegOne(), Util.OneToNegOne());
+            Engine.Camera.Position += Player.Direction * Speed + new Vector2(Util.OneToNegOne(), Util.OneToNegOne());
             Player.Velocity -= Player.Direction / 3;
-            Util.FiringParticles(Player.Position + Player.Direction * 8, Player.Velocity, Player.Direction);
+            Util.FiringParticles(Player.Position + Player.Direction * 6, Player.Velocity, Player.Direction);
             Player.Flash(Color.BurlyWood);
         }
     }
@@ -499,6 +502,7 @@ public class Basic() : Module(Modules.Basic)
 public class Antimaterial() : Module(Modules.Sniper)
 {
     ReloadSystem ammo = new ReloadSystem(4, 2f);
+    public override float Speed => 20;
     public override void OnShoot()
     {
         if (Cooldown > 0)
@@ -507,15 +511,15 @@ public class Antimaterial() : Module(Modules.Sniper)
         }
         if (ammo.Fire())
         {
-            var p1 = NewAssassinShot(Player.Position, Player.IdealSpeedWithVelocity(20), Util.ToAngle(Player.Direction), 0, Team, 16);
+            var p1 = NewAssassinShot(Player.Position, Player.IdealSpeedWithVelocity(Speed), Util.ToAngle(Player.Direction), 0, Team, 16);
             p1.Texture = Assets.Get(Sprites.Arrow);
-            Engine.SaveGame.CurrentMission.Add(p1);
+            Player.Shoot(p1);
             SoundManager.PlaySound(Assets.Get(Sound.SniperFire), Player.Position);
             Cooldown = 0.75f;
-            Engine.Camera.Position += Player.Direction * 12 + new Vector2(Util.OneToNegOne(), Util.OneToNegOne()) * 2;
+            Engine.Camera.Position += Player.Direction * Speed + new Vector2(Util.OneToNegOne(), Util.OneToNegOne()) * 2;
             Engine.ShakeScreen(0.5f);
             Player.Velocity -= Player.Direction / 2;
-            Util.FiringParticles(Player.Position + Player.Direction * 8, Player.Velocity, Player.Direction);
+            Util.FiringParticles(Player.Position + Player.Direction * 6/2, Player.Velocity, Player.Direction);
             Player.Flash(Color.BurlyWood);
         }
     }
@@ -529,6 +533,7 @@ public class Antimaterial() : Module(Modules.Sniper)
 public class Railgun() : Module(Modules.Antimaterial)
 {
     ReloadSystem ammo = new ReloadSystem(1, 1.5f);
+    public override float Speed => float.MaxValue;
     public override void OnShoot()
     {
         if (Cooldown > 0)
@@ -566,6 +571,7 @@ public class Railgun() : Module(Modules.Antimaterial)
 public class Spiral() : Module(Modules.Spiral)
 {
     ReloadSystem ammo = new ReloadSystem(10, 2);
+    public override float Speed => 12;
     public override void OnShoot()
     {
         if (Cooldown > 0)
@@ -574,10 +580,9 @@ public class Spiral() : Module(Modules.Spiral)
         }
         if (ammo.Fire())
         {
-            Vector2 speed = Player.IdealSpeedWithVelocity(12);
             for (int i = 0; i < Util.Random.Next(3, 5); i++)
             {
-                Engine.SaveGame.CurrentMission.Add(NewSpiralShot(Player.Position, speed, Util.ToAngle(Player.Direction), 0, Team, 5, Util.OneToNegOne() * MathF.PI, 1));
+                Player.Shoot(NewSpiralShot(Player.Position, Player.IdealSpeedWithVelocity(Speed), Util.ToAngle(Player.Direction), 0, Team, 5, Util.OneToNegOne() * MathF.PI, 1));
             }
 
             SoundManager.PlaySound(Assets.Get(Sound.PulseFire), Player.Position);
@@ -585,7 +590,7 @@ public class Spiral() : Module(Modules.Spiral)
             Engine.ShakeScreen(0.4f);
             Player.Flash(Color.BurlyWood);
             Player.Velocity -= Player.Direction;
-            Util.FiringParticles(Player.Position + Player.Direction * 8, Player.Velocity, Player.Direction);
+            Util.FiringParticles(Player.Position + Player.Direction * 6, Player.Velocity, Player.Direction);
             ParticleManager.Add(new Particle(Assets.Get(Sprites.Dot), 60, Player.Position - Player.Velocity, Player.Velocity
                 + new Vector2(-Player.Direction.Y + Util.OneToNegOne() / 2, Player.Direction.X + Util.OneToNegOne() / 4), 0, Util.OneToNegOne() / 5, Color.Yellow, Color.Transparent)
             { experienceGravity = true });
@@ -601,6 +606,7 @@ public class Spiral() : Module(Modules.Spiral)
 public class Shotgun() : Module(Modules.Shotgun)
 {
     ReloadSystem ammo = new ReloadSystem(20, 3);
+    public override float Speed => 10;
     public override void OnShoot()
     {
         if (Cooldown > 0)
@@ -614,16 +620,16 @@ public class Shotgun() : Module(Modules.Shotgun)
             {
                 float angleDegrees = (Util.Random.NextSingle() - 0.5f) * 5;
                 float offsetAngle = angleDegrees * MathF.PI / 180;
-                Vector2 targetVector = Player.IdealSpeedWithVelocity(10) + new Vector2(Util.OneToNegOne(), Util.OneToNegOne());
+                Vector2 targetVector = Player.IdealSpeedWithVelocity(Speed) + new Vector2(Util.OneToNegOne(), Util.OneToNegOne());
                 Vector2 positionOffset = new Vector2(Player.Direction.Y, -Player.Direction.X) * offsetAngle * 100;
-                Engine.SaveGame.CurrentMission.Add(NewPulseShot(Player.Position + positionOffset, targetVector * (1 + Util.OneToNegOne() / 10), Util.ToAngle(Player.Direction) + offsetAngle, 0, Team, 2));
+                Player.Shoot(NewPulseShot(Player.Position + positionOffset, targetVector * (1 + Util.OneToNegOne() / Speed), Util.ToAngle(Player.Direction) + offsetAngle, 0, Team, 2));
             }
             SoundManager.PlaySound(Assets.Get(Sound.PulseFire), Player.Position);
             Player.Velocity -= Player.Direction / 2;
             Cooldown = 0.5f;
-            Engine.Camera.Position += Player.Direction * 10 + new Vector2(Util.OneToNegOne(), Util.OneToNegOne());
+            Engine.Camera.Position += Player.Direction * Speed + new Vector2(Util.OneToNegOne(), Util.OneToNegOne());
             Engine.ShakeScreen(0.5f);
-            Util.FiringParticles(Player.Position + Player.Direction * 8, Player.Velocity, Player.Direction);
+            Util.FiringParticles(Player.Position + Player.Direction * 6, Player.Velocity, Player.Direction);
             Player.Flash(Color.BurlyWood);
         }
     }
@@ -637,6 +643,7 @@ public class Shotgun() : Module(Modules.Shotgun)
 public class Missile() : Module(Modules.Missile)
 {
     private ReloadSystem ammo = new ReloadSystem(8, 2f);
+    public override float Speed => 9;
     public override void OnShoot()
     {
         if (Cooldown > 0)
@@ -645,7 +652,7 @@ public class Missile() : Module(Modules.Missile)
         }
         if (ammo.Fire())
         {
-            Engine.SaveGame.CurrentMission.Add(NewMissile(Player.Position + new Vector2(Player.Direction.Y, -Player.Direction.X) * 6, Player.IdealSpeedWithVelocity(9), Util.ToAngle(Player.Direction), Team));
+            Player.Shoot(NewMissile(Player.Position + new Vector2(Player.Direction.Y, -Player.Direction.X) * 6, Player.IdealSpeedWithVelocity(Speed), Util.ToAngle(Player.Direction), Team));
             SoundManager.PlaySound(Assets.Get(Sound.MissileFire), Player.Position);
             Cooldown = 0.5f;
             Engine.ShakeScreen(0.5f);
@@ -665,6 +672,7 @@ public class Missile() : Module(Modules.Missile)
 public class LMG() : Module(Modules.LMG)
 {
     private ReloadSystem ammo = new ReloadSystem(80, 4);
+    public override float Speed => 12;
     public override void OnShoot()
     {
         if (Cooldown > 0)
@@ -675,16 +683,16 @@ public class LMG() : Module(Modules.LMG)
         {
             Vector2 offset = new Vector2(Player.Direction.Y, -Player.Direction.X) * Util.Random.Next(-2, 3) + Util.ToUnitVector(Player.Angle) * 8;
             Texture2D dot = Assets.Get(Sprites.Microshot);
-            var shot = NewPulseShot(Player.Position + offset, Player.IdealSpeedWithVelocity(12) + offset / 4, Util.ToAngle(Player.Direction), 0, Team, 2);
+            var shot = NewPulseShot(Player.Position + offset, Player.IdealSpeedWithVelocity(Speed) + offset / 4, Util.ToAngle(Player.Direction), 0, Team, 2);
             shot.Texture = dot;
-            shot.GetComponent<ExpireTimer>().TimeLeft = 3;
-            Engine.SaveGame.CurrentMission.Add(shot);
+            shot.TimeLeft = 3;
+            Player.Shoot(shot);
             SoundManager.PlaySound(Assets.Get(Sound.PulseFire), Player.Position);
             Engine.ShakeScreen(0.1f);
-            Engine.Camera.Position += Player.Direction * 6 + new Vector2(Util.OneToNegOne(), Util.OneToNegOne());
+            Engine.Camera.Position += Player.Direction * Speed + new Vector2(Util.OneToNegOne(), Util.OneToNegOne());
             Player.Velocity -= Player.Direction / 6;
             Cooldown = 0.1f;
-            Util.FiringParticles(Player.Position + Player.Direction * 8, Player.Velocity, Player.Direction);
+            Util.FiringParticles(Player.Position + Player.Direction * 6, Player.Velocity, Player.Direction);
             Player.Flash(Color.BurlyWood);
         }
     }
@@ -699,15 +707,16 @@ public class Crossbow() : Module(Modules.Crossbow)
 {
     //Does not use cooldown, as that decreases player stealth
     ReloadSystem ammo = new ReloadSystem(1, 1.5f);
+    public override float Speed => 15;
     public override void OnShoot()
     {
         if (ammo.Fire())
         {
             Vector2 offset = new Vector2(Player.Direction.Y, -Player.Direction.X) * Util.Random.Next(-2, 3);
-            var shot = NewPulseShot(Player.Position + offset, Player.IdealSpeedWithVelocity(15) + offset / 4, Util.ToAngle(Player.Direction), 0, Team, 18, true, 1);
+            var shot = NewPulseShot(Player.Position + offset, Player.IdealSpeedWithVelocity(Speed) + offset / 4, Util.ToAngle(Player.Direction), 0, Team, 18, true, 1);
             shot.Texture = Assets.Get(Sprites.CrossbowShot);
-            Engine.SaveGame.CurrentMission.Add(shot);
-            Engine.Camera.Position += Player.Direction * 6;
+            Player.Shoot(shot);
+            Engine.Camera.Position += Player.Direction * Speed / 2;
             Engine.ShakeScreen(0.2f);
             Player.Velocity -= Player.Direction / 4;
         }
@@ -722,6 +731,7 @@ public class Flamethrower() : Module(Modules.Flamethrower)
 {
     ReloadSystem ammo = new ReloadSystem(60, 1, delegate ()
     { ParticleManager.Add(new Particle(Assets.Get(Sprites.Cog), 60, Player.Position, Player.Velocity + new Vector2(Util.OneToNegOne(), Util.OneToNegOne()), 0, Util.OneToNegOne() / 2, Color.Green, Color.Transparent) { experienceGravity = true }); });
+    public override float Speed => 5;
     public override void OnShoot()
     {
         if (Cooldown > 0)
@@ -730,7 +740,7 @@ public class Flamethrower() : Module(Modules.Flamethrower)
         }
         if (ammo.Fire())
         {
-            Engine.SaveGame.CurrentMission.Add(new FlameBolt(Player.Position, Player.IdealSpeedWithVelocity(5) + new Vector2(Util.OneToNegOne(), Util.OneToNegOne()) / 4, Team, 1));
+            Player.Shoot(new FlameBolt(Player.Position, Player.IdealSpeedWithVelocity(Speed) + new Vector2(Util.OneToNegOne(), Util.OneToNegOne()) / 4, Team, 1));
             SoundManager.PlaySound(Assets.Get(Sound.LMGFire), Player.Position);
             Player.Velocity -= Player.Direction / 10;
             Cooldown = 0.08f;
@@ -748,6 +758,7 @@ public class Flamethrower() : Module(Modules.Flamethrower)
 public class Fireball() : Module(Modules.Fireball)
 {
     ReloadSystem ammo = new ReloadSystem(3, 2);
+    public override float Speed => 8;
     public override void OnShoot()
     {
         if (Cooldown > 0)
@@ -756,7 +767,7 @@ public class Fireball() : Module(Modules.Fireball)
         }
         if (ammo.Fire())
         {
-            Engine.SaveGame.CurrentMission.Add(new FlameBolt(Player.Position, Player.IdealSpeedWithVelocity(8) + new Vector2(Util.OneToNegOne(), Util.OneToNegOne()) / 2, Team, 4, 4, 0.5f));
+            Player.Shoot(new FlameBolt(Player.Position, Player.IdealSpeedWithVelocity(Speed) + new Vector2(Util.OneToNegOne(), Util.OneToNegOne()) / 2, Team, 4, 4, 0.5f));
             SoundManager.PlaySound(Assets.Get(Sound.LMGFire), Player.Position);
             Cooldown = 0.5f;
             Engine.ShakeScreen(0.3f);
@@ -773,6 +784,7 @@ public class Fireball() : Module(Modules.Fireball)
 public class GrenadeLauncher() : Module(Modules.GrenadeLauncher)
 {
     ReloadSystem ammo = new ReloadSystem(8, 3);
+    public override float Speed => 8;
     public override void OnShoot()
     {
         if (Cooldown > 0)
@@ -781,13 +793,13 @@ public class GrenadeLauncher() : Module(Modules.GrenadeLauncher)
         }
         if (ammo.Fire())
         {
-            Engine.SaveGame.CurrentMission.Add(NewExplosive(Player.Position, Player.IdealSpeedWithVelocity(8) + new Vector2(Util.OneToNegOne(), Util.OneToNegOne()), Util.ToAngle(Player.Direction), Util.OneToNegOne() / 8, Team, 16, 40, 1));
+            Player.Shoot(NewExplosive(Player.Position, Player.IdealSpeedWithVelocity(Speed) + new Vector2(Util.OneToNegOne(), Util.OneToNegOne()), Util.ToAngle(Player.Direction), Util.OneToNegOne() / 8, Team, 16, 40, 1));
             SoundManager.PlaySound(Assets.Get(Sound.PulseFire), Player.Position);
             Cooldown = 0.8f;
             Engine.ShakeScreen(0.4f);
             Player.Velocity -= Player.Direction / 2;
-            Engine.Camera.Position += Player.Direction * 8 + new Vector2(Util.OneToNegOne(), Util.OneToNegOne()) / 2;
-            Util.FiringParticles(Player.Position + Player.Direction * 8, Player.Velocity, Player.Direction);
+            Engine.Camera.Position += Player.Direction * Speed + new Vector2(Util.OneToNegOne(), Util.OneToNegOne()) / 2;
+            Util.FiringParticles(Player.Position + Player.Direction * 6, Player.Velocity, Player.Direction);
             Player.Flash(Color.BurlyWood);
         }
     }
@@ -800,6 +812,7 @@ public class GrenadeLauncher() : Module(Modules.GrenadeLauncher)
 public class SpewerModule() : Module(Modules.Spewer)
 {
     ReloadSystem ammo = new ReloadSystem(3, 5);
+    public override float Speed => 4;
     public override void OnShoot()
     {
         if (Cooldown > 0)
@@ -808,13 +821,13 @@ public class SpewerModule() : Module(Modules.Spewer)
         }
         if (ammo.Fire())
         {
-            Engine.SaveGame.CurrentMission.Add(NewSpewer(Player.Position, Player.IdealSpeedWithVelocity(4) + new Vector2(Util.OneToNegOne(), Util.OneToNegOne()) / 2, Util.ToAngle(Player.Direction), Util.OneToNegOne() / 8, Team, 2));
+            Player.Shoot(NewSpewer(Player.Position, Player.IdealSpeedWithVelocity(Speed) + new Vector2(Util.OneToNegOne(), Util.OneToNegOne()) / 2, Util.ToAngle(Player.Direction), Util.OneToNegOne() / 8, Team, 2));
             SoundManager.PlaySound(Assets.Get(Sound.PulseFire), Player.Position);
             Cooldown = 1f;
             Engine.ShakeScreen(0.6f);
             Player.Velocity -= Player.Direction;
-            Engine.Camera.Position += Player.Direction * 12 + new Vector2(Util.OneToNegOne(), Util.OneToNegOne());
-            Util.FiringParticles(Player.Position + Player.Direction * 8, Player.Velocity, Player.Direction);
+            Engine.Camera.Position += Player.Direction * Speed * 3 + new Vector2(Util.OneToNegOne(), Util.OneToNegOne());
+            Util.FiringParticles(Player.Position + Player.Direction * 6 * 2, Player.Velocity, Player.Direction);
             Player.Flash(Color.BurlyWood);
         }
     }
@@ -833,6 +846,7 @@ public class PrismArray() : Module(Modules.PrismArray)
     private SoundEffectInstance beamBlend;
     private float duration = (float)Assets.Get(Sound.FireLaser).Duration.TotalSeconds;
     private float timeLeft = 0;
+    public override float Speed => float.MaxValue;
     public override void OnShoot()
     {
         isFiring = true;
@@ -910,6 +924,7 @@ public class PrismArray() : Module(Modules.PrismArray)
 public class MatrixLauncher() : Module(Modules.MatrixLauncher)
 {
     ReloadSystem ammo = new ReloadSystem(3, 2);
+    public override float Speed => 12;
     public override void OnShoot()
     {
         if (Cooldown > 0)
@@ -918,12 +933,12 @@ public class MatrixLauncher() : Module(Modules.MatrixLauncher)
         }
         if (ammo.Fire())
         {
-            Vector2 vel = Player.IdealSpeedWithVelocity(12);
-            Engine.SaveGame.CurrentMission.Add(new FlameBolt(Player.Position, vel + new Vector2(Util.OneToNegOne(), Util.OneToNegOne()) / 2, Team, 6,
+            Vector2 vel = Player.IdealSpeedWithVelocity(Speed);
+            Player.Shoot(new FlameBolt(Player.Position, vel + new Vector2(Util.OneToNegOne(), Util.OneToNegOne()) / 2, Team, 6,
                 new ParticleEmitter(Assets.Get(Sprites.Circle), Player.Position, 0, Color.Cyan) { sprayCone = MathF.PI * 2 / 3, sprayAngle = Util.ToAngle(vel - Player.Velocity), speedOfEmission = 0.5f }, 4, 0, -20));
             SoundManager.PlaySound(Assets.Get(Sound.SniperFire), Player.Position);
             Cooldown = 1.5f;
-            Engine.Camera.Position += Player.Direction * 12 + new Vector2(Util.OneToNegOne(), Util.OneToNegOne());
+            Engine.Camera.Position += Player.Direction * Speed + new Vector2(Util.OneToNegOne(), Util.OneToNegOne());
             Engine.ShakeScreen(0.5f);
             Player.Flash(Color.Cyan);
         }
@@ -940,6 +955,7 @@ public class Torch() : Module(Modules.Torch)
     ReloadSystem ammo = new ReloadSystem(8, 1);
     int count = 0;
     float betweenShots = 0;
+    public override float Speed => 12;
     public override void OnShoot()
     {
         if (Cooldown > 0 || count > 0)
@@ -959,12 +975,12 @@ public class Torch() : Module(Modules.Torch)
             {
                 betweenShots = 0.05f;
                 Vector2 offset = new Vector2(Player.Direction.Y, -Player.Direction.X) * Util.OneToNegOne() * 3;
-                var shot = new FlameBolt(Player.Position - offset * 5, Player.IdealSpeedWithVelocity(12) + offset / 3, Team, 2, 2, 0.1f, 0, 20);
-                Engine.SaveGame.CurrentMission.Add(shot);
+                var shot = new FlameBolt(Player.Position - offset * 5, Player.IdealSpeedWithVelocity(Speed) + offset / 3, Team, 2, 2, 0.1f, 0, 20);
+                Player.Shoot(shot);
                 SoundManager.PlaySound(Assets.Get(Sound.PulseFire), Player.Position);
                 Engine.ShakeScreen(0.2f);
-                Util.FiringParticles(Player.Position + Player.Direction * 8, Player.Velocity, Player.Direction);
-                Engine.Camera.Position += Player.Direction * 6;
+                Util.FiringParticles(Player.Position + Player.Direction * 6, Player.Velocity, Player.Direction);
+                Engine.Camera.Position += Player.Direction * Speed / 2;
                 Player.Velocity -= Player.Direction / 6;
                 Player.Flash(Color.Orange);
                 count++;
@@ -988,6 +1004,7 @@ public class Torch() : Module(Modules.Torch)
 public class SplitterModule() : Module(Modules.SplitterModule)
 {
     ReloadSystem ammo = new ReloadSystem(6, 3);
+    public override float Speed => 8;
     public override void OnShoot()
     {
         if (Cooldown > 0)
@@ -1001,13 +1018,13 @@ public class SplitterModule() : Module(Modules.SplitterModule)
             {
                 missiles.Add(delegate(Vector2 _position, Vector2 _velocity, float _angle) { return NewMissile(_position, _velocity, _angle, Team, 1); });
             }
-            Engine.SaveGame.CurrentMission.Add(NewSplitter(Player.Position, Player.IdealSpeedWithVelocity(8), Util.ToAngle(Player.Direction), Team, 8, missiles, 0.5f));
+            Player.Shoot(NewSplitter(Player.Position + Player.Direction * 6, Player.IdealSpeedWithVelocity(Speed), Util.ToAngle(Player.Direction), Team, 8, missiles, 0.5f));
             SoundManager.PlaySound(Assets.Get(Sound.PulseFire), Player.Position);
             Engine.ShakeScreen(0.5f);
             Player.Velocity -= Player.Direction;
             Cooldown = 0.75f;
-            Engine.Camera.Position += Player.Direction * 12 + new Vector2(Util.OneToNegOne(), Util.OneToNegOne());
-            Util.FiringParticles(Player.Position + Player.Direction * 8, Player.Velocity, Player.Direction);
+            Engine.Camera.Position += Player.Direction * Speed + new Vector2(Util.OneToNegOne(), Util.OneToNegOne());
+            Util.FiringParticles(Player.Position + Player.Direction * 6, Player.Velocity, Player.Direction);
             Player.Flash(Color.BurlyWood);
         }
     }
@@ -1021,6 +1038,7 @@ public class SplitterModule() : Module(Modules.SplitterModule)
 public class Fractal() : Module(Modules.Fractal)
 {
     ReloadSystem ammo = new ReloadSystem(10, 3);
+    public override float Speed => 6;
     public override void OnShoot()
     {
         if (Cooldown > 0)
@@ -1039,15 +1057,15 @@ public class Fractal() : Module(Modules.Fractal)
                 }
                 splitters.Add(delegate (Vector2 _position, Vector2 _velocity, float _angle) { var p2 = NewSplitter(_position, _velocity, _angle, Team, 5, finalBullets, 0.2f, 1); p2.Texture = Assets.Get(Sprites.Glow); return p2; });
             }
-            var p1 = NewSplitter(Player.Position, Player.IdealSpeedWithVelocity(6), Util.ToAngle(Player.Direction), Team, 8, splitters, 0.2f);
+            var p1 = NewSplitter(Player.Position, Player.IdealSpeedWithVelocity(Speed), Util.ToAngle(Player.Direction), Team, 8, splitters, 0.2f);
             p1.Texture = Assets.Get(Sprites.Glow);
-            Engine.SaveGame.CurrentMission.Add(p1);
+            Player.Shoot(p1);
             SoundManager.PlaySound(Assets.Get(Sound.PulseFire), Player.Position);
             Engine.ShakeScreen(0.3f);
             Player.Velocity -= Player.Direction / 2;
             Cooldown = 0.25f;
-            Engine.Camera.Position += Player.Direction * 8 + new Vector2(Util.OneToNegOne(), Util.OneToNegOne());
-            Util.FiringParticles(Player.Position + Player.Direction * 8, Player.Velocity, Player.Direction);
+            Engine.Camera.Position += Player.Direction * Speed + new Vector2(Util.OneToNegOne(), Util.OneToNegOne());
+            Util.FiringParticles(Player.Position + Player.Direction * 6, Player.Velocity, Player.Direction);
             Player.Flash(Color.BurlyWood);
         }
     }
@@ -1061,6 +1079,7 @@ public class Fractal() : Module(Modules.Fractal)
 public class CrackShot() : Module(Modules.CrackShot)
 {
     ReloadSystem ammo = new ReloadSystem(6, 2.5f);
+    public override float Speed => 8;
     public override void OnShoot()
     {
         if (Cooldown > 0)
@@ -1069,13 +1088,13 @@ public class CrackShot() : Module(Modules.CrackShot)
         }
         if (ammo.Fire())
         {
-            Engine.SaveGame.CurrentMission.Add(NewSplitter(Player.Position, Player.IdealSpeedWithVelocity(8), Util.ToAngle(Player.Direction), Team, 3, [delegate (Vector2 _position, Vector2 _velocity, float _angle) { return NewAssassinShot(_position, _velocity, _angle, 0, Team, 3, 0); }], 0.2f, 0, true));
+            Player.Shoot(NewSplitter(Player.Position, Player.IdealSpeedWithVelocity(Speed), Util.ToAngle(Player.Direction), Team, 3, [delegate (Vector2 _position, Vector2 _velocity, float _angle) { return NewAssassinShot(_position, _velocity, _angle, 0, Team, 3, 0); }], 0.2f, 0, true));
             SoundManager.PlaySound(Assets.Get(Sound.PulseFire), Player.Position);
             Engine.ShakeScreen(0.3f);
             Player.Velocity -= Player.Direction / 2;
             Cooldown = 0.2f;
-            Engine.Camera.Position += Player.Direction * 6;
-            Util.FiringParticles(Player.Position + Player.Direction * 8, Player.Velocity, Player.Direction);
+            Engine.Camera.Position += Player.Direction * Speed;
+            Util.FiringParticles(Player.Position + Player.Direction * 6, Player.Velocity, Player.Direction);
             Player.Flash(Color.BurlyWood);
         }
     }
@@ -1090,6 +1109,7 @@ public class MicroRocketLauncher() : Module(Modules.MicroRocketLauncher)
 {
     ReloadSystem ammo = new ReloadSystem(30, 4);
     float offset = 2;
+    public override float Speed => 5;
     public override void OnShoot()
     {
         if (Cooldown > 0)
@@ -1098,10 +1118,11 @@ public class MicroRocketLauncher() : Module(Modules.MicroRocketLauncher)
         }
         if (ammo.Fire())
         {
-            Vector2 speed = Player.IdealSpeedWithVelocity(5);
+            Vector2 speed = Player.IdealSpeedWithVelocity(Speed);
             var dir = Vector2.Normalize(speed - Player.Velocity);
             Vector2 finalSpeed = speed + new Vector2(dir.Y, -dir.X) * offset;
-            Engine.SaveGame.CurrentMission.Add(NewMissile(Player.Position + Player.Direction * 6, finalSpeed, Util.ToAngle(finalSpeed), Team, 3, 3, 5));
+            Player.Shoot(NewMissile(Player.Position + Player.Direction * 6, finalSpeed, Util.ToAngle(finalSpeed), Team, 3, 3, 5));
+            Engine.Camera.Position += Player.Direction * Speed;
             SoundManager.PlaySound(Assets.Get(Sound.MissileFire), Player.Position);
             Cooldown = 0.25f;
             Engine.ShakeScreen(0.2f);
@@ -1119,6 +1140,7 @@ public class MicroRocketLauncher() : Module(Modules.MicroRocketLauncher)
 public class AdaptiveShotgun() : Module(Modules.AdaptiveShotgun)
 {
     ReloadSystem ammo = new ReloadSystem(2, 3);
+    public override float Speed => 18;
     public override void OnShoot()
     {
         if (Cooldown > 0)
@@ -1130,19 +1152,19 @@ public class AdaptiveShotgun() : Module(Modules.AdaptiveShotgun)
             float distance = Vector2.Distance(new Vector2(Input.NewMouseState.X, Input.NewMouseState.Y), Engine.BackBuffer / 2) + 1; //Plus one prevents division by zero
             for (float i = -5; i <= 5; i++)
             {
-                Vector2 speed = Player.IdealSpeedWithVelocity(18);
+                Vector2 speed = Player.IdealSpeedWithVelocity(Speed);
                 var dir = Vector2.Normalize(speed);
                 Vector2 offset = (dir * i / 5 + new Vector2(dir.Y, -dir.X)) * i * 100 / distance;
                 Vector2 targetVector = speed + offset;
                 var p1 = NewPulseShot(Player.Position, targetVector, Util.ToAngle(targetVector - Player.Velocity), 0, Team, 6 - (int)MathF.Abs(i), true, 0);
                 p1.Texture = Assets.Get(Sprites.Microshot);
                 p1.GetComponent<ExpireTimer>().TimeLeft = 5;
-                Engine.SaveGame.CurrentMission.Add(p1);
+                Player.Shoot(p1);
             }
             SoundManager.PlaySound(Assets.Get(Sound.PulseFire), Player.Position);
             Player.Velocity -= Player.Direction * 2;
             Cooldown = 0.75f;
-            Engine.Camera.Position += Player.Direction * 12 + new Vector2(Util.OneToNegOne(), Util.OneToNegOne());
+            Engine.Camera.Position += Player.Direction * Speed + new Vector2(Util.OneToNegOne(), Util.OneToNegOne());
             Engine.ShakeScreen(0.6f);
             Util.FiringParticles(Player.Position + Player.Direction * 8, Player.Velocity, Player.Direction);
             Player.Flash(Color.BurlyWood);
@@ -1159,6 +1181,7 @@ public class GuidedRound() : Module(Modules.GuidedRound)
 {
     private ReloadSystem ammo = new ReloadSystem(3, 3);
     private List<Entity> rounds = [];
+    public override float Speed => 9;
     public override void OnShoot()
     {
         Vector2 mousePos = new Vector2(Input.NewMouseState.X, Input.NewMouseState.Y) - Engine.BackBuffer / 2 + Engine.MousePositionOffset * 1.5f;
@@ -1174,18 +1197,18 @@ public class GuidedRound() : Module(Modules.GuidedRound)
         }
         if (ammo.Fire())
         {
-            Vector2 vel = Player.IdealSpeedWithVelocity(9) + new Vector2(Util.OneToNegOne(), Util.OneToNegOne()) / 2;
+            Vector2 vel = Player.IdealSpeedWithVelocity(Speed) + new Vector2(Util.OneToNegOne(), Util.OneToNegOne()) / 2;
             var round = NewAssassinShot(Player.Position, vel, Util.ToAngle(vel - Player.Velocity), 0, Team, 10);
             round.TimeLeft = 20;
             round.Texture = Assets.Get(Sprites.Glow);
             rounds.Add(round);
-            Engine.SaveGame.CurrentMission.Add(round);
+            Player.Shoot(round);
             SoundManager.PlaySound(Assets.Get(Sound.PulseFire), Player.Position);
             Cooldown = 0.5f;
             Engine.ShakeScreen(0.2f);
-            Engine.Camera.Position += Player.Direction * 8 + new Vector2(Util.OneToNegOne(), Util.OneToNegOne());
+            Engine.Camera.Position += Player.Direction * Speed + new Vector2(Util.OneToNegOne(), Util.OneToNegOne());
             Player.Velocity -= Player.Direction / 3;
-            Util.FiringParticles(Player.Position + Player.Direction * 8, Player.Velocity, Player.Direction);
+            Util.FiringParticles(Player.Position + Player.Direction * 6, Player.Velocity, Player.Direction);
             Player.Flash(Color.BurlyWood);
         }
     }
@@ -1296,7 +1319,7 @@ public class SummonGrapplingHook() : Module(Modules.GrapplingHook)
             SoundManager.PlaySound(Assets.Get(Sound.Click), Player.Position);
             Engine.ShakeScreen(0.3f);
             Player.Velocity -= Player.Direction / 2;
-            Engine.SaveGame.CurrentMission.Add(hook);
+            Player.Shoot(hook);
             Cooldown = MaxCooldown;
         }
     }
@@ -1361,7 +1384,7 @@ public class CreateFighter() : Module(Modules.CreateFighter)
                     var enemy = NewSurgeChild(Player.Position + new Vector2(Util.OneToNegOne(), Util.OneToNegOne()), Player.Velocity, Player.Angle, Player, allies);
                     enemy.Team = Team.Friendly;
                     enemy.AddComponent(new Behaviour().AddBehaviour(enemy.AvoidProjectiles(1)));
-                    Engine.SaveGame.CurrentMission.Add(enemy);
+                    Player.Shoot(enemy);
                     allies.Add(enemy);
                 }
                 Cooldown = MaxCooldown;
@@ -1392,7 +1415,7 @@ public class Assault() : Module(Modules.Assault)
         count = 1;
         for (float angle = 0; angle < MathF.Tau; angle += MathF.PI / 4)
         {
-            Engine.SaveGame.CurrentMission.Add(NewPulseShot(Player.Position, Util.ToUnitVector(angle) * 10, angle, 0, Team, 20, true, 1));
+            Player.Shoot(NewPulseShot(Player.Position, Util.ToUnitVector(angle) * 10, angle, 0, Team, 20, true, 1));
         }
         Cooldown = 0.1f;
         isShooting = true;
@@ -1414,7 +1437,7 @@ public class Assault() : Module(Modules.Assault)
         }
         if (isShooting && Cooldown <= 0)
         {
-            Engine.SaveGame.CurrentMission.Add(NewMissile(Player.Position, Util.ToUnitVector(count * MathF.PI * 2 / 3) * 5, count * MathF.PI * 2 / 3, Team));
+            Player.Shoot(NewMissile(Player.Position, Util.ToUnitVector(count * MathF.PI * 2 / 3) * 5, count * MathF.PI * 2 / 3, Team));
             SoundManager.PlaySound(Assets.Get(Sound.MissileFire), Player.Position);
             Cooldown = 0.25f;
             count++;
@@ -1472,12 +1495,12 @@ public class Expose() : Module(Modules.Expose)
         }
         if (Input.NewState.IsKeyDown(Keys.LeftShift))
         {
-            Engine.SaveGame.CurrentMission.Add(aura = new FlameBolt(Player.Position + new Vector2(Input.NewMouseState.X, Input.NewMouseState.Y) + Engine.MousePositionOffset - Engine.BackBuffer / 2, Vector2.Zero, Team, 0, new ParticleEmitter(Assets.Get(Sprites.Dot), Player.Position, 0, Color.Orange * 0.75f) { speedOfEmission = 0.5f }, 10, 2, 20));
+            Player.Shoot(aura = new FlameBolt(Player.Position + new Vector2(Input.NewMouseState.X, Input.NewMouseState.Y) + Engine.MousePositionOffset - Engine.BackBuffer / 2, Vector2.Zero, Team, 0, new ParticleEmitter(Assets.Get(Sprites.Dot), Player.Position, 0, Color.Orange * 0.75f) { speedOfEmission = 0.5f }, 10, 2, 20));
             isFire = true;        
         }
         else
         {
-            Engine.SaveGame.CurrentMission.Add(aura = new FlameBolt(Player.Position + new Vector2(Input.NewMouseState.X, Input.NewMouseState.Y) + Engine.MousePositionOffset - Engine.BackBuffer / 2, Vector2.Zero, Team, 0, new ParticleEmitter(Assets.Get(Sprites.Dot), Player.Position, 0, Color.Cyan * 0.75f) { speedOfEmission = 0.5f }, 10, 2, -20));
+            Player.Shoot(aura = new FlameBolt(Player.Position + new Vector2(Input.NewMouseState.X, Input.NewMouseState.Y) + Engine.MousePositionOffset - Engine.BackBuffer / 2, Vector2.Zero, Team, 0, new ParticleEmitter(Assets.Get(Sprites.Dot), Player.Position, 0, Color.Cyan * 0.75f) { speedOfEmission = 0.5f }, 10, 2, -20));
             isFire = false;
         }
         aura.Transform.IsImmovable = true;
@@ -1499,6 +1522,24 @@ public class Expose() : Module(Modules.Expose)
             }
         }
         base.OnUpdate(_fuseRatio);
+    }
+}
+public class CloakingModifier() : Module(Modules.CloakingModifier)
+{
+    public override Entity ModifyProjectile(Entity _projectile)
+    {
+        if(Util.Random.NextSingle() > 0.5f * Player.CalculateFuseRatio(ModuleType.Sensors))
+        {
+            _projectile.StealthAbility = 99;
+        }
+        return _projectile;
+    }
+}
+public class ProjectingModifier() : Module(Modules.ProjectingModifier)
+{
+    public override void OnUpdate(float _fuseRatio)
+    {
+        Engine.SaveGame.CurrentMission.CalculateTrajectory(Player.Position, Player.IdealSpeedWithVelocity(Player.modules[ModuleType.Guns].Speed), 8 * SaveGame.EnemyHitboxModifier);
     }
 }
 

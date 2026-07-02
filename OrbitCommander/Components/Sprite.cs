@@ -36,33 +36,9 @@ public class Sprite(Entity _entity, Color _color) : IComponent
         collider.isEmitterActive = SaveGame.DebugMode;
         collider.particleVelocity = _entity.ColliderRadius;
         collider.Update();
-        float stealth = 1;
-        var sC = _entity.GetComponent<Stealth>();
-        if (sC != null)
-        {
-            var maxDistance = Mission.StealthRange * Engine.SaveGame.Player.CountFuses(ModuleType.Sensors) / 4;
-            //Player has superior sensing to stealth -> full detection
-            //Player has equal sensing to stealth -> partial detection when nearby
-            //Player has inferior sensing to stealth -> no detection
-            if (Engine.SaveGame.Player.SensingAbility == sC.StealthAbility)
-            {
-                float distanceSqr = Vector2.DistanceSquared(Engine.SaveGame.Player.Position, _entity.Position);
-                if (distanceSqr > maxDistance * maxDistance)
-                {
-                    stealth = 0;
-                }
-                else
-                {
-                    stealth = MathF.Sqrt(maxDistance - MathF.Sqrt(distanceSqr)) / MathF.Sqrt(maxDistance);
-                }
-            }
-            else if (Engine.SaveGame.Player.SensingAbility < sC.StealthAbility)
-            {
-                stealth = 0;
-            }
-            stealth = MathF.Max(stealth, (float)Math.Clamp(sC.RevealDuration, 0f, 1f));
-        }
-        var tc = TargetColor * stealth;
+        var sc = _entity.GetComponent<Stealth>();
+
+        Color tc = TargetColor * ((sc != null) ? sc.StealthTransparency() : 1);
         if (Color != tc)
         {
             float l = Util.FIED(0.025f);

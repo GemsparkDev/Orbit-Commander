@@ -51,9 +51,9 @@ public enum Modules
 
     //Sensors
     Sensors,
-    Lidar,
+    ProjectingModifier,
     Radar,
-    PulseEmitter,
+    CloakingModifier,
 
     //Cores
     Dash,
@@ -149,7 +149,7 @@ public enum Sprites
     Assault, RealAssault,
     Furnace, RealFurnace,
     SummonShield, RealSummonShield,
-    Lidar, RealLidar,
+    ProjectingModifier, RealProjectingModifier,
     Nanomachines, RealNanomachines,
     Expose, RealExpose,
     Stealth, RealStealth,
@@ -157,7 +157,7 @@ public enum Sprites
     GrapplingHook, RealGrapplingHook,
     Fireball, RealFireball,
     PrismArray, RealPrismArray,
-    PulseEmitter, RealPulseEmitter,
+    CloakingModifier, RealCloakingModifier,
     Ablative, RealAblative,
     Orion, RealOrion,
     Reflective, RealReflective,

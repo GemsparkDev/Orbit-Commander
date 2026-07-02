@@ -166,6 +166,10 @@ public class Player : Entity
     }
     public override void Update()
     {
+        if (!IsDocked && Progression > -1 && modules[ModuleType.Sensors].Type != Modules.ProjectingModifier)
+        {
+            Engine.SaveGame.CurrentMission.CalculateTrajectory(Position, Velocity, ColliderRadius);
+        }
         GetComponent<Sprite>().TargetColor = SaveGame.ColorScheme.TeamColors[Team];
         if (modules[ModuleType.Core].Health <= 0)
         {
@@ -314,101 +318,104 @@ public class Player : Entity
     }
     public void LowerCooldown()
     {
-        if (SecondaryWeapon != null && Util.Random.NextSingle() < 0.25f)
-        {
-            SecondaryWeapon.OnUpdate(1);
-        }
+        SecondaryWeapon?.OnUpdate(0.25f);
         for (int i = 0; i < modules.Count; i++)
         {
             var module = modules[(ModuleType)i];
-            //Square root of the ratio reduces impact with additional fuse (especially with weapon dps)
-            float fuseRatio = MathF.ReciprocalSqrtEstimate((float)CountFuses((ModuleType)i) / 3);
+            float fuseRatio = CalculateFuseRatio((ModuleType)i);
             module.OnUpdate(fuseRatio);
 
             //Sensor subtype behavior
             //Probably won't add more
-            if(isSensorActive && i == (int)Modules.Sensors)
+            if(i == (int)Modules.Sensors)
             {
-                switch (sensorType)
+                if (isSensorActive)
                 {
-                    case SensorType.Lidar:
-                        if (sensorCD > 0)
-                        {
-                            sensorCD -= Engine.DeltaSeconds;
-                        }
-                        else
-                        {
-                            for (int j = 0; j < 3 * fuseRatio; j++)
+                    switch (sensorType)
+                    {
+                        case SensorType.Lidar:
+                            if (sensorCD > 0)
                             {
-                                Vector2 dir = Util.ToUnitVector(Util.ToAngle(Player.Direction) + Util.OneToNegOne() * Util.Random.NextSingle());
-                                var entity = Engine.SaveGame.CurrentMission.Hitscan(Player.Position, dir, 2000, false, out Vector2 end, null, true);
-                                var vel = Vector2.Zero;
-                                var col = Color.White;
-                                if (entity.Count > 0)
+                                sensorCD -= Engine.DeltaSeconds;
+                            }
+                            else
+                            {
+                                for (int j = 0; j < 3 * fuseRatio; j++)
                                 {
-                                    vel = entity[0].Velocity;
-                                    col = entity[0].Color;
-                                    Vector3 color = new Vector3(col.R, col.G, col.B) / 255f;
-                                    if (color != Vector3.Zero)
+                                    Vector2 dir = Util.ToUnitVector(Util.ToAngle(Player.Direction) + Util.OneToNegOne() * Util.Random.NextSingle());
+                                    var entity = Engine.SaveGame.CurrentMission.Hitscan(Player.Position, dir, 2000, false, out Vector2 end, null, true);
+                                    var vel = Vector2.Zero;
+                                    var col = Color.White;
+                                    if (entity.Count > 0)
                                     {
-                                        color.Normalize();
+                                        vel = entity[0].Velocity;
+                                        col = entity[0].Color;
+                                        Vector3 color = new Vector3(col.R, col.G, col.B) / 255f;
+                                        if (color != Vector3.Zero)
+                                        {
+                                            color.Normalize();
+                                        }
+                                        else
+                                        {
+                                            color = Vector3.One;
+                                        }
+                                        col = new Color(color.X, color.Y, color.Z, 1f);
                                     }
-                                    else
-                                    {
-                                        color = Vector3.One;
-                                    }
-                                    col = new Color(color.X, color.Y, color.Z, 1f);
-                                }
-                                ParticleManager.Add(new Particle(Assets.Get(Sprites.Dot), 1f, end, vel, 0, 0, col, Color.Transparent));
-                            }
-                        }
-                        break;
-                    case SensorType.Radar:
-                        sensorCD += Engine.DeltaSeconds / fuseRatio;
-                        if(sensorCD > MathF.Tau)
-                        {
-                            sensorCD = 0;
-                        }
-                        if (sensorCD <= 0)
-                        {
-                            int fuses = Player.CountFuses(ModuleType.Sensors);
-                            Vector2 dir = Util.ToUnitVector(sensorCD * fuses / 3);
-                            var revealedEntities = Engine.SaveGame.CurrentMission.Hitscan(Player.Position, dir, 2000, true, out Vector2 end, null).Where(x => x.HasComponent<Stealth>());
-                            foreach (var entity in revealedEntities)
-                            {
-                                entity.RevealDuration = 2f;
-                            }
-                            for (int j = 0; j < 12; j++)
-                            {
-                                ParticleManager.Add(new Particle(Assets.Get(Sprites.Dot), Player.Position + dir * 2 * (j + 4) + Player.Velocity, 0, Color.Green * (1 - (float)j / 12)));
-                            }
-                            ParticleManager.Add(new Particle(Assets.Get(Sprites.Dot), end, 0, Color.White));
-                        }
-                        break;
-                    case SensorType.PulseEmitter:
-                        if(sensorCD > 0)
-                        {
-                            sensorCD -= Engine.DeltaSeconds;
-                        }
-                        else
-                        {
-                            foreach (var entity in Engine.SaveGame.CurrentMission.Entities)
-                            {
-                                if (Vector2.Distance(entity.Position, Player.Position) < 250 / fuseRatio && entity.HasComponent<Stealth>())
-                                {
-                                    entity.RevealDuration += 0.5f;
+                                    ParticleManager.Add(new Particle(Assets.Get(Sprites.Dot), 1f, end, vel, 0, 0, col, Color.Transparent));
                                 }
                             }
-                            for (float angle = 0; angle < MathF.Tau; angle += MathF.PI / 60)
+                            break;
+                        case SensorType.Radar:
+                            sensorCD += Engine.DeltaSeconds / fuseRatio;
+                            if (sensorCD / fuseRatio > MathF.Tau)
                             {
-                                ParticleManager.Add(new Particle(Assets.Get(Sprites.Dot), 1f, Player.Position, Util.ToUnitVector(angle) * 2 / fuseRatio + Player.Velocity, angle, 0, Color.Cyan, Color.Transparent));
+                                sensorCD = 0;
                             }
-                            sensorCD = 2 * fuseRatio;
-                        }
-                        break;
+                            if (sensorCD <= 0)
+                            {
+                                Vector2 dir = Util.ToUnitVector(sensorCD / fuseRatio);
+                                var revealedEntities = Engine.SaveGame.CurrentMission.Hitscan(Player.Position, dir, 2000, true, out Vector2 end, null).Where(x => x.HasComponent<Stealth>());
+                                foreach (var entity in revealedEntities)
+                                {
+                                    entity.RevealDuration = 2f;
+                                }
+                                for (int j = 0; j < 12; j++)
+                                {
+                                    ParticleManager.Add(new Particle(Assets.Get(Sprites.Dot), Player.Position + dir * 2 * (j + 4) + Player.Velocity, 0, Color.Green * (1 - (float)j / 12)));
+                                }
+                                ParticleManager.Add(new Particle(Assets.Get(Sprites.Dot), end, 0, Color.White));
+                            }
+                            break;
+                        case SensorType.PulseEmitter:
+                            if (sensorCD > 0)
+                            {
+                                sensorCD -= Engine.DeltaSeconds;
+                            }
+                            else
+                            {
+                                foreach (var entity in Engine.SaveGame.CurrentMission.Entities)
+                                {
+                                    if (Vector2.Distance(entity.Position, Player.Position) < 250 / fuseRatio && entity.HasComponent<Stealth>())
+                                    {
+                                        entity.RevealDuration += 0.5f;
+                                    }
+                                }
+                                for (float angle = 0; angle < MathF.Tau; angle += MathF.PI / 60)
+                                {
+                                    ParticleManager.Add(new Particle(Assets.Get(Sprites.Dot), 1f, Player.Position, Util.ToUnitVector(angle) * 2 / fuseRatio + Player.Velocity, angle, 0, Color.Cyan, Color.Transparent));
+                                }
+                                sensorCD = 2 * fuseRatio;
+                            }
+                            break;
+                    }
                 }
             }
         }
+    }
+    public float CalculateFuseRatio(ModuleType _module)
+    {
+        //Square root of the ratio reduces impact with additional fuse (especially with weapon dps)
+        return MathF.ReciprocalSqrtEstimate((float)CountFuses(_module) / 3);
     }
     public void OnEnemyHit(Entity _entity, int _damage)
     {
@@ -417,9 +424,14 @@ public class Player : Entity
             module.Value.OnEnemyHit(_entity, _damage);
         }
     }
-    public Entity ModifyProjectile(Entity _projectile)
+    public Entity Shoot(Entity _projectile)
     {
         _projectile.Temperature = Temperature;
+        foreach (var module in modules)
+        {
+            module.Value.ModifyProjectile(_projectile);
+        }
+        Engine.SaveGame.CurrentMission.Add(_projectile);
         return _projectile;
     }
     public void RestrictedActions()
