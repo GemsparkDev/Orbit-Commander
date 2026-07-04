@@ -114,8 +114,8 @@ public static class Assets
         Add(Core.Sprites.RealExpose, Content.Load<Texture2D>("Images/Items/Item_13-1"));
         Add(Core.Sprites.Stealth, Content.Load<Texture2D>("Images/Items/Item_14"));
         Add(Core.Sprites.RealStealth, Content.Load<Texture2D>("Images/Items/Item_14-1"));
-        Add(Core.Sprites.Radar, Content.Load<Texture2D>("Images/Items/Item_15"));
-        Add(Core.Sprites.RealRadar, Content.Load<Texture2D>("Images/Items/Item_15-1"));
+        Add(Core.Sprites.AmplifyingModifier, Content.Load<Texture2D>("Images/Items/Item_15"));
+        Add(Core.Sprites.RealAmplifyingModifier, Content.Load<Texture2D>("Images/Items/Item_15-1"));
         Add(Core.Sprites.GrapplingHook, Content.Load<Texture2D>("Images/Items/Item_16"));
         Add(Core.Sprites.RealGrapplingHook, Content.Load<Texture2D>("Images/Items/Item_16-1"));
         Add(Core.Sprites.Fireball, Content.Load<Texture2D>("Images/Items/Item_17"));

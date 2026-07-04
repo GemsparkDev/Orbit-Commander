@@ -52,7 +52,7 @@ public enum Modules
     //Sensors
     Sensors,
     ProjectingModifier,
-    Radar,
+    AmplifyingModifier,
     CloakingModifier,
 
     //Cores
@@ -153,7 +153,7 @@ public enum Sprites
     Nanomachines, RealNanomachines,
     Expose, RealExpose,
     Stealth, RealStealth,
-    Radar, RealRadar,
+    AmplifyingModifier, RealAmplifyingModifier,
     GrapplingHook, RealGrapplingHook,
     Fireball, RealFireball,
     PrismArray, RealPrismArray,

@@ -709,7 +709,7 @@ public class Mission
     {
         objective.CompleteCustomRule(_target);
     }
-    public void CalculateTrajectory(Vector2 _startPosition, Vector2 _startVelocity, float _radius)
+    public void CalculateTrajectory(Vector2 _startPosition, Vector2 _startVelocity, float _radius, int type = 0)
     {
         Entity[] planets = [.. Engine.SaveGame.CurrentMission.Entities.Where(x => x is Planet)];
         ICollider[] Colliders = [];
@@ -724,7 +724,16 @@ public class Mission
         Vector2[] futurePlanetVelocities = [.. planets.Select(planet => planet.Velocity)];
         int currentPlanet = 0;
         bool hasChanged = false;
-        var emitter = new ParticleEmitter(Assets.Get(Sprites.Dot), Engine.DeltaSeconds, _startPosition, 0, 0, 0, 5f, Color.Cyan, EmitterType.EmissionOverDistance);
+        ParticleEmitter emitter = null;
+        //Lazy solution, probably good enough
+        if(type == 0)
+        {
+            emitter = new ParticleEmitter(Assets.Get(Sprites.Dot), Engine.DeltaSeconds, _startPosition, 0, 0, 0, 5f, Color.Cyan, EmitterType.EmissionOverDistance);
+        }
+        else if(type == 1)
+        {
+            emitter = new ParticleEmitter(Assets.Get(Sprites.Dot), Engine.DeltaSeconds, _startPosition, 0, 0, 0, 50f, Color.Red, EmitterType.EmissionOverDistance);
+        }
         bool exit = false;
 
         for (int n = 0; n < 1000; n++)

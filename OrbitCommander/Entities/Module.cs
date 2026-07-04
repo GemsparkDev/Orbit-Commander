@@ -542,10 +542,11 @@ public class Railgun() : Module(Modules.Antimaterial)
         }
         if (ammo.Fire())
         {
+            var proj = Player.Modify(NewAssassinShot(Player.Position, Player.Direction * 50, Util.ToAngle(Player.Direction), 0, Player.Team, 30, 0));
             List<Entity> entities = Engine.SaveGame.CurrentMission.Hitscan(Player.Position, Player.Direction, 3000, true, out Vector2 end, null);
             foreach (var entity in entities)
             {
-                entity.Collide(30);
+                entity.Collide(proj.Damage);
             }
             SoundManager.PlaySound(Assets.Get(Sound.SniperFire), Player.Position);
             Engine.Camera.Position += Player.Direction * 30 + new Vector2(Util.OneToNegOne(), Util.OneToNegOne());
@@ -849,6 +850,7 @@ public class PrismArray() : Module(Modules.PrismArray)
     public override float Speed => float.MaxValue;
     public override void OnShoot()
     {
+        var proj = Player.Modify(NewAssassinShot(Player.Position, Player.Direction * 50, Util.ToAngle(Player.Direction), 0, Player.Team, 30, 0));
         isFiring = true;
         timeLeft += Engine.DeltaSeconds;
         if (timeLeft > duration)
@@ -877,7 +879,7 @@ public class PrismArray() : Module(Modules.PrismArray)
         {
             if (enemy.GetComponent<Health>() != null)
             {
-                enemy.Collide(1);
+                enemy.Collide(proj.Damage);
                 enemy.ApplyWork(-10);
             }
         }
@@ -1539,7 +1541,24 @@ public class ProjectingModifier() : Module(Modules.ProjectingModifier)
 {
     public override void OnUpdate(float _fuseRatio)
     {
-        Engine.SaveGame.CurrentMission.CalculateTrajectory(Player.Position, Player.IdealSpeedWithVelocity(Player.modules[ModuleType.Guns].Speed), 8 * SaveGame.EnemyHitboxModifier);
+        Engine.SaveGame.CurrentMission.CalculateTrajectory(Player.Position, Player.IdealSpeedWithVelocity(Player.modules[ModuleType.Guns].Speed), 8 * SaveGame.EnemyHitboxModifier, 1);
+    }
+}
+public class AmplifyingModifier() : Module(Modules.AmplifyingModifier)
+{
+    public override Entity ModifyProjectile(Entity _projectile)
+    {
+        var damage = _projectile.GetComponent<Attack>();
+        if(damage != null)
+        {
+            damage.Damage *= 2;
+        }
+        _projectile.Velocity *= 1.25f;
+        return _projectile;
+    }
+    public override int OnCollide(int _damage)
+    {
+        return _damage * 2;
     }
 }
 

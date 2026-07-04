@@ -424,15 +424,18 @@ public class Player : Entity
             module.Value.OnEnemyHit(_entity, _damage);
         }
     }
-    public Entity Shoot(Entity _projectile)
+    public Entity Modify(Entity _projectile)
     {
         _projectile.Temperature = Temperature;
         foreach (var module in modules)
         {
             module.Value.ModifyProjectile(_projectile);
         }
-        Engine.SaveGame.CurrentMission.Add(_projectile);
         return _projectile;
+    }
+    public void Shoot(Entity _projectile)
+    {
+        Engine.SaveGame.CurrentMission.Add(Modify(_projectile));
     }
     public void RestrictedActions()
     {
