@@ -688,7 +688,7 @@ public class Entity : IMissionComponent
                 }
                 else
                 {
-                    Engine.SaveGame.CurrentMission.Add(new SummonShield() { Position = Position, Velocity = GetNormalizedAcceleration() * 10, AngularVelocity = AngularVelocity });
+                    Engine.SaveGame.CurrentMission.Add(new AmplifyingModifier() { Position = Position, Velocity = GetNormalizedAcceleration() * 10, AngularVelocity = AngularVelocity });
                 }
             }
             yield return 0;
@@ -2260,7 +2260,7 @@ public class Entity : IMissionComponent
                 }
                 else
                 {
-                    Engine.SaveGame.CurrentMission.Add(new Assault() { Position = Position, Velocity = GetNormalizedAcceleration() * 10, AngularVelocity = AngularVelocity });
+                    Engine.SaveGame.CurrentMission.Add(new ProjectingModifier() { Position = Position, Velocity = GetNormalizedAcceleration() * 10, AngularVelocity = AngularVelocity });
                 }
             }
             targetAngle = Util.ToAngle(targetVector);
