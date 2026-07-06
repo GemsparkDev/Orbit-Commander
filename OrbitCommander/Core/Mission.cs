@@ -63,7 +63,7 @@ public class Mission
             new Planet(new Vector2(400, 0), Planet.GetOrbitalVelocity(new Vector2(400, 0), Vector2.Zero, 5000), 240, 1f, false, Color.Cyan),
             new Planet(new Vector2(-600, 0), -Planet.GetOrbitalVelocity(new Vector2(-600, 0), Vector2.Zero, 5000) * 1.2f, 120, 0.6f, false, Color.Yellow),
             new WaveSpawner(T1, 1f, true),
-            a=Entity.NewScrambled(new Vector2(0, -6*50), Vector2.Zero, 0),],
+            a=Entity.NewCovertBoss(new Vector2(0, -6*50), Vector2.Zero, 0, Team.Hostile),],
             new Conditional([new Kill([a])], SendPickup(2000)),
             new DropSpawner(1500));}),
 

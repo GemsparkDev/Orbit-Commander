@@ -2559,6 +2559,63 @@ public class Entity : IMissionComponent
             yield return 0;
         }
     }
+    IEnumerable<int> CovertBoss()
+    {
+        CD = [1, 5];
+        List<Entity> bullets = [];
+
+        while(true)
+        {
+            foreach (var round in bullets)
+            {
+                round.Velocity += Vector2.Normalize(Player.Position - (round.Position - Position)) * Engine.DeltaSeconds * 60;
+                round.Velocity *= Util.FIED(0.3f);
+                round.Angle = Util.ToAngle(round.Velocity - Player.Velocity);
+            }
+            if (CD[0] < 0)
+            {
+                CD[0] = 1;
+                Vector2 vel = Vector2.Normalize(Player.Position - Position) * 8 + new Vector2(Util.OneToNegOne(), Util.OneToNegOne()) / 2;
+                var round = NewAssassinShot(Player.Position, vel, Util.ToAngle(vel - Player.Velocity), 0, Team, 10);
+                round.TimeLeft = 20;
+                round.Texture = Assets.Get(Sprites.Glow);
+                bullets.Add(round);
+                SoundManager.PlaySound(Assets.Get(Sound.PulseFire), Position);
+                RevealDuration += 0.1f;
+            }
+            if (CD[1] < 0)
+            {
+                foreach (var bullet in bullets)
+                {
+                    bullet.StealthAbility = 99;
+                }
+                CD[1] = 5;
+            }
+            if (Health <= 0)
+            {
+                isExpired = true;
+                Explode(10, ColliderRadius);
+                SoundManager.PlaySound(Assets.Get(Sound.Explosion), Position);
+                if (Engine.SaveGame.GiveWeapon)
+                {
+                    Engine.SaveGame.CurrentMission.Add(new GuidedRound() { Position = Position, Velocity = GetNormalizedAcceleration() * 10, AngularVelocity = AngularVelocity });
+                }
+                else
+                {
+                    Engine.SaveGame.CurrentMission.Add(new CloakingModifier() { Position = Position, Velocity = GetNormalizedAcceleration() * 10, AngularVelocity = AngularVelocity });
+                }
+            }
+            yield return 0;
+        }
+    }
+    public static Entity NewCovertBoss(Vector2 position, Vector2 velocity, float angle, Team _team)
+    {
+        var boss = NewEnemy(position, velocity, angle, 200, Assets.Get(Sprites.ClockworkBoss), _team);
+        boss.StealthAbility = 1;
+        boss.SensingAbility = 1;
+        boss.AddComponent(new Behaviour().AddBehaviour(boss.CovertBoss()));
+        return boss;
+    }
     IEnumerable<int> EpitomeBoss()
     {
         int damage = 8;

@@ -58,7 +58,7 @@ public static class ItemFactory
 
         { Modules.Sensors, new ModuleData(Sprites.RealSensors,Sprites.Sensors, "Sensors", (int)ModuleType.Sensors, 20, typeof(Sensors), Color.CornflowerBlue) },
         { Modules.ProjectingModifier, new ModuleData(Sprites.RealProjectingModifier,Sprites.ProjectingModifier, "Lidar", (int)ModuleType.Sensors, 20, typeof(ProjectingModifier), Color.Yellow) },
-        { Modules.AmplifyingModifier, new ModuleData(Sprites.RealAmplifyingModifier,Sprites.AmplifyingModifier, "Radar", (int)ModuleType.Sensors, 20, typeof(Radar), Color.Yellow) },
+        { Modules.AmplifyingModifier, new ModuleData(Sprites.RealAmplifyingModifier,Sprites.AmplifyingModifier, "Radar", (int)ModuleType.Sensors, 20, typeof(AmplifyingModifier), Color.Yellow) },
         { Modules.CloakingModifier, new ModuleData(Sprites.RealCloakingModifier,Sprites.CloakingModifier, "Pulse Emitter", (int)ModuleType.Sensors, 20, typeof(CloakingModifier), Color.Yellow) },
 
         { Modules.Assault, new ModuleData(Sprites.RealAssault, Sprites.Assault, "Assault", (int)ModuleType.Core, 20, typeof(Assault)) },
