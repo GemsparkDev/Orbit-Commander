@@ -2561,25 +2561,27 @@ public class Entity : IMissionComponent
     }
     IEnumerable<int> CovertBoss()
     {
-        CD = [1, 5];
+        CD = [1, 5.5f];
         List<Entity> bullets = [];
 
         while(true)
         {
             foreach (var round in bullets)
             {
-                round.Velocity += Vector2.Normalize(Player.Position - (round.Position - Position)) * Engine.DeltaSeconds * 60;
+                round.Velocity += Vector2.Normalize(Player.Position - round.Position) * Engine.DeltaSeconds * 10;
                 round.Velocity *= Util.FIED(0.3f);
                 round.Angle = Util.ToAngle(round.Velocity - Player.Velocity);
             }
+            Velocity *= 0.95f;
             if (CD[0] < 0)
             {
                 CD[0] = 1;
                 Vector2 vel = Vector2.Normalize(Player.Position - Position) * 8 + new Vector2(Util.OneToNegOne(), Util.OneToNegOne()) / 2;
-                var round = NewAssassinShot(Player.Position, vel, Util.ToAngle(vel - Player.Velocity), 0, Team, 10);
-                round.TimeLeft = 20;
+                var round = NewAssassinShot(Position + Util.ToUnitVector(Angle) * 5, vel, Util.ToAngle(vel - Player.Velocity), 0, Team, 10);
+                round.TimeLeft = 10;
                 round.Texture = Assets.Get(Sprites.Glow);
                 bullets.Add(round);
+                Engine.SaveGame.CurrentMission.Add(round);
                 SoundManager.PlaySound(Assets.Get(Sound.PulseFire), Position);
                 RevealDuration += 0.1f;
             }
@@ -2589,6 +2591,7 @@ public class Entity : IMissionComponent
                 {
                     bullet.StealthAbility = 99;
                 }
+                bullets.Clear();
                 CD[1] = 5;
             }
             if (Health <= 0)
@@ -2604,6 +2607,10 @@ public class Entity : IMissionComponent
                 {
                     Engine.SaveGame.CurrentMission.Add(new CloakingModifier() { Position = Position, Velocity = GetNormalizedAcceleration() * 10, AngularVelocity = AngularVelocity });
                 }
+            }
+            if (Vector2.DistanceSquared(Position, Player.Position) > 250 * 250)
+            {
+                GoToPosition(Player.Position, 2);
             }
             yield return 0;
         }
@@ -5171,6 +5178,7 @@ public class Entity : IMissionComponent
                 }
                 Collide(1, false);
             }
+            UpdateTrail();
             Angle = Util.ToAngle(Velocity);
             AngularVelocity = 0;
             yield return 0;

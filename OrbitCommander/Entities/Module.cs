@@ -1541,7 +1541,10 @@ public class ProjectingModifier() : Module(Modules.ProjectingModifier)
 {
     public override void OnUpdate(float _fuseRatio)
     {
-        Engine.SaveGame.CurrentMission.CalculateTrajectory(Player.Position, Player.IdealSpeedWithVelocity(Player.modules[ModuleType.Guns].Speed), 8 * SaveGame.EnemyHitboxModifier, 1);
+        if(!Player.IsDocked && Player.Progression > 0)
+        {
+            Engine.SaveGame.CurrentMission.CalculateTrajectory(Player.Position, Player.IdealSpeedWithVelocity(Player.modules[ModuleType.Guns].Speed), 8 * SaveGame.EnemyHitboxModifier, 1);
+        }
     }
 }
 public class AmplifyingModifier() : Module(Modules.AmplifyingModifier)
