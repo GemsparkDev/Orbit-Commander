@@ -2561,7 +2561,9 @@ public class Entity : IMissionComponent
     }
     IEnumerable<int> CovertBoss()
     {
-        CD = [1, 5.5f];
+        CD = [1, 5.5f, 1];
+        int waves = 0;
+        int bullet = 0;
         List<Entity> bullets = [];
 
         while(true)
@@ -2573,26 +2575,48 @@ public class Entity : IMissionComponent
                 round.Angle = Util.ToAngle(round.Velocity - Player.Velocity);
             }
             Velocity *= 0.95f;
-            if (CD[0] < 0)
+            if(waves < 3)
+            {
+                if (CD[0] < 0)
+                {
+                    CD[0] = 1;
+                    Vector2 vel = Vector2.Normalize(Player.Position - Position) * 8 + new Vector2(Util.OneToNegOne(), Util.OneToNegOne()) / 2;
+                    var round = NewAssassinShot(Position + Util.ToUnitVector(Angle) * 5, vel, Util.ToAngle(vel - Player.Velocity), 0, Team, 10);
+                    round.TimeLeft = 10;
+                    round.Texture = Assets.Get(Sprites.Glow);
+                    bullets.Add(round);
+                    Engine.SaveGame.CurrentMission.Add(round);
+                    SoundManager.PlaySound(Assets.Get(Sound.PulseFire), Position);
+                    RevealDuration += 0.1f;
+                }
+                if (CD[1] < 0)
+                {
+                    foreach (var b in bullets)
+                    {
+                        b.StealthAbility = 99;
+                    }
+                    bullets.Clear();
+                    CD[1] = 5;
+                    waves++;
+                }
+                CD[2] = 1;
+            }
+            else
             {
                 CD[0] = 1;
-                Vector2 vel = Vector2.Normalize(Player.Position - Position) * 8 + new Vector2(Util.OneToNegOne(), Util.OneToNegOne()) / 2;
-                var round = NewAssassinShot(Position + Util.ToUnitVector(Angle) * 5, vel, Util.ToAngle(vel - Player.Velocity), 0, Team, 10);
-                round.TimeLeft = 10;
-                round.Texture = Assets.Get(Sprites.Glow);
-                bullets.Add(round);
-                Engine.SaveGame.CurrentMission.Add(round);
-                SoundManager.PlaySound(Assets.Get(Sound.PulseFire), Position);
-                RevealDuration += 0.1f;
-            }
-            if (CD[1] < 0)
-            {
-                foreach (var bullet in bullets)
+                CD[1] = 5.5f;
+                Vector2 velocity = Util.PredictEnemy(Player, this, 12);
+                DrawLine(Util.ToAngle(velocity), 1 - CD[2], 1);
+                if (CD[2] < 0)
                 {
-                    bullet.StealthAbility = 99;
+                    Engine.SaveGame.CurrentMission.Add(NewPulseShot(Position, velocity, Util.ToAngle(velocity), 0, Team, 10, false, 99));
+                    bullet++;
                 }
-                bullets.Clear();
-                CD[1] = 5;
+                if(bullet > 4)
+                {
+                    bullet = 0;
+                    waves = 0;
+                }
             }
             if (Health <= 0)
             {
