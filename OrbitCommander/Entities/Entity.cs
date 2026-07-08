@@ -75,13 +75,12 @@ public class Entity : IMissionComponent
     }
     private void UpdateTrail()
     {
-        var stealthComp = GetComponent<Stealth>();
         var stationaryEmitter = GetComponent<StationaryEmitter>();
-        if (stealthComp == null || stationaryEmitter == null)
+        if (stationaryEmitter == null)
         {
             return;
         }
-        stationaryEmitter.ParticleEmitter.particleColor = Color * stealthComp.StealthTransparency();
+        stationaryEmitter.ParticleEmitter.particleColor = Color;
     }
     public virtual void Initialize() { }
     public bool CollideWith(Entity nearestEnemy)
@@ -2575,12 +2574,14 @@ public class Entity : IMissionComponent
                 round.Angle = Util.ToAngle(round.Velocity - Player.Velocity);
             }
             Velocity *= 0.95f;
-            if(waves < 3)
+            Vector2 posDiff = Player.Position - Position;
+            RotateTowards(Util.ToAngle(posDiff));
+            if (waves < 2)
             {
                 if (CD[0] < 0)
                 {
                     CD[0] = 1;
-                    Vector2 vel = Vector2.Normalize(Player.Position - Position) * 8 + new Vector2(Util.OneToNegOne(), Util.OneToNegOne()) / 2;
+                    Vector2 vel = Vector2.Normalize(posDiff) * 4 + new Vector2(Util.OneToNegOne(), Util.OneToNegOne()) / 2;
                     var round = NewAssassinShot(Position + Util.ToUnitVector(Angle) * 5, vel, Util.ToAngle(vel - Player.Velocity), 0, Team, 10);
                     round.TimeLeft = 10;
                     round.Texture = Assets.Get(Sprites.Glow);
@@ -2606,18 +2607,24 @@ public class Entity : IMissionComponent
                 CD[0] = 1;
                 CD[1] = 5.5f;
                 Vector2 velocity = Util.PredictEnemy(Player, this, 12);
-                DrawLine(Util.ToAngle(velocity), 1 - CD[2], 1);
+                DrawLine(Util.ToAngle(velocity), CD[2], 1);
                 if (CD[2] < 0)
                 {
                     Engine.SaveGame.CurrentMission.Add(NewPulseShot(Position, velocity, Util.ToAngle(velocity), 0, Team, 10, false, 99));
+                    CD[2] = 1;
                     bullet++;
                 }
                 if(bullet > 4)
                 {
                     bullet = 0;
                     waves = 0;
+
                 }
             }
+            float speed = (Player.Position - Position).Length() / 75;
+            Vector2 gravityForce = GetNormalizedAcceleration();
+            float theta = MathF.Atan2(gravityForce.Y, gravityForce.X);
+            GoToPosition(Player.Position + 100 * new Vector2(MathF.Cos(theta), MathF.Sin(theta)), speed);
             if (Health <= 0)
             {
                 isExpired = true;
@@ -2642,9 +2649,9 @@ public class Entity : IMissionComponent
     public static Entity NewCovertBoss(Vector2 position, Vector2 velocity, float angle, Team _team)
     {
         var boss = NewEnemy(position, velocity, angle, 200, Assets.Get(Sprites.ClockworkBoss), _team);
-        boss.StealthAbility = 1;
+        boss.StealthAbility = 2;
         boss.SensingAbility = 1;
-        boss.AddComponent(new Behaviour().AddBehaviour(boss.CovertBoss()));
+        boss.AddComponent(new Behaviour().AddBehaviour(boss.AvoidProjectiles(1)).AddBehaviour(boss.CovertBoss()));
         return boss;
     }
     IEnumerable<int> EpitomeBoss()
