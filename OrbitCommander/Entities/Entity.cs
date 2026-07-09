@@ -242,7 +242,7 @@ public class Entity : IMissionComponent
             .AddComponent(new Statuses(entity))
             .AddComponent(new Friendly(entity) { Team = _team })
             .AddComponent(new Sprite(entity, SaveGame.ColorScheme.TeamColors[entity.Team]) { Texture = _texture })
-            .AddComponent(new Health(entity) { CurrentHealth = _health, MaxHealth = _health })
+            .AddComponent(new Health(entity, _health))
             .AddComponent(new Collide(entity, delegate (int damage, bool _ignoreImmunity)
             {
                 damage = entity.Statuses.ModifyDamage(damage);

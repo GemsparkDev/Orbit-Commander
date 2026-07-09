@@ -3,6 +3,12 @@
 Lagrange Commander is a game made using C# in monogame. It is a 2D top down wave based shooter where you must repair and upgrade your ship by salvaging from enemies you defeat. It features realistic N-Body gravitation, which affects all entities and projectiles.
   
 # Changelog
+0.8.9.5 - 7/9/2026
+ - Fuse count now modifies how much damage individual modules take.
+ - The Barricade now does the effects of the CryoMace.
+ - The CryoMace now gives bonus DR to friendly enemies in its radius.
+ - You can now overheal constructs.
+ - Added overheal, which appears yellow and adds additional temporary health.
 0.8.9.4 - 7/8/2026
  - Added movement to the Covert boss.
 0.8.9.3 - 7/7/2026

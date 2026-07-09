@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using UILib.Content;
+using System;
 
 namespace OrbitCommander.Core;
 public static class Events
@@ -42,9 +43,9 @@ public static class Events
         Engine.Camera.Position = Vector2.Zero;
         CurrentGameState.SwitchState(new MainMenu());
     }
-    public static void RepairModule()
+    public static void RepairItem()
     {
-        Module daughterModule;
+        Entity daughterModule;
         if (UI.RepairSlot.daughterItem != null)
         {
             daughterModule = UI.RepairSlot.daughterItem;
@@ -54,10 +55,33 @@ public static class Events
             SoundManager.PlayGlobalSound(Assets.Get(Sound.Fail));
             return;
         }
-        if (daughterModule.Health < 20 && Engine.SaveGame.Scrap >= 1)
+        if(Engine.SaveGame.Scrap >= 1)
         {
-            daughterModule.Health = 20;
-            daughterModule.isFailed = false;
+            if (daughterModule is Module)
+            {
+                if(daughterModule.Health < daughterModule.MaxHealth)
+                {
+                    daughterModule.Health = daughterModule.MaxHealth;
+                    (daughterModule as Module).isFailed = false;
+                }
+                else
+                {
+                    SoundManager.PlayGlobalSound(Assets.Get(Sound.Fail));
+                    return;
+                }
+            }
+            else
+            {
+                if(daughterModule.Health < daughterModule.MaxHealth * 2)
+                {
+                    daughterModule.GetComponent<Health>().SetOverhealth(daughterModule.MaxHealth + (int)Math.Ceiling(daughterModule.Health * 0.5f) + 5);
+                }
+                else
+                {
+                    SoundManager.PlayGlobalSound(Assets.Get(Sound.Fail));
+                    return;
+                }
+            }
             Engine.SaveGame.Scrap -= 1;
             SoundManager.PlayGlobalSound(Assets.Get(Sound.Interact));
             UpdateRepairText();
@@ -70,7 +94,7 @@ public static class Events
     }
     public static void UpdateRepairText()
     {
-        Module daughterModule = UI.RepairSlot.daughterItem;
+        Pickup daughterModule = UI.RepairSlot.daughterItem;
         if (daughterModule != null)
         {
             UI.RepairText.text = $"{daughterModule.Health}/{daughterModule.MaxHealth}";

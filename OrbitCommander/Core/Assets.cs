@@ -138,8 +138,8 @@ public static class Assets
         Add(Core.Sprites.RealCore, Content.Load<Texture2D>("Images/Items/Item_25-1"));
         Add(Core.Sprites.Reflective, Content.Load<Texture2D>("Images/Items/Item_26"));
         Add(Core.Sprites.RealReflective, Content.Load<Texture2D>("Images/Items/Item_26-1"));
-        Add(Core.Sprites.Barricade, Content.Load<Texture2D>("Images/Items/Item_27"));
-        Add(Core.Sprites.RealBarricade, Content.Load<Texture2D>("Images/Items/Item_27-1"));
+        Add(Core.Sprites.CryoBarricade, Content.Load<Texture2D>("Images/Items/Item_27"));
+        Add(Core.Sprites.RealCryoBarricade, Content.Load<Texture2D>("Images/Items/Item_27-1"));
         Add(Core.Sprites.Trap, Content.Load<Texture2D>("Images/Items/Item_28"));
         Add(Core.Sprites.RealTrap, Content.Load<Texture2D>("Images/Items/Item_28-1"));
         Add(Core.Sprites.Bomb, Content.Load<Texture2D>("Images/Items/Item_29"));
@@ -150,8 +150,8 @@ public static class Assets
         Add(Core.Sprites.RealWork, Content.Load<Texture2D>("Images/Items/Item_31-1"));
         Add(Core.Sprites.Plasma, Content.Load<Texture2D>("Images/Items/Item_32"));
         Add(Core.Sprites.RealPlasma, Content.Load<Texture2D>("Images/Items/Item_32-1"));
-        Add(Core.Sprites.Mace, Content.Load<Texture2D>("Images/Items/Item_33"));
-        Add(Core.Sprites.RealMace, Content.Load<Texture2D>("Images/Items/Item_33-1"));
+        Add(Core.Sprites.FaradayShield, Content.Load<Texture2D>("Images/Items/Item_33"));
+        Add(Core.Sprites.RealFaradayShield, Content.Load<Texture2D>("Images/Items/Item_33-1"));
         Add(Core.Sprites.Dash, Content.Load<Texture2D>("Images/Items/Item_34"));
         Add(Core.Sprites.RealDash, Content.Load<Texture2D>("Images/Items/Item_34-1"));
         Add(Core.Sprites.Adaptive, Content.Load<Texture2D>("Images/Items/Item_35"));

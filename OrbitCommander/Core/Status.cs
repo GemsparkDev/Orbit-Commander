@@ -24,6 +24,7 @@ public abstract class Status(Sprites _icon)
         Frost,
         Healing,
         Berserk,
+        FleetingDefense,
     }
 }
 public class Bomb() : Status(Sprites.Knob)
@@ -266,8 +267,8 @@ public class Pressure(Color _color, bool _isFatal) : Status(Sprites.Knob)
     float duration = Engine.DeltaSeconds * 2;
     float fireCooldown = 0.05f;
     float attackCooldown = 0.1f;
-    public override StatusType Type { get; } = StatusType.Fire;
-    public override bool IsImmunable { get => true; }
+    public override StatusType Type => StatusType.Fire;
+    public override bool IsImmunable => true;
     public override void Update(Entity _parent)
     {
         if (fireCooldown > 0)
@@ -313,5 +314,30 @@ public class Pressure(Color _color, bool _isFatal) : Status(Sprites.Knob)
         {
             duration += Engine.DeltaSeconds * 2;
         }
+    }
+}
+public class FleetingDefense() : Status(Sprites.Knob)
+{
+    float duration = 0.1f;
+    public override StatusType Type => StatusType.FleetingDefense;
+    public override bool IsImmunable => false;
+    public override void Update(Entity _parent)
+    {
+        if (duration > 0)
+        {
+            duration -= Engine.DeltaSeconds;
+        }
+        else
+        {
+            IsExpired = true;
+        }
+    }
+    public override void Reset()
+    {
+        duration = 0.1f;
+    }
+    public override int ModifyDamage(int _damage)
+    {
+        return (_damage * 5) / 6;
     }
 }

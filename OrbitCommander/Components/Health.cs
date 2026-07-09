@@ -5,19 +5,38 @@ using System;
 using OrbitCommander.Core;
 
 namespace OrbitCommander.Components;
-internal class Health(Entity _entity) : IComponent
+internal class Health(Entity _entity, int _maxHealth) : IComponent
 {
-    private int currentHealth;
+    private int currentHealth = _maxHealth;
     private int prevHealth;
-    public int CurrentHealth { get => currentHealth; set { if (prevHealth <= currentHealth) { prevHealth = currentHealth; } healthCD = 0.5f; currentHealth = value; } }
-    public int MaxHealth { get; set; }
+    public int CurrentHealth { get => currentHealth; 
+        set 
+        { 
+            if (prevHealth <= currentHealth) 
+            { 
+                prevHealth = currentHealth; 
+            } 
+            healthCD = 0.5f; 
+            currentHealth = value;
+            if (currentHealth > MaxHealth)
+            {
+                currentHealth = MaxHealth;
+            }
+        } 
+    }
+    public int MaxHealth { get; set; } = _maxHealth;
     private float healthCD = 0;
+    public void SetOverhealth(int _health)
+    {
+        currentHealth = _health;
+        if (currentHealth > MaxHealth * 2)
+        {
+            currentHealth = MaxHealth * 2;
+        }
+        prevHealth = currentHealth;
+    }
     public void Update()
     {
-        if (currentHealth > MaxHealth)
-        {
-            currentHealth = MaxHealth;
-        }
         if (healthCD <= 0)
         {
             if (prevHealth > currentHealth)
@@ -63,8 +82,31 @@ internal class Health(Entity _entity) : IComponent
             Vector2 barPosition = _entity.Position + new Vector2(-_entity.ColliderRadius * 0.875f, _entity.ColliderRadius * 1.1f);
             Rectangle sourceRectangle = new(0, 0, (int)(_entity.ColliderRadius * 1.75f), 2);
             _spriteBatch.Draw(Engine.Line, barPosition, sourceRectangle, new Color(0, 50, 25) * val);
-            _spriteBatch.Draw(Engine.Line, barPosition, new Rectangle(sourceRectangle.Location, new Point((int)(sourceRectangle.Width * (prevHealth / (float)MaxHealth)), sourceRectangle.Height)), Color.White * val);
-            _spriteBatch.Draw(Engine.Line, barPosition, new Rectangle(sourceRectangle.Location, new Point((int)(sourceRectangle.Width * (float)currentHealth / MaxHealth), sourceRectangle.Height)), Color.Green * val);
+            if(CurrentHealth > MaxHealth)
+            {
+                DrawGreenHealth();
+                DrawWhiteOverhealth();
+                _spriteBatch.Draw(Engine.Line, barPosition, new Rectangle(sourceRectangle.Location, new Point((int)(sourceRectangle.Width * (currentHealth / (float)MaxHealth - 1)), sourceRectangle.Height)), Color.Yellow * val);
+            }
+            else if(CurrentHealth < MaxHealth && prevHealth > MaxHealth)
+            {
+                _spriteBatch.Draw(Engine.Line, barPosition, new Rectangle(sourceRectangle.Location, new Point(sourceRectangle.Width, sourceRectangle.Height)), Color.White * val);
+                DrawGreenHealth();
+                DrawWhiteOverhealth();
+            }
+            else
+            {
+                _spriteBatch.Draw(Engine.Line, barPosition, new Rectangle(sourceRectangle.Location, new Point((int)(sourceRectangle.Width * (prevHealth / (float)MaxHealth)), sourceRectangle.Height)), Color.White * val);
+                DrawGreenHealth();
+            }
+            void DrawGreenHealth()
+            {
+                _spriteBatch.Draw(Engine.Line, barPosition, new Rectangle(sourceRectangle.Location, new Point((int)(sourceRectangle.Width * Math.Clamp((float)currentHealth / MaxHealth, 0, 1)), sourceRectangle.Height)), Color.Green * val);
+            }
+            void DrawWhiteOverhealth()
+            {
+                _spriteBatch.Draw(Engine.Line, barPosition, new Rectangle(sourceRectangle.Location, new Point((int)(sourceRectangle.Width * (prevHealth / (float)MaxHealth - 1)), sourceRectangle.Height)), Color.White * val);
+            }
         }
     }
 }

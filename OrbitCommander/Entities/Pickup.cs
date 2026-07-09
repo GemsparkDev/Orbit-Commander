@@ -1,11 +1,13 @@
-﻿using Microsoft.Xna.Framework;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using OrbitCommander.Components;
-using OrbitCommander.Particles;
-using System;
-using System.Collections.Generic;
-using UILib.Content;
 using OrbitCommander.Core;
+using OrbitCommander.Particles;
+using UILib.Content;
+using System.Diagnostics;
 
 namespace OrbitCommander.Entities;
 public class Pickup : Entity, IData
@@ -28,7 +30,8 @@ public class Pickup : Entity, IData
         Tooltip.AddWidget(new Decal(new Vector2(-Tooltip.Size.X / 3, 0), _itemData.RealSprite));
         textbox = new Decal(new Vector2(0, -5), Assets.TextFont, _itemData.Name, _itemData.TextColor, 5f);
         Tooltip.AddWidget(textbox);
-        AddComponent(new Health(this) { CurrentHealth = _health, MaxHealth = _health });
+        AddComponent(new Health(this, _health));
+        AddComponent(new Statuses(this));
         AddTag(Tags.IsImportant);
         AddComponent(new Collide(this, delegate (int _damage, bool _ignoreImmunity)
         {
@@ -69,7 +72,7 @@ public class Pickup : Entity, IData
         {
             _health = 10;
         }
-        AddComponent(new Health(this) { CurrentHealth = _health, MaxHealth = _health });
+        AddComponent(new Health(this, _health));
         AddTag(Tags.IsImportant);
         AddComponent(new Collide(this, delegate (int _damage, bool _ignoreImmunity)
         {
@@ -150,7 +153,7 @@ public class Pickup : Entity, IData
     {
         return $"{{{Type},{Health}}}";
     }
-    IEnumerable<int> Barricade()
+    IEnumerable<int> CryoBarricade()
     {
         float cooldown = 0;
         Entity nearestEnemy;
@@ -170,14 +173,44 @@ public class Pickup : Entity, IData
                 SoundManager.PlaySound(Assets.Get(Sound.PulseFire), Position);
                 cooldown = 1.5f;
             }
+            foreach (var enemy in Engine.SaveGame.CurrentMission.enemies)
+            {
+                float distSqr = Vector2.DistanceSquared(enemy.Position, Position);
+                if (distSqr < 3600)
+                {
+                    enemy.ApplyWork(-0.5f);
+                }
+                if (IsFriendly(enemy))
+                {
+                    continue;
+                }
+                if (distSqr < 100000)
+                {
+                    Vector2 dir = (enemy.Position - Position) / (distSqr + 50) * 1000 * Engine.DeltaSeconds;
+                    float lerp = MaxHealth / 2 / (enemy.MaxHealth + MaxHealth / 2);
+                    Velocity += dir * lerp;
+                    enemy.Velocity -= dir * (1 - lerp);
+                }
+                if (distSqr < (ColliderRadius + enemy.ColliderRadius) * (ColliderRadius + enemy.ColliderRadius) && enemy.HasComponent<Health>())
+                {
+                    //Mace sticks to enemies and has mass equal to maximum health div by 2
+                    float lerp = MaxHealth / 2 / (enemy.MaxHealth + MaxHealth / 2);
+                    Velocity = Velocity * (1 - lerp) + enemy.Velocity * lerp;
+                    enemy.Velocity = Velocity;
+                }
+            }
+            if (Vector2.DistanceSquared(Position, Player.Position) < 1600)
+            {
+                Player.ApplyWork(-0.33f);
+            }
             GetComponent<FollowEmitter>().ParticleEmitter.isEmitterActive = SaveGame.DebugMode;
             yield return 0;
         }
     }
-    public static Pickup NewBarricade(Vector2 _position, Vector2 _velocity, float _angle, float _angularVelocity, int _stealth = 0, Team _team = Team.Friendly)
+    public static Pickup NewCryoBarricade(Vector2 _position, Vector2 _velocity, float _angle, float _angularVelocity, int _stealth = 0, Team _team = Team.Friendly)
     {
-        var construct = new Pickup(ItemFactory.itemData[Items.Barricade], _position, _velocity, _angularVelocity, ItemFactory.itemData[Items.Barricade].Integrity);
-        construct.AddComponent(new Behaviour().AddBehaviour(construct.Barricade()));
+        var construct = new Pickup(ItemFactory.itemData[Items.CryoBarricade], _position, _velocity, _angularVelocity, ItemFactory.itemData[Items.CryoBarricade].Integrity);
+        construct.AddComponent(new Behaviour().AddBehaviour(construct.CryoBarricade()));
         construct.AddComponent<Smelt>(new Smelt() { Value = 1 });
         construct.Angle = _angle;
         construct.StealthAbility = _stealth;
@@ -321,53 +354,35 @@ public class Pickup : Entity, IData
         construct.AddTag(Tags.IsSpecialized);
         return construct;
     }
-    IEnumerable<int> Cryomace()
+    IEnumerable<int> FaradayShield()
     {
         while (true)
         {
-            foreach(var enemy in Engine.SaveGame.CurrentMission.enemies)
+            foreach (var enemy in Engine.SaveGame.CurrentMission.enemies.Where(x => IsFriendly(x) && x.HasComponent<Statuses>()))
             {
                 float distSqr = Vector2.DistanceSquared(enemy.Position, Position);
-                if (distSqr < 3600)
+                if(distSqr < 22500)
                 {
-                    enemy.ApplyWork(-0.5f);
-                }
-                if (IsFriendly(enemy))
-                {
-                    continue;
-                }
-                if (distSqr < 100000)
-                {
-                    Vector2 dir = (enemy.Position - Position) / (distSqr + 50) * 1000  * Engine.DeltaSeconds;
-                    float lerp = MaxHealth / 2 / (enemy.MaxHealth + MaxHealth / 2);
-                    Velocity += dir * lerp;
-                    enemy.Velocity -= dir * (1 - lerp);
-                }
-                if (distSqr < (ColliderRadius + enemy.ColliderRadius) * (ColliderRadius + enemy.ColliderRadius) && enemy.HasComponent<Health>())
-                {
-                    //Mace sticks to enemies and has mass equal to maximum health div by 2
-                    float lerp = MaxHealth / 2 / (enemy.MaxHealth + MaxHealth / 2);
-                    Velocity = Velocity * (1 - lerp) + enemy.Velocity * lerp;
-                    enemy.Velocity = Velocity;
+                    enemy.Statuses.ApplyStatus(new FleetingDefense());
                 }
             }
-            if(Vector2.DistanceSquared(Position, Player.Position) < 1600)
+            if (Vector2.DistanceSquared(Position, Player.Position) < 22500)
             {
-                Player.ApplyWork(-0.33f);
+                Player.Statuses.ApplyStatus(new FleetingDefense());
             }
             yield return 0;
         }
     }
-    public static Pickup NewCryomace(Vector2 _position, Vector2 _velocity, float _angle, float _angularVelocity, int _stealth = 0, Team _team = Team.Friendly)
+    public static Pickup NewFaradayShield(Vector2 _position, Vector2 _velocity, float _angle, float _angularVelocity, int _stealth = 0, Team _team = Team.Friendly)
     {
-        var construct = new Pickup(ItemFactory.itemData[Items.Cryomace], _position, _velocity, _angularVelocity, ItemFactory.itemData[Items.Cryomace].Integrity)
+        var construct = new Pickup(ItemFactory.itemData[Items.FaradayShield], _position, _velocity, _angularVelocity, ItemFactory.itemData[Items.FaradayShield].Integrity)
         {
             Angle = _angle,
             StealthAbility = _stealth,
             Team = _team
         };
         construct.AddComponent(new Smelt() { Value = 1 });
-        construct.AddComponent(new Behaviour().AddBehaviour(construct.Cryomace()));
+        construct.AddComponent(new Behaviour().AddBehaviour(construct.FaradayShield()));
         return construct;
     }
 }
@@ -385,10 +400,10 @@ public class ItemData(Sprites _realSprite, Sprites _virtualSprite, string _name,
 public enum Items
 {
     Scrap,
-    Barricade,
+    CryoBarricade,
     Trap,
     Bomb,
     SpecializedParts,
     Furnace,
-    Cryomace
+    FaradayShield
 }

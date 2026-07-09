@@ -11,13 +11,13 @@ public static class ItemFactory
     //Items
     public readonly static Dictionary<Items, ItemData> itemData = new()
     {
-        { Items.Scrap, new ItemData(Sprites.RealMetalScrap,Sprites.MetalScrap, "Metal Salvage", 1, Color.White) },
-        { Items.Barricade, new ItemData(Sprites.RealBarricade, Sprites.Barricade, "Barricade", 1, Color.White,Color.White,20) },
-        { Items.Trap, new ItemData(Sprites.RealTrap, Sprites.Trap, "Trap", 1, Color.White,Color.White,8) },
-        { Items.Bomb, new ItemData(Sprites.RealBomb, Sprites.Bomb, "Bomb", 1, Color.White,Color.White,3) },
-        { Items.Furnace, new ItemData(Sprites.RealFurnace, Sprites.Furnace, "Furnace", 1, Color.White, Color.White,10) },
-        { Items.SpecializedParts, new ItemData(Sprites.RealSpecializedParts, Sprites.SpecializedParts, "Specialized Parts", 1, Color.White, Color.CornflowerBlue, 5) },
-        { Items.Cryomace, new ItemData(Sprites.RealMace, Sprites.Mace, "Cryomace", 1, Color.White, Color.White, 50) }
+        { Items.Scrap, new ItemData(Sprites.RealMetalScrap,Sprites.MetalScrap, "Metal Salvage", -1, Color.White) },
+        { Items.SpecializedParts, new ItemData(Sprites.RealSpecializedParts, Sprites.SpecializedParts, "Specialized Parts", -1, Color.White, Color.CornflowerBlue, 10) },
+        { Items.CryoBarricade, new ItemData(Sprites.RealCryoBarricade, Sprites.CryoBarricade, "CryoBarricade", 5, Color.White,Color.White,60) },
+        { Items.Trap, new ItemData(Sprites.RealTrap, Sprites.Trap, "Trap", 5, Color.White,Color.White,35) },
+        { Items.Bomb, new ItemData(Sprites.RealBomb, Sprites.Bomb, "Bomb", 5, Color.White,Color.White,10) },
+        { Items.Furnace, new ItemData(Sprites.RealFurnace, Sprites.Furnace, "Furnace", 5, Color.White, Color.White,10) },
+        { Items.FaradayShield, new ItemData(Sprites.RealFaradayShield, Sprites.FaradayShield, "FaradayShield", 5, Color.White, Color.White, 25) }
     };
     public readonly static Dictionary<Modules, ModuleData> moduleData = new()
     {

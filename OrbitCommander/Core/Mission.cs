@@ -284,7 +284,7 @@ public class Mission
         return new([
             k, l.AddComponent(new Sprite(l, Color.White) { Texture = Assets.Get(Sprites.MetalScrap) })
             .AddComponent(new Lock(l) { Key = k }),
-            p.AddComponent(new Health(p) { CurrentHealth = 1000, MaxHealth = 1000 })
+            p.AddComponent(new Health(p, 1000))
             .AddComponent(new Friendly(p) { Team = Team.Hostile })
             .AddComponent(new Stealth(p) { SensingAbility = 1, StealthAbility = 0 })
             .AddComponent(new Collide(p, delegate(int damage, bool _ignoreImmunity)

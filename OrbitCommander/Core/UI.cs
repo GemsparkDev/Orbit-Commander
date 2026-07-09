@@ -76,7 +76,7 @@ public static class UI
 
     //Garage Menu
     public static Button RepairButton { get; } = new Button(new Vector2(-GarageMenu.Size.X / 4 - 25, -40), Assets.Get(Sprites.Button), Assets.TextFont, "Repair", Color.LightBlue);
-    public static ItemSlot<Module> RepairSlot { get; } = new ItemSlot<Module>(new Vector2(-GarageMenu.Size.X / 4 - 25, 0), Assets.Get(Sprites.EmptySlot), Engine.UIManager, -1);
+    public static ItemSlot<Pickup> RepairSlot { get; } = new ItemSlot<Pickup>(new Vector2(-GarageMenu.Size.X / 4 - 25, 0), Assets.Get(Sprites.EmptySlot), Engine.UIManager, [0, 1, 2, 3, 4, 5]); //Contains all module ids and the construct id
     public static Decal MothershipScrap { get; } = new Decal(new Vector2(GarageMenu.Size.X / 2.2f, 20) - GarageMenu.Size / 2, Assets.TextFont, "0", Color.Gray, 10);
     public static Decal RepairText { get; } = new Decal(new Vector2(-GarageMenu.Size.X / 4 - 60 / 2.5f, 40), Assets.TextFont, "", Color.White, 10);
     public static Decal GaragePlayerImage { get; } = new Decal(new Vector2(GarageMenu.Size.X / 4, 0), Assets.Get(Sprites.PlayerUI));
@@ -213,7 +213,7 @@ public static class UI
         MusicSlider.AddBehaviour(delegate ()
         {
             float i = MusicSlider.Intervals[0];
-            SoundManager.MusicVolume = Math.Clamp(MathF.Pow(10, i - 0.954242509439f) - 0.111111111111f, 0, 1);
+            SoundManager.MusicVolume = i;
             MusicVolume.text = $"Music: {Math.Round(i * 100)}%";
         });
         NextWindowType.AddBehaviour(delegate ()
@@ -257,7 +257,7 @@ public static class UI
 
         QuitToMissionButton.AddBehaviour(delegate () { Events.MissionSelectTrigger(new MissionSelect()); });
         GarageButton.AddBehaviour(Events.GarageTrigger);
-        RepairButton.AddBehaviour(Events.RepairModule);
+        RepairButton.AddBehaviour(Events.RepairItem);
         var tooltip = new Window(Vector2.Zero, wideButton);
         tooltip.AddWidget(new Decal(new Vector2(0, 0), Assets.TextFont, "1 metal to repair", Color.White, 3f));
         RepairButton.AddTooltip(tooltip);

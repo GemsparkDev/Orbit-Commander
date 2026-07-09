@@ -224,18 +224,29 @@ public class Player : Entity
         }
         else if(cachedDamage > 0)
         {
-            int randomNumber = Util.Random.Next(1, 4);
+            var _randomType = (ModuleType)Util.Random.Next(1, 4);
             if (modules[ModuleType.Hull].Health > 0)
             {
-                modules[ModuleType.Hull].Health--;
+                DecreaseModuleHealth(ModuleType.Hull);
             }
-            else if (modules.ElementAt(randomNumber).Value.Health > 0)
+            else if (modules[_randomType].Health > 0)
             {
-                modules.ElementAt(randomNumber).Value.Health--;
+                DecreaseModuleHealth(_randomType);
             }
             else
             {
-                modules[ModuleType.Core].Health--;
+                DecreaseModuleHealth(ModuleType.Core);
+            }
+            void DecreaseModuleHealth(ModuleType _type)
+            {
+                //Higher true fuse count results in modules sometimes taking more damage
+                //Fuses vs damage: 0 -> 50%, 1 -> 79%, 2 -> 91%, 3 -> 100%, 4 -> 108%
+                //Bonus fuses shouldn't increase damage (for balancing reasons)
+                int i = (int)_type;
+                float ratio = MathF.Sqrt((moduleFuses[i, 0] ? 0.333f : 0f) + (moduleFuses[i, 1] ? 0.333f : 0f) + (moduleFuses[i, 2] ? 0.333f : 0f) + (moduleFuses[i, 3] ? 0.333f : 0f)) / 2 + 0.5f;
+                int truncate = (int)Math.Truncate(ratio);
+                int damage = truncate + ((Util.Random.NextSingle() < (ratio - truncate)) ? 1 : 0);
+                modules[_type].Health = Math.Max(modules[_type].Health - damage, 0);
             }
             cachedDamage--;
             cachedDamageCd = 0.05f;
@@ -537,7 +548,7 @@ public class Player : Entity
                         float dist = (new Vector2(Input.NewMouseState.X, Input.NewMouseState.Y) - Engine.BackBuffer / 2).Length();
                         var constructs = new List<(string description, Texture2D sprite)>()
                         {
-                        ("Req. 1 scrap, blocks enemy fire. 20 integrity.", Assets.Get(Sprites.Barricade)),
+                        ("Req. 1 scrap, blocks enemy fire. 20 integrity.", Assets.Get(Sprites.CryoBarricade)),
                         ("Req. 1 scrap, attacks enemies. 8 integrity.", Assets.Get(Sprites.Trap)),
                         ("Req. 1 scrap, 100 dmg to all in radius when destroyed. 3 integrity.", Assets.Get(Sprites.Bomb)),
                         ("Req. 1 scrap, smelts all scrap within it", Assets.Get(Sprites.Furnace)),
@@ -609,7 +620,7 @@ public class Player : Entity
                                 {
                                     case "Barricade":
                                         firstScrap.isExpired = true;
-                                        var barricade = Pickup.NewBarricade(firstScrap.Position, firstScrap.Velocity, 0, 0);
+                                        var barricade = Pickup.NewCryoBarricade(firstScrap.Position, firstScrap.Velocity, 0, 0);
                                         if (modules[ModuleType.Engines] is WorkEngine)
                                         {
                                             barricade.AddTag(Tags.IsImmune);
@@ -664,7 +675,7 @@ public class Player : Entity
                                         break;
                                     case "Mace":
                                         firstScrap.isExpired = true;
-                                        var mace = Pickup.NewCryomace(firstScrap.Position, firstScrap.Velocity, 0, 0);
+                                        var mace = Pickup.NewFaradayShield(firstScrap.Position, firstScrap.Velocity, 0, 0);
                                         if (modules[ModuleType.Engines] is WorkEngine)
                                         {
                                             mace.AddTag(Tags.IsImmune);
