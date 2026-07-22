@@ -44,7 +44,7 @@ public static class UI
     public static Decal MusicVolume { get; } = new Decal(new Vector2(40, -15), Assets.TextFont, "Music: 100%", Color.White, 5);
     public static Decal UIScale { get; } = new Decal(new Vector2(40, 15), Assets.TextFont, $"UI Scale: {Math.Truncate((UIScaleSlider.Intervals[0] + 1) * 10) / 10}", Color.White, 5);
     public static Button ShaderToggle { get; } = new Button(new Vector2(75, MainMenu.Size.Y / 4), Assets.Get(Sprites.WideButton), Assets.TextFont, $"Shader: {SaveGame.UseShader}", Color.White);
-    public static Button SingleplayerButton { get; } = new Button(new Vector2(0, -MainMenu.Size.Y / 4), Assets.Get(Sprites.WideButton), Assets.TextFont, "Singleplayer", Color.White);
+    public static TerminalButton SingleplayerButton { get; } = new TerminalButton(new Vector2(0, -MainMenu.Size.Y / 4), Assets.TextFont, "Singleplayer", Color.White, 10);
     public static Button ExitButton { get; } = new Button(new Vector2(0, MainMenu.Size.Y / 4), Assets.Get(Sprites.WideButton), Assets.TextFont, "Exit", Color.White);
     public static Decal TitleName { get; } = new Decal(new Vector2(0, -MainMenu.Size.Y), Assets.Get(Sprites.Title));
     public static Button LoadButton { get; } = new Button(new Vector2(0, 0), Assets.Get(Sprites.WideButton), Assets.TextFont, "Load", Color.White);
