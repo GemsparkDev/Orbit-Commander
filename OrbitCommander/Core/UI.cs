@@ -36,28 +36,28 @@ public static class UI
     public static Window EscapeMenu { get; } = new Window(center, Assets.Get(Sprites.LargePanel));
 
     //Main Menu
-    public static Button PatchedConicsToggle { get; } = new Button(new Vector2(75, -MainMenu.Size.Y / 4), Assets.Get(Sprites.WideButton), Assets.TextFont, $"Patched Conics: {SaveGame.PatchedConics}", Color.White);
-    public static Slider SFXSlider { get; } = new Slider(Line, Assets.Get(Sprites.Knob), new Vector2(100, 0), new Vector2(50, 2), false, [Color.White, Color.Gray]);
-    public static Slider MusicSlider { get; } = new Slider(Line, Assets.Get(Sprites.Knob), new Vector2(100, -15), new Vector2(50, 2), false, [Color.White, Color.Gray]);
-    public static Slider UIScaleSlider { get; } = new Slider(Line, Assets.Get(Sprites.Knob), new Vector2(100, 15), new Vector2(50, 2), false, [Color.White, Color.Gray]);
+    public static TerminalButton PatchedConicsToggle { get; } = new TerminalButton(new Vector2(75, -MainMenu.Size.Y / 4), Assets.TextFont, $"Patched Conics: {SaveGame.PatchedConics}", Color.White, 10);
+    public static Slider SFXSlider { get; } = new Slider(Line, Assets.Get(Sprites.Knob), new Vector2(100, 0), new Vector2(50, 5), false, [Color.White, Color.Gray]);
+    public static Slider MusicSlider { get; } = new Slider(Line, Assets.Get(Sprites.Knob), new Vector2(100, -15), new Vector2(50, 5), false, [Color.White, Color.Gray]);
+    public static Slider UIScaleSlider { get; } = new Slider(Line, Assets.Get(Sprites.Knob), new Vector2(100, 15), new Vector2(50, 5), false, [Color.White, Color.Gray]);
     public static Decal SFXVolume { get; } = new Decal(new Vector2(40, 0), Assets.TextFont, "Sound: 100%", Color.White, 5);
     public static Decal MusicVolume { get; } = new Decal(new Vector2(40, -15), Assets.TextFont, "Music: 100%", Color.White, 5);
     public static Decal UIScale { get; } = new Decal(new Vector2(40, 15), Assets.TextFont, $"UI Scale: {Math.Truncate((UIScaleSlider.Intervals[0] + 1) * 10) / 10}", Color.White, 5);
-    public static Button ShaderToggle { get; } = new Button(new Vector2(75, MainMenu.Size.Y / 4), Assets.Get(Sprites.WideButton), Assets.TextFont, $"Shader: {SaveGame.UseShader}", Color.White);
+    public static TerminalButton ShaderToggle { get; } = new TerminalButton(new Vector2(75, MainMenu.Size.Y / 4), Assets.TextFont, $"Shader: {SaveGame.UseShader}", Color.White, 10);
     public static TerminalButton SingleplayerButton { get; } = new TerminalButton(new Vector2(0, -MainMenu.Size.Y / 4), Assets.TextFont, "Singleplayer", Color.White, 10);
-    public static Button ExitButton { get; } = new Button(new Vector2(0, MainMenu.Size.Y / 4), Assets.Get(Sprites.WideButton), Assets.TextFont, "Exit", Color.White);
+    public static TerminalButton ExitButton { get; } = new TerminalButton(new Vector2(0, MainMenu.Size.Y / 4), Assets.TextFont, "Exit", Color.White, 10);
     public static Decal TitleName { get; } = new Decal(new Vector2(0, -MainMenu.Size.Y), Assets.Get(Sprites.Title));
-    public static Button LoadButton { get; } = new Button(new Vector2(0, 0), Assets.Get(Sprites.WideButton), Assets.TextFont, "Load", Color.White);
+    public static TerminalButton LoadButton { get; } = new TerminalButton(new Vector2(0, 0), Assets.TextFont, "Load", Color.White, 10);
     public static Decal WindowType { get; } = new Decal(new Vector2(-90, -15), null, Assets.TextFont, "Borderless Window", Color.White, 10);
-    public static Button NextWindowType { get; } = new Button(new Vector2(-130, 10), Assets.Get(Sprites.Button), Assets.TextFont, "Next", Color.White);
+    public static TerminalButton NextWindowType { get; } = new TerminalButton(new Vector2(-130, 10), Assets.TextFont, "Next", Color.White, 10);
     public static Decal Resolution { get; } = new Decal(new Vector2(-30, 45), null, Assets.TextFont, "1920 x 1080", Color.White, 10);
-    public static Button NextResolution { get; } = new Button(new Vector2(-130, 45), Assets.Get(Sprites.Button), Assets.TextFont, "Next Resolution", Color.White);
-    public static Button ApplyChanges { get; } = new Button(new Vector2(-40, 10), Assets.Get(Sprites.Button), Assets.TextFont, "Apply changes", Color.White);
-    public static Button[] NextModule { get; } = new Button[5];
-    public static Button[] PrevModule { get; } = new Button[5];
+    public static TerminalButton NextResolution { get; } = new TerminalButton(new Vector2(-130, 45), Assets.TextFont, "Next Resolution", Color.White, 10);
+    public static TerminalButton ApplyChanges { get; } = new TerminalButton(new Vector2(-40, 10), Assets.TextFont, "Apply changes", Color.White, 10);
+    public static TerminalButton[] NextModule { get; } = new TerminalButton[5];
+    public static TerminalButton[] PrevModule { get; } = new TerminalButton[5];
     public static Decal[] Module { get; } = new Decal[5];
     public static Decal[] KeybindTexts { get; } = new Decal[Input.Keybinds.Count];
-    public static Button[] KeybindInputs { get; } = new Button[Input.Keybinds.Count];
+    public static TerminalButton[] KeybindInputs { get; } = new TerminalButton[Input.Keybinds.Count];
 
     //Pause Menu
     public static Button QuitToMissionButton { get; } = new Button(new Vector2(0, -20), Assets.Get(Sprites.WideButton), Assets.TextFont, "Return", Color.White);
@@ -476,7 +476,7 @@ public static class UI
             var binding = (Binding)i; //Saving to a variable prevents delegate weirdness
             var key = Input.Keybinds[binding];
             MainMenu.AddWidget(KeybindTexts[i] = new Decal(new Vector2(-140 + Assets.TextFont.MeasureString($"{binding}").X / 2.55f, 12 * i - 80), Assets.TextFont, $"{binding}", Color.White, 8), 3);
-            var button = new Button(new Vector2(80, 12 * i - 80), Assets.TextFont, $"{key}", Color.White, 8);
+            var button = new TerminalButton(new Vector2(80, 12 * i - 80), Assets.TextFont, $"{key}", Color.White, 8);
             button.AddBehaviour(delegate ()
             {
                 var keys = Input.NewState.GetPressedKeys();
@@ -492,7 +492,7 @@ public static class UI
         for (int i = 0; i < NextModule.Length; i++)
         {
             int module = i;
-            MainMenu.AddWidget(NextModule[i] = new Button(new Vector2(120, 25 * i - 40), Assets.Get(Sprites.Button), Assets.TextFont, $"Next", Color.White), 2);
+            MainMenu.AddWidget(NextModule[i] = new TerminalButton(new Vector2(120, 25 * i - 40), Assets.TextFont, $"Next", Color.White, 10), 2);
             int index = i;
             NextModule[i].AddBehaviour(
                 delegate () 
@@ -508,7 +508,7 @@ public static class UI
                     }
                     Events.SetModules();
                 });
-            MainMenu.AddWidget(PrevModule[i] = new Button(new Vector2(-120, 25 * i - 40), Assets.Get(Sprites.Button), Assets.TextFont, $"Prev", Color.White), 2);
+            MainMenu.AddWidget(PrevModule[i] = new TerminalButton(new Vector2(-120, 25 * i - 40), Assets.TextFont, $"Prev", Color.White, 10), 2);
             PrevModule[i].AddBehaviour(
                 delegate () 
                 {
