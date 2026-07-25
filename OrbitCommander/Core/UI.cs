@@ -37,9 +37,9 @@ public static class UI
 
     //Main Menu
     public static TerminalButton PatchedConicsToggle { get; } = new TerminalButton(new Vector2(75, -MainMenu.Size.Y / 4), Assets.TextFont, $"Patched Conics: {SaveGame.PatchedConics}", Color.White, 10);
-    public static Slider SFXSlider { get; } = new Slider(Line, Assets.Get(Sprites.Knob), new Vector2(100, 0), new Vector2(50, 5), false, [Color.White, Color.Gray]);
-    public static Slider MusicSlider { get; } = new Slider(Line, Assets.Get(Sprites.Knob), new Vector2(100, -15), new Vector2(50, 5), false, [Color.White, Color.Gray]);
-    public static Slider UIScaleSlider { get; } = new Slider(Line, Assets.Get(Sprites.Knob), new Vector2(100, 15), new Vector2(50, 5), false, [Color.White, Color.Gray]);
+    public static TerminalSlider SFXSlider { get; } = new TerminalSlider(Line, Assets.Get(Sprites.Knob), new Vector2(100, 0), new Vector2(50, 5), false, [Color.White, Color.Gray]);
+    public static TerminalSlider MusicSlider { get; } = new TerminalSlider(Line, Assets.Get(Sprites.Knob), new Vector2(100, -15), new Vector2(50, 5), false, [Color.White, Color.Gray]);
+    public static TerminalSlider UIScaleSlider { get; } = new TerminalSlider(Line, Assets.Get(Sprites.Knob), new Vector2(100, 15), new Vector2(50, 5), false, [Color.White, Color.Gray]);
     public static Decal SFXVolume { get; } = new Decal(new Vector2(40, 0), Assets.TextFont, "Sound: 100%", Color.White, 5);
     public static Decal MusicVolume { get; } = new Decal(new Vector2(40, -15), Assets.TextFont, "Music: 100%", Color.White, 5);
     public static Decal UIScale { get; } = new Decal(new Vector2(40, 15), Assets.TextFont, $"UI Scale: {Math.Truncate((UIScaleSlider.Intervals[0] + 1) * 10) / 10}", Color.White, 5);

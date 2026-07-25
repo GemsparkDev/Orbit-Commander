@@ -23,9 +23,9 @@ public class TerminalButton(Vector2 _offset, SpriteFont _textFont, string _text,
             isOver = false;
         }
     }
-    public override void HoveringDraw(SpriteBatch _spriteBatch)
+    public override void HoveringDraw(SpriteBatch _spriteBatch, Vector2 _parentPosition, float _transparency, Vector2 _center)
     {
-        base.HoveringDraw(_spriteBatch);
+        base.HoveringDraw(_spriteBatch, _parentPosition, _transparency, _center);
         if (!isOver)
         {
             isOver = true;

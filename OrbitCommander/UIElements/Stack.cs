@@ -35,15 +35,8 @@ public class Stack<T> : FunctionalWidget where T : IData
             behaviours[i]();
         }
     }
-    public override void ContinuousInteract(Vector2 parentPosition)
-    {
-
-    }
-
-    public override void HoveringDraw(SpriteBatch _spriteBatch)
-    {
-
-    }
+    public override void ContinuousInteract(Vector2 parentPosition) { }
+    public override void HoveringDraw(SpriteBatch _spriteBatch, Vector2 _parentPosition, float _transparency, Vector2 _center) { }
 
     public override void Interact(Vector2 parentPosition)
     {

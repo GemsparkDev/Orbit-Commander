@@ -45,7 +45,7 @@ public class Dial : FunctionalWidget
         base.Draw(_spriteBatch, _parentPosition, _transparency, _center);
         _spriteBatch.Draw(dialTexture, _parentPosition + Offset - _center, null, color * _transparency, (2 * currentVal - 1) * MathF.PI / 4, new Vector2(dialTexture.Width, dialTexture.Height) / 2, UIManager.UIScale, 0, 0);
     }
-    public override void HoveringDraw(SpriteBatch _spriteBatch)
+    public override void HoveringDraw(SpriteBatch _spriteBatch, Vector2 _parentPosition, float _transparency, Vector2 _center)
     {
         if (Tooltip == null)
         {
