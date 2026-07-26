@@ -35,7 +35,7 @@ public static class Events
         Engine.IngameTime = new();
         Engine.MousePositionOffset = Vector2.Zero;
         Engine.UIManager.DisableAll();
-        UI.MainMenu.enabled = true;
+        UI.GlobalMainMenu.enabled = true;
         ParticleManager.Initialize();
         SoundManager.SetAllSounds(false);
         SoundManager.Initialize();

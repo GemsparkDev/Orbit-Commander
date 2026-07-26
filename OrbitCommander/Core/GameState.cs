@@ -84,7 +84,7 @@ public class MainMenu : GameState
     public override void Initialize()
     {
         smokeParticles.isEmitterActive = true;
-        Engine.UIManager.ScreenWindow.enabled = false;
+        Engine.UIManager.ScreenWindow = UI.GlobalMainMenu;
         SoundManager.ChangeTrack(Assets.Get(Sound.menu));
         Engine.Camera.Position = Vector2.Zero;
         Engine.Camera.Zoom = 1;
