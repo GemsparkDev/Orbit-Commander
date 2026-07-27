@@ -44,9 +44,9 @@ public static class UI
     public static Decal MusicVolume { get; } = new Decal(new Vector2(40, -15), Assets.TextFont, "Music: 100%", Color.White, 5);
     public static Decal UIScale { get; } = new Decal(new Vector2(40, 15), Assets.TextFont, $"UI Scale: {Math.Truncate((UIScaleSlider.Intervals[0] + 1) * 10) / 10}", Color.White, 5);
     public static TerminalButton ShaderToggle { get; } = new TerminalButton(new Vector2(75, GlobalMainMenu.Size.Y / 4), Assets.TextFont, $"Shader: {SaveGame.UseShader}", Color.White, 10);
-    public static TerminalButton SingleplayerButton { get; } = new TerminalButton(new Vector2(5, 15), Assets.TextFont, "Singleplayer", Color.White, 10);
-    public static TerminalButton ExitButton { get; } = new TerminalButton(new Vector2(0, GlobalMainMenu.Size.Y / 4), Assets.TextFont, "Exit", Color.White, 10);
-    public static TerminalButton LoadButton { get; } = new TerminalButton(new Vector2(0, 0), Assets.TextFont, "Load", Color.White, 10);
+    public static TerminalButton SingleplayerButton { get; } = new TerminalButton(new Vector2(0, 0), Assets.TextFont, "Singleplayer", Color.White, 10);
+    public static TerminalButton ExitButton { get; } = new TerminalButton(new Vector2(0, 40), Assets.TextFont, "Exit", Color.White, 10);
+    public static TerminalButton LoadButton { get; } = new TerminalButton(new Vector2(0, 20), Assets.TextFont, "Load", Color.White, 10);
     public static Decal WindowType { get; } = new Decal(new Vector2(-90, -15), null, Assets.TextFont, "Borderless Window", Color.White, 10);
     public static TerminalButton NextWindowType { get; } = new TerminalButton(new Vector2(-130, 10), Assets.TextFont, "Next", Color.White, 10);
     public static Decal Resolution { get; } = new Decal(new Vector2(-30, 45), null, Assets.TextFont, "1920 x 1080", Color.White, 10);
@@ -452,27 +452,27 @@ public static class UI
 
         EscapeButton.AddBehaviour(delegate { Events.SendMessage(Message.EscapeDroneLeave); });
 
-        GlobalMainMenu.AddWidget(ExitButton, (int)Alignment.Center);
-        GlobalMainMenu.AddWidget(SingleplayerButton, (int)Alignment.Center);
-        GlobalMainMenu.AddWidget(PatchedConicsToggle, (int)Alignment.Center);
-        GlobalMainMenu.AddWidget(SFXSlider, (int)Alignment.Center);
-        GlobalMainMenu.AddWidget(MusicSlider, (int)Alignment.Center);
-        GlobalMainMenu.AddWidget(UIScaleSlider, (int)Alignment.Center);
-        GlobalMainMenu.AddWidget(SFXVolume, (int)Alignment.Center);
-        GlobalMainMenu.AddWidget(MusicVolume, (int)Alignment.Center);
-        GlobalMainMenu.AddWidget(UIScale, (int)Alignment.Center);
-        GlobalMainMenu.AddWidget(ShaderToggle, (int)Alignment.Center);
-        GlobalMainMenu.AddWidget(LoadButton, (int)Alignment.Center);
-        GlobalMainMenu.AddWidget(WindowType, (int)Alignment.Center);
-        GlobalMainMenu.AddWidget(NextWindowType, (int)Alignment.Center);
-        GlobalMainMenu.AddWidget(Resolution, (int)Alignment.Center);
-        GlobalMainMenu.AddWidget(NextResolution, (int)Alignment.Center);
-        GlobalMainMenu.AddWidget(ApplyChanges, (int)Alignment.Center);
+        GlobalMainMenu.AddWidget(ExitButton, (int)Alignment.TopLeft);
+        GlobalMainMenu.AddWidget(SingleplayerButton, (int)Alignment.TopLeft);
+        GlobalMainMenu.AddWidget(PatchedConicsToggle, (int)Alignment.Top);
+        GlobalMainMenu.AddWidget(SFXSlider, (int)Alignment.Top);
+        GlobalMainMenu.AddWidget(MusicSlider, (int)Alignment.Top);
+        GlobalMainMenu.AddWidget(UIScaleSlider, (int)Alignment.Top);
+        GlobalMainMenu.AddWidget(SFXVolume, (int)Alignment.Top);
+        GlobalMainMenu.AddWidget(MusicVolume, (int)Alignment.Top);
+        GlobalMainMenu.AddWidget(UIScale, (int)Alignment.Top);
+        GlobalMainMenu.AddWidget(ShaderToggle, (int)Alignment.Top);
+        GlobalMainMenu.AddWidget(LoadButton, (int)Alignment.TopLeft);
+        GlobalMainMenu.AddWidget(WindowType, (int)Alignment.Top);
+        GlobalMainMenu.AddWidget(NextWindowType, (int)Alignment.Top);
+        GlobalMainMenu.AddWidget(Resolution, (int)Alignment.Top);
+        GlobalMainMenu.AddWidget(NextResolution, (int)Alignment.Top);
+        GlobalMainMenu.AddWidget(ApplyChanges, (int)Alignment.Top);
         for (int i = 0; i < Input.Keybinds.Count; i++)
         {
             var binding = (Binding)i; //Saving to a variable prevents delegate weirdness
             var key = Input.Keybinds[binding];
-            GlobalMainMenu.AddWidget(KeybindTexts[i] = new Decal(new Vector2(-140 + Assets.TextFont.MeasureString($"{binding}").X / 2.55f, 12 * i - 80), Assets.TextFont, $"{binding}", Color.White, 8), 3);
+            GlobalMainMenu.AddWidget(KeybindTexts[i] = new Decal(new Vector2(-140 + Assets.TextFont.MeasureString($"{binding}").X / 2.55f, 12 * i - 80), Assets.TextFont, $"{binding}", Color.White, 8), (int)Alignment.TopRight);
             var button = new TerminalButton(new Vector2(80, 12 * i - 80), Assets.TextFont, $"{key}", Color.White, 8);
             button.AddBehaviour(delegate ()
             {
@@ -483,13 +483,13 @@ public static class UI
                     button.text = $"{keys[0]}";
                 }
             });
-            GlobalMainMenu.AddWidget(KeybindInputs[i] = button, 3);
+            GlobalMainMenu.AddWidget(KeybindInputs[i] = button, (int)Alignment.TopRight);
         }
 
         for (int i = 0; i < NextModule.Length; i++)
         {
             int module = i;
-            GlobalMainMenu.AddWidget(NextModule[i] = new TerminalButton(new Vector2(120, 25 * i - 40), Assets.TextFont, $"Next", Color.White, 10), 2);
+            GlobalMainMenu.AddWidget(NextModule[i] = new TerminalButton(new Vector2(120, 25 * i - 40), Assets.TextFont, $"Next", Color.White, 10), (int)Alignment.Center);
             int index = i;
             NextModule[i].AddBehaviour(
                 delegate () 
@@ -505,7 +505,7 @@ public static class UI
                     }
                     Events.SetModules();
                 });
-            GlobalMainMenu.AddWidget(PrevModule[i] = new TerminalButton(new Vector2(-120, 25 * i - 40), Assets.TextFont, $"Prev", Color.White, 10), 2);
+            GlobalMainMenu.AddWidget(PrevModule[i] = new TerminalButton(new Vector2(-120, 25 * i - 40), Assets.TextFont, $"Prev", Color.White, 10), (int)Alignment.Center);
             PrevModule[i].AddBehaviour(
                 delegate () 
                 {
@@ -520,7 +520,7 @@ public static class UI
                     }
                     Events.SetModules(); 
                 });
-            GlobalMainMenu.AddWidget(Module[i] = new Decal(new Vector2(0, 25 * i - 40), Assets.TextFont, "Loading...", Color.White, 10), 2);
+            GlobalMainMenu.AddWidget(Module[i] = new Decal(new Vector2(0, 25 * i - 40), Assets.TextFont, "Loading...", Color.White, 10), (int)Alignment.Center);
         }
 
         PauseMenu.AddWidget(QuitToMissionButton);
