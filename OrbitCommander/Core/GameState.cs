@@ -76,38 +76,19 @@ public abstract class GameState
 }
 public class MainMenu : GameState
 {
-    private float time = MathF.PI;
-    private Planet menuPlanet = new Planet(new Vector2(0, 750), Vector2.Zero, 5000, 9, true, Color.Cyan);
-    private Planet moonPlanet = new Planet(new Vector2(0, 1750), Vector2.Zero, 750, 1.5f, true, Color.Cyan);
-    private ParticleEmitter smokeParticles = new(Assets.Get(Sprites.Circle), 1f, new Vector2(0, 300 - Assets.DimsOf(Sprites.Mothership).Y + 10), 0, MathF.PI / 4, 1, 40, Color.Gray, EmitterType.EmissionOverTime)
-    { particleFadeToColor = new Color(169, 169, 169, 0), probability = 0.25f };
     public override void Initialize()
     {
-        smokeParticles.isEmitterActive = true;
         Engine.UIManager.ScreenWindow = UI.GlobalMainMenu;
+        Engine.UIManager.ScreenWindow.enabled = true;
         SoundManager.ChangeTrack(Assets.Get(Sound.menu));
         Engine.Camera.Position = Vector2.Zero;
         Engine.Camera.Zoom = 1;
     }
     public override void Update()
     {
-        float d = 1000;
-        time += MathF.Sqrt(5000 / d) / d * Engine.DeltaSeconds * 60;
-        moonPlanet.Position = Util.ToUnitVector(time) * d + new Vector2(0, 750);
-        moonPlanet.GetComponent<StationaryEmitter>().Update();
-        smokeParticles.Update();
-        ParticleManager.Update();
-        if (time > MathF.Tau)
-        {
-            time -= MathF.Tau;
-        }
     }
     public override void Draw(SpriteBatch _spriteBatch)
     {
-        _spriteBatch.Draw(Assets.Get(Sprites.Mothership), new Vector2(-Assets.DimsOf(Sprites.Mothership).X / 2, 300 - Assets.DimsOf(Sprites.Mothership).Y), new Color(0, 255, 0));
-        ParticleManager.Draw(_spriteBatch);
-        menuPlanet.Draw(_spriteBatch);
-        moonPlanet.Draw(_spriteBatch);
     }
 }
 public class PlayingGame : GameState
@@ -115,6 +96,7 @@ public class PlayingGame : GameState
     public override bool PersistentParticles { get; } = true;
     public override void Initialize()
     {
+        Engine.UIManager.ScreenWindow = UI.GlobalMenu;
         Engine.UIManager.ScreenWindow.enabled = true;
     }
     public override void Update()
