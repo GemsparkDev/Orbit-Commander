@@ -86,7 +86,6 @@ public static class UI
     public static Decal WaveText { get; } = new Decal(new Vector2(-20, 0), Assets.TextFont, "0", Color.White, 10);
     public static Decal EnemiesLeft { get; } = new Decal(new Vector2(0, 0), Assets.TextFont, "0", Color.Red, 10);
     public static Decal Overlay { get; } = new Decal(new Vector2(-10.5f, 49f), Assets.Get(Sprites.Overlay)) { color = Color.White * 0.5f };
-
     //Mission Select Menu
     public static Decal MissionName { get; } = new Decal(new Vector2(0, -30), Assets.TextFont, "Name", Color.White, 10);
     public static Decal MissionDescription { get; } = new Decal(new Vector2(0, -15), Assets.TextFont, "Description", Color.Gray, 3f);
@@ -203,6 +202,7 @@ public static class UI
             float i = SFXSlider.Intervals[0];
             UILib.Content.UIManager.UIScale = (i + 1f) * BackBuffer.X / ScreenSize.X;
             UIScale.text = $"UI Scale: {Math.Truncate((i + 1) * 10) / 10}";
+            Debug.WriteLine(i);
         });
         ExitButton.AddBehaviour(delegate ()
         {
