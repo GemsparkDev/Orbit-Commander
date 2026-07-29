@@ -199,10 +199,12 @@ public static class UI
         });
         UIScaleSlider.AddBehaviour(delegate ()
         {
-            float i = SFXSlider.Intervals[0];
-            UILib.Content.UIManager.UIScale = (i + 1f) * BackBuffer.X / ScreenSize.X;
+            float i = UIScaleSlider.Intervals[0];
             UIScale.text = $"UI Scale: {Math.Truncate((i + 1) * 10) / 10}";
-            Debug.WriteLine(i);
+            if (Input.NewMouseState.LeftButton == ButtonState.Released)
+            {
+                UILib.Content.UIManager.UIScale = (i + 1f) * BackBuffer.X / ScreenSize.X;
+            }
         });
         ExitButton.AddBehaviour(delegate ()
         {

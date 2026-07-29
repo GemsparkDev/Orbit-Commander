@@ -39,9 +39,8 @@ public class Engine : Game
     public static int SaveSlot { get; private set; } = 0;
     private List<IActor> ShaderExceptions { get; } = [];
     public LoadingStage LoadingStage { get; private set; } = LoadingStage.Preload;
-
     public static float Time { get; private set; } = 0;
-
+    private Task loadingThread;
     public Engine()
     {
         graphics = new GraphicsDeviceManager(this);
@@ -68,7 +67,7 @@ public class Engine : Game
     }
     protected override void LoadContent()
     {
-        var loading = Task.Factory.StartNew(() =>
+        loadingThread = Task.Factory.StartNew(() =>
         {
             spriteBatch = new SpriteBatch(GraphicsDevice);
             Line = new Texture2D(graphics.GraphicsDevice, 1, 1, false, SurfaceFormat.Color);
@@ -121,6 +120,7 @@ public class Engine : Game
             Events.SetModules();
             LoadingStage = LoadingStage.Complete;
         });
+        
     }
     public static void Startgame()
     {
