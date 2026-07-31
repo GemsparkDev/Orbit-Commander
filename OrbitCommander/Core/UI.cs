@@ -36,18 +36,18 @@ public static class UI
     public static Window EscapeMenu { get; } = new Window(center, Assets.Get(Sprites.LargePanel));
 
     //Main Menu
-    public static TerminalButton PatchedConicsToggle { get; } = new TerminalButton(new Vector2(75, -GlobalMainMenu.Size.Y / 4), Assets.TextFont, $"Patched Conics: {SaveGame.PatchedConics}", Color.White, 10);
+    public static TerminalButton PatchedConicsToggle { get; } = new TerminalButton(new Vector2(75, 100), Assets.TextFont, $"Patched Conics: {SaveGame.PatchedConics}", Color.White, 10);
     public static TerminalSlider SFXSlider { get; } = new TerminalSlider(Line, Assets.Get(Sprites.Knob), new Vector2(100, 0), new Vector2(50, 5), false, [Color.White, Color.Gray]);
     public static TerminalSlider MusicSlider { get; } = new TerminalSlider(Line, Assets.Get(Sprites.Knob), new Vector2(100, -15), new Vector2(50, 5), false, [Color.White, Color.Gray]);
     public static TerminalSlider UIScaleSlider { get; } = new TerminalSlider(Line, Assets.Get(Sprites.Knob), new Vector2(100, 15), new Vector2(50, 5), false, [Color.White, Color.Gray]);
     public static Decal SFXVolume { get; } = new Decal(new Vector2(40, 0), Assets.TextFont, "Sound: 100%", Color.White, 5);
     public static Decal MusicVolume { get; } = new Decal(new Vector2(40, -15), Assets.TextFont, "Music: 100%", Color.White, 5);
     public static Decal UIScale { get; } = new Decal(new Vector2(40, 15), Assets.TextFont, $"UI Scale: {Math.Truncate((UIScaleSlider.Intervals[0] + 1) * 10) / 10}", Color.White, 5);
-    public static TerminalButton ShaderToggle { get; } = new TerminalButton(new Vector2(75, GlobalMainMenu.Size.Y / 4), Assets.TextFont, $"Shader: {SaveGame.UseShader}", Color.White, 10);
+    public static TerminalButton ShaderToggle { get; } = new TerminalButton(new Vector2(75, 80), Assets.TextFont, $"Shader: {SaveGame.UseShader}", Color.White, 10);
     public static TerminalButton SingleplayerButton { get; } = new TerminalButton(new Vector2(0, 0), Assets.TextFont, "Singleplayer", Color.White, 10);
     public static TerminalButton ExitButton { get; } = new TerminalButton(new Vector2(0, 40), Assets.TextFont, "Exit", Color.White, 10);
     public static TerminalButton LoadButton { get; } = new TerminalButton(new Vector2(0, 20), Assets.TextFont, "Load", Color.White, 10);
-    public static Decal WindowType { get; } = new Decal(new Vector2(-90, -15), null, Assets.TextFont, "Borderless Window", Color.White, 10);
+    public static Decal WindowType { get; } = new Decal(new Vector2(-60, 10), null, Assets.TextFont, "Borderless Window", Color.White, 10);
     public static TerminalButton NextWindowType { get; } = new TerminalButton(new Vector2(-130, 10), Assets.TextFont, "Next", Color.White, 10);
     public static Decal Resolution { get; } = new Decal(new Vector2(-30, 45), null, Assets.TextFont, "1920 x 1080", Color.White, 10);
     public static TerminalButton NextResolution { get; } = new TerminalButton(new Vector2(-130, 45), Assets.TextFont, "Next Resolution", Color.White, 10);
