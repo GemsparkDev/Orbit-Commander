@@ -47,7 +47,7 @@ public static class UI
     public static TerminalButton SingleplayerButton { get; } = new TerminalButton(new Vector2(0, 0), Assets.TextFont, "Singleplayer", Color.White, 10);
     public static TerminalButton ExitButton { get; } = new TerminalButton(new Vector2(0, 40), Assets.TextFont, "Exit", Color.White, 10);
     public static TerminalButton LoadButton { get; } = new TerminalButton(new Vector2(0, 20), Assets.TextFont, "Load", Color.White, 10);
-    public static Decal WindowType { get; } = new Decal(new Vector2(-60, 10), null, Assets.TextFont, "Borderless Window", Color.White, 10);
+    public static Decal WindowType { get; } = new Decal(new Vector2(-130, 10), null, Assets.TextFont, "Borderless Window", Color.White, 10);
     public static TerminalButton NextWindowType { get; } = new TerminalButton(new Vector2(-130, 10), Assets.TextFont, "Next", Color.White, 10);
     public static Decal Resolution { get; } = new Decal(new Vector2(-30, 45), null, Assets.TextFont, "1920 x 1080", Color.White, 10);
     public static TerminalButton NextResolution { get; } = new TerminalButton(new Vector2(-130, 45), Assets.TextFont, "Next Resolution", Color.White, 10);
