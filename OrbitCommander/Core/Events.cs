@@ -85,7 +85,7 @@ public static class Events
             Engine.SaveGame.Scrap -= 1;
             SoundManager.PlayGlobalSound(Assets.Get(Sound.Interact));
             UpdateRepairText();
-            UI.MothershipScrap.text = Engine.SaveGame.Scrap.ToString();
+            UI.MothershipScrap.Text {get; set;} = Engine.SaveGame.Scrap.ToString();
         }
         else
         {
@@ -97,11 +97,11 @@ public static class Events
         Pickup daughterModule = UI.RepairSlot.daughterItem;
         if (daughterModule != null)
         {
-            UI.RepairText.text = $"{daughterModule.Health}/{daughterModule.MaxHealth}";
+            UI.RepairText.Text {get; set;} = $"{daughterModule.Health}/{daughterModule.MaxHealth}";
         }
         else
         {
-            UI.RepairText.text = "";
+            UI.RepairText.Text {get; set;} = "";
         }
     }
     public static void UpdateInventoryUI()
@@ -140,11 +140,11 @@ public static class Events
         {
             if (module.daughterItem == null)
             {
-                UI.ValidConfigText.text = "";
+                UI.ValidConfigText.Text {get; set;} = "";
                 return;
             }
         }
-        UI.ValidConfigText.text = "Ready for Combat";
+        UI.ValidConfigText.Text {get; set;} = "Ready for Combat";
     }
     public static bool SyncModules()
     {
@@ -166,7 +166,7 @@ public static class Events
     {
         UI.FurnaceSlot.daughterItem = furnaceItem;
         UI.FurnaceSlider.SetInterval(_value, _maxValue);
-        UI.MothershipScrap.text = Engine.SaveGame.Scrap.ToString();
+        UI.MothershipScrap.Text {get; set;} = Engine.SaveGame.Scrap.ToString();
     }
     public static void CraftItem()
     {
@@ -184,13 +184,13 @@ public static class Events
     public static void UpdateCraftingUI(float _value, float _maxValue, int requiredCraftsLeft)
     {
         UI.CraftingSlider.SetInterval(_value, _maxValue);
-        UI.MothershipScrap.text = Engine.SaveGame.Scrap.ToString();
-        UI.RequiredCraftsText.text = requiredCraftsLeft.ToString();
+        UI.MothershipScrap.Text {get; set;} = Engine.SaveGame.Scrap.ToString();
+        UI.RequiredCraftsText.Text {get; set;} = requiredCraftsLeft.ToString();
     }
     public static void UpdateEnemyCountdownUI(float _value, float _maxValue, float _wave)
     {
         UI.EnemySlider.Intervals[0] = _value / _maxValue;
-        UI.WaveText.text = $"{_wave}";
+        UI.WaveText.Text {get; set;} = $"{_wave}";
     }
     public static void GarageTrigger()
     {
@@ -220,16 +220,16 @@ public static class Events
         var mission = Mission.missions[Engine.SaveGame.CurrentMissionIndex].data;
         bool completed = Engine.SaveGame.CurrentMissionCompleted;
         bool isDangerous = Engine.SaveGame.FleetSystem > Mission.missions[Engine.SaveGame.CurrentMissionIndex].data.System;
-        UI.MissionName.text = mission.Name;
-        UI.MissionDescription.text = mission.Description;
-        UI.IsComplete.text = completed ? "Completed" : "Not Completed";
+        UI.MissionName.Text {get; set;} = mission.Name;
+        UI.MissionDescription.Text {get; set;} = mission.Description;
+        UI.IsComplete.Text {get; set;} = completed ? "Completed" : "Not Completed";
         UI.IsComplete.textColor = completed ? Color.Green : Color.Red;
         UI.SelectMission.TextColor = completed && mission.IsRelaunchable ? Color.Gray : Color.Yellow;
-        UI.AlertText.text = isDangerous ? "Danger: Fleet Detected" : "";
+        UI.AlertText.Text {get; set;} = isDangerous ? "Danger: Fleet Detected" : "";
     }
     public static void UpdateScrapText()
     {
-        UI.MothershipScrap.text = Engine.SaveGame.Scrap.ToString();
+        UI.MothershipScrap.Text {get; set;} = Engine.SaveGame.Scrap.ToString();
     }
     public static void UpdateModulesStatus()
     {
@@ -317,11 +317,11 @@ public static class Events
             string text = outputFile.ReadLine();
             if (text != null)
             {
-                UI.LoadedName.text = SaveGame.Disassemble(text)[0];
+                UI.LoadedName.Text {get; set;} = SaveGame.Disassemble(text)[0];
             }
             return;
         }
-        UI.LoadedName.text = "Empty";
+        UI.LoadedName.Text {get; set;} = "Empty";
     }
     public static void DeleteSave()
     {
@@ -367,7 +367,7 @@ public static class Events
         string text;
         if (Engine.SaveGame.Scrap < 5)
         {
-            UI.UpgradeText.text = "Smelt 5 scrap to upgrade.";
+            UI.UpgradeText.Text {get; set;} = "Smelt 5 scrap to upgrade.";
             return;
         }
         var upgrades = new Dictionary<Modules, Modules>
@@ -382,12 +382,12 @@ public static class Events
             };
         if (!upgrades.TryGetValue(_moduleType.Type, out Modules value))
         {
-            UI.UpgradeText.text = "Selected module cannot be upgraded.";
+            UI.UpgradeText.Text {get; set;} = "Selected module cannot be upgraded.";
             return;
         }
         Module mod = ItemFactory.moduleData[value].Retrieve();
         text = $"{_moduleType.Name} has been upgraded to {mod.Name}.";
-        UI.UpgradeText.text = text;
+        UI.UpgradeText.Text {get; set;} = text;
         Engine.SaveGame.Player.modules[_slot] = mod;
         Engine.SaveGame.Scrap -= 5;
     }
@@ -395,7 +395,7 @@ public static class Events
     {
         for (int i = 0; i < 5; i++)
         {
-            UI.Module[i].text = ItemFactory.moduleData[UI.setModules[i]].Name;
+            UI.Module[i].Text {get; set;} = ItemFactory.moduleData[UI.setModules[i]].Name;
         }
     }
 }

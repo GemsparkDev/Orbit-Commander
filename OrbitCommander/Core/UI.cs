@@ -183,24 +183,24 @@ public static class UI
         PatchedConicsToggle.AddBehaviour(delegate
         {
             SaveGame.PatchedConics = !SaveGame.PatchedConics;
-            PatchedConicsToggle.text = $"Patched Conics: {SaveGame.PatchedConics}";
+            PatchedConicsToggle.Text {get; set;} = $"Patched Conics: {SaveGame.PatchedConics}";
         });
         ShaderToggle.AddBehaviour(delegate () 
         { 
             SaveGame.UseShader = !SaveGame.UseShader; 
-            ShaderToggle.text = $"Shader: {SaveGame.UseShader}"; 
+            ShaderToggle.Text {get; set;} = $"Shader: {SaveGame.UseShader}"; 
         });
         SFXSlider.AddBehaviour(delegate ()
         {
             float i = SFXSlider.Intervals[0];
             SoundManager.SFXVolume = i;
             UILib.Content.UIManager.SFXVolume = i;
-            SFXVolume.text = $"Sound: {Math.Round(i * 100)}%";
+            SFXVolume.Text {get; set;} = $"Sound: {Math.Round(i * 100)}%";
         });
         UIScaleSlider.AddBehaviour(delegate ()
         {
             float i = UIScaleSlider.Intervals[0];
-            UIScale.text = $"UI Scale: {Math.Truncate((i + 1) * 10) / 10}";
+            UIScale.Text {get; set;} = $"UI Scale: {Math.Truncate((i + 1) * 10) / 10}";
             if (Input.NewMouseState.LeftButton == ButtonState.Released)
             {
                 UILib.Content.UIManager.UIScale = (i + 1f) * BackBuffer.X / ScreenSize.X;
@@ -215,7 +215,7 @@ public static class UI
         {
             float i = MusicSlider.Intervals[0];
             SoundManager.MusicVolume = i;
-            MusicVolume.text = $"Music: {Math.Round(i * 100)}%";
+            MusicVolume.Text {get; set;} = $"Music: {Math.Round(i * 100)}%";
         });
         NextWindowType.AddBehaviour(delegate ()
         {
@@ -227,13 +227,13 @@ public static class UI
             switch (type)
             {
                 case 0:
-                    WindowType.text = "Windowed";
+                    WindowType.Text {get; set;} = "Windowed";
                     break;
                 case 1:
-                    WindowType.text = "Borderless Windowed";
+                    WindowType.Text {get; set;} = "Borderless Windowed";
                     break;
                 case 2:
-                    WindowType.text = "Fullscreen";
+                    WindowType.Text {get; set;} = "Fullscreen";
                     break;
                 default:
                     break;
@@ -246,7 +246,7 @@ public static class UI
             {
                 selectedResolution = 0;
             }
-            Resolution.text = $"{resolutions[selectedResolution].X} x {resolutions[selectedResolution].Y}";
+            Resolution.Text {get; set;} = $"{resolutions[selectedResolution].X} x {resolutions[selectedResolution].Y}";
         });
         SFXSlider.SetInterval(1, 1);
         MusicSlider.SetInterval(0, 1);
@@ -417,7 +417,7 @@ public static class UI
         SaveButton.AddBehaviour(delegate { Engine.UIManager.DisableAll(); SaveMenu.enabled = true; Events.GetSave(); });
         LoadButton.AddBehaviour(delegate { GlobalMainMenu.enabled = false; LoadMenu.enabled = true; Events.GetSave(); });
 
-        Name.AddBehaviour(delegate { Engine.SaveGame.Name = Name.text; });
+        Name.AddBehaviour(delegate { Engine.SaveGame.Name = Name.Text {get; set;}; });
         SaveToFile.AddBehaviour(Util.Save);
         LoadFromFile.AddBehaviour(delegate() 
         {
@@ -482,7 +482,7 @@ public static class UI
                 if (keys.Length > 0)
                 {
                     Input.Keybinds[binding] = keys[0];
-                    button.text = $"{keys[0]}";
+                    button.Text {get; set;} = $"{keys[0]}";
                 }
             });
             GlobalMainMenu.AddWidget(KeybindInputs[i] = button, (int)Alignment.TopRight);

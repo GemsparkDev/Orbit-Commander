@@ -33,7 +33,7 @@ public abstract class Module : Pickup, IData
     }
     private void UpdateHealth()
     {
-        healthDecal.text = $"{health.CurrentHealth} / {health.MaxHealth}";
+        healthDecal.Text {get; set;} = $"{health.CurrentHealth} / {health.MaxHealth}";
     }
 
     public virtual int OnCollide(int _damage) { return _damage; }

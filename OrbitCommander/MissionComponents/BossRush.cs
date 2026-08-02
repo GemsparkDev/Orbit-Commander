@@ -75,7 +75,7 @@ internal class BossRush : IMissionComponent
                 ParticleManager.Add(new Particle(currentBoss.Texture, currentBoss.Position, currentBoss.Angle, new Color(255, 127, 0) * (Util.Random.NextSingle() / 2 + 0.25f)));
             }
         }
-        UI.EnemiesLeft.text = (currentWaveActive ? (currentBoss.isExpired == false ? 1 : 0) : 0).ToString();
+        UI.EnemiesLeft.Text {get; set;} = (currentWaveActive ? (currentBoss.isExpired == false ? 1 : 0) : 0).ToString();
         Events.UpdateEnemyCountdownUI(waveTimer, maxWaveTimer, Engine.SaveGame.CurrentMission.Wave);
     }
 }

@@ -179,7 +179,7 @@ public class Engine : Game
         {
             ScreenShakeFactor = 0;
         }
-        UI.Timer.text = $"{IngameTime.DrawText}";
+        UI.Timer.Text {get; set;} = $"{IngameTime.DrawText}";
         Time += DeltaSeconds;
     }
     public static void WriteLine<T>(T arg, Color _color = default)
