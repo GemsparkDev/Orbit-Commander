@@ -101,8 +101,8 @@ public class Engine : Game
             });
             UI.ApplyChanges.AddBehaviour(delegate ()
             {
-                Self.Window.IsBorderless = UI.type == 1;
-                Self.graphics.IsFullScreen = UI.type == 2;
+                Self.Window.IsBorderless = UI.windowType == 1;
+                Self.graphics.IsFullScreen = UI.windowType == 2;
                 Self.graphics.PreferredBackBufferWidth = (int)UI.resolutions[UI.selectedResolution].X;
                 Self.graphics.PreferredBackBufferHeight = (int)UI.resolutions[UI.selectedResolution].Y;
                 BackBuffer = UI.resolutions[UI.selectedResolution];
@@ -179,7 +179,8 @@ public class Engine : Game
         {
             ScreenShakeFactor = 0;
         }
-        UI.Timer.Text {get; set;} = $"{IngameTime.DrawText}";
+        UI.Timer.Text
+            = $"{IngameTime.DrawText}";
         Time += DeltaSeconds;
     }
     public static void WriteLine<T>(T arg, Color _color = default)

@@ -444,6 +444,18 @@ public class Player : Entity
         }
         return _projectile;
     }
+    public int TryCrit(float _damage, float _crit, bool _condition)
+    {
+        if(!_condition)
+        {
+            return (int)_damage;
+        }
+        foreach(var module in modules)
+        {
+            _crit = module.Value.ModifyCrit(_crit);
+        }
+        return (int)Math.Round(_damage * _crit);
+    }
     public void Shoot(Entity _projectile)
     {
         Engine.SaveGame.CurrentMission.Add(Modify(_projectile));

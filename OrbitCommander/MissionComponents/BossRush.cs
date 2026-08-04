@@ -22,7 +22,7 @@ internal class BossRush : IMissionComponent
         currentBoss = bosses[index](pos, Vector2.Zero, Util.ToAngle(pos), Team.Hostile);
         index++;
     }
-    private List<T> Shuffle<T>(IList<T> _list)
+    private static List<T> Shuffle<T>(IList<T> _list)
     {
         return [.. _list.OrderBy(item => Util.Random.Next())];
     }
@@ -75,7 +75,7 @@ internal class BossRush : IMissionComponent
                 ParticleManager.Add(new Particle(currentBoss.Texture, currentBoss.Position, currentBoss.Angle, new Color(255, 127, 0) * (Util.Random.NextSingle() / 2 + 0.25f)));
             }
         }
-        UI.EnemiesLeft.Text {get; set;} = (currentWaveActive ? (currentBoss.isExpired == false ? 1 : 0) : 0).ToString();
+        UI.EnemiesLeft.Text = (currentWaveActive ? (currentBoss.isExpired == false ? 1 : 0) : 0).ToString();
         Events.UpdateEnemyCountdownUI(waveTimer, maxWaveTimer, Engine.SaveGame.CurrentMission.Wave);
     }
 }

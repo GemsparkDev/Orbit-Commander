@@ -33,7 +33,7 @@ public abstract class Module : Pickup, IData
     }
     private void UpdateHealth()
     {
-        healthDecal.Text {get; set;} = $"{health.CurrentHealth} / {health.MaxHealth}";
+        healthDecal.Text = $"{health.CurrentHealth} / {health.MaxHealth}";
     }
 
     public virtual int OnCollide(int _damage) { return _damage; }
@@ -41,6 +41,7 @@ public abstract class Module : Pickup, IData
     public virtual void OnEnemyHit(Entity _entity, int _damage) { }
     public virtual int SensingChange() { return 0; }
     public virtual int StealthChange() { return 0; }
+    public virtual float ModifyCrit(float _crit) { return _crit; }
     public virtual void OnUpdate(float _fuseRatio)
     {
         if (Cooldown > 0)
@@ -75,9 +76,9 @@ public abstract class Module : Pickup, IData
 }
 public class ReloadSystem(int _magazineSize, float _reloadSpeed, Action _reloadCallback = null)
 {
-    private int rounds = _magazineSize;
     private int magazineSize = _magazineSize;
     float reloadCD = 0;
+    public int Rounds { get; private set; } = _magazineSize;
     public void Update(Module _module, float _fuseRatio)
     {
         if (reloadCD > 0)
@@ -85,17 +86,17 @@ public class ReloadSystem(int _magazineSize, float _reloadSpeed, Action _reloadC
             reloadCD -= Engine.DeltaSeconds * _fuseRatio;
             if (reloadCD < 0)
             {
-                rounds = magazineSize;
+                Rounds = magazineSize;
             }
         }
-        float val = rounds;
+        float val = Rounds;
         if (reloadCD > 0)
         {
             val = (1 - reloadCD / _reloadSpeed) * magazineSize;
         }
-        if (rounds != magazineSize && reloadCD <= 0 && Input.NewState.IsKeyDown(Keys.R))
+        if (Rounds != magazineSize && reloadCD <= 0 && Input.NewState.IsKeyDown(Keys.R))
         {
-            rounds = 0;
+            Rounds = 0;
             reloadCD = _reloadSpeed;
             SoundManager.PlayGlobalSound(Assets.Get(Sound.Dock));
         }
@@ -106,9 +107,9 @@ public class ReloadSystem(int _magazineSize, float _reloadSpeed, Action _reloadC
     }
     public bool Fire()
     {
-        if (rounds > 0)
+        if (Rounds > 0)
         {
-            rounds--;
+            Rounds--;
             return true;
         }
         else
@@ -472,6 +473,7 @@ public class OrionEngine() : Module(Modules.Orion)
 public class Basic() : Module(Modules.Basic)
 {
     private ReloadSystem ammo = new ReloadSystem(18, 2);
+    private float critCD = 0;
     public override float Speed => 9;
     public override void OnShoot()
     {
@@ -481,8 +483,12 @@ public class Basic() : Module(Modules.Basic)
         }
         if (ammo.Fire())
         {
+            if(Util.Random.NextSingle() > 0.95f) //Has a chance to cause a critical hit buff
+            {
+                critCD = 2.5f;
+            }
             Vector2 vel = Player.IdealSpeedWithVelocity(Speed) + new Vector2(Util.OneToNegOne(), Util.OneToNegOne()) / 2;
-            Player.Shoot(NewPulseShot(Player.Position, vel, Util.ToAngle(vel - Player.Velocity), 0, Team, 3));
+            Player.Shoot(NewPulseShot(Player.Position, vel, Util.ToAngle(vel - Player.Velocity), 0, Team, Player.TryCrit(3f, 2f, critCD > 0)));
             SoundManager.PlaySound(Assets.Get(Sound.PulseFire), Player.Position);
             Cooldown = 0.2f;
             Engine.ShakeScreen(0.3f);
@@ -495,6 +501,10 @@ public class Basic() : Module(Modules.Basic)
     public override void OnUpdate(float _fuseRatio)
     {
         ammo.Update(this, _fuseRatio);
+        if(critCD > 0)
+        {
+            critCD -= Engine.DeltaSeconds;
+        }
         base.OnUpdate(_fuseRatio);
     }
     public override int StealthChange() => GunStealthChange();
@@ -544,9 +554,12 @@ public class Railgun() : Module(Modules.Antimaterial)
         {
             var proj = Player.Modify(NewAssassinShot(Player.Position, Player.Direction * 50, Util.ToAngle(Player.Direction), 0, Player.Team, 30, 0));
             List<Entity> entities = Engine.SaveGame.CurrentMission.Hitscan(Player.Position, Player.Direction, 3000, true, out Vector2 end, null);
-            foreach (var entity in entities)
+            float critBonus = 1f;
+            for(int i = 0; i < entities.Count; i++)
             {
-                entity.Collide(proj.Damage);
+                var entity = entities[i];
+                entity.Collide(Player.TryCrit(proj.Damage, critBonus, i > 0));
+                critBonus += 0.5f;
             }
             SoundManager.PlaySound(Assets.Get(Sound.SniperFire), Player.Position);
             Engine.Camera.Position += Player.Direction * 30 + new Vector2(Util.OneToNegOne(), Util.OneToNegOne());
@@ -673,6 +686,7 @@ public class Missile() : Module(Modules.Missile)
 public class LMG() : Module(Modules.LMG)
 {
     private ReloadSystem ammo = new ReloadSystem(80, 4);
+    private float critCD = 0;
     public override float Speed => 12;
     public override void OnShoot()
     {
@@ -684,7 +698,7 @@ public class LMG() : Module(Modules.LMG)
         {
             Vector2 offset = new Vector2(Player.Direction.Y, -Player.Direction.X) * Util.Random.Next(-2, 3) + Util.ToUnitVector(Player.Angle) * 8;
             Texture2D dot = Assets.Get(Sprites.Microshot);
-            var shot = NewPulseShot(Player.Position + offset, Player.IdealSpeedWithVelocity(Speed) + offset / 4, Util.ToAngle(Player.Direction), 0, Team, 2);
+            var shot = NewPulseShot(Player.Position + offset, Player.IdealSpeedWithVelocity(Speed) + offset / 4, Util.ToAngle(Player.Direction), 0, Team, Player.TryCrit(2, 1.5f, critCD > 0.5f));
             shot.Texture = dot;
             shot.TimeLeft = 3;
             Player.Shoot(shot);
@@ -700,7 +714,15 @@ public class LMG() : Module(Modules.LMG)
     public override void OnUpdate(float _fuseRatio)
     {
         ammo.Update(this, _fuseRatio);
+        if(critCD > 0)
+        {
+            critCD -= Engine.DeltaSeconds;
+        }
         base.OnUpdate(_fuseRatio);
+    }
+    public override void OnEnemyHit(Entity _entity, int _damage)
+    {
+        critCD = critCD * 4 / 5 + 0.2f;
     }
     public override int StealthChange() => GunStealthChange();
 }
@@ -741,7 +763,7 @@ public class Flamethrower() : Module(Modules.Flamethrower)
         }
         if (ammo.Fire())
         {
-            Player.Shoot(new FlameBolt(Player.Position, Player.IdealSpeedWithVelocity(Speed) + new Vector2(Util.OneToNegOne(), Util.OneToNegOne()) / 4, Team, 1));
+            Player.Shoot(new FlameBolt(Player.Position, Player.IdealSpeedWithVelocity(Speed) + new Vector2(Util.OneToNegOne(), Util.OneToNegOne()) / 4, Team, Player.TryCrit(1, 3, Player.Temperature > 1)));
             SoundManager.PlaySound(Assets.Get(Sound.LMGFire), Player.Position);
             Player.Velocity -= Player.Direction / 10;
             Cooldown = 0.08f;
@@ -768,7 +790,7 @@ public class Fireball() : Module(Modules.Fireball)
         }
         if (ammo.Fire())
         {
-            Player.Shoot(new FlameBolt(Player.Position, Player.IdealSpeedWithVelocity(Speed) + new Vector2(Util.OneToNegOne(), Util.OneToNegOne()) / 2, Team, 4, 4, 0.5f));
+            Player.Shoot(new FlameBolt(Player.Position, Player.IdealSpeedWithVelocity(Speed) + new Vector2(Util.OneToNegOne(), Util.OneToNegOne()) / 2, Team, Player.TryCrit(4, 3f, Player.Temperature > 1), 4, 0.5f));
             SoundManager.PlaySound(Assets.Get(Sound.LMGFire), Player.Position);
             Cooldown = 0.5f;
             Engine.ShakeScreen(0.3f);
@@ -957,6 +979,7 @@ public class Torch() : Module(Modules.Torch)
     ReloadSystem ammo = new ReloadSystem(8, 1);
     int count = 0;
     float betweenShots = 0;
+    private float critCD = 0;
     public override float Speed => 12;
     public override void OnShoot()
     {
@@ -977,7 +1000,7 @@ public class Torch() : Module(Modules.Torch)
             {
                 betweenShots = 0.05f;
                 Vector2 offset = new Vector2(Player.Direction.Y, -Player.Direction.X) * Util.OneToNegOne() * 3;
-                var shot = new FlameBolt(Player.Position - offset * 5, Player.IdealSpeedWithVelocity(Speed) + offset / 3, Team, 2, 2, 0.1f, 0, 20);
+                var shot = new FlameBolt(Player.Position - offset * 5, Player.IdealSpeedWithVelocity(Speed) + offset / 3, Team, Player.TryCrit(2, 2.5f, critCD > 0), 2, 0.1f, 0, 20);
                 Player.Shoot(shot);
                 SoundManager.PlaySound(Assets.Get(Sound.PulseFire), Player.Position);
                 Engine.ShakeScreen(0.2f);
@@ -998,10 +1021,21 @@ public class Torch() : Module(Modules.Torch)
                 Cooldown = 0.25f;
             }
         }
+        if(critCD > 0)
+        {
+            critCD -= Engine.DeltaSeconds;
+        }
         ammo.Update(this, _fuseRatio);
         base.OnUpdate(_fuseRatio);
     }
     public override int StealthChange() => GunStealthChange();
+    public override void OnEnemyHit(Entity _entity, int _damage)
+    {
+        if(_entity.Temperature > 1)
+        {
+            critCD = 0.5f;
+        }
+    }
 }
 public class SplitterModule() : Module(Modules.SplitterModule)
 {
@@ -1078,10 +1112,15 @@ public class Fractal() : Module(Modules.Fractal)
     }
     public override int StealthChange() => GunStealthChange();
 }
-public class CrackShot() : Module(Modules.CrackShot)
+public class CrackShot : Module
 {
-    ReloadSystem ammo = new ReloadSystem(6, 2.5f);
+    ReloadSystem ammo;
     public override float Speed => 8;
+    private float critCD = 0;
+    public CrackShot() : base (Modules.CrackShot)
+    {
+        ammo = new ReloadSystem(6, 2.5f, ReloadCallback);
+    }
     public override void OnShoot()
     {
         if (Cooldown > 0)
@@ -1090,7 +1129,8 @@ public class CrackShot() : Module(Modules.CrackShot)
         }
         if (ammo.Fire())
         {
-            Player.Shoot(NewSplitter(Player.Position, Player.IdealSpeedWithVelocity(Speed), Util.ToAngle(Player.Direction), Team, 3, [delegate (Vector2 _position, Vector2 _velocity, float _angle) { return NewAssassinShot(_position, _velocity, _angle, 0, Team, 3, 0); }], 0.2f, 0, true));
+            int dmg = Player.TryCrit(3, 1.25f, critCD > 0);
+            Player.Shoot(NewSplitter(Player.Position, Player.IdealSpeedWithVelocity(Speed), Util.ToAngle(Player.Direction), Team, dmg, [delegate (Vector2 _position, Vector2 _velocity, float _angle) { return NewAssassinShot(_position, _velocity, _angle, 0, Team, dmg, 0); }], 0.2f, 0, true));
             SoundManager.PlaySound(Assets.Get(Sound.PulseFire), Player.Position);
             Engine.ShakeScreen(0.3f);
             Player.Velocity -= Player.Direction / 2;
@@ -1100,9 +1140,17 @@ public class CrackShot() : Module(Modules.CrackShot)
             Player.Flash(Color.BurlyWood);
         }
     }
+    private void ReloadCallback()
+    {
+        critCD = 1.2f;
+    }
     public override void OnUpdate(float _fuseRatio)
     {
         ammo.Update(this, _fuseRatio);
+        if(critCD > 0)
+        {
+            critCD -= Engine.DeltaSeconds;
+        }
         base.OnUpdate(_fuseRatio);
     }
     public override int StealthChange() => GunStealthChange();
@@ -1158,7 +1206,7 @@ public class AdaptiveShotgun() : Module(Modules.AdaptiveShotgun)
                 var dir = Vector2.Normalize(speed);
                 Vector2 offset = (dir * i / 5 + new Vector2(dir.Y, -dir.X)) * i * 100 / distance;
                 Vector2 targetVector = speed + offset;
-                var p1 = NewPulseShot(Player.Position, targetVector, Util.ToAngle(targetVector - Player.Velocity), 0, Team, 6 - (int)MathF.Abs(i), true, 0);
+                var p1 = NewPulseShot(Player.Position, targetVector, Util.ToAngle(targetVector - Player.Velocity), 0, Team, Player.TryCrit(6 - (int)MathF.Abs(i), 1.5f, ammo.Rounds == 1), true, 0);
                 p1.Texture = Assets.Get(Sprites.Microshot);
                 p1.GetComponent<ExpireTimer>().TimeLeft = 5;
                 Player.Shoot(p1);

@@ -157,7 +157,7 @@ public static class UI
     public static ItemSlot<Module>[] ModuleSlots { get; private set; } = new ItemSlot<Module>[5];
     public static ItemSlot<Module> SecondarySlot { get; private set; } = new ItemSlot<Module>(new Vector2(-GarageMenu.Size.X / 4 - 25, 50), Assets.Get(Sprites.EmptySlot), Engine.UIManager, (int)ModuleType.Guns);
 
-    public static int type = 1;
+    public static int windowType = 1;
     public static readonly Vector2[] resolutions = [new Vector2(1920, 1080), new Vector2(640, 480)];
     public static int selectedResolution = 0;
     public static readonly Modules[] setModules = [Modules.Hull, Modules.Basic, Modules.Engines, Modules.ProjectingModifier, Modules.Dash];
@@ -183,24 +183,24 @@ public static class UI
         PatchedConicsToggle.AddBehaviour(delegate
         {
             SaveGame.PatchedConics = !SaveGame.PatchedConics;
-            PatchedConicsToggle.Text {get; set;} = $"Patched Conics: {SaveGame.PatchedConics}";
+            PatchedConicsToggle.Text = $"Patched Conics: {SaveGame.PatchedConics}";
         });
         ShaderToggle.AddBehaviour(delegate () 
         { 
             SaveGame.UseShader = !SaveGame.UseShader; 
-            ShaderToggle.Text {get; set;} = $"Shader: {SaveGame.UseShader}"; 
+            ShaderToggle.Text = $"Shader: {SaveGame.UseShader}"; 
         });
         SFXSlider.AddBehaviour(delegate ()
         {
             float i = SFXSlider.Intervals[0];
             SoundManager.SFXVolume = i;
             UILib.Content.UIManager.SFXVolume = i;
-            SFXVolume.Text {get; set;} = $"Sound: {Math.Round(i * 100)}%";
+            SFXVolume.Text = $"Sound: {Math.Round(i * 100)}%";
         });
         UIScaleSlider.AddBehaviour(delegate ()
         {
             float i = UIScaleSlider.Intervals[0];
-            UIScale.Text {get; set;} = $"UI Scale: {Math.Truncate((i + 1) * 10) / 10}";
+            UIScale.Text = $"UI Scale: {Math.Truncate((i + 1) * 10) / 10}";
             if (Input.NewMouseState.LeftButton == ButtonState.Released)
             {
                 UILib.Content.UIManager.UIScale = (i + 1f) * BackBuffer.X / ScreenSize.X;
@@ -215,25 +215,25 @@ public static class UI
         {
             float i = MusicSlider.Intervals[0];
             SoundManager.MusicVolume = i;
-            MusicVolume.Text {get; set;} = $"Music: {Math.Round(i * 100)}%";
+            MusicVolume.Text = $"Music: {Math.Round(i * 100)}%";
         });
         NextWindowType.AddBehaviour(delegate ()
         {
-            type++;
-            if (type > 2)
+            windowType++;
+            if (windowType > 2)
             {
-                type -= 3;
+                windowType -= 3;
             }
-            switch (type)
+            switch (windowType)
             {
                 case 0:
-                    WindowType.Text {get; set;} = "Windowed";
+                    WindowType.Text = "Windowed";
                     break;
                 case 1:
-                    WindowType.Text {get; set;} = "Borderless Windowed";
+                    WindowType.Text = "Borderless Windowed";
                     break;
                 case 2:
-                    WindowType.Text {get; set;} = "Fullscreen";
+                    WindowType.Text = "Fullscreen";
                     break;
                 default:
                     break;
@@ -246,7 +246,7 @@ public static class UI
             {
                 selectedResolution = 0;
             }
-            Resolution.Text {get; set;} = $"{resolutions[selectedResolution].X} x {resolutions[selectedResolution].Y}";
+            Resolution.Text = $"{resolutions[selectedResolution].X} x {resolutions[selectedResolution].Y}";
         });
         SFXSlider.SetInterval(1, 1);
         MusicSlider.SetInterval(0, 1);
@@ -417,7 +417,7 @@ public static class UI
         SaveButton.AddBehaviour(delegate { Engine.UIManager.DisableAll(); SaveMenu.enabled = true; Events.GetSave(); });
         LoadButton.AddBehaviour(delegate { GlobalMainMenu.enabled = false; LoadMenu.enabled = true; Events.GetSave(); });
 
-        Name.AddBehaviour(delegate { Engine.SaveGame.Name = Name.Text {get; set;}; });
+        Name.AddBehaviour(delegate { Engine.SaveGame.Name = Name.Text; });
         SaveToFile.AddBehaviour(Util.Save);
         LoadFromFile.AddBehaviour(delegate() 
         {
@@ -482,7 +482,7 @@ public static class UI
                 if (keys.Length > 0)
                 {
                     Input.Keybinds[binding] = keys[0];
-                    button.Text {get; set;} = $"{keys[0]}";
+                    button.Text = $"{keys[0]}";
                 }
             });
             GlobalMainMenu.AddWidget(KeybindInputs[i] = button, (int)Alignment.TopRight);

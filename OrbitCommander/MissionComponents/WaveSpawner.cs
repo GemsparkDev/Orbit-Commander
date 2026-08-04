@@ -205,7 +205,7 @@ internal class WaveSpawner : IMissionComponent
                 }
             }
         }
-        UI.EnemiesLeft.Text {get; set;} = (currentWaveActive ? enemiesSpawned.Where(x => x.Health > 0).Count() : 0).ToString();
+        UI.EnemiesLeft.Text = (currentWaveActive ? enemiesSpawned.Where(x => x.Health > 0).Count() : 0).ToString();
         Events.UpdateEnemyCountdownUI(waveTimer, maxWaveTimer, Wave);
     }
 }
