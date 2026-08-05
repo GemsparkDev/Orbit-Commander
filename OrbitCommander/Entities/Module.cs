@@ -39,6 +39,7 @@ public abstract class Module : Pickup, IData
     public virtual int OnCollide(int _damage) { return _damage; }
     public virtual void OnShoot() { }
     public virtual void OnEnemyHit(Entity _entity, int _damage) { }
+    public virtual void OnContruct(Pickup _c) { }
     public virtual int SensingChange() { return 0; }
     public virtual int StealthChange() { return 0; }
     public virtual float ModifyCrit(float _crit) { return _crit; }
@@ -434,6 +435,10 @@ public class WorkEngine() : Module(Modules.Work)
         }
         base.OnUpdate(_fuseRatio);
     }
+    public override void OnContruct(Pickup _c)
+    {
+        _c.AddTag(Tags.IsImmune);
+    }
 }
 public class OrionEngine() : Module(Modules.Orion)
 {
@@ -807,6 +812,7 @@ public class Fireball() : Module(Modules.Fireball)
 public class GrenadeLauncher() : Module(Modules.GrenadeLauncher)
 {
     ReloadSystem ammo = new ReloadSystem(8, 3);
+    private float critCD = 0;
     public override float Speed => 8;
     public override void OnShoot()
     {
@@ -816,7 +822,7 @@ public class GrenadeLauncher() : Module(Modules.GrenadeLauncher)
         }
         if (ammo.Fire())
         {
-            Player.Shoot(NewExplosive(Player.Position, Player.IdealSpeedWithVelocity(Speed) + new Vector2(Util.OneToNegOne(), Util.OneToNegOne()), Util.ToAngle(Player.Direction), Util.OneToNegOne() / 8, Team, 16, 40, 1));
+            Player.Shoot(NewExplosive(Player.Position, Player.IdealSpeedWithVelocity(Speed) + new Vector2(Util.OneToNegOne(), Util.OneToNegOne()), Util.ToAngle(Player.Direction), Util.OneToNegOne() / 8, Team, Player.TryCrit(16, 1.66f, critCD > 0), 40, 1));
             SoundManager.PlaySound(Assets.Get(Sound.PulseFire), Player.Position);
             Cooldown = 0.8f;
             Engine.ShakeScreen(0.4f);
@@ -829,7 +835,15 @@ public class GrenadeLauncher() : Module(Modules.GrenadeLauncher)
     public override void OnUpdate(float _fuseRatio)
     {
         ammo.Update(this, _fuseRatio);
+        if(critCD > 0)
+        {
+            critCD -= Engine.DeltaSeconds;
+        }
         base.OnUpdate(_fuseRatio);
+    }
+    public override void OnContruct(Pickup _c)
+    {
+        critCD += 30;
     }
 }
 public class SpewerModule() : Module(Modules.Spewer)

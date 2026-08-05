@@ -2,5 +2,6 @@
 //Currently used as a projectile tag standin
 internal class Attack : IComponent
 {
-    public int Damage { get; set; }
+    public int Damage { get; set; } = 0;
+    public bool IsCrit { get; set; } = false;
 }

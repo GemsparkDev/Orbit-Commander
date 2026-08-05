@@ -18,7 +18,7 @@ public class Entity : IMissionComponent
 {
     //TODO: Make sure to add null checks to all these!
     public Transform Transform { get; private set; } //All game entities have transforms
-    public Vector2 Position { get { return Transform.Position; } set { Transform.Position = value; } }
+    public Vector2 Position { get => Transform.Position; set => Transform.Position = value; }
     public Vector2 Velocity { get { return Transform.Velocity; } set { Transform.Velocity = value; } }
     public float Angle { get { return Transform.Angle; } set { Transform.Angle = value; } }
     public float AngularVelocity { get { return Transform.AngularVelocity; } set { Transform.AngularVelocity = value; } }
@@ -32,8 +32,9 @@ public class Entity : IMissionComponent
     public float Temperature { get { return GetComponent<Temp>().Temperature; } set { GetComponent<Temp>().Temperature = value; } }
     public Team Team { get { return FriendlyComp.Team; } set { FriendlyComp.Team = value; } }
     public virtual int SensingAbility { get { return GetComponent<Stealth>().SensingAbility; } set { GetComponent<Stealth>().SensingAbility = value; } }
-    public virtual int StealthAbility { get { return GetComponent<Stealth>().StealthAbility; } set { GetComponent<Stealth>().StealthAbility = value; } }
-    public float InvincibilityCooldown { get { return GetComponent<Collide>().InvincibilityCooldown; } set { GetComponent<Collide>().InvincibilityCooldown = value; } }
+    public virtual int StealthAbility { get { return GetComponent<Stealth>().StealthAbility; } set => GetComponent<Stealth>().StealthAbility = value; }
+    public float InvincibilityCooldown { get => GetComponent<Collide>().InvincibilityCooldown; set => GetComponent<Collide>().InvincibilityCooldown = value; }
+    public bool Crit { get => GetComponent<Attack>().IsCrit; set => GetComponent<Attack>().IsCrit = value; }
     public ParticleEmitter EnemyRange => GetComponent<FollowEmitter>().ParticleEmitter;
     public Statuses Statuses => GetComponent<Statuses>();
     public Vector2 Size => (GetComponent<Sprite>()?.Size) ?? Vector2.Zero;
@@ -265,7 +266,8 @@ public class Entity : IMissionComponent
                     entity.ApplyWork(damage);
                     entity.Health -= damage;
                     Engine.ShakeScreen(10 / ((entity.Position - Engine.Camera.Position).Length() + 200) * damage);
-                    ParticleManager.Add(new Particle(null, 1, entity.Position + new Vector2(0, -1), new Vector2(0, -1.5f), 0, 0, Color.Orange, new Color(255, 0, 0, 0)) { drawText = $"{damage}" });
+                    Color color = Color.Orange;
+                    ParticleManager.Add(new Particle(null, 1, entity.Position + new Vector2(0, -1), new Vector2(0, -1.5f), 0, 0, color, new Color(255, 0, 0, 0)) { drawText = $"{damage}" });
                     entity.RevealDuration = Math.Max(entity.RevealDuration, 0.3f * MathF.Sqrt(damage));
                     return damage;
                 }

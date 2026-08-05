@@ -628,47 +628,24 @@ public class Player : Entity
                             Vector2 dir = Util.ToUnitVector(angle);
                             if (dir.X * Direction.X + dir.Y * Direction.Y > 1f - 0.9f / types.Count && dist > 300 && firstScrap != null)
                             {
+                                Pickup construct = null;
                                 switch (types[i])
                                 {
                                     case "Barricade":
                                         firstScrap.isExpired = true;
-                                        var barricade = Pickup.NewCryoBarricade(firstScrap.Position, firstScrap.Velocity, 0, 0);
-                                        if (modules[ModuleType.Engines] is WorkEngine)
-                                        {
-                                            barricade.AddTag(Tags.IsImmune);
-                                        }
-                                        leashedMaterials.Add(barricade);
-                                        Engine.SaveGame.CurrentMission.Add(barricade);
+                                        construct = Pickup.NewCryoBarricade(firstScrap.Position, firstScrap.Velocity, 0, 0);
                                         break;
                                     case "Trap":
                                         firstScrap.isExpired = true;
-                                        var trap = Pickup.NewTrap(firstScrap.Position, firstScrap.Velocity, 0, 0);
-                                        if (modules[ModuleType.Engines] is WorkEngine)
-                                        {
-                                            trap.AddTag(Tags.IsImmune);
-                                        }
-                                        leashedMaterials.Add(trap);
-                                        Engine.SaveGame.CurrentMission.Add(trap);
+                                        construct = Pickup.NewTrap(firstScrap.Position, firstScrap.Velocity, 0, 0);
                                         break;
                                     case "Bomb":
                                         firstScrap.isExpired = true;
-                                        var bomb = Pickup.NewBomb(firstScrap.Position, firstScrap.Velocity, 0, 0);
-                                        if (modules[ModuleType.Engines] is WorkEngine)
-                                        {
-                                            bomb.AddTag(Tags.IsImmune);
-                                        }
-                                        leashedMaterials.Add(bomb);
-                                        Engine.SaveGame.CurrentMission.Add(bomb);
+                                        construct = Pickup.NewBomb(firstScrap.Position, firstScrap.Velocity, 0, 0);
                                         break;
                                     case "Furnace":
                                         firstScrap.isExpired = true;
-                                        var furnace = Pickup.NewFurnace(firstScrap.Position, firstScrap.Velocity, 0, 0);
-                                        if (modules[ModuleType.Engines] is WorkEngine)
-                                        {
-                                            furnace.AddTag(Tags.IsImmune);
-                                        }
-                                        leashedMaterials.Add(furnace);
-                                        Engine.SaveGame.CurrentMission.Add(furnace);
+                                        construct = Pickup.NewFurnace(firstScrap.Position, firstScrap.Velocity, 0, 0);
                                         break;
                                     case "Mothership":
                                         if (scrapCount >= 3)
@@ -687,16 +664,19 @@ public class Player : Entity
                                         break;
                                     case "Mace":
                                         firstScrap.isExpired = true;
-                                        var mace = Pickup.NewFaradayShield(firstScrap.Position, firstScrap.Velocity, 0, 0);
-                                        if (modules[ModuleType.Engines] is WorkEngine)
-                                        {
-                                            mace.AddTag(Tags.IsImmune);
-                                        }
-                                        leashedMaterials.Add(mace);
-                                        Engine.SaveGame.CurrentMission.Add(mace);
+                                        construct = Pickup.NewFaradayShield(firstScrap.Position, firstScrap.Velocity, 0, 0);
                                         break;
                                     default:
                                         break;
+                                }
+                                if(construct != null)
+                                {
+                                    foreach (var module in modules.Values)
+                                    {
+                                        module.OnContruct(construct);
+                                    }
+                                    Engine.SaveGame.CurrentMission.Add(construct);
+                                    leashedMaterials.Add(construct);
                                 }
                             }
                             angle += MathF.PI * 2 / types.Count;
