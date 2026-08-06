@@ -95,6 +95,8 @@ public class Player : Entity
             return stealth;
         }
     }
+    public override int Health { get => modules.Select(x => x.Value.Health).Sum(); set => throw new InvalidOperationException(); }
+    public override int MaxHealth { get => modules.Select(x => x.Value.MaxHealth).Sum(); set => throw new InvalidOperationException(); }
     public Player(Vector2 _position, Vector2 _velocity, float _angle)
         : base(_position, _velocity, _angle, 0)
     {

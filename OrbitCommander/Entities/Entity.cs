@@ -23,8 +23,8 @@ public class Entity : IMissionComponent
     public float Angle { get { return Transform.Angle; } set { Transform.Angle = value; } }
     public float AngularVelocity { get { return Transform.AngularVelocity; } set { Transform.AngularVelocity = value; } }
     public float TimeLeft { get { return GetComponent<ExpireTimer>().TimeLeft; } set { GetComponent<ExpireTimer>().TimeLeft = value; } }
-    public int Health { get { return GetComponent<Health>().CurrentHealth; } set { GetComponent<Health>().CurrentHealth = value; } }
-    public int MaxHealth { get { return GetComponent<Health>().MaxHealth; } set { GetComponent<Health>().MaxHealth = value; } }
+    public virtual int Health { get => GetComponent<Health>().CurrentHealth; set => GetComponent<Health>().CurrentHealth = value; }
+    public virtual int MaxHealth { get => GetComponent<Health>().MaxHealth; set => GetComponent<Health>().MaxHealth = value; }
     protected List<float> CD { get { return GetComponent<Cooldown>().Cooldowns; } set { GetComponent<Cooldown>().Cooldowns = value; } }
     public Texture2D Texture { get { return GetComponent<Sprite>().Texture; } set { GetComponent<Sprite>().Texture = value; } }
     public virtual Color Color { get { return GetComponent<Sprite>().Color; } set { GetComponent<Sprite>().Color = value; } }
