@@ -21,17 +21,17 @@ public static class ItemFactory
     };
     public readonly static Dictionary<Modules, ModuleData> moduleData = new()
     {
-        { Modules.Hull, new ModuleData(Sprites.RealHull, Sprites.Hull, "Hull", (int)ModuleType.Hull, 20, typeof(Hull)) },
-        { Modules.Reflective, new ModuleData(Sprites.RealReflective, Sprites.Reflective, "Reflective", (int)ModuleType.Hull, 16, typeof(Reflective)) },
-        { Modules.Stealth, new ModuleData(Sprites.RealStealth, Sprites.Stealth, "Stealth", (int)ModuleType.Hull, 18, typeof(StealthHull)) },
-        { Modules.Turtle, new ModuleData(Sprites.RealHull, Sprites.Hull, "Turtle", (int)ModuleType.Hull, 22, typeof(Turtle)) },
-        { Modules.Ablative, new ModuleData(Sprites.RealAblative, Sprites.Ablative, "Ablative", (int)ModuleType.Hull, 17, typeof(Ablative)) },
-        { Modules.Adaptive, new ModuleData(Sprites.RealAdaptive, Sprites.Adaptive, "Ablative", (int)ModuleType.Hull, 20, typeof(Adaptive)) },
-        { Modules.ThermalShield,new ModuleData(Sprites.RealHull, Sprites.Hull, "Thermal Shield", (int)ModuleType.Hull, 20, typeof(ThermalShield)) },
+        { Modules.Hull, new ModuleData(Sprites.RealHull, Sprites.Hull, "Hull", "Getting hit provides temporary damage resistance.", (int)ModuleType.Hull, 20, typeof(Hull)) },
+        { Modules.Reflective, new ModuleData(Sprites.RealReflective, Sprites.Reflective, "Reflective", "Projectiles are periodically reflected towards enemies.", (int)ModuleType.Hull, 16, typeof(Reflective)) },
+        { Modules.Stealth, new ModuleData(Sprites.RealStealth, Sprites.Stealth, "Stealth", "Provides a stealth bonus, which is amplified after hitting enemies.", (int)ModuleType.Hull, 18, typeof(StealthHull)) },
+        { Modules.Turtle, new ModuleData(Sprites.RealHull, Sprites.Hull, "Turtle", "Provides resistance when being close to enemies.", (int)ModuleType.Hull, 22, typeof(Turtle)) },
+        { Modules.Ablative, new ModuleData(Sprites.RealAblative, Sprites.Ablative, "Ablative", "Blocks all damage until the regenerating buffer is saturated.", (int)ModuleType.Hull, 17, typeof(Ablative)) },
+        { Modules.Adaptive, new ModuleData(Sprites.RealAdaptive, Sprites.Adaptive, "Adaptive", "Buffs damage but resists less damage when this module has health.", (int)ModuleType.Hull, 20, typeof(Adaptive)) },
+        { Modules.ThermalShield,new ModuleData(Sprites.RealHull, Sprites.Hull, "Thermal Shield", "Brings the player toward thermal equilibrium, resisting damage near extremes.", (int)ModuleType.Hull, 20, typeof(ThermalShield)) },
 
-        { Modules.Basic, new ModuleData(Sprites.RealGuns, Sprites.Guns, "Basic", (int)ModuleType.Guns, 20, typeof(Basic)) },
+        { Modules.Basic, new ModuleData(Sprites.RealGuns, Sprites.Guns, "Basic", "2x Crit for 2.5 seconds randomly after firing.", (int)ModuleType.Guns, 20, typeof(Basic)) },
         { Modules.Spiral, new ModuleData(Sprites.RealSpiral,Sprites.Spiral, "Spiral", (int)ModuleType.Guns, 20, typeof(Spiral)) },
-        { Modules.Shotgun, new ModuleData(Sprites.RealGuns,Sprites.Guns, "Shotgun", (int)ModuleType.Guns, 20, typeof(Shotgun), Color.CornflowerBlue) },
+        { Modules.Shotgun, new ModuleData(Sprites.RealGuns,Sprites.Guns, "Shotgun", "2x Crit for half damage seconds after getting hit.", (int)ModuleType.Guns, 20, typeof(Shotgun), Color.CornflowerBlue) },
         { Modules.Missile, new ModuleData(Sprites.RealMissileModule,Sprites.MissileModule, "Missile Launcher", (int)ModuleType.Guns, 18, typeof(Missile), Color.CornflowerBlue) },
         { Modules.LMG, new ModuleData(Sprites.RealGuns,Sprites.Guns, "Chain Gun", (int)ModuleType.Guns, 20, typeof(LMG), Color.CornflowerBlue) },
         { Modules.Sniper, new ModuleData(Sprites.RealSniperModule,Sprites.SniperModule, "Antimaterial Rifle", (int)ModuleType.Guns, 20, typeof(Antimaterial), Color.CornflowerBlue)},

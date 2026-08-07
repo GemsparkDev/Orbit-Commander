@@ -19,6 +19,7 @@ public abstract class Module : Pickup, IData
     public new Modules Type { get; }
     Color IData.Color => isFailed ? Color.Red : Color.White;
     private Decal healthDecal;
+    private Decal description;
     public float Cooldown { get; protected set; } = 0;
     private Health health;
 
@@ -27,7 +28,9 @@ public abstract class Module : Pickup, IData
     {
         Type = _type;
         healthDecal = new Decal(new Vector2(0, 5), Assets.TextFont, $"{Health} / {MaxHealth}", Color.Pink, 5f);
+        description = new Decal(new Vector2(-10, 15), Assets.TextFont, ItemFactory.moduleData[_type].Description, Color.White, 5f);
         Tooltip.AddWidget(healthDecal);
+        Tooltip.AddWidget(description);
         AddComponent(new Smelt() { Value = 3 });
         health = GetComponent<Health>();
     }
@@ -124,9 +127,10 @@ public class ReloadSystem(int _magazineSize, float _reloadSpeed, Action _reloadC
         }
     }
 }
-public class ModuleData(Sprites _realSprite, Sprites _virtualSprite, string _name, int _id, int _health, Type _type, Color? _textColor = null)
+public class ModuleData(Sprites _realSprite, Sprites _virtualSprite, string _name, string _description, int _id, int _health, Type _type, Color? _textColor = null)
     : ItemData(_realSprite, _virtualSprite, _name, _id, Color.White, _textColor, _health)
 {
+    public string Description { get; } = _description;
     public int MaxHealth { get; } = _health;
     public Type ModuleType { get; } = _type;
     public Module Retrieve()
