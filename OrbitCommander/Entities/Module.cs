@@ -844,7 +844,7 @@ public class GrenadeLauncher() : Module(Modules.GrenadeLauncher)
         }
         if (ammo.Fire())
         {
-            Player.Shoot(NewExplosive(Player.Position, Player.IdealSpeedWithVelocity(Speed) + new Vector2(Util.OneToNegOne(), Util.OneToNegOne()), Util.ToAngle(Player.Direction), Util.OneToNegOne() / 8, Team, Player.TryCrit(16, 1.66f, critCD > 0), 40, 1));
+            Player.Shoot(NewExplosive(Player.Position, Player.IdealSpeedWithVelocity(Speed) + new Vector2(Util.OneToNegOne(), Util.OneToNegOne()), Util.ToAngle(Player.Direction), Util.OneToNegOne() / 8, Team, Player.TryCrit(16, 1.667f, critCD > 0), 40, 1));
             SoundManager.PlaySound(Assets.Get(Sound.PulseFire), Player.Position);
             Cooldown = 0.8f;
             Engine.ShakeScreen(0.4f);
@@ -1308,6 +1308,16 @@ public class GuidedRound() : Module(Modules.GuidedRound)
     {
         rounds = [.. rounds.Where(x => !x.isExpired)];
         ammo.Update(this, _fuseRatio);
+        if(Input.NewMouseState.LeftButton == ButtonState.Released && rounds.Count > 3)
+        {
+            foreach(var round in rounds)
+            {
+                var component = round.GetComponent<Attack>();
+                component.Damage = (int)MathF.Round(round.Damage * 1.5f);
+                component.IsCrit = true;
+            }
+            rounds.Clear();
+        }
         base.OnUpdate(_fuseRatio);
     }
     public override int StealthChange() => GunStealthChange();
@@ -1564,7 +1574,7 @@ public class Decoy() : Module(Modules.Decoy)
         return 0;
     }
 }
-public class Sensors() : Module(Modules.Sensors)
+public class TargettingModifer() : Module(Modules.Sensors) //TODO: Make this module reduce the requirements for critical hits
 {
 
 }
