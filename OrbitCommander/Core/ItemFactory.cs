@@ -61,14 +61,14 @@ public static class ItemFactory
         { Modules.AmplifyingModifier, new ModuleData(Sprites.RealAmplifyingModifier,Sprites.AmplifyingModifier, "Radar", (int)ModuleType.Sensors, 20, typeof(AmplifyingModifier), Color.Yellow) },
         { Modules.CloakingModifier, new ModuleData(Sprites.RealCloakingModifier,Sprites.CloakingModifier, "Pulse Emitter", (int)ModuleType.Sensors, 20, typeof(CloakingModifier), Color.Yellow) },
 
-        { Modules.Assault, new ModuleData(Sprites.RealAssault, Sprites.Assault, "Assault", (int)ModuleType.Core, 20, typeof(Assault)) },
-        { Modules.Dash, new ModuleData(Sprites.RealDash,Sprites.Dash, "Dash Core", (int)ModuleType.Core, 20, typeof(Dash)) },
-        { Modules.GrapplingHook, new ModuleData(Sprites.RealGrapplingHook, Sprites.GrapplingHook, "Grapple Core", (int)ModuleType.Core, 20, typeof(SummonGrapplingHook)) },
-        { Modules.SummonShield, new ModuleData(Sprites.RealSummonShield, Sprites.SummonShield, "Shield Core", (int)ModuleType.Core, 20, typeof(SummonShield)) },
-        { Modules.Nanomachines, new ModuleData(Sprites.RealNanomachines, Sprites.Nanomachines, "Nanomachines", (int)ModuleType.Core, 20, typeof(Nanomachines)) },
-        { Modules.CreateFighter, new ModuleData(Sprites.RealConstructFighter, Sprites.ConstructFighter, "Construct fighter", (int)ModuleType.Core, 20, typeof(CreateFighter)) },
-        { Modules.Expose, new ModuleData(Sprites.RealExpose, Sprites.Expose, "Exposure", (int)ModuleType.Core, 20, typeof(Expose)) },
-        { Modules.Decoy, new ModuleData(Sprites.RealDecoy,Sprites.Decoy, "Decoy", (int)ModuleType.Core, 20, typeof(Decoy))},
+        { Modules.Assault, new ModuleData(Sprites.RealAssault, Sprites.Assault, "Assault", "Shoots a variety of projectiles around the player.", (int)ModuleType.Core, 20, typeof(Assault)) },
+        { Modules.Dash, new ModuleData(Sprites.RealDash,Sprites.Dash, "Dash Core", "Teleports the player a short distance with brief immunity.", (int)ModuleType.Core, 20, typeof(Dash)) },
+        { Modules.GrapplingHook, new ModuleData(Sprites.RealGrapplingHook, Sprites.GrapplingHook, "Grapple Core", $"Launches a hook which can latch on to anything. Attach the other end to objects using RMB", (int)ModuleType.Core, 20, typeof(SummonGrapplingHook)) },
+        { Modules.SummonShield, new ModuleData(Sprites.RealSummonShield, Sprites.SummonShield, "Shield Core", "Summons two shields which are destroyed on hit.", (int)ModuleType.Core, 20, typeof(SummonShield)) },
+        { Modules.Nanomachines, new ModuleData(Sprites.RealNanomachines, Sprites.Nanomachines, "Nanomachines", "Consumes scrap to heal the player over a short period of time.", (int)ModuleType.Core, 20, typeof(Nanomachines)) },
+        { Modules.CreateFighter, new ModuleData(Sprites.RealConstructFighter, Sprites.ConstructFighter, "Construct fighter", "Consumes scrap to create several fighters around the player.", (int)ModuleType.Core, 20, typeof(CreateFighter)) },
+        { Modules.Expose, new ModuleData(Sprites.RealExpose, Sprites.Expose, "Exposure", "Creates a heating or cooling aura at the cursor, doing the opposite on the player./nHold left shift to summon the other type.", (int)ModuleType.Core, 20, typeof(Expose)) },
+        { Modules.Decoy, new ModuleData(Sprites.RealDecoy,Sprites.Decoy, "Decoy", "Creates a false player for enemies to attack and boosts stealth.", (int)ModuleType.Core, 20, typeof(Decoy))},
 
     };
     public static Pickup NewScrap(Vector2 _position = default, Vector2 _velocity = default, float _angularVelocity = 0)
