@@ -35,7 +35,7 @@ public static class ItemFactory
         { Modules.Missile, new ModuleData(Sprites.RealMissileModule,Sprites.MissileModule, "Missile Launcher", (int)ModuleType.Guns, 18, typeof(Missile), Color.CornflowerBlue) },
         { Modules.LMG, new ModuleData(Sprites.RealGuns,Sprites.Guns, "Chain Gun", "1.5x Crit after continually hitting enemies.", (int)ModuleType.Guns, 20, typeof(LMG), Color.CornflowerBlue) },
         { Modules.Sniper, new ModuleData(Sprites.RealSniperModule,Sprites.SniperModule, "Antimaterial Rifle", (int)ModuleType.Guns, 20, typeof(Antimaterial), Color.CornflowerBlue)},
-        { Modules.Crossbow, new ModuleData(Sprites.RealCrossbow,Sprites.Crossbow, "Crossbow", (int)ModuleType.Guns, 20, typeof(Crossbow))},
+        { Modules.Crossbow, new ModuleData(Sprites.RealCrossbow,Sprites.Crossbow, "Crossbow", "1.5x Crit when charging for an additional 0.5 seconds.", (int)ModuleType.Guns, 20, typeof(Crossbow))},
         { Modules.Flamethrower, new ModuleData(Sprites.RealFlamethrower,Sprites.Flamethrower, "Flamethrower", "3x Crit when dangerously hot.", (int)ModuleType.Guns, 18, typeof(Flamethrower), Color.Orange)},
         { Modules.Fireball, new ModuleData(Sprites.RealFireball,Sprites.Fireball, "Fireball", "3x Crit when dangerously hot.", (int)ModuleType.Guns, 18, typeof(Fireball), Color.Orange)},
         { Modules.GrenadeLauncher, new ModuleData(Sprites.RealCrossbow,Sprites.Crossbow, "Grenade Launcher", "1.66x Crit for 30 seconds after creating a construct.", (int)ModuleType.Guns, 20, typeof(GrenadeLauncher))},
@@ -56,10 +56,10 @@ public static class ItemFactory
         { Modules.Work, new ModuleData(Sprites.RealWork, Sprites.Work, "Work", "High torque, low acceleration. Constructs are immune to debuffs and decay.", (int)ModuleType.Engines, 25, typeof(WorkEngine)) },
         { Modules.Orion, new ModuleData(Sprites.RealOrion, Sprites.Orion, "Orion", "Uses explosions to move which can damage enemies. Attacking enemies causes an explosion.", (int)ModuleType.Engines, 20, typeof(OrionEngine)) },
 
-        { Modules.Sensors, new ModuleData(Sprites.RealSensors,Sprites.Sensors, "Sensors", "Reduces the requirements to critically hit for most weapons.", (int)ModuleType.Sensors, 20, typeof(TargettingModifer), Color.CornflowerBlue) },
-        { Modules.ProjectingModifier, new ModuleData(Sprites.RealProjectingModifier,Sprites.ProjectingModifier, "Lidar", (int)ModuleType.Sensors, 20, typeof(ProjectingModifier), Color.Yellow) },
-        { Modules.AmplifyingModifier, new ModuleData(Sprites.RealAmplifyingModifier,Sprites.AmplifyingModifier, "Radar", (int)ModuleType.Sensors, 20, typeof(AmplifyingModifier), Color.Yellow) },
-        { Modules.CloakingModifier, new ModuleData(Sprites.RealCloakingModifier,Sprites.CloakingModifier, "Pulse Emitter", (int)ModuleType.Sensors, 20, typeof(CloakingModifier), Color.Yellow) },
+        { Modules.Sensors, new ModuleData(Sprites.RealSensors,Sprites.Sensors, "Sensors", "Increases the crit damage bonus by 1.25x + 0.1, but reduces damage by 10%.", (int)ModuleType.Sensors, 20, typeof(TargettingModifer), Color.CornflowerBlue) },
+        { Modules.ProjectingModifier, new ModuleData(Sprites.RealProjectingModifier,Sprites.ProjectingModifier, "Lidar", "Projects a path for where your projectiles will go.", (int)ModuleType.Sensors, 20, typeof(ProjectingModifier), Color.Yellow) },
+        { Modules.AmplifyingModifier, new ModuleData(Sprites.RealAmplifyingModifier,Sprites.AmplifyingModifier, "Radar", "Doubles damage dealt and taken", (int)ModuleType.Sensors, 20, typeof(AmplifyingModifier), Color.Yellow) },
+        { Modules.CloakingModifier, new ModuleData(Sprites.RealCloakingModifier,Sprites.CloakingModifier, "Pulse Emitter", "Fired bullets randomly become invisible to enemies and you", (int)ModuleType.Sensors, 20, typeof(CloakingModifier), Color.Yellow) },
 
         { Modules.Assault, new ModuleData(Sprites.RealAssault, Sprites.Assault, "Assault", "Shoots a variety of projectiles around the player.", (int)ModuleType.Core, 20, typeof(Assault)) },
         { Modules.Dash, new ModuleData(Sprites.RealDash,Sprites.Dash, "Dash Core", "Teleports the player a short distance with brief immunity.", (int)ModuleType.Core, 20, typeof(Dash)) },

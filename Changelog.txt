@@ -3,6 +3,10 @@
 Lagrange Commander is a game made using C# in monogame. It is a 2D top down wave based shooter where you must repair and upgrade your ship by salvaging from enemies you defeat. It features realistic N-Body gravitation, which affects all entities and projectiles.
   
 # Changelog
+0.9.2.2 - 8/9/2026
+ - The Crossbow can now charge, with 1.5x crit for overcharge.
+ - The Sensors now gives a critical bonus, but a damage nerf.
+ - Added more descriptions.
 0.9.2.1 - 8/8/2026
  - Added descriptions to all ability modules.
 0.9.2.0 - 8/7/2026

@@ -755,26 +755,40 @@ public class LMG() : Module(Modules.LMG)
 }
 public class Crossbow() : Module(Modules.Crossbow)
 {
-    //Does not use cooldown, as that decreases player stealth
-    ReloadSystem ammo = new ReloadSystem(1, 1.5f);
+    private float chargeTime = 0;
     public override float Speed => 15;
-    public override void OnShoot()
-    {
-        if (ammo.Fire())
-        {
-            Vector2 offset = new Vector2(Player.Direction.Y, -Player.Direction.X) * Util.Random.Next(-2, 3);
-            var shot = NewPulseShot(Player.Position + offset, Player.IdealSpeedWithVelocity(Speed) + offset / 4, Util.ToAngle(Player.Direction), 0, Team, 18, true, 1);
-            shot.Texture = Assets.Get(Sprites.CrossbowShot);
-            Player.Shoot(shot);
-            Engine.Camera.Position += Player.Direction * Speed / 2;
-            Engine.ShakeScreen(0.2f);
-            Player.Velocity -= Player.Direction / 4;
-        }
-    }
     public override void OnUpdate(float _fuseRatio)
     {
-        ammo.Update(this, _fuseRatio);
+        if(Input.NewMouseState.LeftButton == ButtonState.Pressed)
+        {
+            if (chargeTime < 2)
+            {
+                chargeTime += Engine.DeltaSeconds / _fuseRatio;
+            }
+        }
+        else
+        {
+            if(chargeTime > 1.5f)
+            {
+                Vector2 offset = new Vector2(Player.Direction.Y, -Player.Direction.X) * Util.Random.Next(-2, 3);
+                var shot = NewPulseShot(Player.Position + offset, Player.IdealSpeedWithVelocity(Speed) + offset / 4, Util.ToAngle(Player.Direction), 0, Team, Player.TryCrit(18, 1.5f, chargeTime > 0), true, 1);
+                shot.Texture = Assets.Get(Sprites.CrossbowShot);
+                Player.Shoot(shot);
+                Engine.Camera.Position += Player.Direction * Speed / 2;
+                Engine.ShakeScreen(0.2f);
+                Player.Velocity -= Player.Direction / 4;
+                chargeTime = 0;
+            }
+            else if(chargeTime > 0)
+            {
+                chargeTime -= Engine.DeltaSeconds;
+            }
+        }
         base.OnUpdate(_fuseRatio);
+        if (Engine.SaveGame.Player.modules.ContainsValue(this))
+        {
+            UI.PlayerAmmo.SetInterval(Math.Min(chargeTime, 1.5f), 1.5f);
+        }
     }
 }
 public class Flamethrower() : Module(Modules.Flamethrower)
@@ -1574,9 +1588,21 @@ public class Decoy() : Module(Modules.Decoy)
         return 0;
     }
 }
-public class TargettingModifer() : Module(Modules.Sensors) //TODO: Make this module reduce the requirements for critical hits
+public class TargettingModifer() : Module(Modules.Sensors)
 {
-
+    public override float ModifyCrit(float _crit)
+    {
+        return _crit * 1.25f + 0.1f;
+    }
+    public override Entity ModifyProjectile(Entity _projectile)
+    {
+        var damage = _projectile.GetComponent<Attack>();
+        if (damage != null)
+        {
+            damage.Damage = (int)MathF.Round(damage.Damage*0.9f);
+        }
+        return _projectile;
+    }
 }
 public class Expose() : Module(Modules.Expose)
 {
