@@ -604,6 +604,7 @@ public class Spiral() : Module(Modules.Spiral)
 {
     ReloadSystem ammo = new ReloadSystem(10, 2);
     public override float Speed => 12;
+    private float critCD = 0;
     public override void OnShoot()
     {
         if (Cooldown > 0)
@@ -614,7 +615,7 @@ public class Spiral() : Module(Modules.Spiral)
         {
             for (int i = 0; i < Util.Random.Next(3, 5); i++)
             {
-                Player.Shoot(NewSpiralShot(Player.Position, Player.IdealSpeedWithVelocity(Speed), Util.ToAngle(Player.Direction), 0, Team, 5, Util.OneToNegOne() * MathF.PI, 1));
+                Player.Shoot(NewSpiralShot(Player.Position, Player.IdealSpeedWithVelocity(Speed), Util.ToAngle(Player.Direction), 0, Team, Player.TryCrit(5, 1.25f, critCD > 0), Util.OneToNegOne() * MathF.PI, 1));
             }
             SoundManager.PlaySound(Assets.Get(Sound.PulseFire), Player.Position);
             Cooldown = 0.5f;
@@ -630,7 +631,15 @@ public class Spiral() : Module(Modules.Spiral)
     public override void OnUpdate(float _fuseRatio)
     {
         ammo.Update(this, _fuseRatio);
+        if(critCD > 0)
+        {
+            critCD -= Engine.DeltaSeconds;
+        }
         base.OnUpdate(_fuseRatio);
+    }
+    public override void OnAbility()
+    {
+        critCD += Player.modules[ModuleType.Core].Cooldown / 3;
     }
     public override int StealthChange() => GunStealthChange();
 }
