@@ -3226,7 +3226,7 @@ public class Entity : IMissionComponent
         var enemy = NewEnemy(position, velocity, angle, 10, Assets.Get(Sprites.Missile), _team);
         enemy.SensingAbility = _sensingAbility;
         enemy.AddComponent(new Behaviour().AddBehaviour(enemy.Missile()).AddBehaviour(enemy.AvoidNearbyAllies()));
-        enemy.Tags |= Tags.IsMissile;
+        enemy.AddTag(Tags.IsMissile);
         enemy.AddComponent(new Attack() { Damage = 8 });
         return enemy;
     }

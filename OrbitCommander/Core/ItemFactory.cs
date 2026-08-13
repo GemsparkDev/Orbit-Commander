@@ -1,9 +1,9 @@
-﻿using Microsoft.Xna.Framework;
-using OrbitCommander.Entities;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using Microsoft.Xna.Framework;
 using OrbitCommander.Components;
+using OrbitCommander.Entities;
 
 namespace OrbitCommander.Core;
 public static class ItemFactory
@@ -32,22 +32,22 @@ public static class ItemFactory
         { Modules.Basic, new ModuleData(Sprites.RealGuns, Sprites.Guns, "Basic", "2x Crit for 2.5 seconds randomly after firing.", (int)ModuleType.Guns, 20, typeof(Basic)) },
         { Modules.Spiral, new ModuleData(Sprites.RealSpiral,Sprites.Spiral, "Spiral", "1.25x Crit after using an ability for a time equal to one third the ability cooldown duration.", (int)ModuleType.Guns, 20, typeof(Spiral)) },
         { Modules.Shotgun, new ModuleData(Sprites.RealGuns,Sprites.Guns, "Shotgun", "2x Crit when getting hit for a time equal to one half the taken damage seconds.", (int)ModuleType.Guns, 20, typeof(Shotgun), Color.CornflowerBlue) },
-        { Modules.Missile, new ModuleData(Sprites.RealMissileModule,Sprites.MissileModule, "Missile Launcher", (int)ModuleType.Guns, 18, typeof(Missile), Color.CornflowerBlue) },
+        { Modules.Missile, new ModuleData(Sprites.RealMissileModule,Sprites.MissileModule, "Missile Launcher", "2x Crit on next shot when hitting 3 or more enemies within 0.05 seconds.", (int)ModuleType.Guns, 18, typeof(Missile), Color.CornflowerBlue) },
         { Modules.LMG, new ModuleData(Sprites.RealGuns,Sprites.Guns, "Chain Gun", "1.5x Crit after continually hitting enemies.", (int)ModuleType.Guns, 20, typeof(LMG), Color.CornflowerBlue) },
-        { Modules.Sniper, new ModuleData(Sprites.RealSniperModule,Sprites.SniperModule, "Antimaterial Rifle", "2x Crit on next shot when hitting a distant enemy.", (int)ModuleType.Guns, 20, typeof(Antimaterial), Color.CornflowerBlue)},
+        { Modules.Antimaterial, new ModuleData(Sprites.RealSniperModule,Sprites.SniperModule, "Antimaterial Rifle", "2x Crit on next shot when hitting a distant enemy.", (int)ModuleType.Guns, 20, typeof(Antimaterial), Color.CornflowerBlue)},
         { Modules.Crossbow, new ModuleData(Sprites.RealCrossbow,Sprites.Crossbow, "Crossbow", "Charge to fire. 1.5x Crit when charging for an additional 0.5 seconds.", (int)ModuleType.Guns, 20, typeof(Crossbow))},
         { Modules.Flamethrower, new ModuleData(Sprites.RealFlamethrower,Sprites.Flamethrower, "Flamethrower", "3x Crit when dangerously hot.", (int)ModuleType.Guns, 18, typeof(Flamethrower), Color.Orange)},
         { Modules.Fireball, new ModuleData(Sprites.RealFireball,Sprites.Fireball, "Fireball", "3x Crit when dangerously hot.", (int)ModuleType.Guns, 18, typeof(Fireball), Color.Orange)},
         { Modules.GrenadeLauncher, new ModuleData(Sprites.RealCrossbow,Sprites.Crossbow, "Grenade Launcher", "1.66x Crit for 30 seconds after creating a construct.", (int)ModuleType.Guns, 20, typeof(GrenadeLauncher))},
         { Modules.Spewer, new ModuleData(Sprites.RealCrossbow,Sprites.Crossbow, "Spewer", "2x Crit when firing slower than once every 2 seconds.", (int)ModuleType.Guns, 15, typeof(SpewerModule))},
-        { Modules.Antimaterial, new ModuleData(Sprites.RealCrossbow,Sprites.Crossbow, "Railgun", "Additional 0.5x crit for every enemy penetrated in one shot.", (int)ModuleType.Guns, 15, typeof(Railgun), Color.Yellow)},
+        { Modules.Railgun, new ModuleData(Sprites.RealCrossbow,Sprites.Crossbow, "Railgun", "Additional 0.5x crit for every enemy penetrated in one shot.", (int)ModuleType.Guns, 15, typeof(Railgun), Color.Yellow)},
         { Modules.PrismArray, new ModuleData(Sprites.RealPrismArray,Sprites.PrismArray, "Prism Array", "2x Crit when below 20 HP.", (int)ModuleType.Guns, 15, typeof(PrismArray), Color.Cyan)},
         { Modules.MatrixLauncher, new ModuleData(Sprites.RealCrossbow,Sprites.Crossbow, "Matrix Launcher", "2x Crit when below 20 HP.", (int)ModuleType.Guns, 15, typeof(MatrixLauncher), Color.Cyan)},
         { Modules.Torch, new ModuleData(Sprites.RealTorch,Sprites.Torch, "Torch", "2.5x Crit when hitting enemies who are dangerously hot.", (int)ModuleType.Guns, 15, typeof(Torch), Color.Yellow)},
         { Modules.SplitterModule, new ModuleData(Sprites.RealTorch,Sprites.Torch, "Splitter", (int)ModuleType.Guns, 20, typeof(SplitterModule))},
         { Modules.Fractal, new ModuleData(Sprites.RealTorch,Sprites.Torch, "Fractal", "1.5x Crit when the player is moving faster than 20 units per second. Bonus crit when hitting near the base of the fractal.", (int)ModuleType.Guns, 20, typeof(Fractal))},
         { Modules.CrackShot, new ModuleData(Sprites.RealTorch,Sprites.Torch, "Crackshot", "1.25x Crit for 1.2 seconds after reloading.", (int)ModuleType.Guns, 20, typeof(CrackShot))},
-        { Modules.MicroRocketLauncher, new ModuleData(Sprites.RealMicroLauncher,Sprites.MicroLauncher, "Micro Rocket Launcher", (int)ModuleType.Guns, 18, typeof(MicroRocketLauncher), Color.Yellow) },
+        { Modules.MicroRocketLauncher, new ModuleData(Sprites.RealMicroLauncher,Sprites.MicroLauncher, "Micro Rocket Launcher", "1.7x Crit when hitting 4 or more unique enemies within 5 seconds.", (int)ModuleType.Guns, 18, typeof(MicroRocketLauncher), Color.Yellow) },
         { Modules.AdaptiveShotgun, new ModuleData(Sprites.RealTorch,Sprites.Torch, "Adaptive Shotgun", "1.5x Crit on the second shot.", (int)ModuleType.Guns, 18, typeof(AdaptiveShotgun), Color.Yellow) },
         { Modules.GuidedRound, new ModuleData(Sprites.RealTorch,Sprites.Torch, "Guided Round", "1.5x Crit when releasing at least 4 rounds at once.", (int)ModuleType.Guns, 20, typeof(GuidedRound), Color.White) },
 

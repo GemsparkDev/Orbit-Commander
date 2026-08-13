@@ -518,7 +518,7 @@ public class Basic() : Module(Modules.Basic)
     }
     public override int StealthChange() => GunStealthChange();
 }
-public class Antimaterial() : Module(Modules.Sniper)
+public class Antimaterial() : Module(Modules.Antimaterial)
 {
     ReloadSystem ammo = new ReloadSystem(4, 2f);
     public override float Speed => 20;
@@ -558,7 +558,7 @@ public class Antimaterial() : Module(Modules.Sniper)
     }
     public override int StealthChange() => GunStealthChange();
 }
-public class Railgun() : Module(Modules.Antimaterial)
+public class Railgun() : Module(Modules.Railgun)
 {
     ReloadSystem ammo = new ReloadSystem(1, 1.5f);
     public override float Speed => float.MaxValue;
@@ -693,6 +693,8 @@ public class Shotgun() : Module(Modules.Shotgun)
 public class Missile() : Module(Modules.Missile)
 {
     private ReloadSystem ammo = new ReloadSystem(8, 2f);
+    private List<(float timer, Entity entity)> hitEntities = [];
+    bool nextCrit = false;
     public override float Speed => 9;
     public override void OnShoot()
     {
@@ -702,10 +704,11 @@ public class Missile() : Module(Modules.Missile)
         }
         if (ammo.Fire())
         {
-            Player.Shoot(NewMissile(Player.Position + new Vector2(Player.Direction.Y, -Player.Direction.X) * 6, Player.IdealSpeedWithVelocity(Speed), Util.ToAngle(Player.Direction), Team));
+            Player.Shoot(NewMissile(Player.Position + new Vector2(Player.Direction.Y, -Player.Direction.X) * 6, Player.IdealSpeedWithVelocity(Speed), Util.ToAngle(Player.Direction), Team, 1, Player.TryCrit(8, 2f, nextCrit), 10));
             SoundManager.PlaySound(Assets.Get(Sound.MissileFire), Player.Position);
             Cooldown = 0.5f;
             Engine.ShakeScreen(0.5f);
+            nextCrit = false;
         }
     }
     public override void OnUpdate(float _fuseRatio)
@@ -714,8 +717,30 @@ public class Missile() : Module(Modules.Missile)
         {
             ParticleManager.Add(new Particle(Assets.Get(Sprites.Circle), Cooldown, Player.Position - Player.Direction * 8 - Player.Velocity, Player.Velocity - Player.Direction * Cooldown * 2 + new Vector2(Util.OneToNegOne(), Util.OneToNegOne()) * Cooldown / 2, 0, 0, Color.Gray * (1 - (1 - Cooldown * 2) * (1 - Cooldown * 2)), Color.Transparent));
         }
+        for(int i = 0; i < hitEntities.Count; i++)
+        {
+            var (timer, entity) = hitEntities[i];
+            hitEntities[i] = (timer - Engine.DeltaSeconds, entity);
+        }
+        hitEntities = [.. hitEntities.Where(x => x.timer > 0)];
         ammo.Update(this, _fuseRatio);
         base.OnUpdate(_fuseRatio);
+    }
+    public override void OnEnemyHit(Entity _entity, int _damage)
+    {
+        foreach(var pair in hitEntities)
+        {
+            if(pair.entity == _entity)
+            {
+                return;
+            }
+        }
+        hitEntities.Add((0.05f, _entity));
+        if(hitEntities.Count > 2)
+        {
+            hitEntities.Clear();
+            nextCrit = true;
+        }
     }
     public override int StealthChange() => GunStealthChange();
 }
@@ -1226,6 +1251,7 @@ public class MicroRocketLauncher() : Module(Modules.MicroRocketLauncher)
 {
     ReloadSystem ammo = new ReloadSystem(30, 4);
     float offset = 2;
+    private List<(float timer, Entity entity)> hitEntities = [];
     public override float Speed => 5;
     public override void OnShoot()
     {
@@ -1238,7 +1264,7 @@ public class MicroRocketLauncher() : Module(Modules.MicroRocketLauncher)
             Vector2 speed = Player.IdealSpeedWithVelocity(Speed);
             var dir = Vector2.Normalize(speed - Player.Velocity);
             Vector2 finalSpeed = speed + new Vector2(dir.Y, -dir.X) * offset;
-            Player.Shoot(NewMissile(Player.Position + Player.Direction * 6, finalSpeed, Util.ToAngle(finalSpeed), Team, 3, 3, 5));
+            Player.Shoot(NewMissile(Player.Position + Player.Direction * 6, finalSpeed, Util.ToAngle(finalSpeed), Team, 3, Player.TryCrit(3, 1.7f, hitEntities.Count > 3), 5));
             Engine.Camera.Position += Player.Direction * Speed;
             SoundManager.PlaySound(Assets.Get(Sound.MissileFire), Player.Position);
             Cooldown = 0.25f;
@@ -1250,7 +1276,24 @@ public class MicroRocketLauncher() : Module(Modules.MicroRocketLauncher)
     public override void OnUpdate(float _fuseRatio)
     {
         ammo.Update(this, _fuseRatio);
+        for (int i = 0; i < hitEntities.Count; i++)
+        {
+            var (timer, entity) = hitEntities[i];
+            hitEntities[i] = (timer - Engine.DeltaSeconds, entity);
+        }
+        hitEntities = [.. hitEntities.Where(x => x.timer > 0)];
         base.OnUpdate(_fuseRatio);
+    }
+    public override void OnEnemyHit(Entity _entity, int _damage)
+    {
+        foreach (var pair in hitEntities)
+        {
+            if (pair.entity == _entity)
+            {
+                return;
+            }
+        }
+        hitEntities.Add((5f, _entity));
     }
     public override int StealthChange() => GunStealthChange();
 }

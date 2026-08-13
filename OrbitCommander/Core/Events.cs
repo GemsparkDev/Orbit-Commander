@@ -374,7 +374,7 @@ public static class Events
             {
                 { Modules.Flamethrower, Modules.PrismArray },
                 { Modules.Fireball, Modules.Flamethrower },
-                { Modules.Sniper, Modules.Antimaterial },
+                { Modules.Antimaterial, Modules.Railgun },
                 { Modules.LMG, Modules.Torch },
                 { Modules.Shotgun, Modules.AdaptiveShotgun },
                 { Modules.Missile, Modules.MicroRocketLauncher }
