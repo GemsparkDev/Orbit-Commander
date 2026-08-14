@@ -1139,12 +1139,15 @@ public class SplitterModule() : Module(Modules.SplitterModule)
         }
         if (ammo.Fire())
         {
+            
+            var nearestPlanet = Util.Nearest(Player.Position, [.. Engine.SaveGame.CurrentMission.Entities.Where(x => x is Planet)]);
+            bool isCrit = Vector2.Distance(Player.Position, nearestPlanet.Position) < nearestPlanet.ColliderRadius * 1.2f;
             List<Func<Vector2, Vector2, float, Entity>> missiles = [];
             for (int i = 0; i < 3; i++)
             {
                 missiles.Add(delegate(Vector2 _position, Vector2 _velocity, float _angle) { return NewMissile(_position, _velocity, _angle, Team, 1); });
             }
-            Player.Shoot(NewSplitter(Player.Position + Player.Direction * 6, Player.IdealSpeedWithVelocity(Speed), Util.ToAngle(Player.Direction), Team, 8, missiles, 0.5f));
+            Player.Shoot(NewSplitter(Player.Position + Player.Direction * 6, Player.IdealSpeedWithVelocity(Speed), Util.ToAngle(Player.Direction), Team, Player.TryCrit(8, 1.5f, isCrit), missiles, 0.5f));
             SoundManager.PlaySound(Assets.Get(Sound.PulseFire), Player.Position);
             Engine.ShakeScreen(0.5f);
             Player.Velocity -= Player.Direction;

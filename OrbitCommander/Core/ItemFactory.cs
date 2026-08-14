@@ -44,7 +44,7 @@ public static class ItemFactory
         { Modules.PrismArray, new ModuleData(Sprites.RealPrismArray,Sprites.PrismArray, "Prism Array", "2x Crit when below 20 HP.", (int)ModuleType.Guns, 15, typeof(PrismArray), Color.Cyan)},
         { Modules.MatrixLauncher, new ModuleData(Sprites.RealCrossbow,Sprites.Crossbow, "Matrix Launcher", "2x Crit when below 20 HP.", (int)ModuleType.Guns, 15, typeof(MatrixLauncher), Color.Cyan)},
         { Modules.Torch, new ModuleData(Sprites.RealTorch,Sprites.Torch, "Torch", "2.5x Crit when hitting enemies who are dangerously hot.", (int)ModuleType.Guns, 15, typeof(Torch), Color.Yellow)},
-        { Modules.SplitterModule, new ModuleData(Sprites.RealTorch,Sprites.Torch, "Splitter", (int)ModuleType.Guns, 20, typeof(SplitterModule))},
+        { Modules.SplitterModule, new ModuleData(Sprites.RealTorch,Sprites.Torch, "Splitter", "1.5x Crit when nearby a planet.", (int)ModuleType.Guns, 20, typeof(SplitterModule))},
         { Modules.Fractal, new ModuleData(Sprites.RealTorch,Sprites.Torch, "Fractal", "1.5x Crit when the player is moving faster than 20 units per second. Bonus crit when hitting near the base of the fractal.", (int)ModuleType.Guns, 20, typeof(Fractal))},
         { Modules.CrackShot, new ModuleData(Sprites.RealTorch,Sprites.Torch, "Crackshot", "1.25x Crit for 1.2 seconds after reloading.", (int)ModuleType.Guns, 20, typeof(CrackShot))},
         { Modules.MicroRocketLauncher, new ModuleData(Sprites.RealMicroLauncher,Sprites.MicroLauncher, "Micro Rocket Launcher", "1.7x Crit when hitting 4 or more unique enemies within 5 seconds.", (int)ModuleType.Guns, 18, typeof(MicroRocketLauncher), Color.Yellow) },
