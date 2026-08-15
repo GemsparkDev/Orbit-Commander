@@ -32,6 +32,7 @@ public class Pickup : Entity, IData
         Tooltip.AddWidget(textbox);
         AddComponent(new Health(this, _health));
         AddComponent(new Statuses(this));
+        AddComponent(new Temp());
         AddTag(Tags.IsImportant);
         AddComponent(new Collide(this, delegate (int _damage, bool _ignoreImmunity)
         {

@@ -29,7 +29,7 @@ public class Entity : IMissionComponent
     public Texture2D Texture { get { return GetComponent<Sprite>().Texture; } set { GetComponent<Sprite>().Texture = value; } }
     public virtual Color Color { get { return GetComponent<Sprite>().Color; } set { GetComponent<Sprite>().Color = value; } }
     public float RevealDuration { get { return GetComponent<Stealth>().RevealDuration; } set { GetComponent<Stealth>().RevealDuration = value; } }
-    public float Temperature { get { return GetComponent<Temp>().Temperature; } set { GetComponent<Temp>().Temperature = value; } }
+    public float Temperature { get => GetComponent<Temp>().Temperature; set => GetComponent<Temp>().Temperature = value; }
     public Team Team { get { return FriendlyComp.Team; } set { FriendlyComp.Team = value; } }
     public virtual int SensingAbility { get { return GetComponent<Stealth>().SensingAbility; } set { GetComponent<Stealth>().SensingAbility = value; } }
     public virtual int StealthAbility { get { return GetComponent<Stealth>().StealthAbility; } set => GetComponent<Stealth>().StealthAbility = value; }

@@ -437,30 +437,31 @@ public class Player : Entity
             module.Value.OnEnemyHit(_entity, _damage);
         }
     }
-    public Entity Modify(Entity _projectile)
+    public Entity Modify(Entity _projectile, float _crit, bool _condition)
     {
         _projectile.Temperature = Temperature;
         foreach (var module in modules)
         {
             module.Value.ModifyProjectile(_projectile);
         }
+        if (_condition)
+        {
+            var attack = _projectile.GetComponent<Attack>();
+            if (attack != null)
+            {
+                foreach (var module in modules)
+                {
+                    _crit = module.Value.ModifyCrit(_crit);
+                }
+                attack.Damage = (int)Math.Round(attack.Damage * _crit);
+                attack.IsCrit = true;
+            }
+        }
         return _projectile;
     }
-    public int TryCrit(float _damage, float _crit, bool _condition)
+    public void Shoot(Entity _projectile, float _crit, bool _condition)
     {
-        if(!_condition)
-        {
-            return (int)_damage;
-        }
-        foreach(var module in modules)
-        {
-            _crit = module.Value.ModifyCrit(_crit);
-        }
-        return (int)Math.Round(_damage * _crit);
-    }
-    public void Shoot(Entity _projectile)
-    {
-        Engine.SaveGame.CurrentMission.Add(Modify(_projectile));
+        Engine.SaveGame.CurrentMission.Add(Modify(_projectile, _crit, _condition));
     }
     public void RestrictedActions()
     {

@@ -40,7 +40,7 @@ public static class ItemFactory
         { Modules.Fireball, new ModuleData(Sprites.RealFireball,Sprites.Fireball, "Fireball", "3x Crit when dangerously hot.", (int)ModuleType.Guns, 18, typeof(Fireball), Color.Orange)},
         { Modules.GrenadeLauncher, new ModuleData(Sprites.RealCrossbow,Sprites.Crossbow, "Grenade Launcher", "1.66x Crit for 30 seconds after creating a construct.", (int)ModuleType.Guns, 20, typeof(GrenadeLauncher))},
         { Modules.Spewer, new ModuleData(Sprites.RealCrossbow,Sprites.Crossbow, "Spewer", "2x Crit when firing slower than once every 2 seconds.", (int)ModuleType.Guns, 15, typeof(SpewerModule))},
-        { Modules.Railgun, new ModuleData(Sprites.RealCrossbow,Sprites.Crossbow, "Railgun", "Additional 0.5x crit for every enemy penetrated in one shot.", (int)ModuleType.Guns, 15, typeof(Railgun), Color.Yellow)},
+        { Modules.Railgun, new ModuleData(Sprites.RealCrossbow,Sprites.Crossbow, "Railgun", "Additional 0.5x Crit to penetrated enemies for every enemy hit.", (int)ModuleType.Guns, 15, typeof(Railgun), Color.Yellow)},
         { Modules.PrismArray, new ModuleData(Sprites.RealPrismArray,Sprites.PrismArray, "Prism Array", "2x Crit when below 20 HP.", (int)ModuleType.Guns, 15, typeof(PrismArray), Color.Cyan)},
         { Modules.MatrixLauncher, new ModuleData(Sprites.RealCrossbow,Sprites.Crossbow, "Matrix Launcher", "2x Crit when below 20 HP.", (int)ModuleType.Guns, 15, typeof(MatrixLauncher), Color.Cyan)},
         { Modules.Torch, new ModuleData(Sprites.RealTorch,Sprites.Torch, "Torch", "2.5x Crit when hitting enemies who are dangerously hot.", (int)ModuleType.Guns, 15, typeof(Torch), Color.Yellow)},
@@ -49,7 +49,7 @@ public static class ItemFactory
         { Modules.CrackShot, new ModuleData(Sprites.RealTorch,Sprites.Torch, "Crackshot", "1.25x Crit for 1.2 seconds after reloading.", (int)ModuleType.Guns, 20, typeof(CrackShot))},
         { Modules.MicroRocketLauncher, new ModuleData(Sprites.RealMicroLauncher,Sprites.MicroLauncher, "Micro Rocket Launcher", "1.7x Crit when hitting 4 or more unique enemies within 5 seconds.", (int)ModuleType.Guns, 18, typeof(MicroRocketLauncher), Color.Yellow) },
         { Modules.AdaptiveShotgun, new ModuleData(Sprites.RealTorch,Sprites.Torch, "Adaptive Shotgun", "1.5x Crit on the second shot.", (int)ModuleType.Guns, 18, typeof(AdaptiveShotgun), Color.Yellow) },
-        { Modules.GuidedRound, new ModuleData(Sprites.RealTorch,Sprites.Torch, "Guided Round", "1.5x Crit when releasing at least 4 rounds at once.", (int)ModuleType.Guns, 20, typeof(GuidedRound), Color.White) },
+        { Modules.GuidedRound, new ModuleData(Sprites.RealTorch,Sprites.Torch, "Guided Round", "1.5x Crit when releasing 3 rounds at once.", (int)ModuleType.Guns, 20, typeof(GuidedRound), Color.White) },
 
         { Modules.Engines, new ModuleData(Sprites.RealEngines, Sprites.Engines, "Engines", "Basic engines with average acceleration and torque.", (int)ModuleType.Engines, 20, typeof(StandardEngine)) },
         { Modules.Plasma, new ModuleData(Sprites.RealPlasma, Sprites.Plasma, "Plasma", "High acceleration, low torque. Has a short period of higher force.", (int)ModuleType.Engines, 15, typeof(PlasmaEngine)) },

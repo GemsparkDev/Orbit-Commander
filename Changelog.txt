@@ -3,6 +3,11 @@
 Lagrange Commander is a game made using C# in monogame. It is a 2D top down wave based shooter where you must repair and upgrade your ship by salvaging from enemies you defeat. It features realistic N-Body gravitation, which affects all entities and projectiles.
   
 # Changelog
+0.9.2.7 - 8/14/2026
+ - Fixed the pickup function not adding the temperature component.
+ - Reduced the crit release count for the Guided Round to 3.
+ - The crit of the railgun now applies to all enemies hit equally.
+ - Moved critical strike code to the projectile Modify function.
 0.9.2.6 - 8/13/2026
  - The SplitterModule now 1.5x crits when within 1.2x the radius of a planet.
 0.9.2.5 - 8/12/2026
