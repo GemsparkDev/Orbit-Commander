@@ -54,11 +54,17 @@ public class Sprite(Entity _entity, Color _color) : IComponent
         {
             return;
         }
+        var color = Color.Black;
+        var attack = _entity.GetComponent<Attack>();
+        if(attack != null && attack.IsCrit)
+        {
+            color = Color.Yellow;
+        }
         //Outline in atmosphere looks better
-        _spriteBatch.Draw(Texture, _entity.Position + new Vector2(0, 1), null, Color.Black, _entity.Angle, Size / 2, 1, 0, 0);
-        _spriteBatch.Draw(Texture, _entity.Position + new Vector2(0, -1), null, Color.Black, _entity.Angle, Size / 2, 1, 0, 0);
-        _spriteBatch.Draw(Texture, _entity.Position + new Vector2(1, 0), null, Color.Black, _entity.Angle, Size / 2, 1, 0, 0);
-        _spriteBatch.Draw(Texture, _entity.Position + new Vector2(-1, 0), null, Color.Black, _entity.Angle, Size / 2, 1, 0, 0);
+        _spriteBatch.Draw(Texture, _entity.Position + new Vector2(0, 1), null, color, _entity.Angle, Size / 2, 1, 0, 0);
+        _spriteBatch.Draw(Texture, _entity.Position + new Vector2(0, -1), null, color, _entity.Angle, Size / 2, 1, 0, 0);
+        _spriteBatch.Draw(Texture, _entity.Position + new Vector2(1, 0), null, color, _entity.Angle, Size / 2, 1, 0, 0);
+        _spriteBatch.Draw(Texture, _entity.Position + new Vector2(-1, 0), null, color, _entity.Angle, Size / 2, 1, 0, 0);
         _spriteBatch.Draw(Texture, _entity.Position, null, Color, _entity.Angle, Size / 2, 1, 0, 0);
     }
 }
