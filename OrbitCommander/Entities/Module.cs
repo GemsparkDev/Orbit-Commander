@@ -64,7 +64,6 @@ public abstract class Module : Pickup, IData
     }
     public virtual void OnEngine() { }
     public virtual void OnAbility() { }
-    public virtual float Speed { get { throw new InvalidOperationException("This module does not fire projectiles."); } }
     public virtual Entity ModifyProjectile(Entity _projectile) { return _projectile; }
     //Override to provide custom serialization for modules
     public virtual void Parse(Modules _type, List<string> _disassembly, LoadLogger _logger)
@@ -77,6 +76,11 @@ public abstract class Module : Pickup, IData
     {
         return $"{{{Type},{SerializeAttributes()},{isFailed}}}";
     }
+}
+public interface IWeapon
+{
+    public float Speed { get; }
+    public bool CritCondition { get; }
 }
 public class ReloadSystem(int _magazineSize, float _reloadSpeed, Action _reloadCallback = null)
 {
@@ -479,11 +483,11 @@ public class OrionEngine() : Module(Modules.Orion)
         }
     }
 }
-public class Basic() : Module(Modules.Basic)
+public class Basic() : Module(Modules.Basic), IWeapon
 {
     private ReloadSystem ammo = new ReloadSystem(18, 2);
     private float critCD = 0;
-    public override float Speed => 9;
+    public float Speed => 9;
     public override void OnShoot()
     {
         if (Cooldown > 0)
@@ -518,10 +522,10 @@ public class Basic() : Module(Modules.Basic)
     }
     public override int StealthChange() => GunStealthChange();
 }
-public class Antimaterial() : Module(Modules.Antimaterial)
+public class Antimaterial() : Module(Modules.Antimaterial), IWeapon
 {
     ReloadSystem ammo = new ReloadSystem(4, 2f);
-    public override float Speed => 20;
+    public float Speed => 20;
     bool nextShotCrit = false;
     public override void OnShoot()
     {
@@ -558,10 +562,10 @@ public class Antimaterial() : Module(Modules.Antimaterial)
     }
     public override int StealthChange() => GunStealthChange();
 }
-public class Railgun() : Module(Modules.Railgun)
+public class Railgun() : Module(Modules.Railgun), IWeapon
 {
     ReloadSystem ammo = new ReloadSystem(1, 1.5f);
-    public override float Speed => float.MaxValue;
+    public float Speed => float.MaxValue;
     public override void OnShoot()
     {
         if (Cooldown > 0)
@@ -598,10 +602,10 @@ public class Railgun() : Module(Modules.Railgun)
     }
     public override int StealthChange() => GunStealthChange();
 }
-public class Spiral() : Module(Modules.Spiral)
+public class Spiral() : Module(Modules.Spiral), IWeapon
 {
     ReloadSystem ammo = new ReloadSystem(10, 2);
-    public override float Speed => 12;
+    public float Speed => 12;
     private float critCD = 0;
     public override void OnShoot()
     {
@@ -641,11 +645,11 @@ public class Spiral() : Module(Modules.Spiral)
     }
     public override int StealthChange() => GunStealthChange();
 }
-public class Shotgun() : Module(Modules.Shotgun)
+public class Shotgun() : Module(Modules.Shotgun), IWeapon
 {
     ReloadSystem ammo = new ReloadSystem(20, 3);
     float fireCD = 0;
-    public override float Speed => 10;
+    public float Speed => 10;
     public override void OnShoot()
     {
         if (Cooldown > 0)
@@ -688,12 +692,12 @@ public class Shotgun() : Module(Modules.Shotgun)
     }
     public override int StealthChange() => GunStealthChange();
 }
-public class Missile() : Module(Modules.Missile)
+public class Missile() : Module(Modules.Missile), IWeapon
 {
     private ReloadSystem ammo = new ReloadSystem(8, 2f);
     private List<(float timer, Entity entity)> hitEntities = [];
     bool nextCrit = false;
-    public override float Speed => 9;
+    public float Speed => 9;
     public override void OnShoot()
     {
         if (Cooldown > 0)
@@ -742,7 +746,7 @@ public class Missile() : Module(Modules.Missile)
     }
     public override int StealthChange() => GunStealthChange();
 }
-public class LMG() : Module(Modules.LMG)
+public class LMG() : Module(Modules.LMG), IWeapon
 {
     private ReloadSystem ammo = new ReloadSystem(80, 4);
     private float critCD = 0;
