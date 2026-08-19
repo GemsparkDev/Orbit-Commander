@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Graphics;
@@ -488,6 +489,7 @@ public class Basic() : Module(Modules.Basic), IWeapon
     private ReloadSystem ammo = new ReloadSystem(18, 2);
     private float critCD = 0;
     public float Speed => 9;
+    public bool CritCondition => critCD > 0;
     public override void OnShoot()
     {
         if (Cooldown > 0)
@@ -501,7 +503,7 @@ public class Basic() : Module(Modules.Basic), IWeapon
                 critCD = 2.5f;
             }
             Vector2 vel = Player.IdealSpeedWithVelocity(Speed) + new Vector2(Util.OneToNegOne(), Util.OneToNegOne()) / 2;
-            Player.Shoot(NewPulseShot(Player.Position, vel, Util.ToAngle(vel - Player.Velocity), 0, Team, 3), 2f, critCD > 0);
+            Player.Shoot(NewPulseShot(Player.Position, vel, Util.ToAngle(vel - Player.Velocity), 0, Team, 3), 2f, CritCondition);
             SoundManager.PlaySound(Assets.Get(Sound.PulseFire), Player.Position);
             Cooldown = 0.2f;
             Engine.ShakeScreen(0.3f);
@@ -527,6 +529,7 @@ public class Antimaterial() : Module(Modules.Antimaterial), IWeapon
     ReloadSystem ammo = new ReloadSystem(4, 2f);
     public float Speed => 20;
     bool nextShotCrit = false;
+    public bool CritCondition => nextShotCrit;
     public override void OnShoot()
     {
         if (Cooldown > 0)
@@ -537,7 +540,7 @@ public class Antimaterial() : Module(Modules.Antimaterial), IWeapon
         {
             var p1 = NewAssassinShot(Player.Position, Player.IdealSpeedWithVelocity(Speed), Util.ToAngle(Player.Direction), 0, Team, 16);
             p1.Texture = Assets.Get(Sprites.Arrow);
-            Player.Shoot(p1, 3, nextShotCrit);
+            Player.Shoot(p1, 3, CritCondition);
             SoundManager.PlaySound(Assets.Get(Sound.SniperFire), Player.Position);
             Cooldown = 0.75f;
             Engine.Camera.Position += Player.Direction * Speed + new Vector2(Util.OneToNegOne(), Util.OneToNegOne()) * 2;
@@ -566,6 +569,7 @@ public class Railgun() : Module(Modules.Railgun), IWeapon
 {
     ReloadSystem ammo = new ReloadSystem(1, 1.5f);
     public float Speed => float.MaxValue;
+    public bool CritCondition => false; //TODO: Figure out how to make this show
     public override void OnShoot()
     {
         if (Cooldown > 0)
@@ -607,6 +611,7 @@ public class Spiral() : Module(Modules.Spiral), IWeapon
     ReloadSystem ammo = new ReloadSystem(10, 2);
     public float Speed => 12;
     private float critCD = 0;
+    public bool CritCondition => critCD > 0;
     public override void OnShoot()
     {
         if (Cooldown > 0)
@@ -617,7 +622,7 @@ public class Spiral() : Module(Modules.Spiral), IWeapon
         {
             for (int i = 0; i < Util.Random.Next(3, 5); i++)
             {
-                Player.Shoot(NewSpiralShot(Player.Position, Player.IdealSpeedWithVelocity(Speed), Util.ToAngle(Player.Direction), 0, Team, 5, Util.OneToNegOne() * MathF.PI, 1), 1.25f, critCD > 0);
+                Player.Shoot(NewSpiralShot(Player.Position, Player.IdealSpeedWithVelocity(Speed), Util.ToAngle(Player.Direction), 0, Team, 5, Util.OneToNegOne() * MathF.PI, 1), 1.25f, CritCondition);
             }
             SoundManager.PlaySound(Assets.Get(Sound.PulseFire), Player.Position);
             Cooldown = 0.5f;
@@ -650,6 +655,7 @@ public class Shotgun() : Module(Modules.Shotgun), IWeapon
     ReloadSystem ammo = new ReloadSystem(20, 3);
     float fireCD = 0;
     public float Speed => 10;
+    public bool CritCondition => fireCD > 0;
     public override void OnShoot()
     {
         if (Cooldown > 0)
@@ -665,7 +671,7 @@ public class Shotgun() : Module(Modules.Shotgun), IWeapon
                 float offsetAngle = angleDegrees * MathF.PI / 180;
                 Vector2 targetVector = Player.IdealSpeedWithVelocity(Speed) + new Vector2(Util.OneToNegOne(), Util.OneToNegOne());
                 Vector2 positionOffset = new Vector2(Player.Direction.Y, -Player.Direction.X) * offsetAngle * 100;
-                Player.Shoot(NewPulseShot(Player.Position + positionOffset, targetVector * (1 + Util.OneToNegOne() / Speed), Util.ToAngle(Player.Direction) + offsetAngle, 0, Team, 2), 2, fireCD > 0);
+                Player.Shoot(NewPulseShot(Player.Position + positionOffset, targetVector * (1 + Util.OneToNegOne() / Speed), Util.ToAngle(Player.Direction) + offsetAngle, 0, Team, 2), 2, CritCondition);
             }
             SoundManager.PlaySound(Assets.Get(Sound.PulseFire), Player.Position);
             Player.Velocity -= Player.Direction / 2;
@@ -697,6 +703,7 @@ public class Missile() : Module(Modules.Missile), IWeapon
     private ReloadSystem ammo = new ReloadSystem(8, 2f);
     private List<(float timer, Entity entity)> hitEntities = [];
     bool nextCrit = false;
+    public bool CritCondition => nextCrit;
     public float Speed => 9;
     public override void OnShoot()
     {
@@ -706,7 +713,7 @@ public class Missile() : Module(Modules.Missile), IWeapon
         }
         if (ammo.Fire())
         {
-            Player.Shoot(NewMissile(Player.Position + new Vector2(Player.Direction.Y, -Player.Direction.X) * 6, Player.IdealSpeedWithVelocity(Speed), Util.ToAngle(Player.Direction), Team, 1, 8, 10), 2f, nextCrit);
+            Player.Shoot(NewMissile(Player.Position + new Vector2(Player.Direction.Y, -Player.Direction.X) * 6, Player.IdealSpeedWithVelocity(Speed), Util.ToAngle(Player.Direction), Team, 1, 8, 10), 2f, CritCondition);
             SoundManager.PlaySound(Assets.Get(Sound.MissileFire), Player.Position);
             Cooldown = 0.5f;
             Engine.ShakeScreen(0.5f);
@@ -750,7 +757,8 @@ public class LMG() : Module(Modules.LMG), IWeapon
 {
     private ReloadSystem ammo = new ReloadSystem(80, 4);
     private float critCD = 0;
-    public override float Speed => 12;
+    public float Speed => 12;
+    public bool CritCondition => critCD > 0.5f;
     public override void OnShoot()
     {
         if (Cooldown > 0)
@@ -764,7 +772,7 @@ public class LMG() : Module(Modules.LMG), IWeapon
             var shot = NewPulseShot(Player.Position + offset, Player.IdealSpeedWithVelocity(Speed) + offset / 4, Util.ToAngle(Player.Direction), 0, Team, 2);
             shot.Texture = dot;
             shot.TimeLeft = 3;
-            Player.Shoot(shot, 1.5f, critCD > 0.5f);
+            Player.Shoot(shot, 1.5f, CritCondition);
             SoundManager.PlaySound(Assets.Get(Sound.PulseFire), Player.Position);
             Engine.ShakeScreen(0.1f);
             Engine.Camera.Position += Player.Direction * Speed + new Vector2(Util.OneToNegOne(), Util.OneToNegOne());
@@ -792,7 +800,8 @@ public class LMG() : Module(Modules.LMG), IWeapon
 public class Crossbow() : Module(Modules.Crossbow)
 {
     private float chargeTime = 0;
-    public override float Speed => 15;
+    public float Speed => 15;
+    public bool CritCondition => chargeTime > 1.5f;
     public override void OnUpdate(float _fuseRatio)
     {
         if(Input.NewMouseState.LeftButton == ButtonState.Pressed)
@@ -809,7 +818,7 @@ public class Crossbow() : Module(Modules.Crossbow)
                 Vector2 offset = new Vector2(Player.Direction.Y, -Player.Direction.X) * Util.Random.Next(-2, 3);
                 var shot = NewPulseShot(Player.Position + offset, Player.IdealSpeedWithVelocity(Speed) + offset / 4, Util.ToAngle(Player.Direction), 0, Team, 18, true, 1);
                 shot.Texture = Assets.Get(Sprites.CrossbowShot);
-                Player.Shoot(shot, 1.5f, chargeTime > 0);
+                Player.Shoot(shot, 1.5f, CritCondition);
                 Engine.Camera.Position += Player.Direction * Speed / 2;
                 Engine.ShakeScreen(0.2f);
                 Player.Velocity -= Player.Direction / 4;

@@ -28,12 +28,17 @@ public class Player : Entity
         { true, true, true, false },
         { true, true, true, false },
     };
+    public Module Hull => modules[ModuleType.Hull];
+    public IWeapon Gun => modules[ModuleType.Guns] as IWeapon;
+    public Module Engines => modules[ModuleType.Engines];
+    public Module Sensors => modules[ModuleType.Sensors];
+    public Module Core => modules[ModuleType.Core];
     public Dictionary<ModuleType, Module> modules = new()
     {
         { ModuleType.Hull, ItemFactory.moduleData[UI.setModules[0]].Retrieve()},
         { ModuleType.Guns, ItemFactory.moduleData[UI.setModules[1]].Retrieve() },
         { ModuleType.Engines, ItemFactory.moduleData[UI.setModules[2]].Retrieve() },
-        { ModuleType.Sensors, ItemFactory.moduleData[UI.setModules[3]].Retrieve() }, // Swap sensors to weapon augment module
+        { ModuleType.Sensors, ItemFactory.moduleData[UI.setModules[3]].Retrieve() },
         { ModuleType.Core, ItemFactory.moduleData[UI.setModules[4]].Retrieve() }
     };
     public Module SecondaryWeapon { get; set; } = null;
@@ -263,6 +268,14 @@ public class Player : Entity
         float maxHealth = modules.Values.Sum(x => x.MaxHealth);
         UI.PlayerHealth.SetInterval(currentHealth - cachedDamage, maxHealth, 0);
         UI.PlayerHealth.SetInterval(currentHealth + cachedDamageCd / 0.05f, maxHealth, 1);
+        if ((modules[ModuleType.Guns] as IWeapon).CritCondition)
+        {
+            UI.PlayerAmmo.Colors[0] = Color.White;
+        }
+        else
+        {
+            UI.PlayerAmmo.Colors[0] = Color.Yellow;
+        }
 
         float lerp = (MathF.Sin(Engine.Time) + 1f) / 2;
         Vector3 colorVec = new Vector3(1, 0, 0) * lerp + new Vector3(1, 0.2f, 0.2f) * (1f - lerp);
