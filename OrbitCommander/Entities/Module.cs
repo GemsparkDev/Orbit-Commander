@@ -78,10 +78,11 @@ public abstract class Module : Pickup, IData
         return $"{{{Type},{SerializeAttributes()},{isFailed}}}";
     }
 }
-public interface IWeapon
+public abstract class Weapon(Modules _type, Vector2 _position = default, Vector2 _velocity = default, float _angularVelocity = 0) : Module(_type, _position, _velocity, _angularVelocity)
 {
-    public float Speed { get; }
-    public bool CritCondition { get; }
+
+    public abstract float Speed { get; }
+    public abstract bool CritCondition { get; }
 }
 public class ReloadSystem(int _magazineSize, float _reloadSpeed, Action _reloadCallback = null)
 {
@@ -484,12 +485,12 @@ public class OrionEngine() : Module(Modules.Orion)
         }
     }
 }
-public class Basic() : Module(Modules.Basic), IWeapon
+public class Basic() : Weapon(Modules.Basic)
 {
     private ReloadSystem ammo = new ReloadSystem(18, 2);
     private float critCD = 0;
-    public float Speed => 9;
-    public bool CritCondition => critCD > 0;
+    public override float Speed => 9;
+    public override bool CritCondition => critCD > 0;
     public override void OnShoot()
     {
         if (Cooldown > 0)
@@ -524,12 +525,12 @@ public class Basic() : Module(Modules.Basic), IWeapon
     }
     public override int StealthChange() => GunStealthChange();
 }
-public class Antimaterial() : Module(Modules.Antimaterial), IWeapon
+public class Antimaterial() : Weapon(Modules.Antimaterial)
 {
     ReloadSystem ammo = new ReloadSystem(4, 2f);
-    public float Speed => 20;
+    public override float Speed => 20;
     bool nextShotCrit = false;
-    public bool CritCondition => nextShotCrit;
+    public override bool CritCondition => nextShotCrit;
     public override void OnShoot()
     {
         if (Cooldown > 0)
@@ -565,11 +566,11 @@ public class Antimaterial() : Module(Modules.Antimaterial), IWeapon
     }
     public override int StealthChange() => GunStealthChange();
 }
-public class Railgun() : Module(Modules.Railgun), IWeapon
+public class Railgun() : Weapon(Modules.Railgun)
 {
     ReloadSystem ammo = new ReloadSystem(1, 1.5f);
-    public float Speed => float.MaxValue;
-    public bool CritCondition => false; //TODO: Figure out how to make this show
+    public override float Speed => float.MaxValue;
+    public override bool CritCondition => false; //TODO: Figure out how to make this show
     public override void OnShoot()
     {
         if (Cooldown > 0)
@@ -606,12 +607,12 @@ public class Railgun() : Module(Modules.Railgun), IWeapon
     }
     public override int StealthChange() => GunStealthChange();
 }
-public class Spiral() : Module(Modules.Spiral), IWeapon
+public class Spiral() : Weapon(Modules.Spiral)
 {
     ReloadSystem ammo = new ReloadSystem(10, 2);
-    public float Speed => 12;
+    public override float Speed => 12;
     private float critCD = 0;
-    public bool CritCondition => critCD > 0;
+    public override bool CritCondition => critCD > 0;
     public override void OnShoot()
     {
         if (Cooldown > 0)
@@ -650,12 +651,12 @@ public class Spiral() : Module(Modules.Spiral), IWeapon
     }
     public override int StealthChange() => GunStealthChange();
 }
-public class Shotgun() : Module(Modules.Shotgun), IWeapon
+public class Shotgun() : Weapon(Modules.Shotgun)
 {
     ReloadSystem ammo = new ReloadSystem(20, 3);
     float fireCD = 0;
-    public float Speed => 10;
-    public bool CritCondition => fireCD > 0;
+    public override float Speed => 10;
+    public override bool CritCondition => fireCD > 0;
     public override void OnShoot()
     {
         if (Cooldown > 0)
@@ -698,13 +699,13 @@ public class Shotgun() : Module(Modules.Shotgun), IWeapon
     }
     public override int StealthChange() => GunStealthChange();
 }
-public class Missile() : Module(Modules.Missile), IWeapon
+public class Missile() : Weapon(Modules.Missile)
 {
     private ReloadSystem ammo = new ReloadSystem(8, 2f);
     private List<(float timer, Entity entity)> hitEntities = [];
     bool nextCrit = false;
-    public bool CritCondition => nextCrit;
-    public float Speed => 9;
+    public override bool CritCondition => nextCrit;
+    public override float Speed => 9;
     public override void OnShoot()
     {
         if (Cooldown > 0)
@@ -753,12 +754,12 @@ public class Missile() : Module(Modules.Missile), IWeapon
     }
     public override int StealthChange() => GunStealthChange();
 }
-public class LMG() : Module(Modules.LMG), IWeapon
+public class LMG() : Weapon(Modules.LMG)
 {
     private ReloadSystem ammo = new ReloadSystem(80, 4);
     private float critCD = 0;
-    public float Speed => 12;
-    public bool CritCondition => critCD > 0.5f;
+    public override float Speed => 12;
+    public override bool CritCondition => critCD > 0.5f;
     public override void OnShoot()
     {
         if (Cooldown > 0)
@@ -797,11 +798,11 @@ public class LMG() : Module(Modules.LMG), IWeapon
     }
     public override int StealthChange() => GunStealthChange();
 }
-public class Crossbow() : Module(Modules.Crossbow), IWeapon
+public class Crossbow() : Weapon(Modules.Crossbow)
 {
     private float chargeTime = 0;
-    public float Speed => 15;
-    public bool CritCondition => chargeTime > 1.5f;
+    public override float Speed => 15;
+    public override bool CritCondition => chargeTime > 1.5f;
     public override void OnUpdate(float _fuseRatio)
     {
         if(Input.NewMouseState.LeftButton == ButtonState.Pressed)
@@ -836,12 +837,12 @@ public class Crossbow() : Module(Modules.Crossbow), IWeapon
         }
     }
 }
-public class Flamethrower() : Module(Modules.Flamethrower), IWeapon
+public class Flamethrower() : Weapon(Modules.Flamethrower)
 {
     ReloadSystem ammo = new ReloadSystem(60, 1, delegate ()
     { ParticleManager.Add(new Particle(Assets.Get(Sprites.Cog), 60, Player.Position, Player.Velocity + new Vector2(Util.OneToNegOne(), Util.OneToNegOne()), 0, Util.OneToNegOne() / 2, Color.Green, Color.Transparent) { experienceGravity = true }); });
-    public float Speed => 5;
-    public bool CritCondition => Player.Temperature > 1;
+    public override float Speed => 5;
+    public override bool CritCondition => Player.Temperature > 1;
     public override void OnShoot()
     {
         if (Cooldown > 0)
@@ -865,11 +866,11 @@ public class Flamethrower() : Module(Modules.Flamethrower), IWeapon
     }
     public override int StealthChange() => GunStealthChange();
 }
-public class Fireball() : Module(Modules.Fireball), IWeapon
+public class Fireball() : Weapon(Modules.Fireball)
 {
     ReloadSystem ammo = new ReloadSystem(3, 2);
-    public float Speed => 8;
-    public bool CritCondition => Player.Temperature > 1;
+    public override float Speed => 8;
+    public override bool CritCondition => Player.Temperature > 1;
     public override void OnShoot()
     {
         if (Cooldown > 0)
@@ -892,12 +893,12 @@ public class Fireball() : Module(Modules.Fireball), IWeapon
     }
     public override int StealthChange() => GunStealthChange();
 }
-public class GrenadeLauncher() : Module(Modules.GrenadeLauncher), IWeapon
+public class GrenadeLauncher() : Weapon(Modules.GrenadeLauncher)
 {
     ReloadSystem ammo = new ReloadSystem(8, 3);
     private float critCD = 0;
-    public float Speed => 8;
-    public bool CritCondition => critCD > 0;
+    public override float Speed => 8;
+    public override bool CritCondition => critCD > 0;
     public override void OnShoot()
     {
         if (Cooldown > 0)
@@ -930,12 +931,12 @@ public class GrenadeLauncher() : Module(Modules.GrenadeLauncher), IWeapon
         critCD += 30;
     }
 }
-public class SpewerModule() : Module(Modules.Spewer), IWeapon
+public class SpewerModule() : Weapon(Modules.Spewer)
 {
     ReloadSystem ammo = new ReloadSystem(3, 5);
     private float fireCD = 0;
-    public float Speed => 4;
-    public bool CritCondition => fireCD < 0;
+    public override float Speed => 4;
+    public override bool CritCondition => fireCD < 0;
     public override void OnShoot()
     {
         if (Cooldown > 0)
@@ -966,7 +967,7 @@ public class SpewerModule() : Module(Modules.Spewer), IWeapon
     }
     public override int StealthChange() => GunStealthChange();
 }
-public class PrismArray() : Module(Modules.PrismArray), IWeapon
+public class PrismArray() : Weapon(Modules.PrismArray)
 {
     float time = 0;
     private bool isFiring = false;
@@ -974,8 +975,8 @@ public class PrismArray() : Module(Modules.PrismArray), IWeapon
     private SoundEffectInstance beamBlend;
     private float duration = (float)Assets.Get(Sound.FireLaser).Duration.TotalSeconds;
     private float timeLeft = 0;
-    public float Speed => float.MaxValue;
-    public bool CritCondition => Player.Health <= 20;
+    public override float Speed => float.MaxValue;
+    public override bool CritCondition => Player.Health <= 20;
     public override void OnShoot()
     {
         var proj = Player.Modify(NewAssassinShot(Player.Position, Player.Direction * 50, Util.ToAngle(Player.Direction), 0, Player.Team, 30, 0), 2, CritCondition);
@@ -1051,11 +1052,11 @@ public class PrismArray() : Module(Modules.PrismArray), IWeapon
     }
     public override int StealthChange() => GunStealthChange();
 }
-public class MatrixLauncher() : Module(Modules.MatrixLauncher), IWeapon
+public class MatrixLauncher() : Weapon(Modules.MatrixLauncher)
 {
     ReloadSystem ammo = new ReloadSystem(3, 2);
-    public float Speed => 12;
-    public bool CritCondition => Player.Health <= 20;
+    public override float Speed => 12;
+    public override bool CritCondition => Player.Health <= 20;
     public override void OnShoot()
     {
         if (Cooldown > 0)
@@ -1081,14 +1082,14 @@ public class MatrixLauncher() : Module(Modules.MatrixLauncher), IWeapon
     }
     public override int StealthChange() => GunStealthChange();
 }
-public class Torch() : Module(Modules.Torch), IWeapon
+public class Torch() : Weapon(Modules.Torch)
 {
     ReloadSystem ammo = new ReloadSystem(8, 1);
     int count = 0;
     float betweenShots = 0;
     private float critCD = 0;
-    public float Speed => 12;
-    public bool CritCondition => critCD > 0;
+    public override float Speed => 12;
+    public override bool CritCondition => critCD > 0;
     public override void OnShoot()
     {
         if (Cooldown > 0 || count > 0)
@@ -1145,11 +1146,11 @@ public class Torch() : Module(Modules.Torch), IWeapon
         }
     }
 }
-public class SplitterModule() : Module(Modules.SplitterModule), IWeapon
+public class SplitterModule() : Weapon(Modules.SplitterModule)
 {
     ReloadSystem ammo = new ReloadSystem(6, 3);
-    public float Speed => 8;
-    public bool CritCondition 
+    public override float Speed => 8;
+    public override bool CritCondition 
     { 
         get 
         {
@@ -1187,11 +1188,11 @@ public class SplitterModule() : Module(Modules.SplitterModule), IWeapon
     }
     public override int StealthChange() => GunStealthChange();
 }
-public class Fractal() : Module(Modules.Fractal), IWeapon
+public class Fractal() : Weapon(Modules.Fractal)
 {
     ReloadSystem ammo = new ReloadSystem(10, 3);
-    public float Speed => 6;
-    public bool CritCondition => Player.Velocity.Length() > 20;
+    public override float Speed => 6;
+    public override bool CritCondition => Player.Velocity.Length() > 20;
     public override void OnShoot()
     {
         if (Cooldown > 0)
@@ -1229,11 +1230,11 @@ public class Fractal() : Module(Modules.Fractal), IWeapon
     }
     public override int StealthChange() => GunStealthChange();
 }
-public class CrackShot : Module, IWeapon
+public class CrackShot : Weapon
 {
     ReloadSystem ammo;
-    public float Speed => 8;
-    public bool CritCondition => critCD > 0;
+    public override float Speed => 8;
+    public override bool CritCondition => critCD > 0;
     private float critCD = 0;
     public CrackShot() : base (Modules.CrackShot)
     {
@@ -1272,13 +1273,13 @@ public class CrackShot : Module, IWeapon
     }
     public override int StealthChange() => GunStealthChange();
 }
-public class MicroRocketLauncher() : Module(Modules.MicroRocketLauncher), IWeapon
+public class MicroRocketLauncher() : Weapon(Modules.MicroRocketLauncher)
 {
     ReloadSystem ammo = new ReloadSystem(30, 4);
     float offset = 2;
     private List<(float timer, Entity entity)> hitEntities = [];
-    public float Speed => 5;
-    public bool CritCondition => false;
+    public override float Speed => 5;
+    public override bool CritCondition => false;
     public override void OnShoot()
     {
         if (Cooldown > 0)
@@ -1323,11 +1324,11 @@ public class MicroRocketLauncher() : Module(Modules.MicroRocketLauncher), IWeapo
     }
     public override int StealthChange() => GunStealthChange();
 }
-public class AdaptiveShotgun() : Module(Modules.AdaptiveShotgun), IWeapon
+public class AdaptiveShotgun() : Weapon(Modules.AdaptiveShotgun)
 {
     ReloadSystem ammo = new ReloadSystem(2, 3);
-    public float Speed => 18;
-    public bool CritCondition => ammo.Rounds == 1;
+    public override float Speed => 18;
+    public override bool CritCondition => ammo.Rounds == 1;
     public override void OnShoot()
     {
         if (Cooldown > 0)
@@ -1364,12 +1365,12 @@ public class AdaptiveShotgun() : Module(Modules.AdaptiveShotgun), IWeapon
     }
     public override int StealthChange() => GunStealthChange();
 }
-public class GuidedRound() : Module(Modules.GuidedRound), IWeapon
+public class GuidedRound() : Weapon(Modules.GuidedRound)
 {
     private ReloadSystem ammo = new ReloadSystem(3, 3);
     private List<Entity> rounds = [];
-    public float Speed => 9;
-    public bool CritCondition => false;
+    public override float Speed => 9;
+    public override bool CritCondition => false;
     public override void OnShoot()
     {
         Vector2 mousePos = new Vector2(Input.NewMouseState.X, Input.NewMouseState.Y) - Engine.BackBuffer / 2 + Engine.MousePositionOffset * 1.5f;
@@ -1751,7 +1752,7 @@ public class ProjectingModifier() : Module(Modules.ProjectingModifier)
     {
         if(!Player.IsDocked && Player.Progression > 0)
         {
-            Engine.SaveGame.CurrentMission.CalculateTrajectory(Player.Position, Player.IdealSpeedWithVelocity((Player.modules[ModuleType.Guns] as IWeapon).Speed), 8 * SaveGame.EnemyHitboxModifier, 1);
+            Engine.SaveGame.CurrentMission.CalculateTrajectory(Player.Position, Player.IdealSpeedWithVelocity(Player.Gun.Speed), 8 * SaveGame.EnemyHitboxModifier, 1);
         }
     }
 }

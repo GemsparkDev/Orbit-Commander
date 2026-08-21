@@ -28,12 +28,13 @@ public class Player : Entity
         { true, true, true, false },
         { true, true, true, false },
     };
-    public Module Hull => modules[ModuleType.Hull];
-    public IWeapon Gun => modules[ModuleType.Guns] as IWeapon;
-    public Module Engines => modules[ModuleType.Engines];
-    public Module Sensors => modules[ModuleType.Sensors];
-    public Module Core => modules[ModuleType.Core];
-    public Dictionary<ModuleType, Module> modules = new()
+    public Module Hull { get => modules[ModuleType.Hull]; set => modules[ModuleType.Hull] = value; }
+    public Weapon Gun { get => modules[ModuleType.Guns] as Weapon; set => modules[ModuleType.Guns] = value; }
+    public Module Engines { get => modules[ModuleType.Engines]; set => modules[ModuleType.Engines] = value; }
+    public Module Sensors { get => modules[ModuleType.Sensors]; set => modules[ModuleType.Sensors] = value; }
+    public Module Core { get => modules[ModuleType.Core]; set => modules[ModuleType.Core] = value; }
+    public Weapon SecondaryWeapon { get; set; } = null;
+    public readonly Dictionary<ModuleType, Module> modules = new()
     {
         { ModuleType.Hull, ItemFactory.moduleData[UI.setModules[0]].Retrieve()},
         { ModuleType.Guns, ItemFactory.moduleData[UI.setModules[1]].Retrieve() },
@@ -41,7 +42,6 @@ public class Player : Entity
         { ModuleType.Sensors, ItemFactory.moduleData[UI.setModules[3]].Retrieve() },
         { ModuleType.Core, ItemFactory.moduleData[UI.setModules[4]].Retrieve() }
     };
-    public Module SecondaryWeapon { get; set; } = null;
 
     public Dockable dockedEntity;
     public List<Pickup> leashedMaterials = [];
@@ -66,7 +66,7 @@ public class Player : Entity
     {
         get
         {
-            if (modules[ModuleType.Sensors] == null)
+            if (Sensors == null)
             {
                 return -1;
             }
@@ -158,11 +158,11 @@ public class Player : Entity
                 }
             }
         }
-        for(int i = 0; i < 5; i++)
+        for(ModuleType i = ModuleType.Hull; i <= ModuleType.Core; i++)
         {
-            modules[(ModuleType)i] = (Module)ItemFactory.TryDeserialize(serialization[i + 3], _logger);
+            modules[i] = (Module)ItemFactory.TryDeserialize(serialization[(int)i + 3], _logger);
         }
-        SecondaryWeapon = (Module)ItemFactory.TryDeserialize(serialization[8], _logger);
+        SecondaryWeapon = (Weapon)ItemFactory.TryDeserialize(serialization[8], _logger);
         var textures = new Texture2D[modules.Count];
         for (int i = 0; i < modules.Count; i++)
         {
@@ -173,12 +173,12 @@ public class Player : Entity
     }
     public override void Update()
     {
-        if (!IsDocked && Progression > -1 && modules[ModuleType.Sensors].Type != Modules.ProjectingModifier)
+        if (!IsDocked && Progression > -1 && Sensors.Type != Modules.ProjectingModifier)
         {
             Engine.SaveGame.CurrentMission.CalculateTrajectory(Position, Velocity, ColliderRadius);
         }
         GetComponent<Sprite>().TargetColor = SaveGame.ColorScheme.TeamColors[Team];
-        if (modules[ModuleType.Core].Health <= 0)
+        if (Core.Health <= 0)
         {
             isExpired = true;
             engineSounds.Stop();
@@ -220,7 +220,7 @@ public class Player : Entity
             if(swapCd <= 0)
             {
                 SoundManager.PlayGlobalSound(Assets.Get(Sound.Click));
-                (modules[ModuleType.Guns], SecondaryWeapon) = (SecondaryWeapon, modules[ModuleType.Guns]);
+                (Gun, SecondaryWeapon) = (SecondaryWeapon, Gun);
                 Events.UpdateModulesUI();
                 swapCd = 0;
             }
@@ -268,7 +268,7 @@ public class Player : Entity
         float maxHealth = modules.Values.Sum(x => x.MaxHealth);
         UI.PlayerHealth.SetInterval(currentHealth - cachedDamage, maxHealth, 0);
         UI.PlayerHealth.SetInterval(currentHealth + cachedDamageCd / 0.05f, maxHealth, 1);
-        if ((modules[ModuleType.Guns] as IWeapon).CritCondition)
+        if (Gun.CritCondition)
         {
             UI.PlayerAmmo.Colors[0] = Color.White;
         }
@@ -966,7 +966,7 @@ public class Player : Entity
                     if (modules[failedPart].isFailed)
                     {
                         failedPart = ModuleType.Core;
-                        if (modules[ModuleType.Core].isFailed)
+                        if (Core.isFailed)
                         {
                             return _damage;
                         }
