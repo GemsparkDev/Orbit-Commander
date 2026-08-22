@@ -13,7 +13,7 @@ public class Sprite(Entity _entity, Color _color) : IComponent
     private ParticleEmitter collider;
     public Texture2D Texture
     {
-        get { return texture; }
+        get => texture;
         set
         {
             texture = value;
@@ -21,7 +21,24 @@ public class Sprite(Entity _entity, Color _color) : IComponent
         }
     }
     public Color Color { get; set; } = _color;
-    public Color TargetColor { get; set; } = _color;
+    private Color targetColor = _color;
+    public Color TargetColor 
+    { 
+        get 
+        {
+            //Nondestructive critical strike color overwrite
+            var attack = _entity.GetComponent<Attack>();
+            if (attack != null && attack.IsCrit)
+            {
+                return Color.White;
+            }
+            else
+            {
+                return targetColor;
+            }
+        } 
+        set => _color = value;  
+    }
     public virtual float ColliderRadius
     {
         get { return Texture == null ? 0 : SaveGame.EnemyHitboxModifier * (Texture.Height + Texture.Width) / 4 + 1; }
@@ -53,11 +70,6 @@ public class Sprite(Entity _entity, Color _color) : IComponent
          || _entity.Position.X - pos.X > halfSize.X || _entity.Position.Y - pos.Y > halfSize.Y)
         {
             return;
-        }
-        var attack = _entity.GetComponent<Attack>();
-        if(attack != null && attack.IsCrit)
-        {
-            TargetColor = Color.White;
         }
         //Outline in atmosphere looks better
         _spriteBatch.Draw(Texture, _entity.Position + new Vector2(0, 1), null, Color.Black, _entity.Angle, Size / 2, 1, 0, 0);

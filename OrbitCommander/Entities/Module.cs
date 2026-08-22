@@ -570,7 +570,13 @@ public class Railgun() : Weapon(Modules.Railgun)
 {
     ReloadSystem ammo = new ReloadSystem(1, 1.5f);
     public override float Speed => float.MaxValue;
-    public override bool CritCondition => false; //TODO: Figure out how to make this show
+    public override bool CritCondition 
+    { 
+        get 
+        {
+            return Engine.SaveGame.CurrentMission.Hitscan(Player.Position, Player.Direction, 3000, true, out Vector2 _, null).Count > 1;
+        } 
+    }
     public override void OnShoot()
     {
         if (Cooldown > 0)
@@ -1279,7 +1285,7 @@ public class MicroRocketLauncher() : Weapon(Modules.MicroRocketLauncher)
     float offset = 2;
     private List<(float timer, Entity entity)> hitEntities = [];
     public override float Speed => 5;
-    public override bool CritCondition => false;
+    public override bool CritCondition => hitEntities.Count > 3;
     public override void OnShoot()
     {
         if (Cooldown > 0)
@@ -1291,7 +1297,7 @@ public class MicroRocketLauncher() : Weapon(Modules.MicroRocketLauncher)
             Vector2 speed = Player.IdealSpeedWithVelocity(Speed);
             var dir = Vector2.Normalize(speed - Player.Velocity);
             Vector2 finalSpeed = speed + new Vector2(dir.Y, -dir.X) * offset;
-            Player.Shoot(NewMissile(Player.Position + Player.Direction * 6, finalSpeed, Util.ToAngle(finalSpeed), Team, 3, 3, 5), 1.7f, hitEntities.Count > 3); //Figure out how to work the crit condition in
+            Player.Shoot(NewMissile(Player.Position + Player.Direction * 6, finalSpeed, Util.ToAngle(finalSpeed), Team, 3, 3, 5), 1.7f, CritCondition);
             Engine.Camera.Position += Player.Direction * Speed;
             SoundManager.PlaySound(Assets.Get(Sound.MissileFire), Player.Position);
             Cooldown = 0.25f;
@@ -1370,7 +1376,7 @@ public class GuidedRound() : Weapon(Modules.GuidedRound)
     private ReloadSystem ammo = new ReloadSystem(3, 3);
     private List<Entity> rounds = [];
     public override float Speed => 9;
-    public override bool CritCondition => false;
+    public override bool CritCondition => rounds.Count >= 3;
     public override void OnShoot()
     {
         Vector2 mousePos = new Vector2(Input.NewMouseState.X, Input.NewMouseState.Y) - Engine.BackBuffer / 2 + Engine.MousePositionOffset * 1.5f;
