@@ -1393,7 +1393,7 @@ public class GuidedRound() : Weapon(Modules.GuidedRound)
         if (ammo.Fire())
         {
             Vector2 vel = Player.IdealSpeedWithVelocity(Speed) + new Vector2(Util.OneToNegOne(), Util.OneToNegOne()) / 2;
-            var round = NewAssassinShot(Player.Position, vel, Util.ToAngle(vel - Player.Velocity), 0, Team, 10);
+            var round = NewAssassinShot(Player.Position + Util.ToUnitVector(Player.Angle) * 10, vel, Util.ToAngle(vel - Player.Velocity), 0, Team, 10);
             round.TimeLeft = 20;
             round.Texture = Assets.Get(Sprites.Glow);
             rounds.Add(round);

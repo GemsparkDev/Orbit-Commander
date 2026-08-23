@@ -271,10 +271,12 @@ public class Player : Entity
         if (Gun.CritCondition)
         {
             UI.PlayerAmmo.Colors[0] = Color.White;
+            UI.PlayerAmmo.Colors[1] = Color.DarkGray;
         }
         else
         {
             UI.PlayerAmmo.Colors[0] = Color.Yellow;
+            UI.PlayerAmmo.Colors[1] = Color.Gray;
         }
 
         float lerp = (MathF.Sin(Engine.Time) + 1f) / 2;
