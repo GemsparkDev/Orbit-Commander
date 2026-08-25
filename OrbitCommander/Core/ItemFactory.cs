@@ -29,7 +29,7 @@ public static class ItemFactory
         { Modules.Adaptive, new ModuleData(Sprites.RealAdaptive, Sprites.Adaptive, "Adaptive", "Buffs damage but resists less damage when this module has health.", (int)ModuleType.Hull, 20, typeof(Adaptive)) },
         { Modules.ThermalShield,new ModuleData(Sprites.RealHull, Sprites.Hull, "Thermal Shield", "Brings the player toward thermal equilibrium, resisting damage near extremes.", (int)ModuleType.Hull, 20, typeof(ThermalShield)) },
 
-        { Modules.Basic, new ModuleData(Sprites.RealGuns, Sprites.Guns, "Basic", "2x Crit for 2.5 seconds randomly after firing.", (int)ModuleType.Guns, 20, typeof(Basic)) },
+        { Modules.Basic, new ModuleData(Sprites.RealGuns, Sprites.Guns, "Basic", "2x Crit for the last 3 shots.", (int)ModuleType.Guns, 20, typeof(Basic)) },
         { Modules.Spiral, new ModuleData(Sprites.RealSpiral,Sprites.Spiral, "Spiral", "1.25x Crit after using an ability for a time equal to one third the ability cooldown duration.", (int)ModuleType.Guns, 20, typeof(Spiral)) },
         { Modules.Shotgun, new ModuleData(Sprites.RealGuns,Sprites.Guns, "Shotgun", "2x Crit when getting hit for a time equal to one half the taken damage seconds.", (int)ModuleType.Guns, 20, typeof(Shotgun), Color.CornflowerBlue) },
         { Modules.Missile, new ModuleData(Sprites.RealMissileModule,Sprites.MissileModule, "Missile Launcher", "2x Crit on next shot when hitting 3 or more enemies within 0.05 seconds.", (int)ModuleType.Guns, 18, typeof(Missile), Color.CornflowerBlue) },

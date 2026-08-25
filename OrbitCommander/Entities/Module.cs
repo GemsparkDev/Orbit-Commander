@@ -488,9 +488,8 @@ public class OrionEngine() : Module(Modules.Orion)
 public class Basic() : Weapon(Modules.Basic)
 {
     private ReloadSystem ammo = new ReloadSystem(18, 2);
-    private float critCD = 0;
     public override float Speed => 9;
-    public override bool CritCondition => critCD > 0;
+    public override bool CritCondition => ammo.Rounds < 4;
     public override void OnShoot()
     {
         if (Cooldown > 0)
@@ -499,12 +498,8 @@ public class Basic() : Weapon(Modules.Basic)
         }
         if (ammo.Fire())
         {
-            if(Util.Random.NextSingle() > 0.95f) //Has a chance to cause a critical hit buff
-            {
-                critCD = 2.5f;
-            }
             Vector2 vel = Player.IdealSpeedWithVelocity(Speed) + new Vector2(Util.OneToNegOne(), Util.OneToNegOne()) / 2;
-            Player.Shoot(NewPulseShot(Player.Position, vel, Util.ToAngle(vel - Player.Velocity), 0, Team, 3), 2f, CritCondition);
+            Player.Shoot(NewPulseShot(Player.Position, vel, Util.ToAngle(vel - Player.Velocity), 0, Team, 3), 3f, CritCondition);
             SoundManager.PlaySound(Assets.Get(Sound.PulseFire), Player.Position);
             Cooldown = 0.2f;
             Engine.ShakeScreen(0.3f);
@@ -517,10 +512,6 @@ public class Basic() : Weapon(Modules.Basic)
     public override void OnUpdate(float _fuseRatio)
     {
         ammo.Update(this, _fuseRatio);
-        if(critCD > 0)
-        {
-            critCD -= Engine.DeltaSeconds;
-        }
         base.OnUpdate(_fuseRatio);
     }
     public override int StealthChange() => GunStealthChange();
