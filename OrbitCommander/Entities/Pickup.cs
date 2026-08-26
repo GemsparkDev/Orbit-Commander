@@ -170,7 +170,13 @@ public class Pickup : Entity, IData
             if (cooldown <= 0 && nearestEnemy != null && Vector2.Distance(nearestEnemy.Position, Position) < 300)
             {
                 var dir = Vector2.Normalize(nearestEnemy.Position - Position);
-                Engine.SaveGame.CurrentMission.Add(NewPulseShot(Position, dir * 10, MathF.Atan2(dir.X, -dir.Y), 0, Team, 5, true));
+                //TODO: Integrate this better with future critical hit code, and make it better with harder critical conditions.
+                int damage = 5;
+                if(Player.Gun.CritCondition && Player.Engines is WorkEngine)
+                {
+                    damage = 8;
+                }
+                Engine.SaveGame.CurrentMission.Add(NewPulseShot(Position, dir * 10, MathF.Atan2(dir.X, -dir.Y), 0, Team, damage, true));
                 SoundManager.PlaySound(Assets.Get(Sound.PulseFire), Position);
                 cooldown = 1.5f;
             }
@@ -229,6 +235,13 @@ public class Pickup : Entity, IData
             {
                 cooldown -= Engine.DeltaSeconds;
             }
+            int damage = 10;
+            var color = Color.Red;
+            if(Player.Gun.CritCondition && Player.Engines is WorkEngine)
+            {
+                damage = 15;
+                color = Color.White;
+            }
             nearestEnemy = Engine.SaveGame.CurrentMission.NearestEnemy(NewEnemy(Position, Vector2.Zero, 0, 0, null, Team));
             if (cooldown <= 0 && nearestEnemy != null && Vector2.Distance(nearestEnemy.Position, Position) < 800)
             {
@@ -236,11 +249,11 @@ public class Pickup : Entity, IData
                 var enemies = Engine.SaveGame.CurrentMission.Hitscan(Position, dir, 800, true, out Vector2 _end, Friendly.Blacklist(Team));
                 foreach (var enemy in enemies)
                 {
-                    enemy.Collide(10);
+                    enemy.Collide(damage);
                 }
                 for (int i = 0; i < (_end - Position).Length() / 4; i++)
                 {
-                    ParticleManager.Add(new Particle(Assets.Get(Sprites.Dot), 1, Position + dir * 4 * i, Vector2.Zero, Util.ToAngle(dir), 0, Color.Red, Color.Transparent));
+                    ParticleManager.Add(new Particle(Assets.Get(Sprites.Dot), 1, Position + dir * 4 * i, Vector2.Zero, Util.ToAngle(dir), 0, color, Color.Transparent));
                 }
                 SoundManager.PlaySound(Assets.Get(Sound.LMGFire), Position);
                 cooldown = 0.75f;
@@ -266,9 +279,14 @@ public class Pickup : Entity, IData
         {
             yield return 0;
         }
+        int range = 100;
+        if(Player.Gun.CritCondition && Player.Engines is WorkEngine)
+        {
+            range = 120;
+        }
         var tex = Assets.Get(Sprites.Explosion);
         ParticleManager.Add(new Particle(tex, 3, Position, Vector2.Zero, 0, 0, Color.White, Color.Transparent));
-        Engine.SaveGame.CurrentMission.Explode(100, 100, Position);
+        Engine.SaveGame.CurrentMission.Explode(100, range, Position);
         yield return 1;
     }
     public static Pickup NewBomb(Vector2 _position, Vector2 _velocity, float _angle, float _angularVelocity, int _stealth = 0)
@@ -320,6 +338,10 @@ public class Pickup : Entity, IData
                     Player.leashedMaterials.Remove(nearestPickup as Pickup);
                 }
                 cooldown += Engine.DeltaSeconds * 2;
+                if(Player.Gun.CritCondition && Player.Engines is WorkEngine)
+                {
+                    cooldown += Engine.DeltaSeconds;
+                }
                 ParticleManager.Add(new Particle(Assets.Get(Sprites.Dot), 1, Position + Util.RotateVector2(new Vector2(Util.OneToNegOne(), Util.OneToNegOne()) * 5, Angle),
                     Velocity, Angle, 0, Color.Orange, Color.Transparent));
                 if (cooldown > 15)
@@ -359,15 +381,20 @@ public class Pickup : Entity, IData
     {
         while (true)
         {
+            int range = 22500;
+            if(Player.Gun.CritCondition && Player.Engines is WorkEngine)
+            {
+                range = 27500;
+            }
             foreach (var enemy in Engine.SaveGame.CurrentMission.enemies.Where(x => IsFriendly(x) && x.HasComponent<Statuses>()))
             {
                 float distSqr = Vector2.DistanceSquared(enemy.Position, Position);
-                if(distSqr < 22500)
+                if(distSqr < range)
                 {
                     enemy.Statuses.ApplyStatus(new FleetingDefense());
                 }
             }
-            if (Vector2.DistanceSquared(Position, Player.Position) < 22500)
+            if (Vector2.DistanceSquared(Position, Player.Position) < range)
             {
                 Player.Statuses.ApplyStatus(new FleetingDefense());
             }

@@ -53,7 +53,7 @@ public static class ItemFactory
 
         { Modules.Engines, new ModuleData(Sprites.RealEngines, Sprites.Engines, "Engines", "Basic engines with average acceleration and torque.", (int)ModuleType.Engines, 20, typeof(StandardEngine)) },
         { Modules.Plasma, new ModuleData(Sprites.RealPlasma, Sprites.Plasma, "Plasma", "High acceleration, low torque. Has a short period of higher force.", (int)ModuleType.Engines, 15, typeof(PlasmaEngine)) },
-        { Modules.Work, new ModuleData(Sprites.RealWork, Sprites.Work, "Work", "High torque, low acceleration. Constructs are immune to debuffs and decay.", (int)ModuleType.Engines, 25, typeof(WorkEngine)) },
+        { Modules.Work, new ModuleData(Sprites.RealWork, Sprites.Work, "Work", "High torque, low acceleration. Constructs are immune to decay and are improved if the player can critically hit.", (int)ModuleType.Engines, 25, typeof(WorkEngine)) },
         { Modules.Orion, new ModuleData(Sprites.RealOrion, Sprites.Orion, "Orion", "Uses explosions to move which can damage enemies. Attacking enemies causes an explosion.", (int)ModuleType.Engines, 20, typeof(OrionEngine)) },
 
         { Modules.Sensors, new ModuleData(Sprites.RealSensors,Sprites.Sensors, "Sensors", "Increases the crit damage bonus by 1.25x + 0.1, but reduces damage by 10%.", (int)ModuleType.Sensors, 20, typeof(TargettingModifer), Color.CornflowerBlue) },
