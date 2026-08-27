@@ -324,12 +324,29 @@ public static class UI
         RestartSwitch.SetInterval(1, 1);
         FuseCounter.AddBehaviour(delegate () { Engine.SaveGame.Player.UpdateSpares(); });
 
-        GlobalSidePanelOpen.AddBehaviour(delegate () { Events.ToggleDockingMenus(); });
+        GlobalSidePanelOpen.AddBehaviour(delegate () 
+        {
+            if(GlobalMainMenu.enabled)
+            {
+                //Main menu settings
+            }
+            else
+            {
+                Events.ToggleDockingMenus();
+            }
+        });
         GlobalFusePanelOpen.AddBehaviour(delegate ()
         {
             SoundManager.PlayGlobalSound(Assets.Get(Sound.Interact));
-            Events.UpdateModulesStatus();
-            FuseMenu.enabled = true;
+            if(GlobalMainMenu.enabled)
+            {
+                //Main menu settings
+            }
+            else
+            {
+                Events.UpdateModulesStatus();
+                FuseMenu.enabled = true;
+            }
         });
         SidePanelClose.AddBehaviour(Events.ToggleDockingMenus);
         FuseMenuClose.AddBehaviour(delegate ()
@@ -470,6 +487,8 @@ public static class UI
         GlobalMainMenu.AddWidget(Resolution, (int)Alignment.Top);
         GlobalMainMenu.AddWidget(NextResolution, (int)Alignment.Top);
         GlobalMainMenu.AddWidget(ApplyChanges, (int)Alignment.Top);
+        GlobalMainMenu.AddWidget(GlobalSidePanelOpen, (int)Alignment.Left);
+        GlobalMainMenu.AddWidget(GlobalFusePanelOpen, (int)Alignment.Right);
         for (int i = 0; i < Input.Keybinds.Count; i++)
         {
             var binding = (Binding)i; //Saving to a variable prevents delegate weirdness
