@@ -157,6 +157,16 @@ public class Mission
             new Conditional([new Kill([a])], SendPickup(2000)),
             new GliderSpawner(new Vector2(-1500, -2000), -1500), Sound.None);}),
 
+        (new("Sandbox", "",
+        100, [], 3, 2000, 4),
+        delegate(){ Entity a = null, b, c = null;return new([
+            a=Entity.NewButton(new Vector2(-25, 0), Vector2.Zero, 0, delegate { Engine.SaveGame.CurrentMission.Add(ItemFactory.NewScrap(a.Position + new Vector2(0, 50))); }),
+            b=Entity.NewMothership(new Vector2(100, 0), Vector2.Zero, 0),
+            c=Entity.NewButton(new Vector2(25, 0), Vector2.Zero, 0, delegate { Engine.SaveGame.CurrentMission.Add(Entity.NewFighter(c.Position + new Vector2(0, 50), Vector2.Zero, 0)); }),
+            new Planet(new Vector2(0, 200), Vector2.Zero, 2500, 2, true, Color.Cyan),
+            new Reflective(),
+        ], new Conditional([new Protect([b])], SendPickup(2000)),
+         new DropSpawner(1500)); } ),
         //Epilogue
         (new("Boss Rush", "",
         100, [], 3, 2000, 4),

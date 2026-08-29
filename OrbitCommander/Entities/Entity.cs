@@ -5102,6 +5102,31 @@ public class Entity : IMissionComponent
         b.AddBehaviour(enemy.EnemyDeath());
         return enemy;
     }
+    public static Entity NewButton(Vector2 _position, Vector2 _velocity, float _angle, Action _action)
+    {
+        var enemy = NewEnemy(_position, _velocity, _angle, 9999, Assets.Get(Sprites.Explosive), Team.Hostile);
+        enemy.AddComponent(new Behaviour().AddBehaviour(enemy.Button(_action)));
+        return enemy;
+    }
+    IEnumerable<int> Button(Action _action)
+    {
+        CD = [0];
+        Transform.IsImmovable = true;
+        while (true)
+        {
+            if(Health < MaxHealth)
+            {
+                Health = MaxHealth;
+                if (CD[0] <= 0)
+                {
+                    _action();
+                    CD[0] = 0.05f;
+                }
+            }
+            
+            yield return 0;
+        }
+    }
     public static Entity NewProjectile(Texture2D _texture, Vector2 _position, Vector2 _velocity, float _angle, float _angularVelocity, Team _team, int _damage, int _stealth)
     {
         var projectile = new Entity(_position, _velocity, _angle, _angularVelocity);
