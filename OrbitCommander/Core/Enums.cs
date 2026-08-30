@@ -186,6 +186,8 @@ public enum Sprites
     Title,
     Button,
     LargePanel,
+    SwitchOff,
+    SwitchOn,
     GargantuanPanel,
     EmptySlot,
     SelectedTab,

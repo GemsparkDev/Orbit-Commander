@@ -34,17 +34,18 @@ public static class UI
     public static Window FloppyTerminal { get; } = new Window(new Vector2(0, center.Y), Assets.Get(Sprites.Terminal)) { alignment = Alignment.Left };
     public static Window FuseMenu { get; } = new Window(new Vector2(BackBuffer.X, center.Y), Assets.Get(Sprites.RightSidePanel)) { alignment = Alignment.Right };
     public static Window EscapeMenu { get; } = new Window(center, Assets.Get(Sprites.LargePanel));
-    public static Window MenuSettings { get; } = new Window(new Vector2(0, center.Y), Assets.Get(Sprites.Terminal)) { alignment = Alignment.Left };
+    public static Window MenuSettings { get; } = new Window(new Vector2(center.X * 2, center.Y), Assets.Get(Sprites.RightSidePanel)) { alignment = Alignment.Right };
+    public static Window KeyBinds { get; } = new Window(new Vector2(0, center.Y), Assets.Get(Sprites.Terminal)) { alignment = Alignment.Left };
 
     //Main Menu
-    public static TerminalButton PatchedConicsToggle { get; } = new TerminalButton(new Vector2(-10, 50), Assets.TextFont, $"Patched Conics: {SaveGame.PatchedConics}", Color.White, 10);
+    public static Button PatchedConicsToggle { get; } = new Button(new Vector2(-10, 50), Assets.Get(Sprites.SwitchOn), Assets.TextFont, $"Patched Conics: {SaveGame.PatchedConics}", Color.White, Assets.Get(Sprites.SwitchOff));
+    public static Button ShaderToggle { get; } = new Button(new Vector2(-10, 70), Assets.Get(Sprites.SwitchOn), Assets.TextFont, $"Shader: {SaveGame.UseShader}", Color.White, Assets.Get(Sprites.SwitchOff)) { };
     public static TerminalSlider SFXSlider { get; } = new TerminalSlider(Line, Assets.Get(Sprites.Knob), new Vector2(50, -50), new Vector2(50, 5), false, [Color.White, Color.Gray]);
     public static TerminalSlider MusicSlider { get; } = new TerminalSlider(Line, Assets.Get(Sprites.Knob), new Vector2(50, -65), new Vector2(50, 5), false, [Color.White, Color.Gray]);
     public static TerminalSlider UIScaleSlider { get; } = new TerminalSlider(Line, Assets.Get(Sprites.Knob), new Vector2(50, -35), new Vector2(50, 5), false, [Color.White, Color.Gray]);
     public static Decal SFXVolume { get; } = new Decal(new Vector2(-10, -50), Assets.TextFont, "Sound: 100%", Color.White, 5);
     public static Decal MusicVolume { get; } = new Decal(new Vector2(-10, -65), Assets.TextFont, "Music: 100%", Color.White, 5);
     public static Decal UIScale { get; } = new Decal(new Vector2(-10, -35), Assets.TextFont, $"UI Scale: {Math.Truncate((UIScaleSlider.Intervals[0] + 1) * 10) / 10}", Color.White, 5);
-    public static TerminalButton ShaderToggle { get; } = new TerminalButton(new Vector2(-10, 70), Assets.TextFont, $"Shader: {SaveGame.UseShader}", Color.White, 10);
     public static TerminalButton SingleplayerButton { get; } = new TerminalButton(new Vector2(0, 0), Assets.TextFont, "Singleplayer", Color.White, 10);
     public static TerminalButton ExitButton { get; } = new TerminalButton(new Vector2(0, 40), Assets.TextFont, "Exit", Color.White, 10);
     public static TerminalButton LoadButton { get; } = new TerminalButton(new Vector2(0, 20), Assets.TextFont, "Load", Color.White, 10);
@@ -329,7 +330,7 @@ public static class UI
         {
             if(GlobalMainMenu.enabled)
             {
-                MenuSettings.enabled = true;
+                KeyBinds.enabled = true;
             }
             else
             {
@@ -341,7 +342,7 @@ public static class UI
             SoundManager.PlayGlobalSound(Assets.Get(Sound.Interact));
             if(GlobalMainMenu.enabled)
             {
-                //Main menu settings
+                MenuSettings.enabled = true;
             }
             else
             {
@@ -350,11 +351,12 @@ public static class UI
             }
         });
         SidePanelClose.AddBehaviour(delegate {
-            MenuSettings.enabled = false;
+            KeyBinds.enabled = false;
             Events.ToggleDockingMenus();
         });
         FuseMenuClose.AddBehaviour(delegate ()
         {
+            MenuSettings.enabled = false;
             SoundManager.PlayGlobalSound(Assets.Get(Sound.Interact));
             FuseMenu.enabled = false;
             if(Engine.UIManager.selectedIcon is Fuse)
@@ -484,8 +486,8 @@ public static class UI
         {
             var binding = (Binding)i; //Saving to a variable prevents delegate weirdness
             var key = Input.Keybinds[binding];
-            GlobalMainMenu.AddWidget(KeybindTexts[i] = new Decal(new Vector2(-140 + Assets.TextFont.MeasureString($"{binding}").X / 2.55f, 12 * i - 80), Assets.TextFont, $"{binding}", Color.White, 8), (int)Alignment.TopRight);
-            var button = new TerminalButton(new Vector2(80, 12 * i - 80), Assets.TextFont, $"{key}", Color.White, 8);
+            KeyBinds.AddWidget(KeybindTexts[i] = new Decal(new Vector2(-120 + Assets.TextFont.MeasureString($"{binding}").X / 2.55f, 12 * i - 80), Assets.TextFont, $"{binding}", Color.White, 8), (int)Alignment.TopRight);
+            var button = new TerminalButton(new Vector2(60, 12 * i - 80), Assets.TextFont, $"{key}", Color.White, 8);
             button.AddBehaviour(delegate ()
             {
                 var keys = Input.NewState.GetPressedKeys();
@@ -495,8 +497,9 @@ public static class UI
                     button.Text = $"{keys[0]}";
                 }
             });
-            GlobalMainMenu.AddWidget(KeybindInputs[i] = button, (int)Alignment.TopRight);
+            KeyBinds.AddWidget(KeybindInputs[i] = button, (int)Alignment.TopRight);
         }
+        KeyBinds.AddWidget(SidePanelClose);
 
         for (int i = 0; i < NextModule.Length; i++)
         {
@@ -593,7 +596,7 @@ public static class UI
         MenuSettings.AddWidget(Resolution, (int)Alignment.Top);
         MenuSettings.AddWidget(NextResolution, (int)Alignment.Top);
         MenuSettings.AddWidget(ApplyChanges, (int)Alignment.Top);
-        MenuSettings.AddWidget(SidePanelClose);
+        MenuSettings.AddWidget(FuseMenuClose);
 
         MissionSelect.AddWidget(MissionName, 0);
         MissionSelect.AddWidget(MissionDescription, 0);
@@ -736,6 +739,7 @@ public static class UI
         Engine.UIManager.AddContainer(FuseMenu);
         Engine.UIManager.AddContainer(EscapeMenu);
         Engine.UIManager.AddContainer(MenuSettings);
+        Engine.UIManager.AddContainer(KeyBinds);
 
         Engine.UIManager.ScreenWindow = GlobalMenu;
     }
