@@ -29,7 +29,7 @@ public abstract class Module : Pickup, IData
     {
         Type = _type;
         healthDecal = new Decal(new Vector2(0, 5), Assets.TextFont, $"{Health} / {MaxHealth}", Color.Pink, 5f);
-        description = new Decal(new Vector2(-10, 15), Assets.TextFont, ItemFactory.moduleData[_type].Description, Color.White, 5f);
+        description = new Decal(new Vector2(-5, 15), Assets.TextFont, ItemFactory.moduleData[_type].Description, Color.White, 3f);
         Tooltip.AddWidget(healthDecal);
         Tooltip.AddWidget(description);
         AddComponent(new Smelt() { Value = 3 });

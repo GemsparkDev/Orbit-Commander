@@ -328,7 +328,7 @@ public static class UI
 
         GlobalSidePanelOpen.AddBehaviour(delegate () 
         {
-            if(GlobalMainMenu.enabled)
+            if(Engine.UIManager.ScreenWindow == GlobalMainMenu)
             {
                 KeyBinds.enabled = true;
             }
@@ -340,7 +340,7 @@ public static class UI
         GlobalFusePanelOpen.AddBehaviour(delegate ()
         {
             SoundManager.PlayGlobalSound(Assets.Get(Sound.Interact));
-            if(GlobalMainMenu.enabled)
+            if(Engine.UIManager.ScreenWindow == GlobalMainMenu)
             {
                 MenuSettings.enabled = true;
             }
