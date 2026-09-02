@@ -67,6 +67,8 @@ public class Engine : Game
     }
     protected override void LoadContent()
     {
+        BackBuffer = new Vector2(graphics.PreferredBackBufferWidth, graphics.PreferredBackBufferHeight);
+        ScreenSize = new Vector2(1920 * BackBuffer.Y / 1080, 1080);
         loadingThread = Task.Factory.StartNew(() =>
         {
             spriteBatch = new SpriteBatch(GraphicsDevice);

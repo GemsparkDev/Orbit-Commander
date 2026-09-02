@@ -1579,7 +1579,7 @@ public class CreateFighter() : Module(Modules.CreateFighter)
                 {
                     var enemy = NewSurgeChild(Player.Position + new Vector2(Util.OneToNegOne(), Util.OneToNegOne()), Player.Velocity, Player.Angle, Player, allies);
                     enemy.Team = Team.Friendly;
-                    enemy.AddComponent(new Behaviour().AddBehaviour(enemy.AvoidProjectiles(1)));
+                    enemy.GetComponent<Behaviour>().AddBehaviour(enemy.AvoidProjectiles(1));
                     Engine.SaveGame.CurrentMission.Add(enemy);
                     allies.Add(enemy);
                 }
@@ -1722,11 +1722,11 @@ public class Expose() : Module(Modules.Expose)
         {
             if(isFire)
             {
-                Engine.SaveGame.Player.ConductHeat(-1, 0.1f);
+                Engine.SaveGame.Player.ConductHeat(-1.5f, 0.1f);
             }
             else
             {
-                Engine.SaveGame.Player.ConductHeat(1, 0.1f);
+                Engine.SaveGame.Player.ConductHeat(1.5f, 0.1f);
             }
         }
         base.OnUpdate(_fuseRatio);
