@@ -100,6 +100,7 @@ public static class UI
     public static Button RepairModule { get; } = new Button(new Vector2(-85, 15), Assets.Get(Sprites.Button), Assets.TextFont, "Queue Module", Color.Yellow);
     public static Button CancelQueue { get; } = new Button(new Vector2(-85, 45), Assets.Get(Sprites.Button), Assets.TextFont, "Cancel Latest", Color.Red);
     public static Button SaveButton { get; } = new Button(new Vector2(0, -60), Assets.Get(Sprites.WideButton), Assets.TextFont, "Save & Exit", Color.LightBlue);
+    public static Button ExitWithoutSave { get; } = new Button(new Vector2(0, -80), Assets.Get(Sprites.WideButton), Assets.TextFont, "Exit", Color.White);
     public static Decal AlertText { get; } = new Decal(new Vector2(0, 60), Assets.TextFont, "", Color.Yellow, 10);
 
     //Pickup Drone Menu
@@ -438,6 +439,7 @@ public static class UI
             }
         });
         SaveButton.AddBehaviour(delegate { Engine.UIManager.DisableAll(); SaveMenu.enabled = true; Events.GetSave(); });
+        ExitWithoutSave.AddBehaviour(delegate { Engine.UIManager.DisableAll(); Events.QuitToMenu(); });
         LoadButton.AddBehaviour(delegate { GlobalMainMenu.enabled = false; LoadMenu.enabled = true; Events.GetSave(); });
 
         Name.AddBehaviour(delegate { Engine.SaveGame.Name = Name.Text; });
@@ -611,6 +613,7 @@ public static class UI
         MissionSelect.AddWidget(CancelQueue, 1);
         MissionSelect.AddWidget(SaveButton, 0);
         MissionSelect.AddWidget(AlertText, 0);
+        MissionSelect.AddWidget(ExitWithoutSave, 0);
 
         PickupDroneMenu.AddWidget(LaunchButton);
 

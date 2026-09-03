@@ -62,6 +62,7 @@ public class Engine : Game
 
         BackBuffer = new Vector2(graphics.PreferredBackBufferWidth, graphics.PreferredBackBufferHeight);
         ScreenSize = new Vector2(1920 * BackBuffer.Y / 1080, 1080);
+        renderTarget = new RenderTarget2D(GraphicsDevice, 1920, 1080);
 
         IsMouseVisible = false;
     }
@@ -112,7 +113,6 @@ public class Engine : Game
                 Self.graphics.ApplyChanges();
             });
             UI.AddUIElements();
-            renderTarget = new RenderTarget2D(GraphicsDevice, 1920, 1080);
             Camera = new Camera(Vector2.Zero, ScreenSize / 2, 1f, 0);
             DialogueManager = new DialogueManager();
             CurrentGameState.SwitchState(new MainMenu());
@@ -134,7 +134,9 @@ public class Engine : Game
         SoundManager.PlayGlobalSound(Assets.Get(Sound.Interact));
         ScreenShakeFactor = 0;
         SaveGame.Player.Progression = Mission.missions[SaveGame.CurrentMissionIndex].data.PlayerProgression;
+        //Prevents scrap and debuffs from persisting between missions.
         SaveGame.Player.leashedMaterials.Clear();
+        SaveGame.Player.GetComponent<Statuses>().Clear();
         SaveGame.CurrentMission.Initialize();
     }
     public static void Load()
