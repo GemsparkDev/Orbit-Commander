@@ -82,6 +82,8 @@ public class Entity : IMissionComponent
             return;
         }
         stationaryEmitter.ParticleEmitter.particleColor = Color;
+        float alpha = ((float)(stationaryEmitter.ParticleEmitter.particleColor.A) / 255f) + 0.2f;
+        stationaryEmitter.ParticleEmitter.particleColor.A = (Byte)(MathF.Sqrt(2 * alpha - alpha * alpha) * 255); //Increases mid alpha slightly to better match projectiles
     }
     public virtual void Initialize() { }
     public bool CollideWith(Entity nearestEnemy)

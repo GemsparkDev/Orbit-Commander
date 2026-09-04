@@ -37,7 +37,7 @@ public class Sprite(Entity _entity, Color _color) : IComponent
                 return targetColor;
             }
         } 
-        set => _color = value;  
+        set => targetColor = value;  
     }
     public virtual float ColliderRadius
     {
@@ -59,7 +59,7 @@ public class Sprite(Entity _entity, Color _color) : IComponent
         if (Color != tc)
         {
             float l = Util.FIED(0.025f);
-            Color = new Color((byte)(_entity.Color.R * l + tc.R * (1f - l)), (byte)(_entity.Color.G * l + tc.G * (1f - l)), (byte)(_entity.Color.B * l + tc.B * (1f - l)), tc.A); //Lerp towards ideal color
+            Color = new Color((byte)(_entity.Color.R * l + tc.R * (1f - l)), (byte)(_entity.Color.G * l + tc.G * (1f - l)), (byte)(_entity.Color.B * l + tc.B * (1f - l)), (byte)(_entity.Color.A * l + tc.A * (1f - l))); //Lerp towards ideal color
         }
     }
     public void Draw(SpriteBatch _spriteBatch)
