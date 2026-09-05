@@ -1515,7 +1515,7 @@ public class SummonGrapplingHook() : Module(Modules.GrapplingHook)
             SoundManager.PlaySound(Assets.Get(Sound.Click), Player.Position);
             Engine.ShakeScreen(0.3f);
             Player.Velocity -= Player.Direction / 2;
-            Player.Shoot(hook, 1, false);
+            Engine.SaveGame.CurrentMission.Add(hook);
             Cooldown = MaxCooldown;
         }
     }
@@ -1528,7 +1528,7 @@ public class SummonGrapplingHook() : Module(Modules.GrapplingHook)
         }
         if (p != null)
         {
-            hook.Parent.Position = p.Position + offset;
+            hook.Parent.Position = p.Position += offset;
         }
         UI.PlayerAbility.SetInterval(1 - Cooldown / MaxCooldown, 1);
         base.OnUpdate(_fuseRatio);

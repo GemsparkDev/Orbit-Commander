@@ -31,6 +31,7 @@ public class Planet : Entity, ICollider
         AddComponent(new Temp());
         AddComponent(new StationaryEmitter(this) { ParticleEmitter = new ParticleEmitter(Assets.Get(Sprites.Dot), 10, Position, 0, 0, 0, 10f, _color * 0.5f, EmitterType.EmissionOverDistance) { particleFadeToColor = Color.Transparent } });
         AddComponent(new Circle(this, ColliderRadius));
+        AddTag(Tags.OffsetGrapple);
     }
     public Vector2 GetAcceleration(Vector2 _position)
     {

@@ -5068,6 +5068,31 @@ public class Entity : IMissionComponent
         enemy.AddComponent(new Dockable(enemy, UI.MothershipMenu, true));
         return enemy;
     }
+    public static Entity NewButton(Vector2 _position, Vector2 _velocity, float _angle, Action _action)
+    {
+        var enemy = NewEnemy(_position, _velocity, _angle, 9999, Assets.Get(Sprites.Explosive), Team.Hostile);
+        enemy.AddComponent(new Behaviour().AddBehaviour(enemy.Button(_action)));
+        return enemy;
+    }
+    IEnumerable<int> Button(Action _action)
+    {
+        CD = [0];
+        Transform.IsImmovable = true;
+        while (true)
+        {
+            if (Health < MaxHealth)
+            {
+                Health = MaxHealth;
+                if (CD[0] <= 0)
+                {
+                    _action();
+                    CD[0] = 0.05f;
+                }
+            }
+
+            yield return 0;
+        }
+    }
     #endregion
     public static Entity NewTrader(Vector2 _position, Vector2 _velocity, float _angle)
     {
@@ -5103,31 +5128,6 @@ public class Entity : IMissionComponent
         }
         b.AddBehaviour(enemy.EnemyDeath());
         return enemy;
-    }
-    public static Entity NewButton(Vector2 _position, Vector2 _velocity, float _angle, Action _action)
-    {
-        var enemy = NewEnemy(_position, _velocity, _angle, 9999, Assets.Get(Sprites.Explosive), Team.Hostile);
-        enemy.AddComponent(new Behaviour().AddBehaviour(enemy.Button(_action)));
-        return enemy;
-    }
-    IEnumerable<int> Button(Action _action)
-    {
-        CD = [0];
-        Transform.IsImmovable = true;
-        while (true)
-        {
-            if(Health < MaxHealth)
-            {
-                Health = MaxHealth;
-                if (CD[0] <= 0)
-                {
-                    _action();
-                    CD[0] = 0.05f;
-                }
-            }
-            
-            yield return 0;
-        }
     }
     public static Entity NewProjectile(Texture2D _texture, Vector2 _position, Vector2 _velocity, float _angle, float _angularVelocity, Team _team, int _damage, int _stealth)
     {
@@ -5390,7 +5390,7 @@ public class GrapplingHook : Entity
     }
     internal class LatchedEntity(Entity _entity, Vector2 _position) : ILatchable
     {
-        public Vector2 Position => _entity.Position + _position;
+        public Vector2 Position => (_entity.HasTag(Tags.OffsetGrapple) ? _position + _entity.Position : _entity.Position);
         public bool IsExpired => _entity.isExpired;
         public void ApplyForce(Vector2 _force)
         {

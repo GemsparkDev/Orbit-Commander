@@ -311,7 +311,7 @@ public enum SensorType
     PulseEmitter,
 }
 [Flags]
-public enum Tags
+public enum Tags : byte
 {
     None = 0,
     IsSpecialized = 1,
@@ -319,4 +319,5 @@ public enum Tags
     IsImportant = 4,
     IsChild = 8,
     IsImmune = 16,
+    OffsetGrapple = 32,
 }

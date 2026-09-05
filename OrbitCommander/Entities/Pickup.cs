@@ -228,7 +228,7 @@ public class Pickup : Entity, IData
     {
         float cooldown = 0;
         Entity nearestEnemy;
-        Transform.IsImmovable = true;
+        Transform.IsImmovable = true; //TODO: Make it so players can move traps
         while (true)
         {
             if (cooldown > 0)
