@@ -61,15 +61,17 @@ public class Planet : Entity, ICollider
         {
             var normalVector = Vector2.Normalize(relativePosition);
             var frictionVector = new Vector2(normalVector.Y, -normalVector.X);
-            var relativeVelocity = Velocity - _entity.Velocity;
+            var relativeVelocity = Velocity - _entity.Velocity - _entity.AngularVelocity * frictionVector * _entity.ColliderRadius;
             int collisionForce = (int)Math.Floor(relativeVelocity.Length() / 2);
             if (_entity as Pickup == null && (collisionForce > 5 || _entity.HasComponent<Attack>()))
             {
                 _entity.Collide(collisionForce);
             }
             float verticalVelocity = Math.Max(0, Vector2.Dot(relativeVelocity, normalVector));
-            _entity.Velocity += normalVector * verticalVelocity + frictionVector * Vector2.Dot(relativeVelocity, frictionVector) * 0.1f;
+            float frictionForce = Vector2.Dot(relativeVelocity, frictionVector) * 0.1f;
+            _entity.Velocity += normalVector * verticalVelocity + frictionVector * frictionForce;
             _entity.Position += normalVector * (ColliderRadius + _entity.ColliderRadius - Vector2.Distance(Position, _entity.Position));
+            _entity.AngularVelocity += frictionForce * _entity.ColliderRadius * Engine.DeltaSeconds;
             float val = (int)MathF.Sqrt(collisionForce);
             if (verticalVelocity > 1)
             {

@@ -840,7 +840,7 @@ public class Mission
         {
             float angle = (Util.Random.NextSingle() - 0.5f) * MathF.Tau;
             float distanceMultiplier = 1 + (Util.Random.NextSingle() - 0.5f) / 4;
-            float distance = (Engine.ScreenSize.X + Engine.ScreenSize.Y) * distanceMultiplier / 3;
+            float distance = (Engine.BackBuffer.X + Engine.BackBuffer.Y) * distanceMultiplier / 3;
             spawnLocation = ToUnitVector(angle) * distance + Engine.SaveGame.Player.Position;
         }
         while(IsColliding(spawnLocation, Vector2.Zero, 10, false, out float _) != null);

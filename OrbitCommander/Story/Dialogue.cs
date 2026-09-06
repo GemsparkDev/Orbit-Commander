@@ -66,7 +66,7 @@ public class Dialogue
         {
             size = 1 - MathF.Sqrt(end / WINDUP);
         }
-        var pos = new Vector2(Engine.ScreenSize.X / 2, Engine.ScreenSize.Y * 3 / 4);
+        var pos = new Vector2(Engine.BackBuffer.X / 2, Engine.BackBuffer.Y * 3 / 4);
         _spriteBatch.Draw(Assets.Get(Sprites.Textbox), pos, null, Color.White, 0, Assets.DimsOf(Sprites.Textbox) / 2, new Vector2(size, size), 0, 0);
         if (icon != null)
         {

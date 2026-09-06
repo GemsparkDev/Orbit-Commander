@@ -23,6 +23,7 @@ public abstract class Module : Pickup, IData
     private Decal description;
     public float Cooldown { get; protected set; } = 0;
     private Health health;
+    public override int Health { get => base.Health; set { base.Health = value; UpdateHealth(); } }
 
     public Module(Modules _type, Vector2 _position = default, Vector2 _velocity = default, float _angularVelocity = 0)
         : base(ItemFactory.moduleData[_type], _position, _velocity, _angularVelocity, ItemFactory.moduleData[_type].MaxHealth)
@@ -35,7 +36,7 @@ public abstract class Module : Pickup, IData
         AddComponent(new Smelt() { Value = 3 });
         health = GetComponent<Health>();
     }
-    private void UpdateHealth()
+    public void UpdateHealth()
     {
         healthDecal.Text = $"{health.CurrentHealth} / {health.MaxHealth}";
     }
@@ -80,7 +81,6 @@ public abstract class Module : Pickup, IData
 }
 public abstract class Weapon(Modules _type, Vector2 _position = default, Vector2 _velocity = default, float _angularVelocity = 0) : Module(_type, _position, _velocity, _angularVelocity)
 {
-
     public abstract float Speed { get; }
     public abstract bool CritCondition { get; }
 }

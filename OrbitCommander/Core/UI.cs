@@ -200,13 +200,13 @@ public static class UI
             UILib.Content.UIManager.SFXVolume = i;
             SFXVolume.Text = $"Sound: {Math.Round(i * 100)}%";
         });
-        UIScaleSlider.AddBehaviour(delegate ()
+        UIScaleSlider.AddBehaviour((Action)delegate ()
         {
             float i = UIScaleSlider.Intervals[0];
             UIScale.Text = $"UI Scale: {Math.Truncate((i + 1) * 10) / 10}";
             if (Input.NewMouseState.LeftButton == ButtonState.Released)
             {
-                UILib.Content.UIManager.UIScale = (i + 1f) * BackBuffer.X / ScreenSize.X;
+                UILib.Content.UIManager.UIScale = (i + 1f) * Engine.BackBuffer.X / Engine.BackBuffer.X;
             }
         });
         ExitButton.AddBehaviour(delegate ()

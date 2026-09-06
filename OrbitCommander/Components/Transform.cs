@@ -27,6 +27,7 @@ public class Transform : IComponent
         {
             Position += Velocity * Engine.DeltaSeconds * 60;
             Angle += AngularVelocity * Engine.DeltaSeconds * 60;
+            AngularVelocity *= Util.FIED(0.75f);
         }
         else
         {

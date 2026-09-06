@@ -13,6 +13,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using UILib.Content;
+using System.Diagnostics;
 
 namespace OrbitCommander.Core;
 
@@ -28,8 +29,7 @@ public class Engine : Game
     public static Camera Camera { get; private set; }
     public static Engine Self { get; private set; }
     public static Texture2D Line { get; private set; }
-    public static Vector2 ScreenSize { get; private set; } //Render target size
-    public static Vector2 BackBuffer { get; private set; } //Monitor size
+    public static Vector2 BackBuffer { get => new Vector2(Self.graphics.PreferredBackBufferWidth, Self.graphics.PreferredBackBufferHeight); set { Self.graphics.PreferredBackBufferWidth = (int)value.X;  Self.graphics.PreferredBackBufferHeight = (int)value.Y; Self.graphics.ApplyChanges(); }  } //Application size
     public static Vector2 MousePositionOffset { get; set; }
     public static Timespan IngameTime { get; set; } = new();
     public static float DeltaSeconds { get; private set; }
@@ -60,17 +60,19 @@ public class Engine : Game
         IsFixedTimeStep = true;
         TargetElapsedTime = TimeSpan.FromSeconds(1d / targetFramerate);
 
-        BackBuffer = new Vector2(graphics.PreferredBackBufferWidth, graphics.PreferredBackBufferHeight);
-        ScreenSize = new Vector2(1920 * BackBuffer.Y / 1080, 1080);
         renderTarget = new RenderTarget2D(GraphicsDevice, 1920, 1080);
+        Window.AllowUserResizing = true;
+        Window.ClientSizeChanged += new EventHandler<EventArgs>(ClientSizeChanged);
 
         IsMouseVisible = false;
     }
+    private static void ClientSizeChanged(object sender, EventArgs e)
+    {
+        BackBuffer = new Vector2(Self.Window.ClientBounds.Width, Self.Window.ClientBounds.Height);
+    }
     protected override void LoadContent()
     {
-        BackBuffer = new Vector2(graphics.PreferredBackBufferWidth, graphics.PreferredBackBufferHeight);
-        ScreenSize = new Vector2(1920 * BackBuffer.Y / 1080, 1080);
-        loadingThread = Task.Factory.StartNew(() =>
+        loadingThread = Task.Factory.StartNew((Action)(() =>
         {
             spriteBatch = new SpriteBatch(GraphicsDevice);
             Line = new Texture2D(graphics.GraphicsDevice, 1, 1, false, SurfaceFormat.Color);
@@ -78,8 +80,7 @@ public class Engine : Game
 
             Assets.LoadStageOne(Content);
 
-            UIManager = new UIManager();
-            UIManager.BackBuffer = BackBuffer;
+            UIManager = new UIManager((Func<Vector2>)(() => (Vector2)Engine.BackBuffer));
 
             //UI behaviors that need special permission
             UI.SingleplayerButton.AddBehaviour(delegate()
@@ -102,18 +103,17 @@ public class Engine : Game
                 SaveSlot = Math.Clamp(SaveSlot + 1, 0, 10);
                 Events.GetSave();
             });
-            UI.ApplyChanges.AddBehaviour(delegate ()
+            UI.ApplyChanges.AddBehaviour((Action)delegate ()
             {
                 Self.Window.IsBorderless = UI.windowType == 1;
                 Self.graphics.IsFullScreen = UI.windowType == 2;
                 Self.graphics.PreferredBackBufferWidth = (int)UI.resolutions[UI.selectedResolution].X;
                 Self.graphics.PreferredBackBufferHeight = (int)UI.resolutions[UI.selectedResolution].Y;
-                BackBuffer = UI.resolutions[UI.selectedResolution];
-                UIManager.BackBuffer = BackBuffer;
+                Engine.BackBuffer = UI.resolutions[UI.selectedResolution];
                 Self.graphics.ApplyChanges();
             });
             UI.AddUIElements();
-            Camera = new Camera(Vector2.Zero, ScreenSize / 2, 1f, 0);
+            Camera = new Camera(Vector2.Zero, (Vector2)(Engine.BackBuffer / 2), 1f, 0);
             DialogueManager = new DialogueManager();
             CurrentGameState.SwitchState(new MainMenu());
             LoadingStage = LoadingStage.MainMenu;
@@ -121,7 +121,7 @@ public class Engine : Game
             Assets.LoadFinal(Content);
             Events.SetModules();
             LoadingStage = LoadingStage.Complete;
-        });
+        }));
         
     }
     public static void Startgame()
@@ -236,7 +236,7 @@ public class Engine : Game
             return;
         }
 
-        Camera.Origin = ScreenSize / 2 - MousePositionOffset;
+        Camera.Origin = new Vector2(1920, 1080) / 2 - MousePositionOffset; //TODO: Make sure this updates when the rendertarget size updates!
         //Renders gamespace to a rendertarget, then renders render target with a shader
         GraphicsDevice.SetRenderTarget(renderTarget);
         GraphicsDevice.Clear(SaveGame.ColorScheme.Background());
@@ -246,9 +246,9 @@ public class Engine : Game
 
         GraphicsDevice.SetRenderTarget(null);
         GraphicsDevice.Clear(new Color(50, 50, 50));
-        int renderCoord = (int)(BackBuffer.Y / 0.5625f);
+        Vector2 backbuffer = BackBuffer;
         spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, null, null, Assets.GlobalShader);
-        spriteBatch.Draw(renderTarget, new Rectangle((int)(BackBuffer.X - ScreenSize.X), 0, renderCoord, (int)BackBuffer.Y), Color.White);
+        spriteBatch.Draw(renderTarget, backbuffer / 2, null, Color.White, 0, new Vector2(renderTarget.Bounds.Width, renderTarget.Bounds.Height) / 2, Math.Max(backbuffer.X/1920, backbuffer.Y/1080), 0, 0);
         spriteBatch.End();
 
         //Rendering some components without the shader

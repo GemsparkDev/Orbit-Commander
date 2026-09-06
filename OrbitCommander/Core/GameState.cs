@@ -52,7 +52,7 @@ public abstract class GameState
         if (SaveGame.DebugMode)
         {
             Vector2 cameraPos = Engine.Camera.Position + Engine.MousePositionOffset;
-            Vector2 sz = Engine.ScreenSize / 2 / Engine.Camera.Zoom;
+            Vector2 sz = Engine.BackBuffer / 2 / Engine.Camera.Zoom;
             for (int x = (int)Math.Ceiling((cameraPos.X - sz.X) / 50); x < (cameraPos.X + sz.X) / 50; x++)
             {
                 Color col = x % 10 == 0 ? new Color(0.2f, 0.2f, 0.2f) : new Color(0.1f, 0.1f, 0.1f);
@@ -177,10 +177,10 @@ public class MissionSelect : GameState
     private float time = Util.Random.NextSingle() * 1000f;
     private Vector2 playerPosition;
     private List<(int system, ParticleEmitter orbit)> missionOrbits = [];
-    private ParticleEmitter sun = new(Assets.Get(Sprites.Dot), new Vector2(Engine.ScreenSize.X / 6, 0), 20, new Color(255, 255, 0));
+    private ParticleEmitter sun = new(Assets.Get(Sprites.Dot), new Vector2(Engine.BackBuffer.X / 6, 0), 20, new Color(255, 255, 0));
     public MissionSelect()
     {
-        var center = new Vector2(Engine.ScreenSize.X / 6, 0);
+        var center = new Vector2(Engine.BackBuffer.X / 6, 0);
         foreach (var data in Mission.missions)
         {
             var orbit = (data.data.System, new ParticleEmitter(Assets.Get(Sprites.Dot), center, data.data.Distance, new Color(0, 255, 255)));
@@ -190,11 +190,16 @@ public class MissionSelect : GameState
         if (playerMission.Distance > 0)
         {
             float freq = MathF.Sqrt(playerMission.Distance * playerMission.Distance * playerMission.Distance) / 100;
-            playerPosition = new Vector2(Engine.ScreenSize.X / 6, 0) + new Vector2(MathF.Cos(time / freq), MathF.Sin(time / freq)) * playerMission.Distance;
+            playerPosition = new Vector2(Engine.BackBuffer.X / 6, 0) + new Vector2(MathF.Cos(time / freq), MathF.Sin(time / freq)) * playerMission.Distance;
         }
         else
         {
-            playerPosition = new Vector2(Engine.ScreenSize.X / 6, 0);
+            playerPosition = new Vector2(Engine.BackBuffer.X / 6, 0);
+        }
+        if(Engine.SaveGame.Player.isExpired)
+        {
+            Engine.SaveGame.Player.isExpired = false;
+            Engine.SaveGame.Player.Texture = Assets.Get(Sprites.Player);
         }
     }
     public static MissionSelect New()
@@ -225,18 +230,18 @@ public class MissionSelect : GameState
         time += Engine.DeltaSeconds;
         ParticleManager.Update();
         var pos = new Vector2(Input.NewMouseState.Position.X, Input.NewMouseState.Position.Y);
-        float distance = Vector2.Distance(pos, new Vector2(Engine.ScreenSize.X * 2 / 3, Engine.ScreenSize.Y / 2));
+        float distance = Vector2.Distance(pos, new Vector2(Engine.BackBuffer.X * 2 / 3, Engine.BackBuffer.Y / 2));
         for (int i = 0; i < Mission.missions.Count; i++)
         {
             var mission = Mission.missions[i].data;
             if (mission.Distance > 0)
             {
                 float freq = MathF.Sqrt(mission.Distance * mission.Distance * mission.Distance) / 100;
-                pos = new Vector2(Engine.ScreenSize.X / 6, 0) + new Vector2(MathF.Cos(time / freq), MathF.Sin(time / freq)) * mission.Distance;
+                pos = new Vector2(Engine.BackBuffer.X / 6, 0) + new Vector2(MathF.Cos(time / freq), MathF.Sin(time / freq)) * mission.Distance;
             }
             else
             {
-                pos = new Vector2(Engine.ScreenSize.X / 6, 0);
+                pos = new Vector2(Engine.BackBuffer.X / 6, 0);
             }
             if (i == Engine.SaveGame.CurrentMissionIndex)
             {
@@ -305,7 +310,7 @@ public class MissionSelect : GameState
         {
             var item = Engine.SaveGame.QueuedItems[i];
             var texture = item.Texture;
-            var pos = (new Vector2(20, 20) + new Vector2(30, 0) * i) * UIManager.UIScale - Engine.ScreenSize / 2;
+            var pos = (new Vector2(20, 20) + new Vector2(30, 0) * i) * UIManager.UIScale - Engine.BackBuffer / 2;
             _spriteBatch.Draw(texture, pos, null, Color.White, 0, new Vector2(texture.Width, texture.Height) / 2, UIManager.UIScale, 0, 0);
             for (float j = 0; j <= MathF.Tau * (item.Cost / (float)item.MaxCost) + float.Epsilon; j += MathF.Tau / (3 * UIManager.UIScale * UIManager.UIScale))
             {
@@ -383,7 +388,7 @@ public class Cutscene(List<IEvent> _events, List<IActor> _actors, GameState _nex
         {
             actor.Draw(_spriteBatch);
         }
-        _spriteBatch.DrawString(Assets.TextFont, $"{Input.Keybinds[Binding.SkipCutscene]} to skip", Engine.Camera.Position + Engine.ScreenSize / 2 - Assets.TextFont.MeasureString($"{Input.Keybinds[Binding.SkipCutscene]} to skip") / 2 - new Vector2(100, 100), Color.White * (0.5f + escapeTime * 0.5f));
+        _spriteBatch.DrawString(Assets.TextFont, $"{Input.Keybinds[Binding.SkipCutscene]} to skip", Engine.Camera.Position + Engine.BackBuffer / 2 - Assets.TextFont.MeasureString($"{Input.Keybinds[Binding.SkipCutscene]} to skip") / 2 - new Vector2(100, 100), Color.White * (0.5f + escapeTime * 0.5f));
     }
 }
 public class Loading(Action _function, LoadingStage _stage) : GameState

@@ -190,7 +190,7 @@ public class Player : Entity
                 var module = modules[i];
                 module.Position = Position;
                 module.Velocity = Velocity + new Vector2(Util.OneToNegOne(), Util.OneToNegOne()) * 20;
-                module.AngularVelocity = Util.OneToNegOne() / 5;
+                module.AngularVelocity = Util.OneToNegOne() / 6;
                 module.isFailed = true;
                 module.Health = 1;
                 Engine.SaveGame.CurrentMission.Add(module);
@@ -200,12 +200,13 @@ public class Player : Entity
             {
                 SecondaryWeapon.Position = Position;
                 SecondaryWeapon.Velocity = Velocity + new Vector2(Util.OneToNegOne(), Util.OneToNegOne()) * 20;
-                SecondaryWeapon.AngularVelocity = Util.OneToNegOne() / 5;
+                SecondaryWeapon.AngularVelocity = Util.OneToNegOne() / 6;
                 SecondaryWeapon.isFailed = true;
                 SecondaryWeapon.Health = 1;
                 Engine.SaveGame.CurrentMission.Add(SecondaryWeapon);
                 SecondaryWeapon = null;
             }
+            GetComponent<Sprite>().Texture = Assets.Get(Sprites.PlayerCapsule);
             cachedDamage = 0;
             cachedDamageCd = 0;
             Events.UpdateModulesUI();
@@ -944,6 +945,8 @@ public class Player : Entity
     {
         if(isExpired)
         {
+            leashedMaterials.Clear();
+            SoundManager.PlaySound(Assets.Get(Sound.ShieldHit), Position);
             return 0;
         }
         if (dockedEntity != null)

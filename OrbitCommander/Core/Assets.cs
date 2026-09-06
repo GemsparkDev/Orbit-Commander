@@ -25,6 +25,7 @@ public static class Assets
         //Entities
         Add(Core.Sprites.Fighter, Content.Load<Texture2D>("Images/Entity_1"));
         Add(Core.Sprites.Player, Content.Load<Texture2D>("Images/Entity_2"));
+        Add(Core.Sprites.PlayerCapsule, Content.Load<Texture2D>("Images/Entity_2-1"));
         Add(Core.Sprites.Asteroid, Content.Load<Texture2D>("Images/Entity_3"));
         Add(Core.Sprites.Cruiser, Content.Load<Texture2D>("Images/Entity_4"));
         Add(Core.Sprites.Shotgunner, Content.Load<Texture2D>("Images/Entity_5"));

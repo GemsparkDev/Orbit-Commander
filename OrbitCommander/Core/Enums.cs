@@ -73,6 +73,7 @@ public enum Sprites
 {
     Fighter,
     Player,
+    PlayerCapsule,
     Asteroid,
     Cruiser,
     Shotgunner,
