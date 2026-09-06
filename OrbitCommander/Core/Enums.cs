@@ -64,6 +64,8 @@ public enum Modules
     Assault,
     Expose,
     Decoy,
+    
+    EmergencyModule,
 
     End, //Used for enumeration
 }

@@ -1770,4 +1770,42 @@ public class AmplifyingModifier() : Module(Modules.AmplifyingModifier)
         return _damage * 2;
     }
 }
+public class EmergencyModule : Weapon
+{
+    public EmergencyModule() : base(Modules.EmergencyModule)
+    {
+        GetComponent<Smelt>().Value = 0;
+    }
+    float engineTime = 0;
+    ParticleEmitter engineParticles = new(Assets.Get(Sprites.Circle), 0.15f, Vector2.Zero, 0, MathF.PI / 4, 2, 450f, Color.Cyan, EmitterType.EmissionOverTime)
+    { particleFadeToColor = new Color(72, 61, 139, 0) };
+
+    public override float Speed => 0;
+
+    public override bool CritCondition => false;
+
+    public override void OnEngine()
+    {
+        engineParticles.offsetVelocity = Player.Velocity;
+        engineTime = Math.Clamp(engineTime + Engine.DeltaSeconds, 0, 1);
+        float engineTimeModifier = 1 - (1 - engineTime) * (1 - engineTime);
+        float fuseRatio = (float)Player.CountFuses(ModuleType.Engines) / 3;
+        engineParticles.speedOfEmission = Math.Max(450f * fuseRatio * engineTimeModifier, 10);
+        if (Player.EngineDirection != Vector2.Zero)
+        {
+            Player.Velocity += Vector2.Normalize(Player.EngineDirection) * 24 * Engine.DeltaSeconds * engineTimeModifier * fuseRatio / (Player.leashedMaterials.Count + 2);
+            engineParticles.position = Player.Position - Vector2.Normalize(Player.EngineDirection) * 8 - Player.Velocity;
+            engineParticles.sprayAngle = Util.ToAngle(Player.EngineDirection) + MathF.PI;
+        }
+        engineParticles.Update();
+    }
+    public override void OnUpdate(float _fuseRatio)
+    {
+        if (!Player.isEngineActive && engineTime > 0)
+        {
+            engineTime -= Engine.DeltaSeconds / _fuseRatio;
+        }
+        base.OnUpdate(_fuseRatio);
+    }
+}
 

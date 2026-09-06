@@ -437,18 +437,6 @@ public class Mission
         var time = Engine.IngameTime;
         time.Duration += Engine.DeltaSeconds;
         Engine.IngameTime = time;
-        if (Player.isExpired)
-        {
-            foreach (var module in Player.modules)
-            {
-                //module.Value.Health = module.Value.MaxHealth;
-                module.Value.Health = 20;
-                module.Value.isFailed = false;
-            }
-            Player.isExpired = false;
-            Events.UpdateModulesStatus();
-            Events.MissionSelectTrigger(new MissionSelect());
-        }
         Update();
     }
     public void Update()

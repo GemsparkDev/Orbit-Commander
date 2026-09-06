@@ -48,7 +48,7 @@ public class Player : Entity
     private ParticleEmitter smokeParticles = new(Assets.Get(Sprites.Circle), 1f, Vector2.Zero, 0, MathF.PI / 4, 1, 0.5f, Color.Gray, EmitterType.EmissionOverTime) { isEmitterActive = false, particleFadeToColor = new Color(169, 169, 169, 0) };
     private float swapCd, cachedDamageCd = 0;
     public float invincibilityCd, restartCd = 0;
-    public int cachedDamage = 0;
+    public int cachedDamage = 200;
     public Vector2 Direction { get; private set; }
     private SoundEffectInstance engineSounds;
     //IsEnabled manages dead file sprite
@@ -178,12 +178,37 @@ public class Player : Entity
             Engine.SaveGame.CurrentMission.CalculateTrajectory(Position, Velocity, ColliderRadius);
         }
         GetComponent<Sprite>().TargetColor = SaveGame.ColorScheme.TeamColors[Team];
-        if (Core.Health <= 0)
+        if(Core.Health <= 0 && !isExpired)
         {
-            isExpired = true;
-            engineSounds.Stop();
             SoundManager.PlayGlobalSound(Assets.Get(Sound.Death));
-            return;
+            Util.Explode(Position, Velocity, 50, 100);
+            ParticleManager.Add(new Particle(Assets.Get(Sprites.Explosion), 5, Position, Vector2.Zero, 0, 0, Color.White, Color.Transparent));
+            Engine.ShakeScreen(1);
+            isExpired = true;
+            for(ModuleType i = ModuleType.Hull; i <= ModuleType.Core; i++)
+            {
+                var module = modules[i];
+                module.Position = Position;
+                module.Velocity = Velocity + new Vector2(Util.OneToNegOne(), Util.OneToNegOne()) * 20;
+                module.AngularVelocity = Util.OneToNegOne() / 5;
+                module.isFailed = true;
+                module.Health = 1;
+                Engine.SaveGame.CurrentMission.Add(module);
+                modules[i] = new EmergencyModule();
+            }
+            if(SecondaryWeapon != null)
+            {
+                SecondaryWeapon.Position = Position;
+                SecondaryWeapon.Velocity = Velocity + new Vector2(Util.OneToNegOne(), Util.OneToNegOne()) * 20;
+                SecondaryWeapon.AngularVelocity = Util.OneToNegOne() / 5;
+                SecondaryWeapon.isFailed = true;
+                SecondaryWeapon.Health = 1;
+                Engine.SaveGame.CurrentMission.Add(SecondaryWeapon);
+                SecondaryWeapon = null;
+            }
+            cachedDamage = 0;
+            cachedDamageCd = 0;
+            Events.UpdateModulesUI();
         }
         leashedMaterials = [.. leashedMaterials.Where(x => !x.isExpired)];
         if(restartCd <= 0 && Events.AcknowledgeMessage(Message.RestartModules) && modules.Any(x => x.Value.isFailed))
@@ -256,18 +281,18 @@ public class Player : Entity
                 modules[_type].Health = Math.Max(modules[_type].Health - damage, 0);
             }
             cachedDamage--;
-            cachedDamageCd = 0.05f;
+            cachedDamageCd = 20 / (float)(cachedDamage + 10);
             //Guaranteed death sped along
             if (cachedDamage > 100)
             {
-                cachedDamageCd = 0.0166f;
+                cachedDamageCd *= 0.1f;
             }
         }
 
         float currentHealth = modules.Values.Sum(x => x.Health);
         float maxHealth = modules.Values.Sum(x => x.MaxHealth);
         UI.PlayerHealth.SetInterval(currentHealth - cachedDamage, maxHealth, 0);
-        UI.PlayerHealth.SetInterval(currentHealth + cachedDamageCd / 0.05f, maxHealth, 1);
+        UI.PlayerHealth.SetInterval(currentHealth + cachedDamageCd * (float)(cachedDamage + 10) / 20, maxHealth, 1);
         if (Gun.CritCondition)
         {
             UI.PlayerAmmo.Colors[0] = Color.White;
@@ -917,6 +942,10 @@ public class Player : Entity
     }
     public int PlayerCollide(int _damage, bool _ignoreImmunity = false)
     {
+        if(isExpired)
+        {
+            return 0;
+        }
         if (dockedEntity != null)
         {
             //Note: applied statuses will NOT apply to the docked entity

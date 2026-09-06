@@ -70,6 +70,7 @@ public static class ItemFactory
         { Modules.Expose, new ModuleData(Sprites.RealExpose, Sprites.Expose, "Exposure", "Creates a heating or cooling aura at the cursor,\ndoing the opposite on the player./nHold left shift to summon the other type.", (int)ModuleType.Core, 20, typeof(Expose)) },
         { Modules.Decoy, new ModuleData(Sprites.RealDecoy,Sprites.Decoy, "Decoy", "Creates a false player for enemies to\nattack, boosts stealth.", (int)ModuleType.Core, 20, typeof(Decoy))},
 
+        { Modules.EmergencyModule, new ModuleData(Sprites.RealDecoy,Sprites.Decoy, "Ruined Module", "This module does nothing!", 0, 20, typeof(EmergencyModule))},
     };
     public static Pickup NewScrap(Vector2 _position = default, Vector2 _velocity = default, float _angularVelocity = 0)
     {
