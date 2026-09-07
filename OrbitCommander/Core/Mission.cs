@@ -53,7 +53,7 @@ public class Mission
             new WaveSpawner(T1, 0.18f, true),
             new Tip("Press Q to use your ability. Fuse count empowers or weakens modules.\nRestart failed modules to preserve fuses.", new Vector2(0, -13*50)),
             new IntroCutscene(QueueCrossfireDialogue),
-        ], new Conditional([new Protect([e]), new Custom(e)], SendPickup(2000, RepairCrashedShip)),
+        ], new Conditional([new Protect([e]), new Custom(e)], SendPickup(2000, Win(RepairCrashedShip))),
         new DropSpawner(4000));}),
 
         (new("Showdown", "Our activities appear to have gathered the attention of an advanced drone.\nDefeat it to move to the next system.",
@@ -699,9 +699,14 @@ public class Mission
         }
         return sum;
     }
+    public void WinMission()
+    {
+        Engine.SaveGame.CompletedMissions[Engine.SaveGame.CurrentMissionIndex] = true;
+        Engine.SaveGame.MissionResults(Wave);
+    }
     public void FailMission()
     {
-        throw new NotImplementedException();
+        objective = new Conditional([], SendPickup(2000, Fail()));
     }
     public void CompleteCustomRule(Entity _target)
     {

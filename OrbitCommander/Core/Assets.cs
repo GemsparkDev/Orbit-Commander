@@ -287,6 +287,10 @@ public static class Assets
     }
     public static Texture2D Get(Sprites sprite)
     {
+        if(sprite == Core.Sprites.None)
+        {
+            return null;
+        }
         return Sprites[sprite];
     }
     public static Vector2 DimsOf(Sprites sprite)

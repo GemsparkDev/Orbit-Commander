@@ -167,9 +167,8 @@ public class SaveGame
         CurrentMissionIndex = Math.Clamp(CurrentMissionIndex - 1, 0, Mission.missions.Count - 1);
         Events.UpdateMissionText();
     }
-    public void CompleteMission(int _duration)
+    public void MissionResults(int _duration)
     {
-        CompletedMissions[CurrentMissionIndex] = true;
         int points = _duration / 10;
         foreach (var item in Engine.SaveGame.QueuedItems)
         {

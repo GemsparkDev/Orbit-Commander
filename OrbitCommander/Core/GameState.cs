@@ -202,10 +202,7 @@ public class MissionSelect : GameState
             Engine.SaveGame.Player.Texture = Assets.Get(Sprites.Player);
         }
     }
-    public static MissionSelect New()
-    {
-        return new MissionSelect();
-    }
+    public static MissionSelect New() => new MissionSelect();
     public override void Initialize()
     {
         Engine.UIManager.ScreenWindow.enabled = false;
@@ -217,6 +214,10 @@ public class MissionSelect : GameState
         Engine.DialogueManager.Clear();
         Engine.Camera.Position = Vector2.Zero;
         Engine.Camera.Zoom = 1;
+
+        SoundManager.PlayGlobalSound(Assets.Get(Sound.Interact));
+        while (!Engine.UIManager.ToggleToMenu(UI.MissionSelect))
+        { }
     }
     public override void Update()
     {

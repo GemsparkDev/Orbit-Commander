@@ -1,14 +1,14 @@
-﻿using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
-using OrbitCommander.Components;
-using OrbitCommander.UIElements;
-using OrbitCommander.Entities;
-using OrbitCommander.Particles;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using OrbitCommander.Components;
+using OrbitCommander.Entities;
+using OrbitCommander.Particles;
+using OrbitCommander.UIElements;
 using UILib.Content;
-using System;
 
 namespace OrbitCommander.Core;
 public static class Events
@@ -45,7 +45,7 @@ public static class Events
     }
     public static void RepairItem()
     {
-        Entity daughterModule;
+        Pickup daughterModule;
         if (UI.RepairSlot.daughterItem != null)
         {
             daughterModule = UI.RepairSlot.daughterItem;
@@ -205,15 +205,6 @@ public static class Events
         {
             CurrentGameState.SwitchState(new PlayingGame());
         }
-    }
-    public static void MissionSelectTrigger(GameState _gameState)
-    {
-        SoundManager.PlayGlobalSound(Assets.Get(Sound.Interact));
-        if (!Engine.UIManager.ToggleToMenu(UI.MissionSelect))
-        {
-            UI.MissionSelect.enabled = !UI.MissionSelect.enabled;
-        }
-        CurrentGameState.SwitchState(_gameState);
     }
     public static void UpdateMissionText()
     {

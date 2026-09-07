@@ -149,7 +149,7 @@ public class Engine : Game
         if (text != "")
         {
             SaveGame = new SaveGame(text);
-            Events.MissionSelectTrigger(new MissionSelect());
+            CurrentGameState.SwitchState(new MissionSelect());
         }
     }
     public void QueueShaderException(IActor _exception)

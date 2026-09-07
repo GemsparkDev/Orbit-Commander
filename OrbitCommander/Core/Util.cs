@@ -565,17 +565,22 @@ public static class Util
     }
     //TODO: Find a better way to do this
     //Delegate stacking is messy
-    public static Func<Conditional> SendPickup(float _distance, Func<GameState> _scene = null)
+    public static Func<Conditional> SendPickup(float _distance, Func<Conditional> _winState = null)
     {
+        _winState ??= Win(null);
         return delegate {
             var entity = Entity.NewPickupDrone(new Vector2(-2000, -2000), _distance);
             Engine.SaveGame.CurrentMission.Add(entity);
-            return new Conditional([new Custom(entity)], Win(_scene));
+            return new Conditional([new Custom(entity)], _winState);
         };
     }
     public static Func<Conditional> Win(Func<GameState> _scene = null)
     {
-        return Begin(_scene ?? MissionSelect.New, delegate { Engine.SaveGame.CompleteMission(Engine.SaveGame.CurrentMission.Wave); return null; });
+        return Begin(_scene ?? MissionSelect.New, delegate { Engine.SaveGame.CurrentMission.WinMission(); return null; });
+    }
+    public static Func<Conditional> Fail(Func<GameState> _scene = null)
+    {
+        return Begin(MissionSelect.New, delegate { Engine.SaveGame.MissionResults(Engine.SaveGame.CurrentMission.Wave); return null; });
     }
     public static Func<Conditional> Begin(Func<GameState> _state, Func<Conditional> _nextConditional)
     {

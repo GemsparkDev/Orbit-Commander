@@ -65,7 +65,8 @@ public enum Modules
     Expose,
     Decoy,
     
-    EmergencyModule,
+    EmptyModule,
+    EmergencyEngine,
 
     End, //Used for enumeration
 }
@@ -229,6 +230,7 @@ public enum Sprites
 
     Cursor,
     ClickedCursor,
+    None,
 }
 public enum Sound
 {

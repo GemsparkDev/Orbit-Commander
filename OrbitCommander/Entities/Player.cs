@@ -188,13 +188,23 @@ public class Player : Entity
             for(ModuleType i = ModuleType.Hull; i <= ModuleType.Core; i++)
             {
                 var module = modules[i];
-                module.Position = Position;
-                module.Velocity = Velocity + new Vector2(Util.OneToNegOne(), Util.OneToNegOne()) * 20;
-                module.AngularVelocity = Util.OneToNegOne() / 6;
-                module.isFailed = true;
-                module.Health = 1;
-                Engine.SaveGame.CurrentMission.Add(module);
-                modules[i] = new EmergencyModule();
+                if(module.Type != Modules.EmptyModule && module.Type != Modules.EmergencyEngine)
+                {
+                    module.Position = Position;
+                    module.Velocity = Velocity + new Vector2(Util.OneToNegOne(), Util.OneToNegOne()) * 20;
+                    module.AngularVelocity = Util.OneToNegOne() / 6;
+                    module.isFailed = true;
+                    module.Health = 1;
+                    Engine.SaveGame.CurrentMission.Add(module);
+                }
+                if(i == ModuleType.Engines)
+                {
+                    modules[i] = new EmergencyEngine();
+                }
+                else
+                {
+                    modules[i] = new EmptyModule();
+                }
             }
             if(SecondaryWeapon != null)
             {
@@ -209,7 +219,9 @@ public class Player : Entity
             GetComponent<Sprite>().Texture = Assets.Get(Sprites.PlayerCapsule);
             cachedDamage = 0;
             cachedDamageCd = 0;
+
             Events.UpdateModulesUI();
+            Engine.SaveGame.CurrentMission.FailMission();
         }
         leashedMaterials = [.. leashedMaterials.Where(x => !x.isExpired)];
         if(restartCd <= 0 && Events.AcknowledgeMessage(Message.RestartModules) && modules.Any(x => x.Value.isFailed))

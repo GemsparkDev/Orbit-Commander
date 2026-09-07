@@ -61,7 +61,7 @@ public static class UI
     public static TerminalButton[] KeybindInputs { get; } = new TerminalButton[Input.Keybinds.Count];
 
     //Pause Menu
-    public static Button QuitToMissionButton { get; } = new Button(new Vector2(0, -20), Assets.Get(Sprites.WideButton), Assets.TextFont, "Return", Color.White);
+    public static Button AbortButton { get; } = new Button(new Vector2(0, -20), Assets.Get(Sprites.WideButton), Assets.TextFont, "Abort", Color.White);
     public static Button SettingsButton { get; } = new Button(new Vector2(0, 20), Assets.Get(Sprites.WideButton), Assets.TextFont, "Options", Color.White);
 
     //Settings Menu
@@ -259,7 +259,7 @@ public static class UI
         MusicSlider.ApplyBehaviours();
         UIScaleSlider.ApplyBehaviours();
 
-        QuitToMissionButton.AddBehaviour(delegate () { Events.MissionSelectTrigger(new MissionSelect()); });
+        AbortButton.AddBehaviour(delegate () { Engine.SaveGame.CurrentMission.FailMission(); });
         GarageButton.AddBehaviour(Events.GarageTrigger);
         RepairButton.AddBehaviour(Events.RepairItem);
         var tooltip = new Window(Vector2.Zero, wideButton);
@@ -540,7 +540,7 @@ public static class UI
             GlobalMainMenu.AddWidget(Module[i] = new Decal(new Vector2(0, 25 * i - 40), Assets.TextFont, "Loading...", Color.White, 10), (int)Alignment.Center);
         }
 
-        PauseMenu.AddWidget(QuitToMissionButton);
+        PauseMenu.AddWidget(AbortButton);
         PauseMenu.AddWidget(SettingsButton);
 
         SettingsMenu.AddWidget(PauseMenuButton);

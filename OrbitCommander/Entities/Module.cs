@@ -735,9 +735,9 @@ public class Missile() : Weapon(Modules.Missile)
     }
     public override void OnEnemyHit(Entity _entity, int _damage)
     {
-        foreach(var pair in hitEntities)
+        foreach(var (_, entity) in hitEntities)
         {
-            if(pair.entity == _entity)
+            if(entity == _entity)
             {
                 return;
             }
@@ -1310,9 +1310,9 @@ public class MicroRocketLauncher() : Weapon(Modules.MicroRocketLauncher)
     }
     public override void OnEnemyHit(Entity _entity, int _damage)
     {
-        foreach (var pair in hitEntities)
+        foreach (var (_, entity) in hitEntities)
         {
-            if (pair.entity == _entity)
+            if (entity == _entity)
             {
                 return;
             }
@@ -1770,20 +1770,18 @@ public class AmplifyingModifier() : Module(Modules.AmplifyingModifier)
         return _damage * 2;
     }
 }
-public class EmergencyModule : Weapon
+public class EmptyModule() : Weapon(Modules.EmptyModule)
 {
-    public EmergencyModule() : base(Modules.EmergencyModule)
-    {
-        GetComponent<Smelt>().Value = 0;
-    }
+    public static EmptyModule Get { get; } = new EmptyModule();
+    public override float Speed => 0;
+    public override bool CritCondition => false;
+}
+public class EmergencyEngine() : Module(Modules.EmergencyEngine)
+{
+    public static EmergencyEngine Get { get; } = new EmergencyEngine();
     float engineTime = 0;
     ParticleEmitter engineParticles = new(Assets.Get(Sprites.Circle), 0.15f, Vector2.Zero, 0, MathF.PI / 4, 2, 450f, Color.Cyan, EmitterType.EmissionOverTime)
     { particleFadeToColor = new Color(72, 61, 139, 0) };
-
-    public override float Speed => 0;
-
-    public override bool CritCondition => false;
-
     public override void OnEngine()
     {
         engineParticles.offsetVelocity = Player.Velocity;
