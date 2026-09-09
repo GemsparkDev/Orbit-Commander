@@ -314,6 +314,7 @@ public class Mission
     public List<Entity> enemies = [];
     public List<Entity> projectiles = [];
     public int Wave { get; set; } = 0;
+    private float abortEffect = -1;
     public Mission(List<IMissionComponent> _components, Conditional _objective, IPlayerSpawner _spawner, Sound _music = Sound.main)
     {
         Events.SetModules();
@@ -471,6 +472,17 @@ public class Mission
             for (int i = 0; i < projectiles.Count - 150; i++)
             {
                 projectiles[i].isExpired = true;
+            }
+        }
+        if(abortEffect > -0.75f)
+        {
+            if(abortEffect < 0)
+            {
+                abortEffect = 2;
+            }
+            else
+            {
+                abortEffect -= Engine.DeltaSeconds;
             }
         }
         components = [.. components.Where(x => x as Entity == null || !(x as Entity).isExpired)];
@@ -707,6 +719,7 @@ public class Mission
     public void FailMission()
     {
         objective = new Conditional([], SendPickup(2000, Fail()));
+        abortEffect = 2;
     }
     public void CompleteCustomRule(Entity _target)
     {
@@ -861,6 +874,11 @@ public class Mission
         {
             _spriteBatch.Draw(Assets.Get(Sprites.Arrow), Engine.SaveGame.Player.Position - Vector2.Normalize(Engine.SaveGame.Player.Position) * 25, null, Engine.SaveGame.Player.Color, Util.ToAngle(-Engine.SaveGame.Player.Position), Assets.DimsOf(Sprites.Arrow) / 2, 1, 0, 0.2f);
             _spriteBatch.DrawString(Assets.TextFont, "Return to planet.", Engine.Camera.Position - new Vector2(Assets.TextFont.MeasureString("Return to planet.").X / 2, 225), Color.Crimson);
+        }
+        if(abortEffect > 1)
+        {
+            _spriteBatch.DrawString(Assets.TextFont, "Mission Failed!", Engine.Camera.Position - new Vector2(0, 400), Color.Red, 0, Assets.TextFont.MeasureString("Mission Failed!") / 2, 3, 0, 0);
+            _spriteBatch.DrawString(Assets.TextFont, "Abort", Engine.Camera.Position - new Vector2(0, 350), Color.Red,0, Assets.TextFont.MeasureString("Abort") / 2, 3, 0, 0);
         }
         Player.Draw(_spriteBatch);
     }
