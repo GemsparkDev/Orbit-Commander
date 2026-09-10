@@ -394,6 +394,10 @@ public class Cutscene(List<IEvent> _events, List<IActor> _actors, GameState _nex
 }
 public class Loading(Action _function, LoadingStage _stage) : GameState
 {
+    public override void Initialize()
+    {
+        UIManager.Self.ScreenWindow.enabled = false;
+    }
     public override void Draw(SpriteBatch _spriteBatch)
     {
         _spriteBatch.DrawString(Assets.TextFont, "Loading...", Vector2.Zero, Color.White, 0, Assets.TextFont.MeasureString("Loading...")/2, 4, 0, 0);
