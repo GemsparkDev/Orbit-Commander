@@ -42,7 +42,7 @@ public static class UI
     public static Button ShaderToggle { get; } = new Button(new Vector2(-10, 70), Assets.Get(Sprites.SwitchOn), Assets.TextFont, $"Shader: {SaveGame.UseShader}", Color.White, Assets.Get(Sprites.SwitchOff)) { };
     public static TerminalSlider SFXSlider { get; } = new TerminalSlider(Line, Assets.Get(Sprites.Knob), new Vector2(50, -50), new Vector2(50, 5), false, [Color.White, Color.Gray]);
     public static TerminalSlider MusicSlider { get; } = new TerminalSlider(Line, Assets.Get(Sprites.Knob), new Vector2(50, -65), new Vector2(50, 5), false, [Color.White, Color.Gray]);
-    public static TerminalSlider UIScaleSlider { get; } = new TerminalSlider(Line, Assets.Get(Sprites.Knob), new Vector2(50, -35), new Vector2(50, 5), false, [Color.White, Color.Gray]);
+    public static TerminalSlider UIScaleSlider { get; } = new TerminalSlider(Line, Assets.Get(Sprites.Knob), new Vector2(30, -20), new Vector2(50, 5), false, [Color.White, Color.Gray]);
     public static Decal SFXVolume { get; } = new Decal(new Vector2(-10, -50), Assets.TextFont, "Sound: 100%", Color.White, 5);
     public static Decal MusicVolume { get; } = new Decal(new Vector2(-10, -65), Assets.TextFont, "Music: 100%", Color.White, 5);
     public static Decal UIScale { get; } = new Decal(new Vector2(-10, -35), Assets.TextFont, $"UI Scale: {Math.Truncate((UIScaleSlider.Intervals[0] + 1) * 10) / 10}", Color.White, 5);
