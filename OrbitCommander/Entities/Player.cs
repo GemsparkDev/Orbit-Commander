@@ -188,7 +188,7 @@ public class Player : Entity
             for(ModuleType i = ModuleType.Hull; i <= ModuleType.Core; i++)
             {
                 var module = modules[i];
-                if(module.Type != Modules.EmptyModule && module.Type != Modules.EmergencyEngine)
+                if (module.Type is not Modules.EmptyModule and not Modules.EmergencyEngine)
                 {
                     module.Position = Position;
                     module.Velocity = Velocity + new Vector2(Util.OneToNegOne(), Util.OneToNegOne()) * 20;
@@ -538,7 +538,7 @@ public class Player : Entity
                 }
             }
             var comp = Engine.SaveGame.CurrentMission.GetComponent<Colliders>();
-            if (Input.IsDown(Binding.WarpBackward) && comp.GetColliders.Length > 0)
+            if (Input.WarpBackward.IsDown && comp.GetColliders.Length > 0)
             {
                 Vector2 newPos = new Vector2(Input.NewMouseState.X, Input.NewMouseState.Y) + Engine.Camera.Position - Engine.BackBuffer / 2;
                 Vector2 prevPos = new Vector2(Input.OldMouseState.X, Input.OldMouseState.Y) + Engine.Camera.Position - Engine.BackBuffer / 2;
@@ -582,11 +582,11 @@ public class Player : Entity
         //Prevents undocking when in the garage menu
         if (Progression > -1 && IsEnabled)
         {
-            if (Input.WasJustPressed(Binding.OpenPanel))
+            if (Input.OpenPanel.IsDown && !Input.OpenPanel.WasDown)
             {
                 Events.ToggleDockingMenus();
             }
-            if (Input.WasJustPressed(Binding.SwapPrimary))
+            if (Input.SwapPrimary.IsDown && !Input.SwapPrimary.WasDown)
             {
                 if (SecondaryWeapon != null)
                 {
@@ -597,7 +597,7 @@ public class Player : Entity
                     SoundManager.PlayGlobalSound(Assets.Get(Sound.Fail));
                 }
             }
-            if (Progression > 1 && Input.WasJustPressed(Binding.ToggleAimAssist))
+            if (Progression > 1 && Input.ToggleAimAssist.IsDown && !Input.ToggleAimAssist.WasDown)
             {
                 aimAssist = !aimAssist;
                 SoundEffectInstance sound = Assets.Get(Sound.Click).CreateInstance();
@@ -611,7 +611,7 @@ public class Player : Entity
             {
                 if (Progression > 2 || SaveGame.DebugMode)
                 {
-                    if (Input.IsDown(Binding.Construct))
+                    if (Input.Construct.IsDown)
                     {
                         float dist = (new Vector2(Input.NewMouseState.X, Input.NewMouseState.Y) - Engine.BackBuffer / 2).Length();
                         var constructs = new List<(string description, Texture2D sprite)>()
@@ -649,7 +649,7 @@ public class Player : Entity
                             angle += MathF.Tau / constructs.Count;
                         }
                     }
-                    else if (Input.WasJustReleased(Binding.Construct))
+                    else if (!Input.Construct.IsDown && Input.Construct.WasDown)
                     {
                         float dist = (new Vector2(Input.NewMouseState.X, Input.NewMouseState.Y) - Engine.BackBuffer / 2).Length();
                         int scrapCount = 0;
@@ -776,11 +776,11 @@ public class Player : Entity
                     SoundManager.PlayGlobalSound(Assets.Get(Sound.CloseMenu));
                     canGatherResources = false;
                 }
-                if (Input.WasJustPressed(Binding.DropScrap))
+                if (Input.DropScrap.IsDown && !Input.DropScrap.WasDown)
                 {
                     leashedMaterials = [];
                 }
-                if ((Progression > 1 || SaveGame.DebugMode) && Input.WasJustPressed(Binding.Ability))
+                if ((Progression > 1 || SaveGame.DebugMode) && Input.Ability.IsDown && !Input.Ability.WasDown)
                 {
                     foreach (var module in modules)
                     {
@@ -788,22 +788,7 @@ public class Player : Entity
                     }
                 }
                 Keys[] pressedKey = Input.NewState.GetPressedKeys();
-                EngineDirection = Vector2.Zero;
-                isEngineActive = false;
-                var directions = new Dictionary<Binding, Vector2>
-                {
-                    { Binding.Up, new Vector2(0, -1) },
-                    { Binding.Left, new Vector2(-1, 0) },
-                    { Binding.Down, new Vector2(0, 1) },
-                    { Binding.Right, new Vector2(1, 0) }
-                };
-                foreach (var pair in directions)
-                {
-                    if (Input.IsDown(pair.Key))
-                    {
-                        EngineDirection += pair.Value;
-                    }
-                }
+                EngineDirection = Input.Engine.Direction;
                 isEngineActive = EngineDirection.X != 0 || EngineDirection.Y != 0;
                 if (isEngineActive)
                 {
@@ -828,7 +813,7 @@ public class Player : Entity
                     }
                 }
             }
-            if (Input.WasJustPressed(Binding.Dock))
+            if (Input.Dock.IsDown && !Input.Dock.WasDown)
             {
                 Dock();
             }

@@ -4436,24 +4436,8 @@ public class Entity : IMissionComponent
                     Engine.ShakeScreen(0.2f);
                     Velocity -= targetVector / 4;
                 }
-                Vector2 direction = Vector2.Zero;
-                bool isEngineActive = false;
-                var directions = new Dictionary<Binding, Vector2>
-                {
-                    { Binding.Up, new Vector2(0, -1) },
-                    { Binding.Left, new Vector2(-1, 0) },
-                    { Binding.Down, new Vector2(0, 1) },
-                    { Binding.Right, new Vector2(1, 0) }
-                };
-                foreach (var pair in directions)
-                {
-                    if (Input.IsDown(pair.Key))
-                    {
-                        direction += pair.Value;
-                        isEngineActive = true;
-                    }
-                }
-                if (isEngineActive)
+                Vector2 direction = Input.Engine.Direction;
+                if (direction.Length() > 0.0001f)
                 {
                     Angle = Angle * 0.5f + MathF.Atan2(direction.X, -direction.Y) * 0.5f;
                     Velocity += Util.ToUnitVector(Angle) * 60 * Engine.DeltaSeconds * 0.1f;
@@ -4647,11 +4631,11 @@ public class Entity : IMissionComponent
                 {
                     dir = -1;
                 }
-                else if (Input.IsDown(Binding.WarpBackward))
+                else if (Input.WarpBackward.IsDown)
                 {
                     dir = -1;
                 }
-                else if (Input.IsDown(Binding.WarpForward))
+                else if (Input.WarpForward.IsDown)
                 {
                     dir = 1;
                 }

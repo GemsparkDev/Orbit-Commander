@@ -349,7 +349,7 @@ public class Cutscene(List<IEvent> _events, List<IActor> _actors, GameState _nex
     }
     public override void Update()
     {
-        if (Input.IsDown(Binding.SkipCutscene))
+        if (Input.SkipCutscene.IsDown)
         {
             if (escapeTime < 1)
             {
@@ -389,7 +389,7 @@ public class Cutscene(List<IEvent> _events, List<IActor> _actors, GameState _nex
         {
             actor.Draw(_spriteBatch);
         }
-        _spriteBatch.DrawString(Assets.TextFont, $"{Input.Keybinds[Binding.SkipCutscene]} to skip", Engine.Camera.Position + Engine.BackBuffer / 2 - Assets.TextFont.MeasureString($"{Input.Keybinds[Binding.SkipCutscene]} to skip") / 2 - new Vector2(100, 100), Color.White * (0.5f + escapeTime * 0.5f));
+        _spriteBatch.DrawString(Assets.TextFont, $"{Input.SkipCutscene.InputString} to skip", Engine.Camera.Position + Engine.BackBuffer / 2 - Assets.TextFont.MeasureString($"{Input.SkipCutscene.InputString} to skip") / 2 - new Vector2(100, 100), Color.White * (0.5f + escapeTime * 0.5f));
     }
 }
 public class Loading(Action _function, LoadingStage _stage) : GameState

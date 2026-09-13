@@ -57,8 +57,9 @@ public static class UI
     public static TerminalButton[] NextModule { get; } = new TerminalButton[5];
     public static TerminalButton[] PrevModule { get; } = new TerminalButton[5];
     public static Decal[] Module { get; } = new Decal[5];
-    public static Decal[] KeybindTexts { get; } = new Decal[Input.Keybinds.Count];
-    public static TerminalButton[] KeybindInputs { get; } = new TerminalButton[Input.Keybinds.Count];
+    //TODO: Readd keybind inputs
+    //public static Decal[] KeybindTexts { get; } = new Decal[Input.Keybinds.Count];
+    //public static TerminalButton[] KeybindInputs { get; } = new TerminalButton[Input.Keybinds.Count];
 
     //Pause Menu
     public static Button AbortButton { get; } = new Button(new Vector2(0, -20), Assets.Get(Sprites.WideButton), Assets.TextFont, "Abort", Color.White);
@@ -484,6 +485,7 @@ public static class UI
         GlobalMainMenu.AddWidget(GlobalSidePanelOpen, (int)Alignment.Left);
         GlobalMainMenu.AddWidget(GlobalFusePanelOpen, (int)Alignment.Right);
         GlobalMainMenu.AddWidget(LoadButton, (int)Alignment.TopLeft);
+        /*
         for (int i = 0; i < Input.Keybinds.Count; i++)
         {
             var binding = (Binding)i; //Saving to a variable prevents delegate weirdness
@@ -501,6 +503,7 @@ public static class UI
             });
             KeyBinds.AddWidget(KeybindInputs[i] = button, (int)Alignment.TopRight);
         }
+        */
         KeyBinds.AddWidget(SidePanelClose);
 
         for (int i = 0; i < NextModule.Length; i++)
