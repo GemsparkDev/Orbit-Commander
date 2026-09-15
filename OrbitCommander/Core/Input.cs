@@ -57,9 +57,9 @@ public class KeyboardDirection(Keys _up, Keys _down, Keys _left, Keys _right) : 
         {
             Vector2 output = Vector2.Zero;
             if (Input.NewState.IsKeyDown(_up))
-                output += new Vector2(0, 1);
-            if (Input.NewState.IsKeyDown(_down))
                 output += new Vector2(0, -1);
+            if (Input.NewState.IsKeyDown(_down))
+                output += new Vector2(0, 1);
             if (Input.NewState.IsKeyDown(_left))
                 output += new Vector2(-1, 0);
             if (Input.NewState.IsKeyDown(_right))

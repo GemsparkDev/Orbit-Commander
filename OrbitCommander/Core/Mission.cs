@@ -479,6 +479,7 @@ public class Mission
             if(abortEffect < 0)
             {
                 abortEffect = 2;
+                SoundManager.PlayGlobalSound(Assets.Get(Sound.Beep));
             }
             else
             {
@@ -719,7 +720,7 @@ public class Mission
     public void FailMission()
     {
         objective = new Conditional([], SendPickup(2000, Fail()));
-        abortEffect = 2;
+        abortEffect = 0;
     }
     public void CompleteCustomRule(Entity _target)
     {
@@ -877,8 +878,8 @@ public class Mission
         }
         if(abortEffect > 1)
         {
-            _spriteBatch.DrawString(Assets.TextFont, "Mission Failed!", Engine.Camera.Position - new Vector2(0, 400), Color.Red, 0, Assets.TextFont.MeasureString("Mission Failed!") / 2, 3, 0, 0);
-            _spriteBatch.DrawString(Assets.TextFont, "Abort", Engine.Camera.Position - new Vector2(0, 350), Color.Red,0, Assets.TextFont.MeasureString("Abort") / 2, 3, 0, 0);
+            _spriteBatch.DrawString(Assets.TextFont, "Mission Failed!", Engine.Camera.Position - new Vector2(0, 350), Color.Red, 0, Assets.TextFont.MeasureString("Mission Failed!") / 2, 3, 0, 0);
+            _spriteBatch.DrawString(Assets.TextFont, "Abort", Engine.Camera.Position - new Vector2(0, 300), Color.Red,0, Assets.TextFont.MeasureString("Abort") / 2, 3, 0, 0);
         }
         Player.Draw(_spriteBatch);
     }
