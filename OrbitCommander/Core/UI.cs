@@ -260,7 +260,18 @@ public static class UI
         MusicSlider.ApplyBehaviours();
         UIScaleSlider.ApplyBehaviours();
 
-        AbortButton.AddBehaviour(delegate () { Engine.SaveGame.CurrentMission.FailMission(); });
+        AbortButton.AddBehaviour(delegate () 
+        { 
+            if(Engine.SaveGame.CurrentMission.IsFailed)
+            {
+                return;
+            }
+            Engine.SaveGame.CurrentMission.FailMission();
+            if (Engine.UIManager.ToggleToMenu(PauseMenu))
+            {
+                CurrentGameState.SwitchState(new PlayingGame());
+            }
+        });
         GarageButton.AddBehaviour(Events.GarageTrigger);
         RepairButton.AddBehaviour(Events.RepairItem);
         var tooltip = new Window(Vector2.Zero, wideButton);

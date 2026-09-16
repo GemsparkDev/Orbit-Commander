@@ -315,6 +315,7 @@ public class Mission
     public List<Entity> projectiles = [];
     public int Wave { get; set; } = 0;
     private float abortEffect = -1;
+    public bool IsFailed => abortEffect >= 0;
     public Mission(List<IMissionComponent> _components, Conditional _objective, IPlayerSpawner _spawner, Sound _music = Sound.main)
     {
         Events.SetModules();
@@ -719,6 +720,8 @@ public class Mission
     }
     public void FailMission()
     {
+        if(IsFailed)
+        { return; }
         objective = new Conditional([], SendPickup(2000, Fail()));
         abortEffect = 0;
     }
