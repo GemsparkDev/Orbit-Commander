@@ -24,12 +24,12 @@ public class DropSpawner(float _distance) : IPlayerSpawner
         Engine.SaveGame.Player.Dock(false, true);
     }
 }
-public class GliderSpawner(Vector2 _spawn, float _distance) : IPlayerSpawner
+public class GliderSpawner(Vector2 _spawn) : IPlayerSpawner
 {
     public void Spawn()
     {
         Engine.SaveGame.Player.Position = _spawn;
-        Engine.SaveGame.CurrentMission.Add(Entity.NewGlider(_spawn, _distance));
+        Engine.SaveGame.CurrentMission.Add(Entity.NewGlider(_spawn, -Mission.missions[Engine.SaveGame.CurrentMissionIndex].data.PickupDistance));
         Engine.SaveGame.Player.Dock(false, true);
     }
 }

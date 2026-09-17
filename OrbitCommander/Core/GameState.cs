@@ -183,14 +183,14 @@ public class MissionSelect : GameState
         var center = new Vector2(Engine.BackBuffer.X / 6, 0);
         foreach (var data in Mission.missions)
         {
-            var orbit = (data.data.System, new ParticleEmitter(Assets.Get(Sprites.Dot), center, data.data.Distance, new Color(0, 255, 255)));
+            var orbit = (data.data.System, new ParticleEmitter(Assets.Get(Sprites.Dot), center, data.data.OrbitDistance, new Color(0, 255, 255)));
             missionOrbits.Add(orbit);
         }
         var playerMission = Mission.missions[Engine.SaveGame.CurrentMissionIndex].data;
-        if (playerMission.Distance > 0)
+        if (playerMission.OrbitDistance > 0)
         {
-            float freq = MathF.Sqrt(playerMission.Distance * playerMission.Distance * playerMission.Distance) / 100;
-            playerPosition = new Vector2(Engine.BackBuffer.X / 6, 0) + new Vector2(MathF.Cos(time / freq), MathF.Sin(time / freq)) * playerMission.Distance;
+            float freq = MathF.Sqrt(playerMission.OrbitDistance * playerMission.OrbitDistance * playerMission.OrbitDistance) / 100;
+            playerPosition = new Vector2(Engine.BackBuffer.X / 6, 0) + new Vector2(MathF.Cos(time / freq), MathF.Sin(time / freq)) * playerMission.OrbitDistance;
         }
         else
         {
@@ -235,10 +235,10 @@ public class MissionSelect : GameState
         for (int i = 0; i < Mission.missions.Count; i++)
         {
             var mission = Mission.missions[i].data;
-            if (mission.Distance > 0)
+            if (mission.OrbitDistance > 0)
             {
-                float freq = MathF.Sqrt(mission.Distance * mission.Distance * mission.Distance) / 100;
-                pos = new Vector2(Engine.BackBuffer.X / 6, 0) + new Vector2(MathF.Cos(time / freq), MathF.Sin(time / freq)) * mission.Distance;
+                float freq = MathF.Sqrt(mission.OrbitDistance * mission.OrbitDistance * mission.OrbitDistance) / 100;
+                pos = new Vector2(Engine.BackBuffer.X / 6, 0) + new Vector2(MathF.Cos(time / freq), MathF.Sin(time / freq)) * mission.OrbitDistance;
             }
             else
             {
@@ -277,7 +277,7 @@ public class MissionSelect : GameState
                     canSelect = false;
                 }
             }
-            if (canSelect && Math.Abs(mission.Distance - distance) < 10)
+            if (canSelect && Math.Abs(mission.OrbitDistance - distance) < 10)
             {
                 color = Color.White;
                 if (Input.NewMouseState.LeftButton == ButtonState.Released && Input.OldMouseState.LeftButton == ButtonState.Pressed)
@@ -288,7 +288,7 @@ public class MissionSelect : GameState
 
             missionOrbits[i].orbit.particleColor = color;
             var orbit = missionOrbits[i];
-            if (orbit.system == Engine.SaveGame.System && !(mission.Distance <= 0 && !canSelect))
+            if (orbit.system == Engine.SaveGame.System && !(mission.OrbitDistance <= 0 && !canSelect))
             {
                 ParticleManager.Add(new Particle(Assets.Get(Sprites.Circle), pos, 0, color));
                 orbit.orbit.Update();

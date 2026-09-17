@@ -565,11 +565,11 @@ public static class Util
     }
     //TODO: Find a better way to do this
     //Delegate stacking is messy
-    public static Func<Conditional> SendPickup(float _distance, Func<Conditional> _winState = null)
+    public static Func<Conditional> SendPickup(Func<Conditional> _winState = null)
     {
         _winState ??= Win(null);
         return delegate {
-            var entity = Entity.NewPickupDrone(new Vector2(-2000, -2000), _distance);
+            var entity = Entity.NewPickupDrone(new Vector2(-2000, -2000), Mission.missions[Engine.SaveGame.CurrentMissionIndex].data.PickupDistance);
             Engine.SaveGame.CurrentMission.Add(entity);
             return new Conditional([new Custom(entity)], _winState);
         };
