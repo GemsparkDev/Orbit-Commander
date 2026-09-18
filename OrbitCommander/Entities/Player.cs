@@ -188,7 +188,7 @@ public class Player : Entity
             for(ModuleType i = ModuleType.Hull; i <= ModuleType.Core; i++)
             {
                 var module = modules[i];
-                if (module.Type is not Modules.EmptyModule and not Modules.EmergencyEngine)
+                if (module.Type is not Modules.EmptyModule and not Modules.EmergencyEngine and not Modules.PointDefense)
                 {
                     module.Position = Position;
                     module.Velocity = Velocity + new Vector2(Util.OneToNegOne(), Util.OneToNegOne()) * 20;
@@ -200,6 +200,10 @@ public class Player : Entity
                 if(i == ModuleType.Engines)
                 {
                     modules[i] = new EmergencyEngine();
+                }
+                else if(i == ModuleType.Guns)
+                {
+                    modules[i] = new PointDefense();
                 }
                 else
                 {

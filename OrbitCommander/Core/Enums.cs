@@ -67,6 +67,7 @@ public enum Modules
     
     EmptyModule,
     EmergencyEngine,
+    PointDefense,
 
     End, //Used for enumeration
 }

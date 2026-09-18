@@ -72,6 +72,7 @@ public static class ItemFactory
 
         { Modules.EmptyModule, new ModuleData(Sprites.None,Sprites.None, "Structural Element", "This module does nothing!", 0, 10, typeof(EmptyModule))},
         { Modules.EmergencyEngine, new ModuleData(Sprites.None,Sprites.None, "Emergency Thrusters", "Your capsule's emergency thrusters.", (int)ModuleType.Engines, 10, typeof(EmergencyEngine))},
+        { Modules.PointDefense, new ModuleData(Sprites.None,Sprites.None, "Point Defense", "A weak machine gun designed to shoot down missiles.", (int)ModuleType.Engines, 10, typeof(PointDefense))},
     };
     public static Pickup NewScrap(Vector2 _position = default, Vector2 _velocity = default, float _angularVelocity = 0)
     {

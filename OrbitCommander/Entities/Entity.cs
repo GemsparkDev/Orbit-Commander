@@ -5209,7 +5209,6 @@ public class Entity : IMissionComponent
     }
     IEnumerable<int> AssassinShot()
     {
-        TimeLeft = 3;
         while (true)
         {
             var nearestEnemy = Engine.SaveGame.CurrentMission.Hitscan(Position, Velocity, Velocity.Length() * Engine.DeltaSeconds * 60, false, out Vector2 end, Friendly.Blacklist(Team));
@@ -5233,6 +5232,7 @@ public class Entity : IMissionComponent
         var shot = NewProjectile(Assets.Get(Sprites.Microshot), _position, _velocity, _angle, _angularVelocity, _team, _damage, _stealth);
         var behaviour = new Behaviour();
         behaviour.AddBehaviour(shot.AssassinShot());
+        shot.TimeLeft = 3;
         shot.AddComponent(behaviour);
         var color = Color.Gold;
         color.A = 0;

@@ -14,8 +14,8 @@ internal class ExpireTimer(Entity _entity) : IComponent
         {
             TimeLeft = 0;
             Sprite sprite = _entity.GetComponent<Sprite>();
-            Transform transform = _entity.GetComponent<Transform>();
-            if (sprite != null && transform != null)
+            Transform transform = _entity.Transform;
+            if (sprite != null && sprite.Texture != null)
             {
                 ParticleManager.Add(new Particle(sprite.Texture, 1, transform.Position, transform.Velocity, transform.Angle, 0, sprite.Color, Color.Transparent));
             }

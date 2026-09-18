@@ -10,6 +10,7 @@ using OrbitCommander.Components;
 using OrbitCommander.Core;
 using OrbitCommander.Particles;
 using UILib.Content;
+using System.Diagnostics;
 
 namespace OrbitCommander.Entities;
 
@@ -1772,13 +1773,11 @@ public class AmplifyingModifier() : Module(Modules.AmplifyingModifier)
 }
 public class EmptyModule() : Weapon(Modules.EmptyModule)
 {
-    public static EmptyModule Get { get; } = new EmptyModule();
     public override float Speed => 0;
     public override bool CritCondition => false;
 }
 public class EmergencyEngine() : Module(Modules.EmergencyEngine)
 {
-    public static EmergencyEngine Get { get; } = new EmergencyEngine();
     float engineTime = 0;
     ParticleEmitter engineParticles = new(Assets.Get(Sprites.Circle), 0.15f, Vector2.Zero, 0, MathF.PI / 4, 2, 450f, Color.Cyan, EmitterType.EmissionOverTime)
     { particleFadeToColor = new Color(72, 61, 139, 0) };
@@ -1805,5 +1804,38 @@ public class EmergencyEngine() : Module(Modules.EmergencyEngine)
         }
         base.OnUpdate(_fuseRatio);
     }
+}
+public class PointDefense() : Weapon(Modules.PointDefense)
+{
+    ReloadSystem ammo = new ReloadSystem(50, 3f);
+    public override float Speed => 10;
+    public override bool CritCondition => false;
+    public override void OnShoot()
+    {
+        if (Cooldown > 0)
+        {
+            return;
+        }
+        if (ammo.Fire())
+        {
+            var p1 = NewAssassinShot(Player.Position + new Vector2(Util.OneToNegOne(), Util.OneToNegOne()) * 10, Player.Direction * Speed * (Util.Random.NextSingle() / 4 + 0.825f) + new Vector2(Util.OneToNegOne(), Util.OneToNegOne()) * Util.Random.NextSingle() * Util.Random.NextSingle() * 3, Util.ToAngle(Player.Direction), 0, Team.Friendly, 1);
+            p1.Texture = null;
+            p1.TimeLeft = 0.4f;
+            Engine.SaveGame.CurrentMission.Add(p1);
+            SoundManager.PlaySound(Assets.Get(Sound.LMGFire), Player.Position);
+            Cooldown = 0.125f;
+            Engine.Camera.Position += Player.Direction * Speed / 5 + new Vector2(Util.OneToNegOne(), Util.OneToNegOne()) * 2;
+            Engine.ShakeScreen(0.2f);
+            Player.Velocity -= Player.Direction / 10;
+            Util.FiringParticles(Player.Position + Player.Direction * 6 / 2, Player.Velocity, Player.Direction);
+            Player.Flash(Color.BurlyWood);
+        }
+    }
+    public override void OnUpdate(float _fuseRatio)
+    {
+        ammo.Update(this, _fuseRatio);
+        base.OnUpdate(_fuseRatio);
+    }
+    public override int StealthChange() => GunStealthChange();
 }
 
