@@ -34,7 +34,6 @@ public abstract class Module : Pickup, IData
         description = new Decal(new Vector2(-5, 15), Assets.TextFont, ItemFactory.moduleData[_type].Description, Color.White, 3f);
         Tooltip.AddWidget(healthDecal);
         Tooltip.AddWidget(description);
-        AddComponent(new Smelt() { Value = 3 });
         health = GetComponent<Health>();
     }
     public void UpdateHealth()

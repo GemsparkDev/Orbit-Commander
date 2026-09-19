@@ -69,17 +69,14 @@ public static class UI
     public static Button PauseMenuButton { get; } = new Button(new Vector2(80, 45), Assets.Get(Sprites.WideButton), Assets.TextFont, "Back", Color.White);
 
     //Mothership Menu
-    public static ItemSlot<Pickup> FurnaceSlot { get; } = new ItemSlot<Pickup>(new Vector2(-20, 0), Assets.Get(Sprites.EmptySlot), Engine.UIManager, -1);
+    public static ItemSlot<Pickup> FurnaceSlot { get; } = new ItemSlot<Pickup>(new Vector2(-20, 0), Assets.Get(Sprites.EmptySlot), -1);
     public static Button GarageButton { get; } = new Button(new Vector2(0, -GlobalMainMenu.Size.Y / 4), Assets.Get(Sprites.WideButton), Assets.TextFont, "To Garage", Color.White);
-    public static Button CraftButton { get; } = new Button(new Vector2(0, GlobalMainMenu.Size.Y / 4), Assets.Get(Sprites.Button), Assets.TextFont, "Repair", Color.LightBlue);
     public static Decal RequiredCraftsText { get; } = new Decal(new Vector2(0) + new Vector2(0, -6), Assets.TextFont, "25", Color.White, 10);
     public static Slider FurnaceSlider { get; } = new Slider(Line, new Vector2(-20, -GlobalMainMenu.Size.Y / 6), new Vector2(60, 2), true, [new Color(255, 239, 85), new Color(50, 51, 67)]);
-    public static Slider CraftingSlider { get; } = new Slider(Line, new Vector2(0, -GlobalMainMenu.Size.Y / 4), new Vector2(60, 2), true, [Color.Cyan, Color.Gray]);
 
     //Garage Menu
     public static Button RepairButton { get; } = new Button(new Vector2(-GarageMenu.Size.X / 4 - 25, -40), Assets.Get(Sprites.Button), Assets.TextFont, "Repair", Color.LightBlue);
-    public static ItemSlot<Pickup> RepairSlot { get; } = new ItemSlot<Pickup>(new Vector2(-GarageMenu.Size.X / 4 - 25, 0), Assets.Get(Sprites.EmptySlot), Engine.UIManager, [0, 1, 2, 3, 4, 5]); //Contains all module ids and the construct id
-    public static Decal MothershipScrap { get; } = new Decal(new Vector2(GarageMenu.Size.X / 2.2f, 20) - GarageMenu.Size / 2, Assets.TextFont, "0", Color.Gray, 10);
+    public static ItemSlot<Pickup> RepairSlot { get; } = new ItemSlot<Pickup>(new Vector2(-GarageMenu.Size.X / 4 - 25, 0), Assets.Get(Sprites.EmptySlot), [0, 1, 2, 3, 4, 5]); //Contains all module ids and the construct id
     public static Decal RepairText { get; } = new Decal(new Vector2(-GarageMenu.Size.X / 4 - 60 / 2.5f, 40), Assets.TextFont, "", Color.White, 10);
     public static Decal GaragePlayerImage { get; } = new Decal(new Vector2(GarageMenu.Size.X / 4, 0), Assets.Get(Sprites.PlayerUI));
     public static Decal ValidConfigText { get; } = new Decal(-GarageMenu.Size / 4 + new Vector2(20, GarageMenu.Size.Y / 1.5f), Assets.TextFont, "Ready for Combat", Color.Green, 10);
@@ -159,7 +156,7 @@ public static class UI
     public static ItemSlot<Pickup>[] InventorySlots { get; set; } = new ItemSlot<Pickup>[4];
     public static ItemSlot<Pickup>[] MissionSelectSlots { get; set; } = new ItemSlot<Pickup>[4];
     public static ItemSlot<Module>[] ModuleSlots { get; private set; } = new ItemSlot<Module>[5];
-    public static ItemSlot<Weapon> SecondarySlot { get; private set; } = new ItemSlot<Weapon>(new Vector2(-GarageMenu.Size.X / 4 - 25, 50), Assets.Get(Sprites.EmptySlot), Engine.UIManager, (int)ModuleType.Guns);
+    public static ItemSlot<Weapon> SecondarySlot { get; private set; } = new ItemSlot<Weapon>(new Vector2(-GarageMenu.Size.X / 4 - 25, 50), Assets.Get(Sprites.EmptySlot), (int)ModuleType.Guns);
 
     public static int windowType = 1;
     public static readonly Vector2[] resolutions = [new Vector2(1920, 1080), new Vector2(640, 480)];
@@ -277,10 +274,8 @@ public static class UI
         var tooltip = new Window(Vector2.Zero, wideButton);
         tooltip.AddWidget(new Decal(new Vector2(0, 0), Assets.TextFont, "1 metal to repair", Color.White, 3f));
         RepairButton.AddTooltip(tooltip);
-        CraftButton.AddBehaviour(Events.CraftItem);
         tooltip = new Window(Vector2.Zero, wideButton);
         tooltip.AddWidget(new Decal(new Vector2(0, 0), Assets.TextFont, "1 metal to repair", Color.White, 3f));
-        CraftButton.AddTooltip(tooltip);
         RepairSlot.AddBehaviour(Events.UpdateRepairText);
         FurnaceSlot.AddBehaviour(delegate()
         {
@@ -572,7 +567,6 @@ public static class UI
         SettingsMenu.AddWidget(NextResolution);
         SettingsMenu.AddWidget(ApplyChanges);
 
-        GarageMenu.AddWidget(MothershipScrap);
         GarageMenu.AddWidget(RepairButton);
         GarageMenu.AddWidget(RepairSlot);
         GarageMenu.AddWidget(RepairText);
@@ -582,9 +576,7 @@ public static class UI
         MothershipMenu.AddWidget(FurnaceSlider, 0);
         MothershipMenu.AddWidget(FurnaceSlot, 0);
         MothershipMenu.AddWidget(GarageButton, 1);
-        MothershipMenu.AddWidget(CraftingSlider, 2);
-        MothershipMenu.AddWidget(RequiredCraftsText, 2);
-        MothershipMenu.AddWidget(CraftButton, 2);
+        MothershipMenu.AddWidget(RequiredCraftsText, 0);
         for (int i = 0; i < 3; i++)
         {
             MothershipMenu.AddWidget(SidePanelClose, i);
@@ -669,16 +661,32 @@ public static class UI
 
         for (int x = 0; x < ModuleSlots.GetLength(0); x++)
         {
+            ItemSlot<Module> slot;
             if (x % 2 == 0)
             {
-                ModuleSlots[x] = new ItemSlot<Module>(new Vector2(-30, Assets.DimsOf(Sprites.EmptySlot).Y * x / 2
-                    - Assets.DimsOf(Sprites.EmptySlot).Y), Assets.Get(Sprites.EmptySlot), Engine.UIManager, x);
+                slot = new ItemSlot<Module>(new Vector2(-30, Assets.DimsOf(Sprites.EmptySlot).Y * x / 2
+                    - Assets.DimsOf(Sprites.EmptySlot).Y), Assets.Get(Sprites.EmptySlot), x);
             }
             else
             {
-                ModuleSlots[x] = new ItemSlot<Module>(new Vector2(Assets.DimsOf(Sprites.EmptySlot).X / 1.4142f - 30,
-                    Assets.DimsOf(Sprites.EmptySlot).Y * x / 2 - Assets.DimsOf(Sprites.EmptySlot).Y), Assets.Get(Sprites.EmptySlot), Engine.UIManager, x);
+                slot = new ItemSlot<Module>(new Vector2(Assets.DimsOf(Sprites.EmptySlot).X / 1.4142f - 30,
+                    Assets.DimsOf(Sprites.EmptySlot).Y * x / 2 - Assets.DimsOf(Sprites.EmptySlot).Y), Assets.Get(Sprites.EmptySlot), x);
             }
+            ModuleSlots[x] = slot;
+            slot.AddBehaviour(delegate () 
+            {
+                var item = slot.daughterItem;
+                if(item == null || item.Health >= item.MaxHealth)
+                {
+                    return;
+                }
+                Pickup pickup = UILib.Content.UIManager.Self.selectedIcon as Pickup;
+                if (pickup != null && pickup is not OrbitCommander.Entities.Module) 
+                { 
+                    UILib.Content.UIManager.Self.selectedIcon = null; 
+                    slot.daughterItem.Health = slot.daughterItem.MaxHealth; 
+                } 
+            });
             GarageMenu.AddWidget(ModuleSlots[x]);
             MissionSelect.AddWidget(ModuleSlots[x], 1);
             ModuleSlots[x].AddBehaviour(Events.UpdateModules);
@@ -686,9 +694,9 @@ public static class UI
         for (int i = 0; i < InventorySlots.GetLength(0); i++)
         {
             InventorySlots[i] = new ItemSlot<Pickup>(new Vector2(Assets.DimsOf(Sprites.LargePanel).X / 4,
-                Assets.DimsOf(Sprites.EmptySlot).Y * (i + 1) - Assets.DimsOf(Sprites.LargePanel).X / 2), Assets.Get(Sprites.EmptySlot), Engine.UIManager, -1);
+                Assets.DimsOf(Sprites.EmptySlot).Y * (i + 1) - Assets.DimsOf(Sprites.LargePanel).X / 2), Assets.Get(Sprites.EmptySlot), -1);
             MissionSelectSlots[i] = new ItemSlot<Pickup>(new Vector2(Assets.DimsOf(Sprites.LargePanel).X / 2,
-                Assets.DimsOf(Sprites.EmptySlot).Y * (i + 1) - Assets.DimsOf(Sprites.LargePanel).X / 2), Assets.Get(Sprites.EmptySlot), Engine.UIManager, -1);
+                Assets.DimsOf(Sprites.EmptySlot).Y * (i + 1) - Assets.DimsOf(Sprites.LargePanel).X / 2), Assets.Get(Sprites.EmptySlot), -1);
             MothershipMenu.AddWidget(InventorySlots[i], 0);
             PickupDroneMenu.AddWidget(InventorySlots[i]);
             MissionSelect.AddWidget(InventorySlots[i], 1);
@@ -707,7 +715,7 @@ public static class UI
         {
             for (int j = -2; j < 3; j++)
             {
-                var fuse = new ItemSlot<Fuse>(new Vector2(i * 11 + 2, j * 20 + 0.5f), Assets.Get(Sprites.FuseSlot), Engine.UIManager, -1);
+                var fuse = new ItemSlot<Fuse>(new Vector2(i * 11 + 2, j * 20 + 0.5f), Assets.Get(Sprites.FuseSlot), -1);
                 //Not sure why this works, don't touch
                 int x = j + 2;
                 int y = i;

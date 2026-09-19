@@ -3,6 +3,10 @@
 Lagrange Commander is a game made using C# in monogame. It is a 2D top down wave based shooter where you must repair and upgrade your ship by salvaging from enemies you defeat. It features realistic N-Body gravitation, which affects all entities and projectiles.
   
 # Changelog
+0.9.6.2 - 9/18/2026
+ - Removed refined scrap as a mechanic.
+ - Modules can now be repaired by dragging a scrap over it.
+ - Modules no longer have a smelt value.
 0.9.6.1 - 9/17/2026
  - Added the PointDefense weapon when the player dies.
 0.9.6.0 - 9/16/2026

@@ -936,7 +936,6 @@ public class Player : Entity
                     leashedMaterials[i].isExpired = true;
                 }
                 leashedMaterials.Clear();
-                Events.UpdateScrapText();
             }
         }
         Engine.ShakeScreen(0.35f);

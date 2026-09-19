@@ -10,7 +10,6 @@ namespace OrbitCommander.Core;
 public class SaveGame
 {
     public string Name { get; set; } = "0";
-    public int Scrap { get; set; }
     private int system = 0;
     public int System
     {
@@ -66,7 +65,6 @@ public class SaveGame
         var logger = new LoadLogger();
 
         Name = disassembly[0];
-        Scrap = int.TryParse(disassembly[1], out int scrap) ? scrap : 0;
         System = System = int.TryParse(disassembly[2], out int system) ? system : 0;
         CurrentMissionIndex = int.TryParse(disassembly[3], out int index) ? index : 0;
         giveWeapon = !bool.TryParse(disassembly[4], out bool give) || give;
@@ -218,7 +216,7 @@ public class SaveGame
         inv.Remove(inv.Length - 1, 1);
         globalInv.Remove(globalInv.Length - 1, 1);
         queueables.Remove(queueables.Length - 1, 1);
-        return $"{Name},{Scrap},{System},{CurrentMissionIndex},{giveWeapon},{{{string.Join(",", CompletedMissions)}}},{Player.Serialize()},{{{inv}}},{{{globalInv}}},{{{queueables}}},{FleetSystem}";
+        return $"{Name},{""},{System},{CurrentMissionIndex},{giveWeapon},{{{string.Join(",", CompletedMissions)}}},{Player.Serialize()},{{{inv}}},{{{globalInv}}},{{{queueables}}},{FleetSystem}";
     }
 }
 public class LoadLogger

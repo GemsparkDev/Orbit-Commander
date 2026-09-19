@@ -269,7 +269,6 @@ public enum Sound
 }
 public enum Message
 {
-    MothershipCraftItem,
     MothershipUpdateFurnace,
     ToggleTerminal,
     RestartModules,

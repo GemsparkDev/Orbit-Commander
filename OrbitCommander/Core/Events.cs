@@ -46,7 +46,8 @@ public static class Events
     public static void RepairItem()
     {
         Pickup daughterModule;
-        if (UI.RepairSlot.daughterItem != null)
+        var pickups = GetPickups(1, out ItemSlot<Pickup>[] slots);
+        if (UI.RepairSlot.daughterItem != null && pickups != null)
         {
             daughterModule = UI.RepairSlot.daughterItem;
         }
@@ -55,42 +56,34 @@ public static class Events
             SoundManager.PlayGlobalSound(Assets.Get(Sound.Fail));
             return;
         }
-        if(Engine.SaveGame.Scrap >= 1)
+        if (daughterModule is Module)
         {
-            if (daughterModule is Module)
+            if (daughterModule.Health < daughterModule.MaxHealth)
             {
-                if(daughterModule.Health < daughterModule.MaxHealth)
-                {
-                    daughterModule.Health = daughterModule.MaxHealth;
-                    (daughterModule as Module).isFailed = false;
-                }
-                else
-                {
-                    SoundManager.PlayGlobalSound(Assets.Get(Sound.Fail));
-                    return;
-                }
+                daughterModule.Health = daughterModule.MaxHealth;
+                (daughterModule as Module).isFailed = false;
             }
             else
             {
-                if(daughterModule.Health < daughterModule.MaxHealth * 2)
-                {
-                    daughterModule.GetComponent<Health>().SetOverhealth(daughterModule.MaxHealth + (int)Math.Ceiling(daughterModule.Health * 0.5f) + 5);
-                }
-                else
-                {
-                    SoundManager.PlayGlobalSound(Assets.Get(Sound.Fail));
-                    return;
-                }
+                SoundManager.PlayGlobalSound(Assets.Get(Sound.Fail));
+                return;
             }
-            Engine.SaveGame.Scrap -= 1;
-            SoundManager.PlayGlobalSound(Assets.Get(Sound.Interact));
-            UpdateRepairText();
-            UI.MothershipScrap.Text = Engine.SaveGame.Scrap.ToString();
         }
         else
         {
-            SoundManager.PlayGlobalSound(Assets.Get(Sound.Fail));
+            if (daughterModule.Health < daughterModule.MaxHealth * 2)
+            {
+                daughterModule.GetComponent<Health>().SetOverhealth(daughterModule.MaxHealth + (int)Math.Ceiling(daughterModule.Health * 0.5f) + 5);
+            }
+            else
+            {
+                SoundManager.PlayGlobalSound(Assets.Get(Sound.Fail));
+                return;
+            }
         }
+        slots[0].daughterItem = null;
+        SoundManager.PlayGlobalSound(Assets.Get(Sound.Interact));
+        UpdateRepairText();
     }
     public static void UpdateRepairText()
     {
@@ -162,29 +155,10 @@ public static class Events
         Player.SecondaryWeapon = UI.SecondarySlot.daughterItem;
         return true;
     }
-    public static void UpdateFurnaceUI(float _value, float _maxValue, Pickup furnaceItem)
+    public static void UpdateFurnaceUI(float _value, float _maxValue, Pickup furnaceItem, int requiredCraftsLeft)
     {
         UI.FurnaceSlot.daughterItem = furnaceItem;
         UI.FurnaceSlider.SetInterval(_value, _maxValue);
-        UI.MothershipScrap.Text = Engine.SaveGame.Scrap.ToString();
-    }
-    public static void CraftItem()
-    {
-        if (Engine.SaveGame.Scrap >= 1)
-        {
-            Engine.SaveGame.Scrap -= 1;
-            SendMessage(Message.MothershipCraftItem);
-            SoundManager.PlayGlobalSound(Assets.Get(Sound.Interact));
-        }
-        else
-        {
-            SoundManager.PlayGlobalSound(Assets.Get(Sound.Fail));
-        }
-    }
-    public static void UpdateCraftingUI(float _value, float _maxValue, int requiredCraftsLeft)
-    {
-        UI.CraftingSlider.SetInterval(_value, _maxValue);
-        UI.MothershipScrap.Text = Engine.SaveGame.Scrap.ToString();
         UI.RequiredCraftsText.Text = requiredCraftsLeft.ToString();
     }
     public static void UpdateEnemyCountdownUI(float _value, float _maxValue, float _wave)
@@ -217,10 +191,6 @@ public static class Events
         UI.IsComplete.textColor = completed ? Color.Green : Color.Red;
         UI.SelectMission.TextColor = completed && mission.IsRelaunchable ? Color.Gray : Color.Yellow;
         UI.AlertText.Text = isDangerous ? "Danger: Fleet Detected" : "";
-    }
-    public static void UpdateScrapText()
-    {
-        UI.MothershipScrap.Text = Engine.SaveGame.Scrap.ToString();
     }
     public static void UpdateModulesStatus()
     {
@@ -319,46 +289,51 @@ public static class Events
         string filePath = Path.Combine(Directory.GetCurrentDirectory(), $"Content\\Saves\\Save_{Engine.SaveSlot}.txt");
         File.Delete(filePath);
     }
-    public static void UpgradeSensors(SensorType _sensorType)
+    public static Pickup[] GetPickups(int i, out ItemSlot<Pickup>[] _slots)
     {
-        //Only need one specialized parts
-        if (Player.sensorType != SensorType.Basic)
-        {
-            if (Engine.SaveGame.Scrap > 1)
-            {
-                Engine.SaveGame.Scrap--;
-                Player.sensorType = _sensorType;
-                return;
-            }
-            else
-            {
-                return;
-            }
-        }
-        Pickup firstScrap = null;
-        ItemSlot<Pickup> slot = null;
+        var pickups = new Pickup[i];
+        var slots = new ItemSlot<Pickup>[i];
+        int count = 0;
         foreach (var item in UI.MissionSelectSlots.Concat(UI.InventorySlots))
         {
-            if (item.daughterItem.HasTag(Tags.IsSpecialized))
+            if (item.daughterItem != null && !item.daughterItem.HasTag(Tags.IsSpecialized) && item.daughterItem is not Module)
             {
-                firstScrap = item.daughterItem;
-                slot = item;
+                pickups[count] = item.daughterItem;
+                slots[count] = item;
+                count++;
+            }
+            if (count == i)
+            {
                 break;
             }
         }
-        if (firstScrap != null)
+        if(count < i)
         {
-            slot.daughterItem = null;
-            firstScrap.isExpired = true;
+            pickups = null;
+        }
+        _slots = slots;
+        return pickups;
+    }
+    public static void UpgradeSensors(SensorType _sensorType)
+    {
+        var pickups = GetPickups(1, out ItemSlot<Pickup>[] slots);
+        if (pickups == null)
+        {
+            return;
+        }
+        if (Player.sensorType != SensorType.Basic)
+        {
             Player.sensorType = _sensorType;
         }
+        slots[0].daughterItem = null;
     }
     public static void UpgradeModule(ModuleType _slot, Module _moduleType)
     {
         string text;
-        if (Engine.SaveGame.Scrap < 5)
+        var pickups = GetPickups(1, out ItemSlot<Pickup>[] slots);
+        if (pickups == null)
         {
-            UI.UpgradeText.Text = "Smelt 5 scrap to upgrade.";
+            UI.UpgradeText.Text = "Acquire 3 scrap to upgrade.";
             return;
         }
         var upgrades = new Dictionary<Modules, Modules>
@@ -380,7 +355,10 @@ public static class Events
         text = $"{_moduleType.Name} has been upgraded to {mod.Name}.";
         UI.UpgradeText.Text = text;
         Engine.SaveGame.Player.modules[_slot] = mod;
-        Engine.SaveGame.Scrap -= 5;
+        foreach(var slot in slots)
+        {
+            slot.daughterItem = null;
+        }
     }
     public static void SetModules()
     {

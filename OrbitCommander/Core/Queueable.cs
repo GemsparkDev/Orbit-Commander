@@ -131,13 +131,15 @@ public class SmeltQueue : Queueable
     }
     protected override void Construct()
     {
+        //TODO: Figure out how to rework this
+        throw new NotImplementedException();
         if (pickup.daughterItem is Module)
         {
-            Engine.SaveGame.Scrap += 3;
+            //Engine.SaveGame.Scrap += 3;
         }
         else
         {
-            Engine.SaveGame.Scrap += 2;
+            //Engine.SaveGame.Scrap += 2;
         }
         pickup.daughterItem.isExpired = true;
         pickup.daughterItem = null;

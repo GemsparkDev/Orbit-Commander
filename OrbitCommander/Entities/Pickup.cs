@@ -348,8 +348,9 @@ public class Pickup : Entity, IData
                 {
                     nearestPickup.isExpired = true;
                     cooldown = 0;
-                    Engine.SaveGame.Scrap += nearestPickup.GetComponent<Smelt>().Value;
+                    //Engine.SaveGame.Scrap += nearestPickup.GetComponent<Smelt>().Value;
                     SoundManager.PlaySound(Assets.Get(Sound.Full), Position);
+                    throw new NotImplementedException(); //TODO: Rework the furnace
                 }
             }
             yield return 0;

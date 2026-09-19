@@ -3957,19 +3957,13 @@ public class Entity : IMissionComponent
         int damage = 8;
         CD = [0];
         EnemyRange.particleVelocity = 300;
-        float furnaceCooldown = 8;
-        float craftingCooldown = 20;
+        float furnaceCooldown = 20;
         int requiredCraftsLeft = 10;
         Pickup furnaceItem = null;
-        bool currentlyCrafting = false;
         bool alert = false;
         Transform.IsImmovable = true;
         while (true)
         {
-            if (Events.AcknowledgeMessage(Message.MothershipCraftItem))
-            {
-                currentlyCrafting = true;
-            }
             if (Events.AcknowledgeMessage(Message.MothershipUpdateFurnace))
             {
                 furnaceItem = UI.FurnaceSlot.daughterItem;
@@ -3984,29 +3978,20 @@ public class Entity : IMissionComponent
                 furnaceCooldown -= Engine.DeltaSeconds;
                 if (furnaceCooldown <= 0)
                 {
-                    Engine.SaveGame.Scrap += furnaceItem.GetComponent<Smelt>().Value;
+                    int val = furnaceItem.GetComponent<Smelt>().Value;
+                    requiredCraftsLeft -= val;
+                    Collide(-100 * val);
                     furnaceItem = null;
                     SoundManager.PlaySound(Assets.Get(Sound.Interact), Position);
                 }
             }
             else
             {
-                furnaceCooldown = 8;
-            }
-            if (currentlyCrafting)
-            {
-                craftingCooldown -= Engine.DeltaSeconds;
-                if (craftingCooldown <= 0)
-                {
-                    craftingCooldown = 20;
-                    requiredCraftsLeft -= 1;
-                    Collide(-100);
-                    currentlyCrafting = false;
-                }
+                furnaceCooldown = 20;
             }
 
-            Events.UpdateFurnaceUI(8 - furnaceCooldown, 8, furnaceItem);
-            Events.UpdateCraftingUI(20 - craftingCooldown, 20, requiredCraftsLeft);
+            Events.UpdateFurnaceUI(8 - furnaceCooldown, 8, furnaceItem, requiredCraftsLeft);
+
             if (requiredCraftsLeft <= 5)
             {
                 if (CD[0] <= 0)
@@ -4143,15 +4128,9 @@ public class Entity : IMissionComponent
     IEnumerable<int> Orbiter()
     {
         float furnaceCooldown = 15;
-        float craftingCooldown = 12;
         Pickup furnaceItem = null;
-        bool currentlyCrafting = false;
         while (true)
         {
-            if (Events.AcknowledgeMessage(Message.MothershipCraftItem))
-            {
-                currentlyCrafting = true;
-            }
             if (Events.AcknowledgeMessage(Message.MothershipUpdateFurnace))
             {
                 furnaceItem = UI.FurnaceSlot.daughterItem;
@@ -4166,7 +4145,7 @@ public class Entity : IMissionComponent
                 furnaceCooldown -= Engine.DeltaSeconds;
                 if (furnaceCooldown <= 0)
                 {
-                    Engine.SaveGame.Scrap += furnaceItem.GetComponent<Smelt>().Value;
+                    Collide(-100 * furnaceItem.GetComponent<Smelt>().Value);
                     furnaceItem = null;
                     SoundManager.PlaySound(Assets.Get(Sound.Interact), Position);
                 }
@@ -4175,19 +4154,8 @@ public class Entity : IMissionComponent
             {
                 furnaceCooldown = 15;
             }
-            if (currentlyCrafting)
-            {
-                craftingCooldown -= Engine.DeltaSeconds;
-                if (craftingCooldown <= 0)
-                {
-                    craftingCooldown = 12;
-                    Collide(-100);
-                    currentlyCrafting = false;
-                }
-            }
 
-            Events.UpdateFurnaceUI(15 - furnaceCooldown, 15, furnaceItem);
-            Events.UpdateCraftingUI(12 - craftingCooldown, 12, Health);
+            Events.UpdateFurnaceUI(15 - furnaceCooldown, 15, furnaceItem, Health);
             yield return 0;
         }
     }
@@ -4369,19 +4337,13 @@ public class Entity : IMissionComponent
             0,
         ];
         float furnaceCooldown = 15;
-        float craftingCooldown = 12;
         Pickup furnaceItem = null;
-        bool currentlyCrafting = false;
         int tier = 1;
         int untilNextTier = 1;
         float targetAngle;
         while (Health > 0)
         {
             float tierBonus = 1 / MathF.Sqrt(tier);
-            if (Events.AcknowledgeMessage(Message.MothershipCraftItem))
-            {
-                currentlyCrafting = true;
-            }
             if (Events.AcknowledgeMessage(Message.MothershipUpdateFurnace))
             {
                 furnaceItem = UI.FurnaceSlot.daughterItem;
@@ -4391,7 +4353,14 @@ public class Entity : IMissionComponent
                 furnaceCooldown -= Engine.DeltaSeconds;
                 if (furnaceCooldown <= 0)
                 {
-                    Engine.SaveGame.Scrap += furnaceItem.GetComponent<Smelt>().Value;
+                    untilNextTier -= furnaceItem.GetComponent<Smelt>().Value;
+                    while(untilNextTier <= 0)
+                    {
+                        tier++;
+                        untilNextTier += tier;
+                        MaxHealth = 400 + (int)(100 * MathF.Sqrt(tier));
+                    }
+                    Collide(-100);
                     furnaceItem = null;
                     SoundManager.PlaySound(Assets.Get(Sound.Interact), Position);
                 }
@@ -4400,26 +4369,8 @@ public class Entity : IMissionComponent
             {
                 furnaceCooldown = 15 * tierBonus;
             }
-            if (currentlyCrafting)
-            {
-                craftingCooldown -= Engine.DeltaSeconds;
-                if (craftingCooldown <= 0)
-                {
-                    craftingCooldown = 12 * tierBonus;
-                    untilNextTier -= 1;
-                    if (untilNextTier <= 0)
-                    {
-                        tier++;
-                        untilNextTier = tier;
-                        MaxHealth = 400 + (int)(100 * MathF.Sqrt(tier));
-                    }
-                    Collide(-100);
-                    currentlyCrafting = false;
-                }
-            }
 
-            Events.UpdateFurnaceUI(15f * tierBonus - furnaceCooldown, 15f * tierBonus, furnaceItem);
-            Events.UpdateCraftingUI(12f * tierBonus - craftingCooldown, 12f * tierBonus, untilNextTier);
+            Events.UpdateFurnaceUI(15f * tierBonus - furnaceCooldown, 15f * tierBonus, furnaceItem, tier);
             if (Engine.SaveGame.Player.IsDocked)
             {
                 if (tier > 1 && Input.NewMouseState.LeftButton == ButtonState.Pressed && CD[0] <= 0)
@@ -4770,11 +4721,9 @@ public class Entity : IMissionComponent
     }
     IEnumerable<int> MassRelay()
     {
-        float furnaceCooldown = 15;
-        float craftingCooldown = 20;
+        float furnaceCooldown = 35;
         int requiredCraftsLeft = 18;
         Pickup furnaceItem = null;
-        bool currentlyCrafting = false;
         List<Texture2D> tier =
         [
             Assets.Get(Sprites.MassRelayOne),
@@ -4785,10 +4734,6 @@ public class Entity : IMissionComponent
         Transform.IsImmovable = true;
         while (true)
         {
-            if (Events.AcknowledgeMessage(Message.MothershipCraftItem))
-            {
-                currentlyCrafting = true;
-            }
             if (Events.AcknowledgeMessage(Message.MothershipUpdateFurnace))
             {
                 furnaceItem = UI.FurnaceSlot.daughterItem;
@@ -4803,30 +4748,20 @@ public class Entity : IMissionComponent
                 furnaceCooldown -= Engine.DeltaSeconds;
                 if (furnaceCooldown <= 0)
                 {
-                    Engine.SaveGame.Scrap += furnaceItem.GetComponent<Smelt>().Value;
+                    int val = furnaceItem.GetComponent<Smelt>().Value;
+                    requiredCraftsLeft -= val;
+                    Collide(-100 * val);
+                    MaxHealth += 50 * val;
+                    Texture = tier[3 - (int)Math.Round((float)requiredCraftsLeft / 6)];
                     furnaceItem = null;
                     SoundManager.PlaySound(Assets.Get(Sound.Interact), Position);
                 }
             }
             else
             {
-                furnaceCooldown = 15;
+                furnaceCooldown = 35 - requiredCraftsLeft;
             }
-            if (currentlyCrafting)
-            {
-                craftingCooldown -= Engine.DeltaSeconds;
-                if (craftingCooldown <= 0)
-                {
-                    craftingCooldown = 20 - requiredCraftsLeft;
-                    requiredCraftsLeft -= 1;
-                    Collide(-100);
-                    MaxHealth += 50;
-                    Texture = tier[3 - (int)Math.Round((float)requiredCraftsLeft / 6)];
-                    currentlyCrafting = false;
-                }
-            }
-            Events.UpdateFurnaceUI(15 - furnaceCooldown, 15, furnaceItem);
-            Events.UpdateCraftingUI(20 - craftingCooldown - requiredCraftsLeft, 20 - requiredCraftsLeft, requiredCraftsLeft);
+            Events.UpdateFurnaceUI(15 - furnaceCooldown, 15, furnaceItem, requiredCraftsLeft);
 
             if (requiredCraftsLeft <= 0)
             {
@@ -4926,10 +4861,8 @@ public class Entity : IMissionComponent
         ParticleEmitter engineParticles = new(Assets.Get(Sprites.Circle), 1f, Position, 0, MathF.PI / 2, 1,
          200f, Color.LightGray, EmitterType.EmissionOverTime)
         { particleFadeToColor = Color.Transparent };
-        bool currentlyCrafting = false;
         Pickup furnaceItem = null;
-        float furnaceCooldown = 15;
-        float craftingCooldown = 12;
+        float furnaceCooldown = 28;
         int requiredCraftsLeft = 10;
         int ammo = 200;
         CD = [0, 30];
@@ -4937,10 +4870,6 @@ public class Entity : IMissionComponent
         while (true)
         {
             //UI handling
-            if (Events.AcknowledgeMessage(Message.MothershipCraftItem))
-            {
-                currentlyCrafting = true;
-            }
             if (Events.AcknowledgeMessage(Message.MothershipUpdateFurnace))
             {
                 furnaceItem = UI.FurnaceSlot.daughterItem;
@@ -4957,39 +4886,30 @@ public class Entity : IMissionComponent
                 furnaceCooldown -= Engine.DeltaSeconds;
                 if (furnaceCooldown <= 0)
                 {
-                    Engine.SaveGame.Scrap += furnaceItem.GetComponent<Smelt>().Value;
+                    for(int i = 0; i < furnaceItem.GetComponent<Smelt>().Value; i++)
+                    {
+                        if (ammo > 0)
+                        {
+                            requiredCraftsLeft -= 1;
+                            Collide(-100);
+                            ammo = Math.Clamp(ammo + 25, 0, 200);
+                        }
+                        else
+                        {
+                            ammo = 200;
+                        }
+                    }
                     furnaceItem = null;
                     SoundManager.PlaySound(Assets.Get(Sound.Interact), Position);
                 }
             }
             else
             {
-                furnaceCooldown = 15;
-            }
-            //Repairing
-            if (currentlyCrafting)
-            {
-                craftingCooldown -= Engine.DeltaSeconds;
-                if (craftingCooldown <= 0)
-                {
-                    craftingCooldown = 12;
-                    if (ammo > 0)
-                    {
-                        requiredCraftsLeft -= 1;
-                        Collide(-100);
-                        ammo = Math.Clamp(ammo + 25, 0, 200);
-                    }
-                    else
-                    {
-                        ammo = 200;
-                    }
-                    currentlyCrafting = false;
-                }
+                furnaceCooldown = 28;
             }
 
             //Updating UI
-            Events.UpdateFurnaceUI(15 - furnaceCooldown, 15, furnaceItem);
-            Events.UpdateCraftingUI(12 - craftingCooldown, 12, requiredCraftsLeft);
+            Events.UpdateFurnaceUI(15 - furnaceCooldown, 15, furnaceItem, requiredCraftsLeft);
 
             //Firing at enemies
             if (ammo > 0 && CD[0] <= 0)
