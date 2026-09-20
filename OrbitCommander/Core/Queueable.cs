@@ -98,12 +98,12 @@ public class RepairQueue : Queueable
     }
     protected override void Construct()
     {
-        var storedModule = module.daughterItem as Module;
+        var storedModule = module.Item as Module;
         storedModule.Health = storedModule.MaxHealth;
     }
     protected override bool CanConstruct()
     {
-        return module.daughterItem as Module != null;
+        return module.Item as Module != null;
     }
     public override string Serialize()
     {
@@ -133,7 +133,7 @@ public class SmeltQueue : Queueable
     {
         //TODO: Figure out how to rework this
         throw new NotImplementedException();
-        if (pickup.daughterItem is Module)
+        if (pickup.Item is Module)
         {
             //Engine.SaveGame.Scrap += 3;
         }
@@ -141,12 +141,12 @@ public class SmeltQueue : Queueable
         {
             //Engine.SaveGame.Scrap += 2;
         }
-        pickup.daughterItem.isExpired = true;
-        pickup.daughterItem = null;
+        pickup.Item.isExpired = true;
+        pickup.Item = null;
     }
     protected override bool CanConstruct()
     {
-        return pickup.daughterItem != null;
+        return pickup.Item != null;
     }
     public override string Serialize()
     {

@@ -1770,30 +1770,58 @@ public class AmplifyingModifier() : Module(Modules.AmplifyingModifier)
         return _damage * 2;
     }
 }
-public class EmptyModule() : Weapon(Modules.EmptyModule)
-{
-    public override float Speed => 0;
-    public override bool CritCondition => false;
-}
+public class EmptyModule() : Module(Modules.EmptyModule) { }
 public class EmergencyEngine() : Module(Modules.EmergencyEngine)
 {
     float engineTime = 0;
-    ParticleEmitter engineParticles = new(Assets.Get(Sprites.Circle), 0.15f, Vector2.Zero, 0, MathF.PI / 4, 2, 450f, Color.Cyan, EmitterType.EmissionOverTime)
+    ParticleEmitter engineParticles1 = new(Assets.Get(Sprites.Dot), 0.15f, Vector2.Zero, 0, 0, 1, 20f, Color.Red, EmitterType.EmissionOverTime)
+    { particleFadeToColor = new Color(72, 61, 139, 0) };
+    ParticleEmitter engineParticles2 = new(Assets.Get(Sprites.Dot), 0.15f, Vector2.Zero, 0, 0, 1, 20f, Color.Red, EmitterType.EmissionOverTime)
     { particleFadeToColor = new Color(72, 61, 139, 0) };
     public override void OnEngine()
     {
-        engineParticles.offsetVelocity = Player.Velocity;
+        Player.AngularVelocity = 0;
+        engineParticles1.offsetVelocity = Player.Velocity;
+        engineParticles2.offsetVelocity = Player.Velocity;
         engineTime = Math.Clamp(engineTime + Engine.DeltaSeconds, 0, 1);
         float engineTimeModifier = 1 - (1 - engineTime) * (1 - engineTime);
         float fuseRatio = (float)Player.CountFuses(ModuleType.Engines) / 3;
-        engineParticles.speedOfEmission = Math.Max(450f * fuseRatio * engineTimeModifier, 10);
+        engineParticles1.speedOfEmission = Math.Max(600f * fuseRatio * engineTimeModifier, 10);
+        engineParticles2.speedOfEmission = Math.Max(600f * fuseRatio * engineTimeModifier, 10);
         if (Player.EngineDirection != Vector2.Zero)
         {
-            Player.Velocity += Vector2.Normalize(Player.EngineDirection) * 24 * Engine.DeltaSeconds * engineTimeModifier * fuseRatio / (Player.leashedMaterials.Count + 2);
-            engineParticles.position = Player.Position - Vector2.Normalize(Player.EngineDirection) * 8 - Player.Velocity;
-            engineParticles.sprayAngle = Util.ToAngle(Player.EngineDirection) + MathF.PI;
+            Vector2 normal = Util.ToUnitVector(Player.Angle);
+            var tangent = new Vector2(normal.Y, -normal.X);
+            Player.Angle += Player.EngineDirection.X * Engine.DeltaSeconds * 15 * engineTimeModifier * fuseRatio / (Player.leashedMaterials.Count + 2);
+            Player.Velocity += -normal * Player.EngineDirection.Y * 45 * Engine.DeltaSeconds * engineTimeModifier * fuseRatio / (Player.leashedMaterials.Count + 3) / (Player.Velocity.Length() + 0.5f);
+            float xSign = Math.Sign(Player.EngineDirection.X);
+            float ySign = Math.Sign(Player.EngineDirection.Y);
+            //Thrusting forward and rotating
+            if (xSign != 0 && ySign != 0)
+            {
+                engineParticles1.position = Player.Position - Player.Velocity + normal * ySign * (Player.Size.Y / 2 - 2) - tangent * 2 * ySign * xSign;
+                engineParticles2.position = Player.Position - Player.Velocity - normal * ySign * (Player.Size.Y / 2 - 2) - tangent * Player.Size.X / 2 * ySign * xSign;
+                engineParticles1.sprayAngle = Player.Angle + MathF.PI * ySign / 2 - MathF.PI / 2;
+                engineParticles2.sprayAngle = Player.Angle + MathF.PI / 2 * ySign * xSign;
+            } //Thrusting
+            else if(ySign != 0)
+            {
+                engineParticles1.position = Player.Position - Player.Velocity + normal * ySign * (Player.Size.Y / 2 - 2) + tangent * 2;
+                engineParticles2.position = Player.Position - Player.Velocity + normal * ySign * (Player.Size.Y / 2 - 2) - tangent * 2;
+                engineParticles1.sprayAngle = Player.Angle + MathF.PI / 2 * ySign - MathF.PI / 2;
+                engineParticles2.sprayAngle = Player.Angle + MathF.PI / 2 * ySign - MathF.PI / 2;
+            } //Rotating
+            else if(xSign != 0)
+            {
+                engineParticles1.position = Player.Position - Player.Velocity + normal * xSign * (Player.Size.Y / 2 - 2) + tangent * Player.Size.X/2;
+                engineParticles2.position = Player.Position - Player.Velocity - normal * xSign * (Player.Size.Y / 2 - 2) - tangent * Player.Size.X/2;
+                engineParticles1.sprayAngle = Player.Angle - MathF.PI / 2;
+                engineParticles2.sprayAngle = Player.Angle + MathF.PI / 2;
+            }
+        
         }
-        engineParticles.Update();
+        engineParticles1.Update();
+        engineParticles2.Update();
     }
     public override void OnUpdate(float _fuseRatio)
     {
@@ -1817,7 +1845,7 @@ public class PointDefense() : Weapon(Modules.PointDefense)
         }
         if (ammo.Fire())
         {
-            var p1 = NewAssassinShot(Player.Position + new Vector2(Util.OneToNegOne(), Util.OneToNegOne()) * 10, Player.Direction * Speed * (Util.Random.NextSingle() / 4 + 0.825f) + new Vector2(Util.OneToNegOne(), Util.OneToNegOne()) * Util.Random.NextSingle() * Util.Random.NextSingle() * 3, Util.ToAngle(Player.Direction), 0, Team.Friendly, 1);
+            var p1 = NewAssassinShot(Player.Position + Util.ToUnitVector(Player.Angle) * Player.Size.Y/2, Util.ToUnitVector(Player.Angle) * Speed * (Util.Random.NextSingle() / 4 + 0.825f) + new Vector2(Util.OneToNegOne(), Util.OneToNegOne()) * Util.Random.NextSingle() * Util.Random.NextSingle() * 3, Util.ToAngle(Player.Direction), 0, Team.Friendly, 1);
             p1.Texture = null;
             p1.TimeLeft = 0.4f;
             Engine.SaveGame.CurrentMission.Add(p1);
@@ -1826,7 +1854,6 @@ public class PointDefense() : Weapon(Modules.PointDefense)
             Engine.Camera.Position += Player.Direction * Speed / 5 + new Vector2(Util.OneToNegOne(), Util.OneToNegOne()) * 2;
             Engine.ShakeScreen(0.2f);
             Player.Velocity -= Player.Direction / 10;
-            Util.FiringParticles(Player.Position + Player.Direction * 6 / 2, Player.Velocity, Player.Direction);
             Player.Flash(Color.BurlyWood);
         }
     }

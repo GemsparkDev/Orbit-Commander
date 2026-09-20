@@ -147,31 +147,6 @@ public class PausedGame : GameState
         RenderGamespace(_spriteBatch);
     }
 }
-public class Garage : GameState
-{
-    public override void Initialize()
-    {
-        Events.UpdateModulesUI();
-        Engine.UIManager.ScreenWindow.enabled = false;
-    }
-    public override void Update()
-    {
-        Engine.SaveGame.CurrentMission.IngameUpdate();
-        ParticleManager.Update();
-        if (Input.OldState.IsKeyUp(Keys.Escape) && Input.NewState.IsKeyDown(Keys.Escape))
-        {
-            //Only toggle game state if in valid module configuration
-            if (Events.SyncModules())
-            {
-                Events.GarageTrigger();
-            }
-        }
-    }
-    public override void Draw(SpriteBatch _spriteBatch)
-    {
-        RenderGamespace(_spriteBatch);
-    }
-}
 public class MissionSelect : GameState
 {
     private float time = Util.Random.NextSingle() * 1000f;

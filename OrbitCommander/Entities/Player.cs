@@ -46,9 +46,9 @@ public class Player : Entity
     public Dockable dockedEntity;
     public List<Pickup> leashedMaterials = [];
     private ParticleEmitter smokeParticles = new(Assets.Get(Sprites.Circle), 1f, Vector2.Zero, 0, MathF.PI / 4, 1, 0.5f, Color.Gray, EmitterType.EmissionOverTime) { isEmitterActive = false, particleFadeToColor = new Color(169, 169, 169, 0) };
-    private float swapCd, cachedDamageCd = 0;
+    private float swapCd, cachedDamageCd, deathCd = 0;
     public float invincibilityCd, restartCd = 0;
-    public int cachedDamage = 200;
+    public int cachedDamage = 0;
     public Vector2 Direction { get; private set; }
     private SoundEffectInstance engineSounds;
     //IsEnabled manages dead file sprite
@@ -110,7 +110,6 @@ public class Player : Entity
         AddComponent(new Statuses(this));
         AddComponent(new Friendly(this) { Team = Team.Friendly });
         AddComponent(new Sprite(this, SaveGame.ColorScheme.TeamColors[Team]) { Texture = Assets.Get(Sprites.Player) });
-        smokeParticles.isEmitterActive = false;
         engineSounds = Assets.Get(Sound.FireEngines).CreateInstance();
         engineSounds.IsLooped = true;
         var textures = new Texture2D[modules.Count];
@@ -131,7 +130,6 @@ public class Player : Entity
         AddComponent(new Statuses(this));
         AddComponent(new Friendly(this) { Team = Team.Friendly });
         AddComponent(new Sprite(this, SaveGame.ColorScheme.TeamColors[Team]) { Texture = Assets.Get(Sprites.Player) });
-        smokeParticles.isEmitterActive = false;
         engineSounds = Assets.Get(Sound.FireEngines).CreateInstance();
         engineSounds.IsLooped = true;
         AddComponent(new Collide(this, PlayerCollide));
@@ -185,6 +183,7 @@ public class Player : Entity
             ParticleManager.Add(new Particle(Assets.Get(Sprites.Explosion), 5, Position, Vector2.Zero, 0, 0, Color.White, Color.Transparent));
             Engine.ShakeScreen(1);
             isExpired = true;
+            deathCd = 60; //60 seconds is ideal for the player to grab whatever they can.
             for(ModuleType i = ModuleType.Hull; i <= ModuleType.Core; i++)
             {
                 var module = modules[i];
@@ -265,6 +264,15 @@ public class Player : Entity
                 (Gun, SecondaryWeapon) = (SecondaryWeapon, Gun);
                 Events.UpdateModulesUI();
                 swapCd = 0;
+            }
+        }
+        if(deathCd > 0 && isExpired)
+        {
+            deathCd -= Engine.DeltaSeconds;
+            if(deathCd <= 0)
+            {
+                Engine.SaveGame.MissionResults(Engine.SaveGame.CurrentMission.Wave);
+                CurrentGameState.SwitchState(new MissionSelect());
             }
         }
         if(cachedDamageCd > 0)
@@ -351,7 +359,7 @@ public class Player : Entity
             UI.Thermometer.SetInterval(0.5f, 1, 1);
         }
         LowerCooldown();
-        if (currentHealth > 50)
+        if (currentHealth > maxHealth / 2)
         {
             smokeParticles.isEmitterActive = false;
         }
@@ -601,7 +609,7 @@ public class Player : Entity
                     SoundManager.PlayGlobalSound(Assets.Get(Sound.Fail));
                 }
             }
-            if (Progression > 1 && Input.ToggleAimAssist.IsDown && !Input.ToggleAimAssist.WasDown)
+            if (Progression > -1 && Input.ToggleAimAssist.IsDown && !Input.ToggleAimAssist.WasDown)
             {
                 aimAssist = !aimAssist;
                 SoundEffectInstance sound = Assets.Get(Sound.Click).CreateInstance();
@@ -613,7 +621,7 @@ public class Player : Entity
             }
             if (dockedEntity == null)
             {
-                if (Progression > 2 || SaveGame.DebugMode)
+                if (Progression > -1 || SaveGame.DebugMode)
                 {
                     if (Input.Construct.IsDown)
                     {
@@ -626,7 +634,7 @@ public class Player : Entity
                         ("Req. 1 scrap, smelts all scrap within it", Assets.Get(Sprites.Furnace)),
                         ("Req. 1 scrap, throw at enemies to do damage.", Assets.Get(Sprites.Explosive))
                         };
-                        if (Progression > 3)
+                        if (Progression > -1)
                         {
                             constructs.Add(("Req. 3 scrap, deployable garage. Use metal to upgrade.", Assets.Get(Sprites.Mothership)));
                         }
@@ -675,7 +683,7 @@ public class Player : Entity
                             "Furnace",
                             "Mace"
                         };
-                        if (Progression > 3)
+                        if (Progression > -1)
                         {
                             types.Add("Mothership");
                         }
@@ -784,7 +792,7 @@ public class Player : Entity
                 {
                     leashedMaterials = [];
                 }
-                if ((Progression > 1 || SaveGame.DebugMode) && Input.Ability.IsDown && !Input.Ability.WasDown)
+                if ((Progression > -1 || SaveGame.DebugMode) && Input.Ability.IsDown && !Input.Ability.WasDown)
                 {
                     foreach (var module in modules)
                     {
@@ -801,12 +809,12 @@ public class Player : Entity
                         module.Value.OnEngine();
                     }
                 }
-                if (isEngineActive)
+                if (modules[ModuleType.Engines].Type != Modules.EmergencyEngine) //Custom control scheme for the terrible engine
                 {
-                    Angle = Angle * 0.5f + Util.ToAngle(Direction) * 0.5f; //Better shield aiming
-                }
-                else
-                {
+                    if (Math.Abs(Angle - Util.ToAngle(Direction)) > MathF.PI)
+                    {
+                        Angle = Util.ToAngle(Direction);
+                    }
                     Angle = Angle * 0.5f + Util.ToAngle(Direction) * 0.5f;
                 }
                 if (Input.NewMouseState.LeftButton == ButtonState.Pressed && swapCd <= 0)
@@ -947,6 +955,17 @@ public class Player : Entity
         {
             leashedMaterials.Clear();
             SoundManager.PlaySound(Assets.Get(Sound.ShieldHit), Position);
+            if(deathCd > 1) //Threshold makes sure the escape code runs correctly.
+            {
+                if(deathCd > _damage + 1)
+                {
+                    deathCd -= _damage;
+                }
+                else
+                {
+                    deathCd = 1;
+                }
+            }
             return 0;
         }
         if (dockedEntity != null)
@@ -1034,7 +1053,7 @@ public class Player : Entity
     public void ToggleFuse(int x, int y)
     {
         bool fuse = moduleFuses[x, y];
-        if (UI.Fuses[y, x].daughterItem == null != fuse)
+        if (UI.Fuses[y, x].Item == null != fuse)
         {
             return;
         }
@@ -1083,15 +1102,16 @@ public class Player : Entity
         {
             return;
         }
+        float angle;
         if(swapCd > 0)
         {
             for(float i = 0; i < (0.5f - swapCd) * 200; i++)
             {
-                float angle = i / 100 * MathF.Tau;
+                angle = i / 100 * MathF.Tau;
                 _spriteBatch.Draw(Assets.Get(Sprites.Dot), Util.ToUnitVector(angle) * 30 + Position, null, Color.Green, angle, Assets.DimsOf(Sprites.Dot), 1, 0, 0);
             }
         }
-        if (Engine.SaveGame.CurrentMission.GetAtmospherePressure(this) > 1f)
+        if (Engine.SaveGame.CurrentMission.GetAtmospherePressure(this) > 1f && !isExpired)
         {
             ParticleManager.Add(new Particle(null, Position + new Vector2(0, 50), 0, Color.Red) { drawText = "Danger: Pressure Alert!" });
         }
@@ -1109,6 +1129,23 @@ public class Player : Entity
             }
         }
         base.Draw(_spriteBatch);
+
+        if(!isExpired)
+        {
+            return;
+        }
+        float time = (60 - deathCd) / 10;
+        float max = 6;
+        float count = Math.Clamp(time, 0, max);
+        angle = 0;
+        for (float i = 0; i < count * 50; i++)
+        {
+            float ratio = 1 - i / (50 * max);
+            Vector3 col = (new Vector3(127, 255, 255) * (1 - ratio) + new Vector3(127, 0, 255) * ratio);
+            angle += MathF.PI / 3;
+            ParticleManager.Add(new Particle(Assets.Get(Sprites.Dot), Util.ToUnitVector(angle + time) * 100 * (ratio + 0.1f) + Position + Velocity, angle + time, new Color(col.X / 255, col.Y / 255, col.Z / 255)));
+        }
+        ParticleManager.Add(new Particle(null, Position + new Vector2(0, 25), 0, Color.Orange) { drawText = $"Warp out: {MathF.Round((deathCd) * 10) / 10} seconds" });
     }
     public string Serialize()
     {

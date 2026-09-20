@@ -70,9 +70,9 @@ public static class ItemFactory
         { Modules.Expose, new ModuleData(Sprites.RealExpose, Sprites.Expose, "Exposure", "Creates a heating or cooling aura at the cursor,\ndoing the opposite on the player./nHold left shift to summon the other type.", (int)ModuleType.Core, 20, typeof(Expose)) },
         { Modules.Decoy, new ModuleData(Sprites.RealDecoy,Sprites.Decoy, "Decoy", "Creates a false player for enemies to\nattack, boosts stealth.", (int)ModuleType.Core, 20, typeof(Decoy))},
 
-        { Modules.EmptyModule, new ModuleData(Sprites.None,Sprites.None, "Structural Element", "This module does nothing!", 0, 10, typeof(EmptyModule))},
-        { Modules.EmergencyEngine, new ModuleData(Sprites.None,Sprites.None, "Emergency Thrusters", "Your capsule's emergency thrusters.", (int)ModuleType.Engines, 10, typeof(EmergencyEngine))},
-        { Modules.PointDefense, new ModuleData(Sprites.None,Sprites.None, "Point Defense", "A weak machine gun designed to shoot down missiles.", (int)ModuleType.Engines, 10, typeof(PointDefense))},
+        { Modules.EmptyModule, new ModuleData(Sprites.None,Sprites.None, "Structural Element", "A structural element that does nothing.\nInstall modules over this one.", 0, 10, typeof(EmptyModule))},
+        { Modules.EmergencyEngine, new ModuleData(Sprites.None,Sprites.None, "Emergency Thrusters", "Emergency thrusters lacking fly by wire control.\nInstall modules or upgrade with scrap.", (int)ModuleType.Engines, 10, typeof(EmergencyEngine))},
+        { Modules.PointDefense, new ModuleData(Sprites.None,Sprites.None, "Point Defense", "A light rotary cannon designed for emergencies.\nInstall modules or upgrade with scrap.", (int)ModuleType.Engines, 10, typeof(PointDefense))},
     };
     public static Pickup NewScrap(Vector2 _position = default, Vector2 _velocity = default, float _angularVelocity = 0)
     {

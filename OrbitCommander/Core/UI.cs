@@ -15,11 +15,9 @@ public static class UI
     private static Vector2 center = BackBuffer / 2;
     public static Window PauseMenu { get; } = new Window(center, Assets.Get(Sprites.LargePanel));
     public static Window PlayerMenu { get; } = new Window(new Vector2(0, center.Y), Assets.Get(Sprites.Terminal)) { alignment = Alignment.Left };
-    public static Window GarageMenu { get; } = new Window(center, Assets.Get(Sprites.GargantuanPanel));
     //public static TabbedWindow MainMenu { get; } = new TabbedWindow(center, Assets.Get(Sprites.GargantuanPanel), Assets.Get(Sprites.Tab), Assets.Get(Sprites.SelectedTab), Assets.Get(Sound.Interact), 3) { enabled = true, icons = [Assets.Get(Sprites.PlayIcon), Assets.Get(Sprites.SettingsIcon)] };
     public static Screen GlobalMainMenu { get; } = new Screen() { enabled = true };
-    public static TabbedWindow MothershipMenu { get; } = new TabbedWindow(new Vector2(0, center.Y), Assets.Get(Sprites.Terminal), Assets.Get(Sprites.Tab), Assets.Get(Sprites.SelectedTab), Assets.Get(Sound.Interact), 3)
-    { icons = [Assets.Get(Sprites.SmeltIcon), Assets.Get(Sprites.RepairIcon), Assets.Get(Sprites.VictoryIcon)], alignment = Alignment.Left };
+    public static Window MothershipMenu { get; } = new Window(new Vector2(0, center.Y), Assets.Get(Sprites.Terminal)) { alignment = Alignment.Left };
     public static TabbedWindow MissionSelect { get; } = new TabbedWindow(new Vector2(0, center.Y), Assets.Get(Sprites.GargantuanPanel), Assets.Get(Sprites.Tab), Assets.Get(Sprites.SelectedTab), Assets.Get(Sound.Interact), 2)
     { icons = [Assets.Get(Sprites.PlanetIcon), Assets.Get(Sprites.RepairIcon)], alignment = Alignment.Left };
     public static Window PickupDroneMenu { get; } = new Window(center, Assets.Get(Sprites.LargePanel));
@@ -56,7 +54,7 @@ public static class UI
     public static TerminalButton ApplyChanges { get; } = new TerminalButton(new Vector2(-10, -10), Assets.TextFont, "Apply changes", Color.White, 10);
     public static TerminalButton[] NextModule { get; } = new TerminalButton[5];
     public static TerminalButton[] PrevModule { get; } = new TerminalButton[5];
-    public static Decal[] Module { get; } = new Decal[5];
+    public static Decal[] ModuleSelection { get; } = new Decal[5];
     //TODO: Readd keybind inputs
     //public static Decal[] KeybindTexts { get; } = new Decal[Input.Keybinds.Count];
     //public static TerminalButton[] KeybindInputs { get; } = new TerminalButton[Input.Keybinds.Count];
@@ -70,16 +68,8 @@ public static class UI
 
     //Mothership Menu
     public static ItemSlot<Pickup> FurnaceSlot { get; } = new ItemSlot<Pickup>(new Vector2(-20, 0), Assets.Get(Sprites.EmptySlot), -1);
-    public static Button GarageButton { get; } = new Button(new Vector2(0, -GlobalMainMenu.Size.Y / 4), Assets.Get(Sprites.WideButton), Assets.TextFont, "To Garage", Color.White);
     public static Decal RequiredCraftsText { get; } = new Decal(new Vector2(0) + new Vector2(0, -6), Assets.TextFont, "25", Color.White, 10);
     public static Slider FurnaceSlider { get; } = new Slider(Line, new Vector2(-20, -GlobalMainMenu.Size.Y / 6), new Vector2(60, 2), true, [new Color(255, 239, 85), new Color(50, 51, 67)]);
-
-    //Garage Menu
-    public static Button RepairButton { get; } = new Button(new Vector2(-GarageMenu.Size.X / 4 - 25, -40), Assets.Get(Sprites.Button), Assets.TextFont, "Repair", Color.LightBlue);
-    public static ItemSlot<Pickup> RepairSlot { get; } = new ItemSlot<Pickup>(new Vector2(-GarageMenu.Size.X / 4 - 25, 0), Assets.Get(Sprites.EmptySlot), [0, 1, 2, 3, 4, 5]); //Contains all module ids and the construct id
-    public static Decal RepairText { get; } = new Decal(new Vector2(-GarageMenu.Size.X / 4 - 60 / 2.5f, 40), Assets.TextFont, "", Color.White, 10);
-    public static Decal GaragePlayerImage { get; } = new Decal(new Vector2(GarageMenu.Size.X / 4, 0), Assets.Get(Sprites.PlayerUI));
-    public static Decal ValidConfigText { get; } = new Decal(-GarageMenu.Size / 4 + new Vector2(20, GarageMenu.Size.Y / 1.5f), Assets.TextFont, "Ready for Combat", Color.Green, 10);
 
     //Player Menu
     public static Slider EnemySlider { get; } = new Slider(Line, new Vector2(0, -PlayerMenu.Size.Y / 3), new Vector2(50, 2), true, [Color.White, Color.Gray]);
@@ -156,7 +146,7 @@ public static class UI
     public static ItemSlot<Pickup>[] InventorySlots { get; set; } = new ItemSlot<Pickup>[4];
     public static ItemSlot<Pickup>[] MissionSelectSlots { get; set; } = new ItemSlot<Pickup>[4];
     public static ItemSlot<Module>[] ModuleSlots { get; private set; } = new ItemSlot<Module>[5];
-    public static ItemSlot<Weapon> SecondarySlot { get; private set; } = new ItemSlot<Weapon>(new Vector2(-GarageMenu.Size.X / 4 - 25, 50), Assets.Get(Sprites.EmptySlot), (int)ModuleType.Guns);
+    public static ItemSlot<Weapon> SecondarySlot { get; private set; } = new ItemSlot<Weapon>(new Vector2(-MothershipMenu.Size.X / 4 - 25, 50), Assets.Get(Sprites.EmptySlot), (int)Core.ModuleType.Guns);
 
     public static int windowType = 1;
     public static readonly Vector2[] resolutions = [new Vector2(1920, 1080), new Vector2(640, 480)];
@@ -269,19 +259,11 @@ public static class UI
                 CurrentGameState.SwitchState(new PlayingGame());
             }
         });
-        GarageButton.AddBehaviour(Events.GarageTrigger);
-        RepairButton.AddBehaviour(Events.RepairItem);
-        var tooltip = new Window(Vector2.Zero, wideButton);
-        tooltip.AddWidget(new Decal(new Vector2(0, 0), Assets.TextFont, "1 metal to repair", Color.White, 3f));
-        RepairButton.AddTooltip(tooltip);
-        tooltip = new Window(Vector2.Zero, wideButton);
-        tooltip.AddWidget(new Decal(new Vector2(0, 0), Assets.TextFont, "1 metal to repair", Color.White, 3f));
-        RepairSlot.AddBehaviour(Events.UpdateRepairText);
         FurnaceSlot.AddBehaviour(delegate()
         {
-            if(FurnaceSlot.daughterItem != null && !FurnaceSlot.daughterItem.HasComponent<Smelt>())
+            if(FurnaceSlot.Item != null && !FurnaceSlot.Item.HasComponent<Smelt>())
             {
-                (FurnaceSlot.daughterItem, Engine.UIManager.selectedIcon) = (Engine.UIManager.selectedIcon as Pickup, FurnaceSlot.daughterItem as IData);
+                (FurnaceSlot.Item, Engine.UIManager.selectedIcon) = (Engine.UIManager.selectedIcon as Pickup, FurnaceSlot.Item as IData);
                 return;
             }
             Events.SendMessage(Message.MothershipUpdateFurnace);
@@ -393,7 +375,7 @@ public static class UI
                 Engine.SaveGame.QueuedItems.Add(new FuseQueue());
             }
         });
-        tooltip = new Window(Vector2.Zero, wideButton);
+        var tooltip = new Window(Vector2.Zero, wideButton);
         tooltip.AddWidget(new Decal(new Vector2(0, -3), Assets.TextFont, "Queue fuse construction. Cheap but delicate.", Color.White, 3f));
         tooltip.AddWidget(new Decal(new Vector2(0, 3), Assets.TextFont, "Required time: 10 waves.", Color.White, 3f));
         CreateFuse.AddTooltip(tooltip);
@@ -403,9 +385,9 @@ public static class UI
             {
                 foreach (var item in MissionSelectSlots)
                 {
-                    if (item.daughterItem == null && Engine.SaveGame.QueuedItems.Count < 10)
+                    if (item.Item == null && Engine.SaveGame.QueuedItems.Count < 10)
                     {
-                        item.daughterItem = Engine.UIManager.selectedIcon as Pickup;
+                        item.Item = Engine.UIManager.selectedIcon as Pickup;
                         Engine.UIManager.selectedIcon = null;
                         Engine.SaveGame.QueuedItems.Add(new SmeltQueue(item));
                         Events.UpdateInventory();
@@ -424,9 +406,9 @@ public static class UI
             {
                 foreach (var item in MissionSelectSlots)
                 {
-                    if (item.daughterItem == null && Engine.SaveGame.QueuedItems.Count < 10)
+                    if (item.Item == null && Engine.SaveGame.QueuedItems.Count < 10)
                     {
-                        item.daughterItem = Engine.UIManager.selectedIcon as Module;
+                        item.Item = Engine.UIManager.selectedIcon as Module;
                         Engine.UIManager.selectedIcon = null;
                         Engine.SaveGame.QueuedItems.Add(new RepairQueue(item));
                         Events.UpdateInventory();
@@ -467,19 +449,19 @@ public static class UI
         UpgradeHull.AddTooltip(tooltip);
         UpgradeHull.AddBehaviour(delegate
         {
-            Events.UpgradeModule(ModuleType.Hull, Engine.SaveGame.Player.modules[ModuleType.Hull]);
+            Events.UpgradeModule(Core.ModuleType.Hull, Engine.SaveGame.Player.modules[Core.ModuleType.Hull]);
         });
         UpgradeGuns.AddBehaviour(delegate
         {
-            Events.UpgradeModule(ModuleType.Guns, Engine.SaveGame.Player.modules[ModuleType.Guns]);
+            Events.UpgradeModule(Core.ModuleType.Guns, Engine.SaveGame.Player.modules[Core.ModuleType.Guns]);
         });
         UpgradeEngine.AddBehaviour(delegate
         {
-            Events.UpgradeModule(ModuleType.Engines, Engine.SaveGame.Player.modules[ModuleType.Engines]);
+            Events.UpgradeModule(Core.ModuleType.Engines, Engine.SaveGame.Player.modules[Core.ModuleType.Engines]);
         });
         UpgradeCore.AddBehaviour(delegate
         {
-            Events.UpgradeModule(ModuleType.Core, Engine.SaveGame.Player.modules[ModuleType.Core]);
+            Events.UpgradeModule(Core.ModuleType.Core, Engine.SaveGame.Player.modules[Core.ModuleType.Core]);
         });
 
         HackButton.AddBehaviour(delegate { Events.SendMessage(Message.Hack); });
@@ -546,7 +528,7 @@ public static class UI
                     }
                     Events.SetModules(); 
                 });
-            GlobalMainMenu.AddWidget(Module[i] = new Decal(new Vector2(0, 25 * i - 40), Assets.TextFont, "Loading...", Color.White, 10), (int)Alignment.Center);
+            GlobalMainMenu.AddWidget(ModuleSelection[i] = new Decal(new Vector2(0, 25 * i - 40), Assets.TextFont, "Loading...", Color.White, 10), (int)Alignment.Center);
         }
 
         PauseMenu.AddWidget(AbortButton);
@@ -567,23 +549,14 @@ public static class UI
         SettingsMenu.AddWidget(NextResolution);
         SettingsMenu.AddWidget(ApplyChanges);
 
-        GarageMenu.AddWidget(RepairButton);
-        GarageMenu.AddWidget(RepairSlot);
-        GarageMenu.AddWidget(RepairText);
-        GarageMenu.AddWidget(GaragePlayerImage);
-        GarageMenu.AddWidget(ValidConfigText);
-
         MothershipMenu.AddWidget(FurnaceSlider, 0);
         MothershipMenu.AddWidget(FurnaceSlot, 0);
-        MothershipMenu.AddWidget(GarageButton, 1);
         MothershipMenu.AddWidget(RequiredCraftsText, 0);
         for (int i = 0; i < 3; i++)
         {
             MothershipMenu.AddWidget(SidePanelClose, i);
         }
         MothershipMenu.AddWidget(Overlay, 0);
-        MothershipMenu.AddWidget(Overlay, 1);
-        MothershipMenu.AddWidget(Overlay, 2);
 
         PlayerMenu.AddWidget(EnemySlider);
         PlayerMenu.AddWidget(WaveText);
@@ -612,7 +585,6 @@ public static class UI
         MissionSelect.AddWidget(NextMission, 0);
         MissionSelect.AddWidget(SelectMission, 0);
         MissionSelect.AddWidget(IsComplete, 0);
-        MissionSelect.AddWidget(ValidConfigText, 1);
         MissionSelect.AddWidget(CreateFuse, 1);
         MissionSelect.AddWidget(SmeltScrap, 1);
         MissionSelect.AddWidget(RepairModule, 1);
@@ -659,37 +631,70 @@ public static class UI
         PlayerSpecialHealth.SetInterval(1, 1);
         PlayerHealth.Intervals = [1, 1];
 
+        float xOffset = Assets.DimsOf(Sprites.LargePanel).X / 4 + Assets.DimsOf(Sprites.EmptySlot).X / 1.4142f;
         for (int x = 0; x < ModuleSlots.GetLength(0); x++)
         {
             ItemSlot<Module> slot;
             if (x % 2 == 0)
             {
-                slot = new ItemSlot<Module>(new Vector2(-30, Assets.DimsOf(Sprites.EmptySlot).Y * x / 2
+                slot = new ItemSlot<Module>(new Vector2(xOffset, Assets.DimsOf(Sprites.EmptySlot).Y * x / 2
                     - Assets.DimsOf(Sprites.EmptySlot).Y), Assets.Get(Sprites.EmptySlot), x);
             }
             else
             {
-                slot = new ItemSlot<Module>(new Vector2(Assets.DimsOf(Sprites.EmptySlot).X / 1.4142f - 30,
+                slot = new ItemSlot<Module>(new Vector2(Assets.DimsOf(Sprites.EmptySlot).X / 1.4142f + xOffset,
                     Assets.DimsOf(Sprites.EmptySlot).Y * x / 2 - Assets.DimsOf(Sprites.EmptySlot).Y), Assets.Get(Sprites.EmptySlot), x);
             }
             ModuleSlots[x] = slot;
             slot.AddBehaviour(delegate () 
             {
-                var item = slot.daughterItem;
-                if(item == null || item.Health >= item.MaxHealth)
+                if (Engine.SaveGame.Player.isExpired) //No module repair after death
                 {
                     return;
                 }
-                Pickup pickup = UILib.Content.UIManager.Self.selectedIcon as Pickup;
-                if (pickup != null && pickup is not OrbitCommander.Entities.Module) 
-                { 
-                    UILib.Content.UIManager.Self.selectedIcon = null; 
-                    slot.daughterItem.Health = slot.daughterItem.MaxHealth; 
-                } 
+                var item = slot.Item;
+                if(item == null)
+                {
+                    return;
+                }
+                if (UILib.Content.UIManager.Self.selectedIcon is Pickup pickup && pickup is not Module)
+                {
+                    if (item.Type is Modules.EmergencyEngine)
+                    {
+                        slot.Item = new StandardEngine();
+                        UILib.Content.UIManager.Self.selectedIcon = null;
+                    }
+                    else if (item.Type is Modules.PointDefense)
+                    {
+                        slot.Item = new Basic();
+                        UILib.Content.UIManager.Self.selectedIcon = null;
+                    }
+                    else
+                    {
+                        Events.RepairModule(item);
+                    }
+                }
             });
-            GarageMenu.AddWidget(ModuleSlots[x]);
+            slot.AddBehaviour(delegate () 
+            {
+                if(Engine.SaveGame.Player.isExpired) //No module replacement after death
+                {
+                    return;
+                }
+                var icon = UILib.Content.UIManager.Self.selectedIcon as Module;
+                if (slot.Item == null)
+                {
+                    slot.Item = icon;
+                    UILib.Content.UIManager.Self.selectedIcon = null;
+                }
+                else if(icon != null && icon.Type is Modules.EmergencyEngine or Modules.PointDefense or Modules.EmptyModule)
+                {
+                    UILib.Content.UIManager.Self.selectedIcon = null;
+                }
+                Events.SyncModules();
+            });
+            MothershipMenu.AddWidget(ModuleSlots[x]);
             MissionSelect.AddWidget(ModuleSlots[x], 1);
-            ModuleSlots[x].AddBehaviour(Events.UpdateModules);
         }
         for (int i = 0; i < InventorySlots.GetLength(0); i++)
         {
@@ -704,8 +709,28 @@ public static class UI
             InventorySlots[i].AddBehaviour(Events.UpdateInventory);
             MissionSelectSlots[i].AddBehaviour(Events.UpdateInventory);
         }
-        GarageMenu.AddWidget(SecondarySlot);
         MissionSelect.AddWidget(SecondarySlot, 1);
+        SecondarySlot.AddBehaviour(delegate() 
+        {
+            if (Engine.SaveGame.Player.isExpired) //No module repair after death
+            {
+                return;
+            }
+            var item = SecondarySlot.Item;
+            if (item == null)
+            {
+                return;
+            }
+
+            if (UILib.Content.UIManager.Self.selectedIcon is Pickup pickup && pickup is not Module)
+            {
+                Events.RepairModule(item);
+            }
+        });
+        SecondarySlot.AddBehaviour(delegate ()
+        {
+            Events.SyncModules();
+        });
 
         FuseMenu.AddWidget(FuseDetailing, (int)Alignment.Center);
         FuseMenu.AddWidget(RestartSwitch, (int)Alignment.Center);
@@ -752,7 +777,6 @@ public static class UI
         Engine.UIManager.AddContainer(PauseMenu);
         Engine.UIManager.AddContainer(PlayerMenu);
         Engine.UIManager.AddContainer(MothershipMenu);
-        Engine.UIManager.AddContainer(GarageMenu);
         Engine.UIManager.AddContainer(MissionSelect);
         Engine.UIManager.AddContainer(PickupDroneMenu);
         Engine.UIManager.AddContainer(SaveMenu);

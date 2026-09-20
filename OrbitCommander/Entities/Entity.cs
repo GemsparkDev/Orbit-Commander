@@ -3966,7 +3966,7 @@ public class Entity : IMissionComponent
         {
             if (Events.AcknowledgeMessage(Message.MothershipUpdateFurnace))
             {
-                furnaceItem = UI.FurnaceSlot.daughterItem;
+                furnaceItem = UI.FurnaceSlot.Item;
             }
             if (Health <= 0)
             {
@@ -4133,7 +4133,7 @@ public class Entity : IMissionComponent
         {
             if (Events.AcknowledgeMessage(Message.MothershipUpdateFurnace))
             {
-                furnaceItem = UI.FurnaceSlot.daughterItem;
+                furnaceItem = UI.FurnaceSlot.Item;
             }
             if (Health <= 0)
             {
@@ -4346,7 +4346,7 @@ public class Entity : IMissionComponent
             float tierBonus = 1 / MathF.Sqrt(tier);
             if (Events.AcknowledgeMessage(Message.MothershipUpdateFurnace))
             {
-                furnaceItem = UI.FurnaceSlot.daughterItem;
+                furnaceItem = UI.FurnaceSlot.Item;
             }
             if (furnaceItem != null)
             {
@@ -4736,7 +4736,7 @@ public class Entity : IMissionComponent
         {
             if (Events.AcknowledgeMessage(Message.MothershipUpdateFurnace))
             {
-                furnaceItem = UI.FurnaceSlot.daughterItem;
+                furnaceItem = UI.FurnaceSlot.Item;
             }
             if (Health <= 0)
             {
@@ -4872,7 +4872,7 @@ public class Entity : IMissionComponent
             //UI handling
             if (Events.AcknowledgeMessage(Message.MothershipUpdateFurnace))
             {
-                furnaceItem = UI.FurnaceSlot.daughterItem;
+                furnaceItem = UI.FurnaceSlot.Item;
             }
             //Fail state
             if (Health <= 0)

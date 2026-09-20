@@ -43,121 +43,69 @@ public static class Events
         Engine.Camera.Position = Vector2.Zero;
         CurrentGameState.SwitchState(new MainMenu());
     }
-    public static void RepairItem()
+    public static void RepairModule(Module item)
     {
-        Pickup daughterModule;
-        var pickups = GetPickups(1, out ItemSlot<Pickup>[] slots);
-        if (UI.RepairSlot.daughterItem != null && pickups != null)
-        {
-            daughterModule = UI.RepairSlot.daughterItem;
-        }
-        else
+        if (item.Health >= item.MaxHealth)
         {
             SoundManager.PlayGlobalSound(Assets.Get(Sound.Fail));
             return;
         }
-        if (daughterModule is Module)
-        {
-            if (daughterModule.Health < daughterModule.MaxHealth)
-            {
-                daughterModule.Health = daughterModule.MaxHealth;
-                (daughterModule as Module).isFailed = false;
-            }
-            else
-            {
-                SoundManager.PlayGlobalSound(Assets.Get(Sound.Fail));
-                return;
-            }
-        }
-        else
-        {
-            if (daughterModule.Health < daughterModule.MaxHealth * 2)
-            {
-                daughterModule.GetComponent<Health>().SetOverhealth(daughterModule.MaxHealth + (int)Math.Ceiling(daughterModule.Health * 0.5f) + 5);
-            }
-            else
-            {
-                SoundManager.PlayGlobalSound(Assets.Get(Sound.Fail));
-                return;
-            }
-        }
-        slots[0].daughterItem = null;
+        //TODO: Reimplement construct overheal
+        //daughterModule.GetComponent<Health>().SetOverhealth(daughterModule.MaxHealth + (int)Math.Ceiling(daughterModule.Health * 0.5f) + 5);
         SoundManager.PlayGlobalSound(Assets.Get(Sound.Interact));
-        UpdateRepairText();
-    }
-    public static void UpdateRepairText()
-    {
-        Pickup daughterModule = UI.RepairSlot.daughterItem;
-        if (daughterModule != null)
-        {
-            UI.RepairText.Text = $"{daughterModule.Health}/{daughterModule.MaxHealth}";
-        }
-        else
-        {
-            UI.RepairText.Text = "";
-        }
+        item.Health = item.MaxHealth;
+        item.isFailed = false;
+        UIManager.Self.selectedIcon = null;
     }
     public static void UpdateInventoryUI()
     {
         for (int i = 0; i < UI.InventorySlots.Length; i++)
         {
-            UI.InventorySlots[i].daughterItem = Engine.SaveGame.Inventory[i];
+            UI.InventorySlots[i].Item = Engine.SaveGame.Inventory[i];
         }
         for (int i = 0; i < UI.MissionSelectSlots.Length; i++)
         {
-            UI.MissionSelectSlots[i].daughterItem = Engine.SaveGame.MissionSelectInventory[i];
+            UI.MissionSelectSlots[i].Item = Engine.SaveGame.MissionSelectInventory[i];
         }
     }
     public static void UpdateInventory()
     {
         for (int i = 0; i < UI.InventorySlots.Length; i++)
         {
-            Engine.SaveGame.Inventory[i] = UI.InventorySlots[i].daughterItem;
+            Engine.SaveGame.Inventory[i] = UI.InventorySlots[i].Item;
         }
         for (int i = 0; i < UI.MissionSelectSlots.Length; i++)
         {
-            Engine.SaveGame.MissionSelectInventory[i] = UI.MissionSelectSlots[i].daughterItem;
+            Engine.SaveGame.MissionSelectInventory[i] = UI.MissionSelectSlots[i].Item;
         }
     }
     public static void UpdateModulesUI()
     {
         for (int x = 0; x < UI.ModuleSlots.Length; x++)
         {
-            UI.ModuleSlots[x].daughterItem = Player.modules.ElementAt(x).Value;
+            UI.ModuleSlots[x].Item = Player.modules[(ModuleType)x];
         }
-        UI.SecondarySlot.daughterItem = Player.SecondaryWeapon;
-    }
-    public static void UpdateModules()
-    {
-        foreach (var module in UI.ModuleSlots)
-        {
-            if (module.daughterItem == null)
-            {
-                UI.ValidConfigText.Text = "";
-                return;
-            }
-        }
-        UI.ValidConfigText.Text = "Ready for Combat";
+        UI.SecondarySlot.Item = Player.SecondaryWeapon;
     }
     public static bool SyncModules()
     {
         foreach (var module in UI.ModuleSlots)
         {
-            if (module.daughterItem == null)
+            if (module.Item == null)
             {
                 return false;
             }
         }
         for (int x = 0; x < Player.modules.Count; x++)
         {
-            Player.modules[(ModuleType)x] = UI.ModuleSlots[x].daughterItem;
+            Player.modules[(ModuleType)x] = UI.ModuleSlots[x].Item;
         }
-        Player.SecondaryWeapon = UI.SecondarySlot.daughterItem;
+        Player.SecondaryWeapon = UI.SecondarySlot.Item;
         return true;
     }
     public static void UpdateFurnaceUI(float _value, float _maxValue, Pickup furnaceItem, int requiredCraftsLeft)
     {
-        UI.FurnaceSlot.daughterItem = furnaceItem;
+        UI.FurnaceSlot.Item = furnaceItem;
         UI.FurnaceSlider.SetInterval(_value, _maxValue);
         UI.RequiredCraftsText.Text = requiredCraftsLeft.ToString();
     }
@@ -165,20 +113,6 @@ public static class Events
     {
         UI.EnemySlider.Intervals[0] = _value / _maxValue;
         UI.WaveText.Text = $"{_wave}";
-    }
-    public static void GarageTrigger()
-    {
-        SoundManager.PlayGlobalSound(Assets.Get(Sound.Interact));
-        UI.MothershipMenu.enabled = !UI.MothershipMenu.enabled;
-        UI.GarageMenu.enabled = !UI.GarageMenu.enabled;
-        if (UI.GarageMenu.enabled)
-        {
-            CurrentGameState.SwitchState(new Garage());
-        }
-        else
-        {
-            CurrentGameState.SwitchState(new PlayingGame());
-        }
     }
     public static void UpdateMissionText()
     {
@@ -225,15 +159,15 @@ public static class Events
                 //Active fuse is white, no fuse is gray, disabled fuse is red
                 if (!_fuses[i, j])
                 {
-                    UI.Fuses[j, i].daughterItem = null;
+                    UI.Fuses[j, i].Item = null;
                 }
                 else if (!_fuses[(int)ModuleType.Core, j])
                 {
-                    UI.Fuses[j, i].daughterItem = new Fuse(Color.Red);
+                    UI.Fuses[j, i].Item = new Fuse(Color.Red);
                 }
                 else
                 {
-                    UI.Fuses[j, i].daughterItem = new Fuse(Color.White);
+                    UI.Fuses[j, i].Item = new Fuse(Color.White);
                     totalFuses++;
                 }
             }
@@ -296,9 +230,9 @@ public static class Events
         int count = 0;
         foreach (var item in UI.MissionSelectSlots.Concat(UI.InventorySlots))
         {
-            if (item.daughterItem != null && !item.daughterItem.HasTag(Tags.IsSpecialized) && item.daughterItem is not Module)
+            if (item.Item != null && !item.Item.HasTag(Tags.IsSpecialized) && item.Item is not Module)
             {
-                pickups[count] = item.daughterItem;
+                pickups[count] = item.Item;
                 slots[count] = item;
                 count++;
             }
@@ -325,7 +259,7 @@ public static class Events
         {
             Player.sensorType = _sensorType;
         }
-        slots[0].daughterItem = null;
+        slots[0].Item = null;
     }
     public static void UpgradeModule(ModuleType _slot, Module _moduleType)
     {
@@ -357,14 +291,14 @@ public static class Events
         Engine.SaveGame.Player.modules[_slot] = mod;
         foreach(var slot in slots)
         {
-            slot.daughterItem = null;
+            slot.Item = null;
         }
     }
     public static void SetModules()
     {
         for (int i = 0; i < 5; i++)
         {
-            UI.Module[i].Text = ItemFactory.moduleData[UI.setModules[i]].Name;
+            UI.ModuleSelection[i].Text = ItemFactory.moduleData[UI.setModules[i]].Name;
         }
     }
 }
