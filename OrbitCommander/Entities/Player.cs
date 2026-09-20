@@ -393,6 +393,7 @@ public class Player : Entity
         //ParticleManager.Add(new Particle(Assets.Get(Sprite.Circle), mouseCamPos, 0, Color.White));
         //ParticleManager.Add(new Particle(Assets.Get(Sprite.Circle), position, 0, Color.White));
         Direction = Vector2.Normalize(mouseCamPos - Position);
+        Player.AngularVelocity = 0;
     }
     public void LowerCooldown()
     {
@@ -813,9 +814,11 @@ public class Player : Entity
                 {
                     if (Math.Abs(Angle - Util.ToAngle(Direction)) > MathF.PI)
                     {
-                        Angle = Util.ToAngle(Direction);
+                        Angle = (Angle + MathF.Tau * -MathF.Sign(Angle));
+
                     }
-                    Angle = Angle * 0.5f + Util.ToAngle(Direction) * 0.5f;
+                    float lerp = Util.FIED(0.001f);
+                    Angle = Angle * (lerp) + Util.ToAngle(Direction) * (1 - lerp);
                 }
                 if (Input.NewMouseState.LeftButton == ButtonState.Pressed && swapCd <= 0)
                 {

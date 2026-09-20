@@ -3958,7 +3958,7 @@ public class Entity : IMissionComponent
         CD = [0];
         EnemyRange.particleVelocity = 300;
         float furnaceCooldown = 20;
-        int requiredCraftsLeft = 10;
+        int requiredCraftsLeft = 15;
         Pickup furnaceItem = null;
         bool alert = false;
         Transform.IsImmovable = true;
@@ -3990,7 +3990,7 @@ public class Entity : IMissionComponent
                 furnaceCooldown = 20;
             }
 
-            Events.UpdateFurnaceUI(8 - furnaceCooldown, 8, furnaceItem, requiredCraftsLeft);
+            Events.UpdateFurnaceUI(20 - furnaceCooldown, 20, furnaceItem, requiredCraftsLeft);
 
             if (requiredCraftsLeft <= 5)
             {
@@ -4013,7 +4013,7 @@ public class Entity : IMissionComponent
             {
                 Engine.SaveGame.CurrentMission.CompleteCustomRule(this);
             }
-            if (!alert && requiredCraftsLeft == 9)
+            if (!alert && requiredCraftsLeft == 14)
             {
                 SoundManager.PlaySound(Assets.Get(Sound.Beep), Position);
                 ParticleManager.Add(new Particle(null, 5, Position + new Vector2(0, -80), Velocity, Angle, 0, Color.Red, Color.Transparent) { drawText = "Alert: Enemies detected.\nDefend the mothership." });

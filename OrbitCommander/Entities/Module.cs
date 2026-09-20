@@ -1780,7 +1780,6 @@ public class EmergencyEngine() : Module(Modules.EmergencyEngine)
     { particleFadeToColor = new Color(72, 61, 139, 0) };
     public override void OnEngine()
     {
-        Player.AngularVelocity = 0;
         engineParticles1.offsetVelocity = Player.Velocity;
         engineParticles2.offsetVelocity = Player.Velocity;
         engineTime = Math.Clamp(engineTime + Engine.DeltaSeconds, 0, 1);
