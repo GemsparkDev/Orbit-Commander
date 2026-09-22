@@ -25,6 +25,7 @@ public abstract class Status(Sprites _icon)
         Healing,
         Berserk,
         FleetingDefense,
+        Obscured,
     }
 }
 public class Bomb() : Status(Sprites.Knob)
@@ -49,10 +50,7 @@ public class Bomb() : Status(Sprites.Knob)
             IsExpired = true;
         }
     }
-    public override void Reset()
-    {
-        IsExpired = true;
-    }
+    public override void Reset() => IsExpired = true;
 }
 public class Fire(float _duration, Color _color) : Status(Sprites.Knob)
 {
@@ -92,18 +90,9 @@ public class Fire(float _duration, Color _color) : Status(Sprites.Knob)
             IsExpired = true;
         }
     }
-    public override int StealthChange()
-    {
-        return -10;
-    }
-    public override int FuseChange()
-    {
-        return 1;
-    }
-    public override void Reset()
-    {
-        duration = initialDuration;
-    }
+    public override int StealthChange() => -10;
+    public override int FuseChange() => 1;
+    public override void Reset() => duration = initialDuration;
 }
 public class Frost(float _duration) : Status(Sprites.Knob)
 {
@@ -134,22 +123,10 @@ public class Frost(float _duration) : Status(Sprites.Knob)
             IsExpired = true;
         }
     }
-    public override int ModifyDamage(int _damage)
-    {
-        return _damage * 2;
-    }
-    public override int StealthChange()
-    {
-        return 1;
-    }
-    public override int SensingChange()
-    {
-        return 1;
-    }
-    public override void Reset()
-    {
-        duration = initialDuration;
-    }
+    public override int ModifyDamage(int _damage) => _damage * 2;
+    public override int StealthChange() => 1;
+    public override int SensingChange() => 1;
+    public override void Reset() => duration = initialDuration;
 }
 public class Healing(float _duration) : Status(Sprites.Knob)
 {
@@ -189,14 +166,8 @@ public class Healing(float _duration) : Status(Sprites.Knob)
             IsExpired = true;
         }
     }
-    public override int ModifyDamage(int _damage)
-    {
-        return (int)(_damage * 0.5f);
-    }
-    public override void Reset()
-    {
-        duration += initialDuration;
-    }
+    public override int ModifyDamage(int _damage) => (int)(_damage * 0.5f);
+    public override void Reset() => duration += initialDuration;
 }
 public class Berserk(float _timeLeft) : Status(Sprites.Knob)
 {
@@ -245,22 +216,10 @@ public class Berserk(float _timeLeft) : Status(Sprites.Knob)
         timeLeft = 10;
         bonus = true;
     }
-    public override int SensingChange()
-    {
-        return -1;
-    }
-    public override int StealthChange()
-    {
-        return -1;
-    }
-    public override int FuseChange()
-    {
-        return 1;
-    }
-    public override int ModifyDamage(int _damage)
-    {
-        return (int)(_damage * 1.5f);
-    }
+    public override int SensingChange() => -1;
+    public override int StealthChange() => -1;
+    public override int FuseChange() => 1;
+    public override int ModifyDamage(int _damage) => (int)(_damage * 1.5f);
 }
 public class Pressure(Color _color, bool _isFatal) : Status(Sprites.Knob)
 {
@@ -332,12 +291,23 @@ public class FleetingDefense() : Status(Sprites.Knob)
             IsExpired = true;
         }
     }
-    public override void Reset()
+    public override void Reset() => duration = 0.1f;
+    public override int ModifyDamage(int _damage) => (_damage* 5) / 6;
+}
+public class Obscured() : Status(Sprites.Knob)
+{
+    float duration = 0.1f;
+    public override StatusType Type => StatusType.Obscured;
+    public override bool IsImmunable => false;
+    public override void Update(Entity _parent)
     {
-        duration = 0.1f;
+        if (duration <= 0)
+        {
+            IsExpired = true;
+            return;
+        }
+        duration -= Engine.DeltaSeconds;
     }
-    public override int ModifyDamage(int _damage)
-    {
-        return (_damage * 5) / 6;
-    }
+    public override void Reset() => duration = 0.1f;
+    public override int StealthChange() => 2;
 }

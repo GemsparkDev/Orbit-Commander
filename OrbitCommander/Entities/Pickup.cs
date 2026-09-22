@@ -182,6 +182,10 @@ public class Pickup : Entity, IData
             }
             foreach (var enemy in Engine.SaveGame.CurrentMission.enemies)
             {
+                if(enemy == this)
+                {
+                    continue;
+                }
                 float distSqr = Vector2.DistanceSquared(enemy.Position, Position);
                 if (distSqr < 3600)
                 {
@@ -210,7 +214,6 @@ public class Pickup : Entity, IData
             {
                 Player.ApplyWork(-0.33f);
             }
-            GetComponent<FollowEmitter>().ParticleEmitter.isEmitterActive = SaveGame.DebugMode;
             yield return 0;
         }
     }
@@ -302,16 +305,15 @@ public class Pickup : Entity, IData
     }
     IEnumerable<int> Furnace()
     {
-        float cooldown = 0;
         while (true)
         {
-            if (cooldown > 0)
-            {
-                cooldown -= Engine.DeltaSeconds;
-            }
             Velocity *= Util.FIED(0.2f);
             foreach (var enemy in Engine.SaveGame.CurrentMission.Entities)
             {
+                if (enemy == this)
+                {
+                    continue;
+                }
                 float distSqr = Vector2.DistanceSquared(enemy.Position, Position);
                 if (distSqr < 3600)
                 {
@@ -324,35 +326,6 @@ public class Pickup : Entity, IData
             }
             Vector2 offset = Util.RotateVector2(new Vector2(Util.OneToNegOne(), Util.OneToNegOne()) * 5, Angle);
             ParticleManager.Add(new Particle(Assets.Get(Sprites.Dot), 1, Position + offset, Velocity, Angle, 0, Color.Orange, Color.Transparent));
-            var nearestPickup = Engine.SaveGame.CurrentMission.NearestItem(this, true);
-            if (nearestPickup == null)
-            {
-                break;
-            }
-            Vector2 relativePosition = nearestPickup.Position - Position;
-            if (relativePosition.X < 7 && relativePosition.X > -7 && relativePosition.Y < 7 && relativePosition.Y > -7)
-            {
-                nearestPickup.Position = Position;
-                if (Player.leashedMaterials.Contains(nearestPickup as Pickup))
-                {
-                    Player.leashedMaterials.Remove(nearestPickup as Pickup);
-                }
-                cooldown += Engine.DeltaSeconds * 2;
-                if(Player.Gun.CritCondition && Player.Engines is WorkEngine)
-                {
-                    cooldown += Engine.DeltaSeconds;
-                }
-                ParticleManager.Add(new Particle(Assets.Get(Sprites.Dot), 1, Position + Util.RotateVector2(new Vector2(Util.OneToNegOne(), Util.OneToNegOne()) * 5, Angle),
-                    Velocity, Angle, 0, Color.Orange, Color.Transparent));
-                if (cooldown > 15)
-                {
-                    nearestPickup.isExpired = true;
-                    cooldown = 0;
-                    //Engine.SaveGame.Scrap += nearestPickup.GetComponent<Smelt>().Value;
-                    SoundManager.PlaySound(Assets.Get(Sound.Full), Position);
-                    throw new NotImplementedException(); //TODO: Rework the furnace
-                }
-            }
             yield return 0;
         }
     }
@@ -362,6 +335,7 @@ public class Pickup : Entity, IData
         construct.AddComponent(new Behaviour().AddBehaviour(construct.Furnace()));
         construct.AddComponent(new FollowEmitter(construct) { ParticleEmitter = new ParticleEmitter(Assets.Get(Sprites.Dot), _position, 100, new Color(255, 0, 0)) });
         construct.AddComponent(new Smelt() { Value = 1 });
+        construct.AddComponent(new Dockable(construct, UI.MothershipMenu, true));
         construct.Angle = _angle;
         construct.StealthAbility = _stealth;
         construct.Team = _team;
@@ -387,12 +361,20 @@ public class Pickup : Entity, IData
             {
                 range = 27500;
             }
-            foreach (var enemy in Engine.SaveGame.CurrentMission.enemies.Where(x => IsFriendly(x) && x.HasComponent<Statuses>()))
+            foreach (var enemy in Engine.SaveGame.CurrentMission.Entities.Where(x => IsFriendly(x) && x.HasComponent<Statuses>()))
             {
                 float distSqr = Vector2.DistanceSquared(enemy.Position, Position);
                 if(distSqr < range)
                 {
-                    enemy.Statuses.ApplyStatus(new FleetingDefense());
+                    if(enemy is Pickup)
+                    {
+                        Debug.WriteLine((enemy as Pickup).Type);
+                        enemy.Statuses.ApplyStatus(new Obscured());
+                    }
+                    else if(enemy.HasComponent<Health>())
+                    {
+                        enemy.Statuses.ApplyStatus(new FleetingDefense());
+                    }
                 }
             }
             if (Vector2.DistanceSquared(Position, Player.Position) < range)
@@ -434,5 +416,7 @@ public enum Items
     Bomb,
     SpecializedParts,
     Furnace,
-    FaradayShield
+    FaradayShield,
+    QuantumResonator,
+    MakeshiftMothership,
 }

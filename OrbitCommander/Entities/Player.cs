@@ -624,24 +624,25 @@ public class Player : Entity
             {
                 if (Progression > -1 || SaveGame.DebugMode)
                 {
-                    if (Input.Construct.IsDown)
+                    Items c = Items.Scrap;
+                    if (Input.Construct.WasDown)
                     {
                         float dist = (new Vector2(Input.NewMouseState.X, Input.NewMouseState.Y) - Engine.BackBuffer / 2).Length();
-                        var constructs = new List<(string description, Texture2D sprite)>()
+                        var constructs = new List<(Items item, string description, Texture2D sprite)>()
                         {
-                        ("Req. 1 scrap, blocks enemy fire. 20 integrity.", Assets.Get(Sprites.CryoBarricade)),
-                        ("Req. 1 scrap, attacks enemies. 8 integrity.", Assets.Get(Sprites.Trap)),
-                        ("Req. 1 scrap, 100 dmg to all in radius when destroyed. 3 integrity.", Assets.Get(Sprites.Bomb)),
-                        ("Req. 1 scrap, smelts all scrap within it", Assets.Get(Sprites.Furnace)),
-                        ("Req. 1 scrap, throw at enemies to do damage.", Assets.Get(Sprites.Explosive))
+                        (Items.CryoBarricade, "Req. 1 scrap, Cools nearby entities and blocks damage, 20 integrity.", Assets.Get(Sprites.CryoBarricade)),
+                        (Items.Trap, "Req. 1 scrap, Attacks enemies. 8 integrity.", Assets.Get(Sprites.Trap)),
+                        (Items.Bomb, "Req. 1 scrap, 100 dmg to all in radius when destroyed. 3 integrity.", Assets.Get(Sprites.Bomb)),
+                        (Items.Furnace, "Req. 1 scrap, Can be docked to, enables module repair and storage.", Assets.Get(Sprites.Furnace)),
+                        (Items.FaradayShield, "Req. 1 scrap, Hides modules and protects the player in its radius.", Assets.Get(Sprites.Explosive))
                         };
-                        if (Progression > -1)
+                        if (Progression > 3)
                         {
-                            constructs.Add(("Req. 3 scrap, deployable garage. Use metal to upgrade.", Assets.Get(Sprites.Mothership)));
+                            constructs.Add((Items.MakeshiftMothership, "Req. 3 scrap, deployable garage. Use metal to upgrade.", Assets.Get(Sprites.Mothership)));
                         }
                         if (Mission.missions[Engine.SaveGame.CurrentMissionIndex].data.Name == "???")
                         {
-                            constructs.Add(("1 scrap to construct. Be ready.", Assets.Get(Sprites.QuantumResonator)));
+                            constructs.Add((Items.QuantumResonator, "1 scrap to construct. Be ready.", Assets.Get(Sprites.QuantumResonator)));
                         }
                         float angle = 0;
                         Color color;
@@ -653,6 +654,7 @@ public class Player : Entity
                             {
                                 color = Color.White;
                                 ParticleManager.Add(new Particle(null, new Vector2(0, -100) + Position, 0, Color.White) { drawText = constructs[(int)i].description });
+                                c = constructs[(int)i].item;
                             }
                             else
                             {
@@ -662,9 +664,8 @@ public class Player : Entity
                             angle += MathF.Tau / constructs.Count;
                         }
                     }
-                    else if (!Input.Construct.IsDown && Input.Construct.WasDown)
+                    if(c != Items.Scrap && !Input.Construct.IsDown)
                     {
-                        float dist = (new Vector2(Input.NewMouseState.X, Input.NewMouseState.Y) - Engine.BackBuffer / 2).Length();
                         int scrapCount = 0;
                         Entity firstScrap = null;
                         foreach (var pickup in leashedMaterials)
@@ -675,80 +676,58 @@ public class Player : Entity
                                 firstScrap ??= pickup;
                             }
                         }
-                        float angle = 0;
-                        var types = new List<string>
+                        if(firstScrap != null)
                         {
-                            "Barricade",
-                            "Trap",
-                            "Bomb",
-                            "Furnace",
-                            "Mace"
-                        };
-                        if (Progression > -1)
-                        {
-                            types.Add("Mothership");
-                        }
-                        if (Mission.missions[Engine.SaveGame.CurrentMissionIndex].data.Name == "???")
-                        {
-                            types.Add("Resonator");
-                        }
-                        for (int i = 0; i < types.Count; i++)
-                        {
-                            Vector2 dir = Util.ToUnitVector(angle);
-                            if (dir.X * Direction.X + dir.Y * Direction.Y > 1f - 0.9f / types.Count && dist > 300 && firstScrap != null)
+                            Pickup construct = null;
+                            switch (c)
                             {
-                                Pickup construct = null;
-                                switch (types[i])
-                                {
-                                    case "Barricade":
-                                        firstScrap.isExpired = true;
-                                        construct = Pickup.NewCryoBarricade(firstScrap.Position, firstScrap.Velocity, 0, 0);
-                                        break;
-                                    case "Trap":
-                                        firstScrap.isExpired = true;
-                                        construct = Pickup.NewTrap(firstScrap.Position, firstScrap.Velocity, 0, 0);
-                                        break;
-                                    case "Bomb":
-                                        firstScrap.isExpired = true;
-                                        construct = Pickup.NewBomb(firstScrap.Position, firstScrap.Velocity, 0, 0);
-                                        break;
-                                    case "Furnace":
-                                        firstScrap.isExpired = true;
-                                        construct = Pickup.NewFurnace(firstScrap.Position, firstScrap.Velocity, 0, 0);
-                                        break;
-                                    case "Mothership":
-                                        if (scrapCount >= 3)
-                                        {
-                                            foreach (var pickup in leashedMaterials)
-                                            {
-                                                pickup.isExpired = true;
-                                            }
-                                            leashedMaterials.Clear();
-                                            Engine.SaveGame.CurrentMission.Add(NewMakeshiftMothership(Position, Velocity, 0));
-                                        }
-                                        break;
-                                    case "Resonator":
-                                        firstScrap.isExpired = true;
-                                        Engine.SaveGame.CurrentMission.Add(NewQuantumResonator(Position));
-                                        break;
-                                    case "Mace":
-                                        firstScrap.isExpired = true;
-                                        construct = Pickup.NewFaradayShield(firstScrap.Position, firstScrap.Velocity, 0, 0);
-                                        break;
-                                    default:
-                                        break;
-                                }
-                                if(construct != null)
-                                {
-                                    foreach (var module in modules.Values)
+                                case Items.CryoBarricade:
+                                    firstScrap.isExpired = true;
+                                    construct = Pickup.NewCryoBarricade(firstScrap.Position, firstScrap.Velocity, 0, 0);
+                                    break;
+                                case Items.Trap:
+                                    firstScrap.isExpired = true;
+                                    construct = Pickup.NewTrap(firstScrap.Position, firstScrap.Velocity, 0, 0);
+                                    break;
+                                case Items.Bomb:
+                                    firstScrap.isExpired = true;
+                                    construct = Pickup.NewBomb(firstScrap.Position, firstScrap.Velocity, 0, 0);
+                                    break;
+                                case Items.Furnace:
+                                    firstScrap.isExpired = true;
+                                    construct = Pickup.NewFurnace(firstScrap.Position, firstScrap.Velocity, 0, 0);
+                                    break;
+                                case Items.MakeshiftMothership:
+                                    if (scrapCount >= 3)
                                     {
-                                        module.OnContruct(construct);
+                                        foreach (var pickup in leashedMaterials)
+                                        {
+                                            pickup.isExpired = true;
+                                        }
+                                        leashedMaterials.Clear();
+                                        Engine.SaveGame.CurrentMission.Add(NewMakeshiftMothership(Position, Velocity, 0));
                                     }
-                                    Engine.SaveGame.CurrentMission.Add(construct);
-                                    leashedMaterials.Add(construct);
-                                }
+                                    break;
+                                case Items.QuantumResonator:
+                                    firstScrap.isExpired = true;
+                                    Engine.SaveGame.CurrentMission.Add(NewQuantumResonator(Position));
+                                    break;
+                                case Items.FaradayShield:
+                                    firstScrap.isExpired = true;
+                                    construct = Pickup.NewFaradayShield(firstScrap.Position, firstScrap.Velocity, 0, 0);
+                                    break;
+                                default:
+                                    break;
                             }
-                            angle += MathF.PI * 2 / types.Count;
+                            if (construct != null)
+                            {
+                                foreach (var module in modules.Values)
+                                {
+                                    module.OnContruct(construct);
+                                }
+                                Engine.SaveGame.CurrentMission.Add(construct);
+                                leashedMaterials.Add(construct);
+                            }
                         }
                     }
                 }

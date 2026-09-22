@@ -3,6 +3,9 @@
 Lagrange Commander is a game made using C# in monogame. It is a 2D top down wave based shooter where you must repair and upgrade your ship by salvaging from enemies you defeat. It features realistic N-Body gravitation, which affects all entities and projectiles.
   
 # Changelog
+0.9.6.5 - 9/21/2026
+ - The FaradayShield now obscures nearby pickups.
+ - The Furnace can now be docked to.
 0.9.6.4 - 9/20/2026
  - Increased the maximum camera mouse offset.
  - Increased the required mothership crafts to 15.
