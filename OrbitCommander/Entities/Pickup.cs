@@ -14,7 +14,6 @@ public class Pickup : Entity, IData
 {
     Texture2D IData.Texture => itemData.RealSprite;
     Color IData.Color => itemData.Color;
-    public Items Type => itemData.Type;
     protected ItemData itemData;
     public Window Tooltip { get; } = new Window(Vector2.Zero, Assets.Get(Sprites.WideButton));
     public string Name => itemData.Name;
@@ -152,7 +151,7 @@ public class Pickup : Entity, IData
     }
     public virtual string Serialize()
     {
-        return $"{{{Type},{Health}}}";
+        return $"{{{""},{Health}}}";
     }
     IEnumerable<int> CryoBarricade()
     {
@@ -366,9 +365,8 @@ public class Pickup : Entity, IData
                 float distSqr = Vector2.DistanceSquared(enemy.Position, Position);
                 if(distSqr < range)
                 {
-                    if(enemy is Pickup)
+                    if(enemy is Pickup && (enemy as Pickup).itemData.Name != "FaradayShield") //TODO: make this automatically update
                     {
-                        Debug.WriteLine((enemy as Pickup).Type);
                         enemy.Statuses.ApplyStatus(new Obscured());
                     }
                     else if(enemy.HasComponent<Health>())
@@ -405,7 +403,6 @@ public class ItemData(Sprites _realSprite, Sprites _virtualSprite, string _name,
     public int ID { get; } = _id;
     public Color Color { get; } = _color;
     public Color TextColor { get; } = _textColor ?? Color.White;
-    public Items Type { get; } = Items.Scrap;
     public int Integrity { get; } = _integrity;
 }
 public enum Items

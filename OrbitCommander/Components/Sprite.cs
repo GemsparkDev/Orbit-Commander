@@ -55,7 +55,14 @@ public class Sprite(Entity _entity, Color _color) : IComponent
         collider.Update();
         var sc = _entity.GetComponent<Stealth>();
 
-        Color tc = TargetColor * ((sc != null) ? sc.StealthTransparency() : 1);
+        float c = ((sc != null) ? sc.StealthTransparency() : 1);
+        var team = _entity.GetComponent<Friendly>();
+        if (team != null && team.Team == Engine.SaveGame.Player.Team)
+        {
+            c = Math.Max(c, 0.25f);
+        }
+        Color tc = TargetColor * c;
+
         if (Color != tc)
         {
             float l = Util.FIED(0.025f);
