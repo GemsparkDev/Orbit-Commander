@@ -897,6 +897,10 @@ public class Player : Entity
         else
         {
             dockedEntity = dockableEntity;
+            if(leashedMaterials.Contains(dockableEntity.Entity))
+            {
+                leashedMaterials.Remove(dockableEntity.Entity as Pickup);
+            }
             isEngineActive = false;
             if(!_silent)
             {

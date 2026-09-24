@@ -3,6 +3,10 @@
 Lagrange Commander is a game made using C# in monogame. It is a 2D top down wave based shooter where you must repair and upgrade your ship by salvaging from enemies you defeat. It features realistic N-Body gravitation, which affects all entities and projectiles.
   
 # Changelog
+0.9.6.7 - 9/23/2026
+ - The player can no longer collect and dock to a furnace at the same time.
+ - Increased the radius of the furnace heating.
+ - The furnace no longer heats entities docked to it.
 0.9.6.6 - 9/22/2026
  - The FaradayShield now no longer obscures other FaradayShields.
  - Hidden pickups have a minimum opacity.

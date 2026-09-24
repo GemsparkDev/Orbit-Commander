@@ -314,12 +314,12 @@ public class Pickup : Entity, IData
                     continue;
                 }
                 float distSqr = Vector2.DistanceSquared(enemy.Position, Position);
-                if (distSqr < 3600)
+                if (distSqr < 10000)
                 {
                     enemy.ApplyWork(0.5f);
                 }
             }
-            if (Vector2.DistanceSquared(Position, Player.Position) < 2000)
+            if (Player.dockedEntity?.Entity != this && Vector2.DistanceSquared(Position, Player.Position) < 3600)
             {
                 Player.ApplyWork(0.33f);
             }
