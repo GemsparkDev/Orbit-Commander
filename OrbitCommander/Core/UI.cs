@@ -34,6 +34,7 @@ public static class UI
     public static Window EscapeMenu { get; } = new Window(center, Assets.Get(Sprites.LargePanel));
     public static Window MenuSettings { get; } = new Window(new Vector2(center.X * 2, center.Y), Assets.Get(Sprites.RightSidePanel)) { alignment = Alignment.Right };
     public static Window KeyBinds { get; } = new Window(new Vector2(0, center.Y), Assets.Get(Sprites.Terminal)) { alignment = Alignment.Left };
+    public static Window DebugWindow { get; } = new Window(Vector2.Zero, Assets.Get(Sprites.LargePanel)) { alignment = Alignment.TopLeft };
 
     //Main Menu
     public static Button PatchedConicsToggle { get; } = new Button(new Vector2(-10, 50), Assets.Get(Sprites.SwitchOn), Assets.TextFont, $"Patched Conics: {SaveGame.PatchedConics}", Color.White, Assets.Get(Sprites.SwitchOff));
@@ -789,6 +790,7 @@ public static class UI
         Engine.UIManager.AddContainer(EscapeMenu);
         Engine.UIManager.AddContainer(MenuSettings);
         Engine.UIManager.AddContainer(KeyBinds);
+        Engine.UIManager.AddContainer(DebugWindow);
 
         Engine.UIManager.ScreenWindow = GlobalMenu;
     }
