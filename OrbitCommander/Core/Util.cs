@@ -210,11 +210,11 @@ public static class Util
                 a.Index = a.Text.Length;
                 scene.IsPaused = true;
                 //Check this line for differing UI scales
-                if(Input.OldMouseState.LeftButton == ButtonState.Pressed && MathF.Abs(UI.FloppyTerminal.position.X - floppy.Position.X + 200) < 200 && MathF.Abs(UI.FloppyTerminal.position.Y + 175 - floppy.Position.Y) < 75)
+                if(Input.LMB.WasDown && MathF.Abs(UI.FloppyTerminal.position.X - floppy.Position.X + 200) < 200 && MathF.Abs(UI.FloppyTerminal.position.Y + 175 - floppy.Position.Y) < 75)
                 {
                     floppy.Color = Color.White * (MathF.Sin(Engine.Time * 4) / 8 + 0.875f);
                     floppy.Angle = MathF.Sin(Engine.Time * 5) / 20;
-                    if(Input.NewMouseState.LeftButton == ButtonState.Released)
+                    if(!Input.LMB.IsDown)
                     {
                         scene.IsPaused = false;
                     }
@@ -227,10 +227,10 @@ public static class Util
             new Event(0, 8 + ts * 4 + Engine.DeltaSeconds, delegate(float time) //Render floppy overtop of inserter
             {
                 Engine.Self.QueueShaderException(floppy);
-                var mousePos = new Vector2(Input.OldMouseState.X, Input.OldMouseState.Y);
-                if(Input.NewMouseState.LeftButton == ButtonState.Pressed && Vector2.Distance(floppy.Position, mousePos) < 100 * UIManager.UIScale)
+                var mousePos = Input.MousePosition.OldDirection;
+                if(Input.LMB.IsDown && Vector2.Distance(floppy.Position, mousePos) < 100 * UIManager.UIScale)
                 {
-                    var newPos = new Vector2(Input.NewMouseState.X, Input.NewMouseState.Y);
+                    var newPos = Input.MousePosition.Direction;
                     floppyVel = newPos - mousePos;
                     floppy.Position = newPos;
                     floppy.Angle *= Util.FIED(0.02f);
@@ -578,7 +578,7 @@ public static class Util
     {
         return Begin(_scene ?? MissionSelect.New, delegate { Engine.SaveGame.CurrentMission.WinMission(); return null; });
     }
-    public static Func<Conditional> Fail(Func<GameState> _scene = null)
+    public static Func<Conditional> Fail(Func<GameState> _ = null)
     {
         return Begin(MissionSelect.New, delegate { Engine.SaveGame.MissionResults(Engine.SaveGame.CurrentMission.Wave); return null; });
     }

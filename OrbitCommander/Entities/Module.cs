@@ -18,7 +18,7 @@ public abstract class Module : Pickup, IData
 {
     //Serialized fields
     public bool isFailed = false;
-    public new Modules Type { get; }
+    public Modules Type { get; }
     Color IData.Color => isFailed ? Color.Red : Color.White;
     private Decal healthDecal;
     private Decal description;
@@ -104,7 +104,7 @@ public class ReloadSystem(int _magazineSize, float _reloadSpeed, Action _reloadC
         {
             val = (1 - reloadCD / _reloadSpeed) * magazineSize;
         }
-        if (Rounds != magazineSize && reloadCD <= 0 && Input.NewState.IsKeyDown(Keys.R))
+        if (Rounds != magazineSize && reloadCD <= 0 && Input.Reload.IsDown)
         {
             Rounds = 0;
             reloadCD = _reloadSpeed;
@@ -802,7 +802,7 @@ public class Crossbow() : Weapon(Modules.Crossbow)
     public override bool CritCondition => chargeTime > 1.5f;
     public override void OnUpdate(float _fuseRatio)
     {
-        if(Input.NewMouseState.LeftButton == ButtonState.Pressed)
+        if(Input.LMB.IsDown)
         {
             if (chargeTime < 2)
             {
@@ -1334,7 +1334,7 @@ public class AdaptiveShotgun() : Weapon(Modules.AdaptiveShotgun)
         }
         if (ammo.Fire())
         {
-            float distance = Vector2.Distance(new Vector2(Input.NewMouseState.X, Input.NewMouseState.Y), Engine.BackBuffer / 2) + 1; //Plus one prevents division by zero
+            float distance = Vector2.Distance(Input.MousePosition.Direction, Engine.BackBuffer / 2) + 1; //Plus one prevents division by zero
             for (float i = -5; i <= 5; i++)
             {
                 Vector2 speed = Player.IdealSpeedWithVelocity(Speed);
@@ -1370,7 +1370,7 @@ public class GuidedRound() : Weapon(Modules.GuidedRound)
     public override bool CritCondition => rounds.Count >= 3;
     public override void OnShoot()
     {
-        Vector2 mousePos = new Vector2(Input.NewMouseState.X, Input.NewMouseState.Y) - Engine.BackBuffer / 2 + Engine.MousePositionOffset * 1.5f;
+        Vector2 mousePos = Input.MousePosition.Direction - Engine.BackBuffer / 2 + Engine.MousePositionOffset * 1.5f;
         foreach (var round in rounds)
         {
             round.Velocity += Vector2.Normalize(mousePos - (round.Position - Player.Position)) * Engine.DeltaSeconds * 60;
@@ -1402,7 +1402,7 @@ public class GuidedRound() : Weapon(Modules.GuidedRound)
     {
         rounds = [.. rounds.Where(x => !x.isExpired)];
         ammo.Update(this, _fuseRatio);
-        if(Input.NewMouseState.LeftButton == ButtonState.Released && rounds.Count >= 3)
+        if(!Input.LMB.IsDown && rounds.Count >= 3)
         {
             foreach(var round in rounds)
             {
@@ -1484,7 +1484,7 @@ public class SummonGrapplingHook() : Module(Modules.GrapplingHook)
     {
         if (hook != null)
         {
-            var mousePos = new Vector2(Input.NewMouseState.X, Input.NewMouseState.Y) + Engine.Camera.Position - Engine.BackBuffer / 2 + Engine.MousePositionOffset;
+            var mousePos = Input.MousePosition.Direction + Engine.Camera.Position - Engine.BackBuffer / 2 + Engine.MousePositionOffset;
             if (Vector2.Distance(mousePos, Player.Position) < 100)
             {
                 foreach (var entity in Engine.SaveGame.CurrentMission.Entities)
@@ -1701,14 +1701,14 @@ public class Expose() : Module(Modules.Expose)
             }
             return;
         }
-        if (Input.NewState.IsKeyDown(Keys.LeftShift))
+        if (Input.ModifyAbility.IsDown)
         {
-            Player.Shoot(aura = new FlameBolt(Player.Position + new Vector2(Input.NewMouseState.X, Input.NewMouseState.Y) + Engine.MousePositionOffset - Engine.BackBuffer / 2, Vector2.Zero, Team, 0, new ParticleEmitter(Assets.Get(Sprites.Dot), Player.Position, 0, Color.Orange * 0.75f) { speedOfEmission = 0.5f }, 10, 2, 20), 1, false);
+            Player.Shoot(aura = new FlameBolt(Player.Position + Input.MousePosition.Direction + Engine.MousePositionOffset - Engine.BackBuffer / 2, Vector2.Zero, Team, 0, new ParticleEmitter(Assets.Get(Sprites.Dot), Player.Position, 0, Color.Orange * 0.75f) { speedOfEmission = 0.5f }, 10, 2, 20), 1, false);
             isFire = true;        
         }
         else
         {
-            Player.Shoot(aura = new FlameBolt(Player.Position + new Vector2(Input.NewMouseState.X, Input.NewMouseState.Y) + Engine.MousePositionOffset - Engine.BackBuffer / 2, Vector2.Zero, Team, 0, new ParticleEmitter(Assets.Get(Sprites.Dot), Player.Position, 0, Color.Cyan * 0.75f) { speedOfEmission = 0.5f }, 10, 2, -20), 1, false);
+            Player.Shoot(aura = new FlameBolt(Player.Position + Input.MousePosition.Direction + Engine.MousePositionOffset - Engine.BackBuffer / 2, Vector2.Zero, Team, 0, new ParticleEmitter(Assets.Get(Sprites.Dot), Player.Position, 0, Color.Cyan * 0.75f) { speedOfEmission = 0.5f }, 10, 2, -20), 1, false);
             isFire = false;
         }
         aura.Transform.IsImmovable = true;

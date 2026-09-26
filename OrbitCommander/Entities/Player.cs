@@ -386,9 +386,8 @@ public class Player : Entity
         {
             isEngineActive = false;
         }
-        var mousePos = new Vector2(Input.NewMouseState.X, Input.NewMouseState.Y);
         //Ensures that target vector performs identically in all resolutions
-        Vector2 mouseCamPos = Engine.Camera.Position + mousePos - Engine.BackBuffer / 2 + Engine.MousePositionOffset;
+        Vector2 mouseCamPos = Engine.Camera.Position + Input.MousePosition.Direction - Engine.BackBuffer / 2 + Engine.MousePositionOffset;
         //Testing
         //ParticleManager.Add(new Particle(Assets.Get(Sprite.Circle), mouseCamPos, 0, Color.White));
         //ParticleManager.Add(new Particle(Assets.Get(Sprite.Circle), position, 0, Color.White));
@@ -533,13 +532,13 @@ public class Player : Entity
     {
         if (SaveGame.DebugMode)
         {
-            Vector2 mousePos = new Vector2(Input.NewMouseState.X, Input.NewMouseState.Y) + Engine.Camera.Position - Engine.BackBuffer / 2;
+            Vector2 mousePos = Input.MousePosition.Direction + Engine.Camera.Position - Engine.BackBuffer / 2;
             mousePos = new Vector2(MathF.Round(mousePos.X / 25), MathF.Round(mousePos.Y / 25)) * 25;
             ParticleManager.Add(new Particle(Assets.Get(Sprites.Dot), mousePos, 0, Color.Red));
             if (startLocation != Vector2.Zero)
             {
                 float f = 1;
-                if (Input.NewState.IsKeyDown(Keys.LeftControl))
+                if (Input.ToggleAimAssist.IsDown)
                 {
                     f = 0.5f;
                 }
@@ -551,13 +550,13 @@ public class Player : Entity
                 }
             }
             var comp = Engine.SaveGame.CurrentMission.GetComponent<Colliders>();
-            if (Input.WarpBackward.IsDown && comp.GetColliders.Length > 0)
+            if (Input.ModifyAbility.IsDown && comp.GetColliders.Length > 0)
             {
-                Vector2 newPos = new Vector2(Input.NewMouseState.X, Input.NewMouseState.Y) + Engine.Camera.Position - Engine.BackBuffer / 2;
-                Vector2 prevPos = new Vector2(Input.OldMouseState.X, Input.OldMouseState.Y) + Engine.Camera.Position - Engine.BackBuffer / 2;
+                Vector2 newPos = Input.MousePosition.Direction + Engine.Camera.Position - Engine.BackBuffer / 2;
+                Vector2 prevPos = Input.MousePosition.OldDirection + Engine.Camera.Position - Engine.BackBuffer / 2;
                 comp.GetColliders = [.. comp.GetColliders.Where(x => !x.IsColliding(prevPos, newPos - prevPos, 10, true, out float _))];
             }
-            if (Input.NewState.IsKeyDown(Keys.F) && Input.OldState.IsKeyUp(Keys.F))
+            if (Input.DropScrap.IsDown && !Input.DropScrap.WasDown)
             {
                 if (startLocation == Vector2.Zero)
                 {
@@ -570,7 +569,7 @@ public class Player : Entity
                         comp.GetColliders =
                         [
                             .. comp.GetColliders,
-                            new LineCollider(startLocation, mousePos,Input.NewState.IsKeyDown(Keys.LeftControl)),
+                            new LineCollider(startLocation, mousePos, Input.ToggleAimAssist.IsDown),
                         ];
                     }
                     else
@@ -581,7 +580,7 @@ public class Player : Entity
                     startLocation = Vector2.Zero;
                 }
             }
-            if (Input.NewState.IsKeyDown(Keys.Tab) && Input.OldState.IsKeyUp(Keys.Tab))
+            if (Input.Tab.IsDown && !Input.Tab.WasDown)
             {
                 if (comp != null)
                 {
@@ -627,7 +626,7 @@ public class Player : Entity
                     Items c = Items.Scrap;
                     if (Input.Construct.WasDown)
                     {
-                        float dist = (new Vector2(Input.NewMouseState.X, Input.NewMouseState.Y) - Engine.BackBuffer / 2).Length();
+                        float dist = (Input.MousePosition.Direction - Engine.BackBuffer / 2).Length();
                         var constructs = new List<(Items item, string description, Texture2D sprite)>()
                         {
                         (Items.CryoBarricade, "Req. 1 scrap, Cools nearby entities and blocks damage, 20 integrity.", Assets.Get(Sprites.CryoBarricade)),
@@ -731,7 +730,7 @@ public class Player : Entity
                         }
                     }
                 }
-                if (Input.NewMouseState.RightButton == ButtonState.Pressed)
+                if (Input.RMB.IsDown)
                 {
                     Vector2 targetDir = Direction;
                     if (aimAssist)
@@ -757,13 +756,13 @@ public class Player : Entity
                         Vector3 color = new Vector3(1, 1, 0) * (1 - lerp) + new Vector3(1, 0, 0) * lerp;
                         ParticleManager.Add(new Particle(Assets.Get(Sprites.Dot), targetDir * (i + 4f) * 2 + Position + new Vector2(targetDir.Y, -targetDir.X) * MathF.Sin(i / 2 - Engine.Time * 5) / 2, Util.ToAngle(targetDir), new Color(color.X, color.Y, color.Z) * (1 - lerp)));
                     }
-                    if (Input.OldMouseState.RightButton == ButtonState.Released)
+                    if (!Input.RMB.WasDown)
                     {
                         canGatherResources = true;
                         SoundManager.PlayGlobalSound(Assets.Get(Sound.OpenMenu));
                     }
                 }
-                if (Input.NewMouseState.RightButton == ButtonState.Released && Input.OldMouseState.RightButton == ButtonState.Pressed)
+                if (!Input.RMB.IsDown && Input.RMB.WasDown)
                 {
                     SoundManager.PlayGlobalSound(Assets.Get(Sound.CloseMenu));
                     canGatherResources = false;
@@ -779,7 +778,6 @@ public class Player : Entity
                         module.Value.OnAbility();
                     }
                 }
-                Keys[] pressedKey = Input.NewState.GetPressedKeys();
                 EngineDirection = Input.Engine.Direction;
                 isEngineActive = EngineDirection.X != 0 || EngineDirection.Y != 0;
                 if (isEngineActive)
@@ -793,13 +791,13 @@ public class Player : Entity
                 {
                     if (Math.Abs(Angle - Util.ToAngle(Direction)) > MathF.PI)
                     {
-                        Angle = (Angle + MathF.Tau * -MathF.Sign(Angle));
+                        Angle += MathF.Tau * -MathF.Sign(Angle);
 
                     }
                     float lerp = Util.FIED(0.001f);
                     Angle = Angle * (lerp) + Util.ToAngle(Direction) * (1 - lerp);
                 }
-                if (Input.NewMouseState.LeftButton == ButtonState.Pressed && swapCd <= 0)
+                if (Input.LMB.IsDown && swapCd <= 0)
                 {
                     foreach (var module in modules)
                     {

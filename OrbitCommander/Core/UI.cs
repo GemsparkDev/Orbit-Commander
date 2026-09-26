@@ -195,9 +195,9 @@ public static class UI
         {
             float i = UIScaleSlider.Intervals[0];
             UIScale.Text = $"UI Scale: {Math.Truncate((i + 1) * 10) / 10}";
-            if (Input.NewMouseState.LeftButton == ButtonState.Released)
+            if (!Input.LMB.IsDown)
             {
-                UILib.Content.UIManager.UIScale = (i + 1f) * Engine.BackBuffer.X / Engine.BackBuffer.X;
+                UILib.Content.UIManager.UIScale = (i + 1f);
             }
         });
         ExitButton.AddBehaviour(delegate ()
@@ -276,7 +276,7 @@ public static class UI
             {
                 if (Engine.SaveGame.Player.restartCd > 0)
                 {
-                    if (Input.OldMouseState.LeftButton == ButtonState.Released)
+                    if (!Input.LMB.WasDown)
                     {
                         SoundManager.PlayGlobalSound(Assets.Get(Sound.Fail));
                     }

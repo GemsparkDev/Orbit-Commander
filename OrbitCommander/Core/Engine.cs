@@ -260,13 +260,13 @@ public class Engine : Game
             exception.Draw(spriteBatch);
         }
         ShaderExceptions.Clear();
-        if (Input.NewMouseState.LeftButton == ButtonState.Released)
+        if (Input.LMB.IsDown)
         {
-            spriteBatch.Draw(Assets.Get(Sprites.Cursor), new Vector2(Mouse.GetState().X, Mouse.GetState().Y), null, Color.White, 0, Vector2.Zero, UIManager.UIScale / 2, 0, 0.5f);
+            spriteBatch.Draw(Assets.Get(Sprites.ClickedCursor), new Vector2(Mouse.GetState().X, Mouse.GetState().Y), null, Color.White, 0, Vector2.Zero, UIManager.UIScale / 2, 0, 0.5f);
         }
         else
         {
-            spriteBatch.Draw(Assets.Get(Sprites.ClickedCursor), new Vector2(Mouse.GetState().X, Mouse.GetState().Y), null, Color.White, 0, Vector2.Zero, UIManager.UIScale / 2, 0, 0.5f);
+            spriteBatch.Draw(Assets.Get(Sprites.Cursor), new Vector2(Mouse.GetState().X, Mouse.GetState().Y), null, Color.White, 0, Vector2.Zero, UIManager.UIScale / 2, 0, 0.5f);
         }
         if (SaveGame.DebugMode)
         {

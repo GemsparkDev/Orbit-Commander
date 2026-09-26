@@ -105,7 +105,7 @@ public class PlayingGame : GameState
         Engine.SaveGame.Player.RestrictedActions();
         Engine.DialogueManager.Update();
         ParticleManager.Update();
-        if (Input.OldState.IsKeyUp(Keys.Escape) && Input.NewState.IsKeyDown(Keys.Escape))
+        if (!Input.Exit.WasDown && Input.Exit.IsDown)
         {
             if (Engine.UIManager.ToggleToMenu(UI.PauseMenu))
             {
@@ -130,7 +130,7 @@ public class PausedGame : GameState
     public override bool PersistentParticles { get; } = true;
     public override void Update()
     {
-        if (Input.OldState.IsKeyUp(Keys.Escape) && Input.NewState.IsKeyDown(Keys.Escape))
+        if (!Input.Exit.WasDown && Input.Exit.IsDown)
         {
             if (UI.SettingsMenu.enabled)
             {
@@ -205,7 +205,7 @@ public class MissionSelect : GameState
         }
         time += Engine.DeltaSeconds;
         ParticleManager.Update();
-        var pos = new Vector2(Input.NewMouseState.Position.X, Input.NewMouseState.Position.Y);
+        var pos = Input.MousePosition.Direction;
         float distance = Vector2.Distance(pos, new Vector2(Engine.BackBuffer.X * 2 / 3, Engine.BackBuffer.Y / 2));
         for (int i = 0; i < Mission.missions.Count; i++)
         {
@@ -255,7 +255,7 @@ public class MissionSelect : GameState
             if (canSelect && Math.Abs(mission.OrbitDistance - distance) < 10)
             {
                 color = Color.White;
-                if (Input.NewMouseState.LeftButton == ButtonState.Released && Input.OldMouseState.LeftButton == ButtonState.Pressed)
+                if (!Input.LMB.IsDown && Input.LMB.WasDown)
                 {
                     Engine.SaveGame.SetMission(i);
                 }
@@ -324,7 +324,7 @@ public class Cutscene(List<IEvent> _events, List<IActor> _actors, GameState _nex
     }
     public override void Update()
     {
-        if (Input.SkipCutscene.IsDown)
+        if (Input.Exit.IsDown)
         {
             if (escapeTime < 1)
             {
@@ -364,7 +364,7 @@ public class Cutscene(List<IEvent> _events, List<IActor> _actors, GameState _nex
         {
             actor.Draw(_spriteBatch);
         }
-        _spriteBatch.DrawString(Assets.TextFont, $"{Input.SkipCutscene.InputString} to skip", Engine.Camera.Position + Engine.BackBuffer / 2 - Assets.TextFont.MeasureString($"{Input.SkipCutscene.InputString} to skip") / 2 - new Vector2(100, 100), Color.White * (0.5f + escapeTime * 0.5f));
+        _spriteBatch.DrawString(Assets.TextFont, $"{Input.Exit.InputString} to skip", Engine.Camera.Position + Engine.BackBuffer / 2 - Assets.TextFont.MeasureString($"{Input.Exit.InputString} to skip") / 2 - new Vector2(100, 100), Color.White * (0.5f + escapeTime * 0.5f));
     }
 }
 public class Loading(Action _function, LoadingStage _stage) : GameState

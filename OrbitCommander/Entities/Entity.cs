@@ -4373,7 +4373,7 @@ public class Entity : IMissionComponent
             Events.UpdateFurnaceUI(15f * tierBonus - furnaceCooldown, 15f * tierBonus, furnaceItem, tier);
             if (Engine.SaveGame.Player.IsDocked)
             {
-                if (tier > 1 && Input.NewMouseState.LeftButton == ButtonState.Pressed && CD[0] <= 0)
+                if (tier > 1 && Input.LMB.IsDown && CD[0] <= 0)
                 {
                     var targetVector = Vector2.Normalize(new Vector2(Mouse.GetState().X, Mouse.GetState().Y) - Engine.BackBuffer / 2 - Position + Engine.Camera.Position);
                     targetAngle = MathF.Atan2(targetVector.X, -targetVector.Y);
@@ -4582,7 +4582,7 @@ public class Entity : IMissionComponent
                 {
                     dir = -1;
                 }
-                else if (Input.WarpBackward.IsDown)
+                else if (Input.ModifyAbility.IsDown)
                 {
                     dir = -1;
                 }
@@ -5285,7 +5285,6 @@ public class Entity : IMissionComponent
 }
 public class GrapplingHook : Entity
 {
-    int prevScroll = Input.NewMouseState.ScrollWheelValue;
     internal interface ILatchable
     {
         public Vector2 Position { get; }
@@ -5341,9 +5340,9 @@ public class GrapplingHook : Entity
                 Parent.Velocity += force;
                 target.ApplyForce(force);
             }
-            if (IsFriendly(Engine.SaveGame.Player) && Input.NewMouseState.ScrollWheelValue != prevScroll)
+            if (IsFriendly(Engine.SaveGame.Player) && Input.Zoom.Value != Input.Zoom.OldValue)
             {
-                maxDistance = Math.Max(0, maxDistance + (Input.NewMouseState.ScrollWheelValue - prevScroll) / 5);
+                maxDistance = Math.Max(0, maxDistance + (Input.Zoom.Value - Input.Zoom.OldValue) / 5);
             }
             if (target.IsExpired || Parent.isExpired)
             {
@@ -5389,7 +5388,6 @@ public class GrapplingHook : Entity
                 ParticleManager.Add(new Particle(Texture, 1, Position, Velocity, Angle, 0, Color, Color.Transparent));
             }
         }
-        prevScroll = Input.NewMouseState.ScrollWheelValue;
     }
     public override void Draw(SpriteBatch _spriteBatch)
     {

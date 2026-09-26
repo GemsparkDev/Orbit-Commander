@@ -1,15 +1,88 @@
 ﻿using Microsoft.Xna.Framework.Input;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
+using UILib.Content;
 
 namespace OrbitCommander.Core;
 public static class Input
 {
-    public static KeyboardState NewState { get; private set; }
-    public static KeyboardState OldState { get; private set; }
-    public static MouseState NewMouseState { get; private set; }
-    public static MouseState OldMouseState { get; private set; }
+    public static void SetInputScheme(IInputScheme _inputScheme)
+    {
+        inputScheme = _inputScheme;
+    }
+    private static IInputScheme inputScheme = new KeyboardInput();
     public static void Update()
+    {
+        inputScheme.Update();
+    }
+    //Keyboard
+    public static IDirectionalControl Engine => inputScheme.Engine;
+    public static IControl Dock => inputScheme.Dock;
+    public static IControl Construct => inputScheme.Construct;
+    public static IControl SwapPrimary => inputScheme.SwapPrimary;
+    public static IControl OpenPanel => inputScheme.OpenPanel;
+    public static IControl ToggleAimAssist => inputScheme.ToggleAimAssist;
+    public static IControl DropScrap => inputScheme.DropScrap;
+    public static IControl Ability => inputScheme.Ability;
+    public static IControl WarpForward => inputScheme.WarpForward;
+    public static IControl ModifyAbility => inputScheme.ModifyAbility;
+    public static IControl Reload => inputScheme.Reload;
+    public static IControl Exit => inputScheme.Exit;
+    public static IControl Tab => inputScheme.Tab;
+
+    //Mouse
+    public static IControl LMB => inputScheme.LMB;
+    public static IControl RMB => inputScheme.RMB;
+    public static IScalarControl Zoom => inputScheme.Zoom;
+    public static IDirectionalControl MousePosition => inputScheme.MousePosition;
+}
+public interface IInputScheme
+{
+    public void Update();
+    public IDirectionalControl Engine { get; }
+    public IControl Dock { get; }
+    public IControl Construct { get; }
+    public IControl SwapPrimary { get; }
+    public IControl OpenPanel { get; }
+    public IControl ToggleAimAssist { get; }
+    public IControl DropScrap { get; }
+    public IControl Ability { get; }
+    public IControl WarpForward { get; }
+    public IControl ModifyAbility { get; }
+    public IControl Reload { get; }
+    public IControl Exit { get; }
+    public IControl Tab { get; }
+    public IControl LMB { get; }
+    public IControl RMB { get; }
+    public IScalarControl Zoom { get; }
+    public IDirectionalControl MousePosition { get; }
+}
+public class KeyboardInput() : IInputScheme
+{
+    public KeyboardState NewState { get; set; }
+    public KeyboardState OldState { get; set; }
+    public MouseState NewMouseState { get; set; }
+    public MouseState OldMouseState { get; set; }
+    public IDirectionalControl Engine => new KeyboardDirection(Keys.W, Keys.S, Keys.A, Keys.D, this);
+    public IControl Dock => new KeyboardControl(Keys.Space, this);
+    public IControl Construct => new KeyboardControl(Keys.C, this);
+    public IControl SwapPrimary => new KeyboardControl(Keys.E, this);
+    public IControl OpenPanel => new KeyboardControl(Keys.I, this);
+    public IControl ToggleAimAssist => new KeyboardControl(Keys.LeftControl, this);
+    public IControl DropScrap => new KeyboardControl(Keys.F, this);
+    public IControl Ability => new KeyboardControl(Keys.Q, this);
+    public IControl WarpForward => new KeyboardControl(Keys.RightShift, this);
+    public IControl ModifyAbility => new KeyboardControl(Keys.LeftShift, this);
+    public IControl Reload => new KeyboardControl(Keys.R, this);
+    public IControl Exit => new KeyboardControl(Keys.Escape, this);
+    public IControl Tab => new KeyboardControl(Keys.Tab, this);
+
+    //Mouse
+    public IControl LMB => new LeftButton(this);
+    public IControl RMB => new RightButton(this);
+    public IScalarControl Zoom => new Zoom(this);
+    public IDirectionalControl MousePosition => new MousePosition(this);
+    public void Update()
     {
         OldState = NewState;
         NewState = Keyboard.GetState();
@@ -20,18 +93,6 @@ public static class Input
             SaveGame.DebugMode = !SaveGame.DebugMode;
         }
     }
-    public static IDirectionalControl Engine { get; set; } = new KeyboardDirection(Keys.W, Keys.S, Keys.A, Keys.D);
-    public static IControl Dock { get; set; } = new KeyboardControl(Keys.Space);
-    public static IControl Construct { get; set; } = new KeyboardControl(Keys.C);
-    public static IControl SwapPrimary { get; set; } = new KeyboardControl(Keys.E);
-    public static IControl OpenPanel { get; set; } = new KeyboardControl(Keys.I);
-    public static IControl ToggleAimAssist { get; set; } = new KeyboardControl(Keys.LeftControl);
-    public static IControl DropScrap { get; set; } = new KeyboardControl(Keys.F);
-    public static IControl Ability { get; set; } = new KeyboardControl(Keys.Q);
-    public static IControl WarpForward { get; set; } = new KeyboardControl(Keys.RightShift);
-    public static IControl WarpBackward { get; set; } = new KeyboardControl(Keys.LeftShift);
-    public static IControl SkipCutscene { get; set; } = new KeyboardControl(Keys.Escape);
-
 }
 public interface IControl
 {
@@ -39,30 +100,55 @@ public interface IControl
     public bool WasDown { get; }
     public string InputString { get; }
 }
+public interface IScalarControl
+{
+    public float Value { get; }
+    public float OldValue { get; }
+}
 public interface IDirectionalControl
 {
     public Vector2 Direction { get; }
+    public Vector2 OldDirection { get; }
 }
-public class KeyboardControl(Keys _key) : IControl
+public class KeyboardControl(Keys _key, KeyboardInput _input) : IControl
 {
-    public bool IsDown => Input.NewState.IsKeyDown(_key);
-    public bool WasDown => Input.OldState.IsKeyDown(_key);
+    public bool IsDown => _input.NewState.IsKeyDown(_key);
+    public bool WasDown => _input.OldState.IsKeyDown(_key);
     public string InputString => _key.ToString();
 }
-public class KeyboardDirection(Keys _up, Keys _down, Keys _left, Keys _right) : IDirectionalControl
+public class KeyboardDirection(Keys _up, Keys _down, Keys _left, Keys _right, KeyboardInput _input) : IDirectionalControl
 {
     public Vector2 Direction 
     { 
         get 
         {
             Vector2 output = Vector2.Zero;
-            if (Input.NewState.IsKeyDown(_up))
+            if (_input.NewState.IsKeyDown(_up))
                 output += new Vector2(0, -1);
-            if (Input.NewState.IsKeyDown(_down))
+            if (_input.NewState.IsKeyDown(_down))
                 output += new Vector2(0, 1);
-            if (Input.NewState.IsKeyDown(_left))
+            if (_input.NewState.IsKeyDown(_left))
                 output += new Vector2(-1, 0);
-            if (Input.NewState.IsKeyDown(_right))
+            if (_input.NewState.IsKeyDown(_right))
+                output += new Vector2(1, 0);
+            float length = output.Length();
+            if (length > 0.0001f)
+                output /= length;
+            return output;
+        }
+    }
+    public Vector2 OldDirection
+    {
+        get
+        {
+            Vector2 output = Vector2.Zero;
+            if (_input.OldState.IsKeyDown(_up))
+                output += new Vector2(0, -1);
+            if (_input.OldState.IsKeyDown(_down))
+                output += new Vector2(0, 1);
+            if (_input.OldState.IsKeyDown(_left))
+                output += new Vector2(-1, 0);
+            if (_input.OldState.IsKeyDown(_right))
                 output += new Vector2(1, 0);
             float length = output.Length();
             if (length > 0.0001f)
@@ -71,5 +157,49 @@ public class KeyboardDirection(Keys _up, Keys _down, Keys _left, Keys _right) : 
         }
     }
 }
+public class LeftButton(KeyboardInput _input) : IControl
+{
+    public bool IsDown 
+    { 
+        get 
+        {
+            if(UIManager.Self.IsOver)
+            {
+                return false;
+            }
+            return _input.NewMouseState.LeftButton == ButtonState.Pressed;
+        } 
+    }
 
+    public bool WasDown
+    {
+        get
+        {
+            if (UIManager.Self.IsOver)
+            {
+                return false;
+            }
+            return _input.OldMouseState.LeftButton == ButtonState.Pressed;
+        }
+    }
 
+    public string InputString => "LMB";
+}
+public class RightButton(KeyboardInput _input) : IControl
+{
+    public bool IsDown => _input.NewMouseState.RightButton == ButtonState.Pressed;
+
+    public bool WasDown => _input.OldMouseState.RightButton == ButtonState.Pressed;
+
+    public string InputString => "RMB";
+}
+public class MousePosition(KeyboardInput _input) : IDirectionalControl
+{
+    public Vector2 Direction => new Vector2(_input.NewMouseState.Position.X, _input.NewMouseState.Position.Y);
+    public Vector2 OldDirection => new Vector2(_input.OldMouseState.Position.X, _input.OldMouseState.Position.Y);
+}
+public class Zoom(KeyboardInput _input) : IScalarControl
+{
+    public float Value => _input.NewMouseState.ScrollWheelValue;
+    public float OldValue => _input.OldMouseState.ScrollWheelValue;
+}
