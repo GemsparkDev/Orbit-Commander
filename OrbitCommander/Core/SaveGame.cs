@@ -49,7 +49,7 @@ public class SaveGame
     public bool GiveWeapon { get { giveWeapon = !giveWeapon; return !giveWeapon; } }
     public static float EnemyHitboxModifier { get; set; } = 1.2f;
     private static bool debugMode = false;
-    public static bool DebugMode { get => debugMode; set { debugMode = value; UI.DebugWindow.enabled = debugMode; } }
+    public static bool DebugMode { get => debugMode; set { debugMode = value; UI.DebugMenu.enabled = debugMode; } }
     public static bool PatchedConics { get; set; } = true;
     public static bool UseShader { get; set; } = true;
     public static ColorScheme ColorScheme { get; set; } = new StandardScheme();

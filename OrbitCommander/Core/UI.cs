@@ -8,6 +8,7 @@ using System.Diagnostics;
 using OrbitCommander.Entities;
 using OrbitCommander.Components;
 using OrbitCommander.UIElements;
+using System.Linq;
 
 namespace OrbitCommander.Core;
 public static class UI
@@ -34,7 +35,7 @@ public static class UI
     public static Window EscapeMenu { get; } = new Window(center, Assets.Get(Sprites.LargePanel));
     public static Window MenuSettings { get; } = new Window(new Vector2(center.X * 2, center.Y), Assets.Get(Sprites.RightSidePanel)) { alignment = Alignment.Right };
     public static Window KeyBinds { get; } = new Window(new Vector2(0, center.Y), Assets.Get(Sprites.Terminal)) { alignment = Alignment.Left };
-    public static Window DebugWindow { get; } = new Window(Vector2.Zero, Assets.Get(Sprites.LargePanel)) { alignment = Alignment.TopLeft };
+    public static Window DebugMenu { get; } = new Window(Vector2.Zero, Assets.Get(Sprites.GargantuanPanel)) { alignment = Alignment.TopLeft };
 
     //Main Menu
     public static Button PatchedConicsToggle { get; } = new Button(new Vector2(-10, 50), Assets.Get(Sprites.SwitchOn), Assets.TextFont, $"Patched Conics: {SaveGame.PatchedConics}", Color.White, Assets.Get(Sprites.SwitchOff));
@@ -60,6 +61,7 @@ public static class UI
     //public static Decal[] KeybindTexts { get; } = new Decal[Input.Keybinds.Count];
     //public static TerminalButton[] KeybindInputs { get; } = new TerminalButton[Input.Keybinds.Count];
 
+    public static Button SetModules { get; } = new Button(new Vector2(0, 50), Assets.Get(Sprites.Button), Assets.TextFont, "Apply", Color.White);
     //Pause Menu
     public static Button AbortButton { get; } = new Button(new Vector2(0, -20), Assets.Get(Sprites.WideButton), Assets.TextFont, "Abort", Color.White);
     public static Button SettingsButton { get; } = new Button(new Vector2(0, 20), Assets.Get(Sprites.WideButton), Assets.TextFont, "Options", Color.White);
@@ -450,19 +452,19 @@ public static class UI
         UpgradeHull.AddTooltip(tooltip);
         UpgradeHull.AddBehaviour(delegate
         {
-            Events.UpgradeModule(Core.ModuleType.Hull, Engine.SaveGame.Player.modules[Core.ModuleType.Hull]);
+            Events.UpgradeModule(ModuleType.Hull, Engine.SaveGame.Player.modules[Core.ModuleType.Hull]);
         });
         UpgradeGuns.AddBehaviour(delegate
         {
-            Events.UpgradeModule(Core.ModuleType.Guns, Engine.SaveGame.Player.modules[Core.ModuleType.Guns]);
+            Events.UpgradeModule(ModuleType.Guns, Engine.SaveGame.Player.modules[Core.ModuleType.Guns]);
         });
         UpgradeEngine.AddBehaviour(delegate
         {
-            Events.UpgradeModule(Core.ModuleType.Engines, Engine.SaveGame.Player.modules[Core.ModuleType.Engines]);
+            Events.UpgradeModule(ModuleType.Engines, Engine.SaveGame.Player.modules[Core.ModuleType.Engines]);
         });
         UpgradeCore.AddBehaviour(delegate
         {
-            Events.UpgradeModule(Core.ModuleType.Core, Engine.SaveGame.Player.modules[Core.ModuleType.Core]);
+            Events.UpgradeModule(ModuleType.Core, Engine.SaveGame.Player.modules[Core.ModuleType.Core]);
         });
 
         HackButton.AddBehaviour(delegate { Events.SendMessage(Message.Hack); });
@@ -499,6 +501,7 @@ public static class UI
         {
             int module = i;
             GlobalMainMenu.AddWidget(NextModule[i] = new TerminalButton(new Vector2(120, 25 * i - 40), Assets.TextFont, $"Next", Color.White, 10), (int)Alignment.Center);
+            DebugMenu.AddWidget(NextModule[i]);
             int index = i;
             NextModule[i].AddBehaviour(
                 delegate () 
@@ -515,6 +518,7 @@ public static class UI
                     Events.SetModules();
                 });
             GlobalMainMenu.AddWidget(PrevModule[i] = new TerminalButton(new Vector2(-120, 25 * i - 40), Assets.TextFont, $"Prev", Color.White, 10), (int)Alignment.Center);
+            DebugMenu.AddWidget(PrevModule[i]);
             PrevModule[i].AddBehaviour(
                 delegate () 
                 {
@@ -530,7 +534,16 @@ public static class UI
                     Events.SetModules(); 
                 });
             GlobalMainMenu.AddWidget(ModuleSelection[i] = new Decal(new Vector2(0, 25 * i - 40), Assets.TextFont, "Loading...", Color.White, 10), (int)Alignment.Center);
+            DebugMenu.AddWidget(ModuleSelection[i]);
         }
+        DebugMenu.AddWidget(SetModules);
+        SetModules.AddBehaviour(delegate () 
+        {
+            for(ModuleType i = ModuleType.Hull; i <= ModuleType.Core; i++)
+            {
+                Engine.SaveGame.Player.modules[i] = ItemFactory.moduleData[setModules[(int)i]].Retrieve();
+            }
+        });
 
         PauseMenu.AddWidget(AbortButton);
         PauseMenu.AddWidget(SettingsButton);
@@ -790,7 +803,7 @@ public static class UI
         Engine.UIManager.AddContainer(EscapeMenu);
         Engine.UIManager.AddContainer(MenuSettings);
         Engine.UIManager.AddContainer(KeyBinds);
-        Engine.UIManager.AddContainer(DebugWindow);
+        Engine.UIManager.AddContainer(DebugMenu);
 
         Engine.UIManager.ScreenWindow = GlobalMenu;
     }
