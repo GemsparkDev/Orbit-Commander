@@ -500,8 +500,7 @@ public static class UI
         for (int i = 0; i < NextModule.Length; i++)
         {
             int module = i;
-            GlobalMainMenu.AddWidget(NextModule[i] = new TerminalButton(new Vector2(120, 25 * i - 40), Assets.TextFont, $"Next", Color.White, 10), (int)Alignment.Center);
-            DebugMenu.AddWidget(NextModule[i]);
+            DebugMenu.AddWidget(NextModule[i] = new TerminalButton(new Vector2(120, 25 * i - 40), Assets.TextFont, $"Next", Color.White, 10), (int)Alignment.Center);
             int index = i;
             NextModule[i].AddBehaviour(
                 delegate () 
@@ -517,8 +516,7 @@ public static class UI
                     }
                     Events.SetModules();
                 });
-            GlobalMainMenu.AddWidget(PrevModule[i] = new TerminalButton(new Vector2(-120, 25 * i - 40), Assets.TextFont, $"Prev", Color.White, 10), (int)Alignment.Center);
-            DebugMenu.AddWidget(PrevModule[i]);
+            DebugMenu.AddWidget(PrevModule[i] = new TerminalButton(new Vector2(-120, 25 * i - 40), Assets.TextFont, $"Prev", Color.White, 10), (int)Alignment.Center);
             PrevModule[i].AddBehaviour(
                 delegate () 
                 {
@@ -533,8 +531,7 @@ public static class UI
                     }
                     Events.SetModules(); 
                 });
-            GlobalMainMenu.AddWidget(ModuleSelection[i] = new Decal(new Vector2(0, 25 * i - 40), Assets.TextFont, "Loading...", Color.White, 10), (int)Alignment.Center);
-            DebugMenu.AddWidget(ModuleSelection[i]);
+            DebugMenu.AddWidget(ModuleSelection[i] = new Decal(new Vector2(0, 25 * i - 40), Assets.TextFont, "Loading...", Color.White, 10), (int)Alignment.Center);
         }
         DebugMenu.AddWidget(SetModules);
         SetModules.AddBehaviour(delegate () 
