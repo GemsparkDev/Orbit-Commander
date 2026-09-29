@@ -80,7 +80,7 @@ public class Engine : Game
 
             Assets.LoadStageOne(Content);
 
-            UIManager = new UIManager((Func<Vector2>)(() => (Vector2)Engine.BackBuffer));
+            UIManager = new UIManager((Func<Vector2>)(() => BackBuffer));
 
             //UI behaviors that need special permission
             UI.SingleplayerButton.AddBehaviour(delegate()
@@ -109,11 +109,11 @@ public class Engine : Game
                 Self.graphics.IsFullScreen = UI.windowType == 2;
                 Self.graphics.PreferredBackBufferWidth = (int)UI.resolutions[UI.selectedResolution].X;
                 Self.graphics.PreferredBackBufferHeight = (int)UI.resolutions[UI.selectedResolution].Y;
-                Engine.BackBuffer = UI.resolutions[UI.selectedResolution];
+                BackBuffer = UI.resolutions[UI.selectedResolution];
                 Self.graphics.ApplyChanges();
             });
             UI.AddUIElements();
-            Camera = new Camera(Vector2.Zero, (Vector2)(Engine.BackBuffer / 2), 1f, 0);
+            Camera = new Camera(Vector2.Zero, (Vector2)(BackBuffer / 2), 1f, 0);
             DialogueManager = new DialogueManager();
             CurrentGameState.SwitchState(new MainMenu());
             LoadingStage = LoadingStage.MainMenu;
@@ -260,7 +260,7 @@ public class Engine : Game
             exception.Draw(spriteBatch);
         }
         ShaderExceptions.Clear();
-        if (Input.LMB.IsDown)
+        if (Mouse.GetState().LeftButton == ButtonState.Pressed)
         {
             spriteBatch.Draw(Assets.Get(Sprites.ClickedCursor), new Vector2(Mouse.GetState().X, Mouse.GetState().Y), null, Color.White, 0, Vector2.Zero, UIManager.UIScale / 2, 0, 0.5f);
         }
