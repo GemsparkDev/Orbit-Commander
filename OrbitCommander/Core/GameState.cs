@@ -191,6 +191,7 @@ public class MissionSelect : GameState
         Engine.Camera.Zoom = 1;
 
         SoundManager.PlayGlobalSound(Assets.Get(Sound.Interact));
+        SoundManager.ChangeTrack(Assets.Get(Sound.menu));
         while (!Engine.UIManager.ToggleToMenu(UI.MissionSelect))
         { }
     }
