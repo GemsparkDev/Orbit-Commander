@@ -3571,10 +3571,20 @@ public class Entity : IMissionComponent
                 }
                 if (diff < 0.2f && CD[0] <= 0)
                 {
-                    var p1 = NewAssassinShot(Position, Vector2.Normalize(targetVector) * 300, Angle, 0, Team, damage);
-                    p1.TimeLeft = 0.2f;
-                    Engine.SaveGame.CurrentMission.Add(p1);
-                    CD[0] = 1;
+                    List<Entity> entities = Engine.SaveGame.CurrentMission.Hitscan(Position, targetVector, 3000, true, out Vector2 end, [Team.Friendly, Team.Dead]);
+                    for (int i = 0; i < entities.Count; i++)
+                    {
+                        entities[i].Collide(damage);
+                    }
+                    SoundManager.PlaySound(Assets.Get(Sound.SniperFire), Position);
+
+                    float distance = (end - Position).Length() / 4;
+                    for (int i = 0; i < distance; i++)
+                    {
+                        ParticleManager.Add(new Particle(Assets.Get(Sprites.Dot), 2, Position + Vector2.Normalize(targetVector) * 4 * i, Vector2.Zero, Angle, 0, Color.Red, Color.Transparent));
+                    }
+
+                    CD[0] = 2;
                 }
             }
             else
