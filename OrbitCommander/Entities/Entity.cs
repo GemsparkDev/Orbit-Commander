@@ -3565,26 +3565,33 @@ public class Entity : IMissionComponent
                 targetAngle = MathF.Atan2(targetVector.Y, targetVector.X) + MathF.PI / 2;
                 float diff = MathF.Abs(Angle - targetAngle);
                 RotateTowards(targetAngle, diff / 10);
-                if (targetVector.Length() > 200)
+                if (targetVector.Length() > 350)
                 {
-                    GoToPosition(nearestEnemy.Position, 15);
+                    GoToPosition(nearestEnemy.Position, 10);
                 }
-                if (diff < 0.2f && CD[0] <= 0)
+                if (diff < 0.2f)
                 {
-                    List<Entity> entities = Engine.SaveGame.CurrentMission.Hitscan(Position, targetVector, 3000, true, out Vector2 end, [Team.Friendly, Team.Dead]);
-                    for (int i = 0; i < entities.Count; i++)
+                    if(CD[0] > 0)
                     {
-                        entities[i].Collide(damage);
+                        DrawLine(Util.ToAngle(targetVector), CD[0], 2);
                     }
-                    SoundManager.PlaySound(Assets.Get(Sound.SniperFire), Position);
-
-                    float distance = (end - Position).Length() / 4;
-                    for (int i = 0; i < distance; i++)
+                    else
                     {
-                        ParticleManager.Add(new Particle(Assets.Get(Sprites.Dot), 2, Position + Vector2.Normalize(targetVector) * 4 * i, Vector2.Zero, Angle, 0, Color.Red, Color.Transparent));
-                    }
+                        List<Entity> entities = Engine.SaveGame.CurrentMission.Hitscan(Position, targetVector, 3000, true, out Vector2 end, [Team.Friendly, Team.Dead]);
+                        for (int i = 0; i < entities.Count; i++)
+                        {
+                            entities[i].Collide(damage);
+                        }
+                        SoundManager.PlaySound(Assets.Get(Sound.SniperFire), Position);
 
-                    CD[0] = 2;
+                        float distance = (end - Position).Length() / 4;
+                        for (int i = 0; i < distance; i++)
+                        {
+                            ParticleManager.Add(new Particle(Assets.Get(Sprites.Dot), 2, Position + Vector2.Normalize(targetVector) * 4 * i, Vector2.Zero, Angle, 0, Color.Red, Color.Transparent));
+                        }
+
+                        CD[0] = 2;
+                    }
                 }
             }
             else
