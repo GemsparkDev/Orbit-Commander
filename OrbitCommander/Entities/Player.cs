@@ -493,7 +493,7 @@ public class Player : Entity
     public float CalculateFuseRatio(ModuleType _module)
     {
         //Square root of the ratio reduces impact with additional fuse (especially with weapon dps)
-        return MathF.ReciprocalSqrtEstimate((float)CountFuses(_module) / 3);
+        return MathF.Sqrt((float)CountFuses(_module) / 3);
     }
     public void OnEnemyHit(Entity _entity, int _damage)
     {
