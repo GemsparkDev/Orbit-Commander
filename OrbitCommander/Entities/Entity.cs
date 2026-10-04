@@ -3532,7 +3532,7 @@ public class Entity : IMissionComponent
         EnemyRange.particleVelocity = 500;
         SensingAbility = -1;
         StealthAbility = 0;
-        CD = [0];
+        float cd = 2;
         Entity target = null;
         float trackTime = 0;
         Vector2 rand = Position;
@@ -3569,11 +3569,12 @@ public class Entity : IMissionComponent
                 {
                     GoToPosition(nearestEnemy.Position, 10);
                 }
+                DrawLine(Util.ToAngle(targetVector), cd, 2);
                 if (diff < 0.2f)
                 {
-                    if(CD[0] > 0)
+                    if(cd > 0)
                     {
-                        DrawLine(Util.ToAngle(targetVector), CD[0], 2);
+                        cd -= Engine.DeltaSeconds;
                     }
                     else
                     {
@@ -3590,9 +3591,12 @@ public class Entity : IMissionComponent
                             ParticleManager.Add(new Particle(Assets.Get(Sprites.Dot), 2, Position + Vector2.Normalize(targetVector) * 4 * i, Vector2.Zero, Angle, 0, Color.Red, Color.Transparent));
                         }
 
-                        CD[0] = 2;
+                        cd = 2;
                     }
                 }
+                else
+                    if (cd < 2)
+                        cd += Engine.DeltaSeconds;
             }
             else
             {
@@ -3686,9 +3690,9 @@ public class Entity : IMissionComponent
                 targetAngle = MathF.Atan2(targetVector.Y, targetVector.X) + MathF.PI / 2;
                 float diff = MathF.Abs(Angle - targetAngle);
                 RotateTowards(targetAngle, diff / 10);
-                if (targetVector.Length() > 150)
+                if (targetVector.Length() > 200)
                 {
-                    GoToPosition(target.Position, 15);
+                    GoToPosition(target.Position, 10);
                 }
                 else if (diff < 0.1f && hookCooldown <= 0 && grapplingHook == null)
                 {

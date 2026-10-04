@@ -198,7 +198,6 @@ public class SaveGame
                 inv.Append($"{{}},");
             }
         }
-        Debug.WriteLine(MissionSelectInventory[0] == null);
         foreach (var item in MissionSelectInventory)
         {
             if (item != null)

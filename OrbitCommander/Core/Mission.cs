@@ -131,8 +131,8 @@ public class Mission
 
         (new("Binary system", "It seems plans for a mass relay have been abandoned here.\nConstruct it to recieve some advanced equipment from our previous stations.", 0, 2000, [8], 2, 2000),
         delegate(){Entity a;return new([
-            new Planet(new Vector2(500, 0), new Vector2(0, 1.05f), 10000, 7, false, Color.Cyan) { Temperature = -5},
-            new Planet(new Vector2(-1000, 0), new Vector2(0, -2.1f), 5000, 4f, false, Color.Orange) { Temperature = 5 },
+            new Planet(new Vector2(500, 0), new Vector2(0, 1.05f), 10000, 7, false, Color.Cyan) { Temperature = -1.1f},
+            new Planet(new Vector2(-1000, 0), new Vector2(0, -2.1f), 5000, 4f, false, Color.Orange) { Temperature = 1.1f },
             new WaveSpawner(T3, 1, true),
             a=Entity.MassRelay(Vector2.Zero, Vector2.Zero, 0)],
             new Conditional([new Protect([a]), new Custom(a)], SendPickup()),
