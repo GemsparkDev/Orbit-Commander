@@ -44,14 +44,14 @@ public abstract class GameState
         //Disables rendering when disabled
         if (Engine.SaveGame != null && !Engine.SaveGame.Player.IsEnabled)
         {
-            _spriteBatch.Draw(Assets.Get(Sprites.DeadFile), Engine.Camera.Position + Engine.MousePositionOffset, null, Color.White, 0, Assets.DimsOf(Sprites.DeadFile) / 2, UIManager.UIScale, 0, 0);
+            _spriteBatch.Draw(Assets.Get(Sprites.DeadFile), Engine.Camera.Position, null, Color.White, 0, Assets.DimsOf(Sprites.DeadFile) / 2, UIManager.UIScale, 0, 0);
             return;
         }
         Engine.SaveGame.CurrentMission.Draw(_spriteBatch);
         ParticleManager.Draw(_spriteBatch);
         if (SaveGame.DebugMode)
         {
-            Vector2 cameraPos = Engine.Camera.Position + Engine.MousePositionOffset;
+            Vector2 cameraPos = Engine.Camera.Position;
             Vector2 sz = Engine.BackBuffer / 2 / Engine.Camera.Zoom;
             for (int x = (int)Math.Ceiling((cameraPos.X - sz.X) / 50); x < (cameraPos.X + sz.X) / 50; x++)
             {
@@ -181,7 +181,6 @@ public class MissionSelect : GameState
     public override void Initialize()
     {
         Engine.UIManager.ScreenWindow.enabled = false;
-        Engine.MousePositionOffset = Vector2.Zero;
         ParticleManager.Initialize();
         Events.UpdateModulesUI();
         Events.UpdateMissionText();

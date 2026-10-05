@@ -33,7 +33,6 @@ public static class Events
     {
         Player.Velocity = Vector2.Zero;
         Engine.IngameTime = new();
-        Engine.MousePositionOffset = Vector2.Zero;
         Engine.UIManager.DisableAll();
         UI.GlobalMainMenu.enabled = true;
         ParticleManager.Initialize();

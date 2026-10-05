@@ -30,7 +30,6 @@ public class Engine : Game
     public static Engine Self { get; private set; }
     public static Texture2D Line { get; private set; }
     public static Vector2 BackBuffer { get => new Vector2(Self.graphics.PreferredBackBufferWidth, Self.graphics.PreferredBackBufferHeight); set { Self.graphics.PreferredBackBufferWidth = (int)value.X;  Self.graphics.PreferredBackBufferHeight = (int)value.Y; Self.graphics.ApplyChanges(); }  } //Application size
-    public static Vector2 MousePositionOffset { get; set; }
     public static Timespan IngameTime { get; set; } = new();
     public static float DeltaSeconds { get; private set; }
     private readonly float timeScale = 1f;
@@ -236,7 +235,7 @@ public class Engine : Game
             return;
         }
 
-        Camera.Origin = new Vector2(1920, 1080) / 2 - MousePositionOffset; //TODO: Make sure this updates when the rendertarget size updates!
+        Camera.Origin = new Vector2(1920, 1080) / 2; //TODO: Make sure this updates when the rendertarget size updates!
         //Renders gamespace to a rendertarget, then renders render target with a shader
         GraphicsDevice.SetRenderTarget(renderTarget);
         GraphicsDevice.Clear(SaveGame.ColorScheme.Background());

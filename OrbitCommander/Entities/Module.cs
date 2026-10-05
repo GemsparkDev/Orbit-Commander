@@ -1370,7 +1370,7 @@ public class GuidedRound() : Weapon(Modules.GuidedRound)
     public override bool CritCondition => rounds.Count >= 3;
     public override void OnShoot()
     {
-        Vector2 mousePos = Input.MousePosition.Direction - Engine.BackBuffer / 2 + Engine.MousePositionOffset * 1.5f;
+        Vector2 mousePos = Input.MousePosition.Direction - Engine.BackBuffer / 2 + Engine.Camera.Position - Engine.SaveGame.Player.Position;
         foreach (var round in rounds)
         {
             round.Velocity += Vector2.Normalize(mousePos - (round.Position - Player.Position)) * Engine.DeltaSeconds * 60;
@@ -1484,7 +1484,7 @@ public class SummonGrapplingHook() : Module(Modules.GrapplingHook)
     {
         if (hook != null)
         {
-            var mousePos = Input.MousePosition.Direction + Engine.Camera.Position - Engine.BackBuffer / 2 + Engine.MousePositionOffset;
+            var mousePos = Input.MousePosition.Direction + Engine.Camera.Position - Engine.BackBuffer / 2;
             if (Vector2.Distance(mousePos, Player.Position) < 100)
             {
                 foreach (var entity in Engine.SaveGame.CurrentMission.Entities)
@@ -1703,12 +1703,12 @@ public class Expose() : Module(Modules.Expose)
         }
         if (Input.ModifyAbility.IsDown)
         {
-            Player.Shoot(aura = new FlameBolt(Player.Position + Input.MousePosition.Direction + Engine.MousePositionOffset - Engine.BackBuffer / 2, Vector2.Zero, Team, 0, new ParticleEmitter(Assets.Get(Sprites.Dot), Player.Position, 0, Color.Orange * 0.75f) { speedOfEmission = 0.5f }, 10, 2, 20), 1, false);
+            Player.Shoot(aura = new FlameBolt(Engine.Camera.Position + Input.MousePosition.Direction - Engine.BackBuffer / 2, Vector2.Zero, Team, 0, new ParticleEmitter(Assets.Get(Sprites.Dot), Player.Position, 0, Color.Orange * 0.75f) { speedOfEmission = 0.5f }, 10, 2, 20), 1, false);
             isFire = true;        
         }
         else
         {
-            Player.Shoot(aura = new FlameBolt(Player.Position + Input.MousePosition.Direction + Engine.MousePositionOffset - Engine.BackBuffer / 2, Vector2.Zero, Team, 0, new ParticleEmitter(Assets.Get(Sprites.Dot), Player.Position, 0, Color.Cyan * 0.75f) { speedOfEmission = 0.5f }, 10, 2, -20), 1, false);
+            Player.Shoot(aura = new FlameBolt(Engine.Camera.Position + Input.MousePosition.Direction - Engine.BackBuffer / 2, Vector2.Zero, Team, 0, new ParticleEmitter(Assets.Get(Sprites.Dot), Player.Position, 0, Color.Cyan * 0.75f) { speedOfEmission = 0.5f }, 10, 2, -20), 1, false);
             isFire = false;
         }
         aura.Transform.IsImmovable = true;

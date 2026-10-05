@@ -387,7 +387,7 @@ public class Player : Entity
             isEngineActive = false;
         }
         //Ensures that target vector performs identically in all resolutions
-        Vector2 mouseCamPos = Engine.Camera.Position + Input.MousePosition.Direction - Engine.BackBuffer / 2 + Engine.MousePositionOffset;
+        Vector2 mouseCamPos = Engine.Camera.Position + Input.MousePosition.Direction - Engine.BackBuffer / 2;
         //Testing
         //ParticleManager.Add(new Particle(Assets.Get(Sprite.Circle), mouseCamPos, 0, Color.White));
         //ParticleManager.Add(new Particle(Assets.Get(Sprite.Circle), position, 0, Color.White));
