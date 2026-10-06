@@ -63,19 +63,19 @@ public class KeyboardInput() : IInputScheme
     public KeyboardState OldState { get; set; }
     public MouseState NewMouseState { get; set; }
     public MouseState OldMouseState { get; set; }
-    public IDirectionalControl Engine => new KeyboardDirection(Keys.W, Keys.S, Keys.A, Keys.D, this);
-    public IControl Dock => new KeyboardControl(Keys.Space, this);
-    public IControl Construct => new KeyboardControl(Keys.C, this);
-    public IControl SwapPrimary => new KeyboardControl(Keys.E, this);
-    public IControl OpenPanel => new KeyboardControl(Keys.I, this);
-    public IControl ToggleAimAssist => new KeyboardControl(Keys.LeftControl, this);
-    public IControl DropScrap => new KeyboardControl(Keys.F, this);
-    public IControl Ability => new KeyboardControl(Keys.Q, this);
-    public IControl WarpForward => new KeyboardControl(Keys.RightShift, this);
-    public IControl ModifyAbility => new KeyboardControl(Keys.LeftShift, this);
-    public IControl Reload => new KeyboardControl(Keys.R, this);
-    public IControl Exit => new KeyboardControl(Keys.Escape, this);
-    public IControl Tab => new KeyboardControl(Keys.Tab, this);
+    public IDirectionalControl Engine => new KeyboardDirection(0, 1, 2, 3, this);
+    public IControl Dock => new KeyboardControl(4, this);
+    public IControl Construct => new KeyboardControl(5, this);
+    public IControl SwapPrimary => new KeyboardControl(6, this);
+    public IControl OpenPanel => new KeyboardControl(7, this);
+    public IControl ToggleAimAssist => new KeyboardControl(8, this);
+    public IControl DropScrap => new KeyboardControl(9, this);
+    public IControl Ability => new KeyboardControl(10, this);
+    public IControl WarpForward => new KeyboardControl(11, this);
+    public IControl ModifyAbility => new KeyboardControl(12, this);
+    public IControl Reload => new KeyboardControl(13, this);
+    public IControl Exit => new KeyboardControl(14, this);
+    public IControl Tab => new KeyboardControl(15, this);
 
     //Mouse
     public IControl LMB => new LeftButton(this);
@@ -110,26 +110,26 @@ public interface IDirectionalControl
     public Vector2 Direction { get; }
     public Vector2 OldDirection { get; }
 }
-public class KeyboardControl(Keys _key, KeyboardInput _input) : IControl
+public class KeyboardControl(int _key, KeyboardInput _input) : IControl
 {
-    public bool IsDown => _input.NewState.IsKeyDown(_key);
-    public bool WasDown => _input.OldState.IsKeyDown(_key);
+    public bool IsDown => _input.NewState.IsKeyDown(UI.keys[_key]);
+    public bool WasDown => _input.OldState.IsKeyDown(UI.keys[_key]);
     public string InputString => _key.ToString();
 }
-public class KeyboardDirection(Keys _up, Keys _down, Keys _left, Keys _right, KeyboardInput _input) : IDirectionalControl
+public class KeyboardDirection(int _up, int _down, int _left, int _right, KeyboardInput _input) : IDirectionalControl
 {
     public Vector2 Direction 
     { 
         get 
         {
             Vector2 output = Vector2.Zero;
-            if (_input.NewState.IsKeyDown(_up))
+            if (_input.NewState.IsKeyDown(UI.keys[_up]))
                 output += new Vector2(0, -1);
-            if (_input.NewState.IsKeyDown(_down))
+            if (_input.NewState.IsKeyDown(UI.keys[_down]))
                 output += new Vector2(0, 1);
-            if (_input.NewState.IsKeyDown(_left))
+            if (_input.NewState.IsKeyDown(UI.keys[_left]))
                 output += new Vector2(-1, 0);
-            if (_input.NewState.IsKeyDown(_right))
+            if (_input.NewState.IsKeyDown(UI.keys[_right]))
                 output += new Vector2(1, 0);
             float length = output.Length();
             if (length > 0.0001f)
@@ -142,13 +142,13 @@ public class KeyboardDirection(Keys _up, Keys _down, Keys _left, Keys _right, Ke
         get
         {
             Vector2 output = Vector2.Zero;
-            if (_input.OldState.IsKeyDown(_up))
+            if (_input.OldState.IsKeyDown(UI.keys[_up]))
                 output += new Vector2(0, -1);
-            if (_input.OldState.IsKeyDown(_down))
+            if (_input.OldState.IsKeyDown(UI.keys[_down]))
                 output += new Vector2(0, 1);
-            if (_input.OldState.IsKeyDown(_left))
+            if (_input.OldState.IsKeyDown(UI.keys[_left]))
                 output += new Vector2(-1, 0);
-            if (_input.OldState.IsKeyDown(_right))
+            if (_input.OldState.IsKeyDown(UI.keys[_right]))
                 output += new Vector2(1, 0);
             float length = output.Length();
             if (length > 0.0001f)

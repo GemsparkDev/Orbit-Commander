@@ -9,6 +9,7 @@ using OrbitCommander.Entities;
 using OrbitCommander.Components;
 using OrbitCommander.UIElements;
 using System.Linq;
+using System.Collections.Generic;
 
 namespace OrbitCommander.Core;
 public static class UI
@@ -58,8 +59,9 @@ public static class UI
     public static TerminalButton[] PrevModule { get; } = new TerminalButton[5];
     public static Decal[] ModuleSelection { get; } = new Decal[5];
     //TODO: Readd keybind inputs
-    //public static Decal[] KeybindTexts { get; } = new Decal[Input.Keybinds.Count];
-    //public static TerminalButton[] KeybindInputs { get; } = new TerminalButton[Input.Keybinds.Count];
+    public static List<Keys> keys = [Keys.W, Keys.S, Keys.A, Keys.D, Keys.Space, Keys.C, Keys.E, Keys.I, Keys.LeftControl, Keys.F, Keys.Q, Keys.RightShift, Keys.LeftShift, Keys.R, Keys.Escape, Keys.Tab];
+    public static Decal[] KeybindTexts { get; } = new Decal[keys.Count];
+    public static TerminalButton[] KeybindInputs { get; } = new TerminalButton[keys.Count];
 
     public static Button SetModules { get; } = new Button(new Vector2(0, 50), Assets.Get(Sprites.Button), Assets.TextFont, "Apply", Color.White);
     //Pause Menu
@@ -136,7 +138,7 @@ public static class UI
     public static Decal[] StatusLights { get; } = new Decal[5];
     public static Slider RestartSwitch { get; } = new Slider(Line, new Vector2(15, 70), Assets.DimsOf(Sprites.SwitchFive) + new Vector2(2, 4), false, [Color.Transparent, Color.Transparent]);
     public static Decal Switch { get; } = new Decal(RestartSwitch.Offset / UILib.Content.UIManager.UIScale, Assets.Get(Sprites.SwitchFive));
-    public static Stack<Fuse> FuseCounter { get; } = new UIElements.Stack<Fuse>(new Vector2(-5, -70), Assets.Get(Sprites.Button), 1, Assets.Get(Sprites.Fuse), new Vector2(-Assets.Get(Sprites.Button).Width / 2 * 4 / 5, 0), new Vector2(8, 0), delegate () { return new Fuse(Color.White); });
+    public static UIElements.Stack<Fuse> FuseCounter { get; } = new UIElements.Stack<Fuse>(new Vector2(-5, -70), Assets.Get(Sprites.Button), 1, Assets.Get(Sprites.Fuse), new Vector2(-Assets.Get(Sprites.Button).Width / 2 * 4 / 5, 0), new Vector2(8, 0), delegate () { return new Fuse(Color.White); });
     public static ItemSlot<Fuse>[,] Fuses { get; } = new ItemSlot<Fuse>[4, 5];
     public static Decal[] ModuleIcons { get; } = new Decal[5];
     public static Decal FuseDetailing { get; } = new Decal(new Vector2(30, 0), Assets.Get(Sprites.FuseDetailing));
@@ -476,25 +478,23 @@ public static class UI
         GlobalMainMenu.AddWidget(GlobalSidePanelOpen, (int)Alignment.Left);
         GlobalMainMenu.AddWidget(GlobalFusePanelOpen, (int)Alignment.Right);
         GlobalMainMenu.AddWidget(LoadButton, (int)Alignment.TopLeft);
-        /*
-        for (int i = 0; i < Input.Keybinds.Count; i++)
+        for (int i = 0; i < keys.Count; i++)
         {
-            var binding = (Binding)i; //Saving to a variable prevents delegate weirdness
-            var key = Input.Keybinds[binding];
+            var binding = i; //Saving to a variable prevents delegate weirdness
+            var key = keys[binding];
             KeyBinds.AddWidget(KeybindTexts[i] = new Decal(new Vector2(-120 + Assets.TextFont.MeasureString($"{binding}").X / 2.55f, 12 * i - 80), Assets.TextFont, $"{binding}", Color.White, 8), (int)Alignment.TopRight);
             var button = new TerminalButton(new Vector2(60, 12 * i - 80), Assets.TextFont, $"{key}", Color.White, 8);
             button.AddBehaviour(delegate ()
             {
-                var keys = Input.NewState.GetPressedKeys();
+                var keys = Keyboard.GetState().GetPressedKeys();
                 if (keys.Length > 0)
                 {
-                    Input.Keybinds[binding] = keys[0];
+                    keys[binding] = keys[0];
                     button.Text = $"{keys[0]}";
                 }
             });
             KeyBinds.AddWidget(KeybindInputs[i] = button, (int)Alignment.TopRight);
         }
-        */
         KeyBinds.AddWidget(SidePanelClose);
 
         for (int i = 0; i < NextModule.Length; i++)
