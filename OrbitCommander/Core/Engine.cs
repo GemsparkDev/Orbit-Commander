@@ -82,7 +82,7 @@ public class Engine : Game
             UIManager = new UIManager((Func<Vector2>)(() => BackBuffer));
 
             //UI behaviors that need special permission
-            UI.SingleplayerButton.AddBehaviour(delegate()
+            UI.SingleplayerButton.RisingInteract += delegate
             {
                 UIManager.DisableAll();
                 CurrentGameState.SwitchState(new Loading(delegate ()
@@ -91,18 +91,18 @@ public class Engine : Game
                     Events.UpdateModulesUI();
                     Startgame();
                 }, LoadingStage.Complete));
-            });
-            UI.PrevSave.AddBehaviour(delegate
+            };
+            UI.PrevSave.RisingInteract += delegate
             {
                 SaveSlot = Math.Clamp(SaveSlot - 1, 0, 10);
                 Events.GetSave();
-            });
-            UI.NextSave.AddBehaviour(delegate
+            };
+            UI.NextSave.RisingInteract += delegate
             {
                 SaveSlot = Math.Clamp(SaveSlot + 1, 0, 10);
                 Events.GetSave();
-            });
-            UI.ApplyChanges.AddBehaviour((Action)delegate ()
+            };
+            UI.ApplyChanges.RisingInteract += delegate
             {
                 Self.Window.IsBorderless = UI.windowType == 1;
                 Self.graphics.IsFullScreen = UI.windowType == 2;
@@ -110,7 +110,7 @@ public class Engine : Game
                 Self.graphics.PreferredBackBufferHeight = (int)UI.resolutions[UI.selectedResolution].Y;
                 BackBuffer = UI.resolutions[UI.selectedResolution];
                 Self.graphics.ApplyChanges();
-            });
+            };
             UI.AddUIElements();
             Camera = new Camera(Vector2.Zero, (Vector2)(BackBuffer / 2), 1f, 0);
             DialogueManager = new DialogueManager();

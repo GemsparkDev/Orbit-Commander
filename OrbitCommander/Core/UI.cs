@@ -18,7 +18,7 @@ public static class UI
     public static Window PauseMenu { get; } = new Window(center, Assets.Get(Sprites.LargePanel));
     public static Window PlayerMenu { get; } = new Window(new Vector2(0, center.Y), Assets.Get(Sprites.Terminal)) { alignment = Alignment.Left };
     //public static TabbedWindow MainMenu { get; } = new TabbedWindow(center, Assets.Get(Sprites.GargantuanPanel), Assets.Get(Sprites.Tab), Assets.Get(Sprites.SelectedTab), Assets.Get(Sound.Interact), 3) { enabled = true, icons = [Assets.Get(Sprites.PlayIcon), Assets.Get(Sprites.SettingsIcon)] };
-    public static Screen GlobalMainMenu { get; } = new Screen() { enabled = true };
+    public static Screen GlobalMainMenu { get; } = new Screen() { IsEnabled = true };
     public static Window MothershipMenu { get; } = new Window(new Vector2(0, center.Y), Assets.Get(Sprites.Terminal)) { alignment = Alignment.Left };
     public static TabbedWindow MissionSelect { get; } = new TabbedWindow(new Vector2(0, center.Y), Assets.Get(Sprites.GargantuanPanel), Assets.Get(Sprites.Tab), Assets.Get(Sprites.SelectedTab), Assets.Get(Sound.Interact), 2)
     { icons = [Assets.Get(Sprites.PlanetIcon), Assets.Get(Sprites.RepairIcon)], alignment = Alignment.Left };
@@ -28,8 +28,8 @@ public static class UI
     public static TabbedWindow UpgradeMenu { get; } = new TabbedWindow(center, Assets.Get(Sprites.GargantuanPanel),
         Assets.Get(Sprites.Tab), Assets.Get(Sprites.SelectedTab), Assets.Get(Sound.Interact), 2);
     public static Window SettingsMenu { get; } = new Window(center, Assets.Get(Sprites.GargantuanPanel));
-    public static Screen GlobalMenu { get; } = new Screen() { enabled = true };
-    public static Screen CutsceneGlobalMenu { get; } = new Screen() { enabled = true };
+    public static Screen GlobalMenu { get; } = new Screen() { IsEnabled = true };
+    public static Screen CutsceneGlobalMenu { get; } = new Screen() { IsEnabled = true };
     public static Window HackMenu { get; } = new Window(center, Assets.Get(Sprites.LargePanel));
     public static Window FloppyTerminal { get; } = new Window(new Vector2(0, center.Y), Assets.Get(Sprites.Terminal)) { alignment = Alignment.Left };
     public static Window FuseMenu { get; } = new Window(new Vector2(BackBuffer.X, center.Y), Assets.Get(Sprites.RightSidePanel)) { alignment = Alignment.Right };
@@ -176,44 +176,46 @@ public static class UI
         var selectedTabTexture = Assets.Get(Sprites.SelectedTab);
         var selectSound = Assets.Get(Sound.Interact);
 
-        PatchedConicsToggle.AddBehaviour(delegate
+        PatchedConicsToggle.RisingInteract += delegate
         {
             SaveGame.PatchedConics = !SaveGame.PatchedConics;
             PatchedConicsToggle.Text = $"Patched Conics: {SaveGame.PatchedConics}";
-        });
-        ShaderToggle.AddBehaviour(delegate () 
+        };
+        ShaderToggle.RisingInteract += delegate
         { 
             SaveGame.UseShader = !SaveGame.UseShader; 
             ShaderToggle.Text = $"Shader: {SaveGame.UseShader}"; 
-        });
-        SFXSlider.AddBehaviour(delegate ()
+        };
+        MusicSlider.ContinuousInteract += delegate
+        {
+            float i = MusicSlider.Intervals[0];
+            SoundManager.MusicVolume = i;
+            MusicVolume.Text = $"Music: {Math.Round(i * 100)}%";
+        };
+        SFXSlider.ContinuousInteract += delegate
         {
             float i = SFXSlider.Intervals[0];
             SoundManager.SFXVolume = i;
             UILib.Content.UIManager.SFXVolume = i;
             SFXVolume.Text = $"Sound: {Math.Round(i * 100)}%";
-        });
-        UIScaleSlider.AddBehaviour((Action)delegate ()
+        };
+        UIScaleSlider.FallingInteract += delegate
         {
             float i = UIScaleSlider.Intervals[0];
             UIScale.Text = $"UI Scale: {Math.Truncate((i + 1) * 10) / 10}";
-            if (!Input.LMB.IsDown)
-            {
-                UILib.Content.UIManager.UIScale = (i + 1f);
-            }
-        });
-        ExitButton.AddBehaviour(delegate ()
+            UILib.Content.UIManager.UIScale = (i + 1f);
+        };
+
+        SFXSlider.OnContinuousInteract(new Vector2(SFXSlider.Size.X, 0));
+        MusicSlider.OnContinuousInteract(new Vector2(-MusicSlider.Size.X, 0));
+        UIScaleSlider.OnContinuousInteract(new Vector2(UIScaleSlider.Size.X, 0));
+
+        ExitButton.RisingInteract += delegate
         {
             Self.Exit();
             SoundManager.PlayGlobalSound(Assets.Get(Sound.Interact));
-        });
-        MusicSlider.AddBehaviour(delegate ()
-        {
-            float i = MusicSlider.Intervals[0];
-            SoundManager.MusicVolume = i;
-            MusicVolume.Text = $"Music: {Math.Round(i * 100)}%";
-        });
-        NextWindowType.AddBehaviour(delegate ()
+        };
+        NextWindowType.RisingInteract += delegate
         {
             windowType++;
             if (windowType > 2)
@@ -234,8 +236,8 @@ public static class UI
                 default:
                     break;
             }
-        }); //Write to config?
-        NextResolution.AddBehaviour(delegate ()
+        }; //Write to config?
+        NextResolution.RisingInteract += delegate
         {
             selectedResolution++;
             if (selectedResolution >= resolutions.Length)
@@ -243,16 +245,9 @@ public static class UI
                 selectedResolution = 0;
             }
             Resolution.Text = $"{resolutions[selectedResolution].X} x {resolutions[selectedResolution].Y}";
-        });
-        SFXSlider.SetInterval(1, 1);
-        MusicSlider.SetInterval(0, 1);
-        UIScaleSlider.SetInterval(1, 1);
+        };
 
-        SFXSlider.ApplyBehaviours();
-        MusicSlider.ApplyBehaviours();
-        UIScaleSlider.ApplyBehaviours();
-
-        AbortButton.AddBehaviour(delegate () 
+        AbortButton.RisingInteract += delegate 
         { 
             if(Engine.SaveGame.CurrentMission.IsFailed)
             {
@@ -263,8 +258,8 @@ public static class UI
             {
                 CurrentGameState.SwitchState(new PlayingGame());
             }
-        });
-        FurnaceSlot.AddBehaviour(delegate()
+        };
+        FurnaceSlot.RisingInteract += delegate
         {
             if(FurnaceSlot.Item != null && !FurnaceSlot.Item.HasComponent<Smelt>())
             {
@@ -272,119 +267,119 @@ public static class UI
                 return;
             }
             Events.SendMessage(Message.MothershipUpdateFurnace);
-        });
-        RestartSwitch.AddBehaviour(
-            delegate ()
+        };
+        RestartSwitch.ContinuousInteract += delegate
+        {
+            if (Engine.SaveGame.Player.restartCd > 0)
             {
-                if (Engine.SaveGame.Player.restartCd > 0)
+                if (!Input.LMB.WasDown)
                 {
-                    if (!Input.LMB.WasDown)
-                    {
-                        SoundManager.PlayGlobalSound(Assets.Get(Sound.Fail));
-                    }
-                    return;
+                    SoundManager.PlayGlobalSound(Assets.Get(Sound.Fail));
                 }
-                if (RestartSwitch.Intervals[0] < 0.2f)
+                return;
+            }
+            if (RestartSwitch.Intervals[0] < 0.2f)
+            {
+                if (Engine.SaveGame.Player.IsEnabled)
                 {
-                    if (Engine.SaveGame.Player.IsEnabled)
-                    {
-                        Events.SendMessage(Message.RestartModules);
-                        SoundManager.PlayGlobalSound(Assets.Get(Sound.Undock));
-                        Engine.SaveGame.Player.IsEnabled = false;
-                        Events.UpdateModulesStatus();
-                    }
-                    Switch.Texture = Assets.Get(Sprites.SwitchOne);
+                    Events.SendMessage(Message.RestartModules);
+                    SoundManager.PlayGlobalSound(Assets.Get(Sound.Undock));
+                    Engine.SaveGame.Player.IsEnabled = false;
+                    Events.UpdateModulesStatus();
                 }
-                if (RestartSwitch.Intervals[0] is > 0.2f and < 0.4f)
+                Switch.Texture = Assets.Get(Sprites.SwitchOne);
+            }
+            if (RestartSwitch.Intervals[0] is > 0.2f and < 0.4f)
+            {
+                Switch.Texture = Assets.Get(Sprites.SwitchTwo);
+            }
+            if (RestartSwitch.Intervals[0] is > 0.4f and < 0.6f)
+            {
+                Switch.Texture = Assets.Get(Sprites.SwitchThree);
+            }
+            if (RestartSwitch.Intervals[0] is > 0.6f and < 0.8f)
+            {
+                Switch.Texture = Assets.Get(Sprites.SwitchFour);
+            }
+            if (RestartSwitch.Intervals[0] > 0.8f)
+            {
+                Switch.Texture = Assets.Get(Sprites.SwitchFive);
+                if (!Engine.SaveGame.Player.IsEnabled)
                 {
-                    Switch.Texture = Assets.Get(Sprites.SwitchTwo);
+                    Engine.SaveGame.Player.IsEnabled = true;
+                    SoundManager.PlayGlobalSound(Assets.Get(Sound.Dock));
+                    Events.UpdateModulesStatus();
                 }
-                if (RestartSwitch.Intervals[0] is > 0.4f and < 0.6f)
-                {
-                    Switch.Texture = Assets.Get(Sprites.SwitchThree);
-                }
-                if (RestartSwitch.Intervals[0] is > 0.6f and < 0.8f)
-                {
-                    Switch.Texture = Assets.Get(Sprites.SwitchFour);
-                }
-                if (RestartSwitch.Intervals[0] > 0.8f)
-                {
-                    Switch.Texture = Assets.Get(Sprites.SwitchFive);
-                    if (!Engine.SaveGame.Player.IsEnabled)
-                    {
-                        Engine.SaveGame.Player.IsEnabled = true;
-                        SoundManager.PlayGlobalSound(Assets.Get(Sound.Dock));
-                        Events.UpdateModulesStatus();
-                    }
-                }
-            });
+            }
+        };
         RestartSwitch.SetInterval(1, 1);
-        FuseCounter.AddBehaviour(delegate () { Engine.SaveGame.Player.UpdateSpares(); });
+        FuseCounter.RisingInteract += delegate { Engine.SaveGame.Player.UpdateSpares(); };
 
-        GlobalSidePanelOpen.AddBehaviour(delegate () 
+        GlobalSidePanelOpen.RisingInteract += delegate
         {
             if(Engine.UIManager.ScreenWindow == GlobalMainMenu)
             {
-                KeyBinds.enabled = true;
+                KeyBinds.IsEnabled = true;
             }
             else
             {
                 Events.ToggleDockingMenus();
             }
-        });
-        GlobalFusePanelOpen.AddBehaviour(delegate ()
+        };
+        GlobalFusePanelOpen.RisingInteract += delegate
         {
             SoundManager.PlayGlobalSound(Assets.Get(Sound.Interact));
             if(Engine.UIManager.ScreenWindow == GlobalMainMenu)
             {
-                MenuSettings.enabled = true;
+                MenuSettings.IsEnabled = true;
             }
             else
             {
                 Events.UpdateModulesStatus();
-                FuseMenu.enabled = true;
+                FuseMenu.IsEnabled = true;
             }
-        });
-        SidePanelClose.AddBehaviour(delegate {
-            KeyBinds.enabled = false;
-            Events.ToggleDockingMenus();
-        });
-        FuseMenuClose.AddBehaviour(delegate ()
+        };
+        SidePanelClose.RisingInteract += delegate 
         {
-            MenuSettings.enabled = false;
+            KeyBinds.IsEnabled = false;
+            Events.ToggleDockingMenus();
+        };
+        FuseMenuClose.RisingInteract += delegate
+        {
+            MenuSettings.IsEnabled = false;
             SoundManager.PlayGlobalSound(Assets.Get(Sound.Interact));
-            FuseMenu.enabled = false;
+            FuseMenu.IsEnabled = false;
             if(Engine.UIManager.selectedIcon is Fuse)
             {
                 Engine.UIManager.selectedIcon = null;
                 FuseCounter.Count++;
                 Engine.SaveGame.Player.UpdateSpares();
             }
-        });
-        PrevMission.AddBehaviour(delegate () { Engine.SaveGame.PrevMission(); }); //Do not remove outer delegate
-        NextMission.AddBehaviour(delegate () { Engine.SaveGame.NextMission(); }); //Doing so causes exception due to null savegame
-        SelectMission.AddBehaviour(delegate ()
+        };
+        PrevMission.RisingInteract += delegate { Engine.SaveGame.PrevMission(); }; //Do not remove outer delegate
+        NextMission.RisingInteract += delegate { Engine.SaveGame.NextMission(); }; //Doing so causes exception due to null savegame
+        SelectMission.RisingInteract += delegate
         {
             if ((Mission.missions[Engine.SaveGame.CurrentMissionIndex].data.IsRelaunchable || !Engine.SaveGame.CurrentMissionCompleted) && Events.SyncModules())
             {
                 Startgame();
             }
-        });
-        LaunchButton.AddBehaviour(delegate () { Events.SendMessage(Message.EscapeDroneLeave); });
-        SettingsButton.AddBehaviour(delegate () { PauseMenu.enabled = false; SettingsMenu.enabled = true; });
-        PauseMenuButton.AddBehaviour(delegate () { PauseMenu.enabled = true; SettingsMenu.enabled = false; });
-        CreateFuse.AddBehaviour(delegate ()
+        };
+        LaunchButton.RisingInteract += delegate { Events.SendMessage(Message.EscapeDroneLeave); };
+        SettingsButton.RisingInteract += delegate { PauseMenu.IsEnabled = false; SettingsMenu.IsEnabled = true; };
+        PauseMenuButton.RisingInteract += delegate { PauseMenu.IsEnabled = true; SettingsMenu.IsEnabled = false; };
+        CreateFuse.RisingInteract += delegate
         {
             if (Engine.SaveGame.QueuedItems.Count < 10)
             {
                 Engine.SaveGame.QueuedItems.Add(new FuseQueue());
             }
-        });
+        };
         var tooltip = new Window(Vector2.Zero, wideButton);
         tooltip.AddWidget(new Decal(new Vector2(0, -3), Assets.TextFont, "Queue fuse construction. Cheap but delicate.", Color.White, 3f));
         tooltip.AddWidget(new Decal(new Vector2(0, 3), Assets.TextFont, "Required time: 10 waves.", Color.White, 3f));
         CreateFuse.AddTooltip(tooltip);
-        SmeltScrap.AddBehaviour(delegate ()
+        SmeltScrap.RisingInteract += delegate
         {
             if (Engine.UIManager.selectedIcon != null)
             {
@@ -400,12 +395,12 @@ public static class UI
                     }
                 }
             }
-        });
+        };
         tooltip = new Window(Vector2.Zero, wideButton);
         tooltip.AddWidget(new Decal(new Vector2(0, -3), Assets.TextFont, "Drag pickup over button to queue scrap melting.", Color.White, 3f));
         tooltip.AddWidget(new Decal(new Vector2(0, 3), Assets.TextFont, "Required time: 10 waves. Gains additional metal per scrap.", Color.White, 3f));
         SmeltScrap.AddTooltip(tooltip);
-        RepairModule.AddBehaviour(delegate ()
+        RepairModule.RisingInteract += delegate
         {
             if (Engine.UIManager.selectedIcon as Module != null)
             {
@@ -421,57 +416,57 @@ public static class UI
                     }
                 }
             }
-        });
+        };
         tooltip = new Window(Vector2.Zero, wideButton);
         tooltip.AddWidget(new Decal(new Vector2(0, -3), Assets.TextFont, "Drag module over button to queue repair.\nRequired time: 20 waves. Requires no metal to repair.", Color.White, 3f));
         RepairModule.AddTooltip(tooltip);
-        CancelQueue.AddBehaviour(delegate ()
+        CancelQueue.RisingInteract += delegate
         {
             if (Engine.SaveGame.QueuedItems.Count != 0)
             {
                 Engine.SaveGame.QueuedItems.RemoveAt(Engine.SaveGame.QueuedItems.Count - 1);
             }
-        });
-        SaveButton.AddBehaviour(delegate { Engine.UIManager.DisableAll(); SaveMenu.enabled = true; Events.GetSave(); });
-        ExitWithoutSave.AddBehaviour(delegate { Engine.UIManager.DisableAll(); Events.QuitToMenu(); });
-        LoadButton.AddBehaviour(delegate { GlobalMainMenu.enabled = false; LoadMenu.enabled = true; Events.GetSave(); });
+        };
+        SaveButton.RisingInteract += delegate { Engine.UIManager.DisableAll(); SaveMenu.IsEnabled = true; Events.GetSave(); };
+        ExitWithoutSave.RisingInteract += delegate { Engine.UIManager.DisableAll(); Events.QuitToMenu(); };
+        LoadButton.RisingInteract += delegate { GlobalMainMenu.IsEnabled = false; LoadMenu.IsEnabled = true; Events.GetSave(); };
 
-        Name.AddBehaviour(delegate { Engine.SaveGame.Name = Name.Text; });
-        SaveToFile.AddBehaviour(Util.Save);
-        LoadFromFile.AddBehaviour(delegate() 
+        Name.RisingInteract += delegate { Engine.SaveGame.Name = Name.Text; };
+        SaveToFile.RisingInteract += delegate { Util.Save(); };
+        LoadFromFile.RisingInteract += delegate 
         {
             Engine.UIManager.DisableAll();
             CurrentGameState.SwitchState(new Loading(Load, LoadingStage.Complete)); 
-        });
-        SaveBack.AddBehaviour(delegate { MissionSelect.enabled = true; SaveMenu.enabled = false; });
-        LoadBack.AddBehaviour(delegate { GlobalMainMenu.enabled = true; LoadMenu.enabled = false; });
+        };
+        SaveBack.RisingInteract += (delegate { MissionSelect.IsEnabled = true; SaveMenu.IsEnabled = false; });
+        LoadBack.RisingInteract += (delegate { GlobalMainMenu.IsEnabled = true; LoadMenu.IsEnabled = false; });
 
-        LidarUpgrade.AddBehaviour(delegate { Events.UpgradeSensors(SensorType.Lidar); });
-        RadarUpgrade.AddBehaviour(delegate { Events.UpgradeSensors(SensorType.Radar); });
-        PulseEmitterUpgrade.AddBehaviour(delegate { Events.UpgradeSensors(SensorType.PulseEmitter); });
+        LidarUpgrade.RisingInteract += delegate { Events.UpgradeSensors(SensorType.Lidar); };
+        RadarUpgrade.RisingInteract += delegate { Events.UpgradeSensors(SensorType.Radar); };
+        PulseEmitterUpgrade.RisingInteract += delegate { Events.UpgradeSensors(SensorType.PulseEmitter); };
         tooltip = new Window(Vector2.Zero, wideButton);
         tooltip.AddWidget(new Decal(new Vector2(0, -3), Assets.TextFont, "Drag module over button to queue repair.\nRequired time: 20 waves. Requires no metal to repair.", Color.White, 3f));
         UpgradeHull.AddTooltip(tooltip);
-        UpgradeHull.AddBehaviour(delegate
+        UpgradeHull.RisingInteract += delegate
         {
             Events.UpgradeModule(ModuleType.Hull, Engine.SaveGame.Player.modules[Core.ModuleType.Hull]);
-        });
-        UpgradeGuns.AddBehaviour(delegate
+        };
+        UpgradeGuns.RisingInteract += delegate
         {
             Events.UpgradeModule(ModuleType.Guns, Engine.SaveGame.Player.modules[Core.ModuleType.Guns]);
-        });
-        UpgradeEngine.AddBehaviour(delegate
+        };
+        UpgradeEngine.RisingInteract += delegate
         {
             Events.UpgradeModule(ModuleType.Engines, Engine.SaveGame.Player.modules[Core.ModuleType.Engines]);
-        });
-        UpgradeCore.AddBehaviour(delegate
+        };
+        UpgradeCore.RisingInteract += delegate
         {
             Events.UpgradeModule(ModuleType.Core, Engine.SaveGame.Player.modules[Core.ModuleType.Core]);
-        });
+        };
 
-        HackButton.AddBehaviour(delegate { Events.SendMessage(Message.Hack); });
+        HackButton.RisingInteract += delegate { Events.SendMessage(Message.Hack); };
 
-        EscapeButton.AddBehaviour(delegate { Events.SendMessage(Message.EscapeDroneLeave); });
+        EscapeButton.RisingInteract += delegate { Events.SendMessage(Message.EscapeDroneLeave); };
 
         GlobalMainMenu.AddWidget(ExitButton, (int)Alignment.TopLeft);
         GlobalMainMenu.AddWidget(SingleplayerButton, (int)Alignment.TopLeft);
@@ -484,7 +479,7 @@ public static class UI
             var key = keys[binding];
             KeyBinds.AddWidget(KeybindTexts[i] = new Decal(new Vector2(-120 + Assets.TextFont.MeasureString($"{binding}").X / 2.55f, 12 * i - 80), Assets.TextFont, $"{binding}", Color.White, 8), (int)Alignment.TopRight);
             var button = new TerminalButton(new Vector2(60, 12 * i - 80), Assets.TextFont, $"{key}", Color.White, 8);
-            button.AddBehaviour(delegate ()
+            button.RisingInteract += delegate
             {
                 var keys = Keyboard.GetState().GetPressedKeys();
                 if (keys.Length > 0)
@@ -492,7 +487,7 @@ public static class UI
                     keys[binding] = keys[0];
                     button.Text = $"{keys[0]}";
                 }
-            });
+            };
             KeyBinds.AddWidget(KeybindInputs[i] = button, (int)Alignment.TopRight);
         }
         KeyBinds.AddWidget(SidePanelClose);
@@ -502,8 +497,7 @@ public static class UI
             int module = i;
             DebugMenu.AddWidget(NextModule[i] = new TerminalButton(new Vector2(120, 25 * i - 40), Assets.TextFont, $"Next", Color.White, 10), (int)Alignment.Center);
             int index = i;
-            NextModule[i].AddBehaviour(
-                delegate () 
+            NextModule[i].RisingInteract += delegate
                 {
                     if (Self.LoadingStage != LoadingStage.Complete)
                     {
@@ -515,10 +509,9 @@ public static class UI
                         setModules[module] = nextModule;
                     }
                     Events.SetModules();
-                });
+                };
             DebugMenu.AddWidget(PrevModule[i] = new TerminalButton(new Vector2(-120, 25 * i - 40), Assets.TextFont, $"Prev", Color.White, 10), (int)Alignment.Center);
-            PrevModule[i].AddBehaviour(
-                delegate () 
+            PrevModule[i].RisingInteract += delegate
                 {
                     if (Self.LoadingStage != LoadingStage.Complete)
                     {
@@ -530,17 +523,17 @@ public static class UI
                         setModules[module] = nextModule;
                     }
                     Events.SetModules(); 
-                });
+                };
             DebugMenu.AddWidget(ModuleSelection[i] = new Decal(new Vector2(0, 25 * i - 40), Assets.TextFont, "Loading...", Color.White, 10), (int)Alignment.Center);
         }
         DebugMenu.AddWidget(SetModules);
-        SetModules.AddBehaviour(delegate () 
+        SetModules.RisingInteract += delegate
         {
             for(ModuleType i = ModuleType.Hull; i <= ModuleType.Core; i++)
             {
                 Engine.SaveGame.Player.modules[i] = ItemFactory.moduleData[setModules[(int)i]].Retrieve();
             }
-        });
+        };
 
         PauseMenu.AddWidget(AbortButton);
         PauseMenu.AddWidget(SettingsButton);
@@ -657,7 +650,7 @@ public static class UI
                     Assets.DimsOf(Sprites.EmptySlot).Y * x / 2 - Assets.DimsOf(Sprites.EmptySlot).Y), Assets.Get(Sprites.EmptySlot), x);
             }
             ModuleSlots[x] = slot;
-            slot.AddBehaviour(delegate () 
+            slot.RisingInteract += delegate
             {
                 if (Engine.SaveGame.Player.isExpired) //No module repair after death
                 {
@@ -685,8 +678,8 @@ public static class UI
                         Events.RepairModule(item);
                     }
                 }
-            });
-            slot.AddBehaviour(delegate () 
+            };
+            slot.RisingInteract += delegate
             {
                 if(Engine.SaveGame.Player.isExpired) //No module replacement after death
                 {
@@ -703,7 +696,7 @@ public static class UI
                     UILib.Content.UIManager.Self.selectedIcon = null;
                 }
                 Events.SyncModules();
-            });
+            };
             MothershipMenu.AddWidget(ModuleSlots[x]);
             MissionSelect.AddWidget(ModuleSlots[x], 1);
         }
@@ -717,11 +710,11 @@ public static class UI
             PickupDroneMenu.AddWidget(InventorySlots[i]);
             MissionSelect.AddWidget(InventorySlots[i], 1);
             MissionSelect.AddWidget(MissionSelectSlots[i], 1);
-            InventorySlots[i].AddBehaviour(Events.UpdateInventory);
-            MissionSelectSlots[i].AddBehaviour(Events.UpdateInventory);
+            InventorySlots[i].RisingInteract += delegate { Events.UpdateInventory(); };
+            MissionSelectSlots[i].RisingInteract += delegate{Events.UpdateInventory(); };
         }
         MissionSelect.AddWidget(SecondarySlot, 1);
-        SecondarySlot.AddBehaviour(delegate() 
+        SecondarySlot.RisingInteract += delegate 
         {
             if (Engine.SaveGame.Player.isExpired) //No module repair after death
             {
@@ -737,11 +730,11 @@ public static class UI
             {
                 Events.RepairModule(item);
             }
-        });
-        SecondarySlot.AddBehaviour(delegate ()
+        };
+        SecondarySlot.RisingInteract += delegate
         {
             Events.SyncModules();
-        });
+        };
 
         FuseMenu.AddWidget(FuseDetailing, (int)Alignment.Center);
         FuseMenu.AddWidget(RestartSwitch, (int)Alignment.Center);
@@ -755,10 +748,10 @@ public static class UI
                 //Not sure why this works, don't touch
                 int x = j + 2;
                 int y = i;
-                fuse.AddBehaviour(delegate ()
+                fuse.RisingInteract += delegate
                 {
                     Engine.SaveGame.Player.ToggleFuse(x, y);
-                });
+                };
                 Fuses[i, j + 2] = fuse;
                 FuseMenu.AddWidget(fuse, (int)Alignment.Center);
             }

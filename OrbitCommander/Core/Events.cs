@@ -34,7 +34,7 @@ public static class Events
         Player.Velocity = Vector2.Zero;
         Engine.IngameTime = new();
         Engine.UIManager.DisableAll();
-        UI.GlobalMainMenu.enabled = true;
+        UI.GlobalMainMenu.IsEnabled = true;
         ParticleManager.Initialize();
         SoundManager.SetAllSounds(false);
         SoundManager.Initialize();
@@ -139,9 +139,9 @@ public static class Events
     }
     public static void DisableDockingMenus()
     {
-        UI.MothershipMenu.enabled = false;
-        UI.PickupDroneMenu.enabled = false;
-        UI.PlayerMenu.enabled = false;
+        UI.MothershipMenu.IsEnabled = false;
+        UI.PickupDroneMenu.IsEnabled = false;
+        UI.PlayerMenu.IsEnabled = false;
     }
     public static void ToggleDockingMenus()
     {

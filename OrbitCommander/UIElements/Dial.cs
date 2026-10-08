@@ -9,7 +9,6 @@ using UILib.Content;
 namespace OrbitCommander.UIElements;
 public class Dial : FunctionalWidget
 {
-    private List<Action> behaviours = [];
     public float Target { get; set; } = 0;
     private Texture2D dialTexture;
     private float currentVal = 0;
@@ -20,25 +19,9 @@ public class Dial : FunctionalWidget
         offset = _offset;
         Texture = _texture;
     }
-    public override void Interact(Vector2 parentPosition)
-    {
-        ApplyBehaviours();
-    }
     public void AddTooltip(Window _tooltip)
     {
         Tooltip ??= _tooltip;
-    }
-    public override void ContinuousInteract(Vector2 parentPosition) { }
-    public override void AddBehaviour(Action func)
-    {
-        behaviours.Add(func);
-    }
-    public override void ApplyBehaviours()
-    {
-        for (int i = 0; i < behaviours.Count; i++)
-        {
-            behaviours[i]();
-        }
     }
     public override void Draw(SpriteBatch _spriteBatch, Vector2 _parentPosition, float _transparency, Vector2 _center)
     {

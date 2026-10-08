@@ -822,12 +822,12 @@ public class Player : Entity
             {
                 if (dockedEntity.Menu != null)
                 {
-                    dockedEntity.Menu.enabled = !dockedEntity.Menu.enabled;
+                    dockedEntity.Menu.IsEnabled = !dockedEntity.Menu.IsEnabled;
                 }
             }
             else
             {
-                UI.PlayerMenu.enabled = !UI.PlayerMenu.enabled;
+                UI.PlayerMenu.IsEnabled = !UI.PlayerMenu.IsEnabled;
             }
         }
         if (isEngineActive)

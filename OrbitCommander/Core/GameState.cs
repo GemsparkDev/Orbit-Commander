@@ -79,7 +79,7 @@ public class MainMenu : GameState
     public override void Initialize()
     {
         Engine.UIManager.ScreenWindow = UI.GlobalMainMenu;
-        Engine.UIManager.ScreenWindow.enabled = true;
+        Engine.UIManager.ScreenWindow.IsEnabled = true;
         SoundManager.ChangeTrack(Assets.Get(Sound.menu));
         Engine.Camera.Position = Vector2.Zero;
         Engine.Camera.Zoom = 1;
@@ -97,7 +97,7 @@ public class PlayingGame : GameState
     public override void Initialize()
     {
         Engine.UIManager.ScreenWindow = UI.GlobalMenu;
-        Engine.UIManager.ScreenWindow.enabled = true;
+        Engine.UIManager.ScreenWindow.IsEnabled = true;
     }
     public override void Update()
     {
@@ -116,7 +116,7 @@ public class PlayingGame : GameState
         if (!Engine.Self.IsActive)
         {
             Engine.UIManager.DisableAll();
-            UI.PauseMenu.enabled = true;
+            UI.PauseMenu.IsEnabled = true;
             CurrentGameState.SwitchState(new PausedGame());
         }
     }
@@ -132,9 +132,10 @@ public class PausedGame : GameState
     {
         if (!Input.Exit.WasDown && Input.Exit.IsDown)
         {
-            if (UI.SettingsMenu.enabled)
+            if (UI.SettingsMenu.IsEnabled)
             {
-                UI.PauseMenuButton.ApplyBehaviours();
+                UI.PauseMenu.IsEnabled = true;
+                UI.SettingsMenu.IsEnabled = false;
             }
             else if (Engine.UIManager.ToggleToMenu(UI.PauseMenu))
             {
@@ -180,7 +181,7 @@ public class MissionSelect : GameState
     public static MissionSelect New() => new MissionSelect();
     public override void Initialize()
     {
-        Engine.UIManager.ScreenWindow.enabled = false;
+        Engine.UIManager.ScreenWindow.IsEnabled = false;
         ParticleManager.Initialize();
         Events.UpdateModulesUI();
         Events.UpdateMissionText();
@@ -299,7 +300,7 @@ public class Victory : GameState
 {
     public override void Initialize()
     {
-        Engine.UIManager.ScreenWindow.enabled = false;
+        Engine.UIManager.ScreenWindow.IsEnabled = false;
         Engine.Camera.Position = Vector2.Zero;
         Engine.Camera.Zoom = 1;
     }
@@ -318,7 +319,7 @@ public class Cutscene(List<IEvent> _events, List<IActor> _actors, GameState _nex
     public override void Initialize()
     {
         time = 0;
-        Engine.UIManager.ScreenWindow.enabled = false;
+        Engine.UIManager.ScreenWindow.IsEnabled = false;
         Engine.Camera.Position = Vector2.Zero;
         Engine.Camera.Zoom = 1;
     }
@@ -371,7 +372,7 @@ public class Loading(Action _function, LoadingStage _stage) : GameState
 {
     public override void Initialize()
     {
-        UIManager.Self.ScreenWindow.enabled = false;
+        UIManager.Self.ScreenWindow.IsEnabled = false;
     }
     public override void Draw(SpriteBatch _spriteBatch)
     {

@@ -256,7 +256,7 @@ public static class Util
                 floppy.Angle += floppyAngVel * Engine.DeltaSeconds;
                 if(Events.AcknowledgeMessage(Message.ToggleTerminal))
                 {
-                    UI.FloppyTerminal.enabled = !UI.FloppyTerminal.enabled;
+                    UI.FloppyTerminal.IsEnabled = !UI.FloppyTerminal.IsEnabled;
                 }
             }),
             new Event(8 + ts * 4 + Engine.DeltaSeconds,2,delegate(float time)
@@ -268,7 +268,7 @@ public static class Util
             }),
             new TriggerEvent(10 + ts * 4, delegate(float time)
             {
-                UI.FloppyTerminal.enabled = false;
+                UI.FloppyTerminal.IsEnabled = false;
             }),
             new Event(10 + ts * 5, ts * 10, delegate (float time)
             {
@@ -304,7 +304,7 @@ public static class Util
                 if(!notReady)
                 {
                     scene.IsPaused = false;
-                    UI.FuseMenu.enabled = false;
+                    UI.FuseMenu.IsEnabled = false;
                     for(int i = 0; i < 13; i++)
                     {
                         PushTextUp();
@@ -328,8 +328,8 @@ public static class Util
                 }
                 computerSounds.Pause();
                 Engine.UIManager.ScreenWindow = UI.GlobalMenu;
-                UI.FloppyTerminal.enabled = false;
-                UI.FuseMenu.enabled = false;
+                UI.FloppyTerminal.IsEnabled = false;
+                UI.FuseMenu.IsEnabled = false;
                 Events.AcknowledgeMessage(Message.ToggleTerminal);
             })
         ];

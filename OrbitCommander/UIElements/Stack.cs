@@ -13,7 +13,6 @@ public class Stack<T> : FunctionalWidget where T : IData
     private Vector2 stackOffset;
     private Vector2 stackDepth;
     private Func<T> constructor;
-    private List<Action> behaviours = [];
     public Stack(Vector2 _offset, Texture2D _texture, int _count, Texture2D _stackTexture, Vector2 _stackOffset, Vector2 _stackDepth, Func<T> _constructor)
     {
         offset = _offset;
@@ -24,21 +23,9 @@ public class Stack<T> : FunctionalWidget where T : IData
         stackDepth = _stackDepth;
         constructor = _constructor;
     }
-    public override void AddBehaviour(Action func)
-    {
-        behaviours.Add(func);
-    }
-    public override void ApplyBehaviours()
-    {
-        for (int i = 0; i < behaviours.Count; i++)
-        {
-            behaviours[i]();
-        }
-    }
-    public override void ContinuousInteract(Vector2 parentPosition) { }
     public override void HoveringDraw(SpriteBatch _spriteBatch, Vector2 _parentPosition, float _transparency, Vector2 _center) { }
 
-    public override void Interact(Vector2 parentPosition)
+    public override void OnRisingInteract(Vector2 clickPosition)
     {
         if (Engine.UIManager.selectedIcon == null && Count > 0)
         {
@@ -53,7 +40,7 @@ public class Stack<T> : FunctionalWidget where T : IData
                 Count++;
             }
         }
-        ApplyBehaviours();
+        base.OnRisingInteract(clickPosition);
     }
     public override void Draw(SpriteBatch _spriteBatch, Vector2 _parentPositon, float _transparency, Vector2 _center)
     {
