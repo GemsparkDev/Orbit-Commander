@@ -14,29 +14,28 @@ using System.Collections.Generic;
 namespace OrbitCommander.Core;
 public static class UI
 {
-    private static Vector2 center = BackBuffer / 2;
-    public static Window PauseMenu { get; } = new Window(center, Assets.Get(Sprites.LargePanel));
-    public static Window PlayerMenu { get; } = new Window(new Vector2(0, center.Y), Assets.Get(Sprites.Terminal)) { alignment = Alignment.Left };
+    public static Window PauseMenu { get; } = new Window(Vector2.Zero, Assets.Get(Sprites.LargePanel));
+    public static Window PlayerMenu { get; } = new Window(new Vector2(-1, 0), Assets.Get(Sprites.Terminal)) { alignment = Alignment.Left };
     //public static TabbedWindow MainMenu { get; } = new TabbedWindow(center, Assets.Get(Sprites.GargantuanPanel), Assets.Get(Sprites.Tab), Assets.Get(Sprites.SelectedTab), Assets.Get(Sound.Interact), 3) { enabled = true, icons = [Assets.Get(Sprites.PlayIcon), Assets.Get(Sprites.SettingsIcon)] };
     public static Screen GlobalMainMenu { get; } = new Screen() { IsEnabled = true };
-    public static Window MothershipMenu { get; } = new Window(new Vector2(0, center.Y), Assets.Get(Sprites.Terminal)) { alignment = Alignment.Left };
-    public static TabbedWindow MissionSelect { get; } = new TabbedWindow(new Vector2(0, center.Y), Assets.Get(Sprites.GargantuanPanel), Assets.Get(Sprites.Tab), Assets.Get(Sprites.SelectedTab), Assets.Get(Sound.Interact), 2)
+    public static Window MothershipMenu { get; } = new Window(new Vector2(-1, 0), Assets.Get(Sprites.Terminal)) { alignment = Alignment.Left };
+    public static TabbedWindow MissionSelect { get; } = new TabbedWindow(new Vector2(-1, 0), Assets.Get(Sprites.GargantuanPanel), Assets.Get(Sprites.Tab), Assets.Get(Sprites.SelectedTab), Assets.Get(Sound.Interact), 2)
     { icons = [Assets.Get(Sprites.PlanetIcon), Assets.Get(Sprites.RepairIcon)], alignment = Alignment.Left };
-    public static Window PickupDroneMenu { get; } = new Window(center, Assets.Get(Sprites.LargePanel));
-    public static Window SaveMenu { get; } = new Window(center, Assets.Get(Sprites.GargantuanPanel));
-    public static Window LoadMenu { get; } = new Window(center, Assets.Get(Sprites.GargantuanPanel));
-    public static TabbedWindow UpgradeMenu { get; } = new TabbedWindow(center, Assets.Get(Sprites.GargantuanPanel),
+    public static Window PickupDroneMenu { get; } = new Window(Vector2.Zero, Assets.Get(Sprites.LargePanel));
+    public static Window SaveMenu { get; } = new Window(Vector2.Zero, Assets.Get(Sprites.GargantuanPanel));
+    public static Window LoadMenu { get; } = new Window(Vector2.Zero, Assets.Get(Sprites.GargantuanPanel));
+    public static TabbedWindow UpgradeMenu { get; } = new TabbedWindow(Vector2.Zero, Assets.Get(Sprites.GargantuanPanel),
         Assets.Get(Sprites.Tab), Assets.Get(Sprites.SelectedTab), Assets.Get(Sound.Interact), 2);
-    public static Window SettingsMenu { get; } = new Window(center, Assets.Get(Sprites.GargantuanPanel));
+    public static Window SettingsMenu { get; } = new Window(Vector2.Zero, Assets.Get(Sprites.GargantuanPanel));
     public static Screen GlobalMenu { get; } = new Screen() { IsEnabled = true };
     public static Screen CutsceneGlobalMenu { get; } = new Screen() { IsEnabled = true };
-    public static Window HackMenu { get; } = new Window(center, Assets.Get(Sprites.LargePanel));
-    public static Window FloppyTerminal { get; } = new Window(new Vector2(0, center.Y), Assets.Get(Sprites.Terminal)) { alignment = Alignment.Left };
-    public static Window FuseMenu { get; } = new Window(new Vector2(BackBuffer.X, center.Y), Assets.Get(Sprites.RightSidePanel)) { alignment = Alignment.Right };
-    public static Window EscapeMenu { get; } = new Window(center, Assets.Get(Sprites.LargePanel));
-    public static Window MenuSettings { get; } = new Window(new Vector2(center.X * 2, center.Y), Assets.Get(Sprites.RightSidePanel)) { alignment = Alignment.Right };
-    public static Window KeyBinds { get; } = new Window(new Vector2(0, center.Y), Assets.Get(Sprites.Terminal)) { alignment = Alignment.Left };
-    public static Window DebugMenu { get; } = new Window(Vector2.Zero, Assets.Get(Sprites.GargantuanPanel)) { alignment = Alignment.TopLeft };
+    public static Window HackMenu { get; } = new Window(Vector2.Zero, Assets.Get(Sprites.LargePanel));
+    public static Window FloppyTerminal { get; } = new Window(new Vector2(-1, 0), Assets.Get(Sprites.Terminal)) { alignment = Alignment.Left };
+    public static Window FuseMenu { get; } = new Window(new Vector2(1, 0), Assets.Get(Sprites.RightSidePanel)) { alignment = Alignment.Right };
+    public static Window EscapeMenu { get; } = new Window(Vector2.Zero, Assets.Get(Sprites.LargePanel));
+    public static Window MenuSettings { get; } = new Window(new Vector2(1, 0), Assets.Get(Sprites.RightSidePanel)) { alignment = Alignment.Right };
+    public static Window KeyBinds { get; } = new Window(new Vector2(-1, 0), Assets.Get(Sprites.Terminal)) { alignment = Alignment.Left };
+    public static Window DebugMenu { get; } = new Window(-Vector2.One, Assets.Get(Sprites.GargantuanPanel)) { alignment = Alignment.TopLeft };
 
     //Main Menu
     public static Button PatchedConicsToggle { get; } = new Button(new Vector2(-10, 50), Assets.Get(Sprites.SwitchOn), Assets.TextFont, $"Patched Conics: {SaveGame.PatchedConics}", Color.White, Assets.Get(Sprites.SwitchOff));
@@ -59,7 +58,7 @@ public static class UI
     public static TerminalButton[] PrevModule { get; } = new TerminalButton[5];
     public static Decal[] ModuleSelection { get; } = new Decal[5];
     //TODO: Readd keybind inputs
-    public static List<Keys> keys = [Keys.W, Keys.S, Keys.A, Keys.D, Keys.Space, Keys.C, Keys.E, Keys.I, Keys.LeftControl, Keys.F, Keys.Q, Keys.RightShift, Keys.LeftShift, Keys.R, Keys.Escape, Keys.Tab];
+    public static readonly List<Keys> keys = [Keys.W, Keys.S, Keys.A, Keys.D, Keys.Space, Keys.C, Keys.E, Keys.I, Keys.LeftControl, Keys.F, Keys.Q, Keys.RightShift, Keys.LeftShift, Keys.R, Keys.Escape, Keys.Tab];
     public static Decal[] KeybindTexts { get; } = new Decal[keys.Count];
     public static TerminalButton[] KeybindInputs { get; } = new TerminalButton[keys.Count];
 

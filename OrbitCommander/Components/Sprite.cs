@@ -39,14 +39,8 @@ public class Sprite(Entity _entity, Color _color) : IComponent
         } 
         set => targetColor = value;  
     }
-    public virtual float ColliderRadius
-    {
-        get { return Texture == null ? 0 : SaveGame.EnemyHitboxModifier * (Texture.Height + Texture.Width) / 4 + 1; }
-    }
-    public Vector2 Size
-    {
-        get { return Texture == null ? Vector2.Zero : new Vector2(Texture.Width, Texture.Height); }
-    }
+    public virtual float ColliderRadius => Texture == null ? 0 : SaveGame.EnemyHitboxModifier* (Texture.Height + Texture.Width) / 4 + 1;
+    public Vector2 Size => Texture == null ? Vector2.Zero : new Vector2(Texture.Width, Texture.Height);
     public void Update()
     {
         collider.position = _entity.Position;

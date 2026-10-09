@@ -35,8 +35,7 @@ public class Dial : FunctionalWidget
             return;
         }
         MouseState newState = Mouse.GetState();
-        Texture2D tex = Tooltip.texture;
-        Tooltip.position = new Vector2(newState.Position.X, newState.Position.Y) + new Vector2(tex.Width, tex.Height) / 2 * UIManager.UIScale;
+        Tooltip.Position = new Vector2(newState.Position.X, newState.Position.Y) + Tooltip.Size / 2 * UIManager.UIScale;
         Tooltip.Draw(_spriteBatch);
     }
     public override void Update()

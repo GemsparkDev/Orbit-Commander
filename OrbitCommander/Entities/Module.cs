@@ -136,13 +136,10 @@ public class ReloadSystem(int _magazineSize, float _reloadSpeed, Action _reloadC
 public class ModuleData(Sprites _realSprite, Sprites _virtualSprite, string _name, string _description, int _id, int _health, Type _type, Color? _textColor = null)
     : ItemData(_realSprite, _virtualSprite, _name, _id, Color.White, _textColor, _health)
 {
-    public string Description { get; } = _description;
-    public int MaxHealth { get; } = _health;
-    public Type ModuleType { get; } = _type;
-    public Module Retrieve()
-    {
-        return (Module)Activator.CreateInstance(ModuleType);
-    }
+    public string Description => _description;
+    public int MaxHealth => _health;
+    public Type ModuleType => _type;
+    public Module Retrieve() => (Module)Activator.CreateInstance(ModuleType);
 }
 public class Hull() : Module(Modules.Hull)
 {

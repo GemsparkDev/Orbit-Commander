@@ -34,7 +34,7 @@ public static class CurrentGameState
 }
 public abstract class GameState
 {
-    public virtual bool PersistentParticles { get; } = false;
+    public virtual bool PersistentParticles => false;
     public virtual void Initialize() { }
     public abstract void Update();
     public abstract void Draw(SpriteBatch _spriteBatch);
@@ -93,7 +93,7 @@ public class MainMenu : GameState
 }
 public class PlayingGame : GameState
 {
-    public override bool PersistentParticles { get; } = true;
+    public override bool PersistentParticles => true;
     public override void Initialize()
     {
         Engine.UIManager.ScreenWindow = UI.GlobalMenu;
@@ -127,7 +127,7 @@ public class PlayingGame : GameState
 }
 public class PausedGame : GameState
 {
-    public override bool PersistentParticles { get; } = true;
+    public override bool PersistentParticles => true;
     public override void Update()
     {
         if (!Input.Exit.WasDown && Input.Exit.IsDown)

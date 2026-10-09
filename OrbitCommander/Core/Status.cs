@@ -8,7 +8,7 @@ namespace OrbitCommander.Core;
 public abstract class Status(Sprites _icon)
 {
     public bool IsExpired { get; protected set; } = false;
-    public Sprites Icon { get; } = _icon;
+    public Sprites Icon => _icon;
     public abstract StatusType Type { get; }
     public abstract void Update(Entity _parent);
     public abstract void Reset();
@@ -16,7 +16,7 @@ public abstract class Status(Sprites _icon)
     public virtual int SensingChange() { return 0; }
     public virtual int FuseChange() { return 0; }
     public virtual int ModifyDamage(int _damage) { return _damage; }
-    public virtual bool IsImmunable { get => false; }
+    public virtual bool IsImmunable => false;
     public enum StatusType
     {
         Bomb,
@@ -32,7 +32,7 @@ public class Bomb() : Status(Sprites.Knob)
 {
     float time = 0;
     float maxTime = 300;
-    public override StatusType Type { get; } = StatusType.Bomb;
+    public override StatusType Type => StatusType.Bomb;
     public override void Update(Entity _parent)
     {
         float prevTime = time;
@@ -58,7 +58,7 @@ public class Fire(float _duration, Color _color) : Status(Sprites.Knob)
     float duration = _duration;
     float fireCooldown = 0.05f;
     float attackCooldown = 0.5f;
-    public override StatusType Type { get; } = StatusType.Fire;
+    public override StatusType Type => StatusType.Fire;
     public override bool IsImmunable { get => true; }
     public override void Update(Entity _parent)
     {
@@ -99,8 +99,8 @@ public class Frost(float _duration) : Status(Sprites.Knob)
     float initialDuration = _duration;
     float duration = _duration;
     float fireCooldown = 0.25f;
-    public override StatusType Type { get; } = StatusType.Frost;
-    public override bool IsImmunable { get => true; }
+    public override StatusType Type => StatusType.Frost;
+    public override bool IsImmunable => true;
     public override void Update(Entity _parent)
     {
         if (fireCooldown > 0)
@@ -134,7 +134,7 @@ public class Healing(float _duration) : Status(Sprites.Knob)
     float duration = _duration;
     float fireCooldown = 0.1f;
     float healCooldown = 0.5f;
-    public override StatusType Type { get; } = StatusType.Healing;
+    public override StatusType Type => StatusType.Healing;
 
     public override void Update(Entity _parent)
     {

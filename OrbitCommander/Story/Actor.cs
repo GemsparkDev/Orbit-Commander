@@ -19,7 +19,7 @@ public class TextActor(Vector2 _position, string _text) : IActor
 {
     public Vector2 Position { get; set; } = _position;
     public int Index { get; set; } = 0;
-    public string Text { get; } = _text;
+    public string Text => _text;
     public Color TextColor { get; set; } = Color.White;
     public float TextSize { get; set; } = 1;
     public void Draw(SpriteBatch _spriteBatch)

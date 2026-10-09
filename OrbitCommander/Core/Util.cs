@@ -163,7 +163,7 @@ public static class Util
         var floppy = new Actor(Assets.Get(Sprites.Floppy), new Vector2(Engine.BackBuffer.X * 4 / 5, Engine.BackBuffer.Y), Color.Gray, MathF.PI / 8) { Scale = UIManager.UIScale };
         var floppyFlat = new Actor(Assets.Get(Sprites.FloppyFlat), new Vector2(Engine.BackBuffer.X * 4 / 5, Engine.BackBuffer.Y), Color.White, 0) { Scale = UIManager.UIScale };
         var floppyVel = Vector2.Zero;
-        var ledGlow = new Actor(Assets.Get(Sprites.LEDGlow), UI.FloppyTerminal.position + (new Vector2(72.5f, 94.5f) * UIManager.UIScale - Assets.DimsOf(Sprites.Terminal) / 2) * UIManager.UIScale, Color.Red, 0) { Scale = UIManager.UIScale };
+        var ledGlow = new Actor(Assets.Get(Sprites.LEDGlow), UI.FloppyTerminal.Position + (new Vector2(72.5f, 94.5f) * UIManager.UIScale - Assets.DimsOf(Sprites.Terminal) / 2) * UIManager.UIScale, Color.Red, 0) { Scale = UIManager.UIScale };
         float floppyAngVel = Util.OneToNegOne();
         List<IActor> actors = [];
         for (int i = 0; i < text.Count; i++)
@@ -210,7 +210,7 @@ public static class Util
                 a.Index = a.Text.Length;
                 scene.IsPaused = true;
                 //Check this line for differing UI scales
-                if(Input.LMB.WasDown && MathF.Abs(UI.FloppyTerminal.position.X - floppy.Position.X + 200) < 200 && MathF.Abs(UI.FloppyTerminal.position.Y + 175 - floppy.Position.Y) < 75)
+                if(Input.LMB.WasDown && MathF.Abs(UI.FloppyTerminal.Position.X - floppy.Position.X + 200) < 200 && MathF.Abs(UI.FloppyTerminal.Position.Y + 175 - floppy.Position.Y) < 75)
                 {
                     floppy.Color = Color.White * (MathF.Sin(Engine.Time * 4) / 8 + 0.875f);
                     floppy.Angle = MathF.Sin(Engine.Time * 5) / 20;
@@ -261,7 +261,7 @@ public static class Util
             }),
             new Event(8 + ts * 4 + Engine.DeltaSeconds,2,delegate(float time)
             {
-                floppyFlat.Position = UI.FloppyTerminal.position + (new Vector2(107, 94.5f) * UIManager.UIScale - Assets.DimsOf(Sprites.Terminal) / 2) * UIManager.UIScale;
+                floppyFlat.Position = UI.FloppyTerminal.Position + (new Vector2(107, 94.5f) * UIManager.UIScale - Assets.DimsOf(Sprites.Terminal) / 2) * UIManager.UIScale;
                 floppyFlat.Color = Color.White * ((2f - time)/2f);
                 Engine.Self.QueueShaderException(floppyFlat);
                 Engine.Self.QueueShaderException(ledGlow);

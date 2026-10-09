@@ -12,12 +12,12 @@ using System.Diagnostics;
 namespace OrbitCommander.Entities;
 public class Pickup : Entity, IData
 {
+    protected ItemData itemData;
     Texture2D IData.Texture => itemData.RealSprite;
     Color IData.Color => itemData.Color;
-    protected ItemData itemData;
-    public Window Tooltip { get; } = new Window(Vector2.Zero, Assets.Get(Sprites.WideButton));
     public string Name => itemData.Name;
     public int ID => itemData.ID;
+    public Window Tooltip { get; } = new Window(Vector2.Zero, Assets.Get(Sprites.WideButton));
     private Decal textbox;
     public Pickup(ItemData _itemData, Vector2 _position, Vector2 _velocity, float _angularVelocity, int _health = 10)
         : base(_position, _velocity, 0, _angularVelocity)
@@ -218,7 +218,7 @@ public class Pickup : Entity, IData
     }
     public static Pickup NewCryoBarricade(Vector2 _position, Vector2 _velocity, float _angle, float _angularVelocity, int _stealth = 0, Team _team = Team.Friendly)
     {
-        var construct = new Pickup(ItemFactory.itemData[Items.CryoBarricade], _position, _velocity, _angularVelocity, ItemFactory.itemData[Items.CryoBarricade].Integrity);
+        var construct = new Pickup(ItemFactory.itemData[Items.CryoBarricade], _position, _velocity, _angularVelocity, ItemFactory.itemData[Items.CryoBarricade].Health);
         construct.AddComponent(new Behaviour().AddBehaviour(construct.CryoBarricade()));
         construct.AddComponent<Smelt>(new Smelt() { Value = 1 });
         construct.Angle = _angle;
@@ -266,7 +266,7 @@ public class Pickup : Entity, IData
     }
     public static Pickup NewTrap(Vector2 _position, Vector2 _velocity, float _angle, float _angularVelocity, int _stealth = 0, Team _team = Team.Friendly)
     {
-        var construct = new Pickup(ItemFactory.itemData[Items.Trap], _position, _velocity, _angularVelocity, ItemFactory.itemData[Items.Trap].Integrity);
+        var construct = new Pickup(ItemFactory.itemData[Items.Trap], _position, _velocity, _angularVelocity, ItemFactory.itemData[Items.Trap].Health);
         construct.AddComponent(new Behaviour().AddBehaviour(construct.Trap()));
         construct.AddComponent(new FollowEmitter(construct) { ParticleEmitter = new ParticleEmitter(Assets.Get(Sprites.Dot), _position, 300, new Color(255, 0, 0)) });
         construct.AddComponent<Smelt>(new Smelt() { Value = 1 });
@@ -293,7 +293,7 @@ public class Pickup : Entity, IData
     }
     public static Pickup NewBomb(Vector2 _position, Vector2 _velocity, float _angle, float _angularVelocity, int _stealth = 0)
     {
-        var construct = new Pickup(ItemFactory.itemData[Items.Bomb], _position, _velocity, _angularVelocity, ItemFactory.itemData[Items.Bomb].Integrity);
+        var construct = new Pickup(ItemFactory.itemData[Items.Bomb], _position, _velocity, _angularVelocity, ItemFactory.itemData[Items.Bomb].Health);
         construct.AddComponent(new Behaviour().AddBehaviour(construct.Bomb()));
         construct.AddComponent(new FollowEmitter(construct) { ParticleEmitter = new ParticleEmitter(Assets.Get(Sprites.Dot), _position, 100, new Color(255, 0, 0)) });
         construct.AddComponent<Smelt>(new Smelt() { Value = 1 });
@@ -330,7 +330,7 @@ public class Pickup : Entity, IData
     }
     public static Pickup NewFurnace(Vector2 _position, Vector2 _velocity, float _angle, float _angularVelocity, int _stealth = 0, Team _team = Team.Friendly)
     {
-        var construct = new Pickup(ItemFactory.itemData[Items.Furnace], _position, _velocity, _angularVelocity, ItemFactory.itemData[Items.Furnace].Integrity);
+        var construct = new Pickup(ItemFactory.itemData[Items.Furnace], _position, _velocity, _angularVelocity, ItemFactory.itemData[Items.Furnace].Health);
         construct.AddComponent(new Behaviour().AddBehaviour(construct.Furnace()));
         construct.AddComponent(new FollowEmitter(construct) { ParticleEmitter = new ParticleEmitter(Assets.Get(Sprites.Dot), _position, 100, new Color(255, 0, 0)) });
         construct.AddComponent(new Smelt() { Value = 1 });
@@ -342,7 +342,7 @@ public class Pickup : Entity, IData
     }
     public static Pickup NewSpecializedParts(Vector2 _position, Vector2 _velocity, float _angle, float _angularVelocity, int _stealth = 0, Team _team = Team.Friendly)
     {
-        var construct = new Pickup(ItemFactory.itemData[Items.SpecializedParts], _position, _velocity, _angularVelocity, ItemFactory.itemData[Items.SpecializedParts].Integrity)
+        var construct = new Pickup(ItemFactory.itemData[Items.SpecializedParts], _position, _velocity, _angularVelocity, ItemFactory.itemData[Items.SpecializedParts].Health)
         {
             Angle = _angle,
             StealthAbility = _stealth,
@@ -384,7 +384,7 @@ public class Pickup : Entity, IData
     }
     public static Pickup NewFaradayShield(Vector2 _position, Vector2 _velocity, float _angle, float _angularVelocity, int _stealth = 0, Team _team = Team.Friendly)
     {
-        var construct = new Pickup(ItemFactory.itemData[Items.FaradayShield], _position, _velocity, _angularVelocity, ItemFactory.itemData[Items.FaradayShield].Integrity)
+        var construct = new Pickup(ItemFactory.itemData[Items.FaradayShield], _position, _velocity, _angularVelocity, ItemFactory.itemData[Items.FaradayShield].Health)
         {
             Angle = _angle,
             StealthAbility = _stealth,
@@ -395,15 +395,15 @@ public class Pickup : Entity, IData
         return construct;
     }
 }
-public class ItemData(Sprites _realSprite, Sprites _virtualSprite, string _name, int _id, Color _color, Color? _textColor = null, int _integrity = 3)
+public class ItemData(Sprites _realSprite, Sprites _virtualSprite, string _name, int _id, Color _color, Color? _textColor = null, int _health = 3)
 {
-    public Texture2D RealSprite { get; } = Assets.Get(_realSprite);
-    public Texture2D VirtualSprite { get; } = Assets.Get(_virtualSprite);
-    public string Name { get; } = _name;
-    public int ID { get; } = _id;
-    public Color Color { get; } = _color;
-    public Color TextColor { get; } = _textColor ?? Color.White;
-    public int Integrity { get; } = _integrity;
+    public Texture2D RealSprite => Assets.Get(_realSprite);
+    public Texture2D VirtualSprite => Assets.Get(_virtualSprite);
+    public string Name => _name;
+    public int ID => _id;
+    public Color Color => _color;
+    public Color TextColor => _textColor ?? Color.White;
+    public int Health => _health;
 }
 public enum Items
 {
