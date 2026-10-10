@@ -39,6 +39,7 @@ public class Engine : Game
     private List<IActor> ShaderExceptions { get; } = [];
     public LoadingStage LoadingStage { get; private set; } = LoadingStage.Preload;
     public static float Time { get; private set; } = 0;
+    List<Vector2> relativePositions = [];
     private Task loadingThread;
     public Engine()
     {
@@ -259,13 +260,52 @@ public class Engine : Game
             exception.Draw(spriteBatch);
         }
         ShaderExceptions.Clear();
+        Texture2D mouseTexture;
         if (Mouse.GetState().LeftButton == ButtonState.Pressed)
         {
-            spriteBatch.Draw(Assets.Get(Sprites.ClickedCursor), new Vector2(Mouse.GetState().X, Mouse.GetState().Y), null, Color.White, 0, Vector2.Zero, UIManager.UIScale / 2, 0, 0.5f);
+            mouseTexture = Assets.Get(Sprites.ClickedCursor);
         }
         else
         {
-            spriteBatch.Draw(Assets.Get(Sprites.Cursor), new Vector2(Mouse.GetState().X, Mouse.GetState().Y), null, Color.White, 0, Vector2.Zero, UIManager.UIScale / 2, 0, 0.5f);
+            mouseTexture = Assets.Get(Sprites.Cursor);
+        }
+        Vector2 newPosition = Input.MousePosition.Direction;
+        float count = 5;
+        relativePositions.Add(Input.MousePosition.Direction - Input.MousePosition.OldDirection);
+        if(relativePositions.Count >= count)
+        {
+            relativePositions.RemoveAt(0);
+        }
+        foreach(var pos in relativePositions)
+        {
+            newPosition -= pos;
+        }
+        for (int j = 0; j < relativePositions.Count; j++)
+        {
+            Vector2 relativePosition = relativePositions[j];
+            float distance = 1f;
+            Vector2 dir = Vector2.Zero;
+            if (relativePosition != Vector2.Zero)
+            {
+                distance = relativePosition.Length();
+                dir = relativePosition / distance;
+            }
+            for (float i = 0; i < distance; i += 4)
+            {
+                float lerp = i / distance;
+                float t1 = 40 / (distance + 40) * (1 - lerp) * MathF.Sqrt(j / count);
+                if(j < relativePositions.Count-1)
+                {
+                    t1 += 40 / (relativePositions[j+1].Length() + 40) * lerp * MathF.Sqrt((j+1)/count);
+                }
+                else
+                {
+                    t1 += lerp;
+                }
+                float transparency = t1;
+                spriteBatch.Draw(mouseTexture, newPosition + dir * i, null, Color.White * transparency, 0, Vector2.Zero, UIManager.UIScale / 2 * (j / count / 2 + 0.5f), 0, 0.5f);
+            }
+            newPosition += relativePosition;
         }
         if (SaveGame.DebugMode)
         {
