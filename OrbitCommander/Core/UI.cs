@@ -1,24 +1,21 @@
-﻿using Microsoft.Xna.Framework;
+﻿using System;
+using System.Collections.Generic;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using System;
-using UILib.Content;
-using static OrbitCommander.Core.Engine;
-using System.Diagnostics;
-using OrbitCommander.Entities;
 using OrbitCommander.Components;
+using OrbitCommander.Entities;
 using OrbitCommander.UIElements;
-using System.Linq;
-using System.Collections.Generic;
+using UILib.Content;
 
 namespace OrbitCommander.Core;
 public static class UI
 {
     public static Window PauseMenu { get; } = new Window(Vector2.Zero, Assets.Get(Sprites.LargePanel));
-    public static Window PlayerMenu { get; } = new Window(new Vector2(-1, 0), Assets.Get(Sprites.Terminal)) { alignment = Alignment.Left };
     //public static TabbedWindow MainMenu { get; } = new TabbedWindow(center, Assets.Get(Sprites.GargantuanPanel), Assets.Get(Sprites.Tab), Assets.Get(Sprites.SelectedTab), Assets.Get(Sound.Interact), 3) { enabled = true, icons = [Assets.Get(Sprites.PlayIcon), Assets.Get(Sprites.SettingsIcon)] };
     public static Screen GlobalMainMenu { get; } = new Screen() { IsEnabled = true };
-    public static Window MothershipMenu { get; } = new Window(new Vector2(-1, 0), Assets.Get(Sprites.Terminal)) { alignment = Alignment.Left };
+    public static TabbedWindow TerminalMenu { get; } = new TabbedWindow(new Vector2(-1, 0), Assets.Get(Sprites.Terminal), null, null, null, null) { alignment = Alignment.Left, IsEnabled = true }; //0: Mothership menu, 1: Keybind menu, 2: Floppy menu, 3: Player menu
+    public static TabbedWindow FuseMenu { get; } = new TabbedWindow(new Vector2(1, 0), Assets.Get(Sprites.RightSidePanel), null, null, null, null) { alignment = Alignment.Right, IsEnabled = true }; //0: Fuse menu, 1: Settings menu
     public static TabbedWindow MissionSelect { get; } = new TabbedWindow(new Vector2(-1, 0), Assets.Get(Sprites.GargantuanPanel), Assets.Get(Sprites.Tab), Assets.Get(Sprites.SelectedTab), Assets.Get(Sound.Interact), 2)
     { icons = [Assets.Get(Sprites.PlanetIcon), Assets.Get(Sprites.RepairIcon)], alignment = Alignment.Left };
     public static Window PickupDroneMenu { get; } = new Window(Vector2.Zero, Assets.Get(Sprites.LargePanel));
@@ -30,19 +27,15 @@ public static class UI
     public static Screen GlobalMenu { get; } = new Screen() { IsEnabled = true };
     public static Screen CutsceneGlobalMenu { get; } = new Screen() { IsEnabled = true };
     public static Window HackMenu { get; } = new Window(Vector2.Zero, Assets.Get(Sprites.LargePanel));
-    public static Window FloppyTerminal { get; } = new Window(new Vector2(-1, 0), Assets.Get(Sprites.Terminal)) { alignment = Alignment.Left };
-    public static Window FuseMenu { get; } = new Window(new Vector2(1, 0), Assets.Get(Sprites.RightSidePanel)) { alignment = Alignment.Right };
     public static Window EscapeMenu { get; } = new Window(Vector2.Zero, Assets.Get(Sprites.LargePanel));
-    public static Window MenuSettings { get; } = new Window(new Vector2(1, 0), Assets.Get(Sprites.RightSidePanel)) { alignment = Alignment.Right };
-    public static Window KeyBinds { get; } = new Window(new Vector2(-1, 0), Assets.Get(Sprites.Terminal)) { alignment = Alignment.Left };
     public static Window DebugMenu { get; } = new Window(-Vector2.One, Assets.Get(Sprites.GargantuanPanel)) { alignment = Alignment.TopLeft };
 
     //Main Menu
     public static Button PatchedConicsToggle { get; } = new Button(new Vector2(-10, 50), Assets.Get(Sprites.SwitchOn), Assets.TextFont, $"Patched Conics: {SaveGame.PatchedConics}", Color.White, Assets.Get(Sprites.SwitchOff));
     public static Button ShaderToggle { get; } = new Button(new Vector2(-10, 70), Assets.Get(Sprites.SwitchOn), Assets.TextFont, $"Shader: {SaveGame.UseShader}", Color.White, Assets.Get(Sprites.SwitchOff)) { };
-    public static TerminalSlider SFXSlider { get; } = new TerminalSlider(Line, Assets.Get(Sprites.Knob), new Vector2(50, -50), new Vector2(50, 5), false, [Color.White, Color.Gray]);
-    public static TerminalSlider MusicSlider { get; } = new TerminalSlider(Line, Assets.Get(Sprites.Knob), new Vector2(50, -65), new Vector2(50, 5), false, [Color.White, Color.Gray]);
-    public static TerminalSlider UIScaleSlider { get; } = new TerminalSlider(Line, Assets.Get(Sprites.Knob), new Vector2(30, -20), new Vector2(50, 5), false, [Color.White, Color.Gray]);
+    public static TerminalSlider SFXSlider { get; } = new TerminalSlider(Engine.Line, Assets.Get(Sprites.Knob), new Vector2(50, -50), new Vector2(50, 5), false, [Color.White, Color.Gray]);
+    public static TerminalSlider MusicSlider { get; } = new TerminalSlider(Engine.Line, Assets.Get(Sprites.Knob), new Vector2(50, -65), new Vector2(50, 5), false, [Color.White, Color.Gray]);
+    public static TerminalSlider UIScaleSlider { get; } = new TerminalSlider(Engine.Line, Assets.Get(Sprites.Knob), new Vector2(30, -20), new Vector2(50, 5), false, [Color.White, Color.Gray]);
     public static Decal SFXVolume { get; } = new Decal(new Vector2(-10, -50), Assets.TextFont, "Sound: 100%", Color.White, 5);
     public static Decal MusicVolume { get; } = new Decal(new Vector2(-10, -65), Assets.TextFont, "Music: 100%", Color.White, 5);
     public static Decal UIScale { get; } = new Decal(new Vector2(-10, -35), Assets.TextFont, $"UI Scale: {Math.Truncate((UIScaleSlider.Intervals[0] + 1) * 10) / 10}", Color.White, 5);
@@ -73,10 +66,10 @@ public static class UI
     //Mothership Menu
     public static ItemSlot<Pickup> FurnaceSlot { get; } = new ItemSlot<Pickup>(new Vector2(-20, 0), Assets.Get(Sprites.EmptySlot), -1);
     public static Decal RequiredCraftsText { get; } = new Decal(new Vector2(0) + new Vector2(0, -6), Assets.TextFont, "25", Color.White, 10);
-    public static Slider FurnaceSlider { get; } = new Slider(Line, new Vector2(-20, -GlobalMainMenu.Size.Y / 6), new Vector2(60, 2), true, [new Color(255, 239, 85), new Color(50, 51, 67)]);
+    public static Slider FurnaceSlider { get; } = new Slider(Engine.Line, new Vector2(-20, -GlobalMainMenu.Size.Y / 6), new Vector2(60, 2), true, [new Color(255, 239, 85), new Color(50, 51, 67)]);
 
     //Player Menu
-    public static Slider EnemySlider { get; } = new Slider(Line, new Vector2(0, -PlayerMenu.Size.Y / 3), new Vector2(50, 2), true, [Color.White, Color.Gray]);
+    public static Slider EnemySlider { get; } = new Slider(Engine.Line, new Vector2(0, -TerminalMenu.Size.Y / 3), new Vector2(50, 2), true, [Color.White, Color.Gray]);
     public static Decal WaveText { get; } = new Decal(new Vector2(-20, 0), Assets.TextFont, "0", Color.White, 10);
     public static Decal EnemiesLeft { get; } = new Decal(new Vector2(0, 0), Assets.TextFont, "0", Color.Red, 10);
     public static Decal Overlay { get; } = new Decal(new Vector2(-10.5f, 49f), Assets.Get(Sprites.Overlay)) { color = Color.White * 0.5f };
@@ -110,14 +103,12 @@ public static class UI
     public static Button LoadBack { get; } = new Button(new Vector2(-100, 40), Assets.Get(Sprites.Button), Assets.TextFont, "Back", Color.White);
 
     //Global Menu
-    public static Button GlobalSidePanelOpen { get; } = new Button(Vector2.Zero, Assets.Get(Sprites.ToggleButton));
-    public static Button GlobalFusePanelOpen { get; } = new Button(Vector2.Zero, Assets.Get(Sprites.RightSideOpen));
-    public static Decal Timer { get; } = new Decal(new Vector2(-50, 0), Assets.TextFont, $"{IngameTime.DrawText}", Color.White, 10);
-    public static Slider PlayerHealth { get; } = new Slider(Line, new Vector2(5, 5), new Vector2(150, 15), true, [Color.Red, Color.White, new Color(0.2f, 0.2f, 0.2f)]);
-    public static Slider PlayerSpecialHealth { get; } = new Slider(Line, new Vector2(5, 5), new Vector2(150, 15), true, [Color.Transparent, Color.Transparent]);
-    public static Slider PlayerAmmo { get; } = new Slider(Line, new Vector2(5, 15), new Vector2(100, 2), true, [Color.Yellow, Color.DarkGray]);
-    public static Slider PlayerAbility { get; } = new Slider(Line, new Vector2(5, 15), new Vector2(100, 10), true, [Color.Cyan, Color.DarkGray]);
-    public static Slider Thermometer { get; } = new Slider(Line, new Vector2(0, 15), new Vector2(100, 10), true, [new Color(25, 25, 25), Color.Transparent, new Color(25, 25, 25)]);
+    public static Decal Timer { get; } = new Decal(new Vector2(-50, 0), Assets.TextFont, $"{Engine.IngameTime.DrawText}", Color.White, 10);
+    public static Slider PlayerHealth { get; } = new Slider(Engine.Line, new Vector2(5, 5), new Vector2(150, 15), true, [Color.Red, Color.White, new Color(0.2f, 0.2f, 0.2f)]);
+    public static Slider PlayerSpecialHealth { get; } = new Slider(Engine.Line, new Vector2(5, 5), new Vector2(150, 15), true, [Color.Transparent, Color.Transparent]);
+    public static Slider PlayerAmmo { get; } = new Slider(Engine.Line, new Vector2(5, 15), new Vector2(100, 2), true, [Color.Yellow, Color.DarkGray]);
+    public static Slider PlayerAbility { get; } = new Slider(Engine.Line, new Vector2(5, 15), new Vector2(100, 10), true, [Color.Cyan, Color.DarkGray]);
+    public static Slider Thermometer { get; } = new Slider(Engine.Line, new Vector2(0, 15), new Vector2(100, 10), true, [new Color(25, 25, 25), Color.Transparent, new Color(25, 25, 25)]);
 
     //Upgrade Menu
     public static Decal TraderChat { get; } = new Decal(Vector2.Zero, Assets.TextFont,
@@ -135,22 +126,22 @@ public static class UI
 
     //Fuse Menu
     public static Decal[] StatusLights { get; } = new Decal[5];
-    public static Slider RestartSwitch { get; } = new Slider(Line, new Vector2(15, 70), Assets.DimsOf(Sprites.SwitchFive) + new Vector2(2, 4), false, [Color.Transparent, Color.Transparent]);
-    public static Decal Switch { get; } = new Decal(RestartSwitch.Offset / UILib.Content.UIManager.UIScale, Assets.Get(Sprites.SwitchFive));
+    public static Slider RestartSwitch { get; } = new Slider(Engine.Line, new Vector2(15, 70), Assets.DimsOf(Sprites.SwitchFive) + new Vector2(2, 4), false, [Color.Transparent, Color.Transparent]);
+    public static Decal Switch { get; } = new Decal(RestartSwitch.Offset / UIManager.UIScale, Assets.Get(Sprites.SwitchFive));
     public static UIElements.Stack<Fuse> FuseCounter { get; } = new UIElements.Stack<Fuse>(new Vector2(-5, -70), Assets.Get(Sprites.Button), 1, Assets.Get(Sprites.Fuse), new Vector2(-Assets.Get(Sprites.Button).Width / 2 * 4 / 5, 0), new Vector2(8, 0), delegate () { return new Fuse(Color.White); });
     public static ItemSlot<Fuse>[,] Fuses { get; } = new ItemSlot<Fuse>[4, 5];
     public static Decal[] ModuleIcons { get; } = new Decal[5];
     public static Decal FuseDetailing { get; } = new Decal(new Vector2(30, 0), Assets.Get(Sprites.FuseDetailing));
     public static Dial FuseDial { get; } = new Dial(Assets.Get(Sprites.Indicator), new Vector2(55, -58), Assets.Get(Sprites.Dial));
-    public static Button FuseMenuClose { get; } = new Button(new Vector2(-Assets.Get(Sprites.RightSidePanel).Width / 2 + Assets.Get(Sprites.ToggleButton).Width / 2, 0), Assets.Get(Sprites.RightSideOpen));
-    public static Decal FuseText { get; } = new Decal(FuseDial.Offset / UILib.Content.UIManager.UIScale + new Vector2(0, 5), Assets.TextFont, "Instability", Color.Black, 5);
+    public static Button FuseClose { get; } = new Button(new Vector2(-Assets.Get(Sprites.RightSidePanel).Width / 2 + Assets.Get(Sprites.ToggleButton).Width / 2, 0), Assets.Get(Sprites.RightSideOpen));
+    public static Decal FuseText { get; } = new Decal(FuseDial.Offset / UIManager.UIScale + new Vector2(0, 5), Assets.TextFont, "Instability", Color.Black, 5);
 
     //Misc
-    public static Button SidePanelClose { get; } = new Button(new Vector2(Assets.Get(Sprites.Terminal).Width / 2 - Assets.Get(Sprites.ToggleButton).Width / 2, 0), Assets.Get(Sprites.ToggleButton));
+    public static Button TerminalClose { get; } = new Button(new Vector2(Assets.Get(Sprites.Terminal).Width / 2 - Assets.Get(Sprites.ToggleButton).Width / 2, 0), Assets.Get(Sprites.ToggleButton));
     public static ItemSlot<Pickup>[] InventorySlots { get; set; } = new ItemSlot<Pickup>[4];
     public static ItemSlot<Pickup>[] MissionSelectSlots { get; set; } = new ItemSlot<Pickup>[4];
     public static ItemSlot<Module>[] ModuleSlots { get; private set; } = new ItemSlot<Module>[5];
-    public static ItemSlot<Weapon> SecondarySlot { get; private set; } = new ItemSlot<Weapon>(new Vector2(-MothershipMenu.Size.X / 4 - 25, 50), Assets.Get(Sprites.EmptySlot), (int)Core.ModuleType.Guns);
+    public static ItemSlot<Weapon> SecondarySlot { get; private set; } = new ItemSlot<Weapon>(new Vector2(-TerminalMenu.Size.X / 4 - 25, 50), Assets.Get(Sprites.EmptySlot), (int)Core.ModuleType.Guns);
 
     public static int windowType = 1;
     public static readonly Vector2[] resolutions = [new Vector2(1920, 1080), new Vector2(640, 480)];
@@ -159,7 +150,7 @@ public static class UI
 
     //Hack menu
     public static Button HackButton { get; } = new Button(Vector2.Zero, Assets.Get(Sprites.Button), Assets.TextFont, "Hack", Color.Yellow);
-    public static Slider HackTimer { get; } = new Slider(Line, new Vector2(0, 50), new Vector2(50, 2), true, [Color.Yellow, new Color(0.1f, 0.1f, 0.1f)]);
+    public static Slider HackTimer { get; } = new Slider(Engine.Line, new Vector2(0, 50), new Vector2(50, 2), true, [Color.Yellow, new Color(0.1f, 0.1f, 0.1f)]);
 
     //Restart Terminal
     public static Decal DeadFile { get; } = new Decal(new Vector2(-10, 0), Assets.Get(Sprites.DeadFile));
@@ -181,9 +172,9 @@ public static class UI
             PatchedConicsToggle.Text = $"Patched Conics: {SaveGame.PatchedConics}";
         };
         ShaderToggle.RisingInteract += delegate
-        { 
-            SaveGame.UseShader = !SaveGame.UseShader; 
-            ShaderToggle.Text = $"Shader: {SaveGame.UseShader}"; 
+        {
+            SaveGame.UseShader = !SaveGame.UseShader;
+            ShaderToggle.Text = $"Shader: {SaveGame.UseShader}";
         };
         MusicSlider.ContinuousInteract += delegate
         {
@@ -195,14 +186,14 @@ public static class UI
         {
             float i = SFXSlider.Intervals[0];
             SoundManager.SFXVolume = i;
-            UILib.Content.UIManager.SFXVolume = i;
+            UIManager.SFXVolume = i;
             SFXVolume.Text = $"Sound: {Math.Round(i * 100)}%";
         };
         UIScaleSlider.FallingInteract += delegate
         {
             float i = UIScaleSlider.Intervals[0];
             UIScale.Text = $"UI Scale: {Math.Truncate((i + 1) * 10) / 10}";
-            UILib.Content.UIManager.UIScale = (i + 1f);
+            UIManager.UIScale = (i + 1f);
         };
 
         SFXSlider.OnContinuousInteract(new Vector2(SFXSlider.Size.X, 0));
@@ -211,7 +202,7 @@ public static class UI
 
         ExitButton.RisingInteract += delegate
         {
-            Self.Exit();
+            Engine.Self.Exit();
             SoundManager.PlayGlobalSound(Assets.Get(Sound.Interact));
         };
         NextWindowType.RisingInteract += delegate
@@ -246,21 +237,18 @@ public static class UI
             Resolution.Text = $"{resolutions[selectedResolution].X} x {resolutions[selectedResolution].Y}";
         };
 
-        AbortButton.RisingInteract += delegate 
-        { 
-            if(Engine.SaveGame.CurrentMission.IsFailed)
+        AbortButton.RisingInteract += delegate
+        {
+            if (Engine.SaveGame.CurrentMission.IsFailed)
             {
                 return;
             }
             Engine.SaveGame.CurrentMission.FailMission();
-            if (Engine.UIManager.ToggleToMenu(PauseMenu))
-            {
-                CurrentGameState.SwitchState(new PlayingGame());
-            }
+            CurrentGameState.SwitchState(new PlayingGame());
         };
         FurnaceSlot.RisingInteract += delegate
         {
-            if(FurnaceSlot.Item != null && !FurnaceSlot.Item.HasComponent<Smelt>())
+            if (FurnaceSlot.Item != null && !FurnaceSlot.Item.HasComponent<Smelt>())
             {
                 (FurnaceSlot.Item, Engine.UIManager.selectedIcon) = (Engine.UIManager.selectedIcon as Pickup, FurnaceSlot.Item as IData);
                 return;
@@ -271,7 +259,7 @@ public static class UI
         {
             if (Engine.SaveGame.Player.restartCd > 0)
             {
-                if (!Input.LMB.WasDown)
+                if (!UIManager.NewInput[0])
                 {
                     SoundManager.PlayGlobalSound(Assets.Get(Sound.Fail));
                 }
@@ -314,41 +302,19 @@ public static class UI
         RestartSwitch.SetInterval(1, 1);
         FuseCounter.RisingInteract += delegate { Engine.SaveGame.Player.UpdateSpares(); };
 
-        GlobalSidePanelOpen.RisingInteract += delegate
+        TerminalClose.ContinuousInteract += delegate
         {
-            if(Engine.UIManager.ScreenWindow == GlobalMainMenu)
-            {
-                KeyBinds.IsEnabled = true;
-            }
-            else
-            {
-                Events.ToggleDockingMenus();
-            }
+            TerminalMenu.Position = new Vector2(Math.Clamp(UIManager.NewPosition.X - TerminalMenu.Size.X * UIManager.UIScale + Assets.DimsOf(Sprites.RightSideOpen).X * UIManager.UIScale / 2, 
+                -TerminalMenu.Size.X * UIManager.UIScale + Assets.DimsOf(Sprites.RightSideOpen).X * UIManager.UIScale, 0), TerminalMenu.Position.Y);
         };
-        GlobalFusePanelOpen.RisingInteract += delegate
+        FuseClose.ContinuousInteract += delegate
         {
-            SoundManager.PlayGlobalSound(Assets.Get(Sound.Interact));
-            if(Engine.UIManager.ScreenWindow == GlobalMainMenu)
-            {
-                MenuSettings.IsEnabled = true;
-            }
-            else
-            {
-                Events.UpdateModulesStatus();
-                FuseMenu.IsEnabled = true;
-            }
-        };
-        SidePanelClose.RisingInteract += delegate 
-        {
-            KeyBinds.IsEnabled = false;
-            Events.ToggleDockingMenus();
-        };
-        FuseMenuClose.RisingInteract += delegate
-        {
-            MenuSettings.IsEnabled = false;
-            SoundManager.PlayGlobalSound(Assets.Get(Sound.Interact));
-            FuseMenu.IsEnabled = false;
-            if(Engine.UIManager.selectedIcon is Fuse)
+            Events.UpdateModulesStatus();
+            FuseMenu.Position = new Vector2(Math.Clamp(
+                UIManager.NewPosition.X + FuseMenu.Size.X * UIManager.UIScale - Assets.DimsOf(Sprites.RightSideOpen).X * UIManager.UIScale / 2,
+                Engine.BackBuffer.X,
+                Engine.BackBuffer.X + FuseMenu.Size.X * UIManager.UIScale - Assets.DimsOf(Sprites.RightSideOpen).X * UIManager.UIScale), FuseMenu.Position.Y);
+            if (Engine.UIManager.selectedIcon is Fuse)
             {
                 Engine.UIManager.selectedIcon = null;
                 FuseCounter.Count++;
@@ -361,7 +327,7 @@ public static class UI
         {
             if ((Mission.missions[Engine.SaveGame.CurrentMissionIndex].data.IsRelaunchable || !Engine.SaveGame.CurrentMissionCompleted) && Events.SyncModules())
             {
-                Startgame();
+                Engine.Startgame();
             }
         };
         LaunchButton.RisingInteract += delegate { Events.SendMessage(Message.EscapeDroneLeave); };
@@ -426,16 +392,15 @@ public static class UI
                 Engine.SaveGame.QueuedItems.RemoveAt(Engine.SaveGame.QueuedItems.Count - 1);
             }
         };
-        SaveButton.RisingInteract += delegate { Engine.UIManager.DisableAll(); SaveMenu.IsEnabled = true; Events.GetSave(); };
-        ExitWithoutSave.RisingInteract += delegate { Engine.UIManager.DisableAll(); Events.QuitToMenu(); };
+        SaveButton.RisingInteract += delegate { SaveMenu.IsEnabled = true; Events.GetSave(); };
+        ExitWithoutSave.RisingInteract += delegate { Events.QuitToMenu(); };
         LoadButton.RisingInteract += delegate { GlobalMainMenu.IsEnabled = false; LoadMenu.IsEnabled = true; Events.GetSave(); };
 
         Name.RisingInteract += delegate { Engine.SaveGame.Name = Name.Text; };
         SaveToFile.RisingInteract += delegate { Util.Save(); };
-        LoadFromFile.RisingInteract += delegate 
+        LoadFromFile.RisingInteract += delegate
         {
-            Engine.UIManager.DisableAll();
-            CurrentGameState.SwitchState(new Loading(Load, LoadingStage.Complete)); 
+            CurrentGameState.SwitchState(new Loading(Engine.Load, LoadingStage.Complete));
         };
         SaveBack.RisingInteract += (delegate { MissionSelect.IsEnabled = true; SaveMenu.IsEnabled = false; });
         LoadBack.RisingInteract += (delegate { GlobalMainMenu.IsEnabled = true; LoadMenu.IsEnabled = false; });
@@ -469,14 +434,12 @@ public static class UI
 
         GlobalMainMenu.AddWidget(ExitButton, (int)Alignment.TopLeft);
         GlobalMainMenu.AddWidget(SingleplayerButton, (int)Alignment.TopLeft);
-        GlobalMainMenu.AddWidget(GlobalSidePanelOpen, (int)Alignment.Left);
-        GlobalMainMenu.AddWidget(GlobalFusePanelOpen, (int)Alignment.Right);
         GlobalMainMenu.AddWidget(LoadButton, (int)Alignment.TopLeft);
         for (int i = 0; i < keys.Count; i++)
         {
             var binding = i; //Saving to a variable prevents delegate weirdness
             var key = keys[binding];
-            KeyBinds.AddWidget(KeybindTexts[i] = new Decal(new Vector2(-120 + Assets.TextFont.MeasureString($"{binding}").X / 2.55f, 12 * i - 80), Assets.TextFont, $"{binding}", Color.White, 8), (int)Alignment.TopRight);
+            TerminalMenu.AddWidget(KeybindTexts[i] = new Decal(new Vector2(-120 + Assets.TextFont.MeasureString($"{binding}").X / 2.55f, 12 * i - 80), Assets.TextFont, $"{binding}", Color.White, 8), 1);
             var button = new TerminalButton(new Vector2(60, 12 * i - 80), Assets.TextFont, $"{key}", Color.White, 8);
             button.RisingInteract += delegate
             {
@@ -487,9 +450,9 @@ public static class UI
                     button.Text = $"{keys[0]}";
                 }
             };
-            KeyBinds.AddWidget(KeybindInputs[i] = button, (int)Alignment.TopRight);
+            TerminalMenu.AddWidget(KeybindInputs[i] = button, 1);
         }
-        KeyBinds.AddWidget(SidePanelClose);
+        TerminalMenu.AddWidget(TerminalClose);
 
         for (int i = 0; i < NextModule.Length; i++)
         {
@@ -498,7 +461,7 @@ public static class UI
             int index = i;
             NextModule[i].RisingInteract += delegate
                 {
-                    if (Self.LoadingStage != LoadingStage.Complete)
+                    if (Engine.Self.LoadingStage != LoadingStage.Complete)
                     {
                         return;
                     }
@@ -512,7 +475,7 @@ public static class UI
             DebugMenu.AddWidget(PrevModule[i] = new TerminalButton(new Vector2(-120, 25 * i - 40), Assets.TextFont, $"Prev", Color.White, 10), (int)Alignment.Center);
             PrevModule[i].RisingInteract += delegate
                 {
-                    if (Self.LoadingStage != LoadingStage.Complete)
+                    if (Engine.Self.LoadingStage != LoadingStage.Complete)
                     {
                         return;
                     }
@@ -521,14 +484,14 @@ public static class UI
                     {
                         setModules[module] = nextModule;
                     }
-                    Events.SetModules(); 
+                    Events.SetModules();
                 };
             DebugMenu.AddWidget(ModuleSelection[i] = new Decal(new Vector2(0, 25 * i - 40), Assets.TextFont, "Loading...", Color.White, 10), (int)Alignment.Center);
         }
         DebugMenu.AddWidget(SetModules);
         SetModules.RisingInteract += delegate
         {
-            for(ModuleType i = ModuleType.Hull; i <= ModuleType.Core; i++)
+            for (ModuleType i = ModuleType.Hull; i <= ModuleType.Core; i++)
             {
                 Engine.SaveGame.Player.modules[i] = ItemFactory.moduleData[setModules[(int)i]].Retrieve();
             }
@@ -552,35 +515,35 @@ public static class UI
         SettingsMenu.AddWidget(NextResolution);
         SettingsMenu.AddWidget(ApplyChanges);
 
-        MothershipMenu.AddWidget(FurnaceSlider, 0);
-        MothershipMenu.AddWidget(FurnaceSlot, 0);
-        MothershipMenu.AddWidget(RequiredCraftsText, 0);
+        TerminalMenu.AddWidget(FurnaceSlider, 0);
+        TerminalMenu.AddWidget(FurnaceSlot, 0);
+        TerminalMenu.AddWidget(RequiredCraftsText, 0);
         for (int i = 0; i < 3; i++)
         {
-            MothershipMenu.AddWidget(SidePanelClose, i);
+            TerminalMenu.AddWidget(TerminalClose, i);
         }
-        MothershipMenu.AddWidget(Overlay, 0);
+        TerminalMenu.AddWidget(Overlay, 0);
 
-        PlayerMenu.AddWidget(EnemySlider);
-        PlayerMenu.AddWidget(WaveText);
-        PlayerMenu.AddWidget(SidePanelClose);
-        PlayerMenu.AddWidget(EnemiesLeft);
-        PlayerMenu.AddWidget(Overlay);
+        TerminalMenu.AddWidget(EnemySlider, 3);
+        TerminalMenu.AddWidget(WaveText, 3);
+        TerminalMenu.AddWidget(TerminalClose, 3);
+        TerminalMenu.AddWidget(EnemiesLeft, 3);
+        TerminalMenu.AddWidget(Overlay, 3);
 
-        MenuSettings.AddWidget(PatchedConicsToggle, (int)Alignment.Top);
-        MenuSettings.AddWidget(SFXSlider, (int)Alignment.Top);
-        MenuSettings.AddWidget(MusicSlider, (int)Alignment.Top);
-        MenuSettings.AddWidget(UIScaleSlider, (int)Alignment.Top);
-        MenuSettings.AddWidget(SFXVolume, (int)Alignment.Top);
-        MenuSettings.AddWidget(MusicVolume, (int)Alignment.Top);
-        MenuSettings.AddWidget(UIScale, (int)Alignment.Top);
-        MenuSettings.AddWidget(ShaderToggle, (int)Alignment.Top);
-        MenuSettings.AddWidget(WindowType, (int)Alignment.Top);
-        MenuSettings.AddWidget(NextWindowType, (int)Alignment.Top);
-        MenuSettings.AddWidget(Resolution, (int)Alignment.Top);
-        MenuSettings.AddWidget(NextResolution, (int)Alignment.Top);
-        MenuSettings.AddWidget(ApplyChanges, (int)Alignment.Top);
-        MenuSettings.AddWidget(FuseMenuClose);
+        FuseMenu.AddWidget(PatchedConicsToggle, 1);
+        FuseMenu.AddWidget(SFXSlider, 1);
+        FuseMenu.AddWidget(MusicSlider, 1);
+        FuseMenu.AddWidget(UIScaleSlider, 1);
+        FuseMenu.AddWidget(SFXVolume, 1);
+        FuseMenu.AddWidget(MusicVolume, 1);
+        FuseMenu.AddWidget(UIScale, 1);
+        FuseMenu.AddWidget(ShaderToggle, 1);
+        FuseMenu.AddWidget(WindowType, 1);
+        FuseMenu.AddWidget(NextWindowType, 1);
+        FuseMenu.AddWidget(Resolution, 1);
+        FuseMenu.AddWidget(NextResolution, 1);
+        FuseMenu.AddWidget(ApplyChanges, 1);
+        FuseMenu.AddWidget(FuseClose, 1);
 
         MissionSelect.AddWidget(MissionName, 0);
         MissionSelect.AddWidget(MissionDescription, 0);
@@ -623,8 +586,6 @@ public static class UI
         UpgradeMenu.AddWidget(UpgradeEngine, 2);
         UpgradeMenu.AddWidget(UpgradeCore, 2);
 
-        GlobalMenu.AddWidget(GlobalSidePanelOpen, (int)Alignment.Left);
-        GlobalMenu.AddWidget(GlobalFusePanelOpen, (int)Alignment.Right);
         GlobalMenu.AddWidget(Timer, (int)Alignment.TopRight);
         GlobalMenu.AddWidget(PlayerHealth, (int)Alignment.TopLeft);
         GlobalMenu.AddWidget(PlayerSpecialHealth, (int)Alignment.TopLeft);
@@ -656,21 +617,21 @@ public static class UI
                     return;
                 }
                 var item = slot.Item;
-                if(item == null)
+                if (item == null)
                 {
                     return;
                 }
-                if (UILib.Content.UIManager.Self.selectedIcon is Pickup pickup && pickup is not Module)
+                if (UIManager.Self.selectedIcon is Pickup pickup && pickup is not Module)
                 {
                     if (item.Type is Modules.EmergencyEngine)
                     {
                         slot.Item = new StandardEngine();
-                        UILib.Content.UIManager.Self.selectedIcon = null;
+                        UIManager.Self.selectedIcon = null;
                     }
                     else if (item.Type is Modules.PointDefense)
                     {
                         slot.Item = new Basic();
-                        UILib.Content.UIManager.Self.selectedIcon = null;
+                        UIManager.Self.selectedIcon = null;
                     }
                     else
                     {
@@ -680,23 +641,23 @@ public static class UI
             };
             slot.RisingInteract += delegate
             {
-                if(Engine.SaveGame.Player.isExpired) //No module replacement after death
+                if (Engine.SaveGame.Player.isExpired) //No module replacement after death
                 {
                     return;
                 }
-                var icon = UILib.Content.UIManager.Self.selectedIcon as Module;
+                var icon = UIManager.Self.selectedIcon as Module;
                 if (slot.Item == null)
                 {
                     slot.Item = icon;
-                    UILib.Content.UIManager.Self.selectedIcon = null;
+                    UIManager.Self.selectedIcon = null;
                 }
-                else if(icon != null && icon.Type is Modules.EmergencyEngine or Modules.PointDefense or Modules.EmptyModule)
+                else if (icon != null && icon.Type is Modules.EmergencyEngine or Modules.PointDefense or Modules.EmptyModule)
                 {
-                    UILib.Content.UIManager.Self.selectedIcon = null;
+                    UIManager.Self.selectedIcon = null;
                 }
                 Events.SyncModules();
             };
-            MothershipMenu.AddWidget(ModuleSlots[x]);
+            TerminalMenu.AddWidget(ModuleSlots[x]);
             MissionSelect.AddWidget(ModuleSlots[x], 1);
         }
         for (int i = 0; i < InventorySlots.GetLength(0); i++)
@@ -705,15 +666,15 @@ public static class UI
                 Assets.DimsOf(Sprites.EmptySlot).Y * (i + 1) - Assets.DimsOf(Sprites.LargePanel).X / 2), Assets.Get(Sprites.EmptySlot), -1);
             MissionSelectSlots[i] = new ItemSlot<Pickup>(new Vector2(Assets.DimsOf(Sprites.LargePanel).X / 2,
                 Assets.DimsOf(Sprites.EmptySlot).Y * (i + 1) - Assets.DimsOf(Sprites.LargePanel).X / 2), Assets.Get(Sprites.EmptySlot), -1);
-            MothershipMenu.AddWidget(InventorySlots[i], 0);
+            TerminalMenu.AddWidget(InventorySlots[i], 0);
             PickupDroneMenu.AddWidget(InventorySlots[i]);
             MissionSelect.AddWidget(InventorySlots[i], 1);
             MissionSelect.AddWidget(MissionSelectSlots[i], 1);
             InventorySlots[i].RisingInteract += delegate { Events.UpdateInventory(); };
-            MissionSelectSlots[i].RisingInteract += delegate{Events.UpdateInventory(); };
+            MissionSelectSlots[i].RisingInteract += delegate { Events.UpdateInventory(); };
         }
         MissionSelect.AddWidget(SecondarySlot, 1);
-        SecondarySlot.RisingInteract += delegate 
+        SecondarySlot.RisingInteract += delegate
         {
             if (Engine.SaveGame.Player.isExpired) //No module repair after death
             {
@@ -725,7 +686,7 @@ public static class UI
                 return;
             }
 
-            if (UILib.Content.UIManager.Self.selectedIcon is Pickup pickup && pickup is not Module)
+            if (UIManager.Self.selectedIcon is Pickup pickup && pickup is not Module)
             {
                 Events.RepairModule(item);
             }
@@ -735,10 +696,10 @@ public static class UI
             Events.SyncModules();
         };
 
-        FuseMenu.AddWidget(FuseDetailing, (int)Alignment.Center);
-        FuseMenu.AddWidget(RestartSwitch, (int)Alignment.Center);
-        FuseMenu.AddWidget(Switch, (int)Alignment.Center);
-        FuseMenu.AddWidget(FuseCounter, (int)Alignment.Center);
+        FuseMenu.AddWidget(FuseDetailing, 0);
+        FuseMenu.AddWidget(RestartSwitch, 0);
+        FuseMenu.AddWidget(Switch, 0);
+        FuseMenu.AddWidget(FuseCounter, 0);
         for (int i = 0; i < 4; i++)
         {
             for (int j = -2; j < 3; j++)
@@ -752,34 +713,30 @@ public static class UI
                     Engine.SaveGame.Player.ToggleFuse(x, y);
                 };
                 Fuses[i, j + 2] = fuse;
-                FuseMenu.AddWidget(fuse, (int)Alignment.Center);
+                FuseMenu.AddWidget(fuse, 0);
             }
         }
         for (int i = 0; i < 5; i++)
         {
             float y = (i - 2) * 20 + 0.5f;
-            FuseMenu.AddWidget(ModuleIcons[i] = new Decal(new Vector2(-16.5f, y + 0.5f), null), (int)Alignment.Center);
-            FuseMenu.AddWidget(StatusLights[i] = new Decal(new Vector2(-33f, y), Assets.Get(Sprites.LEDGlow)), (int)Alignment.Center);
+            FuseMenu.AddWidget(ModuleIcons[i] = new Decal(new Vector2(-16.5f, y + 0.5f), null), 0);
+            FuseMenu.AddWidget(StatusLights[i] = new Decal(new Vector2(-33f, y), Assets.Get(Sprites.LEDGlow)), 0);
         }
-        FuseMenu.AddWidget(FuseMenuClose);
-        FuseMenu.AddWidget(FuseDial);
-        FuseMenu.AddWidget(FuseText);
-
-        CutsceneGlobalMenu.AddWidget(GlobalSidePanelOpen, (int)Alignment.Left);
-        CutsceneGlobalMenu.AddWidget(GlobalFusePanelOpen, (int)Alignment.Right);
+        FuseMenu.AddWidget(FuseClose, 0);
+        FuseMenu.AddWidget(FuseDial, 0);
+        FuseMenu.AddWidget(FuseText, 0);
 
         HackMenu.AddWidget(HackButton);
         HackMenu.AddWidget(HackTimer);
 
-        FloppyTerminal.AddWidget(SidePanelClose);
-        FloppyTerminal.AddWidget(DeadFile);
-        FloppyTerminal.AddWidget(Overlay);
+        TerminalMenu.AddWidget(TerminalClose, 2);
+        TerminalMenu.AddWidget(DeadFile, 2);
+        TerminalMenu.AddWidget(Overlay, 2);
 
         EscapeMenu.AddWidget(EscapeButton);
 
         Engine.UIManager.AddContainer(PauseMenu);
-        Engine.UIManager.AddContainer(PlayerMenu);
-        Engine.UIManager.AddContainer(MothershipMenu);
+        Engine.UIManager.AddContainer(TerminalMenu);
         Engine.UIManager.AddContainer(MissionSelect);
         Engine.UIManager.AddContainer(PickupDroneMenu);
         Engine.UIManager.AddContainer(SaveMenu);
@@ -787,11 +744,8 @@ public static class UI
         Engine.UIManager.AddContainer(UpgradeMenu);
         Engine.UIManager.AddContainer(SettingsMenu);
         Engine.UIManager.AddContainer(HackMenu);
-        Engine.UIManager.AddContainer(FloppyTerminal);
         Engine.UIManager.AddContainer(FuseMenu);
         Engine.UIManager.AddContainer(EscapeMenu);
-        Engine.UIManager.AddContainer(MenuSettings);
-        Engine.UIManager.AddContainer(KeyBinds);
         Engine.UIManager.AddContainer(DebugMenu);
 
         Engine.UIManager.ScreenWindow = GlobalMenu;

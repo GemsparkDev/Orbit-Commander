@@ -174,7 +174,6 @@ public static class Assets
         //Particles
         Add(Core.Sprites.Dollar, Content.Load<Texture2D>("Images/Particle_1"));
         Add(Core.Sprites.Glow, Content.Load<Texture2D>("Images/Particle_3"));
-        Add(Core.Sprites.Trail, Content.Load<Texture2D>("Images/Particle_4"));
 
         //
         //Sound FX
@@ -237,6 +236,7 @@ public static class Assets
         Add(Core.Sprites.WideButton, Content.Load<Texture2D>("Images/UI_18"));
         Add(Core.Sprites.ToggleButton, Content.Load<Texture2D>("Images/UI_25"));
         Add(Core.Sprites.PlayerUI, Content.Load<Texture2D>("Images/UI_1"));
+        Add(Core.Sprites.Hand, Content.Load<Texture2D>("Images/UI_5"));
         Add(Core.Sprites.EmptySlot, Content.Load<Texture2D>("Images/UI_6"));
         Add(Core.Sprites.SwitchFive, Content.Load<Texture2D>("Images/UI_40-5"));
         Add(Core.Sprites.DeadFile, Content.Load<Texture2D>("Images/UI_47"));
@@ -261,6 +261,7 @@ public static class Assets
 
         Add(Core.Sprites.Dot, Content.Load<Texture2D>("Images/Particle_0"));
         Add(Core.Sprites.Circle, Content.Load<Texture2D>("Images/Particle_2"));
+        Add(Core.Sprites.Trail, Content.Load<Texture2D>("Images/Particle_4"));
 
         Add(Core.Sprites.Mothership, Content.Load<Texture2D>("Images/Entity_6"));
 

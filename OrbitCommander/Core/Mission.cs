@@ -11,6 +11,7 @@ using OrbitCommander.Entities;
 using OrbitCommander.Components;
 using System.Diagnostics;
 using static OrbitCommander.Core.Util;
+using UILib.Content;
 //using System.Numerics;
 
 namespace OrbitCommander.Core;
@@ -427,7 +428,7 @@ public class Mission
         //If the player is further from the camera, put more weight on the player
         //Tanh prevents frac from going above 1
         float frac = MathF.Tanh(Vector2.Distance(Player.Position, Engine.Camera.Position) / 750);
-        Engine.Camera.Position = Player.Position * frac + Engine.Camera.Position * (1 - frac) + new Vector2(Mouse.GetState().X, Mouse.GetState().Y) / 16 - Engine.BackBuffer / 32
+        Engine.Camera.Position = Player.Position * frac + Engine.Camera.Position * (1 - frac) + Engine.Self.TrueCursorPosition / 16 - Engine.BackBuffer / 32
         + Engine.ScreenShakeFactor * Engine.ScreenShakeFactor * new Vector2(Util.Random.NextSingle() - 0.5f, Util.Random.NextSingle() - 0.5f) * 50;
         var planet = (Engine.SaveGame.CurrentMission.Entities.Where(x => x is Planet).ToArray());
         float sum = 0.75f;

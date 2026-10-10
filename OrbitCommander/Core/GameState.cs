@@ -107,15 +107,12 @@ public class PlayingGame : GameState
         ParticleManager.Update();
         if (!Input.Exit.WasDown && Input.Exit.IsDown)
         {
-            if (Engine.UIManager.ToggleToMenu(UI.PauseMenu))
-            {
-                SoundManager.SetAllSounds(false);
-                CurrentGameState.SwitchState(new PausedGame());
-            }
+            UI.PauseMenu.IsEnabled = true;
+            SoundManager.SetAllSounds(false);
+            CurrentGameState.SwitchState(new PausedGame());
         }
         if (!Engine.Self.IsActive)
         {
-            Engine.UIManager.DisableAll();
             UI.PauseMenu.IsEnabled = true;
             CurrentGameState.SwitchState(new PausedGame());
         }
@@ -137,8 +134,9 @@ public class PausedGame : GameState
                 UI.PauseMenu.IsEnabled = true;
                 UI.SettingsMenu.IsEnabled = false;
             }
-            else if (Engine.UIManager.ToggleToMenu(UI.PauseMenu))
+            else
             {
+                UI.PauseMenu.IsEnabled = false;
                 CurrentGameState.SwitchState(new PlayingGame());
             }
         }
@@ -192,8 +190,7 @@ public class MissionSelect : GameState
 
         SoundManager.PlayGlobalSound(Assets.Get(Sound.Interact));
         SoundManager.ChangeTrack(Assets.Get(Sound.menu));
-        while (!Engine.UIManager.ToggleToMenu(UI.MissionSelect))
-        { }
+        UI.MissionSelect.IsEnabled = true;
     }
     public override void Update()
     {

@@ -1,6 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Input;
 using OrbitCommander.Core;
 using System;
 using System.Collections.Generic;
@@ -34,8 +33,7 @@ public class Dial : FunctionalWidget
         {
             return;
         }
-        MouseState newState = Mouse.GetState();
-        Tooltip.Position = new Vector2(newState.Position.X, newState.Position.Y) + Tooltip.Size / 2 * UIManager.UIScale;
+        Tooltip.Position = UIManager.NewPosition + Tooltip.Size / 2 * UIManager.UIScale;
         Tooltip.Draw(_spriteBatch);
     }
     public override void Update()

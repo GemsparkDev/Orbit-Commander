@@ -4050,7 +4050,7 @@ public class Entity : IMissionComponent
     {
         var enemy = NewEnemy(position, velocity, angle, 1000, Assets.Get(Sprites.Mothership), Team.Friendly);
         enemy.AddComponent(new Behaviour().AddBehaviour(enemy.Mothership()));
-        enemy.AddComponent(new Dockable(enemy, UI.MothershipMenu));
+        enemy.AddComponent(new Dockable(enemy, UI.TerminalMenu));
         return enemy;
     }
     IEnumerable<int> Turret()
@@ -4184,7 +4184,7 @@ public class Entity : IMissionComponent
     {
         var enemy = NewEnemy(position, velocity, angle, 300, Assets.Get(Sprites.Orbiter), Team.Friendly);
         enemy.AddComponent(new Behaviour().AddBehaviour(enemy.Orbiter()));
-        enemy.AddComponent(new Dockable(enemy, UI.MothershipMenu));
+        enemy.AddComponent(new Dockable(enemy, UI.TerminalMenu));
         enemy.AngularVelocity = -0.01f;
         return enemy;
     }
@@ -4423,7 +4423,7 @@ public class Entity : IMissionComponent
     {
         var enemy = NewEnemy(position, velocity, angle, 500, Assets.Get(Sprites.Mothership), _team);
         enemy.AddComponent(new Behaviour().AddBehaviour(enemy.MakeshiftMothership()).AddBehaviour(enemy.EnemyDeath()));
-        enemy.AddComponent(new Dockable(enemy, UI.MothershipMenu));
+        enemy.AddComponent(new Dockable(enemy, UI.TerminalMenu));
         enemy.AddTag(Tags.IsImportant);
         return enemy;
     }
@@ -4795,7 +4795,7 @@ public class Entity : IMissionComponent
     {
         var enemy = NewEnemy(_position, _velocity, _angle, 200, Assets.Get(Sprites.MassRelayOne), Team.Friendly);
         enemy.AddComponent(new Behaviour().AddBehaviour(enemy.MassRelay()));
-        enemy.AddComponent(new Dockable(enemy, UI.MothershipMenu));
+        enemy.AddComponent(new Dockable(enemy, UI.TerminalMenu));
         return enemy;
     }
     IEnumerable<int> MeshNetworkNode()
@@ -4990,7 +4990,7 @@ public class Entity : IMissionComponent
     {
         var enemy = NewEnemy(_position, _velocity, _angle, 1000, Assets.Get(Sprites.Mothership), Team.Friendly);
         enemy.AddComponent(new Behaviour().AddBehaviour(enemy.CrashedShip()));
-        enemy.AddComponent(new Dockable(enemy, UI.MothershipMenu, true));
+        enemy.AddComponent(new Dockable(enemy, UI.TerminalMenu, true));
         return enemy;
     }
     public static Entity NewButton(Vector2 _position, Vector2 _velocity, float _angle, Action _action)

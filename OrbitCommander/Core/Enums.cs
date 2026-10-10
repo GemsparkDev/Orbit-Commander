@@ -219,6 +219,7 @@ public enum Sprites
     Indicator,
     LEDGlow,
     FuseDetailing,
+    Hand,
 
     SmeltIcon,
     RepairIcon,

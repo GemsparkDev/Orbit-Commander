@@ -40,6 +40,10 @@ public class Engine : Game
     public LoadingStage LoadingStage { get; private set; } = LoadingStage.Preload;
     public static float Time { get; private set; } = 0;
     List<Vector2> relativePositions = [];
+    public bool HandMode { get; private set; } = false; //0 = cursor, 1 = hand
+    Vector2 handPos = Vector2.Zero;
+    public Vector2 TrueCursorPosition { get; private set; } = Vector2.Zero;
+    Vector2 prevPos = Vector2.Zero;
     private Task loadingThread;
     public Engine()
     {
@@ -85,7 +89,6 @@ public class Engine : Game
             //UI behaviors that need special permission
             UI.SingleplayerButton.RisingInteract += delegate
             {
-                UIManager.DisableAll();
                 CurrentGameState.SwitchState(new Loading(delegate ()
                 {
                     SaveGame = new();
@@ -126,7 +129,6 @@ public class Engine : Game
     }
     public static void Startgame()
     {
-        UIManager.DisableAll();
         ParticleManager.Initialize();
         SaveGame.CurrentMission = Mission.missions[SaveGame.CurrentMissionIndex].instance();
         SoundManager.Initialize();
@@ -167,9 +169,33 @@ public class Engine : Game
             return;
         }
         Input.Update();
-        if (IsActive)
+        if (HandMode)
         {
-            UIManager.Update();
+            handPos = handPos * 0.9f + Input.MousePosition.Direction * 0.1f;
+            prevPos = TrueCursorPosition;
+            if (IsActive)
+            {
+                UIManager.Update(handPos, [Mouse.GetState().LeftButton == ButtonState.Pressed, Mouse.GetState().RightButton == ButtonState.Pressed]);
+            }
+        }
+        else
+        {
+            float distance = Vector2.Distance(handPos, new Vector2(BackBuffer.X / 2, BackBuffer.Y * 0.8f));
+            float speed = BackBuffer.X / (BackBuffer.X + distance * 10);
+            handPos = handPos * (1 - speed) + new Vector2(BackBuffer.X/2, BackBuffer.Y * 0.8f) * (speed);
+            prevPos = TrueCursorPosition;
+            if(distance < 50)
+            {
+                TrueCursorPosition = TrueCursorPosition * 0.5f + Input.MousePosition.Direction * 0.5f;
+                if (IsActive)
+                {
+                    UIManager.Update(new Vector2(-1000, -1000), [Mouse.GetState().LeftButton == ButtonState.Pressed, Mouse.GetState().RightButton == ButtonState.Pressed]);
+                }
+            }
+        }
+        if(Input.Tab.IsDown && !Input.Tab.WasDown)
+        {
+            HandMode = !HandMode;
         }
         SoundManager.Update();
         CurrentGameState.Update();
@@ -183,8 +209,7 @@ public class Engine : Game
         {
             ScreenShakeFactor = 0;
         }
-        UI.Timer.Text
-            = $"{IngameTime.DrawText}";
+        UI.Timer.Text = $"{IngameTime.DrawText}";
         Time += DeltaSeconds;
     }
     public static void WriteLine<T>(T arg, Color _color = default)
@@ -243,6 +268,62 @@ public class Engine : Game
         spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, null, null, null, transformMatrix: Camera.Transform);
         CurrentGameState.Draw(spriteBatch);
         spriteBatch.End();
+        spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp);
+
+        Vector2 newPosition = TrueCursorPosition;
+        float count = 2;
+        float i = 0;
+        relativePositions.Add(TrueCursorPosition - prevPos);
+        if (relativePositions.Count > count)
+        {
+            relativePositions.RemoveAt(0);
+        }
+        foreach (var pos in relativePositions)
+        {
+            newPosition -= pos;
+        }
+        Texture2D trailTexture = Assets.Get(Sprites.Circle);
+        Texture2D mouseTexture;
+        Color mouseColor;
+        if (Input.LMB.IsDown)
+        {
+            mouseTexture = Assets.Get(Sprites.ClickedCursor);
+            mouseColor = Color.Red;
+        }
+        else
+        {
+            mouseTexture = Assets.Get(Sprites.Cursor);
+            mouseColor = Color.White;
+        }
+        for (int j = 0; j < relativePositions.Count; j++)
+        {
+            Vector2 relativePosition = relativePositions[j];
+            float angle = Util.ToAngle(relativePosition);
+            Vector2 nextRelative = (j < relativePositions.Count - 1) ? relativePositions[j + 1] : Vector2.Zero;
+            float distance = (relativePosition != Vector2.Zero) ? relativePosition.Length() : 1;
+            if (distance < 10)
+            {
+                newPosition += relativePosition;
+                continue;
+            }
+            for (i = i; i < distance; i += 4)
+            {
+                float lerp = i / distance;
+                //TODO; Figure out why the color isn't smooth.
+                float t1 = 40 / (distance + 40) * (1 - lerp) + 40 / (nextRelative.Length() + 40) * (lerp);
+                float transparency = MathF.Sqrt(t1) * MathF.Sqrt((j + 1) / count) * 0.1f;
+                if (distance < 25)
+                {
+                    transparency *= Math.Clamp((distance - 10) / 15, 0, 1);
+                }
+                //new Color(24, 108, 80)
+                spriteBatch.Draw(trailTexture, newPosition + relativePosition * lerp, null, mouseColor * transparency, angle, UIManager.DimsOf(trailTexture) / 2, UIManager.UIScale / 16 * UIManager.DimsOf(mouseTexture) * (j / count * (1 - lerp) * 0.5f + (j + 1) / count * lerp * 0.5f + 0.5f), 0, 0.5f);
+            }
+            i -= distance;
+            newPosition += relativePosition;
+        }
+        spriteBatch.Draw(mouseTexture, TrueCursorPosition, null, mouseColor * (25 / (25 + (TrueCursorPosition - prevPos).Length())), 0, UIManager.DimsOf(mouseTexture) / 2, UIManager.UIScale / 2, 0, 0.5f);
+        spriteBatch.End();
 
         GraphicsDevice.SetRenderTarget(null);
         GraphicsDevice.Clear(new Color(50, 50, 50));
@@ -252,61 +333,16 @@ public class Engine : Game
         spriteBatch.End();
 
         //Rendering some components without the shader
-        spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, null, null, null);
+        spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.NonPremultiplied, SamplerState.PointClamp, null, null, null);
         DialogueManager.Draw(spriteBatch);
         UIManager.Draw(spriteBatch);
         foreach (var exception in ShaderExceptions)
         {
             exception.Draw(spriteBatch);
         }
+        spriteBatch.Draw(Assets.Get(Sprites.Hand), handPos, null, Color.White, Util.ToAngle(handPos - new Vector2(BackBuffer.X * 3 / 4, BackBuffer.Y * 2)), Vector2.Zero, UIManager.UIScale * 2, 0, 0.5f);
         ShaderExceptions.Clear();
-        Texture2D mouseTexture;
-        if (Mouse.GetState().LeftButton == ButtonState.Pressed)
-        {
-            mouseTexture = Assets.Get(Sprites.ClickedCursor);
-        }
-        else
-        {
-            mouseTexture = Assets.Get(Sprites.Cursor);
-        }
-        Vector2 newPosition = Input.MousePosition.Direction;
-        float count = 5;
-        relativePositions.Add(Input.MousePosition.Direction - Input.MousePosition.OldDirection);
-        if(relativePositions.Count >= count)
-        {
-            relativePositions.RemoveAt(0);
-        }
-        foreach(var pos in relativePositions)
-        {
-            newPosition -= pos;
-        }
-        for (int j = 0; j < relativePositions.Count; j++)
-        {
-            Vector2 relativePosition = relativePositions[j];
-            float distance = 1f;
-            Vector2 dir = Vector2.Zero;
-            if (relativePosition != Vector2.Zero)
-            {
-                distance = relativePosition.Length();
-                dir = relativePosition / distance;
-            }
-            for (float i = 0; i < distance; i += 4)
-            {
-                float lerp = i / distance;
-                float t1 = 40 / (distance + 40) * (1 - lerp) * MathF.Sqrt(j / count);
-                if(j < relativePositions.Count-1)
-                {
-                    t1 += 40 / (relativePositions[j+1].Length() + 40) * lerp * MathF.Sqrt((j+1)/count);
-                }
-                else
-                {
-                    t1 += lerp;
-                }
-                float transparency = t1;
-                spriteBatch.Draw(mouseTexture, newPosition + dir * i, null, Color.White * transparency, 0, Vector2.Zero, UIManager.UIScale / 2 * (j / count / 2 + 0.5f), 0, 0.5f);
-            }
-            newPosition += relativePosition;
-        }
+
         if (SaveGame.DebugMode)
         {
             int logCount = debugLog.Count;
@@ -315,17 +351,17 @@ public class Engine : Game
             {
                 logCount = 10;
             }
-            for (int i = 0; i < logCount; i++)
+            for (int log = 0; log < logCount; log++)
             {
                 Vector2 textPosition = new(35, 20 + 20 * offset * UIManager.UIScale);
                 try
                 {
-                    spriteBatch.DrawString(Assets.TextFont, $"{i + 1}: {debugLog[i].log}", textPosition, debugLog[i].color, 0, Vector2.Zero, UIManager.UIScale, SpriteEffects.None, 0.45f);
-                    offset += debugLog[i].log.Split('\n').Length;
+                    spriteBatch.DrawString(Assets.TextFont, $"{log + 1}: {debugLog[log].log}", textPosition, debugLog[log].color, 0, Vector2.Zero, UIManager.UIScale, SpriteEffects.None, 0.45f);
+                    offset += debugLog[log].log.Split('\n').Length;
                 }
                 catch (Exception e)
                 {
-                    spriteBatch.DrawString(Assets.TextFont, $"{i + 1}: {e.Message}", textPosition, Color.Red, 0, Vector2.Zero, UIManager.UIScale, SpriteEffects.None, 0.45f);
+                    spriteBatch.DrawString(Assets.TextFont, $"{log + 1}: {e.Message}", textPosition, Color.Red, 0, Vector2.Zero, UIManager.UIScale, SpriteEffects.None, 0.45f);
                 }
             }
         }

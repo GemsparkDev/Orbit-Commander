@@ -334,7 +334,7 @@ public class Pickup : Entity, IData
         construct.AddComponent(new Behaviour().AddBehaviour(construct.Furnace()));
         construct.AddComponent(new FollowEmitter(construct) { ParticleEmitter = new ParticleEmitter(Assets.Get(Sprites.Dot), _position, 100, new Color(255, 0, 0)) });
         construct.AddComponent(new Smelt() { Value = 1 });
-        construct.AddComponent(new Dockable(construct, UI.MothershipMenu, true));
+        construct.AddComponent(new Dockable(construct, UI.TerminalMenu, true));
         construct.Angle = _angle;
         construct.StealthAbility = _stealth;
         construct.Team = _team;

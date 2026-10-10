@@ -822,12 +822,12 @@ public class Player : Entity
             {
                 if (dockedEntity.Menu != null)
                 {
-                    dockedEntity.Menu.IsEnabled = !dockedEntity.Menu.IsEnabled;
+                    UI.TerminalMenu.CurrentTab = 3;
                 }
             }
             else
             {
-                UI.PlayerMenu.IsEnabled = !UI.PlayerMenu.IsEnabled;
+                UI.TerminalMenu.CurrentTab = 1;
             }
         }
         if (isEngineActive)
@@ -869,7 +869,10 @@ public class Player : Entity
         {
             return false;
         }
-        Events.DisableDockingMenus();
+
+        UI.TerminalMenu.CurrentTab = 3;
+        UI.PickupDroneMenu.IsEnabled = false;
+
         if (dockedEntity != null)
         {
             dockedEntity = null;
