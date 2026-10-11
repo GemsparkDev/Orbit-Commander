@@ -5,7 +5,7 @@ using OrbitCommander.Core;
 using System.Diagnostics;
 
 namespace OrbitCommander.UIElements;
-public class TerminalButton(Vector2 _offset, SpriteFont _textFont, string _text, Color _textColor, float textSize) : Button(_offset, _textFont, _text, _textColor, textSize)
+public class TerminalButton(Vector2 _offset, SpriteFont _textFont, string _text, Color _textColor, float textSize, Container _container, int[] _index) : Button(_offset, _textFont, _text, _textColor, textSize, _container, _index)
 {
     private bool isOver = false;
     private Color previousColor;

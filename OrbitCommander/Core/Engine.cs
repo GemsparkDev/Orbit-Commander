@@ -23,7 +23,24 @@ public class Engine : Game
     private GraphicsDeviceManager graphics;
     private SpriteBatch spriteBatch;
     private RenderTarget2D renderTarget;
-    public static UIManager UIManager { get; private set; }
+
+    private static UIManager realUI;
+    private static UIManager virtualUI;
+    public static UIManager RealUI
+    {
+        get //Lazy initialization prevents static ordering issues
+        {
+            return realUI ??= new UIManager();
+        }
+    }
+    public static UIManager VirtualUI
+    {
+        get
+        {
+            return virtualUI ??= new UIManager();
+        }
+    }
+    public static Cursor Cursor { get; private set; }
     public static DialogueManager DialogueManager { get; private set; }
     public static SaveGame SaveGame { get; private set; }
     public static Camera Camera { get; private set; }
@@ -39,11 +56,6 @@ public class Engine : Game
     private List<IActor> ShaderExceptions { get; } = [];
     public LoadingStage LoadingStage { get; private set; } = LoadingStage.Preload;
     public static float Time { get; private set; } = 0;
-    List<Vector2> relativePositions = [];
-    public bool HandMode { get; private set; } = false; //0 = cursor, 1 = hand
-    Vector2 handPos = Vector2.Zero;
-    public Vector2 TrueCursorPosition { get; private set; } = Vector2.Zero;
-    Vector2 prevPos = Vector2.Zero;
     private Task loadingThread;
     public Engine()
     {
@@ -67,6 +79,7 @@ public class Engine : Game
         renderTarget = new RenderTarget2D(GraphicsDevice, 1920, 1080);
         Window.AllowUserResizing = true;
         Window.ClientSizeChanged += new EventHandler<EventArgs>(ClientSizeChanged);
+        Cursor = new Cursor(BackBuffer/2);
 
         IsMouseVisible = false;
     }
@@ -84,7 +97,7 @@ public class Engine : Game
 
             Assets.LoadStageOne(Content);
 
-            UIManager = new UIManager((Func<Vector2>)(() => BackBuffer));
+            UIManager.GetBackBuffer = () => BackBuffer;
 
             //UI behaviors that need special permission
             UI.SingleplayerButton.RisingInteract += delegate
@@ -143,6 +156,7 @@ public class Engine : Game
     }
     public static void Load()
     {
+        throw new NotImplementedException();
         if(Self.LoadingStage != LoadingStage.Complete) { return; }
         string filePath = Path.Combine(Directory.GetCurrentDirectory(), $"Content\\Saves\\Save_{SaveSlot}.txt");
         string text = "";
@@ -150,7 +164,7 @@ public class Engine : Game
         text = outputFile.ReadLine();
         if (text != "")
         {
-            SaveGame = new SaveGame(text);
+            //SaveGame = new SaveGame(text);
             CurrentGameState.SwitchState(new MissionSelect());
         }
     }
@@ -169,34 +183,7 @@ public class Engine : Game
             return;
         }
         Input.Update();
-        if (HandMode)
-        {
-            handPos = handPos * 0.9f + Input.MousePosition.Direction * 0.1f;
-            prevPos = TrueCursorPosition;
-            if (IsActive)
-            {
-                UIManager.Update(handPos, [Mouse.GetState().LeftButton == ButtonState.Pressed, Mouse.GetState().RightButton == ButtonState.Pressed]);
-            }
-        }
-        else
-        {
-            float distance = Vector2.Distance(handPos, new Vector2(BackBuffer.X / 2, BackBuffer.Y * 0.8f));
-            float speed = BackBuffer.X / (BackBuffer.X + distance * 10);
-            handPos = handPos * (1 - speed) + new Vector2(BackBuffer.X/2, BackBuffer.Y * 0.8f) * (speed);
-            prevPos = TrueCursorPosition;
-            if(distance < 50)
-            {
-                TrueCursorPosition = TrueCursorPosition * 0.5f + Input.MousePosition.Direction * 0.5f;
-                if (IsActive)
-                {
-                    UIManager.Update(new Vector2(-1000, -1000), [Mouse.GetState().LeftButton == ButtonState.Pressed, Mouse.GetState().RightButton == ButtonState.Pressed]);
-                }
-            }
-        }
-        if(Input.Tab.IsDown && !Input.Tab.WasDown)
-        {
-            HandMode = !HandMode;
-        }
+        Cursor.Update();
         SoundManager.Update();
         CurrentGameState.Update();
 
@@ -265,82 +252,32 @@ public class Engine : Game
         //Renders gamespace to a rendertarget, then renders render target with a shader
         GraphicsDevice.SetRenderTarget(renderTarget);
         GraphicsDevice.Clear(SaveGame.ColorScheme.Background());
+
         spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, null, null, null, transformMatrix: Camera.Transform);
         CurrentGameState.Draw(spriteBatch);
         spriteBatch.End();
-        spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp);
 
-        Vector2 newPosition = TrueCursorPosition;
-        float count = 2;
-        float i = 0;
-        relativePositions.Add(TrueCursorPosition - prevPos);
-        if (relativePositions.Count > count)
-        {
-            relativePositions.RemoveAt(0);
-        }
-        foreach (var pos in relativePositions)
-        {
-            newPosition -= pos;
-        }
-        Texture2D trailTexture = Assets.Get(Sprites.Circle);
-        Texture2D mouseTexture;
-        Color mouseColor;
-        if (Input.LMB.IsDown)
-        {
-            mouseTexture = Assets.Get(Sprites.ClickedCursor);
-            mouseColor = Color.Red;
-        }
-        else
-        {
-            mouseTexture = Assets.Get(Sprites.Cursor);
-            mouseColor = Color.White;
-        }
-        for (int j = 0; j < relativePositions.Count; j++)
-        {
-            Vector2 relativePosition = relativePositions[j];
-            float angle = Util.ToAngle(relativePosition);
-            Vector2 nextRelative = (j < relativePositions.Count - 1) ? relativePositions[j + 1] : Vector2.Zero;
-            float distance = (relativePosition != Vector2.Zero) ? relativePosition.Length() : 1;
-            if (distance < 10)
-            {
-                newPosition += relativePosition;
-                continue;
-            }
-            for (i = i; i < distance; i += 4)
-            {
-                float lerp = i / distance;
-                //TODO; Figure out why the color isn't smooth.
-                float t1 = 40 / (distance + 40) * (1 - lerp) + 40 / (nextRelative.Length() + 40) * (lerp);
-                float transparency = MathF.Sqrt(t1) * MathF.Sqrt((j + 1) / count) * 0.1f;
-                if (distance < 25)
-                {
-                    transparency *= Math.Clamp((distance - 10) / 15, 0, 1);
-                }
-                //new Color(24, 108, 80)
-                spriteBatch.Draw(trailTexture, newPosition + relativePosition * lerp, null, mouseColor * transparency, angle, UIManager.DimsOf(trailTexture) / 2, UIManager.UIScale / 16 * UIManager.DimsOf(mouseTexture) * (j / count * (1 - lerp) * 0.5f + (j + 1) / count * lerp * 0.5f + 0.5f), 0, 0.5f);
-            }
-            i -= distance;
-            newPosition += relativePosition;
-        }
-        spriteBatch.Draw(mouseTexture, TrueCursorPosition, null, mouseColor * (25 / (25 + (TrueCursorPosition - prevPos).Length())), 0, UIManager.DimsOf(mouseTexture) / 2, UIManager.UIScale / 2, 0, 0.5f);
+        spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp);
+        VirtualUI.Draw(spriteBatch);
+        Cursor.DrawCursor(spriteBatch);
         spriteBatch.End();
 
         GraphicsDevice.SetRenderTarget(null);
         GraphicsDevice.Clear(new Color(50, 50, 50));
         Vector2 backbuffer = BackBuffer;
+
         spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, null, null, Assets.GlobalShader);
         spriteBatch.Draw(renderTarget, backbuffer / 2, null, Color.White, 0, new Vector2(renderTarget.Bounds.Width, renderTarget.Bounds.Height) / 2, Math.Max(backbuffer.X/1920, backbuffer.Y/1080), 0, 0);
         spriteBatch.End();
 
-        //Rendering some components without the shader
         spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.NonPremultiplied, SamplerState.PointClamp, null, null, null);
         DialogueManager.Draw(spriteBatch);
-        UIManager.Draw(spriteBatch);
+        RealUI.Draw(spriteBatch);
         foreach (var exception in ShaderExceptions)
         {
             exception.Draw(spriteBatch);
         }
-        spriteBatch.Draw(Assets.Get(Sprites.Hand), handPos, null, Color.White, Util.ToAngle(handPos - new Vector2(BackBuffer.X * 3 / 4, BackBuffer.Y * 2)), Vector2.Zero, UIManager.UIScale * 2, 0, 0.5f);
+        Cursor.DrawHand(spriteBatch);
         ShaderExceptions.Clear();
 
         if (SaveGame.DebugMode)

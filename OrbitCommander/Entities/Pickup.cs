@@ -12,23 +12,26 @@ using System.Diagnostics;
 namespace OrbitCommander.Entities;
 public class Pickup : Entity, IData
 {
-    protected ItemData itemData;
-    Texture2D IData.Texture => itemData.RealSprite;
-    Color IData.Color => itemData.Color;
-    public string Name => itemData.Name;
-    public int ID => itemData.ID;
-    public Window Tooltip { get; } = new Window(Vector2.Zero, Assets.Get(Sprites.WideButton));
+    Sprites sprite;
+    string name;
+    int id;
+    Texture2D IData.Texture => Assets.Get(sprite);
+    Color IData.Color => Color.Cyan;
+    public string Name => name;
+    public int ID => id;
+    public Window Tooltip { get; } = new Window(Vector2.Zero, Assets.Get(Sprites.WideButton), Engine.RealUI);
     private Decal textbox;
-    public Pickup(ItemData _itemData, Vector2 _position, Vector2 _velocity, float _angularVelocity, int _health = 10)
+    public Pickup(Sprites _sprite, Vector2 _position, Vector2 _velocity, float _angularVelocity, string _name, Color _textColor, int _id, int _health = 10)
         : base(_position, _velocity, 0, _angularVelocity)
     {
-        AddComponent(new Sprite(this, Color.Cyan) { Texture = _itemData.VirtualSprite });
+        sprite = _sprite;
+        name = _name;
+        id = _id;
+        AddComponent(new Sprite(this, Color.Cyan) { Texture = Assets.Get(_sprite) });
         AddComponent(new Stealth(this) { StealthAbility = 0, SensingAbility = 0 });
-        itemData = _itemData;
         AddComponent(new Friendly(this) { Team = Team.Friendly });
-        Tooltip.AddWidget(new Decal(new Vector2(-Tooltip.Size.X / 3, 0), _itemData.RealSprite));
-        textbox = new Decal(new Vector2(0, -5), Assets.TextFont, _itemData.Name, _itemData.TextColor, 5f);
-        Tooltip.AddWidget(textbox);
+        _ = new Decal(new Vector2(-Tooltip.Size.X / 3, 0), Assets.Get(_sprite), Tooltip, [0]);
+        textbox = new Decal(new Vector2(0, -5), Assets.TextFont, name, _textColor, 5f, Tooltip, [0]);
         AddComponent(new Health(this, _health));
         AddComponent(new Statuses(this));
         AddComponent(new Temp());
@@ -59,15 +62,15 @@ public class Pickup : Entity, IData
         }));
         InvincibilityCooldown = 5;
     }
-    public Pickup(ItemData _itemData, List<string> _disassembly, LoadLogger _logger)
+    /*
+    public Pickup(List<string> _disassembly, LoadLogger _logger)
         : base(default, default, 0, 0)
     {
         AddComponent(new Sprite(this, Color.Cyan) { Texture = _itemData.VirtualSprite });
         itemData = _itemData;
         AddComponent(new Friendly(this) { Team = Team.Friendly });
-        Tooltip.AddWidget(new Decal(new Vector2(-Tooltip.Size.X / 3, 0), _itemData.RealSprite));
-        textbox = new Decal(new Vector2(0, -5), Assets.TextFont, _itemData.Name, _itemData.TextColor, 5f);
-        Tooltip.AddWidget(textbox);
+        _ = new Decal(new Vector2(-Tooltip.Size.X / 3, 0), _itemData.RealSprite, Tooltip, [0]);
+        textbox = new Decal(new Vector2(0, -5), Assets.TextFont, _itemData.Name, _itemData.TextColor, 5f, Tooltip, [0]);
         if(!int.TryParse(_disassembly[1], out int _health))
         {
             _health = 10;
@@ -100,6 +103,8 @@ public class Pickup : Entity, IData
         }));
         InvincibilityCooldown = 5;
     }
+    */
+
     public void Parse(List<string> _disassembly, LoadLogger _logger)
     {
         _logger.Try(delegate 
@@ -218,7 +223,7 @@ public class Pickup : Entity, IData
     }
     public static Pickup NewCryoBarricade(Vector2 _position, Vector2 _velocity, float _angle, float _angularVelocity, int _stealth = 0, Team _team = Team.Friendly)
     {
-        var construct = new Pickup(ItemFactory.itemData[Items.CryoBarricade], _position, _velocity, _angularVelocity, ItemFactory.itemData[Items.CryoBarricade].Health);
+        var construct = new Pickup(Sprites.CryoBarricade, _position, _velocity, _angularVelocity, "CryoBarricade", Color.White, 5, 60);
         construct.AddComponent(new Behaviour().AddBehaviour(construct.CryoBarricade()));
         construct.AddComponent<Smelt>(new Smelt() { Value = 1 });
         construct.Angle = _angle;
@@ -266,7 +271,8 @@ public class Pickup : Entity, IData
     }
     public static Pickup NewTrap(Vector2 _position, Vector2 _velocity, float _angle, float _angularVelocity, int _stealth = 0, Team _team = Team.Friendly)
     {
-        var construct = new Pickup(ItemFactory.itemData[Items.Trap], _position, _velocity, _angularVelocity, ItemFactory.itemData[Items.Trap].Health);
+
+        var construct = new Pickup(Sprites.Trap, _position, _velocity, _angularVelocity, "Trap", Color.White, 5, 35);
         construct.AddComponent(new Behaviour().AddBehaviour(construct.Trap()));
         construct.AddComponent(new FollowEmitter(construct) { ParticleEmitter = new ParticleEmitter(Assets.Get(Sprites.Dot), _position, 300, new Color(255, 0, 0)) });
         construct.AddComponent<Smelt>(new Smelt() { Value = 1 });
@@ -293,7 +299,7 @@ public class Pickup : Entity, IData
     }
     public static Pickup NewBomb(Vector2 _position, Vector2 _velocity, float _angle, float _angularVelocity, int _stealth = 0)
     {
-        var construct = new Pickup(ItemFactory.itemData[Items.Bomb], _position, _velocity, _angularVelocity, ItemFactory.itemData[Items.Bomb].Health);
+        var construct = new Pickup(Sprites.Bomb, _position, _velocity, _angularVelocity, "Bomb", Color.White, 5, 10);
         construct.AddComponent(new Behaviour().AddBehaviour(construct.Bomb()));
         construct.AddComponent(new FollowEmitter(construct) { ParticleEmitter = new ParticleEmitter(Assets.Get(Sprites.Dot), _position, 100, new Color(255, 0, 0)) });
         construct.AddComponent<Smelt>(new Smelt() { Value = 1 });
@@ -330,7 +336,8 @@ public class Pickup : Entity, IData
     }
     public static Pickup NewFurnace(Vector2 _position, Vector2 _velocity, float _angle, float _angularVelocity, int _stealth = 0, Team _team = Team.Friendly)
     {
-        var construct = new Pickup(ItemFactory.itemData[Items.Furnace], _position, _velocity, _angularVelocity, ItemFactory.itemData[Items.Furnace].Health);
+
+        var construct = new Pickup(Sprites.Furnace, _position, _velocity, _angularVelocity, "Furnace", Color.White, 5, 10);
         construct.AddComponent(new Behaviour().AddBehaviour(construct.Furnace()));
         construct.AddComponent(new FollowEmitter(construct) { ParticleEmitter = new ParticleEmitter(Assets.Get(Sprites.Dot), _position, 100, new Color(255, 0, 0)) });
         construct.AddComponent(new Smelt() { Value = 1 });
@@ -342,7 +349,8 @@ public class Pickup : Entity, IData
     }
     public static Pickup NewSpecializedParts(Vector2 _position, Vector2 _velocity, float _angle, float _angularVelocity, int _stealth = 0, Team _team = Team.Friendly)
     {
-        var construct = new Pickup(ItemFactory.itemData[Items.SpecializedParts], _position, _velocity, _angularVelocity, ItemFactory.itemData[Items.SpecializedParts].Health)
+
+        var construct = new Pickup(Sprites.SpecializedParts, _position, _velocity, _angularVelocity, "Specialized Parts", Color.CornflowerBlue, -1, 10)
         {
             Angle = _angle,
             StealthAbility = _stealth,
@@ -365,7 +373,7 @@ public class Pickup : Entity, IData
                 float distSqr = Vector2.DistanceSquared(enemy.Position, Position);
                 if(distSqr < range)
                 {
-                    if(enemy is Pickup && (enemy as Pickup).itemData.Name != "FaradayShield") //TODO: make this automatically update
+                    if(enemy is Pickup && (enemy as Pickup).Name != "FaradayShield") //TODO: make this automatically update
                     {
                         enemy.Statuses.ApplyStatus(new Obscured());
                     }
@@ -384,7 +392,8 @@ public class Pickup : Entity, IData
     }
     public static Pickup NewFaradayShield(Vector2 _position, Vector2 _velocity, float _angle, float _angularVelocity, int _stealth = 0, Team _team = Team.Friendly)
     {
-        var construct = new Pickup(ItemFactory.itemData[Items.FaradayShield], _position, _velocity, _angularVelocity, ItemFactory.itemData[Items.FaradayShield].Health)
+
+        var construct = new Pickup(Sprites.FaradayShield, _position, _velocity, _angularVelocity, "Faraday Shield", Color.White, 5, 25)
         {
             Angle = _angle,
             StealthAbility = _stealth,
@@ -394,16 +403,6 @@ public class Pickup : Entity, IData
         construct.AddComponent(new Behaviour().AddBehaviour(construct.FaradayShield()));
         return construct;
     }
-}
-public class ItemData(Sprites _realSprite, Sprites _virtualSprite, string _name, int _id, Color _color, Color? _textColor = null, int _health = 3)
-{
-    public Texture2D RealSprite => Assets.Get(_realSprite);
-    public Texture2D VirtualSprite => Assets.Get(_virtualSprite);
-    public string Name => _name;
-    public int ID => _id;
-    public Color Color => _color;
-    public Color TextColor => _textColor ?? Color.White;
-    public int Health => _health;
 }
 public enum Items
 {

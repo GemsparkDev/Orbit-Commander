@@ -55,6 +55,7 @@ public class SaveGame
     public static ColorScheme ColorScheme { get; set; } = new StandardScheme();
 
     public SaveGame() { }
+    /*
     public SaveGame(string _serialization)
     {
         ArgumentNullException.ThrowIfNull(_serialization);
@@ -108,6 +109,7 @@ public class SaveGame
 
         logger.Log();
     }
+    */
     public static List<string> Disassemble(string _serialization)
     {
         var disassembly = new List<string>() { "" };

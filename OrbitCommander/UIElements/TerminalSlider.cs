@@ -9,8 +9,8 @@ using UILib.Content;
 using OrbitCommander.Core;
 
 namespace OrbitCommander.UIElements;
-public class TerminalSlider(Texture2D _line, Texture2D _knob, Vector2 _offset, Vector2 _sliderSize, bool _visualSlider, Color[] _colors) 
-    : Slider(_line, _knob, _offset, _sliderSize, _visualSlider, _colors)
+public class TerminalSlider(Texture2D _line, Texture2D _knob, Vector2 _offset, Vector2 _sliderSize, bool _visualSlider, Color[] _colors, Container _container, int[] _index) 
+    : Slider(_line, _knob, _offset, _sliderSize, _visualSlider, _colors, _container, _index)
 {
     public override void HoveringDraw(SpriteBatch _spriteBatch, Vector2 _parentPosition, float _transparency, Vector2 _center) 
     {

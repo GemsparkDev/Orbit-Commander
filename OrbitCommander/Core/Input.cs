@@ -33,7 +33,7 @@ public static class Input
     public static IControl LMB => inputScheme.LMB;
     public static IControl RMB => inputScheme.RMB;
     public static IScalarControl Zoom => inputScheme.Zoom;
-    public static IDirectionalControl MousePosition => inputScheme.MousePosition;
+    //public static IDirectionalControl MousePosition => inputScheme.MousePosition;
 }
 public abstract class InputScheme
 {
@@ -165,7 +165,7 @@ public class LeftButton(KeyboardInput _input) : IControl
     { 
         get 
         {
-            if(Engine.Self.HandMode)
+            if(Engine.Cursor.HandMode)
             {
                 return false;
             }
@@ -177,7 +177,7 @@ public class LeftButton(KeyboardInput _input) : IControl
     {
         get
         {
-            if (Engine.Self.HandMode)
+            if (Engine.Cursor.HandMode)
             {
                 return false;
             }
@@ -193,7 +193,7 @@ public class RightButton(KeyboardInput _input) : IControl
     { 
         get 
         {
-            if(Engine.Self.HandMode)
+            if(Engine.Cursor.HandMode)
             {
                 return false;
             }
@@ -205,7 +205,7 @@ public class RightButton(KeyboardInput _input) : IControl
     { 
         get 
         { 
-            if(Engine.Self.HandMode)
+            if(Engine.Cursor.HandMode)
             {
                 return false;
             }

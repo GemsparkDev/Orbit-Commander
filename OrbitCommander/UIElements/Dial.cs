@@ -12,7 +12,7 @@ public class Dial : FunctionalWidget
     private Texture2D dialTexture;
     private float currentVal = 0;
     public Window Tooltip { get; private set; }
-    public Dial(Texture2D _dialTexture, Vector2 _offset, Texture2D _texture)
+    public Dial(Texture2D _dialTexture, Vector2 _offset, Texture2D _texture, Container _container, int[] _index) : base(_container, _index)
     {
         dialTexture = _dialTexture;
         offset = _offset;
@@ -33,7 +33,7 @@ public class Dial : FunctionalWidget
         {
             return;
         }
-        Tooltip.Position = UIManager.NewPosition + Tooltip.Size / 2 * UIManager.UIScale;
+        Tooltip.Position = Engine.Cursor.HandPosition + Tooltip.Size / 2 * UIManager.UIScale;
         Tooltip.Draw(_spriteBatch);
     }
     public override void Update()

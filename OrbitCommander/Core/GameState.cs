@@ -78,26 +78,25 @@ public class MainMenu : GameState
 {
     public override void Initialize()
     {
-        Engine.UIManager.ScreenWindow = UI.GlobalMainMenu;
-        Engine.UIManager.ScreenWindow.IsEnabled = true;
+        UI.GameplayGlobals.IsEnabled = false;
+        UI.MainGlobals.IsEnabled = true;
         SoundManager.ChangeTrack(Assets.Get(Sound.menu));
+        UI.TerminalMenu.CurrentTab = 0;
         Engine.Camera.Position = Vector2.Zero;
         Engine.Camera.Zoom = 1;
     }
-    public override void Update()
-    {
-    }
-    public override void Draw(SpriteBatch _spriteBatch)
-    {
-    }
+    public override void Update() { }
+    public override void Draw(SpriteBatch _spriteBatch) { }
 }
 public class PlayingGame : GameState
 {
     public override bool PersistentParticles => true;
     public override void Initialize()
     {
-        Engine.UIManager.ScreenWindow = UI.GlobalMenu;
-        Engine.UIManager.ScreenWindow.IsEnabled = true;
+        UI.GameplayGlobals.IsEnabled = true;
+        UI.MainGlobals.IsEnabled = false;
+        UI.PauseMenu.IsEnabled = false;
+        UI.TerminalMenu.CurrentTab = 1;
     }
     public override void Update()
     {
@@ -107,13 +106,11 @@ public class PlayingGame : GameState
         ParticleManager.Update();
         if (!Input.Exit.WasDown && Input.Exit.IsDown)
         {
-            UI.PauseMenu.IsEnabled = true;
             SoundManager.SetAllSounds(false);
             CurrentGameState.SwitchState(new PausedGame());
         }
         if (!Engine.Self.IsActive)
         {
-            UI.PauseMenu.IsEnabled = true;
             CurrentGameState.SwitchState(new PausedGame());
         }
     }
@@ -129,17 +126,13 @@ public class PausedGame : GameState
     {
         if (!Input.Exit.WasDown && Input.Exit.IsDown)
         {
-            if (UI.SettingsMenu.IsEnabled)
-            {
-                UI.PauseMenu.IsEnabled = true;
-                UI.SettingsMenu.IsEnabled = false;
-            }
-            else
-            {
-                UI.PauseMenu.IsEnabled = false;
-                CurrentGameState.SwitchState(new PlayingGame());
-            }
+            CurrentGameState.SwitchState(new PlayingGame());
         }
+    }
+    public override void Initialize()
+    {
+        UI.TerminalMenu.CurrentTab = 0;
+        UI.PauseMenu.IsEnabled = true;
     }
     public override void Draw(SpriteBatch _spriteBatch)
     {
@@ -179,7 +172,6 @@ public class MissionSelect : GameState
     public static MissionSelect New() => new MissionSelect();
     public override void Initialize()
     {
-        Engine.UIManager.ScreenWindow.IsEnabled = false;
         ParticleManager.Initialize();
         Events.UpdateModulesUI();
         Events.UpdateMissionText();
@@ -203,7 +195,7 @@ public class MissionSelect : GameState
         }
         time += Engine.DeltaSeconds;
         ParticleManager.Update();
-        var pos = Input.MousePosition.Direction;
+        var pos = Engine.Cursor.CursorPosition;
         float distance = Vector2.Distance(pos, new Vector2(Engine.BackBuffer.X * 2 / 3, Engine.BackBuffer.Y / 2));
         for (int i = 0; i < Mission.missions.Count; i++)
         {
@@ -297,7 +289,6 @@ public class Victory : GameState
 {
     public override void Initialize()
     {
-        Engine.UIManager.ScreenWindow.IsEnabled = false;
         Engine.Camera.Position = Vector2.Zero;
         Engine.Camera.Zoom = 1;
     }
@@ -316,9 +307,10 @@ public class Cutscene(List<IEvent> _events, List<IActor> _actors, GameState _nex
     public override void Initialize()
     {
         time = 0;
-        Engine.UIManager.ScreenWindow.IsEnabled = false;
         Engine.Camera.Position = Vector2.Zero;
         Engine.Camera.Zoom = 1;
+        UI.GameplayGlobals.IsEnabled = false;
+        UI.MainGlobals.IsEnabled = false;
     }
     public override void Update()
     {
@@ -367,10 +359,6 @@ public class Cutscene(List<IEvent> _events, List<IActor> _actors, GameState _nex
 }
 public class Loading(Action _function, LoadingStage _stage) : GameState
 {
-    public override void Initialize()
-    {
-        UIManager.Self.ScreenWindow.IsEnabled = false;
-    }
     public override void Draw(SpriteBatch _spriteBatch)
     {
         _spriteBatch.DrawString(Assets.TextFont, "Loading...", Vector2.Zero, Color.White, 0, Assets.TextFont.MeasureString("Loading...")/2, 4, 0, 0);

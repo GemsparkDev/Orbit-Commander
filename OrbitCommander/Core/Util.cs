@@ -179,7 +179,6 @@ public static class Util
         [
             new TriggerEvent(0, delegate(float time)
             {
-                Engine.UIManager.ScreenWindow = UI.CutsceneGlobalMenu;
                 for(ModuleType i = 0; i < (ModuleType)5; i++)
                 {
                     Engine.SaveGame.Player.modules[i].isFailed = true;
@@ -227,10 +226,10 @@ public static class Util
             new Event(0, 8 + ts * 4 + Engine.DeltaSeconds, delegate(float time) //Render floppy overtop of inserter
             {
                 Engine.Self.QueueShaderException(floppy);
-                var mousePos = UIManager.OldPosition;
-                if(Engine.Self.HandMode && Mouse.GetState().LeftButton == ButtonState.Pressed && Vector2.Distance(floppy.Position, UIManager.NewPosition) < 100 * UIManager.UIScale)
+                var mousePos = Engine.Cursor.OldHandPosition;
+                if(Engine.Cursor.HandMode && Mouse.GetState().LeftButton == ButtonState.Pressed && Vector2.Distance(floppy.Position, Engine.Cursor.HandPosition) < 100 * UIManager.UIScale)
                 {
-                    var newPos = UIManager.NewPosition;
+                    var newPos = Engine.Cursor.HandPosition;
                     floppyVel = newPos - mousePos;
                     floppy.Position = newPos;
                     floppy.Angle *= Util.FIED(0.02f);
@@ -241,7 +240,7 @@ public static class Util
                 {
                     floppy.Position = new Vector2(Math.Clamp(floppy.Position.X, 0, Engine.BackBuffer.X), floppy.Position.Y);
                     floppyVel.X *= -0.2f;
-                    floppyVel.Y *= Util.FIED(0.03f);
+                    floppyVel.Y *= FIED(0.03f);
                     floppyAngVel = 0;
                 }
                 if(floppy.Position.Y < 0 || floppy.Position.Y > Engine.BackBuffer.Y)
@@ -326,7 +325,7 @@ public static class Util
                     module.Value.isFailed = false;
                 }
                 computerSounds.Pause();
-                Engine.UIManager.ScreenWindow = UI.GlobalMenu;
+                 UI.GameplayGlobals.IsEnabled = true;
                 UI.TerminalMenu.CurrentTab = 3;
                 Events.AcknowledgeMessage(Message.ToggleTerminal);
             })

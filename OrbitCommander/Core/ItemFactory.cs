@@ -8,26 +8,20 @@ using OrbitCommander.Entities;
 namespace OrbitCommander.Core;
 public static class ItemFactory
 {
-    //Items
-    public readonly static Dictionary<Items, ItemData> itemData = new()
+    public readonly static Dictionary<Modules, Type> moduleData = new()
     {
-        { Items.Scrap, new ItemData(Sprites.RealMetalScrap,Sprites.MetalScrap, "Metal Salvage", -1, Color.White) },
-        { Items.SpecializedParts, new ItemData(Sprites.RealSpecializedParts, Sprites.SpecializedParts, "Specialized Parts", -1, Color.White, Color.CornflowerBlue, 10) },
-        { Items.CryoBarricade, new ItemData(Sprites.RealCryoBarricade, Sprites.CryoBarricade, "CryoBarricade", 5, Color.White,Color.White,60) },
-        { Items.Trap, new ItemData(Sprites.RealTrap, Sprites.Trap, "Trap", 5, Color.White,Color.White,35) },
-        { Items.Bomb, new ItemData(Sprites.RealBomb, Sprites.Bomb, "Bomb", 5, Color.White,Color.White,10) },
-        { Items.Furnace, new ItemData(Sprites.RealFurnace, Sprites.Furnace, "Furnace", 5, Color.White, Color.White,10) },
-        { Items.FaradayShield, new ItemData(Sprites.RealFaradayShield, Sprites.FaradayShield, "FaradayShield", 5, Color.White, Color.White, 25) }
-    };
-    public readonly static Dictionary<Modules, ModuleData> moduleData = new()
-    {
-        { Modules.Hull, new ModuleData(Sprites.RealHull, Sprites.Hull, "Hull", "Getting hit provides\ntemporary damage resistance.", (int)ModuleType.Hull, 20, typeof(Hull)) },
-        { Modules.Reflective, new ModuleData(Sprites.RealReflective, Sprites.Reflective, "Reflective", "Projectiles are periodically\nreflected towards enemies.", (int)ModuleType.Hull, 16, typeof(Reflective)) },
-        { Modules.Stealth, new ModuleData(Sprites.RealStealth, Sprites.Stealth, "Stealth", "Provides a stealth bonus.\nAmplified after hitting enemies.", (int)ModuleType.Hull, 18, typeof(StealthHull)) },
-        { Modules.Turtle, new ModuleData(Sprites.RealHull, Sprites.Hull, "Turtle", "Provides resistance when\nbeing close to enemies.", (int)ModuleType.Hull, 22, typeof(Turtle)) },
-        { Modules.Ablative, new ModuleData(Sprites.RealAblative, Sprites.Ablative, "Ablative", "Blocks all damage until the\nregenerating buffer is saturated.", (int)ModuleType.Hull, 17, typeof(Ablative)) },
-        { Modules.Adaptive, new ModuleData(Sprites.RealAdaptive, Sprites.Adaptive, "Adaptive", "Buffs damage but resists less damage\nwhen this module has health.", (int)ModuleType.Hull, 20, typeof(Adaptive)) },
-        { Modules.ThermalShield,new ModuleData(Sprites.RealHull, Sprites.Hull, "Thermal Shield", "Brings the player toward thermal\nequilibrium, resisting damage near extremes.", (int)ModuleType.Hull, 20, typeof(ThermalShield)) },
+        { Modules.Hull, typeof(Hull) },
+        { Modules.Reflective, typeof(Reflective) },
+        { Modules.Stealth, typeof(StealthHull) },
+        { Modules.Turtle, typeof(Turtle) },
+        { Modules.Ablative, typeof(Ablative) },
+        { Modules.Adaptive, typeof(Adaptive) },
+        { Modules.ThermalShield, typeof(ThermalShield) },
+
+        { Modules.Engines, typeof(StandardEngine) },
+        { Modules.Plasma, typeof(PlasmaEngine) },
+        { Modules.Work, typeof(WorkEngine) },
+        { Modules.Orion, new ModuleData(Sprites.RealOrion, Sprites.Orion, "Orion", "Uses explosions to move which\ncan damage enemies. Attacking enemies causes an explosion.", (int)ModuleType.Engines, 20, typeof(OrionEngine)) },
 
         { Modules.Basic, new ModuleData(Sprites.RealGuns, Sprites.Guns, "Basic", "2x Crit for the last 3 shots.", (int)ModuleType.Guns, 20, typeof(Basic)) },
         { Modules.Spiral, new ModuleData(Sprites.RealSpiral,Sprites.Spiral, "Spiral", "1.25x Crit after using an ability for a time\nequal to one third the ability cooldown duration.", (int)ModuleType.Guns, 20, typeof(Spiral)) },
@@ -51,11 +45,6 @@ public static class ItemFactory
         { Modules.AdaptiveShotgun, new ModuleData(Sprites.RealTorch,Sprites.Torch, "Adaptive Shotgun", "1.5x Crit on the second shot.", (int)ModuleType.Guns, 18, typeof(AdaptiveShotgun), Color.Yellow) },
         { Modules.GuidedRound, new ModuleData(Sprites.RealTorch,Sprites.Torch, "Guided Round", "1.5x Crit when releasing 3 rounds at once.", (int)ModuleType.Guns, 20, typeof(GuidedRound), Color.White) },
 
-        { Modules.Engines, new ModuleData(Sprites.RealEngines, Sprites.Engines, "Engines", "Basic engines with average\nacceleration and torque.", (int)ModuleType.Engines, 20, typeof(StandardEngine)) },
-        { Modules.Plasma, new ModuleData(Sprites.RealPlasma, Sprites.Plasma, "Plasma", "High acceleration, low torque.\nHas a short period of higher force.", (int)ModuleType.Engines, 15, typeof(PlasmaEngine)) },
-        { Modules.Work, new ModuleData(Sprites.RealWork, Sprites.Work, "Work", "High torque, low acceleration.\nConstructs are immune to decay and\nare improved if the player can critically hit.", (int)ModuleType.Engines, 25, typeof(WorkEngine)) },
-        { Modules.Orion, new ModuleData(Sprites.RealOrion, Sprites.Orion, "Orion", "Uses explosions to move which\ncan damage enemies. Attacking enemies causes an explosion.", (int)ModuleType.Engines, 20, typeof(OrionEngine)) },
-
         { Modules.Sensors, new ModuleData(Sprites.RealSensors,Sprites.Sensors, "Sensors", "Increases the crit damage bonus by 1.25x + 0.1,\nbut reduces damage by 10%.", (int)ModuleType.Sensors, 20, typeof(TargettingModifer), Color.CornflowerBlue) },
         { Modules.ProjectingModifier, new ModuleData(Sprites.RealProjectingModifier,Sprites.ProjectingModifier, "Lidar", "Projects a path for where\nyour projectiles will go.", (int)ModuleType.Sensors, 20, typeof(ProjectingModifier), Color.Yellow) },
         { Modules.AmplifyingModifier, new ModuleData(Sprites.RealAmplifyingModifier,Sprites.AmplifyingModifier, "Radar", "Doubles damage dealt and taken", (int)ModuleType.Sensors, 20, typeof(AmplifyingModifier), Color.Yellow) },
@@ -74,12 +63,21 @@ public static class ItemFactory
         { Modules.EmergencyEngine, new ModuleData(Sprites.None,Sprites.None, "Emergency Thrusters", "Emergency thrusters lacking fly by wire control.\nInstall modules or upgrade with scrap.", (int)ModuleType.Engines, 10, typeof(EmergencyEngine))},
         { Modules.PointDefense, new ModuleData(Sprites.None,Sprites.None, "Point Defense", "A light rotary cannon designed for emergencies.\nInstall modules or upgrade with scrap.", (int)ModuleType.Engines, 10, typeof(PointDefense))},
     };
+    public static Module Retrieve(int index)
+    {
+        return (Module)Activator.CreateInstance(moduleData[UI.setModules[index]]);
+    }
+    public static Module Retrieve(Modules _module)
+    {
+        return (Module)Activator.CreateInstance(moduleData[_module]);
+    }
     public static Pickup NewScrap(Vector2 _position = default, Vector2 _velocity = default, float _angularVelocity = 0)
     {
-        var p = new Pickup(itemData[0], _position, _velocity, _angularVelocity);
+        var p = new Pickup(Sprites.MetalScrap, _position, _velocity, _angularVelocity, "Metal Salvage", Color.White, -1, 10);
         p.AddComponent(new Smelt() { Value = 1 });
         return p;
     }
+    /*
     public static Pickup TryDeserialize(string _data, LoadLogger _logger)
     {
         List<string> disassembly = SaveGame.Disassemble(_data);
@@ -99,4 +97,5 @@ public static class ItemFactory
         }
         throw new IOException("The module could not be parsed properly.");
     }
+    */
 }

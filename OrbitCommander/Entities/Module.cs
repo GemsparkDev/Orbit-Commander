@@ -26,14 +26,11 @@ public abstract class Module : Pickup, IData
     private Health health;
     public override int Health { get => base.Health; set { base.Health = value; UpdateHealth(); } }
 
-    public Module(Modules _type, Vector2 _position = default, Vector2 _velocity = default, float _angularVelocity = 0)
-        : base(ItemFactory.moduleData[_type], _position, _velocity, _angularVelocity, ItemFactory.moduleData[_type].MaxHealth)
+    public Module(Sprites _sprite, string _name, string _description, int _id, int _health, Color _textColor, Vector2 _position = default, Vector2 _velocity = default, float _angularVelocity = 0)
+        : base(_sprite, _position, _velocity, _angularVelocity, _name, _textColor, _id, _health)
     {
-        Type = _type;
-        healthDecal = new Decal(new Vector2(0, 5), Assets.TextFont, $"{Health} / {MaxHealth}", Color.Pink, 5f);
-        description = new Decal(new Vector2(-5, 15), Assets.TextFont, ItemFactory.moduleData[_type].Description, Color.White, 3f);
-        Tooltip.AddWidget(healthDecal);
-        Tooltip.AddWidget(description);
+        healthDecal = new Decal(new Vector2(0, 5), Assets.TextFont, $"{Health} / {MaxHealth}", Color.Pink, 5f, Tooltip, [0]);
+        description = new Decal(new Vector2(-5, 15), Assets.TextFont, _description, Color.White, 3f, Tooltip, [0]);
         health = GetComponent<Health>();
     }
     public void UpdateHealth()
@@ -133,15 +130,7 @@ public class ReloadSystem(int _magazineSize, float _reloadSpeed, Action _reloadC
         }
     }
 }
-public class ModuleData(Sprites _realSprite, Sprites _virtualSprite, string _name, string _description, int _id, int _health, Type _type, Color? _textColor = null)
-    : ItemData(_realSprite, _virtualSprite, _name, _id, Color.White, _textColor, _health)
-{
-    public string Description => _description;
-    public int MaxHealth => _health;
-    public Type ModuleType => _type;
-    public Module Retrieve() => (Module)Activator.CreateInstance(ModuleType);
-}
-public class Hull() : Module(Modules.Hull)
+public class Hull() : Module(Sprites.Hull, "Hull", "Getting hit provides\ntemporary damage resistance.", (int)ModuleType.Hull, 20, Color.White)
 {
     private float resistanceTime = 0;
     public override int OnCollide(int _damage)
@@ -167,7 +156,7 @@ public class Hull() : Module(Modules.Hull)
         }
     }
 }
-public class Reflective() : Module(Modules.Reflective)
+public class Reflective() : Module(Sprites.Reflective, "Reflective", "Projectiles are periodically\nreflected towards enemies.", (int)ModuleType.Hull, 16, Color.White)
 {
     private ParticleEmitter shieldEffect = new(Assets.Get(Sprites.Dot), Vector2.Zero, 10, Color.Violet) { particleAngularVelocity = 0.1f };
     private float max = 1;
@@ -206,7 +195,7 @@ public class Reflective() : Module(Modules.Reflective)
         return (int)(_damage * 1.5f);
     }
 }
-public class StealthHull() : Module(Modules.Stealth)
+public class StealthHull() : Module(Sprites.Stealth, "Stealth", "Provides a stealth bonus.\nAmplified after hitting enemies.", (int)ModuleType.Hull, 18, Color.White)
 {
     private float stealthCd = 0;
     public override int OnCollide(int _damage)
@@ -215,7 +204,7 @@ public class StealthHull() : Module(Modules.Stealth)
     }
     public override void OnUpdate(float _fuseRatio)
     {
-        if(stealthCd > 0)
+        if (stealthCd > 0)
         {
             stealthCd -= Engine.DeltaSeconds / _fuseRatio;
         }
@@ -225,7 +214,7 @@ public class StealthHull() : Module(Modules.Stealth)
     }
     public override int StealthChange()
     {
-        if(stealthCd > 0)
+        if (stealthCd > 0)
         {
             return 2;
         }
@@ -233,10 +222,10 @@ public class StealthHull() : Module(Modules.Stealth)
     }
     public override void OnEnemyHit(Entity _entity, int _damage)
     {
-        stealthCd += MathF.Sqrt(_damage)/3;
+        stealthCd += MathF.Sqrt(_damage) / 3;
     }
 }
-public class Turtle() : Module(Modules.Turtle)
+public class Turtle() : Module(Sprites.Hull, "Turtle", "Provides resistance when\nbeing close to enemies.", (int)ModuleType.Hull, 22, Color.White)
 {
     float time = 0;
     int flipped = 1;
@@ -288,7 +277,7 @@ public class Turtle() : Module(Modules.Turtle)
         base.OnUpdate(_fuseRatio);
     }
 }
-public class Ablative() : Module(Modules.Ablative)
+public class Ablative() : Module(Sprites.Ablative, "Ablative", "Blocks all damage until the\nregenerating buffer is saturated.", (int)ModuleType.Hull, 17, Color.White)
 {
     float buffer = 25;
     public override int OnCollide(int _damage)
@@ -313,7 +302,7 @@ public class Ablative() : Module(Modules.Ablative)
         base.OnUpdate(_fuseRatio);
     }
 }
-public class Adaptive() : Module(Modules.Adaptive)
+public class Adaptive() : Module(Sprites.Adaptive, "Adaptive", "Buffs damage but resists less damage\nwhen this module has health.", (int)ModuleType.Hull, 20, Color.White)
 {
     public override int OnCollide(int _damage)
     {
@@ -325,7 +314,7 @@ public class Adaptive() : Module(Modules.Adaptive)
         return _damage;
     }
 }
-public class ThermalShield() : Module(Modules.ThermalShield)
+public class ThermalShield() : Module(Sprites.Hull, "Thermal Shield", "Brings the player toward thermal\nequilibrium, resisting damage near extremes.", (int)ModuleType.Hull, 20, Color.White)
 {
     public override int OnCollide(int _damage)
     {
@@ -339,7 +328,7 @@ public class ThermalShield() : Module(Modules.ThermalShield)
         base.OnUpdate(_fuseRatio);
     }
 }
-public class StandardEngine() : Module(Modules.Engines)
+public class StandardEngine() : Module(Sprites.Engines, "Engines", "Basic engines with average\nacceleration and torque.", (int)ModuleType.Engines, 20, Color.White)
 {
     float engineTime = 0;
     ParticleEmitter engineParticles = new(Assets.Get(Sprites.Circle), 0.15f, Vector2.Zero, 0, MathF.PI / 4, 2, 450f, Color.Cyan, EmitterType.EmissionOverTime)
@@ -368,7 +357,7 @@ public class StandardEngine() : Module(Modules.Engines)
         base.OnUpdate(_fuseRatio);
     }
 }
-public class PlasmaEngine() : Module(Modules.Plasma)
+public class PlasmaEngine() : Module(Sprites.Plasma, "Plasma", "High acceleration, low torque.\nHas a short period of higher force.", (int)ModuleType.Engines, 15, Color.White)
 {
     float engineTime = 0;
     float burstTime = 0;
@@ -414,7 +403,7 @@ public class PlasmaEngine() : Module(Modules.Plasma)
         return -1;
     }
 }
-public class WorkEngine() : Module(Modules.Work)
+public class WorkEngine() : Module(Sprites.Work, "Work", "High torque, low acceleration.\nConstructs are immune to decay and\nare improved if the player can critically hit.", (int)ModuleType.Engines, 25, Color.White)
 {
     float engineTime = 0;
     ParticleEmitter engineParticles = new(Assets.Get(Sprites.Circle), 0.15f, Vector2.Zero, 0, MathF.PI / 4, 2, 450f, Color.Orange, EmitterType.EmissionOverTime)
@@ -1331,7 +1320,7 @@ public class AdaptiveShotgun() : Weapon(Modules.AdaptiveShotgun)
         }
         if (ammo.Fire())
         {
-            float distance = Vector2.Distance(Input.MousePosition.Direction, Engine.BackBuffer / 2) + 1; //Plus one prevents division by zero
+            float distance = Vector2.Distance(Engine.Cursor.CursorPosition, Engine.BackBuffer / 2) + 1; //Plus one prevents division by zero
             for (float i = -5; i <= 5; i++)
             {
                 Vector2 speed = Player.IdealSpeedWithVelocity(Speed);
@@ -1367,7 +1356,7 @@ public class GuidedRound() : Weapon(Modules.GuidedRound)
     public override bool CritCondition => rounds.Count >= 3;
     public override void OnShoot()
     {
-        Vector2 mousePos = Input.MousePosition.Direction - Engine.BackBuffer / 2 + Engine.Camera.Position - Engine.SaveGame.Player.Position;
+        Vector2 mousePos = Engine.Cursor.CursorPosition - Engine.BackBuffer / 2 + Engine.Camera.Position - Engine.SaveGame.Player.Position;
         foreach (var round in rounds)
         {
             round.Velocity += Vector2.Normalize(mousePos - (round.Position - Player.Position)) * Engine.DeltaSeconds * 60;
@@ -1481,7 +1470,7 @@ public class SummonGrapplingHook() : Module(Modules.GrapplingHook)
     {
         if (hook != null)
         {
-            var mousePos = Input.MousePosition.Direction + Engine.Camera.Position - Engine.BackBuffer / 2;
+            var mousePos =  Engine.Cursor.CursorPosition + Engine.Camera.Position - Engine.BackBuffer / 2;
             if (Vector2.Distance(mousePos, Player.Position) < 100)
             {
                 foreach (var entity in Engine.SaveGame.CurrentMission.Entities)
@@ -1700,12 +1689,12 @@ public class Expose() : Module(Modules.Expose)
         }
         if (Input.ModifyAbility.IsDown)
         {
-            Player.Shoot(aura = new FlameBolt(Engine.Camera.Position + Input.MousePosition.Direction - Engine.BackBuffer / 2, Vector2.Zero, Team, 0, new ParticleEmitter(Assets.Get(Sprites.Dot), Player.Position, 0, Color.Orange * 0.75f) { speedOfEmission = 0.5f }, 10, 2, 20), 1, false);
+            Player.Shoot(aura = new FlameBolt(Engine.Camera.Position + Engine.Cursor.CursorPosition - Engine.BackBuffer / 2, Vector2.Zero, Team, 0, new ParticleEmitter(Assets.Get(Sprites.Dot), Player.Position, 0, Color.Orange * 0.75f) { speedOfEmission = 0.5f }, 10, 2, 20), 1, false);
             isFire = true;        
         }
         else
         {
-            Player.Shoot(aura = new FlameBolt(Engine.Camera.Position + Input.MousePosition.Direction - Engine.BackBuffer / 2, Vector2.Zero, Team, 0, new ParticleEmitter(Assets.Get(Sprites.Dot), Player.Position, 0, Color.Cyan * 0.75f) { speedOfEmission = 0.5f }, 10, 2, -20), 1, false);
+            Player.Shoot(aura = new FlameBolt(Engine.Camera.Position + Engine.Cursor.CursorPosition - Engine.BackBuffer / 2, Vector2.Zero, Team, 0, new ParticleEmitter(Assets.Get(Sprites.Dot), Player.Position, 0, Color.Cyan * 0.75f) { speedOfEmission = 0.5f }, 10, 2, -20), 1, false);
             isFire = false;
         }
         aura.Transform.IsImmovable = true;

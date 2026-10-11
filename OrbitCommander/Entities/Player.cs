@@ -36,11 +36,11 @@ public class Player : Entity
     public Weapon SecondaryWeapon { get; set; } = null;
     public readonly Dictionary<ModuleType, Module> modules = new()
     {
-        { ModuleType.Hull, ItemFactory.moduleData[UI.setModules[0]].Retrieve()},
-        { ModuleType.Guns, ItemFactory.moduleData[UI.setModules[1]].Retrieve() },
-        { ModuleType.Engines, ItemFactory.moduleData[UI.setModules[2]].Retrieve() },
-        { ModuleType.Sensors, ItemFactory.moduleData[UI.setModules[3]].Retrieve() },
-        { ModuleType.Core, ItemFactory.moduleData[UI.setModules[4]].Retrieve() }
+        { ModuleType.Hull, ItemFactory.Retrieve(0) },
+        { ModuleType.Guns, ItemFactory.Retrieve(1) },
+        { ModuleType.Engines, ItemFactory.Retrieve(2) },
+        { ModuleType.Sensors, ItemFactory.Retrieve(3) },
+        { ModuleType.Core, ItemFactory.Retrieve(4) }
     };
 
     public Dockable dockedEntity;
@@ -121,6 +121,7 @@ public class Player : Entity
         Events.SetFuseModuleDecals(textures);
         Events.UpdateFuseUI(moduleFuses, spareFuses);
     }
+    /*
     public Player(string _serialization, LoadLogger _logger)
         : base(Vector2.One, Vector2.One, 0, 0)
     {
@@ -169,6 +170,7 @@ public class Player : Entity
         Events.SetFuseModuleDecals(textures);
         Events.UpdateFuseUI(moduleFuses, spareFuses);
     }
+    */
     public override void Update()
     {
         if (!IsDocked && Progression > -1 && Sensors.Type != Modules.ProjectingModifier)
@@ -387,7 +389,7 @@ public class Player : Entity
             isEngineActive = false;
         }
         //Ensures that target vector performs identically in all resolutions
-        Vector2 mouseCamPos = Engine.Camera.Position + Input.MousePosition.Direction - Engine.BackBuffer / 2;
+        Vector2 mouseCamPos = Engine.Camera.Position + Engine.Cursor.CursorPosition - Engine.BackBuffer / 2;
         //Testing
         //ParticleManager.Add(new Particle(Assets.Get(Sprite.Circle), mouseCamPos, 0, Color.White));
         //ParticleManager.Add(new Particle(Assets.Get(Sprite.Circle), position, 0, Color.White));
@@ -532,7 +534,7 @@ public class Player : Entity
     {
         if (SaveGame.DebugMode)
         {
-            Vector2 mousePos = Input.MousePosition.Direction + Engine.Camera.Position - Engine.BackBuffer / 2;
+            Vector2 mousePos = Engine.Cursor.CursorPosition + Engine.Camera.Position - Engine.BackBuffer / 2;
             mousePos = new Vector2(MathF.Round(mousePos.X / 25), MathF.Round(mousePos.Y / 25)) * 25;
             ParticleManager.Add(new Particle(Assets.Get(Sprites.Dot), mousePos, 0, Color.Red));
             if (startLocation != Vector2.Zero)
@@ -552,8 +554,8 @@ public class Player : Entity
             var comp = Engine.SaveGame.CurrentMission.GetComponent<Colliders>();
             if (Input.ModifyAbility.IsDown && comp.GetColliders.Length > 0)
             {
-                Vector2 newPos = Input.MousePosition.Direction + Engine.Camera.Position - Engine.BackBuffer / 2;
-                Vector2 prevPos = Input.MousePosition.OldDirection + Engine.Camera.Position - Engine.BackBuffer / 2;
+                Vector2 newPos = Engine.Cursor.CursorPosition + Engine.Camera.Position - Engine.BackBuffer / 2;
+                Vector2 prevPos = Engine.Cursor.OldCursorPosition + Engine.Camera.Position - Engine.BackBuffer / 2;
                 comp.GetColliders = [.. comp.GetColliders.Where(x => !x.IsColliding(prevPos, newPos - prevPos, 10, true, out float _))];
             }
             if (Input.DropScrap.IsDown && !Input.DropScrap.WasDown)
@@ -591,13 +593,8 @@ public class Player : Entity
                 }
             }
         }
-        //Prevents undocking when in the garage menu
         if (Progression > -1 && IsEnabled)
         {
-            if (Input.OpenPanel.IsDown && !Input.OpenPanel.WasDown)
-            {
-                Events.ToggleDockingMenus();
-            }
             if (Input.SwapPrimary.IsDown && !Input.SwapPrimary.WasDown)
             {
                 if (SecondaryWeapon != null)
@@ -626,7 +623,7 @@ public class Player : Entity
                     Items c = Items.Scrap;
                     if (Input.Construct.WasDown)
                     {
-                        float dist = (Input.MousePosition.Direction - Engine.BackBuffer / 2).Length();
+                        float dist = (Engine.Cursor.CursorPosition - Engine.BackBuffer / 2).Length();
                         var constructs = new List<(Items item, string description, Texture2D sprite)>()
                         {
                         (Items.CryoBarricade, "Req. 1 scrap, Cools nearby entities and blocks damage, 20 integrity.", Assets.Get(Sprites.CryoBarricade)),
@@ -816,20 +813,6 @@ public class Player : Entity
                 smokeParticles.Update();
             }
         }
-        if (Events.AcknowledgeMessage(Message.ToggleTerminal))
-        {
-            if (dockedEntity != null)
-            {
-                if (dockedEntity.Menu != null)
-                {
-                    UI.TerminalMenu.CurrentTab = 3;
-                }
-            }
-            else
-            {
-                UI.TerminalMenu.CurrentTab = 1;
-            }
-        }
         if (isEngineActive)
         {
             SoundManager.PlayLoopedSound(engineSounds);
@@ -870,11 +853,12 @@ public class Player : Entity
             return false;
         }
 
-        UI.TerminalMenu.CurrentTab = 3;
-        UI.PickupDroneMenu.IsEnabled = false;
-
         if (dockedEntity != null)
         {
+            if (dockedEntity.Menu != null)
+            {
+                dockedEntity.Menu.IsEnabled = false;
+            }
             dockedEntity = null;
             isEngineActive = false;
             if (_withVelocity)
@@ -885,9 +869,9 @@ public class Player : Entity
             {
                 SoundManager.PlayGlobalSound(Assets.Get(Sound.Undock));
             }
-            if (Engine.UIManager.selectedIcon is Pickup pickup)
+            if (Engine.RealUI.selectedIcon is Pickup pickup)
             {
-                Engine.UIManager.selectedIcon = null;
+                Engine.RealUI.selectedIcon = null;
                 Events.UpdateInventoryUI();
                 pickup.isExpired = false;
                 pickup.Position = dockableEntity.Entity.Position;
@@ -898,14 +882,17 @@ public class Player : Entity
         else
         {
             dockedEntity = dockableEntity;
-            if(leashedMaterials.Contains(dockableEntity.Entity))
+            if (dockedEntity.Menu != null)
+            {
+                dockedEntity.Menu.IsEnabled = true;
+            }
+            if (leashedMaterials.Contains(dockableEntity.Entity))
             {
                 leashedMaterials.Remove(dockableEntity.Entity as Pickup);
             }
             isEngineActive = false;
             if(!_silent)
             {
-                Events.ToggleDockingMenus();
                 SoundManager.PlayGlobalSound(Assets.Get(Sound.Dock));
             }
             if (dockedEntity.HasInventory)

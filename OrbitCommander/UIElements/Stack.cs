@@ -13,7 +13,7 @@ public class Stack<T> : FunctionalWidget where T : IData
     private Vector2 stackOffset;
     private Vector2 stackDepth;
     private Func<T> constructor;
-    public Stack(Vector2 _offset, Texture2D _texture, int _count, Texture2D _stackTexture, Vector2 _stackOffset, Vector2 _stackDepth, Func<T> _constructor)
+    public Stack(Vector2 _offset, Texture2D _texture, int _count, Texture2D _stackTexture, Vector2 _stackOffset, Vector2 _stackDepth, Func<T> _constructor, Container _container, int[] _index) : base(_container, _index)
     {
         offset = _offset;
         Texture = _texture;
@@ -27,16 +27,16 @@ public class Stack<T> : FunctionalWidget where T : IData
 
     public override void OnRisingInteract(Vector2 clickPosition)
     {
-        if (Engine.UIManager.selectedIcon == null && Count > 0)
+        if (Engine.RealUI.selectedIcon == null && Count > 0)
         {
-            Engine.UIManager.selectedIcon = constructor();
+            Engine.RealUI.selectedIcon = constructor();
             Count--;
         }
         else
         {
-            if (Engine.UIManager.selectedIcon is T)
+            if (Engine.RealUI.selectedIcon is T)
             {
-                Engine.UIManager.selectedIcon = null;
+                Engine.RealUI.selectedIcon = null;
                 Count++;
             }
         }

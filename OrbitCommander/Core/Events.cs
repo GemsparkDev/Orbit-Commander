@@ -33,7 +33,7 @@ public static class Events
     {
         Player.Velocity = Vector2.Zero;
         Engine.IngameTime = new();
-        UI.GlobalMainMenu.IsEnabled = true;
+        UI.MainGlobals.IsEnabled = true;
         ParticleManager.Initialize();
         SoundManager.SetAllSounds(false);
         SoundManager.Initialize();
@@ -53,7 +53,7 @@ public static class Events
         SoundManager.PlayGlobalSound(Assets.Get(Sound.Interact));
         item.Health = item.MaxHealth;
         item.isFailed = false;
-        UIManager.Self.selectedIcon = null;
+        Engine.RealUI.selectedIcon = null;
     }
     public static void UpdateInventoryUI()
     {
@@ -144,11 +144,6 @@ public static class Events
     {
         UI.TerminalMenu.CurrentTab = 3;
         UI.PickupDroneMenu.IsEnabled = false;
-    }
-    public static void ToggleDockingMenus()
-    {
-        SoundManager.PlayGlobalSound(Assets.Get(Sound.Interact));
-        SendMessage(Message.ToggleTerminal);
     }
     public static void UpdateFuseUI(bool[,] _fuses, int _spareFuses)
     {
@@ -286,7 +281,7 @@ public static class Events
             UI.UpgradeText.Text = "Selected module cannot be upgraded.";
             return;
         }
-        Module mod = ItemFactory.moduleData[value].Retrieve();
+        Module mod = ItemFactory.Retrieve(value);
         text = $"{_moduleType.Name} has been upgraded to {mod.Name}.";
         UI.UpgradeText.Text = text;
         Engine.SaveGame.Player.modules[_slot] = mod;
@@ -299,7 +294,7 @@ public static class Events
     {
         for (int i = 0; i < 5; i++)
         {
-            UI.ModuleSelection[i].Text = ItemFactory.moduleData[UI.setModules[i]].Name;
+            UI.ModuleSelection[i].Text = UI.setModules[i].ToString();
         }
     }
 }

@@ -234,7 +234,7 @@ public static class Assets
         Add(Core.Sprites.Tab, Content.Load<Texture2D>("Images/UI_14"));
         Add(Core.Sprites.Knob, Content.Load<Texture2D>("Images/UI_16"));
         Add(Core.Sprites.WideButton, Content.Load<Texture2D>("Images/UI_18"));
-        Add(Core.Sprites.ToggleButton, Content.Load<Texture2D>("Images/UI_25"));
+        Add(Core.Sprites.TerminalSlider, Content.Load<Texture2D>("Images/UI_25"));
         Add(Core.Sprites.PlayerUI, Content.Load<Texture2D>("Images/UI_1"));
         Add(Core.Sprites.Hand, Content.Load<Texture2D>("Images/UI_5"));
         Add(Core.Sprites.EmptySlot, Content.Load<Texture2D>("Images/UI_6"));
@@ -243,8 +243,6 @@ public static class Assets
         Add(Core.Sprites.LEDGlow, Content.Load<Texture2D>("Images/UI_51"));
         Add(Core.Sprites.Floppy, Content.Load<Texture2D>("Images/UI_44"));
         Add(Core.Sprites.FloppyFlat, Content.Load<Texture2D>("Images/UI_45"));
-        Add(Core.Sprites.RightSideOpen, Content.Load<Texture2D>("Images/UI_46"));
-        Add(Core.Sprites.RightSidePanel, Content.Load<Texture2D>("Images/UI_48"));
         Add(Core.Sprites.Dial, Content.Load<Texture2D>("Images/UI_49"));
         Add(Core.Sprites.Indicator, Content.Load<Texture2D>("Images/UI_50"));
         Add(Core.Sprites.FuseDetailing, Content.Load<Texture2D>("Images/UI_52"));
