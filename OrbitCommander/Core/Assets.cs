@@ -237,6 +237,9 @@ public static class Assets
         Add(Core.Sprites.TerminalSlider, Content.Load<Texture2D>("Images/UI_25"));
         Add(Core.Sprites.PlayerUI, Content.Load<Texture2D>("Images/UI_1"));
         Add(Core.Sprites.Hand, Content.Load<Texture2D>("Images/UI_5"));
+        Add(Core.Sprites.Arm, Content.Load<Texture2D>("Images/UI_7"));
+        Add(Core.Sprites.TurnableDial, Content.Load<Texture2D>("Images/UI_11"));
+        Add(Core.Sprites.TurnableHands, Content.Load<Texture2D>("Images/UI_12"));
         Add(Core.Sprites.EmptySlot, Content.Load<Texture2D>("Images/UI_6"));
         Add(Core.Sprites.SwitchFive, Content.Load<Texture2D>("Images/UI_40-5"));
         Add(Core.Sprites.DeadFile, Content.Load<Texture2D>("Images/UI_47"));

@@ -130,6 +130,27 @@ public class Cursor(Vector2 _center)
     }
     public void DrawHand(SpriteBatch _spriteBatch)
     {
-        _spriteBatch.Draw(Assets.Get(Sprites.Hand), HandPosition, null, Color.White, Util.ToAngle(HandPosition - new Vector2(Engine.BackBuffer.X * 3 / 4, Engine.BackBuffer.Y * 2)), Vector2.Zero, UIManager.UIScale * 2, 0, 0.5f);
+        //Arm length modifiers
+        //float a1 = 3f;
+        //float a2 = 2f;
+        float a3 = 2f;
+
+        //var armOnePos = new Vector2(Engine.BackBuffer.X * 0.8f, Engine.BackBuffer.Y * 1.66f);
+        float handAngle = Util.ToAngle(HandPosition - new Vector2(Engine.BackBuffer.X * 3 / 4, Engine.BackBuffer.Y * 2));
+        //var handPosition = HandPosition + Util.RotateVector2(Assets.DimsOf(Sprites.Hand) * UIManager.UIScale * a3 * 0.75f, handAngle);
+
+        //float a = 180 * a1 * UIManager.UIScale;
+        //float b = 180 * a2 * UIManager.UIScale;
+        //float csq = Vector2.DistanceSquared(armOnePos, handPosition);
+
+        //float t1 = -MathF.Acos((b*b - a*a - csq) / (- 2 * a * MathF.Sqrt(csq))); //Law of cosines
+        //float armAngle = Util.ToAngle(handPosition - armOnePos);
+        //if (float.IsNaN(t1))
+        //{
+        //    t1 = 0;
+        //}
+        //_spriteBatch.Draw(Assets.Get(Sprites.Arm), armOnePos, null, Color.White, armAngle + t1, Assets.DimsOf(Sprites.Arm) - new Vector2(10, 10), UIManager.UIScale * a1, 0, 0.5f);
+        //_spriteBatch.Draw(Assets.Get(Sprites.Arm), handPosition, null, Color.White, Util.ToAngle(armOnePos + Util.ToUnitVector(armAngle + t1) * a - handPosition), Assets.DimsOf(Sprites.Arm) - new Vector2(10, 10), UIManager.UIScale * a2, 0, 0.5f);
+        _spriteBatch.Draw(Assets.Get(Sprites.Hand), HandPosition, null, Color.White, handAngle, Vector2.Zero, UIManager.UIScale * a3, 0, 0.5f);
     }
 }

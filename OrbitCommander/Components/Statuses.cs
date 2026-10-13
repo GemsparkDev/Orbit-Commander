@@ -11,19 +11,19 @@ public class Statuses(Entity _entity) : IComponent
     List<Status> effects = [];
     public int StealthChange { get; private set; }
     public int SensingChange { get; private set; }
-    public int FuseBonus { get; private set; }
+    public int PowerBonus { get; private set; }
     public void Update()
     {
         StealthChange = 0;
         SensingChange = 0;
-        FuseBonus = 0;
+        PowerBonus = 0;
         effects = [.. effects.Where(x => !x.IsExpired)];
         foreach (var effect in effects)
         {
             effect.Update(_entity);
             StealthChange += effect.StealthChange();
             SensingChange += effect.SensingChange();
-            FuseBonus += effect.FuseChange();
+            PowerBonus += effect.FuseChange();
         }
         _entity.Temperature *= Util.FIED(0.90f); //Radiative
         if (_entity.Temperature > 1)

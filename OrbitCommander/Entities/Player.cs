@@ -20,14 +20,10 @@ public class Player : Entity
     //Serialized variables
     private int spareFuses = 1;
     private bool aimAssist = true;
-    private bool[,] moduleFuses = new bool[5, 4]
-    {
-        { true, true, true, false },
-        { true, true, true, false },
-        { true, true, true, false },
-        { true, true, true, false },
-        { true, true, true, false },
-    };
+    private bool[] powerFuses = { true, true, true, false };
+    private int[] modulePower = [
+        3, 3, 3, 3, 3
+    ];
     public Module Hull { get => modules[ModuleType.Hull]; set => modules[ModuleType.Hull] = value; }
     public Weapon Gun { get => modules[ModuleType.Guns] as Weapon; set => modules[ModuleType.Guns] = value; }
     public Module Engines { get => modules[ModuleType.Engines]; set => modules[ModuleType.Engines] = value; }
@@ -119,7 +115,7 @@ public class Player : Entity
         }
         AddComponent(new Collide(this, PlayerCollide));
         Events.SetFuseModuleDecals(textures);
-        Events.UpdateFuseUI(moduleFuses, spareFuses);
+        Events.UpdateFuseUI(modulePower, powerFuses, spareFuses);
     }
     /*
     public Player(string _serialization, LoadLogger _logger)
@@ -302,7 +298,7 @@ public class Player : Entity
                 //Fuses vs damage: 0 -> 50%, 1 -> 79%, 2 -> 91%, 3 -> 100%, 4 -> 108%
                 //Bonus fuses shouldn't increase damage (for balancing reasons)
                 int i = (int)_type;
-                float ratio = MathF.Sqrt((moduleFuses[i, 0] ? 0.333f : 0f) + (moduleFuses[i, 1] ? 0.333f : 0f) + (moduleFuses[i, 2] ? 0.333f : 0f) + (moduleFuses[i, 3] ? 0.333f : 0f)) / 2 + 0.5f;
+                float ratio = MathF.Sqrt(modulePower[i] * 1.333f) / 2 + 0.5f;
                 int truncate = (int)Math.Truncate(ratio);
                 int damage = truncate + ((Util.Random.NextSingle() < (ratio - truncate)) ? 1 : 0);
                 modules[_type].Health = Math.Max(modules[_type].Health - damage, 0);
@@ -407,7 +403,7 @@ public class Player : Entity
 
             //Sensor subtype behavior
             //Probably won't add more
-            if(i == (int)Modules.Sensors)
+            if(i == (int)Modules.TargettingModifier)
             {
                 if (isSensorActive)
                 {
@@ -869,9 +865,9 @@ public class Player : Entity
             {
                 SoundManager.PlayGlobalSound(Assets.Get(Sound.Undock));
             }
-            if (Engine.RealUI.selectedIcon is Pickup pickup)
+            if (Engine.VirtualUI.selectedIcon is Pickup pickup)
             {
-                Engine.RealUI.selectedIcon = null;
+                Engine.VirtualUI.selectedIcon = null;
                 Events.UpdateInventoryUI();
                 pickup.isExpired = false;
                 pickup.Position = dockableEntity.Entity.Position;
@@ -978,15 +974,15 @@ public class Player : Entity
             if (Progression > 0 && restartCd <= 0)
             {
                 //If a module is failed, further collisions damage fuses
-                var targetFuse = new Vector2(Util.Random.Next(0, moduleFuses.GetLength(0)), Util.Random.Next(0, moduleFuses.GetLength(1)));
+                var targetFuse = Util.Random.Next(0, powerFuses.Length);
                 var failedPart = (ModuleType)Util.Random.Next(0, 4);
                 float threshold = 1 - 1 / _damage;
-                if (Util.Random.NextSingle() < threshold && modules[(ModuleType)targetFuse.X].isFailed && moduleFuses[(int)targetFuse.X, (int)targetFuse.Y])
+                if (Util.Random.NextSingle() < threshold && modules[(ModuleType)targetFuse].isFailed && powerFuses[targetFuse])
                 {
-                    moduleFuses[(int)targetFuse.X, (int)targetFuse.Y] = false;
+                    powerFuses[targetFuse] = false;
                     ParticleManager.Add(new Particle(null, 2, Position + new Vector2(0, -3), new Vector2(0, -0.75f), 0, 0, Color.Red, Color.Transparent) { drawText = "Fuse damaged!" });
                     SoundManager.PlaySound(Assets.Get(Sound.Beep), Position);
-                    Events.UpdateFuseUI(moduleFuses, spareFuses);
+                    Events.UpdateFuseUI(modulePower, powerFuses, spareFuses);
                 }
                 else if (Util.Random.Next(0, 12) == 0)
                 {
@@ -1024,42 +1020,53 @@ public class Player : Entity
         }
         return 0;
     }
-    public void ToggleFuse(int x, int y)
+    public void ToggleFuse(int i)
     {
-        bool fuse = moduleFuses[x, y];
-        if (UI.Fuses[y, x].Item == null != fuse)
+        bool fuse = powerFuses[i];
+        if ((UI.Fuses[i].Item == null) != fuse)
         {
             return;
         }
-        moduleFuses[x, y] = !fuse;
-        Events.UpdateFuseUI(moduleFuses, spareFuses);
+        powerFuses[i] = !fuse;
+        Events.UpdateFuseUI(modulePower, powerFuses, spareFuses);
     }
     public void AddFuse()
     {
         spareFuses++;
-        Events.UpdateFuseUI(moduleFuses, spareFuses);
+        Events.UpdateFuseUI(modulePower, powerFuses, spareFuses);
     }
     public void UpdateSpares()
     {
         spareFuses = UI.FuseCounter.Count;
     }
-    public int CountFuses(ModuleType _module)
+    public void SetPower(int i, float value)
     {
-        int count = Statuses.FuseBonus;
-        //Fuses only count if the corresponding core fuse is also active
-        for (int i = 0; i < 4; i++)
+        modulePower[i] = (int)Math.Round(value);
+        float sum = 0;
+        foreach(var val in modulePower)
         {
-            switch (_module)
+            sum += val;
+        }
+        float max = 0;
+        foreach(var val in powerFuses)
+        {
+            if (val)
             {
-                case ModuleType.Core:
-                    count += moduleFuses[(int)ModuleType.Core, i] ? 1 : 0;
-                    break;
-                default:
-                    bool fuse = moduleFuses[(int)_module, i];
-                    count += fuse && moduleFuses[(int)ModuleType.Core, i] ? 1 : 0;
-                    break;
+                max += 5;
             }
         }
+        if(max < sum)
+        {
+            UI.FuseDial.Target = 0;
+        }
+        else
+        {
+            UI.FuseDial.Target = sum / max;
+        }
+    }
+    public int CountFuses(ModuleType _module)
+    {
+        int count = Statuses.PowerBonus + modulePower[(int)_module];
         if (modules[_module].isFailed)
         {
             count--;
@@ -1074,6 +1081,42 @@ public class Player : Entity
         }
         if (dockedEntity != null)
         {
+            var menuPosition = Engine.Camera.Position + (dockedEntity.Menu.UnitPosition * Engine.BackBuffer / 2) / Engine.Camera.Zoom;
+            var dir = Vector2.Normalize(Engine.Camera.Position + dockedEntity.Menu.UnitPosition * Engine.BackBuffer / 2 / Engine.Camera.Zoom - dockedEntity.Entity.Position);
+            Vector2 p1 = dockedEntity.Entity.Position + new Vector2(dir.Y, -dir.X) * dockedEntity.Entity.ColliderRadius * 0.5f + dir * dockedEntity.Entity.ColliderRadius * 1.25f;
+            Vector2 p3 = dockedEntity.Entity.Position + new Vector2(-dir.Y, dir.X) * dockedEntity.Entity.ColliderRadius * 0.5f + dir * dockedEntity.Entity.ColliderRadius * 1.25f;
+            Vector2 o1 = Vector2.Zero;
+            Vector2 o2 = Vector2.Zero;
+            Vector2 sz = dockedEntity.Menu.Size / Engine.Camera.Zoom - Vector2.One * UIManager.UIScale;
+            if ((p1.Y > menuPosition.Y + sz.Y && p1.X > menuPosition.X - sz.X) || p1.X > menuPosition.X + sz.X)
+            {
+                o1.Y = 1;
+            }
+            if ((p1.X > menuPosition.X + sz.X && p1.Y < menuPosition.Y + sz.Y) || p1.Y < menuPosition.Y - sz.Y)
+            {
+                o1.X = 1;
+            }
+            if ((p3.Y > menuPosition.Y + sz.Y && p3.X < menuPosition.X + sz.X) || p3.X < menuPosition.X - sz.X)
+            {
+                o2.Y = 1;
+            }
+            if ((p3.X > menuPosition.X + sz.X && p3.Y > menuPosition.Y - sz.Y) || p3.Y > menuPosition.Y + sz.Y)
+            {
+                o2.X = 1;
+            }
+
+            Vector2 p2 = menuPosition + o1 * sz * 2 - sz;
+            Vector2 p4 = menuPosition + o2 * sz * 2 - sz;
+
+            float a1 = Util.ToAngle(p2 - p1);
+            float a2 = Util.ToAngle(p4 - p3);
+
+            if(!(dockedEntity.Entity.Position.X + dockedEntity.Entity.ColliderRadius * 1.35f > menuPosition.X - sz.X && dockedEntity.Entity.Position.X - dockedEntity.Entity.ColliderRadius * 1.35f < menuPosition.X + sz.X 
+                && dockedEntity.Entity.Position.Y + dockedEntity.Entity.ColliderRadius * 1.35f > menuPosition.Y - sz.Y && dockedEntity.Entity.Position.Y - dockedEntity.Entity.ColliderRadius * 1.35f < menuPosition.Y + sz.Y))
+            {
+                _spriteBatch.Draw(Engine.Line, (p1+p2)/2, null, Color.Cyan * 0.25f, a1, Vector2.One/2, new Vector2((int)MathF.Round(UIManager.UIScale), (int)MathF.Round((p2 - p1).Length())), 0, 0);
+                _spriteBatch.Draw(Engine.Line, (p3+p4)/2, null, Color.Cyan * 0.25f, a2, Vector2.One/2, new Vector2((int)MathF.Round(UIManager.UIScale), (int)MathF.Round((p4 - p3).Length())), 0, 0);
+            }
             return;
         }
         float angle;
@@ -1104,7 +1147,7 @@ public class Player : Entity
         }
         base.Draw(_spriteBatch);
 
-        if(!isExpired)
+        if (!isExpired)
         {
             return;
         }
@@ -1124,7 +1167,7 @@ public class Player : Entity
     public string Serialize()
     {
         var fuses = new StringBuilder();
-        foreach (var fuse in moduleFuses)
+        foreach (var fuse in modulePower)
         {
             fuses.Append($"{fuse},");
         }

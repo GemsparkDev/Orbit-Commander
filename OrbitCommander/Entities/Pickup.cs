@@ -19,7 +19,7 @@ public class Pickup : Entity, IData
     Color IData.Color => Color.Cyan;
     public string Name => name;
     public int ID => id;
-    public Window Tooltip { get; } = new Window(Vector2.Zero, Assets.Get(Sprites.WideButton), Engine.RealUI);
+    public Window Tooltip { get; } = new Window(Vector2.Zero, Assets.Get(Sprites.WideButton), Engine.VirtualUI);
     private Decal textbox;
     public Pickup(Sprites _sprite, Vector2 _position, Vector2 _velocity, float _angularVelocity, string _name, Color _textColor, int _id, int _health = 10)
         : base(_position, _velocity, 0, _angularVelocity)

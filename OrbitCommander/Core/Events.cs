@@ -53,7 +53,7 @@ public static class Events
         SoundManager.PlayGlobalSound(Assets.Get(Sound.Interact));
         item.Health = item.MaxHealth;
         item.isFailed = false;
-        Engine.RealUI.selectedIcon = null;
+        Engine.VirtualUI.selectedIcon = null;
     }
     public static void UpdateInventoryUI()
     {
@@ -145,51 +145,58 @@ public static class Events
         UI.TerminalMenu.CurrentTab = 3;
         UI.PickupDroneMenu.IsEnabled = false;
     }
-    public static void UpdateFuseUI(bool[,] _fuses, int _spareFuses)
+    public static void UpdateFuseUI(int[] _power, bool[] _fuses, int _spareFuses)
     {
+        UI.FuseCounter.Count = _spareFuses;
+
         float totalFuses = 0;
-        for (int i = 0; i < 5; i++)
+        for (int i = 0; i < 4; i++)
         {
-            for (int j = 0; j < 4; j++)
+            if (!_fuses[i])
             {
-                //Active fuse is white, no fuse is gray, disabled fuse is red
-                if (!_fuses[i, j])
-                {
-                    UI.Fuses[j, i].Item = null;
-                }
-                else if (!_fuses[(int)ModuleType.Core, j])
-                {
-                    UI.Fuses[j, i].Item = new Fuse(Color.Red);
-                }
-                else
-                {
-                    UI.Fuses[j, i].Item = new Fuse(Color.White);
-                    totalFuses++;
-                }
+                UI.Fuses[i].Item = null;
+            }
+            else
+            {
+                UI.Fuses[i].Item = new Fuse(Color.White);
+                totalFuses++;
             }
         }
-        UI.FuseCounter.Count = _spareFuses;
-        UI.FuseDial.Target = (float)totalFuses / 10 - 0.5f;
 
         Color[] possibleColors = [Color.Red, Color.Orange, Color.Yellow, Color.White, Color.Cyan];
+        int power = 0;
+        foreach(var fuse in _fuses)
+        {
+            if(fuse)
+            {
+                power += 5;
+            }
+        }
+        float usedPower = 0;
+        for(int i = 0; i < _power.Length; i++)
+        {
+            usedPower += _power[i];
+            UI.ModulePower[i].Target = (float)(_power[i]) / 4f;
+        }
         for (int i = 0; i < 5; i++)
         {
             var decal = UI.ModuleIcons[i];
-            int count = 0;
-            for (int j = 0; j < 4; j++)
+            if(usedPower > power)
             {
-                switch (i)
-                {
-                    case (int)ModuleType.Core:
-                        count += _fuses[(int)ModuleType.Core, j] ? 1 : 0;
-                        break;
-                    default:
-                        bool fuse = _fuses[i, j];
-                        count += fuse && _fuses[(int)ModuleType.Core, j] ? 1 : 0;
-                        break;
-                }
+                decal.color = Color.Red;
             }
-            decal.color = possibleColors[count];
+            else
+            {
+                decal.color = possibleColors[_power[i]];
+            }
+        }
+        if(usedPower > power)
+        {
+            UI.FuseDial.Target = 0;
+        }
+        else
+        {
+            UI.FuseDial.Target = usedPower/power;
         }
     }
     public static void SetFuseModuleDecals(Texture2D[] moduleTextures)

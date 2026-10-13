@@ -50,7 +50,7 @@ public enum Modules
     Orion,
 
     //Sensors
-    Sensors,
+    TargettingModifier,
     ProjectingModifier,
     AmplifyingModifier,
     CloakingModifier,
@@ -218,6 +218,9 @@ public enum Sprites
     LEDGlow,
     FuseDetailing,
     Hand,
+    Arm,
+    TurnableDial,
+    TurnableHands,
 
     SmeltIcon,
     RepairIcon,

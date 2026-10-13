@@ -27,16 +27,16 @@ public class Stack<T> : FunctionalWidget where T : IData
 
     public override void OnRisingInteract(Vector2 clickPosition)
     {
-        if (Engine.RealUI.selectedIcon == null && Count > 0)
+        if (container.Manager.selectedIcon == null && Count > 0)
         {
-            Engine.RealUI.selectedIcon = constructor();
+            container.Manager.selectedIcon = constructor();
             Count--;
         }
         else
         {
-            if (Engine.RealUI.selectedIcon is T)
+            if (container.Manager.selectedIcon is T)
             {
-                Engine.RealUI.selectedIcon = null;
+                container.Manager.selectedIcon = null;
                 Count++;
             }
         }

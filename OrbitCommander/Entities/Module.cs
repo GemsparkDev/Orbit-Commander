@@ -19,7 +19,7 @@ public abstract class Module : Pickup, IData
     //Serialized fields
     public bool isFailed = false;
     public Modules Type { get; }
-    Color IData.Color => isFailed ? Color.Red : Color.White;
+    Color IData.Color => isFailed ? Color.Red : Color.Cyan;
     private Decal healthDecal;
     private Decal description;
     public float Cooldown { get; protected set; } = 0;
@@ -76,7 +76,8 @@ public abstract class Module : Pickup, IData
         return $"{{{Type},{SerializeAttributes()},{isFailed}}}";
     }
 }
-public abstract class Weapon(Modules _type, Vector2 _position = default, Vector2 _velocity = default, float _angularVelocity = 0) : Module(_type, _position, _velocity, _angularVelocity)
+public abstract class Weapon(Sprites _sprite, string _name, string _description, int _id, int _health, Color _textColor, Vector2 _position = default, Vector2 _velocity = default, float _angularVelocity = 0) 
+: Module(_sprite, _name, _description, _id, _health, _textColor, _position, _velocity, _angularVelocity)
 {
     public abstract float Speed { get; }
     public abstract bool CritCondition { get; }
@@ -436,7 +437,7 @@ public class WorkEngine() : Module(Sprites.Work, "Work", "High torque, low accel
         _c.AddTag(Tags.IsImmune);
     }
 }
-public class OrionEngine() : Module(Modules.Orion)
+public class OrionEngine() : Module(Sprites.Orion, "Orion", "Uses explosions to move which\ncan damage enemies. Attacking enemies causes an explosion.", (int)ModuleType.Engines, 20, Color.White)
 {
     private float explosionTime = 0;
     public override void OnEngine()
@@ -471,7 +472,7 @@ public class OrionEngine() : Module(Modules.Orion)
         }
     }
 }
-public class Basic() : Weapon(Modules.Basic)
+public class Basic() : Weapon(Sprites.Guns, "Basic", "2x Crit for the last 3 shots.", (int)ModuleType.Guns, 20, Color.White)
 {
     private ReloadSystem ammo = new ReloadSystem(18, 2);
     public override float Speed => 9;
@@ -502,7 +503,7 @@ public class Basic() : Weapon(Modules.Basic)
     }
     public override int StealthChange() => GunStealthChange();
 }
-public class Antimaterial() : Weapon(Modules.Antimaterial)
+public class Antimaterial() : Weapon(Sprites.SniperModule, "Antimaterial Rifle", "2x Crit on next shot\nwhen hitting a distant enemy.", (int)ModuleType.Guns, 20, Color.CornflowerBlue)
 {
     ReloadSystem ammo = new ReloadSystem(4, 2f);
     public override float Speed => 20;
@@ -543,7 +544,7 @@ public class Antimaterial() : Weapon(Modules.Antimaterial)
     }
     public override int StealthChange() => GunStealthChange();
 }
-public class Railgun() : Weapon(Modules.Railgun)
+public class Railgun() : Weapon(Sprites.Crossbow, "Railgun", "Additional 0.5x Crit to penetrated\nenemies for every enemy hit.", (int)ModuleType.Guns, 15, Color.Yellow)
 {
     ReloadSystem ammo = new ReloadSystem(1, 1.5f);
     public override float Speed => float.MaxValue;
@@ -590,7 +591,7 @@ public class Railgun() : Weapon(Modules.Railgun)
     }
     public override int StealthChange() => GunStealthChange();
 }
-public class Spiral() : Weapon(Modules.Spiral)
+public class Spiral() : Weapon(Sprites.Spiral, "Spiral", "1.25x Crit after using an ability for a time\nequal to one third the ability cooldown duration.", (int)ModuleType.Guns, 20, Color.White)
 {
     ReloadSystem ammo = new ReloadSystem(10, 2);
     public override float Speed => 12;
@@ -634,7 +635,7 @@ public class Spiral() : Weapon(Modules.Spiral)
     }
     public override int StealthChange() => GunStealthChange();
 }
-public class Shotgun() : Weapon(Modules.Shotgun)
+public class Shotgun() : Weapon(Sprites.Guns, "Shotgun", "2x Crit when getting hit for a time equal\nto one half the taken damage seconds.", (int)ModuleType.Guns, 20, Color.CornflowerBlue)
 {
     ReloadSystem ammo = new ReloadSystem(20, 3);
     float fireCD = 0;
@@ -682,7 +683,7 @@ public class Shotgun() : Weapon(Modules.Shotgun)
     }
     public override int StealthChange() => GunStealthChange();
 }
-public class Missile() : Weapon(Modules.Missile)
+public class Missile() : Weapon(Sprites.MissileModule, "Missile Launcher", "2x Crit on next shot when\nhitting 3 or more enemies within 0.05 seconds.", (int)ModuleType.Guns, 18, Color.CornflowerBlue)
 {
     private ReloadSystem ammo = new ReloadSystem(8, 2f);
     private List<(float timer, Entity entity)> hitEntities = [];
@@ -737,7 +738,7 @@ public class Missile() : Weapon(Modules.Missile)
     }
     public override int StealthChange() => GunStealthChange();
 }
-public class LMG() : Weapon(Modules.LMG)
+public class LMG() : Weapon(Sprites.Guns, "Chain Gun", "1.5x Crit after continually hitting enemies.", (int)ModuleType.Guns, 20, Color.CornflowerBlue)
 {
     private ReloadSystem ammo = new ReloadSystem(80, 4);
     private float critCD = 0;
@@ -781,7 +782,7 @@ public class LMG() : Weapon(Modules.LMG)
     }
     public override int StealthChange() => GunStealthChange();
 }
-public class Crossbow() : Weapon(Modules.Crossbow)
+public class Crossbow() : Weapon(Sprites.Crossbow, "Crossbow", "Charge to fire. 1.5x Crit when charging for\nan additional 0.5 seconds.", (int)ModuleType.Guns, 20, Color.White)
 {
     private float chargeTime = 0;
     public override float Speed => 15;
@@ -820,7 +821,7 @@ public class Crossbow() : Weapon(Modules.Crossbow)
         }
     }
 }
-public class Flamethrower() : Weapon(Modules.Flamethrower)
+public class Flamethrower() : Weapon(Sprites.Flamethrower, "Flamethrower", "3x Crit when dangerously hot.", (int)ModuleType.Guns, 18, Color.Orange)
 {
     ReloadSystem ammo = new ReloadSystem(60, 1, delegate ()
     { ParticleManager.Add(new Particle(Assets.Get(Sprites.Cog), 60, Player.Position, Player.Velocity + new Vector2(Util.OneToNegOne(), Util.OneToNegOne()), 0, Util.OneToNegOne() / 2, Color.Green, Color.Transparent) { experienceGravity = true }); });
@@ -849,7 +850,7 @@ public class Flamethrower() : Weapon(Modules.Flamethrower)
     }
     public override int StealthChange() => GunStealthChange();
 }
-public class Fireball() : Weapon(Modules.Fireball)
+public class Fireball() : Weapon(Sprites.Fireball, "Fireball", "3x Crit when dangerously hot.", (int)ModuleType.Guns, 18, Color.Orange)
 {
     ReloadSystem ammo = new ReloadSystem(3, 2);
     public override float Speed => 8;
@@ -876,7 +877,7 @@ public class Fireball() : Weapon(Modules.Fireball)
     }
     public override int StealthChange() => GunStealthChange();
 }
-public class GrenadeLauncher() : Weapon(Modules.GrenadeLauncher)
+public class GrenadeLauncher() : Weapon(Sprites.Crossbow, "Grenade Launcher", "1.66x Crit for 30 seconds\nafter creating a construct.", (int)ModuleType.Guns, 20, Color.White)
 {
     ReloadSystem ammo = new ReloadSystem(8, 3);
     private float critCD = 0;
@@ -914,7 +915,7 @@ public class GrenadeLauncher() : Weapon(Modules.GrenadeLauncher)
         critCD += 30;
     }
 }
-public class SpewerModule() : Weapon(Modules.Spewer)
+public class SpewerModule() : Weapon(Sprites.Crossbow, "Spewer", "2x Crit when firing slower\nthan once every 2 seconds.", (int)ModuleType.Guns, 15, Color.White)
 {
     ReloadSystem ammo = new ReloadSystem(3, 5);
     private float fireCD = 0;
@@ -950,7 +951,7 @@ public class SpewerModule() : Weapon(Modules.Spewer)
     }
     public override int StealthChange() => GunStealthChange();
 }
-public class PrismArray() : Weapon(Modules.PrismArray)
+public class PrismArray() : Weapon(Sprites.PrismArray, "Prism Array", "2x Crit when below 20 HP.", (int)ModuleType.Guns, 15, Color.Cyan)
 {
     float time = 0;
     private bool isFiring = false;
@@ -1035,7 +1036,7 @@ public class PrismArray() : Weapon(Modules.PrismArray)
     }
     public override int StealthChange() => GunStealthChange();
 }
-public class MatrixLauncher() : Weapon(Modules.MatrixLauncher)
+public class MatrixLauncher() : Weapon(Sprites.Crossbow, "Matrix Launcher", "2x Crit when below 20 HP.", (int)ModuleType.Guns, 15, Color.Cyan)
 {
     ReloadSystem ammo = new ReloadSystem(3, 2);
     public override float Speed => 12;
@@ -1065,7 +1066,7 @@ public class MatrixLauncher() : Weapon(Modules.MatrixLauncher)
     }
     public override int StealthChange() => GunStealthChange();
 }
-public class Torch() : Weapon(Modules.Torch)
+public class Torch() : Weapon(Sprites.Torch, "Torch", "2.5x Crit when hitting enemies\nwho are dangerously hot.", (int)ModuleType.Guns, 15, Color.Yellow)
 {
     ReloadSystem ammo = new ReloadSystem(8, 1);
     int count = 0;
@@ -1129,7 +1130,7 @@ public class Torch() : Weapon(Modules.Torch)
         }
     }
 }
-public class SplitterModule() : Weapon(Modules.SplitterModule)
+public class SplitterModule() : Weapon(Sprites.Torch, "Splitter", "1.5x Crit when nearby a planet.", (int)ModuleType.Guns, 20, Color.White)
 {
     ReloadSystem ammo = new ReloadSystem(6, 3);
     public override float Speed => 8;
@@ -1171,7 +1172,7 @@ public class SplitterModule() : Weapon(Modules.SplitterModule)
     }
     public override int StealthChange() => GunStealthChange();
 }
-public class Fractal() : Weapon(Modules.Fractal)
+public class Fractal() : Weapon(Sprites.Torch, "Fractal", "1.5x Crit when the player is moving\nfaster than 20 units per second. Bonus crit when hitting near the base of the fractal.", (int)ModuleType.Guns, 20, Color.White)
 {
     ReloadSystem ammo = new ReloadSystem(10, 3);
     public override float Speed => 6;
@@ -1219,7 +1220,7 @@ public class CrackShot : Weapon
     public override float Speed => 8;
     public override bool CritCondition => critCD > 0;
     private float critCD = 0;
-    public CrackShot() : base (Modules.CrackShot)
+    public CrackShot() : base (Sprites.Torch, "Crackshot", "1.25x Crit for 1.2 seconds after reloading.", (int)ModuleType.Guns, 20, Color.White)
     {
         ammo = new ReloadSystem(6, 2.5f, ReloadCallback);
     }
@@ -1256,7 +1257,7 @@ public class CrackShot : Weapon
     }
     public override int StealthChange() => GunStealthChange();
 }
-public class MicroRocketLauncher() : Weapon(Modules.MicroRocketLauncher)
+public class MicroRocketLauncher() : Weapon(Sprites.MicroLauncher, "Micro Rocket Launcher", "1.7x Crit when hitting 4 or more unique\nenemies within 5 seconds.", (int)ModuleType.Guns, 18, Color.Yellow)
 {
     ReloadSystem ammo = new ReloadSystem(30, 4);
     float offset = 2;
@@ -1307,7 +1308,7 @@ public class MicroRocketLauncher() : Weapon(Modules.MicroRocketLauncher)
     }
     public override int StealthChange() => GunStealthChange();
 }
-public class AdaptiveShotgun() : Weapon(Modules.AdaptiveShotgun)
+public class AdaptiveShotgun() : Weapon(Sprites.Torch, "Adaptive Shotgun", "1.5x Crit on the second shot.", (int)ModuleType.Guns, 18, Color.Yellow)
 {
     ReloadSystem ammo = new ReloadSystem(2, 3);
     public override float Speed => 18;
@@ -1348,7 +1349,7 @@ public class AdaptiveShotgun() : Weapon(Modules.AdaptiveShotgun)
     }
     public override int StealthChange() => GunStealthChange();
 }
-public class GuidedRound() : Weapon(Modules.GuidedRound)
+public class GuidedRound() : Weapon(Sprites.Torch, "Guided Round", "1.5x Crit when releasing 3 rounds at once.", (int)ModuleType.Guns, 20, Color.White)
 {
     private ReloadSystem ammo = new ReloadSystem(3, 3);
     private List<Entity> rounds = [];
@@ -1402,7 +1403,7 @@ public class GuidedRound() : Weapon(Modules.GuidedRound)
     }
     public override int StealthChange() => GunStealthChange();
 }
-public class Dash() : Module(Modules.Dash)
+public class Dash() : Module(Sprites.Dash, "Dash Core", "Teleports the player a short\ndistance with brief immunity.", (int)ModuleType.Core, 20, Color.White)
 {
     const float MaxCooldown = 2;
     public override void OnAbility()
@@ -1429,7 +1430,7 @@ public class Dash() : Module(Modules.Dash)
         base.OnUpdate(_fuseRatio);
     }
 }
-public class SummonShield() : Module(Modules.SummonShield)
+public class SummonShield() : Module(Sprites.SummonShield, "Shield Core", "Summons two shields which are destroyed on hit.", (int)ModuleType.Core, 20, Color.White)
 {
     Entity shield1;
     Entity shield2;
@@ -1460,7 +1461,7 @@ public class SummonShield() : Module(Modules.SummonShield)
         base.OnUpdate(_fuseRatio);
     }
 }
-public class SummonGrapplingHook() : Module(Modules.GrapplingHook)
+public class SummonGrapplingHook() : Module(Sprites.GrapplingHook, "Grapple Core", $"Launches a hook which can\nlatch on to anything.\nAttach the other end to objects using RMB", (int)ModuleType.Core, 20, Color.White)
 {
     const float MaxCooldown = 5;
     GrapplingHook hook;
@@ -1520,7 +1521,7 @@ public class SummonGrapplingHook() : Module(Modules.GrapplingHook)
         base.OnUpdate(_fuseRatio);
     }
 }
-public class Nanomachines() : Module(Modules.Nanomachines)
+public class Nanomachines() : Module(Sprites.Nanomachines, "Nanomachines", "Consumes scrap to heal the player\nover a short period of time.", (int)ModuleType.Core, 20, Color.White)
 {
     const float MaxCooldown = 30;
     public override void OnAbility()
@@ -1546,7 +1547,7 @@ public class Nanomachines() : Module(Modules.Nanomachines)
         base.OnUpdate(_fuseRatio);
     }
 }
-public class CreateFighter() : Module(Modules.CreateFighter)
+public class CreateFighter() : Module(Sprites.ConstructFighter, "Construct fighter", "Consumes scrap to create several\nfighters around the player.", (int)ModuleType.Core, 20, Color.White)
 {
     const float MaxCooldown = 60;
     private List<Entity> allies = [];
@@ -1581,7 +1582,7 @@ public class CreateFighter() : Module(Modules.CreateFighter)
         base.OnUpdate(_fuseRatio);
     }
 }
-public class Assault() : Module(Modules.Assault)
+public class Assault() : Module(Sprites.Assault, "Assault", "Shoots a variety of projectiles\naround the player.", (int)ModuleType.Core, 20, Color.White)
 {
     bool isShooting = false;
     const float MaxCooldown = 30;
@@ -1634,7 +1635,7 @@ public class Assault() : Module(Modules.Assault)
         base.OnUpdate(_fuseRatio);
     }
 }
-public class Decoy() : Module(Modules.Decoy)
+public class Decoy() : Module(Sprites.Decoy, "Decoy", "Creates a false player for enemies to\nattack, boosts stealth.", (int)ModuleType.Core, 20, Color.White)
 {
     public override void OnAbility()
     {
@@ -1654,23 +1655,7 @@ public class Decoy() : Module(Modules.Decoy)
         return 0;
     }
 }
-public class TargettingModifer() : Module(Modules.Sensors)
-{
-    public override float ModifyCrit(float _crit)
-    {
-        return _crit * 1.25f + 0.1f;
-    }
-    public override Entity ModifyProjectile(Entity _projectile)
-    {
-        var damage = _projectile.GetComponent<Attack>();
-        if (damage != null)
-        {
-            damage.Damage = (int)MathF.Round(damage.Damage*0.9f);
-        }
-        return _projectile;
-    }
-}
-public class Expose() : Module(Modules.Expose)
+public class Expose() : Module(Sprites.Expose, "Exposure", "Creates a heating or cooling aura at the cursor,\ndoing the opposite on the player./nHold left shift to summon the other type.", (int)ModuleType.Core, 20, Color.White)
 {
     const float MaxCooldown = 15;
     FlameBolt aura = null;
@@ -1718,7 +1703,23 @@ public class Expose() : Module(Modules.Expose)
         base.OnUpdate(_fuseRatio);
     }
 }
-public class CloakingModifier() : Module(Modules.CloakingModifier)
+public class TargettingModifer() : Module(Sprites.Sensors, "Sensors", "Increases the crit damage bonus by 1.25x + 0.1,\nbut reduces damage by 10%.", (int)ModuleType.Sensors, 20, Color.CornflowerBlue)
+{
+    public override float ModifyCrit(float _crit)
+    {
+        return _crit * 1.25f + 0.1f;
+    }
+    public override Entity ModifyProjectile(Entity _projectile)
+    {
+        var damage = _projectile.GetComponent<Attack>();
+        if (damage != null)
+        {
+            damage.Damage = (int)MathF.Round(damage.Damage * 0.9f);
+        }
+        return _projectile;
+    }
+}
+public class CloakingModifier() : Module(Sprites.CloakingModifier, "Pulse Emitter", "Fired bullets randomly become\ninvisible to enemies and you", (int)ModuleType.Sensors, 20, Color.Yellow)
 {
     public override Entity ModifyProjectile(Entity _projectile)
     {
@@ -1729,7 +1730,7 @@ public class CloakingModifier() : Module(Modules.CloakingModifier)
         return _projectile;
     }
 }
-public class ProjectingModifier() : Module(Modules.ProjectingModifier)
+public class ProjectingModifier() : Module(Sprites.ProjectingModifier, "Lidar", "Projects a path for where\nyour projectiles will go.", (int)ModuleType.Sensors, 20, Color.Yellow)
 {
     public override void OnUpdate(float _fuseRatio)
     {
@@ -1739,7 +1740,7 @@ public class ProjectingModifier() : Module(Modules.ProjectingModifier)
         }
     }
 }
-public class AmplifyingModifier() : Module(Modules.AmplifyingModifier)
+public class AmplifyingModifier() : Module(Sprites.AmplifyingModifier, "Radar", "Doubles damage dealt and taken", (int)ModuleType.Sensors, 20, Color.Yellow)
 {
     public override Entity ModifyProjectile(Entity _projectile)
     {
@@ -1756,8 +1757,8 @@ public class AmplifyingModifier() : Module(Modules.AmplifyingModifier)
         return _damage * 2;
     }
 }
-public class EmptyModule() : Module(Modules.EmptyModule) { }
-public class EmergencyEngine() : Module(Modules.EmergencyEngine)
+public class EmptyModule() : Module(Sprites.None, "Structural Element", "A structural element that does nothing.\nInstall modules over this one.", 0, 10, Color.Gray) { }
+public class EmergencyEngine() : Module(Sprites.None, "Emergency Thrusters", "Emergency thrusters lacking fly by wire control.\nInstall modules or upgrade with scrap.", (int)ModuleType.Engines, 10, Color.Gray)
 {
     float engineTime = 0;
     ParticleEmitter engineParticles1 = new(Assets.Get(Sprites.Dot), 0.15f, Vector2.Zero, 0, 0, 1, 20f, Color.Red, EmitterType.EmissionOverTime)
@@ -1817,7 +1818,7 @@ public class EmergencyEngine() : Module(Modules.EmergencyEngine)
         base.OnUpdate(_fuseRatio);
     }
 }
-public class PointDefense() : Weapon(Modules.PointDefense)
+public class PointDefense() : Weapon(Sprites.None, "Point Defense", "A light rotary cannon designed for emergencies.\nInstall modules or upgrade with scrap.", (int)ModuleType.Engines, 10, Color.Gray)
 {
     ReloadSystem ammo = new ReloadSystem(50, 3f);
     public override float Speed => 10;

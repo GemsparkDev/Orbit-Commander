@@ -17,7 +17,7 @@ public static class UI
     //Virtual Windows
     public static TabbedWindow MissionSelect { get; } = new TabbedWindow(new Vector2(-1, 0), Assets.Get(Sprites.GargantuanPanel), Assets.Get(Sprites.Tab), Assets.Get(Sprites.SelectedTab), Assets.Get(Sound.Interact), 2, Engine.VirtualUI)
     { icons = [Assets.Get(Sprites.PlanetIcon), Assets.Get(Sprites.RepairIcon)], alignment = Alignment.Left };
-    public static Window MothershipMenu { get; } = new Window(Vector2.Zero, Assets.Get(Sprites.LargePanel), Engine.VirtualUI);
+    public static Window MothershipMenu { get; } = new Window(new Vector2(0, -0.5f), Assets.Get(Sprites.LargePanel), Engine.VirtualUI);
     public static Window DebugMenu { get; } = new Window(-Vector2.One, Assets.Get(Sprites.GargantuanPanel), Engine.VirtualUI) { alignment = Alignment.Left };
     public static Window HackMenu { get; } = new Window(Vector2.Zero, Assets.Get(Sprites.LargePanel), Engine.VirtualUI);
     public static Window EscapeMenu { get; } = new Window(Vector2.Zero, Assets.Get(Sprites.LargePanel), Engine.VirtualUI);
@@ -51,14 +51,15 @@ public static class UI
 
     //Fuse Menu
     public static Decal[] StatusLights { get; } = new Decal[5];
-    public static Slider RestartSwitch { get; } = new Slider(Engine.Line, new Vector2(15, 70), Assets.DimsOf(Sprites.SwitchFive) + new Vector2(2, 4), false, [Color.Transparent, Color.Transparent], TerminalMenu, [1, 2]);
+    public static Slider RestartSwitch { get; } = new Slider(Engine.Line, new Vector2(TerminalMenu.Size.X * 3 / 10, TerminalMenu.Size.Y * 3/10), Assets.DimsOf(Sprites.SwitchFive), false, [Color.Transparent, Color.Transparent], TerminalMenu, [1, 2]);
     public static Decal Switch { get; } = new Decal(RestartSwitch.Offset / UIManager.UIScale, Assets.Get(Sprites.SwitchFive), TerminalMenu, [1, 2]);
-    public static UIElements.Stack<Fuse> FuseCounter { get; } = new UIElements.Stack<Fuse>(new Vector2(-5, -70), Assets.Get(Sprites.Button), 1, Assets.Get(Sprites.Fuse), new Vector2(-Assets.Get(Sprites.Button).Width / 2 * 4 / 5, 0), new Vector2(8, 0), 
-        delegate { return new Fuse(Color.White); }, TerminalMenu, [1, 2]);
-    public static ItemSlot<Fuse>[,] Fuses { get; } = new ItemSlot<Fuse>[4, 5];
+    public static UIElements.Stack<Fuse> FuseCounter { get; } = new UIElements.Stack<Fuse>(new Vector2(TerminalMenu.Size.X * 3 / 10, TerminalMenu.Size.Y / 5), Assets.Get(Sprites.Button), 1, Assets.Get(Sprites.Fuse), 
+        new Vector2(-Assets.Get(Sprites.Button).Width / 2 * 4 / 5, 0), new Vector2(8, 0), delegate { return new Fuse(Color.White); }, TerminalMenu, [1, 2]);
+    public static ItemSlot<Fuse>[] Fuses { get; } = new ItemSlot<Fuse>[4];
+    public static Dial[] ModulePower { get; } = new Dial[5];
     public static Decal[] ModuleIcons { get; } = new Decal[5];
-    public static Decal FuseDetailing { get; } = new Decal(new Vector2(30, 0), Assets.Get(Sprites.FuseDetailing), TerminalMenu, [1, 2]);
-    public static Dial FuseDial { get; } = new Dial(Assets.Get(Sprites.Indicator), new Vector2(55, -58), Assets.Get(Sprites.Dial), TerminalMenu, [1, 2]);
+    public static Decal FuseDetailing { get; } = new Decal(Vector2.Zero, Assets.Get(Sprites.FuseDetailing), TerminalMenu, [1, 2]);
+    public static Dial FuseDial { get; } = new Dial(Assets.Get(Sprites.Indicator), new Vector2(100, -58), Assets.Get(Sprites.Dial), TerminalMenu, [1, 2]) { IsTurnable = false, Range = MathF.PI/2};
     public static Decal FuseText { get; } = new Decal(FuseDial.Offset / UIManager.UIScale + new Vector2(0, 5), Assets.TextFont, "Instability", Color.Black, 5, TerminalMenu, [1, 2]);
 
     //Restart Terminal
@@ -66,7 +67,7 @@ public static class UI
 
     //Terminal All
     public static Button TerminalClose { get; } = new Button(new Vector2(0, Assets.Get(Sprites.Terminal).Height / 2 - Assets.Get(Sprites.TerminalSlider).Height / 2), Assets.Get(Sprites.TerminalSlider), TerminalMenu, [0, 1, 2]);
-    public static Decal Overlay { get; } = new Decal(new Vector2(-10.5f, 49f), Assets.Get(Sprites.Overlay), TerminalMenu, [0, 1, 2]) { color = Color.White * 0.5f };
+    public static Decal Overlay { get; } = new Decal(Vector2.Zero, Assets.Get(Sprites.Overlay), TerminalMenu, [0, 1, 2]) { color = Color.White * 0.5f };
 
     //Main Menu
     public static TerminalButton SingleplayerButton { get; } = new TerminalButton(new Vector2(0, 0), Assets.TextFont, "Singleplayer", Color.White, 10, MainGlobals, [(int)Alignment.TopLeft]);
@@ -96,9 +97,9 @@ public static class UI
     public static Button AbortButton { get; } = new Button(new Vector2(0, -20), Assets.Get(Sprites.WideButton), Assets.TextFont, "Abort", Color.White, PauseMenu, [0]);
 
     //Mothership Menu
-    public static ItemSlot<Pickup> FurnaceSlot { get; } = new ItemSlot<Pickup>(new Vector2(-20, 0), Assets.Get(Sprites.EmptySlot), -1, MothershipMenu, [0]);
-    public static Decal RequiredCraftsText { get; } = new Decal(new Vector2(0) + new Vector2(0, -6), Assets.TextFont, "25", Color.White, 10, MothershipMenu, [0]);
-    public static Slider FurnaceSlider { get; } = new Slider(Engine.Line, new Vector2(-20, -MainGlobals.Size.Y / 6), new Vector2(60, 2), true, [new Color(255, 239, 85), new Color(50, 51, 67)], MothershipMenu, [0]);
+    public static ItemSlot<Pickup> FurnaceSlot { get; } = new ItemSlot<Pickup>(new Vector2(-MothershipMenu.Size.X / 3, MothershipMenu.Size.Y / 3), Assets.Get(Sprites.EmptySlot), -1, MothershipMenu, [0]);
+    public static Decal RequiredCraftsText { get; } = new Decal(new Vector2(-MothershipMenu.Size.X / 6 + Assets.DimsOf(Sprites.EmptySlot).X * 0.5f, MothershipMenu.Size.Y / 3), Assets.TextFont, "25", Color.White, 10, MothershipMenu, [0]);
+    public static Slider FurnaceSlider { get; } = new Slider(Engine.Line, new Vector2(-MothershipMenu.Size.X / 6 - Assets.DimsOf(Sprites.EmptySlot).X / 4f, MothershipMenu.Size.Y / 6), new Vector2(60, 2), true, [new Color(255, 239, 85), new Color(50, 51, 67)], MothershipMenu, [0]);
 
     //Mission Select Menu
     public static Decal MissionName { get; } = new Decal(new Vector2(0, -30), Assets.TextFont, "Name", Color.White, 10, MissionSelect, [0]);
@@ -256,7 +257,7 @@ public static class UI
         {
             if (FurnaceSlot.Item != null && !FurnaceSlot.Item.HasComponent<Smelt>())
             {
-                (FurnaceSlot.Item, Engine.RealUI.selectedIcon) = (Engine.RealUI.selectedIcon as Pickup, FurnaceSlot.Item as IData);
+                (FurnaceSlot.Item, Engine.VirtualUI.selectedIcon) = (Engine.VirtualUI.selectedIcon as Pickup, FurnaceSlot.Item);
                 return;
             }
             Events.SendMessage(Message.MothershipUpdateFurnace);
@@ -327,20 +328,20 @@ public static class UI
                 Engine.SaveGame.QueuedItems.Add(new FuseQueue());
             }
         };
-        var tooltip = new Window(Vector2.Zero, wideButton, Engine.RealUI);
+        var tooltip = new Window(Vector2.Zero, wideButton, Engine.VirtualUI);
         _ = new Decal(new Vector2(0, -3), Assets.TextFont, "Queue fuse construction. Cheap but delicate.", Color.White, 3f, tooltip, [0]);
         _ = new Decal(new Vector2(0, 3), Assets.TextFont, "Required time: 10 waves.", Color.White, 3f, tooltip, [0]);
         CreateFuse.AddTooltip(tooltip);
         SmeltScrap.RisingInteract += delegate
         {
-            if (Engine.RealUI.selectedIcon != null)
+            if (Engine.VirtualUI.selectedIcon != null)
             {
                 foreach (var item in MissionSelectSlots)
                 {
                     if (item.Item == null && Engine.SaveGame.QueuedItems.Count < 10)
                     {
-                        item.Item = Engine.RealUI.selectedIcon as Pickup;
-                        Engine.RealUI.selectedIcon = null;
+                        item.Item = Engine.VirtualUI.selectedIcon as Pickup;
+                        Engine.VirtualUI.selectedIcon = null;
                         Engine.SaveGame.QueuedItems.Add(new SmeltQueue(item));
                         Events.UpdateInventory();
                         return;
@@ -348,20 +349,20 @@ public static class UI
                 }
             }
         };
-        tooltip = new Window(Vector2.Zero, wideButton, Engine.RealUI);
+        tooltip = new Window(Vector2.Zero, wideButton, Engine.VirtualUI);
         _ = new Decal(new Vector2(0, -3), Assets.TextFont, "Drag pickup over button to queue scrap melting.", Color.White, 3f, tooltip, [0]);
         _ = new Decal(new Vector2(0, 3), Assets.TextFont, "Required time: 10 waves. Gains additional metal per scrap.", Color.White, 3f, tooltip, [0]);
         SmeltScrap.AddTooltip(tooltip);
         RepairModule.RisingInteract += delegate
         {
-            if (Engine.RealUI.selectedIcon as Module != null)
+            if (Engine.VirtualUI.selectedIcon as Module != null)
             {
                 foreach (var item in MissionSelectSlots)
                 {
                     if (item.Item == null && Engine.SaveGame.QueuedItems.Count < 10)
                     {
-                        item.Item = Engine.RealUI.selectedIcon as Module;
-                        Engine.RealUI.selectedIcon = null;
+                        item.Item = Engine.VirtualUI.selectedIcon as Module;
+                        Engine.VirtualUI.selectedIcon = null;
                         Engine.SaveGame.QueuedItems.Add(new RepairQueue(item));
                         Events.UpdateInventory();
                         return;
@@ -369,7 +370,7 @@ public static class UI
                 }
             }
         };
-        tooltip = new Window(Vector2.Zero, wideButton, Engine.RealUI);
+        tooltip = new Window(Vector2.Zero, wideButton, Engine.VirtualUI);
         _ = new Decal(new Vector2(0, -3), Assets.TextFont, "Drag module over button to queue repair.\nRequired time: 20 waves. Requires no metal to repair.", Color.White, 3f, tooltip, [0]);
         RepairModule.AddTooltip(tooltip);
         CancelQueue.RisingInteract += delegate
@@ -395,7 +396,7 @@ public static class UI
         LidarUpgrade.RisingInteract += delegate { Events.UpgradeSensors(SensorType.Lidar); };
         RadarUpgrade.RisingInteract += delegate { Events.UpgradeSensors(SensorType.Radar); };
         PulseEmitterUpgrade.RisingInteract += delegate { Events.UpgradeSensors(SensorType.PulseEmitter); };
-        tooltip = new Window(Vector2.Zero, wideButton, Engine.RealUI);
+        tooltip = new Window(Vector2.Zero, wideButton, Engine.VirtualUI);
         _ = new Decal(new Vector2(0, -3), Assets.TextFont, "Drag module over button to queue repair.\nRequired time: 20 waves. Requires no metal to repair.", Color.White, 3f, tooltip, [0]);
         UpgradeHull.AddTooltip(tooltip);
         UpgradeHull.RisingInteract += delegate
@@ -481,21 +482,19 @@ public static class UI
         PlayerSpecialHealth.SetInterval(1, 1);
         PlayerHealth.Intervals = [1, 1];
 
-        float xOffset = Assets.DimsOf(Sprites.LargePanel).X / 4 + Assets.DimsOf(Sprites.EmptySlot).X / 1.4142f;
+        float xOffset = Assets.DimsOf(Sprites.LargePanel).X / 6;
         for (int x = 0; x < ModuleSlots.GetLength(0); x++)
         {
             ItemSlot<Module> slot;
-            if (x % 2 == 0)
+            if(x%2==0)
             {
-                slot = new ItemSlot<Module>(new Vector2(xOffset, Assets.DimsOf(Sprites.EmptySlot).Y * x / 2
-                    - Assets.DimsOf(Sprites.EmptySlot).Y), Assets.Get(Sprites.EmptySlot), x, MothershipMenu, [0]);
+                slot = new ItemSlot<Module>(new Vector2(xOffset, Assets.DimsOf(Sprites.EmptySlot).Y * (x/2-1) * 1.1f), Assets.Get(Sprites.EmptySlot), x, MothershipMenu, [0]);
             }
             else
             {
-                slot = new ItemSlot<Module>(new Vector2(Assets.DimsOf(Sprites.EmptySlot).X / 1.4142f + xOffset,
-                    Assets.DimsOf(Sprites.EmptySlot).Y * x / 2 - Assets.DimsOf(Sprites.EmptySlot).Y), Assets.Get(Sprites.EmptySlot), x, MothershipMenu, [0]);
+                slot = new ItemSlot<Module>(new Vector2(xOffset + Assets.DimsOf(Sprites.EmptySlot).X * 1.1f, Assets.DimsOf(Sprites.EmptySlot).Y * (x/2-0.5f) * 1.1f), Assets.Get(Sprites.EmptySlot), x, MothershipMenu, [0]);
             }
-            ModuleSlots[x] = slot;
+                ModuleSlots[x] = slot;
             slot.RisingInteract += delegate
             {
                 if (Engine.SaveGame.Player.isExpired) //No module repair after death
@@ -507,17 +506,17 @@ public static class UI
                 {
                     return;
                 }
-                if (Engine.RealUI.selectedIcon is Pickup pickup && pickup is not Module)
+                if (Engine.VirtualUI.selectedIcon is Pickup pickup && pickup is not Module)
                 {
                     if (item.Type is Modules.EmergencyEngine)
                     {
                         slot.Item = new StandardEngine();
-                        Engine.RealUI.selectedIcon = null;
+                        Engine.VirtualUI.selectedIcon = null;
                     }
                     else if (item.Type is Modules.PointDefense)
                     {
                         slot.Item = new Basic();
-                        Engine.RealUI.selectedIcon = null;
+                        Engine.VirtualUI.selectedIcon = null;
                     }
                     else
                     {
@@ -531,15 +530,15 @@ public static class UI
                 {
                     return;
                 }
-                var icon = Engine.RealUI.selectedIcon as Module;
+                var icon = Engine.VirtualUI.selectedIcon as Module;
                 if (slot.Item == null)
                 {
                     slot.Item = icon;
-                    Engine.RealUI.selectedIcon = null;
+                    Engine.VirtualUI.selectedIcon = null;
                 }
                 else if (icon != null && icon.Type is Modules.EmergencyEngine or Modules.PointDefense or Modules.EmptyModule)
                 {
-                    Engine.RealUI.selectedIcon = null;
+                    Engine.VirtualUI.selectedIcon = null;
                 }
                 Events.SyncModules();
             };
@@ -547,8 +546,8 @@ public static class UI
         }
         for (int i = 0; i < InventorySlots.GetLength(0); i++)
         {
-            InventorySlots[i] = new ItemSlot<Pickup>(new Vector2(Assets.DimsOf(Sprites.LargePanel).X / 4,
-                Assets.DimsOf(Sprites.EmptySlot).Y * (i + 1) - Assets.DimsOf(Sprites.LargePanel).X / 2), Assets.Get(Sprites.EmptySlot), -1, MothershipMenu, [0]);
+            InventorySlots[i] = new ItemSlot<Pickup>(new Vector2(Assets.DimsOf(Sprites.EmptySlot).X * 1.1f * (i%2),
+                Assets.DimsOf(Sprites.EmptySlot).Y * 1.1f * ((i/2)%2)) - Assets.DimsOf(Sprites.LargePanel)/3f, Assets.Get(Sprites.EmptySlot), -1, MothershipMenu, [0]);
             MissionSelectSlots[i] = new ItemSlot<Pickup>(new Vector2(Assets.DimsOf(Sprites.LargePanel).X / 2,
                 Assets.DimsOf(Sprites.EmptySlot).Y * (i + 1) - Assets.DimsOf(Sprites.LargePanel).X / 2), Assets.Get(Sprites.EmptySlot), -1, MissionSelect, [1]);
 
@@ -571,7 +570,7 @@ public static class UI
                 return;
             }
 
-            if (Engine.RealUI.selectedIcon is Pickup pickup && pickup is not Module)
+            if (Engine.VirtualUI.selectedIcon is Pickup pickup && pickup is not Module)
             {
                 Events.RepairModule(item);
             }
@@ -583,24 +582,28 @@ public static class UI
 
         for (int i = 0; i < 4; i++)
         {
-            for (int j = -2; j < 3; j++)
+            var fuse = new ItemSlot<Fuse>(new Vector2(i * 11 + 2, 0.5f), Assets.Get(Sprites.FuseSlot), -1, TerminalMenu, [1]);
+            //Not sure why this works, don't touch
+            int x = i;
+            fuse.RisingInteract += delegate
             {
-                var fuse = new ItemSlot<Fuse>(new Vector2(i * 11 + 2, j * 20 + 0.5f), Assets.Get(Sprites.FuseSlot), -1, TerminalMenu, [1]);
-                //Not sure why this works, don't touch
-                int x = j + 2;
-                int y = i;
-                fuse.RisingInteract += delegate
-                {
-                    Engine.SaveGame.Player.ToggleFuse(x, y);
-                };
-                Fuses[i, j + 2] = fuse;
-            }
+                Engine.SaveGame.Player.ToggleFuse(x);
+            };
+            Fuses[i] = fuse;
         }
         for (int i = 0; i < 5; i++)
         {
+            var dial = new Dial(Assets.Get(Sprites.TurnableHands), new Vector2(TerminalMenu.Size.X*2/5, i * 24 - TerminalMenu.Size.Y/3), Assets.Get(Sprites.TurnableDial), TerminalMenu, [1, 2]) { Range = MathF.PI * 7 / 8 };
+            int x = i + 2;
+            dial.ContinuousInteract += delegate
+            {
+                Engine.SaveGame.Player.SetPower(i - 2, MathF.Round(dial.Value * 4));
+                //Events.
+            };
+            ModulePower[i] = dial;
             float y = (i - 2) * 20 + 0.5f;
-            ModuleIcons[i] = new Decal(new Vector2(-16.5f, y + 0.5f), null, TerminalMenu, [1]);
-            StatusLights[i] = new Decal(new Vector2(-33f, y), Assets.Get(Sprites.LEDGlow), TerminalMenu, [1]);
+            ModuleIcons[i] = new Decal(new Vector2(61f, y -37.5f), null, TerminalMenu, [1]);
+            StatusLights[i] = new Decal(new Vector2(44.5f, y-38), Assets.Get(Sprites.LEDGlow), TerminalMenu, [1]);
         }
 
     }

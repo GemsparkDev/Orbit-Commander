@@ -258,8 +258,11 @@ public class Engine : Game
         spriteBatch.End();
 
         spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp);
-        VirtualUI.Draw(spriteBatch);
-        Cursor.DrawCursor(spriteBatch);
+        if(SaveGame == null || SaveGame.Player == null || SaveGame.Player.IsEnabled)
+        {
+            VirtualUI.Draw(spriteBatch);
+            Cursor.DrawCursor(spriteBatch);
+        }
         spriteBatch.End();
 
         GraphicsDevice.SetRenderTarget(null);
