@@ -218,7 +218,8 @@ public enum Sprites
     LEDGlow,
     FuseDetailing,
     Hand,
-    Arm,
+    Grip,
+    Pinch,
     TurnableDial,
     TurnableHands,
 

@@ -140,17 +140,13 @@ public static class Events
             UI.StatusLights[i].color = Engine.SaveGame.Player.modules[(ModuleType)i].isFailed ? Color.Red : Color.White;
         }
     }
-    public static void DisableDockingMenus()
-    {
-        UI.TerminalMenu.CurrentTab = 3;
-        UI.PickupDroneMenu.IsEnabled = false;
-    }
     public static void UpdateFuseUI(int[] _power, bool[] _fuses, int _spareFuses)
     {
         UI.FuseCounter.Count = _spareFuses;
+        Color[] possibleColors = [Color.Red, Color.Yellow, Color.White, new Color(0, 255, 0), Color.Cyan];
 
-        float totalFuses = 0;
-        for (int i = 0; i < 4; i++)
+        int power = 0;
+        for (int i = 0; i < _fuses.Length; i++)
         {
             if (!_fuses[i])
             {
@@ -158,52 +154,44 @@ public static class Events
             }
             else
             {
+                power += 2;
                 UI.Fuses[i].Item = new Fuse(Color.White);
-                totalFuses++;
             }
         }
 
-        Color[] possibleColors = [Color.Red, Color.Orange, Color.Yellow, Color.White, Color.Cyan];
-        int power = 0;
-        foreach(var fuse in _fuses)
-        {
-            if(fuse)
-            {
-                power += 5;
-            }
-        }
         float usedPower = 0;
         for(int i = 0; i < _power.Length; i++)
         {
             usedPower += _power[i];
             UI.ModulePower[i].Target = (float)(_power[i]) / 4f;
         }
-        for (int i = 0; i < 5; i++)
-        {
-            var decal = UI.ModuleIcons[i];
-            if(usedPower > power)
-            {
-                decal.color = Color.Red;
-            }
-            else
-            {
-                decal.color = possibleColors[_power[i]];
-            }
-        }
+
         if(usedPower > power)
         {
             UI.FuseDial.Target = 0;
+            foreach(var decal in UI.ModuleIcons)
+            {
+                decal.color = Color.Red;
+            }
+            if(Engine.SaveGame.Player.IsEnabled)
+            {
+                Engine.SaveGame.Player.Disable();
+            }
         }
         else
         {
-            UI.FuseDial.Target = usedPower/power;
+            UI.FuseDial.Target = usedPower / power;
+            for (int i = 0; i < _power.Length; i++)
+            {
+                UI.ModuleIcons[i].color = possibleColors[_power[i]];
+            }
         }
     }
-    public static void SetFuseModuleDecals(Texture2D[] moduleTextures)
+    public static void SetFuseModuleDecals(Texture2D[] _moduleTextures)
     {
-        for (int i = 0; i < 5; i++)
+        for (int i = 0; i < _moduleTextures.Length; i++)
         {
-            UI.ModuleIcons[i].Texture = moduleTextures[i];
+            UI.ModuleIcons[i].Texture = _moduleTextures[i];
         }
     }
     public static void GetSave()
@@ -299,7 +287,7 @@ public static class Events
     }
     public static void SetModules()
     {
-        for (int i = 0; i < 5; i++)
+        for (int i = 0; i < UI.setModules.Length; i++)
         {
             UI.ModuleSelection[i].Text = UI.setModules[i].ToString();
         }

@@ -221,7 +221,7 @@ public static class Assets
     {
         //Assets used in the main menu
         effect = Content.Load<Effect>("Shaders/BloomShader");
-        TextFont = Content.Load<SpriteFont>("Fonts/RobotoMono");
+        TextFont = Content.Load<SpriteFont>("Fonts/Rasterforge");
 
         //UI Elements
         Add(Core.Sprites.Title, Content.Load<Texture2D>("Images/UI_2"));
@@ -237,7 +237,8 @@ public static class Assets
         Add(Core.Sprites.TerminalSlider, Content.Load<Texture2D>("Images/UI_25"));
         Add(Core.Sprites.PlayerUI, Content.Load<Texture2D>("Images/UI_1"));
         Add(Core.Sprites.Hand, Content.Load<Texture2D>("Images/UI_5"));
-        Add(Core.Sprites.Arm, Content.Load<Texture2D>("Images/UI_7"));
+        Add(Core.Sprites.Grip, Content.Load<Texture2D>("Images/UI_7"));
+        Add(Core.Sprites.Pinch, Content.Load<Texture2D>("Images/UI_15"));
         Add(Core.Sprites.TurnableDial, Content.Load<Texture2D>("Images/UI_11"));
         Add(Core.Sprites.TurnableHands, Content.Load<Texture2D>("Images/UI_12"));
         Add(Core.Sprites.EmptySlot, Content.Load<Texture2D>("Images/UI_6"));

@@ -20,9 +20,9 @@ public class Player : Entity
     //Serialized variables
     private int spareFuses = 1;
     private bool aimAssist = true;
-    private bool[] powerFuses = { true, true, true, false };
+    private bool[] powerFuses = [ true, true, true, true, true, false, false, false, false, false ];
     private int[] modulePower = [
-        3, 3, 3, 3, 3
+        2, 2, 2, 2, 2
     ];
     public Module Hull { get => modules[ModuleType.Hull]; set => modules[ModuleType.Hull] = value; }
     public Weapon Gun { get => modules[ModuleType.Guns] as Weapon; set => modules[ModuleType.Guns] = value; }
@@ -48,7 +48,8 @@ public class Player : Entity
     public Vector2 Direction { get; private set; }
     private SoundEffectInstance engineSounds;
     //IsEnabled manages dead file sprite
-    public bool IsEnabled { get; set; } = true;
+    public bool IsEnabled { get; private set; } = true;
+    public bool CanBeReenabled { get; set; } = false;
     public bool IsDocked => dockedEntity != null;
     public bool isEngineActive = false;
     public bool canGatherResources = false;
@@ -295,10 +296,10 @@ public class Player : Entity
             void DecreaseModuleHealth(ModuleType _type)
             {
                 //Higher true fuse count results in modules sometimes taking more damage
-                //Fuses vs damage: 0 -> 50%, 1 -> 79%, 2 -> 91%, 3 -> 100%, 4 -> 108%
+                //Fuses vs damage: 0 -> 50%, 1 -> 75%, 2 -> 100%, 3 -> 100%, 4 -> 108%
                 //Bonus fuses shouldn't increase damage (for balancing reasons)
                 int i = (int)_type;
-                float ratio = MathF.Sqrt(modulePower[i] * 1.333f) / 2 + 0.5f;
+                float ratio = MathF.Sqrt(modulePower[i] / 2) / 2 + 0.5f;
                 int truncate = (int)Math.Truncate(ratio);
                 int damage = truncate + ((Util.Random.NextSingle() < (ratio - truncate)) ? 1 : 0);
                 modules[_type].Health = Math.Max(modules[_type].Health - damage, 0);
@@ -392,13 +393,39 @@ public class Player : Entity
         Direction = Vector2.Normalize(mouseCamPos - Position);
         Player.AngularVelocity = 0;
     }
+    public void Disable()
+    {
+        IsEnabled = false;
+        SoundManager.PlayGlobalSound(Assets.Get(Sound.Undock));
+        Events.UpdateModulesStatus();
+    }
+    public void Enable()
+    {
+        if(!CanBeReenabled)
+        {
+            return;
+        }
+        SoundManager.PlayGlobalSound(Assets.Get(Sound.Dock));
+        CanBeReenabled = false;
+        float sum = modulePower.Sum();
+        float max = 0;
+        foreach(var fuse in powerFuses)
+        {
+            if(fuse)
+            {
+                max += 2;
+            }
+        }
+        IsEnabled = max >= sum;
+        Events.UpdateModulesStatus();
+    }
     public void LowerCooldown()
     {
         SecondaryWeapon?.OnUpdate(0.25f);
         for (int i = 0; i < modules.Count; i++)
         {
             var module = modules[(ModuleType)i];
-            float fuseRatio = CalculateFuseRatio((ModuleType)i);
+            float fuseRatio = GetFuseRatio((ModuleType)i);
             module.OnUpdate(fuseRatio);
 
             //Sensor subtype behavior
@@ -488,10 +515,10 @@ public class Player : Entity
             }
         }
     }
-    public float CalculateFuseRatio(ModuleType _module)
+    public float GetFuseRatio(ModuleType _module)
     {
         //Square root of the ratio reduces impact with additional fuse (especially with weapon dps)
-        return MathF.Sqrt((float)CountFuses(_module) / 3);
+        return MathF.Sqrt((float)CountFuses(_module) / 2);
     }
     public void OnEnemyHit(Entity _entity, int _damage)
     {
@@ -1052,7 +1079,7 @@ public class Player : Entity
         {
             if (val)
             {
-                max += 5;
+                max += 2;
             }
         }
         if(max < sum)
@@ -1063,8 +1090,9 @@ public class Player : Entity
         {
             UI.FuseDial.Target = sum / max;
         }
+        Events.UpdateFuseUI(modulePower, powerFuses, spareFuses);
     }
-    public int CountFuses(ModuleType _module)
+    private int CountFuses(ModuleType _module)
     {
         int count = Statuses.PowerBonus + modulePower[(int)_module];
         if (modules[_module].isFailed)

@@ -45,7 +45,7 @@ public class Cursor(Vector2 _center)
 
         if (HandMode)
         {
-            handVelocity += relativePosition * 0.02f;
+            handVelocity += relativePosition * 0.03f;
             HandPosition += handVelocity;
             handVelocity *= 0.9f;
             Vector2 targetPosition = Engine.BackBuffer / 2;
@@ -126,17 +126,52 @@ public class Cursor(Vector2 _center)
             i -= distance;
             newPosition += relativePosition;
         }
-        _spriteBatch.Draw(mouseTexture, CursorPosition, null, mouseColor * (10 / (10 + (CursorPosition - OldCursorPosition).Length())), 0, UIManager.DimsOf(mouseTexture) / 2, UIManager.UIScale / 2, 0, 0.5f);
+        float t = (10 / (10 + (CursorPosition - OldCursorPosition).Length()));
+        if(HandMode)
+        {
+            t *= 0.5f;
+        }
+        _spriteBatch.Draw(mouseTexture, CursorPosition, null, mouseColor * t, 0, UIManager.DimsOf(mouseTexture) / 2, UIManager.UIScale / 2, 0, 0.5f);
     }
     public void DrawHand(SpriteBatch _spriteBatch)
     {
+        Vector2 offset = Vector2.Zero;
+        float handAngle = 0;
+        Texture2D handTexture;
+        if (Engine.RealUI.FocusedWidget == UI.TerminalClose || !HandMode)
+        {
+            handTexture = Assets.Get(Sprites.Grip);
+            if(HandMode)
+            {
+                offset = new Vector2(handTexture.Width - Assets.DimsOf(Sprites.TerminalSlider).Y * UIManager.UIScale / 4, 0);
+                handAngle = -MathF.PI / 2;
+                float x = UI.TerminalClose.Offset.X + UI.TerminalMenu.Position.X - handTexture.Height / 2 * UIManager.UIScale;
+                HandPosition = new Vector2(Math.Clamp(HandPosition.X, x - Assets.DimsOf(Sprites.TerminalSlider).X * UIManager.UIScale / 4, x + Assets.DimsOf(Sprites.TerminalSlider).X * UIManager.UIScale / 4),
+                    Math.Clamp(HandPosition.Y, Assets.DimsOf(Sprites.TerminalSlider).Y * UIManager.UIScale / 2, UI.TerminalMenu.Position.Y + UI.TerminalClose.Offset.Y - UI.TerminalMenu.Center.Y));
+            }
+        }
+        else if (HandMode && (Mouse.GetState().LeftButton == ButtonState.Pressed || Engine.RealUI.selectedIcon != null))
+        {
+            handTexture = Assets.Get(Sprites.Pinch);
+            handAngle = Util.ToAngle(HandPosition - new Vector2(Engine.BackBuffer.X * 3 / 4, Engine.BackBuffer.Y * 2));
+            offset = new Vector2(0, 23);
+        }
+        else
+        {
+            handTexture = Assets.Get(Sprites.Hand);
+            handAngle = Util.ToAngle(HandPosition - new Vector2(Engine.BackBuffer.X * 3 / 4, Engine.BackBuffer.Y * 2));
+        }
+        float t = 1;
+        if(!HandMode)
+        {
+            t = 0.5f;
+        }
         //Arm length modifiers
         //float a1 = 3f;
         //float a2 = 2f;
-        float a3 = 2f;
+        float a3 = 1f;
 
         //var armOnePos = new Vector2(Engine.BackBuffer.X * 0.8f, Engine.BackBuffer.Y * 1.66f);
-        float handAngle = Util.ToAngle(HandPosition - new Vector2(Engine.BackBuffer.X * 3 / 4, Engine.BackBuffer.Y * 2));
         //var handPosition = HandPosition + Util.RotateVector2(Assets.DimsOf(Sprites.Hand) * UIManager.UIScale * a3 * 0.75f, handAngle);
 
         //float a = 180 * a1 * UIManager.UIScale;
@@ -151,6 +186,7 @@ public class Cursor(Vector2 _center)
         //}
         //_spriteBatch.Draw(Assets.Get(Sprites.Arm), armOnePos, null, Color.White, armAngle + t1, Assets.DimsOf(Sprites.Arm) - new Vector2(10, 10), UIManager.UIScale * a1, 0, 0.5f);
         //_spriteBatch.Draw(Assets.Get(Sprites.Arm), handPosition, null, Color.White, Util.ToAngle(armOnePos + Util.ToUnitVector(armAngle + t1) * a - handPosition), Assets.DimsOf(Sprites.Arm) - new Vector2(10, 10), UIManager.UIScale * a2, 0, 0.5f);
-        _spriteBatch.Draw(Assets.Get(Sprites.Hand), HandPosition, null, Color.White, handAngle, Vector2.Zero, UIManager.UIScale * a3, 0, 0.5f);
+        _spriteBatch.Draw(handTexture, HandPosition + UIManager.DimsOf(handTexture) / 2, null, Color.Black * 0.2f * t, handAngle, offset, UIManager.UIScale * a3, 0, 0.5f);
+        _spriteBatch.Draw(handTexture, HandPosition, null, Color.White * t, handAngle, offset, UIManager.UIScale * a3, 0, 0.5f);
     }
 }

@@ -30,7 +30,7 @@ public class Stealth(Entity _entity) : IComponent
     public float StealthTransparency()
     {
         float stealth = 1;
-        var maxDistance = Mission.StealthRange * Engine.SaveGame.Player.CountFuses(ModuleType.Sensors) / 4;
+        var maxDistance = Mission.StealthRange * Engine.SaveGame.Player.GetFuseRatio(ModuleType.Sensors);
         //Player has superior sensing to stealth -> full detection
         //Player has equal sensing to stealth -> partial detection when nearby
         //Player has inferior sensing to stealth -> no detection

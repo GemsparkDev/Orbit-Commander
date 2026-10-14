@@ -45,6 +45,7 @@ public class Dial : FunctionalWidget
         {
             Target = MathF.Round(Target);
         }
+        Value = Target;
         base.OnContinuousInteract(_clickPosition);
     }
     public override void HoveringDraw(SpriteBatch _spriteBatch, Vector2 _parentPosition, float _transparency, Vector2 _center)
@@ -58,14 +59,14 @@ public class Dial : FunctionalWidget
     }
     public override void Update()
     {
-        float lerp = Util.FIED(0.05f);
+        float lerp = Util.FIED(0.03f);
         if(IsTurnable)
         {
             Value = Value * lerp + Target * (1 - lerp);
         }
         else
         {
-            Value = Value * lerp + (Target + Util.OneToNegOne() * 0.08f) * (1 - lerp);
+            Value = Value * lerp + (Target + Util.OneToNegOne() * 0.2f) * (1 - lerp);
         }
     }
 }
