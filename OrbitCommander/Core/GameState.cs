@@ -15,6 +15,7 @@ public static class CurrentGameState
     private static GameState currentGameState;
     public static void SwitchState(GameState _gameState)
     {
+        Engine.VirtualUI.DisableAll();
         SoundManager.SetAllSounds(false);
         if(!_gameState.PersistentParticles)
         {
@@ -94,9 +95,11 @@ public class PlayingGame : GameState
     public override void Initialize()
     {
         UI.GameplayGlobals.IsEnabled = true;
-        UI.MainGlobals.IsEnabled = false;
-        UI.PauseMenu.IsEnabled = false;
         UI.TerminalMenu.CurrentTab = 1;
+        if(Engine.SaveGame.Player.dockedEntity != null)
+        {
+            Engine.SaveGame.Player.dockedEntity.Menu.IsEnabled = true;
+        }
     }
     public override void Update()
     {
@@ -133,6 +136,7 @@ public class PausedGame : GameState
     {
         UI.TerminalMenu.CurrentTab = 0;
         UI.PauseMenu.IsEnabled = true;
+        UI.GameplayGlobals.IsEnabled = true;
     }
     public override void Draw(SpriteBatch _spriteBatch)
     {
@@ -309,8 +313,6 @@ public class Cutscene(List<IEvent> _events, List<IActor> _actors, GameState _nex
         time = 0;
         Engine.Camera.Position = Vector2.Zero;
         Engine.Camera.Zoom = 1;
-        UI.GameplayGlobals.IsEnabled = false;
-        UI.MainGlobals.IsEnabled = false;
     }
     public override void Update()
     {
@@ -363,7 +365,6 @@ public class Loading(Action _function, LoadingStage _stage) : GameState
     {
         _spriteBatch.DrawString(Assets.TextFont, "Loading...", Vector2.Zero, Color.White, 0, Assets.TextFont.MeasureString("Loading...")/2, 4, 0, 0);
     }
-
     public override void Update()
     {
         if(_stage <= Engine.Self.LoadingStage)

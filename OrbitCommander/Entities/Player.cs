@@ -1109,6 +1109,10 @@ public class Player : Entity
         }
         if (dockedEntity != null)
         {
+            if(!dockedEntity.Menu.IsEnabled)
+            {
+                return;
+            }
             var menuPosition = Engine.Camera.Position + (dockedEntity.Menu.UnitPosition * Engine.BackBuffer / 2) / Engine.Camera.Zoom;
             var dir = Vector2.Normalize(Engine.Camera.Position + dockedEntity.Menu.UnitPosition * Engine.BackBuffer / 2 / Engine.Camera.Zoom - dockedEntity.Entity.Position);
             Vector2 p1 = dockedEntity.Entity.Position + new Vector2(dir.Y, -dir.X) * dockedEntity.Entity.ColliderRadius * 0.5f + dir * dockedEntity.Entity.ColliderRadius * 1.25f;

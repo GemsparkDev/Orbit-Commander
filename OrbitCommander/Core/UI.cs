@@ -19,14 +19,14 @@ public static class UI
     { icons = [Assets.Get(Sprites.PlanetIcon), Assets.Get(Sprites.RepairIcon)], Alignment = Alignment.Left };
     public static Window MothershipMenu { get; } = new Window(new Vector2(0, -0.5f), Assets.Get(Sprites.LargePanel), Engine.VirtualUI);
     public static Window DebugMenu { get; } = new Window(new Vector2(-1, 1), Assets.Get(Sprites.GargantuanPanel), Engine.VirtualUI) { Alignment = Alignment.BottomLeft };
-    public static Window HackMenu { get; } = new Window(Vector2.Zero, Assets.Get(Sprites.LargePanel), Engine.VirtualUI);
-    public static Window EscapeMenu { get; } = new Window(Vector2.Zero, Assets.Get(Sprites.LargePanel), Engine.VirtualUI);
+    public static Window HackMenu { get; } = new Window(new Vector2(0, -0.5f), Assets.Get(Sprites.LargePanel), Engine.VirtualUI);
+    public static Window EscapeMenu { get; } = new Window(new Vector2(0, -0.5f), Assets.Get(Sprites.LargePanel), Engine.VirtualUI);
     public static Screen GameplayGlobals { get; } = new Screen(Engine.VirtualUI);
     public static Screen MainGlobals { get; } = new Screen(Engine.VirtualUI) { IsEnabled = true };
     public static TabbedWindow UpgradeMenu { get; } = new TabbedWindow(Vector2.Zero, Assets.Get(Sprites.GargantuanPanel),
     Assets.Get(Sprites.Tab), Assets.Get(Sprites.SelectedTab), Assets.Get(Sound.Interact), 2, Engine.VirtualUI);
     public static Window PauseMenu { get; } = new Window(Vector2.Zero, Assets.Get(Sprites.LargePanel), Engine.VirtualUI);
-    public static Window PickupDroneMenu { get; } = new Window(Vector2.Zero, Assets.Get(Sprites.LargePanel), Engine.VirtualUI);
+    public static Window PickupDroneMenu { get; } = new Window(new Vector2(0, -0.5f), Assets.Get(Sprites.LargePanel), Engine.VirtualUI);
     public static TabbedWindow SavesMenu { get; } = new TabbedWindow(Vector2.Zero, Assets.Get(Sprites.GargantuanPanel), null, null, null, null, Engine.VirtualUI);
 
     //Settings
@@ -307,6 +307,10 @@ public static class UI
         {
             TerminalMenu.Position = new Vector2(TerminalMenu.Position.X, Math.Clamp(Engine.Cursor.HandPosition.Y - TerminalMenu.Size.Y * UIManager.UIScale + Assets.DimsOf(Sprites.TerminalSlider).Y * UIManager.UIScale / 2, 
                 -TerminalMenu.Size.Y * UIManager.UIScale + Assets.DimsOf(Sprites.TerminalSlider).Y * UIManager.UIScale, 0));
+            if (Engine.RealUI.selectedIcon is Fuse)
+            {
+                FuseCounter.OnRisingInteract(Vector2.Zero);
+            }
         };
         PrevMission.RisingInteract += delegate { Engine.SaveGame.PrevMission(); }; //Do not remove outer delegate
         NextMission.RisingInteract += delegate { Engine.SaveGame.NextMission(); }; //Doing so causes exception due to null savegame

@@ -7,6 +7,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using UILib.Content;
+using OrbitCommander.UIElements;
 
 namespace OrbitCommander.Core;
 public class Cursor(Vector2 _center)
@@ -70,6 +71,10 @@ public class Cursor(Vector2 _center)
         if (Input.Tab.IsDown && !Input.Tab.WasDown)
         {
             HandMode = !HandMode;
+            if (Engine.RealUI.selectedIcon is Fuse)
+            {
+                UI.FuseCounter.OnRisingInteract(Vector2.Zero);
+            }
         }
     }
     public void DrawCursor(SpriteBatch _spriteBatch)
