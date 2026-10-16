@@ -26,7 +26,6 @@ public class Atmosphere : IComponent
         {
             CheckEntity(_entity);
         }
-        CheckEntity(Engine.SaveGame.Player);
     }
     private void CheckEntity(Entity _entity)
     {

@@ -124,23 +124,11 @@ public static class Events
         UI.SelectMission.TextColor = completed && mission.IsRelaunchable ? Color.Gray : Color.Yellow;
         UI.AlertText.Text = isDangerous ? "Danger: Fleet Detected" : "";
     }
-    public static void UpdateModulesStatus()
+    public static void UpdateModulesStatus(bool _isEnabled, IEnumerable<bool> _moduleFailed)
     {
-        if (Engine.SaveGame == null || Engine.SaveGame.Player == null)
-        {
-            return;
-        }
-        for (int i = 0; i < UI.StatusLights.Length; i++)
-        {
-            if (!Engine.SaveGame.Player.IsEnabled)
-            {
-                UI.StatusLights[i].color = Color.Transparent;
-                continue;
-            }
-            UI.StatusLights[i].color = Engine.SaveGame.Player.modules[(ModuleType)i].isFailed ? Color.Red : Color.White;
-        }
+        UI.StatusLights.Zip(_moduleFailed, (l, f) => { l.color = (_isEnabled ? Color.Transparent : (f ? Color.Red : Color.White)); return 0; });
     }
-    public static void UpdateFuseUI(int[] _power, bool[] _fuses, int _spareFuses)
+    public static void UpdateFuseUI(int[] _power, bool[] _fuses, int _spareFuses, Player _player)
     {
         UI.FuseCounter.Count = _spareFuses;
         Color[] possibleColors = [Color.Red, Color.Yellow, Color.White, new Color(0, 255, 0), Color.Cyan];
@@ -173,9 +161,9 @@ public static class Events
             {
                 decal.color = Color.Red;
             }
-            if(Engine.SaveGame.Player.IsEnabled)
+            if(_player.IsEnabled)
             {
-                Engine.SaveGame.Player.Disable();
+                _player.Disable();
             }
         }
         else

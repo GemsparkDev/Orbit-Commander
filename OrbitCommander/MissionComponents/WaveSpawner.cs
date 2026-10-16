@@ -178,7 +178,7 @@ internal class WaveSpawner : IMissionComponent
                             squadLeader = null;
                             count = 0;
                         }
-                        var enemy = enemyCreditValues[i].enemy(pos, Engine.SaveGame.Player.Velocity, MathF.Atan2(-pos.X, pos.Y), Team.Hostile);
+                        var enemy = enemyCreditValues[i].enemy(pos, Vector2.Zero, MathF.Atan2(-pos.X, pos.Y), Team.Hostile);
                         enemiesSpawned.Add(enemy);
                         squadLeader ??= enemy;
                         enemyCredits -= newCosts[i];

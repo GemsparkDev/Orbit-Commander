@@ -108,7 +108,7 @@ public class ReloadSystem(int _magazineSize, float _reloadSpeed, Action _reloadC
             reloadCD = _reloadSpeed;
             SoundManager.PlayGlobalSound(Assets.Get(Sound.Dock));
         }
-        if (Engine.SaveGame.Player.modules.ContainsValue(_module))
+        if (Player.modules.ContainsValue(_module))
         {
             UI.PlayerAmmo.SetInterval(val, magazineSize);
         }

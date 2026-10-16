@@ -113,43 +113,6 @@ public class Pickup : Entity, IData
             Health = val;
         }, 1);
     }
-    public override void Update()
-    {
-        int index = Player.leashedMaterials.IndexOf(this);
-        if (index == -1)
-        {
-            if (Player.IsFriendly(this) && Vector2.DistanceSquared(Player.Position, Position) < 1375 && Player.leashedMaterials.Count < 3 && Player.canGatherResources)
-            {
-                Player.leashedMaterials.Add(this);
-                if (Player.leashedMaterials.Count < 3)
-                {
-                    SoundManager.PlaySound(Assets.Get(Sound.Interact), Position);
-                }
-                else
-                {
-                    SoundManager.PlaySound(Assets.Get(Sound.Full), Position);
-                }
-            }
-            Velocity *= 1 - Engine.DeltaSeconds * 2;
-        }
-        else
-        {
-            Entity parent;
-            if (index == 0)
-            {
-                parent = Player;
-            }
-            else
-            {
-                parent = Player.leashedMaterials[index - 1];
-            }
-            var relativePos = Vector2.Normalize(parent.Position - Position);
-            Velocity += (parent.Position - relativePos * 20 - Position) * Engine.DeltaSeconds * 0.4f;
-            float offset = Util.FIED(0.05f);
-            Velocity = parent.Velocity * (1 - offset) + Velocity * offset;
-        }
-        base.Update();
-    }
     public virtual string SerializeAttributes()
     {
         return $"{Health}";

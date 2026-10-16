@@ -163,7 +163,6 @@ public class Planet : Entity, ICollider
                     AttractObject(particle);
                 }
             }
-            AttractObject(Engine.SaveGame.Player);
         }
         if (EasterEgg)
         {

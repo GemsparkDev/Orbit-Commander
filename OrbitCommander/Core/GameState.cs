@@ -103,7 +103,7 @@ public class PlayingGame : GameState
     }
     public override void Update()
     {
-        Engine.SaveGame.CurrentMission.IngameUpdate();
+        Engine.SaveGame.CurrentMission.Update();
         Engine.SaveGame.Player.RestrictedActions();
         Engine.DialogueManager.Update();
         ParticleManager.Update();

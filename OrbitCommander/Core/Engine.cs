@@ -157,13 +157,8 @@ public class Engine : Game
         ParticleManager.Initialize();
         SaveGame.CurrentMission = Mission.missions[SaveGame.CurrentMissionIndex].instance();
         SoundManager.Initialize();
-        Events.UpdateModulesStatus();
         SoundManager.PlayGlobalSound(Assets.Get(Sound.Interact));
         ScreenShakeFactor = 0;
-        SaveGame.Player.Progression = Mission.missions[SaveGame.CurrentMissionIndex].data.PlayerProgression;
-        //Prevents scrap and debuffs from persisting between missions.
-        SaveGame.Player.leashedMaterials.Clear();
-        SaveGame.Player.GetComponent<Statuses>().Clear();
         SaveGame.CurrentMission.Initialize();
     }
     public static void Load()
@@ -246,11 +241,6 @@ public class Engine : Game
         spriteBatch.End();
         GraphicsDevice.SetRenderTarget(null);
         return renderTarget;
-    }
-    public static void DrawFilledLine(SpriteBatch _spriteBatch, Vector2 _position, Rectangle _sourceRectangle, float _percentFilled, Color _lowerColor, Color _higherColor)
-    {
-        _spriteBatch.Draw(Line, _position, _sourceRectangle, _lowerColor);
-        _spriteBatch.Draw(Line, _position, new Rectangle(_sourceRectangle.Location, new Point((int)(_sourceRectangle.Width * _percentFilled), _sourceRectangle.Height)), _higherColor);
     }
     protected override void Draw(GameTime gameTime)
     {

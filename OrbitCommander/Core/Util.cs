@@ -49,7 +49,7 @@ public static class Util
     {
         return v1.X * v2.Y - v1.Y * v2.X;
     }
-    public static Entity Nearest(Vector2 _position, Entity[] _entities)
+    public static Entity Nearest(Vector2 _position, IEnumerable<Entity> _entities)
     {
         return _entities.MinBy(x => Vector2.DistanceSquared(x.Position, _position));
     }

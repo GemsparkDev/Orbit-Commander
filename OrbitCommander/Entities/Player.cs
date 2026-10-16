@@ -115,8 +115,9 @@ public class Player : Entity
             textures[i] = (modules[(ModuleType)i] as IData).Texture;
         }
         AddComponent(new Collide(this, PlayerCollide));
+        AddTag(Tags.IsImportant);
         Events.SetFuseModuleDecals(textures);
-        Events.UpdateFuseUI(modulePower, powerFuses, spareFuses);
+        Events.UpdateFuseUI(modulePower, powerFuses, spareFuses, this);
     }
     /*
     public Player(string _serialization, LoadLogger _logger)
@@ -391,13 +392,27 @@ public class Player : Entity
         //ParticleManager.Add(new Particle(Assets.Get(Sprite.Circle), mouseCamPos, 0, Color.White));
         //ParticleManager.Add(new Particle(Assets.Get(Sprite.Circle), position, 0, Color.White));
         Direction = Vector2.Normalize(mouseCamPos - Position);
-        Player.AngularVelocity = 0;
+        AngularVelocity = 0;
+
+        Engine.Camera.Rotation = Engine.ScreenShakeFactor * Engine.ScreenShakeFactor * (Util.Random.NextSingle() - 0.5f) * 0.15f;
+        //If the player is further from the camera, put more weight on the player
+        //Tanh prevents frac from going above 1
+        float frac = MathF.Tanh(Vector2.Distance(Position, Engine.Camera.Position) / 750);
+        Engine.Camera.Position = Position * frac + Engine.Camera.Position * (1 - frac) + Engine.Cursor.CursorPosition / 16 - Engine.BackBuffer / 32
+        + Engine.ScreenShakeFactor * Engine.ScreenShakeFactor * new Vector2(Util.Random.NextSingle() - 0.5f, Util.Random.NextSingle() - 0.5f) * 50;
+        var planet = (Engine.SaveGame.CurrentMission.Entities.Where(x => x is Planet).ToArray());
+        float sum = 0.75f;
+        foreach (var p in planet)
+        {
+            sum += p.ColliderRadius / (Vector2.Distance(p.Position, Position)) / 2;
+        }
+        Engine.Camera.Zoom = sum;
     }
     public void Disable()
     {
         IsEnabled = false;
         SoundManager.PlayGlobalSound(Assets.Get(Sound.Undock));
-        Events.UpdateModulesStatus();
+        Events.UpdateModulesStatus(IsEnabled, modules.Select((m) => m.Value.isFailed));
     }
     public void Enable()
     {
@@ -417,7 +432,7 @@ public class Player : Entity
             }
         }
         IsEnabled = max >= sum;
-        Events.UpdateModulesStatus();
+        Events.UpdateModulesStatus(IsEnabled, modules.Select((m) => m.Value.isFailed));
     }
     public void LowerCooldown()
     {
@@ -445,8 +460,8 @@ public class Player : Entity
                             {
                                 for (int j = 0; j < 3 * fuseRatio; j++)
                                 {
-                                    Vector2 dir = Util.ToUnitVector(Util.ToAngle(Player.Direction) + Util.OneToNegOne() * Util.Random.NextSingle());
-                                    var entity = Engine.SaveGame.CurrentMission.Hitscan(Player.Position, dir, 2000, false, out Vector2 end, null, true);
+                                    Vector2 dir = Util.ToUnitVector(Util.ToAngle(Direction) + Util.OneToNegOne() * Util.Random.NextSingle());
+                                    var entity = Engine.SaveGame.CurrentMission.Hitscan(Position, dir, 2000, false, out Vector2 end, null, true);
                                     var vel = Vector2.Zero;
                                     var col = Color.White;
                                     if (entity.Count > 0)
@@ -477,14 +492,14 @@ public class Player : Entity
                             if (sensorCD <= 0)
                             {
                                 Vector2 dir = Util.ToUnitVector(sensorCD / fuseRatio);
-                                var revealedEntities = Engine.SaveGame.CurrentMission.Hitscan(Player.Position, dir, 2000, true, out Vector2 end, null).Where(x => x.HasComponent<Stealth>());
+                                var revealedEntities = Engine.SaveGame.CurrentMission.Hitscan(Position, dir, 2000, true, out Vector2 end, null).Where(x => x.HasComponent<Stealth>());
                                 foreach (var entity in revealedEntities)
                                 {
                                     entity.RevealDuration = 2f;
                                 }
                                 for (int j = 0; j < 12; j++)
                                 {
-                                    ParticleManager.Add(new Particle(Assets.Get(Sprites.Dot), Player.Position + dir * 2 * (j + 4) + Player.Velocity, 0, Color.Green * (1 - (float)j / 12)));
+                                    ParticleManager.Add(new Particle(Assets.Get(Sprites.Dot), Position + dir * 2 * (j + 4) + Velocity, 0, Color.Green * (1 - (float)j / 12)));
                                 }
                                 ParticleManager.Add(new Particle(Assets.Get(Sprites.Dot), end, 0, Color.White));
                             }
@@ -498,14 +513,14 @@ public class Player : Entity
                             {
                                 foreach (var entity in Engine.SaveGame.CurrentMission.Entities)
                                 {
-                                    if (Vector2.Distance(entity.Position, Player.Position) < 250 / fuseRatio && entity.HasComponent<Stealth>())
+                                    if (Vector2.Distance(entity.Position, Position) < 250 / fuseRatio && entity.HasComponent<Stealth>())
                                     {
                                         entity.RevealDuration += 0.5f;
                                     }
                                 }
                                 for (float angle = 0; angle < MathF.Tau; angle += MathF.PI / 60)
                                 {
-                                    ParticleManager.Add(new Particle(Assets.Get(Sprites.Dot), 1f, Player.Position, Util.ToUnitVector(angle) * 2 / fuseRatio + Player.Velocity, angle, 0, Color.Cyan, Color.Transparent));
+                                    ParticleManager.Add(new Particle(Assets.Get(Sprites.Dot), 1f, Position, Util.ToUnitVector(angle) * 2 / fuseRatio + Velocity, angle, 0, Color.Cyan, Color.Transparent));
                                 }
                                 sensorCD = 2 * fuseRatio;
                             }
@@ -781,6 +796,44 @@ public class Player : Entity
                         canGatherResources = true;
                         SoundManager.PlayGlobalSound(Assets.Get(Sound.OpenMenu));
                     }
+
+                    var pickups = Engine.SaveGame.CurrentMission.Entities.Where(x => x is Pickup && !leashedMaterials.Contains(x));
+                    foreach (var pickup in pickups)
+                    {
+                        int index = leashedMaterials.IndexOf(pickup as Pickup);
+                        if (index == -1)
+                        {
+                            if (leashedMaterials.Count < 3 && canGatherResources && IsFriendly(pickup) && Vector2.DistanceSquared(pickup.Position, Position) < 1375)
+                            {
+                                leashedMaterials.Add(pickup as Pickup);
+                                if (leashedMaterials.Count < 3)
+                                {
+                                    SoundManager.PlaySound(Assets.Get(Sound.Interact), Position);
+                                }
+                                else
+                                {
+                                    SoundManager.PlaySound(Assets.Get(Sound.Full), Position);
+                                }
+                            }
+                            pickup.Velocity *= 1 - Engine.DeltaSeconds * 2;
+                        }
+                        else
+                        {
+                            Entity parent;
+                            if (index == 0)
+                            {
+                                parent = this;
+                            }
+                            else
+                            {
+                                parent = leashedMaterials[index - 1];
+                            }
+                            var relativePos = Vector2.Normalize(parent.Position - pickup.Position);
+                            pickup.Velocity += (parent.Position - relativePos * 20 - pickup.Position) * Engine.DeltaSeconds * 0.4f;
+                            float offset = Util.FIED(0.05f);
+                            pickup.Velocity = parent.Velocity * (1 - offset) + pickup.Velocity * offset;
+                        }
+                    }
                 }
                 if (!Input.RMB.IsDown && Input.RMB.WasDown)
                 {
@@ -1009,7 +1062,7 @@ public class Player : Entity
                     powerFuses[targetFuse] = false;
                     ParticleManager.Add(new Particle(null, 2, Position + new Vector2(0, -3), new Vector2(0, -0.75f), 0, 0, Color.Red, Color.Transparent) { drawText = "Fuse damaged!" });
                     SoundManager.PlaySound(Assets.Get(Sound.Beep), Position);
-                    Events.UpdateFuseUI(modulePower, powerFuses, spareFuses);
+                    Events.UpdateFuseUI(modulePower, powerFuses, spareFuses, this);
                 }
                 else if (Util.Random.Next(0, 12) == 0)
                 {
@@ -1024,7 +1077,7 @@ public class Player : Entity
                     modules[failedPart].isFailed = true;
                     ParticleManager.Add(new Particle(null, 2, Position + new Vector2(0, -3), new Vector2(0, -0.75f), 0, 0, Color.Red, Color.Transparent) { drawText = $"{failedPart} has failed!" });
                     SoundManager.PlaySound(Assets.Get(Sound.Beep), Position);
-                    Events.UpdateModulesStatus();
+                    Events.UpdateModulesStatus(IsEnabled, modules.Select((m) => m.Value.isFailed));
                 }
             }
             return _damage;
@@ -1055,12 +1108,12 @@ public class Player : Entity
             return;
         }
         powerFuses[i] = !fuse;
-        Events.UpdateFuseUI(modulePower, powerFuses, spareFuses);
+        Events.UpdateFuseUI(modulePower, powerFuses, spareFuses, this);
     }
     public void AddFuse()
     {
         spareFuses++;
-        Events.UpdateFuseUI(modulePower, powerFuses, spareFuses);
+        Events.UpdateFuseUI(modulePower, powerFuses, spareFuses, this);
     }
     public void UpdateSpares()
     {
@@ -1090,7 +1143,7 @@ public class Player : Entity
         {
             UI.FuseDial.Target = sum / max;
         }
-        Events.UpdateFuseUI(modulePower, powerFuses, spareFuses);
+        Events.UpdateFuseUI(modulePower, powerFuses, spareFuses, this);
     }
     private int CountFuses(ModuleType _module)
     {
@@ -1176,6 +1229,11 @@ public class Player : Entity
                 float lerp = f / d;
                 ParticleManager.Add(new Particle(Assets.Get(Sprites.Dot), prev.Position + relativePosition * lerp + MathF.Sqrt(d) * relativeVelocity * (1 - (2 * lerp - 1) * (2 * lerp - 1)), 0, Color.Cyan * 0.5f));
             }
+        }
+        if (Position.Length() > Mission.missions[Engine.SaveGame.CurrentMissionIndex].data.EdgeRadius)
+        {
+            _spriteBatch.Draw(Assets.Get(Sprites.Arrow), Position - Vector2.Normalize(Position) * 25, null, Color, Util.ToAngle(-Position), Assets.DimsOf(Sprites.Arrow) / 2, 1, 0, 0.2f);
+            _spriteBatch.DrawString(Assets.TextFont, "Return to planet.", Engine.Camera.Position - new Vector2(Assets.TextFont.MeasureString("Return to planet.").X / 2, 225), Color.Crimson);
         }
         base.Draw(_spriteBatch);
 

@@ -17,7 +17,6 @@ using UILib.Content;
 namespace OrbitCommander.Core;
 public class Mission
 {
-    private static Player Player => Engine.SaveGame.Player;
     //Maximum distance for any detection when sensing = stealth
     public static float StealthRange { get; private set; } = 1000;
     //Threshold of detection for enemies
@@ -321,6 +320,7 @@ public class Mission
     {
         Events.SetModules();
         components = _components;
+        Add(Engine.SaveGame.Player);
         foreach(var comp in _components)
         {
             if(comp is IObstacle)
@@ -398,10 +398,13 @@ public class Mission
         CurrentGameState.SwitchState(new PlayingGame());
         SoundManager.ChangeTrack(Assets.Get(music));
 
-        Engine.SaveGame.Player.dockedEntity = null;
-        spawner.Spawn();
-        Engine.Camera.Position = Player.Position + new Vector2(Mouse.GetState().X, Mouse.GetState().Y) / 16 - Engine.BackBuffer / 32
-        + Engine.ScreenShakeFactor * Engine.ScreenShakeFactor * new Vector2(Util.Random.NextSingle() - 0.5f, Util.Random.NextSingle() - 0.5f) * 50;
+        var player = Engine.SaveGame.Player;
+        player.dockedEntity = null;
+        player.Progression = Mission.missions[Engine.SaveGame.CurrentMissionIndex].data.PlayerProgression;
+        //Prevents scrap and debuffs from persisting between missions.
+        player.leashedMaterials.Clear();
+        player.GetComponent<Statuses>().Clear();
+        spawner.Spawn(player);
 
         foreach (var comp in components)
         {
@@ -421,53 +424,31 @@ public class Mission
             }
         }
     }
-    public void IngameUpdate()
+    public void Update()
     {
-        Player.Update();
-        Engine.Camera.Rotation = Engine.ScreenShakeFactor * Engine.ScreenShakeFactor * (Util.Random.NextSingle() - 0.5f) * 0.15f;
-        //If the player is further from the camera, put more weight on the player
-        //Tanh prevents frac from going above 1
-        float frac = MathF.Tanh(Vector2.Distance(Player.Position, Engine.Camera.Position) / 750);
-        Engine.Camera.Position = Player.Position * frac + Engine.Camera.Position * (1 - frac) + Engine.Cursor.CursorPosition / 16 - Engine.BackBuffer / 32
-        + Engine.ScreenShakeFactor * Engine.ScreenShakeFactor * new Vector2(Util.Random.NextSingle() - 0.5f, Util.Random.NextSingle() - 0.5f) * 50;
-        var planet = (Engine.SaveGame.CurrentMission.Entities.Where(x => x is Planet).ToArray());
-        float sum = 0.75f;
-        foreach(var p in planet)
-        {
-            sum += p.ColliderRadius / (Vector2.Distance(p.Position, Player.Position)) / 2;
-        }
-        Engine.Camera.Zoom = sum;
         var time = Engine.IngameTime;
         time.Duration += Engine.DeltaSeconds;
         Engine.IngameTime = time;
-        Update();
-    }
-    public void Update()
-    {
+
         isUpdating = true;
-        foreach(var comp in components)
+        foreach (var comp in components)
         {
             comp.Update();
         }
-        if(objective != null)
+        if (objective != null)
         {
-            objective = objective.Update();    
+            objective = objective.Update();
         }
         //Prevents players from losing important items
         Entity[] importantEntites = [.. Engine.SaveGame.CurrentMission.Entities.Where(x => x.HasTag(Tags.IsImportant))];
         float r = missions[Engine.SaveGame.CurrentMissionIndex].data.EdgeRadius;
-        foreach(var entity in importantEntites)
+        foreach (var entity in importantEntites)
         {
             if (entity.Position.Length() >= r)
             {
                 entity.Velocity *= 0.8f;
                 entity.Velocity += Vector2.Normalize(-entity.Position) * Engine.DeltaSeconds * (entity.Position.Length() - r);
-            }   
-        }
-        if (Engine.SaveGame.Player.Position.Length() >= r)
-        {
-            Engine.SaveGame.Player.Velocity *= 0.8f;
-            Engine.SaveGame.Player.Velocity += Vector2.Normalize(-Engine.SaveGame.Player.Position) * Engine.DeltaSeconds * (Engine.SaveGame.Player.Position.Length() - r);
+            }
         }
         if (projectiles.Count >= 150)
         {
@@ -476,9 +457,9 @@ public class Mission
                 projectiles[i].isExpired = true;
             }
         }
-        if(abortEffect > -0.75f)
+        if (abortEffect > -0.75f)
         {
-            if(abortEffect < 0)
+            if (abortEffect < 0)
             {
                 abortEffect = 2;
                 SoundManager.PlayGlobalSound(Assets.Get(Sound.Beep));
@@ -514,12 +495,6 @@ public class Mission
                 entity.Collide(_damage);
             }
         }
-        dist = Vector2.Distance(_position, Player.Position);
-        //Allows for explosions on the player
-        if (dist < _radius && dist > float.Epsilon)
-        {
-            Player.Collide(_damage);
-        }
     }
     public Dockable NearestDockableEntity(Entity _entity)
     {
@@ -535,23 +510,14 @@ public class Mission
         {
             float stealth = targetEnemy.GetComponent<Stealth>()?.StealthAbility ?? 0;
             float distance = Vector2.DistanceSquared(entity.Position, targetEnemy.Position);
+            if(targetEnemy is Player)
+            {
+                distance /= 1.5f; //Enemies will prioritize the player
+            }
             if (distance < nearestDistance && (stealth < entity.SensingAbility || distance < maxDistSqr))
             {
                 nearestDistance = distance;
                 returnEnemy = targetEnemy;
-            }
-        }
-        if (!entity.IsFriendly(Engine.SaveGame.Player))
-        {
-            //Enemies will prioritize the player
-            float distance = Vector2.DistanceSquared(entity.Position, Player.Position) / 1.5f;
-            if (Player.StealthAbility > entity.SensingAbility)
-            {
-                return returnEnemy;
-            }
-            if (distance < nearestDistance && (Player.StealthAbility < entity.SensingAbility || distance < maxDistSqr))
-            {
-                returnEnemy = Player;
             }
         }
         return returnEnemy;
@@ -566,30 +532,15 @@ public class Mission
     }
     public Entity NearestAlly(Entity entity)
     {
-        Entity[] entities = [.. Entities.Where(IsEligible)];
-        var returnEnemy = Nearest(entity.Position, entities);
-        float nearestDistance = float.MaxValue;
-        if (returnEnemy != null)
-        {
-            nearestDistance = Vector2.DistanceSquared(entity.Position, returnEnemy.Position);
-        }
-        if (entity.IsFriendly(Engine.SaveGame.Player))
-        {
-            float distance = Vector2.DistanceSquared(entity.Position, Player.Position);
-            if (distance < nearestDistance)
-            {
-                returnEnemy = Player;
-            }
-        }
-        return returnEnemy;
+        return Nearest(entity.Position, [.. Entities.Where(IsEligible)]);
         bool IsEligible(Entity targetEnemy)
         {
-            return (entity.IsFriendly(targetEnemy)) && (targetEnemy != entity) && !(targetEnemy.HasTag(Tags.IsChild));
+            return entity.IsFriendly(targetEnemy) && (targetEnemy != entity) && !targetEnemy.HasTag(Tags.IsChild);
         }
     }
     public Entity NearestItem(Entity entity, bool _findAll)
     {
-        return Util.Nearest(entity.Position, [.. Entities.Where(IsEligible)]);
+        return Nearest(entity.Position, [.. Entities.Where(IsEligible)]);
         bool IsEligible(Entity targetEntity)
         {
             return !(targetEntity is not Pickup || targetEntity == entity || !_findAll && (targetEntity is Module || targetEntity.HasTag(Tags.IsSpecialized) || targetEntity.HasComponent<Behaviour>()));
@@ -630,7 +581,6 @@ public class Mission
                 CalculateIntersection(entity);
             }
         }
-        CalculateIntersection(Engine.SaveGame.Player);
         if (maxDist > dist)
         {
             maxDist = dist;
@@ -761,7 +711,7 @@ public class Mission
         {
             foreach(var collider in Colliders)
             {
-                if(collider.IsColliding(futurePosition, futureVelocity, Engine.SaveGame.Player.ColliderRadius, false, out float _))
+                if(collider.IsColliding(futurePosition, futureVelocity, _radius, false, out float _))
                 {
                     exit = true;
                     break;
@@ -864,7 +814,7 @@ public class Mission
             float angle = (Util.Random.NextSingle() - 0.5f) * MathF.Tau;
             float distanceMultiplier = 1 + (Util.Random.NextSingle() - 0.5f) / 4;
             float distance = (Engine.BackBuffer.X + Engine.BackBuffer.Y) * distanceMultiplier / 3;
-            spawnLocation = ToUnitVector(angle) * distance + Engine.SaveGame.Player.Position;
+            spawnLocation = ToUnitVector(angle) * distance;
         }
         while(IsColliding(spawnLocation, Vector2.Zero, 10, false, out float _) != null);
         return spawnLocation;
@@ -875,17 +825,11 @@ public class Mission
         {
             comp.Draw(_spriteBatch);
         }
-        if (Engine.SaveGame.Player.Position.Length() > missions[Engine.SaveGame.CurrentMissionIndex].data.EdgeRadius)
-        {
-            _spriteBatch.Draw(Assets.Get(Sprites.Arrow), Engine.SaveGame.Player.Position - Vector2.Normalize(Engine.SaveGame.Player.Position) * 25, null, Engine.SaveGame.Player.Color, Util.ToAngle(-Engine.SaveGame.Player.Position), Assets.DimsOf(Sprites.Arrow) / 2, 1, 0, 0.2f);
-            _spriteBatch.DrawString(Assets.TextFont, "Return to planet.", Engine.Camera.Position - new Vector2(Assets.TextFont.MeasureString("Return to planet.").X / 2, 225), Color.Crimson);
-        }
         if(abortEffect > 1)
         {
             _spriteBatch.DrawString(Assets.TextFont, "Mission Failed!", Engine.Camera.Position - new Vector2(0, 350), Color.Red, 0, Assets.TextFont.MeasureString("Mission Failed!") / 2, 3, 0, 0);
             _spriteBatch.DrawString(Assets.TextFont, "Abort", Engine.Camera.Position - new Vector2(0, 300), Color.Red,0, Assets.TextFont.MeasureString("Abort") / 2, 3, 0, 0);
         }
-        Player.Draw(_spriteBatch);
     }
 }
 public class MissionData(string _name, string _description, float _distance, float _pickupDistance,
