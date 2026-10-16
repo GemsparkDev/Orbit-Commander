@@ -16,6 +16,7 @@ public class Cursor(Vector2 _center)
     public Vector2 HandPosition { get; private set; } = new Vector2(_center.X/2, _center.Y * 0.8f);
     public Vector2 OldHandPosition { get; private set; } = new Vector2(_center.X / 2, _center.Y * 0.8f);
     private Vector2 handVelocity = Vector2.Zero;
+    private Vector2 relativePosition = Vector2.Zero;
     public Vector2 CursorPosition { get; private set; } = _center;
     public Vector2 OldCursorPosition { get; private set; } = _center;
     private List<Vector2> relativePositions = [];
@@ -27,7 +28,7 @@ public class Cursor(Vector2 _center)
             return;
         }
         var state = Mouse.GetState();
-        Vector2 relativePosition = new Vector2(state.Position.X, state.Position.Y) - Engine.BackBuffer / 2;
+        relativePosition = new Vector2(state.Position.X, state.Position.Y) - Engine.BackBuffer / 2;
         Mouse.SetPosition((int)(Engine.BackBuffer.X / 2), (int)(Engine.BackBuffer.Y / 2));
 
         OldCursorPosition = CursorPosition;
@@ -57,7 +58,8 @@ public class Cursor(Vector2 _center)
         }
         else
         {
-            var targetPosition = new Vector2(Engine.BackBuffer.X / 2, Engine.BackBuffer.Y * 0.8f);
+            float angle = MathF.Atan(CursorPosition.X / Engine.BackBuffer.X - 0.5f);
+            var targetPosition = new Vector2(Engine.BackBuffer.X / 2 * 1.2f, Engine.BackBuffer.Y) + Util.ToUnitVector(angle) * (1 - CursorPosition.Y / Engine.BackBuffer.Y) * 50;
             float distance = Vector2.Distance(HandPosition, targetPosition);
             float speed = Engine.BackBuffer.X / (Engine.BackBuffer.X + distance * 10);
             HandPosition = HandPosition * (1 - speed) + targetPosition * speed;
@@ -71,6 +73,14 @@ public class Cursor(Vector2 _center)
         if (Input.Tab.IsDown && !Input.Tab.WasDown)
         {
             HandMode = !HandMode;
+            if(HandMode)
+            {
+                HandPosition -= Assets.DimsOf(Sprites.Grip) * 2;
+            }
+            else
+            {
+                HandPosition += Assets.DimsOf(Sprites.Grip) * 2;
+            }
             if (Engine.RealUI.selectedIcon is Fuse)
             {
                 UI.FuseCounter.OnRisingInteract(Vector2.Zero);
@@ -154,6 +164,11 @@ public class Cursor(Vector2 _center)
                 HandPosition = new Vector2(Math.Clamp(HandPosition.X, x - Assets.DimsOf(Sprites.TerminalSlider).X * UIManager.UIScale / 4, x + Assets.DimsOf(Sprites.TerminalSlider).X * UIManager.UIScale / 4),
                     Math.Clamp(HandPosition.Y, Assets.DimsOf(Sprites.TerminalSlider).Y * UIManager.UIScale / 2, UI.TerminalMenu.Position.Y + UI.TerminalClose.Offset.Y - UI.TerminalMenu.Center.Y));
             }
+            else
+            {
+                handAngle = MathF.Atan(CursorPosition.X / Engine.BackBuffer.X - 0.5f);
+                offset = new Vector2(handTexture.Width/2, handTexture.Height);
+            }
         }
         else if (HandMode && (Mouse.GetState().LeftButton == ButtonState.Pressed || Engine.RealUI.selectedIcon != null))
         {
@@ -191,6 +206,16 @@ public class Cursor(Vector2 _center)
         //}
         //_spriteBatch.Draw(Assets.Get(Sprites.Arm), armOnePos, null, Color.White, armAngle + t1, Assets.DimsOf(Sprites.Arm) - new Vector2(10, 10), UIManager.UIScale * a1, 0, 0.5f);
         //_spriteBatch.Draw(Assets.Get(Sprites.Arm), handPosition, null, Color.White, Util.ToAngle(armOnePos + Util.ToUnitVector(armAngle + t1) * a - handPosition), Assets.DimsOf(Sprites.Arm) - new Vector2(10, 10), UIManager.UIScale * a2, 0, 0.5f);
+        _spriteBatch.Draw(Assets.Get(Sprites.WideButton), new Vector2(Engine.BackBuffer.X / 2 * 1.2f, Engine.BackBuffer.Y), null, Color.White * t, 0, new Vector2(Assets.DimsOf(Sprites.WideButton).X / 2, Assets.DimsOf(Sprites.WideButton).Y), UIManager.UIScale * a3, 0, 0.5f);
+        _spriteBatch.Draw(Assets.Get(Sprites.WideButton), new Vector2(Engine.BackBuffer.X / 2 * 0.8f, Engine.BackBuffer.Y), null, Color.White * t, 0, new Vector2(Assets.DimsOf(Sprites.WideButton).X / 2, Assets.DimsOf(Sprites.WideButton).Y), UIManager.UIScale * a3, 0, 0.5f);
+
+
+        Vector2 direction = Input.Engine.Direction / 2 + Input.Engine.OldDirection / 2;
+        float angle = MathF.Atan(direction.X / 2);
+        _spriteBatch.Draw(Assets.Get(Sprites.WideButton), new Vector2(Engine.BackBuffer.X / 2 * 0.8f, Engine.BackBuffer.Y), null, Color.White * t, MathF.PI / 2 + angle, new Vector2(Assets.DimsOf(Sprites.WideButton).X, Assets.DimsOf(Sprites.WideButton).Y / 2), UIManager.UIScale * a3, 0, 0.5f);
+        _spriteBatch.Draw(Assets.Get(Sprites.Grip), new Vector2(Engine.BackBuffer.X / 2 * 0.8f, Engine.BackBuffer.Y) - Util.ToUnitVector(angle) * (direction.Y / 2 - 0.5f) * 50, null, Color.White * t, angle, new Vector2(Assets.DimsOf(Sprites.Grip).X / 2, Assets.DimsOf(Sprites.Grip).Y), UIManager.UIScale * a3, SpriteEffects.FlipHorizontally, 0.5f);
+
+        _spriteBatch.Draw(Assets.Get(Sprites.WideButton), new Vector2(Engine.BackBuffer.X / 2 * 1.2f, Engine.BackBuffer.Y), null, Color.White * t, MathF.PI / 2 + MathF.Atan(CursorPosition.X / Engine.BackBuffer.X - 0.5f), new Vector2(Assets.DimsOf(Sprites.WideButton).X, Assets.DimsOf(Sprites.WideButton).Y / 2), UIManager.UIScale * a3, 0, 0.5f);
         _spriteBatch.Draw(handTexture, HandPosition + UIManager.DimsOf(handTexture) / 2, null, Color.Black * 0.2f * t, handAngle, offset, UIManager.UIScale * a3, 0, 0.5f);
         _spriteBatch.Draw(handTexture, HandPosition, null, Color.White * t, handAngle, offset, UIManager.UIScale * a3, 0, 0.5f);
     }
