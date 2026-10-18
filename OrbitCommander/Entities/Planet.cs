@@ -12,14 +12,8 @@ public class Planet : Entity, ICollider
     public override float ColliderRadius { get; }
     public bool EasterEgg { get; set; } = false;
     public override Color Color { get; set; }
-    public override void ApplyWork(float _q)
-    {
-        return;
-    }
-    public override void ConductHeat(float _temp, float _rate)
-    {
-        return;
-    }
+    public override void ApplyWork(float _q) { }
+    public override void ConductHeat(float _temp, float _rate) { }
 
     public Planet(Vector2 _position, Vector2 _velocity, float _mass, float _radius, bool _isImmovable, Color _color)
         : base(_position, _velocity, 0, 0)

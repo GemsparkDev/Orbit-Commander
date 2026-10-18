@@ -17,6 +17,7 @@ namespace OrbitCommander.Entities;
 
 public class Entity : IMissionComponent
 {
+    public Player Player => Engine.SaveGame.Player;
     //TODO: Make sure to add null checks to all these!
     public Transform Transform { get; private set; } //All game entities have transforms
     public Vector2 Position { get => Transform.Position; set => Transform.Position = value; }
@@ -262,7 +263,7 @@ public class Entity : IMissionComponent
                     }
                     else
                     {
-                        entity.Velocity += new Vector2(Util.OneToNegOne(), Util.OneToNegOne()) + Vector2.Normalize(entity.Position - Player.Position) * 0.3f * damage;
+                        entity.Velocity += new Vector2(Util.OneToNegOne(), Util.OneToNegOne()) + Vector2.Normalize(entity.Position - Engine.SaveGame.Player.Position) * 0.3f * damage;
                         entity.AngularVelocity += Util.OneToNegOne() * 0.05f * damage;
                     }
                     entity.ApplyWork(damage);
@@ -1282,7 +1283,7 @@ public class Entity : IMissionComponent
                 {
                     CD[0] = 1;
                     RevealDuration += 0.1f;
-                    var p1 = NewExplosive(Position, Velocity + GetNormalizedAcceleration() * 160, Util.OneToNegOne() * MathF.PI, Util.OneToNegOne(), Team, damage, 100, 2);
+                    var p1 = NewExplosive(Position, Velocity + GetNormalizedAcceleration() * 160, Util.OneToNegOne() * MathF.PI, Util.OneToNegOne(), Team, damage, 100, false, 2);
                     p1.TimeLeft = 10;
                     Engine.SaveGame.CurrentMission.Add(p1);
                     SoundManager.PlaySound(Assets.Get(Sound.LMGFire), Position);
@@ -1967,8 +1968,8 @@ public class Entity : IMissionComponent
                         var vel = Vector2.Normalize(randomPosition - Position);
                         float angle = Util.ToAngle(vel);
                         Engine.SaveGame.CurrentMission.Add(NewPulseShot(Position, vel * 5 + Player.Velocity, angle, 0, Team, damage, true, 1));
-                        Engine.SaveGame.CurrentMission.Add(NewExplosive(Position, vel * 5 + new Vector2(vel.Y, -vel.X) * 5 + Player.Velocity, angle, 0, Team, 8, 25, 1));
-                        Engine.SaveGame.CurrentMission.Add(NewExplosive(Position, vel * 5 - new Vector2(vel.Y, -vel.X) * 5 + Player.Velocity, angle, 0, Team, 8, 25, 1));
+                        Engine.SaveGame.CurrentMission.Add(NewExplosive(Position, vel * 5 + new Vector2(vel.Y, -vel.X) * 5 + Player.Velocity, angle, 0, Team, 8, 25, false, 1));
+                        Engine.SaveGame.CurrentMission.Add(NewExplosive(Position, vel * 5 - new Vector2(vel.Y, -vel.X) * 5 + Player.Velocity, angle, 0, Team, 8, 25, false, 1));
                         CD[2] = 1;
                         shotCount++;
                         if (shotCount >= 10)
@@ -2515,7 +2516,7 @@ public class Entity : IMissionComponent
                         if (!isPhase1)
                         {
                             Vector2 relPos = nearestEnemy.Position - Position;
-                            Engine.SaveGame.CurrentMission.Add(NewExplosive(Position, Velocity + Vector2.Normalize(relPos) * 12, 0, 0, Team, damage, 20));
+                            Engine.SaveGame.CurrentMission.Add(NewExplosive(Position, Velocity + Vector2.Normalize(relPos) * 12, 0, 0, Team, damage, 20, false));
                         }
                         unitsPerAbility = 0;
                     }

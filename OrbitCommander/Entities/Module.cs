@@ -108,7 +108,7 @@ public class ReloadSystem(int _magazineSize, float _reloadSpeed, Action _reloadC
             reloadCD = _reloadSpeed;
             SoundManager.PlayGlobalSound(Assets.Get(Sound.Dock));
         }
-        if (Player.modules.ContainsValue(_module))
+        if (Engine.SaveGame.Player.modules.ContainsValue(_module))
         {
             UI.PlayerAmmo.SetInterval(val, magazineSize);
         }
@@ -824,7 +824,7 @@ public class Crossbow() : Weapon(Modules.Crossbow, Sprites.Crossbow, "Crossbow",
 public class Flamethrower() : Weapon(Modules.Flamethrower, Sprites.Flamethrower, "Flamethrower", "3x Crit when dangerously hot.", (int)ModuleType.Guns, 18, Color.Orange)
 {
     ReloadSystem ammo = new ReloadSystem(60, 1, delegate ()
-    { ParticleManager.Add(new Particle(Assets.Get(Sprites.Cog), 60, Player.Position, Player.Velocity + new Vector2(Util.OneToNegOne(), Util.OneToNegOne()), 0, Util.OneToNegOne() / 2, Color.Green, Color.Transparent) { experienceGravity = true }); });
+    { ParticleManager.Add(new Particle(Assets.Get(Sprites.Cog), 60, Engine.SaveGame.Player.Position, Engine.SaveGame.Player.Velocity + new Vector2(Util.OneToNegOne(), Util.OneToNegOne()), 0, Util.OneToNegOne() / 2, Color.Green, Color.Transparent) { experienceGravity = true }); });
     public override float Speed => 5;
     public override bool CritCondition => Player.Temperature > 1;
     public override void OnShoot()
@@ -891,7 +891,7 @@ public class GrenadeLauncher() : Weapon(Modules.GrenadeLauncher, Sprites.Crossbo
         }
         if (ammo.Fire())
         {
-            Player.Shoot(NewExplosive(Player.Position, Player.IdealSpeedWithVelocity(Speed) + new Vector2(Util.OneToNegOne(), Util.OneToNegOne()), Util.ToAngle(Player.Direction), Util.OneToNegOne() / 8, Team, 16, 40, 1), 1.667f, CritCondition);
+            Player.Shoot(NewExplosive(Player.Position, Player.IdealSpeedWithVelocity(Speed) + new Vector2(Util.OneToNegOne(), Util.OneToNegOne()), Util.ToAngle(Player.Direction), Util.OneToNegOne() / 8, Team, 16, 40, true, 1), 1.667f, CritCondition);
             SoundManager.PlaySound(Assets.Get(Sound.PulseFire), Player.Position);
             Cooldown = 0.8f;
             Engine.ShakeScreen(0.4f);

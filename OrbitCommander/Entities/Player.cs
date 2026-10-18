@@ -407,6 +407,44 @@ public class Player : Entity
             sum += p.ColliderRadius / (Vector2.Distance(p.Position, Position)) / 2;
         }
         Engine.Camera.Zoom = sum;
+
+        var pickups = Engine.SaveGame.CurrentMission.Entities.Where(x => x is Pickup);
+        foreach (var pickup in pickups)
+        {
+            int index = leashedMaterials.IndexOf(pickup as Pickup);
+            if (index == -1)
+            {
+                if (leashedMaterials.Count < 3 && canGatherResources && IsFriendly(pickup) && Vector2.DistanceSquared(pickup.Position, Position) < 1375)
+                {
+                    leashedMaterials.Add(pickup as Pickup);
+                    if (leashedMaterials.Count < 3)
+                    {
+                        SoundManager.PlaySound(Assets.Get(Sound.Interact), Position);
+                    }
+                    else
+                    {
+                        SoundManager.PlaySound(Assets.Get(Sound.Full), Position);
+                    }
+                }
+                pickup.Velocity *= 1 - Engine.DeltaSeconds * 2;
+            }
+            else
+            {
+                Entity parent;
+                if (index == 0)
+                {
+                    parent = this;
+                }
+                else
+                {
+                    parent = leashedMaterials[index - 1];
+                }
+                var relativePos = Vector2.Normalize(parent.Position - pickup.Position);
+                pickup.Velocity += (parent.Position - relativePos * 20 - pickup.Position) * Engine.DeltaSeconds * 0.4f;
+                float offset = Util.FIED(0.05f);
+                pickup.Velocity = parent.Velocity * (1 - offset) + pickup.Velocity * offset;
+            }
+        }
     }
     public void Disable()
     {
@@ -795,44 +833,6 @@ public class Player : Entity
                     {
                         canGatherResources = true;
                         SoundManager.PlayGlobalSound(Assets.Get(Sound.OpenMenu));
-                    }
-
-                    var pickups = Engine.SaveGame.CurrentMission.Entities.Where(x => x is Pickup && !leashedMaterials.Contains(x));
-                    foreach (var pickup in pickups)
-                    {
-                        int index = leashedMaterials.IndexOf(pickup as Pickup);
-                        if (index == -1)
-                        {
-                            if (leashedMaterials.Count < 3 && canGatherResources && IsFriendly(pickup) && Vector2.DistanceSquared(pickup.Position, Position) < 1375)
-                            {
-                                leashedMaterials.Add(pickup as Pickup);
-                                if (leashedMaterials.Count < 3)
-                                {
-                                    SoundManager.PlaySound(Assets.Get(Sound.Interact), Position);
-                                }
-                                else
-                                {
-                                    SoundManager.PlaySound(Assets.Get(Sound.Full), Position);
-                                }
-                            }
-                            pickup.Velocity *= 1 - Engine.DeltaSeconds * 2;
-                        }
-                        else
-                        {
-                            Entity parent;
-                            if (index == 0)
-                            {
-                                parent = this;
-                            }
-                            else
-                            {
-                                parent = leashedMaterials[index - 1];
-                            }
-                            var relativePos = Vector2.Normalize(parent.Position - pickup.Position);
-                            pickup.Velocity += (parent.Position - relativePos * 20 - pickup.Position) * Engine.DeltaSeconds * 0.4f;
-                            float offset = Util.FIED(0.05f);
-                            pickup.Velocity = parent.Velocity * (1 - offset) + pickup.Velocity * offset;
-                        }
                     }
                 }
                 if (!Input.RMB.IsDown && Input.RMB.WasDown)

@@ -320,7 +320,6 @@ public class Mission
     {
         Events.SetModules();
         components = _components;
-        Add(Engine.SaveGame.Player);
         foreach(var comp in _components)
         {
             if(comp is IObstacle)
@@ -399,8 +398,9 @@ public class Mission
         SoundManager.ChangeTrack(Assets.Get(music));
 
         var player = Engine.SaveGame.Player;
+        Add(player);
         player.dockedEntity = null;
-        player.Progression = Mission.missions[Engine.SaveGame.CurrentMissionIndex].data.PlayerProgression;
+        player.Progression = missions[Engine.SaveGame.CurrentMissionIndex].data.PlayerProgression;
         //Prevents scrap and debuffs from persisting between missions.
         player.leashedMaterials.Clear();
         player.GetComponent<Statuses>().Clear();
