@@ -190,6 +190,7 @@ public enum Sprites
     PlayerUI,
     Title,
     Button,
+    Plate,
     LargePanel,
     SwitchOff,
     SwitchOn,

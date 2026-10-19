@@ -53,7 +53,7 @@ public static class UI
     public static Decal[] StatusLights { get; } = new Decal[5];
     public static Slider RestartSwitch { get; } = new Slider(Engine.Line, new Vector2(TerminalMenu.Size.X * 3 / 10, TerminalMenu.Size.Y * 3/10), Assets.DimsOf(Sprites.SwitchFive), false, [Color.Transparent, Color.Transparent], TerminalMenu, [1, 2]);
     public static Decal Switch { get; } = new Decal(RestartSwitch.Offset / UIManager.UIScale, Assets.Get(Sprites.SwitchFive), TerminalMenu, [1, 2]);
-    public static UIElements.Stack<Fuse> FuseCounter { get; } = new UIElements.Stack<Fuse>(new Vector2(TerminalMenu.Size.X * 3 / 10, TerminalMenu.Size.Y / 5), Assets.Get(Sprites.Button), 1, Assets.Get(Sprites.Fuse), 
+    public static UIElements.Stack<Fuse> FuseCounter { get; } = new UIElements.Stack<Fuse>(new Vector2(TerminalMenu.Size.X * 3 / 10, TerminalMenu.Size.Y / 5), Assets.Get(Sprites.Plate), 1, Assets.Get(Sprites.Fuse), 
         new Vector2(-Assets.Get(Sprites.Button).Width / 2 * 4 / 5, 0), new Vector2(8, 0), delegate { return new Fuse(Color.White); }, TerminalMenu, [1, 2]);
     public static ItemSlot<Fuse>[] Fuses { get; } = new ItemSlot<Fuse>[10];
     public static Dial[] ModulePower { get; } = new Dial[5];

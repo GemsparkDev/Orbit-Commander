@@ -226,6 +226,7 @@ public static class Assets
         //UI Elements
         Add(Core.Sprites.Title, Content.Load<Texture2D>("Images/UI_2"));
         Add(Core.Sprites.Button, Content.Load<Texture2D>("Images/UI_3"));
+        Add(Core.Sprites.Plate, Content.Load<Texture2D>("Images/UI_17"));
         Add(Core.Sprites.LargePanel, Content.Load<Texture2D>("Images/UI_8"));
         Add(Core.Sprites.SwitchOff, Content.Load<Texture2D>("Images/UI_9"));
         Add(Core.Sprites.SwitchOn, Content.Load<Texture2D>("Images/UI_10"));
