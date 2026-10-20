@@ -14,7 +14,7 @@ public class TerminalButton(Vector2 _offset, SpriteFont _textFont, string _text,
         if(isOver)
         {
             Vector2 pos = _parentPosition + Offset - _center - Size/2 * UIManager.UIScale;
-            _spriteBatch.Draw(Engine.Line, new Rectangle((int)pos.X, (int)pos.Y, (int)(Size.X * UIManager.UIScale), (int)(Size.Y * UIManager.UIScale * 1.25f)), Color.White);
+            _spriteBatch.Draw(Engine.Line, new Rectangle((int)pos.X, (int)pos.Y, (int)(Size.X * UIManager.UIScale), (int)(Size.Y * UIManager.UIScale)), Color.White);
         }
         base.Draw(_spriteBatch, _parentPosition, _transparency, _center);
         if(isOver)

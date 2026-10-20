@@ -71,6 +71,7 @@ public class Engine : Game
     private List<IActor> ShaderExceptions { get; } = [];
     public LoadingStage LoadingStage { get; private set; } = LoadingStage.Preload;
     public static float Time { get; private set; } = 0;
+    public int StoppedFrames { get; set; } = 0;
     private Task loadingThread;
     public Engine()
     {
@@ -187,6 +188,11 @@ public class Engine : Game
         base.Update(gameTime);
         if (LoadingStage == LoadingStage.Preload)
         {
+            return;
+        }
+        if(StoppedFrames > 0)
+        {
+            StoppedFrames--;
             return;
         }
         Input.Update();

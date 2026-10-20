@@ -30,19 +30,19 @@ public static class UI
     public static TabbedWindow SavesMenu { get; } = new TabbedWindow(Vector2.Zero, Assets.Get(Sprites.GargantuanPanel), null, null, null, null, Engine.VirtualUI);
 
     //Settings
-    public static Button PatchedConicsToggle { get; } = new Button(new Vector2(-10, 50), Assets.Get(Sprites.SwitchOn), Assets.TextFont, $"Patched Conics: {SaveGame.PatchedConics}", Color.White, TerminalMenu, [0], Assets.Get(Sprites.SwitchOff));
-    public static Button ShaderToggle { get; } = new Button(new Vector2(-10, 70), Assets.Get(Sprites.SwitchOn), Assets.TextFont, $"Shader: {SaveGame.UseShader}", Color.White, TerminalMenu, [0], Assets.Get(Sprites.SwitchOff));
-    public static TerminalSlider SFXSlider { get; } = new TerminalSlider(Engine.Line, Assets.Get(Sprites.Knob), new Vector2(50, -50), new Vector2(50, 5), false, [Color.White, Color.Gray], TerminalMenu, [0]);
-    public static TerminalSlider MusicSlider { get; } = new TerminalSlider(Engine.Line, Assets.Get(Sprites.Knob), new Vector2(50, -65), new Vector2(50, 5), false, [Color.White, Color.Gray], TerminalMenu, [0]);
-    public static TerminalSlider UIScaleSlider { get; } = new TerminalSlider(Engine.Line, Assets.Get(Sprites.Knob), new Vector2(30, -20), new Vector2(50, 5), false, [Color.White, Color.Gray], TerminalMenu, [0]);
-    public static Decal SFXVolume { get; } = new Decal(new Vector2(-10, -50), Assets.TextFont, "Sound: 100%", Color.White, 5, TerminalMenu, [0]);
-    public static Decal MusicVolume { get; } = new Decal(new Vector2(-10, -65), Assets.TextFont, "Music: 100%", Color.White, 5, TerminalMenu, [0]);
-    public static Decal UIScale { get; } = new Decal(new Vector2(-10, -35), Assets.TextFont, $"UI Scale: {Math.Truncate((UIScaleSlider.Intervals[0] + 1) * 10) / 10}", Color.White, 5, TerminalMenu, [0]);
-    public static Decal WindowType { get; } = new Decal(new Vector2(-75, -40), null, Assets.TextFont, "Borderless Window", Color.White, 6, TerminalMenu, [0]);
-    public static TerminalButton NextResolution { get; } = new TerminalButton(new Vector2(-30, 20), Assets.TextFont, "Next Resolution", Color.White, 10, TerminalMenu, [0]);
-    public static Decal Resolution { get; } = new Decal(new Vector2(-10, 10), null, Assets.TextFont, "1920 x 1080", Color.White, 6, TerminalMenu, [0]);
-    public static TerminalButton NextWindowType { get; } = new TerminalButton(new Vector2(-75, -65), Assets.TextFont, "Next Window", Color.White, 6, TerminalMenu, [0]);
-    public static TerminalButton ApplyChanges { get; } = new TerminalButton(new Vector2(-10, -10), Assets.TextFont, "Apply changes", Color.White, 10, TerminalMenu, [0]);
+    public static Button PatchedConicsToggle { get; } = new Button(new Vector2(TerminalMenu.Size.X/2.5f, -TerminalMenu.Size.Y/2 * 8 / 10), Assets.Get(Sprites.SwitchOn), Assets.TextFont, $"Patched Conics: {SaveGame.PatchedConics}", Color.White, TerminalMenu, [0], Assets.Get(Sprites.SwitchOff));
+    public static Button ShaderToggle { get; } = new Button(new Vector2(TerminalMenu.Size.X / 2.5f, -TerminalMenu.Size.Y / 2 * 6 / 10), Assets.Get(Sprites.SwitchOn), Assets.TextFont, $"Shader: {SaveGame.UseShader}", Color.White, TerminalMenu, [0], Assets.Get(Sprites.SwitchOff));
+    public static TerminalSlider SFXSlider { get; } = new TerminalSlider(Engine.Line, Assets.Get(Sprites.Knob), new Vector2(TerminalMenu.Size.X / 2.5f, -TerminalMenu.Size.Y / 2 * 4 / 10), new Vector2(50, 5), false, [Color.White, Color.Gray], TerminalMenu, [0]);
+    public static TerminalSlider MusicSlider { get; } = new TerminalSlider(Engine.Line, Assets.Get(Sprites.Knob), new Vector2(TerminalMenu.Size.X / 2.5f, -TerminalMenu.Size.Y / 2 * 3 / 10), new Vector2(50, 5), false, [Color.White, Color.Gray], TerminalMenu, [0]);
+    public static TerminalSlider UIScaleSlider { get; } = new TerminalSlider(Engine.Line, Assets.Get(Sprites.Knob), new Vector2(TerminalMenu.Size.X / 2.5f, -TerminalMenu.Size.Y / 2 * 2 / 10), new Vector2(50, 5), false, [Color.White, Color.Gray], TerminalMenu, [0]);
+    public static Decal SFXVolume { get; } = new Decal(new Vector2(TerminalMenu.Size.X / 5f, -TerminalMenu.Size.Y / 2 * 4 / 10), Assets.TextFont, "Sound: 100%", Color.White, 5, TerminalMenu, [0]);
+    public static Decal MusicVolume { get; } = new Decal(new Vector2(TerminalMenu.Size.X / 5f, -TerminalMenu.Size.Y / 2 * 3 / 10), Assets.TextFont, "Music: 100%", Color.White, 5, TerminalMenu, [0]);
+    public static Decal UIScale { get; } = new Decal(new Vector2(TerminalMenu.Size.X / 5f, -TerminalMenu.Size.Y / 2 * 2 / 10), Assets.TextFont, $"UI Scale: {Math.Truncate((UIScaleSlider.Intervals[0] + 1) * 10) / 10}", Color.White, 5, TerminalMenu, [0]);
+    public static Decal WindowType { get; } = new Decal(new Vector2(TerminalMenu.Size.X / 3.5f, 0), null, Assets.TextFont, "Borderless Window", Color.White, 6, TerminalMenu, [0]);
+    public static TerminalButton NextResolution { get; } = new TerminalButton(new Vector2(TerminalMenu.Size.X / 3.5f, TerminalMenu.Size.Y / 2 / 10), Assets.TextFont, "Next Resolution", Color.White, 6, TerminalMenu, [0]);
+    public static Decal Resolution { get; } = new Decal(new Vector2(TerminalMenu.Size.X / 3.5f, TerminalMenu.Size.Y / 2 * 2 / 10), null, Assets.TextFont, "1920 x 1080", Color.White, 6, TerminalMenu, [0]);
+    public static TerminalButton NextWindowType { get; } = new TerminalButton(new Vector2(TerminalMenu.Size.X / 3.5f, TerminalMenu.Size.Y / 2 * 3 / 10), Assets.TextFont, "Next Window", Color.White, 6, TerminalMenu, [0]);
+    public static TerminalButton ApplyChanges { get; } = new TerminalButton(new Vector2(TerminalMenu.Size.X / 3.5f, TerminalMenu.Size.Y / 2 * 4 / 10), Assets.TextFont, "Apply changes", Color.White, 6, TerminalMenu, [0]);
 
     //Player Menu
     public static Slider EnemySlider { get; } = new Slider(Engine.Line, new Vector2(0, -TerminalMenu.Size.Y / 3), new Vector2(50, 2), true, [Color.White, Color.Gray], TerminalMenu, [1]);
@@ -67,7 +67,7 @@ public static class UI
 
     //Terminal All
     public static Button TerminalClose { get; } = new Button(new Vector2(0, Assets.Get(Sprites.Terminal).Height / 2 - Assets.Get(Sprites.TerminalSlider).Height / 2), Assets.Get(Sprites.TerminalSlider), TerminalMenu, [0, 1, 2]);
-    public static Decal Overlay { get; } = new Decal(Vector2.Zero, Assets.Get(Sprites.Overlay), TerminalMenu, [0, 1, 2]) { color = Color.White * 0.5f };
+    public static Decal Overlay { get; private set; }
 
     //Main Menu
     public static TerminalButton SingleplayerButton { get; } = new TerminalButton(new Vector2(0, 0), Assets.TextFont, "Singleplayer", Color.White, 10, MainGlobals, [(int)Alignment.TopLeft]);
@@ -425,8 +425,8 @@ public static class UI
         {
             var binding = i; //Saving to a variable prevents delegate weirdness
             var key = keys[binding];
-            KeybindTexts[i] = new Decal(new Vector2(-120 + Assets.TextFont.MeasureString($"{binding}").X / 2.55f, 12 * i - 80), Assets.TextFont, $"{binding}", Color.White, 8, TerminalMenu, [0]);
-            KeybindInputs[i] = new TerminalButton(new Vector2(60, 12 * i - 80), Assets.TextFont, $"{key}", Color.White, 8, TerminalMenu, [0]);
+            KeybindTexts[i] = new Decal(new Vector2(-150 + Assets.TextFont.MeasureString($"{binding}").X / 2.55f, 10 * i - 85), Assets.TextFont, $"{binding}", Color.White, 6, TerminalMenu, [0]);
+            KeybindInputs[i] = new TerminalButton(new Vector2(-20, 10 * i - 85), Assets.TextFont, $"{key}", Color.White, 6, TerminalMenu, [0]);
             KeybindInputs[i].RisingInteract += delegate
             {
                 var keys = Keyboard.GetState().GetPressedKeys();
@@ -606,6 +606,6 @@ public static class UI
             ModuleIcons[i] = new Decal(new Vector2(61f, y -37.5f), null, TerminalMenu, [1]);
             StatusLights[i] = new Decal(new Vector2(44.5f, y-38), Assets.Get(Sprites.LEDGlow), TerminalMenu, [1]);
         }
-
+        Overlay = new Decal(Vector2.Zero, Assets.Get(Sprites.Overlay), TerminalMenu, [0, 1, 2]) { color = Color.White * 0.5f };
     }
 }

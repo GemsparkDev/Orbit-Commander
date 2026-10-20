@@ -1038,6 +1038,7 @@ public class Player : Entity
         }
         if (_damage > 0 && (invincibilityCd <= 0 || _ignoreImmunity))
         {
+            Engine.Self.StoppedFrames = _damage / 10 + 2;
             ApplyWork(_damage);
             Flash(Color.White);
             Engine.ShakeScreen(0.08f * _damage);
