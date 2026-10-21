@@ -46,6 +46,7 @@ public static class UI
 
     //Player Menu
     public static Slider EnemySlider { get; } = new Slider(Engine.Line, new Vector2(0, -TerminalMenu.Size.Y / 3), new Vector2(50, 2), true, [Color.White, Color.Gray], TerminalMenu, [1]);
+    public static Slider[] HealthSliders { get; } = new Slider[5];
     public static Decal WaveText { get; } = new Decal(new Vector2(-20, 0), Assets.TextFont, "0", Color.White, 10, TerminalMenu, [1]);
     public static Decal EnemiesLeft { get; } = new Decal(new Vector2(0, 0), Assets.TextFont, "0", Color.Red, 10, TerminalMenu, [1]);
 
@@ -605,6 +606,10 @@ public static class UI
             float y = (i - 2) * 20 + 0.5f;
             ModuleIcons[i] = new Decal(new Vector2(61f, y -37.5f), null, TerminalMenu, [1]);
             StatusLights[i] = new Decal(new Vector2(44.5f, y-38), Assets.Get(Sprites.LEDGlow), TerminalMenu, [1]);
+        }
+        for(int i = 0; i < HealthSliders.Length; i++)
+        {
+            HealthSliders[i] = new Slider(Engine.Line, new Vector2(-20, i * 10 - TerminalMenu.Size.Y/3), new Vector2(30, 3), true, [Color.DarkGray, Color.Cyan], TerminalMenu, [1]);
         }
         Overlay = new Decal(Vector2.Zero, Assets.Get(Sprites.Overlay), TerminalMenu, [0, 1, 2]) { color = Color.White * 0.5f };
     }

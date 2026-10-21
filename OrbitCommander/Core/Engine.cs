@@ -23,6 +23,7 @@ public class Engine : Game
     private GraphicsDeviceManager graphics;
     private SpriteBatch spriteBatch;
     private RenderTarget2D renderTarget;
+    private RenderTarget2D testTarget;
 
     private static UIManager realUI;
     private static UIManager virtualUI;
@@ -93,6 +94,7 @@ public class Engine : Game
         TargetElapsedTime = TimeSpan.FromSeconds(1d / targetFramerate);
 
         renderTarget = new RenderTarget2D(GraphicsDevice, 1920, 1080);
+        testTarget = new RenderTarget2D(GraphicsDevice, 100, 100);
         Window.AllowUserResizing = true;
         Window.ClientSizeChanged += new EventHandler<EventArgs>(ClientSizeChanged);
         Cursor = new Cursor(BackBuffer/2);
@@ -263,6 +265,10 @@ public class Engine : Game
 
         spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, null, null, null, transformMatrix: Camera.Transform);
         CurrentGameState.Draw(spriteBatch);
+        GraphicsDevice.SetRenderTarget(testTarget);
+        spriteBatch.Draw(Assets.Get(Sprites.EmptySlot), new Vector2(50, 50), Color.White);
+        GraphicsDevice.SetRenderTarget(renderTarget);
+        spriteBatch.Draw(testTarget, BackBuffer / 2, Color.White);
         spriteBatch.End();
 
         spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp);

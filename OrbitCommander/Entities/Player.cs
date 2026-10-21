@@ -316,6 +316,10 @@ public class Player : Entity
 
         float currentHealth = modules.Values.Sum(x => x.Health);
         float maxHealth = modules.Values.Sum(x => x.MaxHealth);
+        for(int i = 0; i < modules.Count; i++)
+        {
+            UI.HealthSliders[i].SetInterval(modules[(ModuleType)i].MaxHealth - modules[(ModuleType)i].Health, modules[(ModuleType)i].MaxHealth, 0);
+        }
         UI.PlayerHealth.SetInterval(currentHealth - cachedDamage, maxHealth, 0);
         UI.PlayerHealth.SetInterval(currentHealth + cachedDamageCd * (float)(cachedDamage + 10) / 20, maxHealth, 1);
         if (Gun.CritCondition)
