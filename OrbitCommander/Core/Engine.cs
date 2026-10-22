@@ -265,10 +265,6 @@ public class Engine : Game
 
         spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, null, null, null, transformMatrix: Camera.Transform);
         CurrentGameState.Draw(spriteBatch);
-        GraphicsDevice.SetRenderTarget(testTarget);
-        spriteBatch.Draw(Assets.Get(Sprites.EmptySlot), new Vector2(50, 50), Color.White);
-        GraphicsDevice.SetRenderTarget(renderTarget);
-        spriteBatch.Draw(testTarget, BackBuffer / 2, Color.White);
         spriteBatch.End();
 
         spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp);
