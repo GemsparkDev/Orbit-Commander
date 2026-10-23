@@ -15,10 +15,9 @@ public class Dial : FunctionalWidget
     public float Range { get; set; } = MathF.PI;
     public bool IsTurnable { get; set; } = true;
     public Window Tooltip { get; private set; }
-    public Dial(Texture2D _handTexture, Vector2 _offset, Texture2D _bodyTexture, Container _container, int[] _index) : base(_container, _index)
+    public Dial(Texture2D _handTexture, Vector2 _offset, Texture2D _bodyTexture, Container _container, int[] _index) : base(_offset, _container, _index)
     {
         dialTexture = _handTexture;
-        offset = _offset;
         Texture = _bodyTexture;
     }
     public void AddTooltip(Window _tooltip)

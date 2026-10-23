@@ -22,8 +22,7 @@ public class Engine : Game
     private static readonly List<(string log, Color color)> debugLog = [];
     private GraphicsDeviceManager graphics;
     private SpriteBatch spriteBatch;
-    private RenderTarget2D renderTarget;
-    private RenderTarget2D testTarget;
+    public RenderTarget2D MainScreen { get; private set; }
 
     private static UIManager realUI;
     private static UIManager virtualUI;
@@ -73,7 +72,6 @@ public class Engine : Game
     public LoadingStage LoadingStage { get; private set; } = LoadingStage.Preload;
     public static float Time { get; private set; } = 0;
     public int StoppedFrames { get; set; } = 0;
-    private Task loadingThread;
     public Engine()
     {
         graphics = new GraphicsDeviceManager(this);
@@ -93,11 +91,11 @@ public class Engine : Game
         IsFixedTimeStep = true;
         TargetElapsedTime = TimeSpan.FromSeconds(1d / targetFramerate);
 
-        renderTarget = new RenderTarget2D(GraphicsDevice, 1920, 1080);
-        testTarget = new RenderTarget2D(GraphicsDevice, 100, 100);
         Window.AllowUserResizing = true;
         Window.ClientSizeChanged += new EventHandler<EventArgs>(ClientSizeChanged);
         Cursor = new Cursor(BackBuffer/2);
+
+        MainScreen = new RenderTarget2D(GraphicsDevice, 1920, 1080);
 
         IsMouseVisible = false;
     }
@@ -107,7 +105,7 @@ public class Engine : Game
     }
     protected override void LoadContent()
     {
-        loadingThread = Task.Factory.StartNew((() =>
+        Task.Factory.StartNew((() =>
         {
             spriteBatch = new SpriteBatch(GraphicsDevice);
             Line = new Texture2D(graphics.GraphicsDevice, 1, 1, false, SurfaceFormat.Color);
@@ -260,7 +258,7 @@ public class Engine : Game
 
         Camera.Origin = new Vector2(1920, 1080) / 2; //TODO: Make sure this updates when the rendertarget size updates!
         //Renders gamespace to a rendertarget, then renders render target with a shader
-        GraphicsDevice.SetRenderTarget(renderTarget);
+        GraphicsDevice.SetRenderTarget(MainScreen);
         GraphicsDevice.Clear(SaveGame.ColorScheme.Background());
 
         spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, null, null, null, transformMatrix: Camera.Transform);
@@ -277,10 +275,9 @@ public class Engine : Game
 
         GraphicsDevice.SetRenderTarget(null);
         GraphicsDevice.Clear(new Color(50, 50, 50));
-        Vector2 backbuffer = BackBuffer;
 
         spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, null, null, Assets.GlobalShader);
-        spriteBatch.Draw(renderTarget, backbuffer / 2, null, Color.White, 0, new Vector2(renderTarget.Bounds.Width, renderTarget.Bounds.Height) / 2, Math.Max(backbuffer.X/1920, backbuffer.Y/1080), 0, 0);
+        spriteBatch.Draw(MainScreen, BackBuffer / 2, null, Color.White, 0, new Vector2(MainScreen.Bounds.Width, MainScreen.Bounds.Height) / 2, Math.Max(BackBuffer.X/1920, BackBuffer.Y/1080), 0, 0);
         spriteBatch.End();
 
         spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.NonPremultiplied, SamplerState.PointClamp, null, null, null);

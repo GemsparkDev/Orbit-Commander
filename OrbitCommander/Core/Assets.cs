@@ -253,6 +253,7 @@ public static class Assets
         Add(Core.Sprites.FuseDetailing, Content.Load<Texture2D>("Images/UI_52"));
         Add(Core.Sprites.FuseSlot, Content.Load<Texture2D>("Images/UI_53"));
         Add(Core.Sprites.Terminal, Content.Load<Texture2D>("Images/UI_26"));
+        Add(Core.Sprites.TerminalScreen, Content.Load<Texture2D>("Images/UI_27"));
         Add(Core.Sprites.Overlay, Content.Load<Texture2D>("Images/UI_42"));
         Add(Core.Sprites.SmeltIcon, Content.Load<Texture2D>("Images/UI_19"));
         Add(Core.Sprites.RepairIcon, Content.Load<Texture2D>("Images/UI_20"));

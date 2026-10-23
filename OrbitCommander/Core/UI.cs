@@ -28,6 +28,7 @@ public static class UI
     public static Window PauseMenu { get; } = new Window(Vector2.Zero, Assets.Get(Sprites.LargePanel), Engine.VirtualUI);
     public static Window PickupDroneMenu { get; } = new Window(new Vector2(0, -0.5f), Assets.Get(Sprites.LargePanel), Engine.VirtualUI);
     public static TabbedWindow SavesMenu { get; } = new TabbedWindow(Vector2.Zero, Assets.Get(Sprites.GargantuanPanel), null, null, null, null, Engine.VirtualUI);
+    public static Window TerminalScreen { get; } = new Window(new Vector2(0, -1), Assets.Get(Sprites.TerminalScreen), Engine.VirtualUI) { Alignment = TerminalMenu.Alignment };
 
     //Settings
     public static Button PatchedConicsToggle { get; } = new Button(new Vector2(TerminalMenu.Size.X/2.5f, -TerminalMenu.Size.Y/2 * 8 / 10), Assets.Get(Sprites.SwitchOn), Assets.TextFont, $"Patched Conics: {SaveGame.PatchedConics}", Color.White, TerminalMenu, [0], Assets.Get(Sprites.SwitchOff));
@@ -44,11 +45,11 @@ public static class UI
     public static TerminalButton NextWindowType { get; } = new TerminalButton(new Vector2(TerminalMenu.Size.X / 3.5f, TerminalMenu.Size.Y / 2 * 3 / 10), Assets.TextFont, "Next Window", Color.White, 6, TerminalMenu, [0]);
     public static TerminalButton ApplyChanges { get; } = new TerminalButton(new Vector2(TerminalMenu.Size.X / 3.5f, TerminalMenu.Size.Y / 2 * 4 / 10), Assets.TextFont, "Apply changes", Color.White, 6, TerminalMenu, [0]);
 
-    //Player Menu
-    public static Slider EnemySlider { get; } = new Slider(Engine.Line, new Vector2(0, -TerminalMenu.Size.Y / 3), new Vector2(50, 2), true, [Color.White, Color.Gray], TerminalMenu, [1]);
+    //Terminal Screen
+    public static Slider EnemySlider { get; } = new Slider(Engine.Line, new Vector2(0, -TerminalMenu.Size.Y / 3), new Vector2(50, 2), true, [Color.White, Color.Gray], TerminalScreen, [1]);
     public static Slider[] HealthSliders { get; } = new Slider[5];
-    public static Decal WaveText { get; } = new Decal(new Vector2(-20, 0), Assets.TextFont, "0", Color.White, 10, TerminalMenu, [1]);
-    public static Decal EnemiesLeft { get; } = new Decal(new Vector2(0, 0), Assets.TextFont, "0", Color.Red, 10, TerminalMenu, [1]);
+    public static Decal WaveText { get; } = new Decal(new Vector2(-20, 0), Assets.TextFont, "0", Color.White, 10, TerminalScreen, [1]);
+    public static Decal EnemiesLeft { get; } = new Decal(new Vector2(0, 0), Assets.TextFont, "0", Color.Red, 10, TerminalScreen, [1]);
 
     //Fuse Menu
     public static Decal[] StatusLights { get; } = new Decal[5];
@@ -312,6 +313,7 @@ public static class UI
             {
                 FuseCounter.OnRisingInteract(Vector2.Zero);
             }
+            TerminalScreen.Position = TerminalMenu.Position;
         };
         PrevMission.RisingInteract += delegate { Engine.SaveGame.PrevMission(); }; //Do not remove outer delegate
         NextMission.RisingInteract += delegate { Engine.SaveGame.NextMission(); }; //Doing so causes exception due to null savegame
@@ -609,7 +611,7 @@ public static class UI
         }
         for(int i = 0; i < HealthSliders.Length; i++)
         {
-            HealthSliders[i] = new Slider(Engine.Line, new Vector2(-20, i * 10 - TerminalMenu.Size.Y/3), new Vector2(30, 3), true, [Color.DarkGray, Color.Cyan], TerminalMenu, [1]);
+            HealthSliders[i] = new Slider(Engine.Line, new Vector2(-20, i * 10 - TerminalScreen.Size.Y/3), new Vector2(30, 3), true, [Color.DarkGray, Color.Cyan], TerminalScreen, [1]);
         }
         Overlay = new Decal(Vector2.Zero, Assets.Get(Sprites.Overlay), TerminalMenu, [0, 1, 2]) { color = Color.White * 0.5f };
     }

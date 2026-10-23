@@ -16,6 +16,7 @@ public static class CurrentGameState
     public static void SwitchState(GameState _gameState)
     {
         Engine.VirtualUI.DisableAll();
+        UI.TerminalScreen.IsEnabled = true;
         SoundManager.SetAllSounds(false);
         if(!_gameState.PersistentParticles)
         {

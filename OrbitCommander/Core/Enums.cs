@@ -202,6 +202,7 @@ public enum Sprites
     WideButton,
     TerminalSlider,
     Terminal,
+    TerminalScreen,
     Miniplayer,
     Textbox,
     Underlay,
