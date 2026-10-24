@@ -255,10 +255,6 @@ public static class Util
                 floppyVel += new Vector2(0,18) * Engine.DeltaSeconds;
                 floppy.Position += floppyVel;
                 floppy.Angle += floppyAngVel * Engine.DeltaSeconds;
-                if(Events.AcknowledgeMessage(Message.ToggleTerminal))
-                {
-                    UI.TerminalMenu.CurrentTab = 2;
-                }
             }),
             new Event(8 + ts * 4 + Engine.DeltaSeconds,2,delegate(float time)
             {
@@ -266,10 +262,6 @@ public static class Util
                 floppyFlat.Color = Color.White * ((2f - time)/2f);
                 Engine.Self.QueueShaderException(floppyFlat);
                 Engine.Self.QueueShaderException(ledGlow);
-            }),
-            new TriggerEvent(10 + ts * 4, delegate(float time)
-            {
-                UI.TerminalMenu.CurrentTab = 3;
             }),
             new Event(10 + ts * 5, ts * 10, delegate (float time)
             {
@@ -328,7 +320,6 @@ public static class Util
                 }
                 computerSounds.Pause();
                  UI.GameplayGlobals.IsEnabled = true;
-                UI.TerminalMenu.CurrentTab = 3;
                 Events.AcknowledgeMessage(Message.ToggleTerminal);
             })
         ];

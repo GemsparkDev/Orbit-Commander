@@ -84,6 +84,7 @@ public class MainMenu : GameState
         UI.MainGlobals.IsEnabled = true;
         SoundManager.ChangeTrack(Assets.Get(Sound.menu));
         UI.TerminalMenu.CurrentTab = 0;
+        UI.TerminalScreen.CurrentTab = 0;
         Engine.Camera.Position = Vector2.Zero;
         Engine.Camera.Zoom = 1;
     }
@@ -97,7 +98,8 @@ public class PlayingGame : GameState
     {
         UI.GameplayGlobals.IsEnabled = true;
         UI.TerminalMenu.CurrentTab = 1;
-        if(Engine.SaveGame.Player.dockedEntity != null)
+        UI.TerminalScreen.CurrentTab = 1;
+        if (Engine.SaveGame.Player.dockedEntity != null)
         {
             Engine.SaveGame.Player.dockedEntity.Menu.IsEnabled = true;
         }
@@ -136,6 +138,7 @@ public class PausedGame : GameState
     public override void Initialize()
     {
         UI.TerminalMenu.CurrentTab = 0;
+        UI.TerminalScreen.CurrentTab = 0;
         UI.PauseMenu.IsEnabled = true;
         UI.GameplayGlobals.IsEnabled = true;
     }

@@ -28,7 +28,7 @@ public static class UI
     public static Window PauseMenu { get; } = new Window(Vector2.Zero, Assets.Get(Sprites.LargePanel), Engine.VirtualUI);
     public static Window PickupDroneMenu { get; } = new Window(new Vector2(0, -0.5f), Assets.Get(Sprites.LargePanel), Engine.VirtualUI);
     public static TabbedWindow SavesMenu { get; } = new TabbedWindow(Vector2.Zero, Assets.Get(Sprites.GargantuanPanel), null, null, null, null, Engine.VirtualUI);
-    public static Window TerminalScreen { get; } = new Window(new Vector2(0, -1), Assets.Get(Sprites.TerminalScreen), Engine.VirtualUI) { Alignment = TerminalMenu.Alignment };
+    public static TabbedWindow TerminalScreen { get; } = new TabbedWindow(new Vector2(0, -1), Assets.Get(Sprites.TerminalScreen), null, null, null, null, Engine.VirtualUI) { Alignment = TerminalMenu.Alignment };
 
     //Settings
     public static Button PatchedConicsToggle { get; } = new Button(new Vector2(TerminalMenu.Size.X/2.5f, -TerminalMenu.Size.Y/2 * 8 / 10), Assets.Get(Sprites.SwitchOn), Assets.TextFont, $"Patched Conics: {SaveGame.PatchedConics}", Color.White, TerminalMenu, [0], Assets.Get(Sprites.SwitchOff));
@@ -428,8 +428,8 @@ public static class UI
         {
             var binding = i; //Saving to a variable prevents delegate weirdness
             var key = keys[binding];
-            KeybindTexts[i] = new Decal(new Vector2(-150 + Assets.TextFont.MeasureString($"{binding}").X / 2.55f, 10 * i - 85), Assets.TextFont, $"{binding}", Color.White, 6, TerminalMenu, [0]);
-            KeybindInputs[i] = new TerminalButton(new Vector2(-20, 10 * i - 85), Assets.TextFont, $"{key}", Color.White, 6, TerminalMenu, [0]);
+            KeybindTexts[i] = new Decal(new Vector2(-150 + Assets.TextFont.MeasureString($"{binding}").X / 2.55f, 10 * i - 85), Assets.TextFont, $"{binding}", Color.White, 6, TerminalScreen, [0]);
+            KeybindInputs[i] = new TerminalButton(new Vector2(-20, 10 * i - 85), Assets.TextFont, $"{key}", Color.White, 6, TerminalScreen, [0]);
             KeybindInputs[i].RisingInteract += delegate
             {
                 var keys = Keyboard.GetState().GetPressedKeys();
