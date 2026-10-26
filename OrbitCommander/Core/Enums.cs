@@ -224,6 +224,8 @@ public enum Sprites
     Pinch,
     TurnableDial,
     TurnableHands,
+    Stick,
+    StickBase,
 
     SmeltIcon,
     RepairIcon,

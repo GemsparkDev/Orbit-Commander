@@ -59,7 +59,7 @@ public class Cursor(Vector2 _center)
         else
         {
             float angle = MathF.Atan(CursorPosition.X / Engine.BackBuffer.X - 0.5f);
-            var targetPosition = new Vector2(Engine.BackBuffer.X / 2 * 1.2f, Engine.BackBuffer.Y) + Util.ToUnitVector(angle) * (1 - CursorPosition.Y / Engine.BackBuffer.Y) * 50;
+            var targetPosition = new Vector2(Engine.BackBuffer.X / 2 * 1.2f, Engine.BackBuffer.Y - Assets.DimsOf(Sprites.StickBase).Y * 0.6f * UIManager.UIScale) + Util.ToUnitVector(angle) * (1 - CursorPosition.Y / Engine.BackBuffer.Y) * 20;
             float distance = Vector2.Distance(HandPosition, targetPosition);
             float speed = Engine.BackBuffer.X / (Engine.BackBuffer.X + distance * 10);
             HandPosition = HandPosition * (1 - speed) + targetPosition * speed;
@@ -151,7 +151,7 @@ public class Cursor(Vector2 _center)
     public void DrawHand(SpriteBatch _spriteBatch)
     {
         Vector2 offset = Vector2.Zero;
-        float handAngle = 0;
+        float handAngle;
         Texture2D handTexture;
         if (Engine.RealUI.FocusedWidget == UI.TerminalClose || !HandMode)
         {
@@ -181,42 +181,28 @@ public class Cursor(Vector2 _center)
             handTexture = Assets.Get(Sprites.Hand);
             handAngle = Util.ToAngle(HandPosition - new Vector2(Engine.BackBuffer.X * 3 / 4, Engine.BackBuffer.Y * 2));
         }
-        float t = 1;
+        Color color = Color.White;
         if(!HandMode)
         {
-            t = 0.5f;
+            color = new Color(0.1f, 0.1f, 0.1f);
         }
-        //Arm length modifiers
-        //float a1 = 3f;
-        //float a2 = 2f;
-        float a3 = 1f;
 
-        //var armOnePos = new Vector2(Engine.BackBuffer.X * 0.8f, Engine.BackBuffer.Y * 1.66f);
-        //var handPosition = HandPosition + Util.RotateVector2(Assets.DimsOf(Sprites.Hand) * UIManager.UIScale * a3 * 0.75f, handAngle);
-
-        //float a = 180 * a1 * UIManager.UIScale;
-        //float b = 180 * a2 * UIManager.UIScale;
-        //float csq = Vector2.DistanceSquared(armOnePos, handPosition);
-
-        //float t1 = -MathF.Acos((b*b - a*a - csq) / (- 2 * a * MathF.Sqrt(csq))); //Law of cosines
-        //float armAngle = Util.ToAngle(handPosition - armOnePos);
-        //if (float.IsNaN(t1))
-        //{
-        //    t1 = 0;
-        //}
-        //_spriteBatch.Draw(Assets.Get(Sprites.Arm), armOnePos, null, Color.White, armAngle + t1, Assets.DimsOf(Sprites.Arm) - new Vector2(10, 10), UIManager.UIScale * a1, 0, 0.5f);
-        //_spriteBatch.Draw(Assets.Get(Sprites.Arm), handPosition, null, Color.White, Util.ToAngle(armOnePos + Util.ToUnitVector(armAngle + t1) * a - handPosition), Assets.DimsOf(Sprites.Arm) - new Vector2(10, 10), UIManager.UIScale * a2, 0, 0.5f);
-        _spriteBatch.Draw(Assets.Get(Sprites.WideButton), new Vector2(Engine.BackBuffer.X / 2 * 1.2f, Engine.BackBuffer.Y), null, Color.White * t, 0, new Vector2(Assets.DimsOf(Sprites.WideButton).X / 2, Assets.DimsOf(Sprites.WideButton).Y), UIManager.UIScale * a3, 0, 0.5f);
-        _spriteBatch.Draw(Assets.Get(Sprites.WideButton), new Vector2(Engine.BackBuffer.X / 2 * 0.8f, Engine.BackBuffer.Y), null, Color.White * t, 0, new Vector2(Assets.DimsOf(Sprites.WideButton).X / 2, Assets.DimsOf(Sprites.WideButton).Y), UIManager.UIScale * a3, 0, 0.5f);
-
+        _spriteBatch.Draw(Assets.Get(Sprites.StickBase), new Vector2(Engine.BackBuffer.X / 2 * 1.2f, Engine.BackBuffer.Y), null, color, 0, new Vector2(Assets.DimsOf(Sprites.StickBase).X / 2, Assets.DimsOf(Sprites.StickBase).Y), UIManager.UIScale, 0, 0.5f);
+        _spriteBatch.Draw(Assets.Get(Sprites.StickBase), new Vector2(Engine.BackBuffer.X / 2 * 0.8f, Engine.BackBuffer.Y), null, color, 0, new Vector2(Assets.DimsOf(Sprites.StickBase).X / 2, Assets.DimsOf(Sprites.StickBase).Y), UIManager.UIScale, 0, 0.5f);
 
         Vector2 direction = Input.Engine.Direction / 2 + Input.Engine.OldDirection / 2;
         float angle = MathF.Atan(direction.X / 2);
-        _spriteBatch.Draw(Assets.Get(Sprites.WideButton), new Vector2(Engine.BackBuffer.X / 2 * 0.8f, Engine.BackBuffer.Y), null, Color.White * t, MathF.PI / 2 + angle, new Vector2(Assets.DimsOf(Sprites.WideButton).X, Assets.DimsOf(Sprites.WideButton).Y / 2), UIManager.UIScale * a3, 0, 0.5f);
-        _spriteBatch.Draw(Assets.Get(Sprites.Grip), new Vector2(Engine.BackBuffer.X / 2 * 0.8f, Engine.BackBuffer.Y) - Util.ToUnitVector(angle) * (direction.Y / 2 - 0.5f) * 50, null, Color.White * t, angle, new Vector2(Assets.DimsOf(Sprites.Grip).X / 2, Assets.DimsOf(Sprites.Grip).Y), UIManager.UIScale * a3, SpriteEffects.FlipHorizontally, 0.5f);
+        var stickOffset = new Vector2(Assets.DimsOf(Sprites.Stick).X / 2, Assets.DimsOf(Sprites.Stick).Y);
+        var gripOffset = new Vector2(Assets.DimsOf(Sprites.Grip).X / 2, Assets.DimsOf(Sprites.Grip).Y);
+        var position = new Vector2(Engine.BackBuffer.X / 2 * 0.8f, Engine.BackBuffer.Y - Assets.DimsOf(Sprites.StickBase).Y * 0.6f * UIManager.UIScale);
+        Vector2 handOffset = -Util.ToUnitVector(angle) * (direction.Y / 2 - 0.5f);
 
-        _spriteBatch.Draw(Assets.Get(Sprites.WideButton), new Vector2(Engine.BackBuffer.X / 2 * 1.2f, Engine.BackBuffer.Y), null, Color.White * t, MathF.PI / 2 + MathF.Atan(CursorPosition.X / Engine.BackBuffer.X - 0.5f), new Vector2(Assets.DimsOf(Sprites.WideButton).X, Assets.DimsOf(Sprites.WideButton).Y / 2), UIManager.UIScale * a3, 0, 0.5f);
-        _spriteBatch.Draw(handTexture, HandPosition + UIManager.DimsOf(handTexture) / 2, null, Color.Black * 0.2f * t, handAngle, offset, UIManager.UIScale * a3, 0, 0.5f);
-        _spriteBatch.Draw(handTexture, HandPosition, null, Color.White * t, handAngle, offset, UIManager.UIScale * a3, 0, 0.5f);
+        _spriteBatch.Draw(Assets.Get(Sprites.Stick), position, null, color, angle, stickOffset, UIManager.UIScale, SpriteEffects.FlipHorizontally, 0);
+        _spriteBatch.Draw(Assets.Get(Sprites.Grip), position + handOffset + Assets.DimsOf(Sprites.Grip) / 2, null, Color.Black * 0.2f, angle, gripOffset, UIManager.UIScale, SpriteEffects.FlipHorizontally, 0);
+        _spriteBatch.Draw(Assets.Get(Sprites.Grip), position + handOffset, null, color, angle, gripOffset, UIManager.UIScale, SpriteEffects.FlipHorizontally,0);
+
+        _spriteBatch.Draw(Assets.Get(Sprites.Stick), new Vector2(Engine.BackBuffer.X / 2 * 1.2f, Engine.BackBuffer.Y - Assets.DimsOf(Sprites.StickBase).Y * 0.6f * UIManager.UIScale), null, color, MathF.Atan(CursorPosition.X / Engine.BackBuffer.X - 0.5f), stickOffset, UIManager.UIScale, 0, 0);
+        _spriteBatch.Draw(handTexture, HandPosition + UIManager.DimsOf(handTexture) / 2, null, Color.Black * 0.2f, handAngle, offset, UIManager.UIScale, 0, 0);
+        _spriteBatch.Draw(handTexture, HandPosition, null, color, handAngle, offset, UIManager.UIScale, 0, 0);
     }
 }
