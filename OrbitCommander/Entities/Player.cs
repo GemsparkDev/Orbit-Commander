@@ -1080,6 +1080,7 @@ public class Player : Entity
                         }
                     }
                     modules[failedPart].isFailed = true;
+                    RandomEffect.ApplyRandomEffect(this);
                     ParticleManager.Add(new Particle(null, 2, Position + new Vector2(0, -3), new Vector2(0, -0.75f), 0, 0, Color.Red, Color.Transparent) { drawText = $"{failedPart} has failed!" });
                     SoundManager.PlaySound(Assets.Get(Sound.Beep), Position);
                     Events.UpdateModulesStatus(IsEnabled, modules.Select((m) => m.Value.isFailed));
@@ -1281,5 +1282,20 @@ public class Player : Entity
             modules.Append("null");
         }
         return $"{{{spareFuses},{aimAssist},{{{fuses}}},{modules}}}";
+    }
+}
+public static class RandomEffect
+{
+    private static List<Action<Player>> effects = [
+        delegate(Player _player) { _player.Explode(20, 100); }, //Explosion
+        delegate(Player _player) { _player.Statuses.ApplyStatus(new Fire(3, Color.Wheat)); }, //Burn
+        delegate(Player _player) { foreach(var module in _player.modules) { module.Value.OnAbility(); } }, //Misfire
+        delegate(Player _player) { _player.GetComponent<Stealth>().RevealDuration = 2; }, //Reveal
+        delegate(Player _player) { _player.Disable(); }, //Disable
+        delegate(Player _player) { _player.Statuses.ApplyStatus(new Healing(2)); }, //Heal
+    ];
+    public static void ApplyRandomEffect(Player _player)
+    {
+        effects[Util.Random.Next(0, effects.Count)](_player);
     }
 }
