@@ -195,7 +195,7 @@ public class Cursor(Vector2 _center)
         var stickOffset = new Vector2(Assets.DimsOf(Sprites.Stick).X / 2, Assets.DimsOf(Sprites.Stick).Y);
         var gripOffset = new Vector2(Assets.DimsOf(Sprites.Grip).X / 2, Assets.DimsOf(Sprites.Grip).Y);
         var position = new Vector2(Engine.BackBuffer.X / 2 * 0.8f, Engine.BackBuffer.Y - Assets.DimsOf(Sprites.StickBase).Y * 0.6f * UIManager.UIScale);
-        Vector2 handOffset = -Util.ToUnitVector(angle) * (direction.Y / 2 - 0.5f);
+        Vector2 handOffset = -Util.ToUnitVector(angle) * (direction.Y / 2 - 0.5f) * 20;
 
         _spriteBatch.Draw(Assets.Get(Sprites.Stick), position, null, color, angle, stickOffset, UIManager.UIScale, SpriteEffects.FlipHorizontally, 0);
         _spriteBatch.Draw(Assets.Get(Sprites.Grip), position + handOffset + Assets.DimsOf(Sprites.Grip) / 2, null, Color.Black * 0.2f, angle, gripOffset, UIManager.UIScale, SpriteEffects.FlipHorizontally, 0);

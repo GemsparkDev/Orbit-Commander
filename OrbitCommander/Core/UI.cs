@@ -432,11 +432,11 @@ public static class UI
             KeybindInputs[i] = new TerminalButton(new Vector2(-20, 10 * i - 85), Assets.TextFont, $"{key}", Color.White, 6, TerminalScreen, [0]);
             KeybindInputs[i].RisingInteract += delegate
             {
-                var keys = Keyboard.GetState().GetPressedKeys();
-                if (keys.Length > 0)
+                var key = Keyboard.GetState().GetPressedKeys();
+                if (key.Length > 0)
                 {
-                    keys[binding] = keys[0];
-                    KeybindInputs[i].Text = $"{keys[0]}";
+                    keys[binding] = key[0];
+                    KeybindInputs[binding].Text = $"{key[0]}";
                 }
             };
         }

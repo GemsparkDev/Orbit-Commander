@@ -102,10 +102,10 @@ public static class Util
     }
     public static void Autosave()
     {
-        throw new NotImplementedException();
-        string filePath = Path.Combine(Directory.GetCurrentDirectory(), $"Content\\Saves\\Save_{Engine.SaveSlot}.txt");
-        using var outputFile = new StreamWriter(filePath);
-        outputFile.WriteLine(Engine.SaveGame.Serialize());
+        //throw new NotImplementedException();
+        //string filePath = Path.Combine(Directory.GetCurrentDirectory(), $"Content\\Saves\\Save_{Engine.SaveSlot}.txt");
+        //using var outputFile = new StreamWriter(filePath);
+        //outputFile.WriteLine(Engine.SaveGame.Serialize());
     }
     public static void Save()
     {
