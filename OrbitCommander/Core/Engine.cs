@@ -14,6 +14,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using UILib.Content;
 using System.Diagnostics;
+using System.Reflection;
 
 namespace OrbitCommander.Core;
 
@@ -96,6 +97,13 @@ public class Engine : Game
         Cursor = new Cursor(BackBuffer/2);
 
         MainScreen = new RenderTarget2D(GraphicsDevice, 1920, 1080);
+
+        var type = GetType();
+        var prop = type.GetProperty("IsActive");
+        if (prop != null && prop.CanWrite)
+        {
+            prop.SetValue(this, true, null); //Prevents grabbing the cursor immediately
+        }
 
         IsMouseVisible = false;
     }
