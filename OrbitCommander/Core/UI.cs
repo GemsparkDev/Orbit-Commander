@@ -501,7 +501,7 @@ public static class UI
                 ModuleSlots[x] = slot;
             slot.RisingInteract += delegate
             {
-                if (Engine.SaveGame.Player.isExpired) //No module repair after death
+                if (Engine.SaveGame.Player.IsCapsule) //No module repair after death
                 {
                     return;
                 }
@@ -530,7 +530,7 @@ public static class UI
             };
             slot.RisingInteract += delegate
             {
-                if (Engine.SaveGame.Player.isExpired) //No module replacement after death
+                if (Engine.SaveGame.Player.IsCapsule) //No module replacement after death
                 {
                     return;
                 }
@@ -564,7 +564,7 @@ public static class UI
 
         SecondarySlot.RisingInteract += delegate
         {
-            if (Engine.SaveGame.Player.isExpired) //No module repair after death
+            if (Engine.SaveGame.Player.IsCapsule) //No module repair after death
             {
                 return;
             }

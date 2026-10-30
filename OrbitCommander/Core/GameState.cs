@@ -171,9 +171,9 @@ public class MissionSelect : GameState
         {
             playerPosition = new Vector2(Engine.BackBuffer.X / 6, 0);
         }
-        if(Engine.SaveGame.Player.isExpired)
+        if(Engine.SaveGame.Player.IsCapsule)
         {
-            Engine.SaveGame.Player.isExpired = false;
+            Engine.SaveGame.Player.IsCapsule = false;
             Engine.SaveGame.Player.Texture = Assets.Get(Sprites.Player);
         }
     }

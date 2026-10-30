@@ -39,6 +39,7 @@ public class Player : Entity
         { ModuleType.Core, ItemFactory.Retrieve(4) }
     };
 
+    public bool IsCapsule { get; set; } = false;
     public Dockable dockedEntity;
     public List<Pickup> leashedMaterials = [];
     private ParticleEmitter smokeParticles = new(Assets.Get(Sprites.Circle), 1f, Vector2.Zero, 0, MathF.PI / 4, 1, 0.5f, Color.Gray, EmitterType.EmissionOverTime) { isEmitterActive = false, particleFadeToColor = new Color(169, 169, 169, 0) };
@@ -176,13 +177,13 @@ public class Player : Entity
             Engine.SaveGame.CurrentMission.CalculateTrajectory(Position, Velocity, ColliderRadius);
         }
         GetComponent<Sprite>().TargetColor = SaveGame.ColorScheme.TeamColors[Team];
-        if(Core.Health <= 0 && !isExpired)
+        if(Core.Health <= 0 && !IsCapsule)
         {
             SoundManager.PlayGlobalSound(Assets.Get(Sound.Death));
             Util.Explode(Position, Velocity, 50, 100);
             ParticleManager.Add(new Particle(Assets.Get(Sprites.Explosion), 5, Position, Vector2.Zero, 0, 0, Color.White, Color.Transparent));
             Engine.ShakeScreen(1);
-            isExpired = true;
+            IsCapsule = true;
             deathCd = 60; //60 seconds is ideal for the player to grab whatever they can.
             for(ModuleType i = ModuleType.Hull; i <= ModuleType.Core; i++)
             {
@@ -266,7 +267,7 @@ public class Player : Entity
                 swapCd = 0;
             }
         }
-        if(deathCd > 0 && isExpired)
+        if(deathCd > 0 && IsCapsule)
         {
             deathCd -= Engine.DeltaSeconds;
             if(deathCd <= 0)
@@ -1005,7 +1006,7 @@ public class Player : Entity
     }
     public int PlayerCollide(int _damage, bool _ignoreImmunity = false)
     {
-        if(isExpired)
+        if(IsCapsule)
         {
             leashedMaterials.Clear();
             SoundManager.PlaySound(Assets.Get(Sound.ShieldHit), Position);
@@ -1219,7 +1220,7 @@ public class Player : Entity
                 _spriteBatch.Draw(Assets.Get(Sprites.Dot), Util.ToUnitVector(angle) * 30 + Position, null, Color.Green, angle, Assets.DimsOf(Sprites.Dot), 1, 0, 0);
             }
         }
-        if (Engine.SaveGame.CurrentMission.GetAtmospherePressure(this) > 1f && !isExpired)
+        if (Engine.SaveGame.CurrentMission.GetAtmospherePressure(this) > 1f && !IsCapsule)
         {
             ParticleManager.Add(new Particle(null, Position + new Vector2(0, 50), 0, Color.Red) { drawText = "Danger: Pressure Alert!" });
         }
@@ -1243,7 +1244,7 @@ public class Player : Entity
         }
         base.Draw(_spriteBatch);
 
-        if (!isExpired)
+        if (!IsCapsule)
         {
             return;
         }
