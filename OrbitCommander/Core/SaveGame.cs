@@ -31,6 +31,7 @@ public class SaveGame
     public Pickup[] MissionSelectInventory { get; } = new Pickup[4];
     public List<Queueable> QueuedItems { get; private set; } = [];
     public int FleetSystem { get; private set; } = 0;
+    public Module StolenModule { get; set; } = null;
 
     private Mission currentMission;
     public Mission CurrentMission
@@ -168,7 +169,7 @@ public class SaveGame
         CurrentMissionIndex = Math.Clamp(CurrentMissionIndex - 1, 0, Mission.missions.Count - 1);
         Events.UpdateMissionText();
     }
-    public void MissionResults(int _duration)
+    public void MissionResults(int _duration, List<Module> _modules)
     {
         int points = _duration / 10;
         foreach (var item in Engine.SaveGame.QueuedItems)
@@ -181,6 +182,7 @@ public class SaveGame
         }
         QueuedItems = [.. from item in QueuedItems where !item.IsExpired select item];
         Engine.SaveGame.Player.Statuses.Clear();
+        Engine.SaveGame.StolenModule = _modules[Util.Random.Next(0, _modules.Count)];
         Util.Autosave();
     }
     public string Serialize()

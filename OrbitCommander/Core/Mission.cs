@@ -667,12 +667,12 @@ public class Mission
     public void WinMission()
     {
         Engine.SaveGame.CompletedMissions[Engine.SaveGame.CurrentMissionIndex] = true;
-        Engine.SaveGame.MissionResults(Wave);
+        Engine.SaveGame.MissionResults(Wave, Entities.Where(x => x is Module).ToList() as List<Module>);
     }
     public void FailMission()
     {
         if(IsFailed)
-        { return; }
+            return;
         objective = new Conditional([], SendPickup(Fail()));
         abortEffect = 0;
     }
