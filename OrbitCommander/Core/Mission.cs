@@ -157,6 +157,16 @@ public class Mission
             new Conditional([new Kill([a])], SendPickup()),
             new GliderSpawner(new Vector2(-1500, -2000)), Sound.None);}),
 
+
+        (new MissionData("Retrieval","A boss is here that has stolen your module. Retrieve it.", 160, 800, [], 0, 2000, 0),
+        delegate(){Entity m;
+        return new Mission([
+            new Planet(Vector2.Zero, Vector2.Zero, 10000, 8, true, Color.Cyan),
+            m = Entity.NewMothership(new Vector2(0, -8*50 - Assets.DimsOf(Sprites.Mothership).Y / 2), Vector2.Zero, 0f), 
+            new ModuleStealer()],
+            new Conditional([new Protect([m])], Win()),
+            new DropSpawner(1000)); }),
+
         (new("Sandbox", "",
         100, 2000, [], 3, 2000, 4),
         delegate(){ Entity a = null, b, c = null;return new([
@@ -667,7 +677,7 @@ public class Mission
     public void WinMission()
     {
         Engine.SaveGame.CompletedMissions[Engine.SaveGame.CurrentMissionIndex] = true;
-        Engine.SaveGame.MissionResults(Wave, Entities.Where(x => x is Module).ToList() as List<Module>);
+        Engine.SaveGame.MissionResults(Wave, [.. Entities.OfType<Module>()]);
     }
     public void FailMission()
     {

@@ -570,7 +570,7 @@ public static class Util
     }
     public static Func<Conditional> Fail(Func<GameState> _ = null)
     {
-        return Begin(MissionSelect.New, delegate { Engine.SaveGame.MissionResults(Engine.SaveGame.CurrentMission.Wave); return null; });
+        return Begin(MissionSelect.New, delegate { Engine.SaveGame.MissionResults(Engine.SaveGame.CurrentMission.Wave, [.. Engine.SaveGame.CurrentMission.Entities.OfType<Module>()]); return null; });
     }
     public static Func<Conditional> Begin(Func<GameState> _state, Func<Conditional> _nextConditional)
     {

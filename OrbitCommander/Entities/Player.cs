@@ -272,7 +272,7 @@ public class Player : Entity
             deathCd -= Engine.DeltaSeconds;
             if(deathCd <= 0)
             {
-                Engine.SaveGame.MissionResults(Engine.SaveGame.CurrentMission.Wave);
+                Engine.SaveGame.MissionResults(Engine.SaveGame.CurrentMission.Wave, [.. Engine.SaveGame.CurrentMission.Entities.OfType<Module>()]);
                 CurrentGameState.SwitchState(new MissionSelect());
             }
         }
