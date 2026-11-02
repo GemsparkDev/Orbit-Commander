@@ -1169,7 +1169,7 @@ public class Player : Entity
         }
         if (dockedEntity != null)
         {
-            if(!dockedEntity.Menu.IsEnabled)
+            if(dockedEntity.Menu == null || !dockedEntity.Menu.IsEnabled)
             {
                 return;
             }

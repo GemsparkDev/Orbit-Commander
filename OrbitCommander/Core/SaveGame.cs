@@ -182,7 +182,10 @@ public class SaveGame
         }
         QueuedItems = [.. from item in QueuedItems where !item.IsExpired select item];
         Engine.SaveGame.Player.Statuses.Clear();
-        Engine.SaveGame.StolenModule = _modules[Util.Random.Next(0, _modules.Count)];
+        if(_modules.Count > 0)
+        {
+            Engine.SaveGame.StolenModule = _modules[Util.Random.Next(0, _modules.Count)];
+        }
         Util.Autosave();
     }
     public string Serialize()

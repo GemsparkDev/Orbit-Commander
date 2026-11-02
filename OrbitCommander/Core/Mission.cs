@@ -404,6 +404,7 @@ public class Mission
     }
     public void Initialize()
     {
+        isUpdating = true;
         CurrentGameState.SwitchState(new PlayingGame());
         SoundManager.ChangeTrack(Assets.Get(music));
 
@@ -433,6 +434,7 @@ public class Mission
                 }
             }
         }
+        isUpdating = false;
     }
     public void Update()
     {
