@@ -118,6 +118,8 @@ public static class UI
     public static Button RepairModule { get; } = new Button(new Vector2(-85, 15), Assets.Get(Sprites.Button), Assets.TextFont, "Queue Module", Color.Yellow, MissionSelect, [1]);
     public static Button CancelQueue { get; } = new Button(new Vector2(-85, 45), Assets.Get(Sprites.Button), Assets.TextFont, "Cancel Latest", Color.Red, MissionSelect, [1]);
     public static ItemSlot<Weapon> SecondarySlot { get; private set; } = new ItemSlot<Weapon>(new Vector2(-TerminalMenu.Size.X / 4 - 25, 50), Assets.Get(Sprites.EmptySlot), (int)Core.ModuleType.Guns, MissionSelect, [1]);
+    public static Decal StolenModule { get; } = new Decal(Vector2.Zero, null, MissionSelect, [0]);
+    public static Decal ModuleText { get; } = new Decal(Vector2.Zero, Assets.TextFont, "", Color.White, 10, MissionSelect, [0]);
 
     //Pickup Drone Menu
     public static Button LaunchButton { get; } = new Button(new Vector2(-20, 0), Assets.Get(Sprites.Button), Assets.TextFont, "Leave", Color.LightBlue, PickupDroneMenu, [0]);

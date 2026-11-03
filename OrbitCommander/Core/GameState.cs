@@ -191,6 +191,16 @@ public class MissionSelect : GameState
         SoundManager.PlayGlobalSound(Assets.Get(Sound.Interact));
         SoundManager.ChangeTrack(Assets.Get(Sound.menu));
         UI.MissionSelect.IsEnabled = true;
+        if(Engine.SaveGame.StolenModule != null)
+        {
+            UI.StolenModule.Texture = Engine.SaveGame.StolenModule.Texture;
+            UI.ModuleText.Text = "Stolen Module: " + Engine.SaveGame.StolenModule.Name;
+        }
+        else
+        {
+            UI.StolenModule.Texture = null;
+            UI.ModuleText.Text = "";
+        }
     }
     public override void Update()
     {
