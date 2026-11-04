@@ -89,6 +89,7 @@ public static class UI
     public static Decal[] ModuleSelection { get; } = new Decal[5];
     //TODO: Readd keybind inputs
     public static readonly List<Keys> keys = [Keys.W, Keys.S, Keys.A, Keys.D, Keys.Space, Keys.C, Keys.E, Keys.I, Keys.LeftControl, Keys.F, Keys.Q, Keys.RightShift, Keys.LeftShift, Keys.R, Keys.Escape, Keys.Tab];
+    public static readonly List<String> text = ["Up", "Down", "Right", "Left", "Undock", "Drop Scrap", "Swap Primary", "", "Toggle Aim Assist", "Drop Scrap", "Ability", "Warp Back", "Warp Forward", "Reload", "Pause", "Tab"];
     public static Decal[] KeybindTexts { get; } = new Decal[keys.Count];
     public static TerminalButton[] KeybindInputs { get; } = new TerminalButton[keys.Count];
 
@@ -117,7 +118,7 @@ public static class UI
     public static Button SmeltScrap { get; } = new Button(new Vector2(-85, -15), Assets.Get(Sprites.Button), Assets.TextFont, "Queue Smelt", Color.Yellow, MissionSelect, [1]);
     public static Button RepairModule { get; } = new Button(new Vector2(-85, 15), Assets.Get(Sprites.Button), Assets.TextFont, "Queue Module", Color.Yellow, MissionSelect, [1]);
     public static Button CancelQueue { get; } = new Button(new Vector2(-85, 45), Assets.Get(Sprites.Button), Assets.TextFont, "Cancel Latest", Color.Red, MissionSelect, [1]);
-    public static ItemSlot<Weapon> SecondarySlot { get; private set; } = new ItemSlot<Weapon>(new Vector2(-TerminalMenu.Size.X / 4 - 25, 50), Assets.Get(Sprites.EmptySlot), (int)Core.ModuleType.Guns, MissionSelect, [1]);
+    public static ItemSlot<Weapon> SecondarySlot { get; private set; } = new ItemSlot<Weapon>(new Vector2(-TerminalMenu.Size.X / 4 - 25, 50), Assets.Get(Sprites.EmptySlot), (int)ModuleType.Guns, MissionSelect, [1]);
     public static Decal StolenModule { get; } = new Decal(Vector2.Zero, null, MissionSelect, [0]);
     public static Decal ModuleText { get; } = new Decal(Vector2.Zero, Assets.TextFont, "", Color.White, 10, MissionSelect, [0]);
 
@@ -430,7 +431,7 @@ public static class UI
         {
             var binding = i; //Saving to a variable prevents delegate weirdness
             var key = keys[binding];
-            KeybindTexts[i] = new Decal(new Vector2(-150 + Assets.TextFont.MeasureString($"{binding}").X / 2.55f, 10 * i - 85), Assets.TextFont, $"{binding}", Color.White, 6, TerminalScreen, [0]);
+            KeybindTexts[i] = new Decal(new Vector2(-150 + Assets.TextFont.MeasureString($"{binding}").X / 2.55f, 10 * i - 85), Assets.TextFont, $"{text[binding]}", Color.White, 6, TerminalScreen, [0]);
             KeybindInputs[i] = new TerminalButton(new Vector2(-20, 10 * i - 85), Assets.TextFont, $"{key}", Color.White, 6, TerminalScreen, [0]);
             KeybindInputs[i].RisingInteract += delegate
             {

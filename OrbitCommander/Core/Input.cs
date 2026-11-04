@@ -19,7 +19,6 @@ public static class Input
     public static IControl Dock => inputScheme.Dock;
     public static IControl Construct => inputScheme.Construct;
     public static IControl SwapPrimary => inputScheme.SwapPrimary;
-    public static IControl OpenPanel => inputScheme.OpenPanel;
     public static IControl ToggleAimAssist => inputScheme.ToggleAimAssist;
     public static IControl DropScrap => inputScheme.DropScrap;
     public static IControl Ability => inputScheme.Ability;
@@ -42,7 +41,6 @@ public abstract class InputScheme
     public IControl Dock { get; protected set; }
     public IControl Construct { get; protected set; }
     public IControl SwapPrimary { get; protected set; }
-    public IControl OpenPanel { get; protected set; }
     public IControl ToggleAimAssist { get; protected set; }
     public IControl DropScrap { get; protected set; }
     public IControl Ability { get; protected set; }
@@ -68,7 +66,6 @@ public class KeyboardInput : InputScheme
         Dock = new KeyboardControl(4, this);
         Construct = new KeyboardControl(5, this);
         SwapPrimary = new KeyboardControl(6, this);
-        OpenPanel = new KeyboardControl(7, this);
         ToggleAimAssist = new KeyboardControl(8, this);
         DropScrap = new KeyboardControl(9, this);
         Ability = new KeyboardControl(10, this);
