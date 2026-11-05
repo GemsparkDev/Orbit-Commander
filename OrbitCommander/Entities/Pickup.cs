@@ -31,7 +31,7 @@ public class Pickup : Entity, IData
         AddComponent(new Stealth(this) { StealthAbility = 0, SensingAbility = 0 });
         AddComponent(new Friendly(this) { Team = Team.Friendly });
         _ = new Decal(new Vector2(-Tooltip.Size.X / 3, 0), Assets.Get(_sprite), Tooltip, [0]);
-        textbox = new Decal(new Vector2(0, -5), Assets.TextFont, name, _textColor, 5f, Tooltip, [0]);
+        textbox = new Decal(new Vector2(0, -5), Assets.Rasterforge, name, _textColor, 5f, Tooltip, [0]);
         AddComponent(new Health(this, _health));
         AddComponent(new Statuses(this));
         AddComponent(new Temp());

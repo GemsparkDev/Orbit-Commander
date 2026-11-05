@@ -12,7 +12,8 @@ public static class Assets
 {
     private static Dictionary<Sprites, Texture2D> Sprites { get; } = [];
     private static Dictionary<Sound, SoundEffect> SoundFX { get; } = [];
-    public static SpriteFont TextFont { get; private set; }
+    public static SpriteFont Rasterforge { get; private set; }
+    public static SpriteFont Ithica { get; private set; }
     private static Effect effect;
     public static Effect GlobalShader => SaveGame.UseShader ? effect : null;
     public static void LoadFinal(ContentManager Content)
@@ -221,7 +222,8 @@ public static class Assets
     {
         //Assets used in the main menu
         effect = Content.Load<Effect>("Shaders/BloomShader");
-        TextFont = Content.Load<SpriteFont>("Fonts/Rasterforge");
+        Rasterforge = Content.Load<SpriteFont>("Fonts/Rasterforge");
+        Ithica = Content.Load<SpriteFont>("Fonts/Ithica");
 
         //UI Elements
         Add(Core.Sprites.Title, Content.Load<Texture2D>("Images/UI_2"));

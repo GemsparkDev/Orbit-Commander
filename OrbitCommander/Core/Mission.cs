@@ -839,8 +839,8 @@ public class Mission
         }
         if(abortEffect > 1)
         {
-            _spriteBatch.DrawString(Assets.TextFont, "Mission Failed!", Engine.Camera.Position - new Vector2(0, 350), Color.Red, 0, Assets.TextFont.MeasureString("Mission Failed!") / 2, 3, 0, 0);
-            _spriteBatch.DrawString(Assets.TextFont, "Abort", Engine.Camera.Position - new Vector2(0, 300), Color.Red,0, Assets.TextFont.MeasureString("Abort") / 2, 3, 0, 0);
+            _spriteBatch.DrawString(Assets.Rasterforge, "Mission Failed!", Engine.Camera.Position - new Vector2(0, 350), Color.Red, 0, Assets.Rasterforge.MeasureString("Mission Failed!") / 2, 3, 0, 0);
+            _spriteBatch.DrawString(Assets.Rasterforge, "Abort", Engine.Camera.Position - new Vector2(0, 300), Color.Red,0, Assets.Rasterforge.MeasureString("Abort") / 2, 3, 0, 0);
         }
     }
 }

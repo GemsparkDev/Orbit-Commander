@@ -69,7 +69,7 @@ namespace OrbitCommander.Particles
             Vector2 size = Vector2.One * lerp + targetSize * (1 - lerp);
             if (drawText != null)
             {
-                _spriteBatch.DrawString(Assets.TextFont, drawText, Position, renderColor * (renderColor.A / 255f), angle, Assets.TextFont.MeasureString(drawText) / 2, 0.75f * size, 0, 0.2f);
+                _spriteBatch.DrawString(Assets.Rasterforge, drawText, Position, renderColor * (renderColor.A / 255f), angle, Assets.Rasterforge.MeasureString(drawText) / 2, 0.75f * size, 0, 0.2f);
                 return;
             }
             _spriteBatch.Draw(texture, Position, null, renderColor * (renderColor.A / 255f), angle, Size / 2, size, 0, 0.2f);

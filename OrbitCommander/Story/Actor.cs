@@ -24,7 +24,7 @@ public class TextActor(Vector2 _position, string _text) : IActor
     public float TextSize { get; set; } = 1;
     public void Draw(SpriteBatch _spriteBatch)
     {
-        _spriteBatch.DrawString(Assets.TextFont, Text[0..Index], Position, TextColor, 0, Vector2.Zero, TextSize, 0, 0);
+        _spriteBatch.DrawString(Assets.Rasterforge, Text[0..Index], Position, TextColor, 0, Vector2.Zero, TextSize, 0, 0);
     }
 }
 public interface IActor

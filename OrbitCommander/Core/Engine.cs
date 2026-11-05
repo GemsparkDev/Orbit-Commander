@@ -311,12 +311,12 @@ public class Engine : Game
                 Vector2 textPosition = new(35, 20 + 20 * offset * UIManager.UIScale);
                 try
                 {
-                    spriteBatch.DrawString(Assets.TextFont, $"{log + 1}: {debugLog[log].log}", textPosition, debugLog[log].color, 0, Vector2.Zero, UIManager.UIScale, SpriteEffects.None, 0.45f);
+                    spriteBatch.DrawString(Assets.Rasterforge, $"{log + 1}: {debugLog[log].log}", textPosition, debugLog[log].color, 0, Vector2.Zero, UIManager.UIScale, SpriteEffects.None, 0.45f);
                     offset += debugLog[log].log.Split('\n').Length;
                 }
                 catch (Exception e)
                 {
-                    spriteBatch.DrawString(Assets.TextFont, $"{log + 1}: {e.Message}", textPosition, Color.Red, 0, Vector2.Zero, UIManager.UIScale, SpriteEffects.None, 0.45f);
+                    spriteBatch.DrawString(Assets.Rasterforge, $"{log + 1}: {e.Message}", textPosition, Color.Red, 0, Vector2.Zero, UIManager.UIScale, SpriteEffects.None, 0.45f);
                 }
             }
         }

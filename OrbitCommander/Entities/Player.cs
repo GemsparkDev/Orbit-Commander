@@ -1240,7 +1240,7 @@ public class Player : Entity
         if (Position.Length() > Mission.missions[Engine.SaveGame.CurrentMissionIndex].data.EdgeRadius)
         {
             _spriteBatch.Draw(Assets.Get(Sprites.Arrow), Position - Vector2.Normalize(Position) * 25, null, Color, Util.ToAngle(-Position), Assets.DimsOf(Sprites.Arrow) / 2, 1, 0, 0.2f);
-            _spriteBatch.DrawString(Assets.TextFont, "Return to planet.", Engine.Camera.Position - new Vector2(Assets.TextFont.MeasureString("Return to planet.").X / 2, 225), Color.Crimson);
+            _spriteBatch.DrawString(Assets.Rasterforge, "Return to planet.", Engine.Camera.Position - new Vector2(Assets.Rasterforge.MeasureString("Return to planet.").X / 2, 225), Color.Crimson);
         }
         base.Draw(_spriteBatch);
 

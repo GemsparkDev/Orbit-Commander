@@ -83,7 +83,7 @@ public class Dialogue
         for (int i = 0; i < characters; i += increment)
         {
             increment = NextSpace(i, index);
-            _spriteBatch.DrawString(Assets.TextFont, text[index][i..Math.Min(i + increment, characters)], pos, Color.White, 0, -new Vector2(0, 15) * offset - new Vector2(-70, -45), size, 0, 0);
+            _spriteBatch.DrawString(Assets.Rasterforge, text[index][i..Math.Min(i + increment, characters)], pos, Color.White, 0, -new Vector2(0, 15) * offset - new Vector2(-70, -45), size, 0, 0);
             offset++;
         }
     }

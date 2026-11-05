@@ -69,7 +69,7 @@ public abstract class GameState
                     for (int x = (int)Math.Ceiling((cameraPos.X - sz.X) / 500) * 10; x < (cameraPos.X + sz.X) / 50; x += 10)
                     {
                         var text = $"{x},{y}";
-                        _spriteBatch.DrawString(Assets.TextFont, text, new Vector2(x * 50, y * 50), Color.White, 0, Assets.TextFont.MeasureString(text) / 2, 1, 0, 0);
+                        _spriteBatch.DrawString(Assets.Rasterforge, text, new Vector2(x * 50, y * 50), Color.White, 0, Assets.Rasterforge.MeasureString(text) / 2, 1, 0, 0);
                     }
                 }
             }
@@ -313,8 +313,8 @@ public class Victory : GameState
     public override void Update() { }
     public override void Draw(SpriteBatch _spriteBatch)
     {
-        _spriteBatch.DrawString(Assets.TextFont, "You Win!", new Vector2(-12 * 8, -60) * UIManager.UIScale + Engine.Camera.Position, Color.Yellow, 0, Vector2.Zero, UIManager.UIScale * 2, SpriteEffects.None, 0);
-        _spriteBatch.DrawString(Assets.TextFont, $"Your Time: {Engine.IngameTime.DrawText}", new Vector2(-12 * 12 / 2, 12 * 4 - 60) * UIManager.UIScale + Engine.Camera.Position, Color.White, 0, Vector2.Zero, UIManager.UIScale / 2, SpriteEffects.None, 0);
+        _spriteBatch.DrawString(Assets.Rasterforge, "You Win!", new Vector2(-12 * 8, -60) * UIManager.UIScale + Engine.Camera.Position, Color.Yellow, 0, Vector2.Zero, UIManager.UIScale * 2, SpriteEffects.None, 0);
+        _spriteBatch.DrawString(Assets.Rasterforge, $"Your Time: {Engine.IngameTime.DrawText}", new Vector2(-12 * 12 / 2, 12 * 4 - 60) * UIManager.UIScale + Engine.Camera.Position, Color.White, 0, Vector2.Zero, UIManager.UIScale / 2, SpriteEffects.None, 0);
     }
 }
 public class Cutscene(List<IEvent> _events, List<IActor> _actors, GameState _nextGameState) : GameState
@@ -370,14 +370,14 @@ public class Cutscene(List<IEvent> _events, List<IActor> _actors, GameState _nex
         {
             actor.Draw(_spriteBatch);
         }
-        _spriteBatch.DrawString(Assets.TextFont, $"{Input.Exit.InputString} to skip", Engine.Camera.Position + Engine.BackBuffer / 2 - Assets.TextFont.MeasureString($"{Input.Exit.InputString} to skip") / 2 - new Vector2(100, 100), Color.White * (0.5f + escapeTime * 0.5f));
+        _spriteBatch.DrawString(Assets.Rasterforge, $"{Input.Exit.InputString} to skip", Engine.Camera.Position + Engine.BackBuffer / 2 - Assets.Rasterforge.MeasureString($"{Input.Exit.InputString} to skip") / 2 - new Vector2(100, 100), Color.White * (0.5f + escapeTime * 0.5f));
     }
 }
 public class Loading(Action _function, LoadingStage _stage) : GameState
 {
     public override void Draw(SpriteBatch _spriteBatch)
     {
-        _spriteBatch.DrawString(Assets.TextFont, "Loading...", Vector2.Zero, Color.White, 0, Assets.TextFont.MeasureString("Loading...")/2, 4, 0, 0);
+        _spriteBatch.DrawString(Assets.Rasterforge, "Loading...", Vector2.Zero, Color.White, 0, Assets.Rasterforge.MeasureString("Loading...")/2, 4, 0, 0);
     }
     public override void Update()
     {

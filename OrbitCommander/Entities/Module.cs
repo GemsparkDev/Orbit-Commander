@@ -30,8 +30,8 @@ public abstract class Module : Pickup, IData
         : base(_sprite, _position, _velocity, _angularVelocity, _name, _textColor, _id, _health)
     {
         Type = _type;
-        healthDecal = new Decal(new Vector2(0, 5), Assets.TextFont, $"{Health} / {MaxHealth}", Color.Pink, 5f, Tooltip, [0]);
-        description = new Decal(new Vector2(-5, 15), Assets.TextFont, _description, Color.White, 3f, Tooltip, [0]);
+        healthDecal = new Decal(new Vector2(0, 5), Assets.Rasterforge, $"{Health} / {MaxHealth}", Color.Pink, 5f, Tooltip, [0]);
+        description = new Decal(new Vector2(-5, 15), Assets.Rasterforge, _description, Color.White, 3f, Tooltip, [0]);
         health = GetComponent<Health>();
     }
     public void UpdateHealth()
