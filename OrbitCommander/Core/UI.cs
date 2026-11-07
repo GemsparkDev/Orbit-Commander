@@ -11,6 +11,7 @@ using UILib.Content;
 namespace OrbitCommander.Core;
 public static class UI
 {
+    private static Color color = new Color(26, 26, 26);
     //Real Windows
     public static TabbedWindow TerminalMenu { get; } = new TabbedWindow(new Vector2(0, -1), Assets.Get(Sprites.Terminal), null, null, null, null, Engine.RealUI) { Alignment = Alignment.Top, IsEnabled = true, CurrentTab = 1 }; //0: Player / Fuse menu, 1: Keybind / Settings menu, 2: Floppy menu
 
@@ -33,9 +34,9 @@ public static class UI
     //Settings
     public static Button PatchedConicsToggle { get; } = new Button(new Vector2(TerminalMenu.Size.X/2.5f, -TerminalMenu.Size.Y/2 * 8 / 10), Assets.Get(Sprites.SwitchOn), Assets.Ithica, $"Patched Conics: {SaveGame.PatchedConics}", Color.White, TerminalMenu, [0], Assets.Get(Sprites.SwitchOff));
     public static Button ShaderToggle { get; } = new Button(new Vector2(TerminalMenu.Size.X / 2.5f, -TerminalMenu.Size.Y / 2 * 6 / 10), Assets.Get(Sprites.SwitchOn), Assets.Ithica, $"Shader: {SaveGame.UseShader}", Color.White, TerminalMenu, [0], Assets.Get(Sprites.SwitchOff));
-    public static TerminalSlider SFXSlider { get; } = new TerminalSlider(Engine.Line, Assets.Get(Sprites.Knob), new Vector2(TerminalMenu.Size.X / 2.5f, -TerminalMenu.Size.Y / 2 * 4 / 10), new Vector2(50, 5), false, [Color.White, Color.Gray], TerminalMenu, [0]);
-    public static TerminalSlider MusicSlider { get; } = new TerminalSlider(Engine.Line, Assets.Get(Sprites.Knob), new Vector2(TerminalMenu.Size.X / 2.5f, -TerminalMenu.Size.Y / 2 * 3 / 10), new Vector2(50, 5), false, [Color.White, Color.Gray], TerminalMenu, [0]);
-    public static TerminalSlider UIScaleSlider { get; } = new TerminalSlider(Engine.Line, Assets.Get(Sprites.Knob), new Vector2(TerminalMenu.Size.X / 2.5f, -TerminalMenu.Size.Y / 2 * 2 / 10), new Vector2(50, 5), false, [Color.White, Color.Gray], TerminalMenu, [0]);
+    public static Slider SFXSlider { get; } = new Slider(Engine.Line, Assets.Get(Sprites.Knob), new Vector2(TerminalMenu.Size.X / 2.5f, -TerminalMenu.Size.Y / 2 * 4 / 10), new Vector2(50, 5), false, [color, color], TerminalMenu, [0]);
+    public static Slider MusicSlider { get; } = new Slider(Engine.Line, Assets.Get(Sprites.Knob), new Vector2(TerminalMenu.Size.X / 2.5f, -TerminalMenu.Size.Y / 2 * 3 / 10), new Vector2(50, 5), false, [color, color], TerminalMenu, [0]);
+    public static Slider UIScaleSlider { get; } = new Slider(Engine.Line, Assets.Get(Sprites.Knob), new Vector2(TerminalMenu.Size.X / 2.5f, -TerminalMenu.Size.Y / 2 * 2 / 10), new Vector2(50, 5), false, [color, color], TerminalMenu, [0]);
     public static Decal SFXVolume { get; } = new Decal(new Vector2(TerminalMenu.Size.X / 5f, -TerminalMenu.Size.Y / 2 * 4 / 10), Assets.Ithica, "Sound: 100%", Color.White, 5, TerminalMenu, [0]);
     public static Decal MusicVolume { get; } = new Decal(new Vector2(TerminalMenu.Size.X / 5f, -TerminalMenu.Size.Y / 2 * 3 / 10), Assets.Ithica, "Music: 100%", Color.White, 5, TerminalMenu, [0]);
     public static Decal UIScale { get; } = new Decal(new Vector2(TerminalMenu.Size.X / 5f, -TerminalMenu.Size.Y / 2 * 2 / 10), Assets.Ithica, $"UI Scale: {Math.Truncate((UIScaleSlider.Intervals[0] + 1) * 10) / 10}", Color.White, 5, TerminalMenu, [0]);
