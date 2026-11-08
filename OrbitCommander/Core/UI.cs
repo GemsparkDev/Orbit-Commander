@@ -32,8 +32,10 @@ public static class UI
     public static TabbedWindow TerminalScreen { get; } = new TabbedWindow(new Vector2(0, -1), Assets.Get(Sprites.TerminalScreen), null, null, null, null, Engine.VirtualUI) { Alignment = TerminalMenu.Alignment };
 
     //Settings
-    public static Button PatchedConicsToggle { get; } = new Button(new Vector2(TerminalMenu.Size.X/2.5f, -TerminalMenu.Size.Y/2 * 8 / 10), Assets.Get(Sprites.SwitchOn), Assets.Ithica, $"Patched Conics: {SaveGame.PatchedConics}", Color.White, TerminalMenu, [0], Assets.Get(Sprites.SwitchOff));
-    public static Button ShaderToggle { get; } = new Button(new Vector2(TerminalMenu.Size.X / 2.5f, -TerminalMenu.Size.Y / 2 * 6 / 10), Assets.Get(Sprites.SwitchOn), Assets.Ithica, $"Shader: {SaveGame.UseShader}", Color.White, TerminalMenu, [0], Assets.Get(Sprites.SwitchOff));
+    public static Button PatchedConicsToggle { get; } = new Button(new Vector2(TerminalMenu.Size.X/ 2.5f, -TerminalMenu.Size.Y/2 * 8 / 10), Assets.Get(Sprites.SwitchOn), TerminalMenu, [0], Assets.Get(Sprites.SwitchOff));
+    public static Button ShaderToggle { get; } = new Button(new Vector2(TerminalMenu.Size.X / 2.5f, -TerminalMenu.Size.Y / 2 * 6 / 10), Assets.Get(Sprites.SwitchOn), TerminalMenu, [0], Assets.Get(Sprites.SwitchOff));
+    public static Decal PatchedConicsText { get; } = new Decal(new Vector2(TerminalMenu.Size.X / 5f, -TerminalMenu.Size.Y / 2 * 8 / 10), Assets.Ithica, $"Patched Conics: {SaveGame.PatchedConics}", Color.White, 5, TerminalMenu, [0]);
+    public static Decal ShaderText { get; } = new Decal(new Vector2(TerminalMenu.Size.X / 5f, -TerminalMenu.Size.Y / 2 * 6 / 10), Assets.Ithica, $"Shader: {SaveGame.UseShader}", Color.White, 5, TerminalMenu, [0]);
     public static Slider SFXSlider { get; } = new Slider(Engine.Line, Assets.Get(Sprites.Knob), new Vector2(TerminalMenu.Size.X / 2.5f, -TerminalMenu.Size.Y / 2 * 4 / 10), new Vector2(50, 5), false, [color, color], TerminalMenu, [0]);
     public static Slider MusicSlider { get; } = new Slider(Engine.Line, Assets.Get(Sprites.Knob), new Vector2(TerminalMenu.Size.X / 2.5f, -TerminalMenu.Size.Y / 2 * 3 / 10), new Vector2(50, 5), false, [color, color], TerminalMenu, [0]);
     public static Slider UIScaleSlider { get; } = new Slider(Engine.Line, Assets.Get(Sprites.Knob), new Vector2(TerminalMenu.Size.X / 2.5f, -TerminalMenu.Size.Y / 2 * 2 / 10), new Vector2(50, 5), false, [color, color], TerminalMenu, [0]);
@@ -182,12 +184,12 @@ public static class UI
         PatchedConicsToggle.RisingInteract += delegate
         {
             SaveGame.PatchedConics = !SaveGame.PatchedConics;
-            PatchedConicsToggle.Text = $"Patched Conics: {SaveGame.PatchedConics}";
+            PatchedConicsText.Text = $"Patched Conics: {SaveGame.PatchedConics}";
         };
         ShaderToggle.RisingInteract += delegate
         {
             SaveGame.UseShader = !SaveGame.UseShader;
-            ShaderToggle.Text = $"Shader: {SaveGame.UseShader}";
+            ShaderText.Text = $"Shader: {SaveGame.UseShader}";
         };
         MusicSlider.ContinuousInteract += delegate
         {
