@@ -34,8 +34,8 @@ public static class UI
     //Settings
     public static Button PatchedConicsToggle { get; } = new Button(new Vector2(TerminalMenu.Size.X/ 2.5f, -TerminalMenu.Size.Y/2 * 8 / 10), Assets.Get(Sprites.SwitchOn), TerminalMenu, [0], Assets.Get(Sprites.SwitchOff));
     public static Button ShaderToggle { get; } = new Button(new Vector2(TerminalMenu.Size.X / 2.5f, -TerminalMenu.Size.Y / 2 * 6 / 10), Assets.Get(Sprites.SwitchOn), TerminalMenu, [0], Assets.Get(Sprites.SwitchOff));
-    public static Decal PatchedConicsText { get; } = new Decal(new Vector2(TerminalMenu.Size.X / 5f, -TerminalMenu.Size.Y / 2 * 8 / 10), Assets.Ithica, $"Patched Conics: {SaveGame.PatchedConics}", Color.White, 5, TerminalMenu, [0]);
-    public static Decal ShaderText { get; } = new Decal(new Vector2(TerminalMenu.Size.X / 5f, -TerminalMenu.Size.Y / 2 * 6 / 10), Assets.Ithica, $"Shader: {SaveGame.UseShader}", Color.White, 5, TerminalMenu, [0]);
+    public static Decal PatchedConicsText { get; } = new Decal(new Vector2(TerminalMenu.Size.X / 3f, -TerminalMenu.Size.Y / 2 * 8 / 10), Assets.Ithica, "Patched Conics", Color.White, 5, TerminalMenu, [0]) { WidgetAlignment = Alignment.Right};
+    public static Decal ShaderText { get; } = new Decal(new Vector2(TerminalMenu.Size.X / 3f, -TerminalMenu.Size.Y / 2 * 6 / 10), Assets.Ithica, "Shader", Color.White, 5, TerminalMenu, [0]) { WidgetAlignment = Alignment.Right };
     public static Slider SFXSlider { get; } = new Slider(Engine.Line, Assets.Get(Sprites.Knob), new Vector2(TerminalMenu.Size.X / 2.5f, -TerminalMenu.Size.Y / 2 * 4 / 10), new Vector2(50, 5), false, [color, color], TerminalMenu, [0]);
     public static Slider MusicSlider { get; } = new Slider(Engine.Line, Assets.Get(Sprites.Knob), new Vector2(TerminalMenu.Size.X / 2.5f, -TerminalMenu.Size.Y / 2 * 3 / 10), new Vector2(50, 5), false, [color, color], TerminalMenu, [0]);
     public static Slider UIScaleSlider { get; } = new Slider(Engine.Line, Assets.Get(Sprites.Knob), new Vector2(TerminalMenu.Size.X / 2.5f, -TerminalMenu.Size.Y / 2 * 2 / 10), new Vector2(50, 5), false, [color, color], TerminalMenu, [0]);
@@ -184,12 +184,10 @@ public static class UI
         PatchedConicsToggle.RisingInteract += delegate
         {
             SaveGame.PatchedConics = !SaveGame.PatchedConics;
-            PatchedConicsText.Text = $"Patched Conics: {SaveGame.PatchedConics}";
         };
         ShaderToggle.RisingInteract += delegate
         {
             SaveGame.UseShader = !SaveGame.UseShader;
-            ShaderText.Text = $"Shader: {SaveGame.UseShader}";
         };
         MusicSlider.ContinuousInteract += delegate
         {
@@ -434,8 +432,8 @@ public static class UI
         {
             var binding = i; //Saving to a variable prevents delegate weirdness
             var key = keys[binding];
-            KeybindTexts[i] = new Decal(new Vector2(-150 + Assets.Rasterforge.MeasureString($"{binding}").X / 2.55f, 10 * i - 85), Assets.Rasterforge, $"{text[binding]}", Color.White, 6, TerminalScreen, [0]);
-            KeybindInputs[i] = new TerminalButton(new Vector2(-20, 10 * i - 85), Assets.Rasterforge, $"{key}", Color.White, 6, TerminalScreen, [0]);
+            KeybindTexts[i] = new Decal(new Vector2(-150, 10 * i - 85), Assets.Rasterforge, $"{text[binding]}", Color.White, 6, TerminalScreen, [0]) { WidgetAlignment = Alignment.Left };
+            KeybindInputs[i] = new TerminalButton(new Vector2(0, 10 * i - 85), Assets.Rasterforge, $"{key}", Color.White, 6, TerminalScreen, [0]) { WidgetAlignment = Alignment.Right };
             KeybindInputs[i].RisingInteract += delegate
             {
                 var key = Keyboard.GetState().GetPressedKeys();
