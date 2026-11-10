@@ -43,10 +43,10 @@ public static class UI
     public static Decal MusicVolume { get; } = new Decal(new Vector2(TerminalMenu.Size.X / 5f, -TerminalMenu.Size.Y / 2 * 3 / 10), Assets.Ithica, "Music: 100%", Color.White, 5, TerminalMenu, [0]);
     public static Decal UIScale { get; } = new Decal(new Vector2(TerminalMenu.Size.X / 5f, -TerminalMenu.Size.Y / 2 * 2 / 10), Assets.Ithica, $"UI Scale: {Math.Truncate((UIScaleSlider.Intervals[0] + 1) * 10) / 10}", Color.White, 5, TerminalMenu, [0]);
     public static Decal WindowType { get; } = new Decal(new Vector2(TerminalMenu.Size.X / 3.5f, 0), null, Assets.Ithica, "Borderless Window", Color.White, 6, TerminalMenu, [0]);
-    public static TerminalButton NextResolution { get; } = new TerminalButton(new Vector2(TerminalMenu.Size.X / 3.5f, TerminalMenu.Size.Y / 2 / 10), Assets.Ithica, "Next Resolution", Color.White, 6, TerminalMenu, [0]);
+    public static Button NextResolution { get; } = new Button(new Vector2(TerminalMenu.Size.X / 3.5f, TerminalMenu.Size.Y / 2 / 10), Assets.Get(Sprites.Plate), Assets.Ithica, "Next Resolution", Color.White, 6, TerminalMenu, [0]);
     public static Decal Resolution { get; } = new Decal(new Vector2(TerminalMenu.Size.X / 3.5f, TerminalMenu.Size.Y / 2 * 2 / 10), null, Assets.Ithica, "1920 x 1080", Color.White, 6, TerminalMenu, [0]);
-    public static TerminalButton NextWindowType { get; } = new TerminalButton(new Vector2(TerminalMenu.Size.X / 3.5f, TerminalMenu.Size.Y / 2 * 3 / 10), Assets.Ithica, "Next Window", Color.White, 6, TerminalMenu, [0]);
-    public static TerminalButton ApplyChanges { get; } = new TerminalButton(new Vector2(TerminalMenu.Size.X / 3.5f, TerminalMenu.Size.Y / 2 * 4 / 10), Assets.Ithica, "Apply changes", Color.White, 6, TerminalMenu, [0]);
+    public static Button NextWindowType { get; } = new Button(new Vector2(TerminalMenu.Size.X / 3.5f, TerminalMenu.Size.Y / 2 * 3 / 10), Assets.Get(Sprites.Plate), Assets.Ithica, "Next Window", Color.White, 6, TerminalMenu, [0]);
+    public static Button ApplyChanges { get; } = new Button(new Vector2(TerminalMenu.Size.X / 3.5f, TerminalMenu.Size.Y / 2 * 6 / 10), Assets.Get(Sprites.Plate), Assets.Ithica, "Apply changes", Color.White, 6, TerminalMenu, [0]);
 
     //Terminal Screen
     public static Slider EnemySlider { get; } = new Slider(Engine.Line, new Vector2(0, -TerminalMenu.Size.Y / 3), new Vector2(50, 2), true, [Color.White, Color.Gray], TerminalScreen, [1]);
@@ -97,10 +97,10 @@ public static class UI
     public static TerminalButton[] KeybindInputs { get; } = new TerminalButton[keys.Count];
 
     //Debug Menu
-    public static Button SetModules { get; } = new Button(new Vector2(0, 50), Assets.Get(Sprites.Button), Assets.Rasterforge, "Apply", Color.White, DebugMenu, [0]);
+    public static Button SetModules { get; } = new Button(new Vector2(0, 50), Assets.Get(Sprites.Button), Assets.Rasterforge, "Apply", Color.White, 10, DebugMenu, [0]);
 
     //Pause Menu
-    public static Button AbortButton { get; } = new Button(new Vector2(0, -20), Assets.Get(Sprites.WideButton), Assets.Rasterforge, "Abort", Color.White, PauseMenu, [0]);
+    public static Button AbortButton { get; } = new Button(new Vector2(0, -20), Assets.Get(Sprites.WideButton), Assets.Rasterforge, "Abort", Color.White, 10, PauseMenu, [0]);
 
     //Mothership Menu
     public static ItemSlot<Pickup> FurnaceSlot { get; } = new ItemSlot<Pickup>(new Vector2(-MothershipMenu.Size.X / 3, MothershipMenu.Size.Y / 3), Assets.Get(Sprites.EmptySlot), -1, MothershipMenu, [0]);
@@ -110,55 +110,55 @@ public static class UI
     //Mission Select Menu
     public static Decal MissionName { get; } = new Decal(new Vector2(0, -30), Assets.Rasterforge, "Name", Color.White, 10, MissionSelect, [0]);
     public static Decal MissionDescription { get; } = new Decal(new Vector2(0, -15), Assets.Rasterforge, "Description", Color.Gray, 3f, MissionSelect, [0]);
-    public static Button PrevMission { get; } = new Button(new Vector2(-75, 20), Assets.Get(Sprites.Button), Assets.Rasterforge, "Prev", Color.LightBlue, MissionSelect, [0]);
-    public static Button NextMission { get; } = new Button(new Vector2(75, 20), Assets.Get(Sprites.Button), Assets.Rasterforge, "Next", Color.LightBlue, MissionSelect, [0]);
-    public static Button SelectMission { get; } = new Button(new Vector2(0, 20), Assets.Get(Sprites.Button), Assets.Rasterforge, "Launch!", Color.Yellow, MissionSelect, [0]);
+    public static Button PrevMission { get; } = new Button(new Vector2(-75, 20), Assets.Get(Sprites.Button), Assets.Rasterforge, "Prev", Color.LightBlue, 10, MissionSelect, [0]);
+    public static Button NextMission { get; } = new Button(new Vector2(75, 20), Assets.Get(Sprites.Button), Assets.Rasterforge, "Next", Color.LightBlue, 10, MissionSelect, [0]);
+    public static Button SelectMission { get; } = new Button(new Vector2(0, 20), Assets.Get(Sprites.Button), Assets.Rasterforge, "Launch!", Color.Yellow, 10, MissionSelect, [0]);
     public static Decal IsComplete { get; } = new Decal(new Vector2(0, 45), Assets.Rasterforge, "Not Complete", Color.Red, 10, MissionSelect, [0]);
-    public static Button SaveButton { get; } = new Button(new Vector2(0, -60), Assets.Get(Sprites.WideButton), Assets.Rasterforge, "Save & Exit", Color.LightBlue, MissionSelect, [0]);
+    public static Button SaveButton { get; } = new Button(new Vector2(0, -60), Assets.Get(Sprites.WideButton), Assets.Rasterforge, "Save & Exit", Color.LightBlue, 10, MissionSelect, [0]);
     public static Decal AlertText { get; } = new Decal(new Vector2(0, 60), Assets.Rasterforge, "", Color.Yellow, 10, MissionSelect, [0]);
-    public static Button ExitWithoutSave { get; } = new Button(new Vector2(0, -80), Assets.Get(Sprites.WideButton), Assets.Rasterforge, "Exit", Color.White, MissionSelect, [0]);
-    public static Button CreateFuse { get; } = new Button(new Vector2(-85, -45), Assets.Get(Sprites.Button), Assets.Rasterforge, "Queue Fuse", Color.Yellow, MissionSelect, [1]);
-    public static Button SmeltScrap { get; } = new Button(new Vector2(-85, -15), Assets.Get(Sprites.Button), Assets.Rasterforge, "Queue Smelt", Color.Yellow, MissionSelect, [1]);
-    public static Button RepairModule { get; } = new Button(new Vector2(-85, 15), Assets.Get(Sprites.Button), Assets.Rasterforge, "Queue Module", Color.Yellow, MissionSelect, [1]);
-    public static Button CancelQueue { get; } = new Button(new Vector2(-85, 45), Assets.Get(Sprites.Button), Assets.Rasterforge, "Cancel Latest", Color.Red, MissionSelect, [1]);
+    public static Button ExitWithoutSave { get; } = new Button(new Vector2(0, -80), Assets.Get(Sprites.WideButton), Assets.Rasterforge, "Exit", Color.White, 10, MissionSelect, [0]);
+    public static Button CreateFuse { get; } = new Button(new Vector2(-85, -45), Assets.Get(Sprites.Button), Assets.Rasterforge, "Queue Fuse", Color.Yellow, 10, MissionSelect, [1]);
+    public static Button SmeltScrap { get; } = new Button(new Vector2(-85, -15), Assets.Get(Sprites.Button), Assets.Rasterforge, "Queue Smelt", Color.Yellow, 10, MissionSelect, [1]);
+    public static Button RepairModule { get; } = new Button(new Vector2(-85, 15), Assets.Get(Sprites.Button), Assets.Rasterforge, "Queue Module", Color.Yellow, 10, MissionSelect, [1]);
+    public static Button CancelQueue { get; } = new Button(new Vector2(-85, 45), Assets.Get(Sprites.Button), Assets.Rasterforge, "Cancel Latest", Color.Red, 10, MissionSelect, [1]);
     public static ItemSlot<Weapon> SecondarySlot { get; private set; } = new ItemSlot<Weapon>(new Vector2(-TerminalMenu.Size.X / 4 - 25, 50), Assets.Get(Sprites.EmptySlot), (int)ModuleType.Guns, MissionSelect, [1]);
     public static Decal StolenModule { get; } = new Decal(Vector2.Zero, null, MissionSelect, [0]);
     public static Decal ModuleText { get; } = new Decal(Vector2.Zero, Assets.Rasterforge, "", Color.White, 10, MissionSelect, [0]);
 
     //Pickup Drone Menu
-    public static Button LaunchButton { get; } = new Button(new Vector2(-20, 0), Assets.Get(Sprites.Button), Assets.Rasterforge, "Leave", Color.LightBlue, PickupDroneMenu, [0]);
+    public static Button LaunchButton { get; } = new Button(new Vector2(-20, 0), Assets.Get(Sprites.Button), Assets.Rasterforge, "Leave", Color.LightBlue, 10, PickupDroneMenu, [0]);
 
     //Saves Menu
-    public static Button SaveToFile { get; } = new Button(Vector2.Zero, Assets.Get(Sprites.Button), Assets.Rasterforge, "Save", Color.White, SavesMenu, [1]);
-    public static Button LoadFromFile { get; } = new Button(Vector2.Zero, Assets.Get(Sprites.Button), Assets.Rasterforge, "Load", Color.White, SavesMenu, [0]);
-    public static Button PrevSave { get; } = new Button(new Vector2(-100, 0), Assets.Get(Sprites.Button), Assets.Rasterforge, "Prev", Color.White, SavesMenu, [0, 1]);
-    public static Button NextSave { get; } = new Button(new Vector2(100, 0), Assets.Get(Sprites.Button), Assets.Rasterforge, "Next", Color.White, SavesMenu, [0, 1]);
-    public static Button DeleteSave { get; } = new Button(new Vector2(100, 40), Assets.Get(Sprites.Button), Assets.Rasterforge, "Delete", Color.White, SavesMenu, [0, 1]);
+    public static Button SaveToFile { get; } = new Button(Vector2.Zero, Assets.Get(Sprites.Button), Assets.Rasterforge, "Save", Color.White, 10, SavesMenu, [1]);
+    public static Button LoadFromFile { get; } = new Button(Vector2.Zero, Assets.Get(Sprites.Button), Assets.Rasterforge, "Load", Color.White, 10, SavesMenu, [0]);
+    public static Button PrevSave { get; } = new Button(new Vector2(-100, 0), Assets.Get(Sprites.Button), Assets.Rasterforge, "Prev", Color.White, 10, SavesMenu, [0, 1]);
+    public static Button NextSave { get; } = new Button(new Vector2(100, 0), Assets.Get(Sprites.Button), Assets.Rasterforge, "Next", Color.White, 10, SavesMenu, [0, 1]);
+    public static Button DeleteSave { get; } = new Button(new Vector2(100, 40), Assets.Get(Sprites.Button), Assets.Rasterforge, "Delete", Color.White, 10, SavesMenu, [0, 1]);
     public static Textbox Name { get; } = new Textbox(new Vector2(0, -40), Assets.Get(Sprites.Button), Assets.Rasterforge, SavesMenu, [1]);
     public static Decal LoadedName { get; } = new Decal(new Vector2(0, 40), Assets.Rasterforge, "", Color.White, 10, SavesMenu, [0, 1]);
-    public static Button SaveBack { get; } = new Button(new Vector2(-100, 40), Assets.Get(Sprites.Button), Assets.Rasterforge, "Back", Color.White, SavesMenu, [1]);
-    public static Button LoadBack { get; } = new Button(new Vector2(-100, 40), Assets.Get(Sprites.Button), Assets.Rasterforge, "Back", Color.White, SavesMenu, [0]);
+    public static Button SaveBack { get; } = new Button(new Vector2(-100, 40), Assets.Get(Sprites.Button), Assets.Rasterforge, "Back", Color.White, 10, SavesMenu, [1]);
+    public static Button LoadBack { get; } = new Button(new Vector2(-100, 40), Assets.Get(Sprites.Button), Assets.Rasterforge, "Back", Color.White, 10, SavesMenu, [0]);
 
     //Upgrade Menu
     public static Decal TraderChat { get; } = new Decal(Vector2.Zero, Assets.Rasterforge,
         "Hey there!" +
         "\nIf you get me some rare materials, I can improve your sensors." +
         "\nI'm also willing to upgrade some of your other modules for 5 scrap and retool upgraded sensors for 1.", Color.White, 8, UpgradeMenu, [0]);
-    public static Button LidarUpgrade { get; } = new Button(new Vector2(75, 0), Assets.Get(Sprites.Button), Assets.Rasterforge, "Lidar", Color.Green, UpgradeMenu, [1]);
-    public static Button RadarUpgrade { get; } = new Button(new Vector2(0, 0), Assets.Get(Sprites.Button), Assets.Rasterforge, "Radar", Color.Green, UpgradeMenu, [1]);
-    public static Button PulseEmitterUpgrade { get; } = new Button(new Vector2(-75, 0), Assets.Get(Sprites.Button), Assets.Rasterforge, "Pulse", Color.Green, UpgradeMenu, [1]);
-    public static Button UpgradeHull { get; } = new Button(new Vector2(0, 0), Assets.Get(Sprites.Button), Assets.Rasterforge, "Upgrade Hull", Color.Green, UpgradeMenu, [2]);
-    public static Button UpgradeGuns { get; } = new Button(new Vector2(0, 0), Assets.Get(Sprites.Button), Assets.Rasterforge, "Upgrade Guns", Color.Green, UpgradeMenu, [2]);
-    public static Button UpgradeEngine { get; } = new Button(new Vector2(0, 0), Assets.Get(Sprites.Button), Assets.Rasterforge, "Upgrade Engines", Color.Green, UpgradeMenu, [2]);
-    public static Button UpgradeCore { get; } = new Button(new Vector2(0, 0), Assets.Get(Sprites.Button), Assets.Rasterforge, "Upgrade Core", Color.Green, UpgradeMenu, [2]);
+    public static Button LidarUpgrade { get; } = new Button(new Vector2(75, 0), Assets.Get(Sprites.Button), Assets.Rasterforge, "Lidar", Color.Green, 10, UpgradeMenu, [1]);
+    public static Button RadarUpgrade { get; } = new Button(new Vector2(0, 0), Assets.Get(Sprites.Button), Assets.Rasterforge, "Radar", Color.Green, 10, UpgradeMenu, [1]);
+    public static Button PulseEmitterUpgrade { get; } = new Button(new Vector2(-75, 0), Assets.Get(Sprites.Button), Assets.Rasterforge, "Pulse", Color.Green, 10, UpgradeMenu, [1]);
+    public static Button UpgradeHull { get; } = new Button(new Vector2(0, 0), Assets.Get(Sprites.Button), Assets.Rasterforge, "Upgrade Hull", Color.Green, 10, UpgradeMenu, [2]);
+    public static Button UpgradeGuns { get; } = new Button(new Vector2(0, 0), Assets.Get(Sprites.Button), Assets.Rasterforge, "Upgrade Guns", Color.Green, 10, UpgradeMenu, [2]);
+    public static Button UpgradeEngine { get; } = new Button(new Vector2(0, 0), Assets.Get(Sprites.Button), Assets.Rasterforge, "Upgrade Engines", Color.Green, 10, UpgradeMenu, [2]);
+    public static Button UpgradeCore { get; } = new Button(new Vector2(0, 0), Assets.Get(Sprites.Button), Assets.Rasterforge, "Upgrade Core", Color.Green, 10, UpgradeMenu, [2]);
     public static Decal UpgradeText { get; } = new Decal(new Vector2(-30, -20), Assets.Rasterforge, "", Color.White, 10, UpgradeMenu, [2]);
 
     //Hack menu
-    public static Button HackButton { get; } = new Button(Vector2.Zero, Assets.Get(Sprites.Button), Assets.Rasterforge, "Hack", Color.Yellow, HackMenu, [0]);
+    public static Button HackButton { get; } = new Button(Vector2.Zero, Assets.Get(Sprites.Button), Assets.Rasterforge, "Hack", Color.Yellow, 10, HackMenu, [0]);
     public static Slider HackTimer { get; } = new Slider(Engine.Line, new Vector2(0, 50), new Vector2(50, 2), true, [Color.Yellow, new Color(0.1f, 0.1f, 0.1f)], HackMenu, [0]);
 
     //Escape menu
-    public static Button EscapeButton { get; } = new Button(Vector2.Zero, Assets.Get(Sprites.Button), Assets.Rasterforge, "Escape!", Color.White, EscapeMenu, [0]);
+    public static Button EscapeButton { get; } = new Button(Vector2.Zero, Assets.Get(Sprites.Button), Assets.Rasterforge, "Escape!", Color.White, 10, EscapeMenu, [0]);
 
     //Multiple
     public static ItemSlot<Pickup>[] InventorySlots { get; set; } = new ItemSlot<Pickup>[4];
