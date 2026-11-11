@@ -41,7 +41,7 @@ public class Engine : Game
             return virtualUI ??= new UIManager();
         }
     }
-    public static Cursor Cursor { get; private set; }
+    public static Cursor Cursor { get; set; }
     public static DialogueManager DialogueManager { get; private set; }
     public static SaveGame SaveGame { get; private set; }
     public static Camera Camera { get; private set; }
@@ -94,18 +94,10 @@ public class Engine : Game
 
         Window.AllowUserResizing = true;
         Window.ClientSizeChanged += new EventHandler<EventArgs>(ClientSizeChanged);
-        Cursor = new Cursor(BackBuffer/2);
 
         MainScreen = new RenderTarget2D(GraphicsDevice, 1920, 1080);
-
-        var type = GetType();
-        var prop = type.GetProperty("IsActive");
-        if (prop != null && prop.CanWrite)
-        {
-            prop.SetValue(this, true, null); //Prevents grabbing the cursor immediately
-        }
-
         IsMouseVisible = false;
+
     }
     private static void ClientSizeChanged(object sender, EventArgs e)
     {
@@ -152,7 +144,6 @@ public class Engine : Game
             UI.AddUIElements();
             Camera = new Camera(Vector2.Zero, (Vector2)(BackBuffer / 2), 1f, 0);
             DialogueManager = new DialogueManager();
-            CurrentGameState.SwitchState(new MainMenu());
             LoadingStage = LoadingStage.MainMenu;
 
             Assets.LoadFinal(Content);
@@ -204,7 +195,7 @@ public class Engine : Game
             return;
         }
         Input.Update();
-        Cursor.Update();
+        Cursor?.Update();
         SoundManager.Update();
         CurrentGameState.Update();
 
@@ -277,7 +268,7 @@ public class Engine : Game
         if(SaveGame == null || SaveGame.Player == null || SaveGame.Player.IsEnabled)
         {
             VirtualUI.Draw(spriteBatch);
-            Cursor.DrawCursor(spriteBatch);
+            Cursor?.DrawCursor(spriteBatch);
         }
         spriteBatch.End();
 
@@ -295,7 +286,7 @@ public class Engine : Game
         {
             exception.Draw(spriteBatch);
         }
-        Cursor.DrawHand(spriteBatch);
+        Cursor?.DrawHand(spriteBatch);
         ShaderExceptions.Clear();
 
         if (SaveGame.DebugMode)

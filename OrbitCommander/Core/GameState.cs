@@ -12,7 +12,7 @@ using UILib.Content;
 namespace OrbitCommander.Core;
 public static class CurrentGameState
 {
-    private static GameState currentGameState;
+    private static GameState currentGameState = new FadeIn();
     public static void SwitchState(GameState _gameState)
     {
         Engine.VirtualUI.DisableAll();
@@ -73,6 +73,22 @@ public abstract class GameState
                     }
                 }
             }
+        }
+    }
+}
+public class FadeIn : GameState
+{
+    public override void Draw(SpriteBatch _spriteBatch)
+    {
+        
+    }
+
+    public override void Update()
+    {
+        if(Input.SwapPrimary.IsDown)
+        {
+            Engine.Cursor = new Cursor(Engine.BackBuffer / 2);
+            CurrentGameState.SwitchState(new MainMenu());
         }
     }
 }
