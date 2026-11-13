@@ -78,18 +78,50 @@ public abstract class GameState
 }
 public class FadeIn : GameState
 {
+    private float time = 0;
+    bool canContinue = false;
     public override void Draw(SpriteBatch _spriteBatch)
     {
-        
+        if (time < 9)
+        {
+            float val = time / 2 - time * time / 18;
+            float transparency = Math.Clamp(val, 0, 1);
+            _spriteBatch.Draw(Assets.Get(Sprites.Title), -Assets.DimsOf(Sprites.Title)/2, Color.White * transparency);
+        }
+        else if (time > 12 && time < 15)
+        {
+            float transparency = Math.Min((time - 12) / 3, 1);
+            string s = $"Press Q to continue.";
+            _spriteBatch.DrawString(Assets.Ithica, s, -Assets.Ithica.MeasureString(s) / 2, Color.White * transparency);
+        }
+        else if (time > 15)
+        {
+            float transparency = Math.Min(1 - (time - 15) / 3, 1);
+            string s = $"Press Q to continue.";
+            _spriteBatch.DrawString(Assets.Ithica, s, -Assets.Ithica.MeasureString(s) / 2, Color.White * transparency); //TODO: FIX ME (keys need to update)
+        }
     }
 
     public override void Update()
     {
+        if(time < 15 || canContinue)
+        {
+            time += Engine.DeltaSeconds * 1.5f;
+        }
         if(Input.SwapPrimary.IsDown)
+        {
+            canContinue = true;
+        }
+        if(time > 18)
         {
             Engine.Cursor = new Cursor(Engine.BackBuffer / 2);
             CurrentGameState.SwitchState(new MainMenu());
         }
+    }
+    public override void Initialize()
+    {
+        UI.TerminalMenu.IsEnabled = false;
+        base.Initialize();
     }
 }
 public class MainMenu : GameState
@@ -99,6 +131,7 @@ public class MainMenu : GameState
         UI.GameplayGlobals.IsEnabled = false;
         UI.MainGlobals.IsEnabled = true;
         SoundManager.ChangeTrack(Assets.Get(Sound.menu));
+        UI.TerminalMenu.IsEnabled = true;
         UI.TerminalMenu.CurrentTab = 0;
         UI.TerminalScreen.CurrentTab = 0;
         Engine.Camera.Position = Vector2.Zero;
