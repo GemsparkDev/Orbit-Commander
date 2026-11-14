@@ -79,43 +79,43 @@ public abstract class GameState
 public class FadeIn : GameState
 {
     private float time = 0;
+    private float transparencyTime = 0;
     bool canContinue = false;
     public override void Draw(SpriteBatch _spriteBatch)
     {
+        float t2 = 1 - transparencyTime;
         if (time < 9)
         {
             float val = time / 2 - time * time / 18;
-            float transparency = Math.Clamp(val, 0, 1);
+            float transparency = Math.Clamp(val, 0, 1) * t2;
             _spriteBatch.Draw(Assets.Get(Sprites.Title), -Assets.DimsOf(Sprites.Title)/2, Color.White * transparency);
         }
-        else if (time > 12 && time < 15)
+        else if (time is > 11 and < 14)
         {
-            float transparency = Math.Min((time - 12) / 3, 1);
-            string s = $"Press Q to continue.";
+            float transparency = Math.Min((time - 11) / 3, 1) * t2;
+            string s = $"Press E to continue.";
             _spriteBatch.DrawString(Assets.Ithica, s, -Assets.Ithica.MeasureString(s) / 2, Color.White * transparency);
-        }
-        else if (time > 15)
-        {
-            float transparency = Math.Min(1 - (time - 15) / 3, 1);
-            string s = $"Press Q to continue.";
-            _spriteBatch.DrawString(Assets.Ithica, s, -Assets.Ithica.MeasureString(s) / 2, Color.White * transparency); //TODO: FIX ME (keys need to update)
         }
     }
 
     public override void Update()
     {
-        if(time < 15 || canContinue)
+        if(time < 14)
         {
             time += Engine.DeltaSeconds * 1.5f;
+        }
+        if(canContinue)
+        {
+            transparencyTime += Engine.DeltaSeconds;
+        }    
+        if(transparencyTime > 1)
+        {
+            Engine.Cursor = new Cursor(Engine.BackBuffer / 2);
+            CurrentGameState.SwitchState(new MainMenu());
         }
         if(Input.SwapPrimary.IsDown)
         {
             canContinue = true;
-        }
-        if(time > 18)
-        {
-            Engine.Cursor = new Cursor(Engine.BackBuffer / 2);
-            CurrentGameState.SwitchState(new MainMenu());
         }
     }
     public override void Initialize()
