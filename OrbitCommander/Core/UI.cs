@@ -37,11 +37,11 @@ public static class UI
     public static Decal PatchedConicsText { get; } = new Decal(new Vector2(TerminalMenu.Size.X / 3f, -TerminalMenu.Size.Y / 2 * 8 / 10), Assets.Ithica, "Patched Conics", Color.White, 5, TerminalMenu, [0]) { WidgetAlignment = Alignment.Right};
     public static Decal ShaderText { get; } = new Decal(new Vector2(TerminalMenu.Size.X / 3f, -TerminalMenu.Size.Y / 2 * 6 / 10), Assets.Ithica, "Shader", Color.White, 5, TerminalMenu, [0]) { WidgetAlignment = Alignment.Right };
     public static Slider SFXSlider { get; } = new Slider(Engine.Line, Assets.Get(Sprites.Knob), new Vector2(TerminalMenu.Size.X / 2.5f, -TerminalMenu.Size.Y / 2 * 4 / 10), new Vector2(50, 5), false, [color, color], TerminalMenu, [0]);
-    public static Slider MusicSlider { get; } = new Slider(Engine.Line, Assets.Get(Sprites.Knob), new Vector2(TerminalMenu.Size.X / 2.5f, -TerminalMenu.Size.Y / 2 * 3 / 10), new Vector2(50, 5), false, [color, color], TerminalMenu, [0]);
-    public static Slider UIScaleSlider { get; } = new Slider(Engine.Line, Assets.Get(Sprites.Knob), new Vector2(TerminalMenu.Size.X / 2.5f, -TerminalMenu.Size.Y / 2 * 2 / 10), new Vector2(50, 5), false, [color, color], TerminalMenu, [0]);
-    public static Decal SFXVolume { get; } = new Decal(new Vector2(TerminalMenu.Size.X / 5f, -TerminalMenu.Size.Y / 2 * 4 / 10), Assets.Ithica, "Sound: 100%", Color.White, 5, TerminalMenu, [0]);
-    public static Decal MusicVolume { get; } = new Decal(new Vector2(TerminalMenu.Size.X / 5f, -TerminalMenu.Size.Y / 2 * 3 / 10), Assets.Ithica, "Music: 100%", Color.White, 5, TerminalMenu, [0]);
-    public static Decal UIScale { get; } = new Decal(new Vector2(TerminalMenu.Size.X / 5f, -TerminalMenu.Size.Y / 2 * 2 / 10), Assets.Ithica, $"UI Scale: {Math.Truncate((UIScaleSlider.Intervals[0] + 1) * 10) / 10}", Color.White, 5, TerminalMenu, [0]);
+    public static Slider MusicSlider { get; } = new Slider(Engine.Line, Assets.Get(Sprites.Knob), new Vector2(TerminalMenu.Size.X / 2.5f, -TerminalMenu.Size.Y / 2 * 2.5f / 10), new Vector2(50, 5), false, [color, color], TerminalMenu, [0]);
+    public static Slider UIScaleSlider { get; } = new Slider(Engine.Line, Assets.Get(Sprites.Knob), new Vector2(TerminalMenu.Size.X / 2.5f, -TerminalMenu.Size.Y / 2 / 10), new Vector2(50, 5), false, [color, color], TerminalMenu, [0]);
+    public static Decal SFXVolume { get; } = new Decal(new Vector2(TerminalMenu.Size.X / 3.4f, -TerminalMenu.Size.Y / 2 * 4 / 10), Assets.Ithica, "Sound", Color.White, 5, TerminalMenu, [0]) { WidgetAlignment = Alignment.Right };
+    public static Decal MusicVolume { get; } = new Decal(new Vector2(TerminalMenu.Size.X / 3.4f, -TerminalMenu.Size.Y / 2 * 2.5f / 10), Assets.Ithica, "Music", Color.White, 5, TerminalMenu, [0]) { WidgetAlignment = Alignment.Right };
+    public static Decal UIScale { get; } = new Decal(new Vector2(TerminalMenu.Size.X / 3.4f, -TerminalMenu.Size.Y / 2 / 10), Assets.Ithica, "UI Scale", Color.White, 5, TerminalMenu, [0]) { WidgetAlignment = Alignment.Right };
     public static Decal WindowType { get; } = new Decal(new Vector2(TerminalMenu.Size.X / 3.5f, 0), null, Assets.Ithica, "Borderless Window", Color.White, 6, TerminalMenu, [0]);
     public static Button NextResolution { get; } = new Button(new Vector2(TerminalMenu.Size.X / 3.5f, TerminalMenu.Size.Y / 2 / 10), Assets.Get(Sprites.Plate), Assets.Ithica, "Next Resolution", Color.White, 6, TerminalMenu, [0]);
     public static Decal Resolution { get; } = new Decal(new Vector2(TerminalMenu.Size.X / 3.5f, TerminalMenu.Size.Y / 2 * 2 / 10), null, Assets.Ithica, "1920 x 1080", Color.White, 6, TerminalMenu, [0]);
@@ -193,19 +193,16 @@ public static class UI
         {
             float i = MusicSlider.Intervals[0];
             SoundManager.MusicVolume = i;
-            MusicVolume.Text = $"Music: {Math.Round(i * 100)}%";
         };
         SFXSlider.ContinuousInteract += delegate
         {
             float i = SFXSlider.Intervals[0];
             SoundManager.SFXVolume = i;
             UIManager.SFXVolume = i;
-            SFXVolume.Text = $"Sound: {Math.Round(i * 100)}%";
         };
         UIScaleSlider.FallingInteract += delegate
         {
             float i = UIScaleSlider.Intervals[0];
-            UIScale.Text = $"UI Scale: {Math.Truncate((i + 1) * 10) / 10}";
             UIManager.UIScale = (i + 1f);
         };
 

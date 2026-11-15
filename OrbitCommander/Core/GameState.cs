@@ -90,7 +90,7 @@ public class FadeIn : GameState
             float transparency = Math.Clamp(val, 0, 1) * t2;
             _spriteBatch.Draw(Assets.Get(Sprites.Title), -Assets.DimsOf(Sprites.Title)/2, Color.White * transparency);
         }
-        else if (time is > 11 and < 14)
+        else if (time > 11)
         {
             float transparency = Math.Min((time - 11) / 3, 1) * t2;
             string s = $"Press E to continue.";
