@@ -88,7 +88,7 @@ public class FadeIn : GameState
         {
             float val = time / 2 - time * time / 18;
             float transparency = Math.Clamp(val, 0, 1) * t2;
-            _spriteBatch.Draw(Assets.Get(Sprites.Title), -Assets.DimsOf(Sprites.Title)/2, Color.White * transparency);
+            _spriteBatch.Draw(Assets.Get(Sprites.Title), Vector2.Zero, null, Color.White * transparency, 0, Assets.DimsOf(Sprites.Title) / 2, UIManager.UIScale, 0, 0);
         }
         else if (time > 11)
         {

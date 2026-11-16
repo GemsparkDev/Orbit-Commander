@@ -49,10 +49,10 @@ public static class UI
     public static Button ApplyChanges { get; } = new Button(new Vector2(TerminalMenu.Size.X / 3.5f, TerminalMenu.Size.Y / 2 * 6 / 10), Assets.Get(Sprites.Plate), Assets.Ithica, "Apply changes", Color.White, 6, TerminalMenu, [0]);
 
     //Terminal Screen
-    public static Slider EnemySlider { get; } = new Slider(Engine.Line, new Vector2(0, -TerminalMenu.Size.Y / 3), new Vector2(50, 2), true, [Color.White, Color.Gray], TerminalScreen, [1]);
+    public static Slider EnemySlider { get; } = new Slider(Engine.Line, new Vector2(-130, -TerminalMenu.Size.Y / 3), new Vector2(50, 2), true, [Color.White, Color.Gray], TerminalScreen, [1]) { WidgetAlignment = Alignment.Left };
     public static Slider[] HealthSliders { get; } = new Slider[5];
-    public static Decal WaveText { get; } = new Decal(new Vector2(-20, 0), Assets.Rasterforge, "0", Color.White, 10, TerminalScreen, [1]);
-    public static Decal EnemiesLeft { get; } = new Decal(new Vector2(0, 0), Assets.Rasterforge, "0", Color.Red, 10, TerminalScreen, [1]);
+    public static Decal WaveText { get; } = new Decal(new Vector2(-120, -TerminalMenu.Size.Y / 4), Assets.Rasterforge, "0", Color.White, 10, TerminalScreen, [1]);
+    public static Decal EnemiesLeft { get; } = new Decal(new Vector2(-140, -TerminalMenu.Size.Y / 4), Assets.Rasterforge, "0", Color.Red, 10, TerminalScreen, [1]);
 
     //Fuse Menu
     public static Decal[] StatusLights { get; } = new Decal[5];
@@ -85,7 +85,7 @@ public static class UI
     public static Slider PlayerSpecialHealth { get; } = new Slider(Engine.Line, new Vector2(5, 5), new Vector2(150, 15), true, [Color.Transparent, Color.Transparent], GameplayGlobals, [(int)Alignment.TopLeft]);
     public static Slider PlayerAmmo { get; } = new Slider(Engine.Line, new Vector2(5, 15), new Vector2(100, 2), true, [Color.Yellow, Color.DarkGray], TerminalScreen, [1]);
     public static Slider PlayerAbility { get; } = new Slider(Engine.Line, new Vector2(5, 15), new Vector2(100, 10), true, [Color.Cyan, Color.DarkGray], TerminalScreen, [1]);
-    public static Slider Thermometer { get; } = new Slider(Engine.Line, new Vector2(0, 15), new Vector2(100, 10), true, [new Color(25, 25, 25), Color.Transparent, new Color(25, 25, 25)], TerminalScreen, [1]);
+    public static Slider Thermometer { get; } = new Slider(Engine.Line, new Vector2(-120, -85), new Vector2(100, 10), true, [new Color(25, 25, 25), Color.Transparent, new Color(25, 25, 25)], TerminalScreen, [1]) { WidgetAlignment = Alignment.Left };
 
     public static TerminalButton[] NextModule { get; } = new TerminalButton[5];
     public static TerminalButton[] PrevModule { get; } = new TerminalButton[5];
@@ -97,10 +97,10 @@ public static class UI
     public static TerminalButton[] KeybindInputs { get; } = new TerminalButton[keys.Count];
 
     //Debug Menu
-    public static Button SetModules { get; } = new Button(new Vector2(0, 50), Assets.Get(Sprites.Button), Assets.Rasterforge, "Apply", Color.White, 10, DebugMenu, [0]);
+    public static Button SetModules { get; } = new Button(new Vector2(0, 50), Assets.Get(Sprites.Button), Assets.Rasterforge, "Apply", Color.White, 6, DebugMenu, [0]);
 
     //Pause Menu
-    public static Button AbortButton { get; } = new Button(new Vector2(0, -20), Assets.Get(Sprites.WideButton), Assets.Rasterforge, "Abort", Color.White, 10, PauseMenu, [0]);
+    public static Button AbortButton { get; } = new Button(new Vector2(0, -20), Assets.Get(Sprites.WideButton), Assets.Rasterforge, "Abort", Color.White, 6, PauseMenu, [0]);
 
     //Mothership Menu
     public static ItemSlot<Pickup> FurnaceSlot { get; } = new ItemSlot<Pickup>(new Vector2(-MothershipMenu.Size.X / 3, MothershipMenu.Size.Y / 3), Assets.Get(Sprites.EmptySlot), -1, MothershipMenu, [0]);
@@ -609,10 +609,7 @@ public static class UI
             float y = (i - 2) * 20 + 0.5f;
             ModuleIcons[i] = new Decal(new Vector2(61f, y -37.5f), null, TerminalMenu, [1]);
             StatusLights[i] = new Decal(new Vector2(44.5f, y-38), Assets.Get(Sprites.LEDGlow), TerminalMenu, [1]);
-        }
-        for(int i = 0; i < HealthSliders.Length; i++)
-        {
-            HealthSliders[i] = new Slider(Engine.Line, new Vector2(-20, i * 10 - TerminalScreen.Size.Y/3), new Vector2(30, 3), true, [Color.DarkGray, Color.Cyan], TerminalScreen, [1]);
+            HealthSliders[i] = new Slider(Engine.Line, new Vector2(-15, y - 37.5f), new Vector2(50, 4), true, [Color.DarkGray, Color.Cyan], TerminalScreen, [1]);
         }
         Overlay = new Decal(Vector2.Zero, Assets.Get(Sprites.Overlay), TerminalMenu, [0, 1, 2]) { color = Color.White * 0.5f };
     }
