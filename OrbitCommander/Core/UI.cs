@@ -42,10 +42,10 @@ public static class UI
     public static Decal SFXVolume { get; } = new Decal(new Vector2(TerminalMenu.Size.X / 3.4f, -TerminalMenu.Size.Y / 2 * 4 / 10), Assets.Ithica, "Sound", Color.White, 5, TerminalMenu, [0]) { WidgetAlignment = Alignment.Right };
     public static Decal MusicVolume { get; } = new Decal(new Vector2(TerminalMenu.Size.X / 3.4f, -TerminalMenu.Size.Y / 2 * 2.5f / 10), Assets.Ithica, "Music", Color.White, 5, TerminalMenu, [0]) { WidgetAlignment = Alignment.Right };
     public static Decal UIScale { get; } = new Decal(new Vector2(TerminalMenu.Size.X / 3.4f, -TerminalMenu.Size.Y / 2 / 10), Assets.Ithica, "UI Scale", Color.White, 5, TerminalMenu, [0]) { WidgetAlignment = Alignment.Right };
-    public static Decal WindowType { get; } = new Decal(new Vector2(TerminalMenu.Size.X / 3.5f, 0), null, Assets.Ithica, "Borderless Window", Color.White, 6, TerminalMenu, [0]);
-    public static Button NextResolution { get; } = new Button(new Vector2(TerminalMenu.Size.X / 3.5f, TerminalMenu.Size.Y / 2 / 10), Assets.Get(Sprites.Plate), Assets.Ithica, "Next Resolution", Color.White, 6, TerminalMenu, [0]);
-    public static Decal Resolution { get; } = new Decal(new Vector2(TerminalMenu.Size.X / 3.5f, TerminalMenu.Size.Y / 2 * 2 / 10), null, Assets.Ithica, "1920 x 1080", Color.White, 6, TerminalMenu, [0]);
-    public static Button NextWindowType { get; } = new Button(new Vector2(TerminalMenu.Size.X / 3.5f, TerminalMenu.Size.Y / 2 * 3 / 10), Assets.Get(Sprites.Plate), Assets.Ithica, "Next Window", Color.White, 6, TerminalMenu, [0]);
+    public static Dial SelectResolution { get; } = new Dial(Assets.Get(Sprites.TurnableHands), new Vector2(60, TerminalMenu.Size.Y / 2 / 10), Assets.Get(Sprites.TurnableDial), TerminalMenu, [0]) { Range = MathF.PI / 2 };
+    public static Decal Resolution { get; } = new Decal(new Vector2(TerminalMenu.Size.X / 2.667f, TerminalMenu.Size.Y / 2 / 10), null, Assets.Ithica, "1920 x 1080", Color.White, 6, TerminalMenu, [0]);
+    public static Dial SelectWindowType { get; } = new Dial(Assets.Get(Sprites.TurnableHands), new Vector2(60, TerminalMenu.Size.Y / 2 * 3 / 10), Assets.Get(Sprites.TurnableDial), TerminalMenu, [0]) { Range = MathF.PI / 2 };
+    public static Decal WindowType { get; } = new Decal(new Vector2(TerminalMenu.Size.X / 3.5f, TerminalMenu.Size.Y / 2 * 3 / 10), null, Assets.Ithica, "Borderless Window", Color.White, 6, TerminalMenu, [0]);
     public static Button ApplyChanges { get; } = new Button(new Vector2(TerminalMenu.Size.X / 3.5f, TerminalMenu.Size.Y / 2 * 6 / 10), Assets.Get(Sprites.Plate), Assets.Ithica, "Apply changes", Color.White, 6, TerminalMenu, [0]);
 
     //Terminal Screen
@@ -215,13 +215,10 @@ public static class UI
             Engine.Self.Exit();
             SoundManager.PlayGlobalSound(Assets.Get(Sound.Interact));
         };
-        NextWindowType.RisingInteract += delegate
+        SelectWindowType.ContinuousInteract += delegate
         {
-            windowType++;
-            if (windowType > 2)
-            {
-                windowType -= 3;
-            }
+            const int max = 2;
+            windowType = (int)Math.Round(SelectWindowType.Value * max);
             switch (windowType)
             {
                 case 0:
@@ -230,20 +227,16 @@ public static class UI
                 case 1:
                     WindowType.Text = "Borderless Windowed";
                     break;
-                case 2:
+                case max:
                     WindowType.Text = "Fullscreen";
                     break;
                 default:
                     break;
             }
         }; //Write to config?
-        NextResolution.RisingInteract += delegate
+        SelectResolution.ContinuousInteract += delegate
         {
-            selectedResolution++;
-            if (selectedResolution >= resolutions.Length)
-            {
-                selectedResolution = 0;
-            }
+            selectedResolution = (int)Math.Round(SelectResolution.Value * (resolutions.Length - 1));
             Resolution.Text = $"{resolutions[selectedResolution].X} x {resolutions[selectedResolution].Y}";
         };
 
