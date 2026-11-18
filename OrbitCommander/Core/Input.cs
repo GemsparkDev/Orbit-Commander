@@ -66,14 +66,14 @@ public class KeyboardInput : InputScheme
         Dock = new KeyboardControl(4, this);
         Construct = new KeyboardControl(5, this);
         SwapPrimary = new KeyboardControl(6, this);
-        ToggleAimAssist = new KeyboardControl(8, this);
-        DropScrap = new KeyboardControl(9, this);
-        Ability = new KeyboardControl(10, this);
-        WarpForward = new KeyboardControl(11, this);
-        ModifyAbility = new KeyboardControl(12, this);
-        Reload = new KeyboardControl(13, this);
-        Exit = new KeyboardControl(14, this);
-        Tab = new KeyboardControl(15, this);
+        ToggleAimAssist = new KeyboardControl(7, this);
+        DropScrap = new KeyboardControl(8, this);
+        Ability = new KeyboardControl(9, this);
+        WarpForward = new KeyboardControl(10, this);
+        ModifyAbility = new KeyboardControl(11, this);
+        Reload = new KeyboardControl(12, this);
+        Exit = new KeyboardControl(13, this);
+        Tab = new KeyboardControl(14, this);
 
         //Mouse
         LMB = new LeftButton(this);

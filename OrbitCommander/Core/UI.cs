@@ -91,8 +91,8 @@ public static class UI
     public static TerminalButton[] PrevModule { get; } = new TerminalButton[5];
     public static Decal[] ModuleSelection { get; } = new Decal[5];
     //TODO: Readd keybind inputs
-    public static readonly List<Keys> keys = [Keys.W, Keys.S, Keys.A, Keys.D, Keys.Space, Keys.C, Keys.E, Keys.I, Keys.LeftControl, Keys.F, Keys.Q, Keys.RightShift, Keys.LeftShift, Keys.R, Keys.Escape, Keys.Tab];
-    public static readonly List<String> text = ["Up", "Down", "Right", "Left", "Undock", "Drop Scrap", "Swap Primary", "", "Toggle Aim Assist", "Drop Scrap", "Ability", "Warp Back", "Warp Forward", "Reload", "Pause", "Tab"];
+    public static readonly List<Keys> keys = [Keys.W, Keys.S, Keys.A, Keys.D, Keys.Space, Keys.C, Keys.E, Keys.LeftControl, Keys.F, Keys.Q, Keys.RightShift, Keys.LeftShift, Keys.R, Keys.Escape, Keys.Tab];
+    public static readonly List<String> text = ["Up", "Down", "Right", "Left", "Undock", "Drop Scrap", "Swap Primary", "Toggle Aim Assist", "Drop Scrap", "Ability", "Warp Back", "Warp Forward", "Reload", "Pause", "Tab"];
     public static Decal[] KeybindTexts { get; } = new Decal[keys.Count];
     public static TerminalButton[] KeybindInputs { get; } = new TerminalButton[keys.Count];
 
