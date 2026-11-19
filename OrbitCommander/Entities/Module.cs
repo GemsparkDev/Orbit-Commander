@@ -110,7 +110,7 @@ public class ReloadSystem(int _magazineSize, float _reloadSpeed, Action _reloadC
         }
         if (Engine.SaveGame.Player.modules.ContainsValue(_module))
         {
-            UI.PlayerAmmo.SetInterval(val, magazineSize);
+            UI.ModuleSliders[(int)ModuleType.Guns].SetInterval(val, magazineSize);
         }
     }
     public bool Fire()
@@ -140,9 +140,9 @@ public class Hull() : Module(Modules.Hull, Sprites.Hull, "Hull", "Getting hit pr
     }
     public override void OnUpdate(float _fuseRatio)
     {
-        UI.PlayerSpecialHealth.Colors[0] = Color.Orange * 0.5f;
-        UI.PlayerSpecialHealth.SetInterval(resistanceTime, 2f);
-        UI.PlayerSpecialHealth.Colors[1] = Color.Transparent;
+        UI.ModuleSliders[(int)ModuleType.Hull].Colors[0] = Color.Orange * 0.5f;
+        UI.ModuleSliders[(int)ModuleType.Hull].SetInterval(resistanceTime, 2f);
+        UI.ModuleSliders[(int)ModuleType.Hull].Colors[1] = Color.Transparent;
         if(resistanceTime > 0)
         {
             resistanceTime -= Engine.DeltaSeconds * 0.33f / _fuseRatio;
@@ -169,9 +169,9 @@ public class Reflective() : Module(Modules.Reflective, Sprites.Reflective, "Refl
             shieldEffect.offsetVelocity = Player.Velocity;
             shieldEffect.Update();
         }
-        UI.PlayerSpecialHealth.SetInterval(max-Cooldown, max);
-        UI.PlayerSpecialHealth.Colors[0] = Color.Yellow;
-        UI.PlayerSpecialHealth.Colors[1] = Color.Transparent;
+        UI.ModuleSliders[(int)ModuleType.Hull].SetInterval(max-Cooldown, max);
+        UI.ModuleSliders[(int)ModuleType.Hull].Colors[0] = Color.Yellow;
+        UI.ModuleSliders[(int)ModuleType.Hull].Colors[1] = Color.Transparent;
         base.OnUpdate(_fuseRatio);
     }
     public override int OnCollide(int _damage)
@@ -209,8 +209,8 @@ public class StealthHull() : Module(Modules.Stealth, Sprites.Stealth, "Stealth",
         {
             stealthCd -= Engine.DeltaSeconds / _fuseRatio;
         }
-        UI.PlayerSpecialHealth.Colors[0] = Color.Transparent;
-        UI.PlayerSpecialHealth.Colors[1] = Color.Transparent;
+        UI.ModuleSliders[(int)ModuleType.Hull].Colors[0] = Color.Transparent;
+        UI.ModuleSliders[(int)ModuleType.Hull].Colors[1] = Color.Transparent;
         base.OnUpdate(_fuseRatio);
     }
     public override int StealthChange()
@@ -250,8 +250,8 @@ public class Turtle() : Module(Modules.Turtle, Sprites.Hull, "Turtle", "Provides
             dr = 0.5f + distance * distance;
         }
 
-        UI.PlayerSpecialHealth.Colors[0] = Color.Orange * 0.5f;
-        UI.PlayerSpecialHealth.SetInterval(1.5f - dr, 1);
+        UI.ModuleSliders[(int)ModuleType.Hull].Colors[0] = Color.Orange * 0.5f;
+        UI.ModuleSliders[(int)ModuleType.Hull].SetInterval(1.5f - dr, 1);
         time += Engine.DeltaSeconds;
         if (time > 1)
         {
@@ -294,8 +294,8 @@ public class Ablative() : Module(Modules.Ablative, Sprites.Ablative, "Ablative",
     }
     public override void OnUpdate(float _fuseRatio)
     {
-        UI.PlayerSpecialHealth.Colors[0] = Color.Cyan;
-        UI.PlayerSpecialHealth.SetInterval(buffer, 25f);
+        UI.ModuleSliders[(int)ModuleType.Hull].Colors[0] = Color.Cyan;
+        UI.ModuleSliders[(int)ModuleType.Hull].SetInterval(buffer, 25f);
         if (Cooldown <= 0 && buffer < 25)
         {
             buffer += Engine.DeltaSeconds * 10;
@@ -323,8 +323,8 @@ public class ThermalShield() : Module(Modules.ThermalShield, Sprites.Hull, "Ther
     }
     public override void OnUpdate(float _fuseRatio)
     {
-        UI.PlayerSpecialHealth.Colors[0] = Color.Transparent;
-        UI.PlayerSpecialHealth.Colors[1] = Color.Transparent;
+        UI.ModuleSliders[(int)ModuleType.Hull].Colors[0] = Color.Transparent;
+        UI.ModuleSliders[(int)ModuleType.Hull].Colors[1] = Color.Transparent;
         Player.ApplyWork(0.33f * (float)Math.Sign(-Player.Temperature));
         base.OnUpdate(_fuseRatio);
     }
@@ -817,7 +817,7 @@ public class Crossbow() : Weapon(Modules.Crossbow, Sprites.Crossbow, "Crossbow",
         base.OnUpdate(_fuseRatio);
         if (Engine.SaveGame.Player.modules.ContainsValue(this))
         {
-            UI.PlayerAmmo.SetInterval(Math.Min(chargeTime, 1.5f), 1.5f);
+            UI.ModuleSliders[(int)ModuleType.Guns].SetInterval(Math.Min(chargeTime, 1.5f), 1.5f);
         }
     }
 }
@@ -1426,7 +1426,7 @@ public class Dash() : Module(Modules.Dash, Sprites.Dash, "Dash Core", "Teleports
     }
     public override void OnUpdate(float _fuseRatio)
     {
-        UI.PlayerAbility.SetInterval(1 - Cooldown / MaxCooldown, 1);
+        UI.ModuleSliders[(int)ModuleType.Core].SetInterval(1 - Cooldown / MaxCooldown, 1);
         base.OnUpdate(_fuseRatio);
     }
 }
@@ -1457,7 +1457,7 @@ public class SummonShield() : Module(Modules.SummonShield, Sprites.SummonShield,
         {
             shield2 = null;
         }
-        UI.PlayerAbility.SetInterval(1 - Cooldown / MaxCooldown, 1);
+        UI.ModuleSliders[(int)ModuleType.Core].SetInterval(1 - Cooldown / MaxCooldown, 1);
         base.OnUpdate(_fuseRatio);
     }
 }
@@ -1517,7 +1517,7 @@ public class SummonGrapplingHook() : Module(Modules.GrapplingHook, Sprites.Grapp
         {
             hook.Parent.Position = p.Position += offset;
         }
-        UI.PlayerAbility.SetInterval(1 - Cooldown / MaxCooldown, 1);
+        UI.ModuleSliders[(int)ModuleType.Core].SetInterval(1 - Cooldown / MaxCooldown, 1);
         base.OnUpdate(_fuseRatio);
     }
 }
@@ -1543,7 +1543,7 @@ public class Nanomachines() : Module(Modules.Nanomachines, Sprites.Nanomachines,
     }
     public override void OnUpdate(float _fuseRatio)
     {
-        UI.PlayerAbility.SetInterval(1 - Cooldown / MaxCooldown, 1);
+        UI.ModuleSliders[(int)ModuleType.Core].SetInterval(1 - Cooldown / MaxCooldown, 1);
         base.OnUpdate(_fuseRatio);
     }
 }
@@ -1577,7 +1577,7 @@ public class CreateFighter() : Module(Modules.CreateFighter, Sprites.ConstructFi
     }
     public override void OnUpdate(float _fuseRatio)
     {
-        UI.PlayerAbility.SetInterval(1 - Cooldown / MaxCooldown, 1);
+        UI.ModuleSliders[(int)ModuleType.Core].SetInterval(1 - Cooldown / MaxCooldown, 1);
         allies = [.. allies.Where(x => !x.isExpired)];
         base.OnUpdate(_fuseRatio);
     }
@@ -1631,7 +1631,7 @@ public class Assault() : Module(Modules.Assault, Sprites.Assault, "Assault", "Sh
                 isShooting = false;
             }
         }
-        UI.PlayerAbility.SetInterval(1 - Cooldown / MaxCooldown, 1);
+        UI.ModuleSliders[(int)ModuleType.Core].SetInterval(1 - Cooldown / MaxCooldown, 1);
         base.OnUpdate(_fuseRatio);
     }
 }
@@ -1687,7 +1687,7 @@ public class Expose() : Module(Modules.Expose, Sprites.Expose, "Exposure", "Crea
     }
     public override void OnUpdate(float _fuseRatio)
     {
-        UI.PlayerAbility.SetInterval(1 - Cooldown / MaxCooldown, 1);
+        UI.ModuleSliders[(int)ModuleType.Core].SetInterval(1 - Cooldown / MaxCooldown, 1);
         //Helps the player with temperature control
         if(aura != null)
         {

@@ -321,34 +321,31 @@ public class Player : Entity
         {
             UI.HealthSliders[i].SetInterval(modules[(ModuleType)i].MaxHealth - modules[(ModuleType)i].Health, modules[(ModuleType)i].MaxHealth, 0);
         }
-        UI.PlayerHealth.SetInterval(currentHealth - cachedDamage, maxHealth, 0);
-        UI.PlayerHealth.SetInterval(currentHealth + cachedDamageCd * (float)(cachedDamage + 10) / 20, maxHealth, 1);
         if (Gun.CritCondition)
         {
-            UI.PlayerAmmo.Colors[0] = Color.White;
-            UI.PlayerAmmo.Colors[1] = Color.DarkGray;
+            UI.ModuleSliders[(int)ModuleType.Guns].Colors[0] = Color.White;
+            UI.ModuleSliders[(int)ModuleType.Guns].Colors[1] = Color.DarkGray;
         }
         else
         {
-            UI.PlayerAmmo.Colors[0] = Color.Yellow;
-            UI.PlayerAmmo.Colors[1] = Color.Gray;
+            UI.ModuleSliders[(int)ModuleType.Guns].Colors[0] = Color.Yellow;
+            UI.ModuleSliders[(int)ModuleType.Guns].Colors[1] = Color.Gray;
         }
 
         float lerp = (MathF.Sin(Engine.Time) + 1f) / 2;
         Vector3 colorVec = new Vector3(1, 0, 0) * lerp + new Vector3(1, 0.2f, 0.2f) * (1f - lerp);
-        UI.PlayerHealth.Colors[0] = new Color(colorVec.X, colorVec.Y, colorVec.Z);
 
         //Only displays if the player has abilities unlocked
         if (Progression > 1 || SaveGame.DebugMode)
         {
             colorVec = new Vector3(0, 1, 1) * lerp + new Vector3(0.2f, 1, 0.8f) * (1f - lerp);
-            UI.PlayerAbility.Colors[0] = new Color(colorVec.X, colorVec.Y, colorVec.Z);
-            UI.PlayerAbility.Colors[1] = Color.DarkGray;
+            UI.ModuleSliders[(int)ModuleType.Core].Colors[0] = new Color(colorVec.X, colorVec.Y, colorVec.Z);
+            UI.ModuleSliders[(int)ModuleType.Core].Colors[1] = Color.DarkGray;
         }
         else
         {
-            UI.PlayerAbility.Colors[0] = Color.Transparent;
-            UI.PlayerAbility.Colors[1] = Color.Transparent;
+            UI.ModuleSliders[(int)ModuleType.Core].Colors[0] = Color.Transparent;
+            UI.ModuleSliders[(int)ModuleType.Core].Colors[1] = Color.Transparent;
         }
         var temp = Temperature;
         if(temp > 0)

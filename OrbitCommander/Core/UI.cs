@@ -50,7 +50,6 @@ public static class UI
 
     //Terminal Screen
     public static Slider EnemySlider { get; } = new Slider(Engine.Line, new Vector2(-130, -TerminalMenu.Size.Y / 3), new Vector2(50, 2), true, [Color.White, Color.Gray], TerminalScreen, [1]) { WidgetAlignment = Alignment.Left };
-    public static Slider[] HealthSliders { get; } = new Slider[5];
     public static Decal WaveText { get; } = new Decal(new Vector2(-120, -TerminalMenu.Size.Y / 4), Assets.Rasterforge, "0", Color.White, 10, TerminalScreen, [1]);
     public static Decal EnemiesLeft { get; } = new Decal(new Vector2(-140, -TerminalMenu.Size.Y / 4), Assets.Rasterforge, "0", Color.Red, 10, TerminalScreen, [1]);
 
@@ -81,11 +80,9 @@ public static class UI
 
     //Gameplay Menu
     public static Decal Timer { get; } = new Decal(new Vector2(-50, 0), Assets.Rasterforge, $"{Engine.IngameTime.DrawText}", Color.White, 10, GameplayGlobals, [(int)Alignment.TopRight]);
-    public static Slider PlayerHealth { get; } = new Slider(Engine.Line, new Vector2(5, 5), new Vector2(150, 15), true, [Color.Red, Color.White, new Color(0.2f, 0.2f, 0.2f)], GameplayGlobals, [(int)Alignment.TopLeft]);
-    public static Slider PlayerSpecialHealth { get; } = new Slider(Engine.Line, new Vector2(5, 5), new Vector2(150, 15), true, [Color.Transparent, Color.Transparent], GameplayGlobals, [(int)Alignment.TopLeft]);
-    public static Slider PlayerAmmo { get; } = new Slider(Engine.Line, new Vector2(5, 15), new Vector2(100, 2), true, [Color.Yellow, Color.DarkGray], TerminalScreen, [1]);
-    public static Slider PlayerAbility { get; } = new Slider(Engine.Line, new Vector2(5, 15), new Vector2(100, 10), true, [Color.Cyan, Color.DarkGray], TerminalScreen, [1]);
     public static Slider Thermometer { get; } = new Slider(Engine.Line, new Vector2(-120, -85), new Vector2(100, 10), true, [new Color(25, 25, 25), Color.Transparent, new Color(25, 25, 25)], TerminalScreen, [1]) { WidgetAlignment = Alignment.Left };
+    public static Slider[] HealthSliders { get; } = new Slider[5];
+    public static Slider[] ModuleSliders { get; } = new Slider[5];
 
     public static TerminalButton[] NextModule { get; } = new TerminalButton[5];
     public static TerminalButton[] PrevModule { get; } = new TerminalButton[5];
@@ -477,9 +474,6 @@ public static class UI
             }
         };
 
-        PlayerSpecialHealth.SetInterval(1, 1);
-        PlayerHealth.Intervals = [1, 1];
-
         float xOffset = Assets.DimsOf(Sprites.LargePanel).X / 6;
         for (int x = 0; x < ModuleSlots.Length; x++)
         {
@@ -599,10 +593,11 @@ public static class UI
                 //Events.
             };
             ModulePower[i] = dial;
-            float y = (i - 2) * 20 + 0.5f;
+            float y = (i - 2) * 10 + 0.5f;
             ModuleIcons[i] = new Decal(new Vector2(61f, y -37.5f), null, TerminalMenu, [1]);
             StatusLights[i] = new Decal(new Vector2(44.5f, y-38), Assets.Get(Sprites.LEDGlow), TerminalMenu, [1]);
-            HealthSliders[i] = new Slider(Engine.Line, new Vector2(-15, y - 37.5f), new Vector2(50, 4), true, [Color.DarkGray, Color.Cyan], TerminalScreen, [1]);
+            HealthSliders[i] = new Slider(Engine.Line, new Vector2(10, y + 37.5f), new Vector2(100, 4), true, [Color.DarkGray, Color.Cyan], GameplayGlobals, [(int)Alignment.TopLeft]);
+            ModuleSliders[i] = new Slider(Engine.Line, new Vector2(10, y + 40f), new Vector2(80, 4), true, [Color.DarkGray, Color.DarkCyan], GameplayGlobals, [(int)Alignment.TopLeft]);
         }
         Overlay = new Decal(Vector2.Zero, Assets.Get(Sprites.Overlay), TerminalMenu, [0, 1, 2]) { color = Color.White * 0.5f };
     }
