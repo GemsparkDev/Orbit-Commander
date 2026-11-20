@@ -11,7 +11,7 @@ using UILib.Content;
 namespace OrbitCommander.Core;
 public static class UI
 {
-    private static Color color = new Color(26, 26, 26);
+    public static Color UltraDark { get; } = new Color(26, 26, 26);
     //Real Windows
     public static TabbedWindow TerminalMenu { get; } = new TabbedWindow(new Vector2(0, -1), Assets.Get(Sprites.Terminal), null, null, null, null, Engine.RealUI) { Alignment = Alignment.Top, CurrentTab = 1 }; //0: Player / Fuse menu, 1: Keybind / Settings menu, 2: Floppy menu
 
@@ -36,9 +36,9 @@ public static class UI
     public static Button ShaderToggle { get; } = new Button(new Vector2(TerminalMenu.Size.X / 2.5f, -TerminalMenu.Size.Y / 2 * 6 / 10), Assets.Get(Sprites.SwitchOn), TerminalMenu, [0], Assets.Get(Sprites.SwitchOff));
     public static Decal PatchedConicsText { get; } = new Decal(new Vector2(TerminalMenu.Size.X / 3f, -TerminalMenu.Size.Y / 2 * 8 / 10), Assets.Ithica, "Patched Conics", Color.White, 5, TerminalMenu, [0]) { WidgetAlignment = Alignment.Right};
     public static Decal ShaderText { get; } = new Decal(new Vector2(TerminalMenu.Size.X / 3f, -TerminalMenu.Size.Y / 2 * 6 / 10), Assets.Ithica, "Shader", Color.White, 5, TerminalMenu, [0]) { WidgetAlignment = Alignment.Right };
-    public static Slider SFXSlider { get; } = new Slider(Engine.Line, Assets.Get(Sprites.Knob), new Vector2(TerminalMenu.Size.X / 2.5f, -TerminalMenu.Size.Y / 2 * 4 / 10), new Vector2(50, 5), false, [color, color], TerminalMenu, [0]);
-    public static Slider MusicSlider { get; } = new Slider(Engine.Line, Assets.Get(Sprites.Knob), new Vector2(TerminalMenu.Size.X / 2.5f, -TerminalMenu.Size.Y / 2 * 2.5f / 10), new Vector2(50, 5), false, [color, color], TerminalMenu, [0]);
-    public static Slider UIScaleSlider { get; } = new Slider(Engine.Line, Assets.Get(Sprites.Knob), new Vector2(TerminalMenu.Size.X / 2.5f, -TerminalMenu.Size.Y / 2 / 10), new Vector2(50, 5), false, [color, color], TerminalMenu, [0]);
+    public static Slider SFXSlider { get; } = new Slider(Engine.Line, Assets.Get(Sprites.Knob), new Vector2(TerminalMenu.Size.X / 2.5f, -TerminalMenu.Size.Y / 2 * 4 / 10), new Vector2(50, 5), false, [UltraDark, UltraDark], TerminalMenu, [0]);
+    public static Slider MusicSlider { get; } = new Slider(Engine.Line, Assets.Get(Sprites.Knob), new Vector2(TerminalMenu.Size.X / 2.5f, -TerminalMenu.Size.Y / 2 * 2.5f / 10), new Vector2(50, 5), false, [UltraDark, UltraDark], TerminalMenu, [0]);
+    public static Slider UIScaleSlider { get; } = new Slider(Engine.Line, Assets.Get(Sprites.Knob), new Vector2(TerminalMenu.Size.X / 2.5f, -TerminalMenu.Size.Y / 2 / 10), new Vector2(50, 5), false, [UltraDark, UltraDark], TerminalMenu, [0]);
     public static Decal SFXVolume { get; } = new Decal(new Vector2(TerminalMenu.Size.X / 3.4f, -TerminalMenu.Size.Y / 2 * 4 / 10), Assets.Ithica, "Sound", Color.White, 5, TerminalMenu, [0]) { WidgetAlignment = Alignment.Right };
     public static Decal MusicVolume { get; } = new Decal(new Vector2(TerminalMenu.Size.X / 3.4f, -TerminalMenu.Size.Y / 2 * 2.5f / 10), Assets.Ithica, "Music", Color.White, 5, TerminalMenu, [0]) { WidgetAlignment = Alignment.Right };
     public static Decal UIScale { get; } = new Decal(new Vector2(TerminalMenu.Size.X / 3.4f, -TerminalMenu.Size.Y / 2 / 10), Assets.Ithica, "UI Scale", Color.White, 5, TerminalMenu, [0]) { WidgetAlignment = Alignment.Right };
@@ -166,7 +166,7 @@ public static class UI
     public static int windowType = 1;
     public static readonly Vector2[] resolutions = [new Vector2(1920, 1080), new Vector2(640, 480)];
     public static int selectedResolution = 0;
-    public static readonly Modules[] setModules = [Modules.Hull, Modules.Basic, Modules.Engines, Modules.CloakingModifier, Modules.Dash];
+    public static readonly Modules[] setModules = [Modules.Hull, Modules.PrismArray, Modules.Engines, Modules.CloakingModifier, Modules.Dash];
 
     public static void AddUIElements()
     {
@@ -596,8 +596,8 @@ public static class UI
             float y = (i - 2) * 10 + 0.5f;
             ModuleIcons[i] = new Decal(new Vector2(61f, y -37.5f), null, TerminalMenu, [1]);
             StatusLights[i] = new Decal(new Vector2(44.5f, y-38), Assets.Get(Sprites.LEDGlow), TerminalMenu, [1]);
-            HealthSliders[i] = new Slider(Engine.Line, new Vector2(10, y + 37.5f), new Vector2(100, 4), true, [Color.DarkGray, Color.Cyan], GameplayGlobals, [(int)Alignment.TopLeft]);
-            ModuleSliders[i] = new Slider(Engine.Line, new Vector2(10, y + 40f), new Vector2(80, 4), true, [Color.DarkGray, Color.DarkCyan], GameplayGlobals, [(int)Alignment.TopLeft]);
+            HealthSliders[i] = new Slider(Engine.Line, new Vector2(10, y + 37.5f), new Vector2(100, 4), true, [Color.Cyan, UltraDark], GameplayGlobals, [(int)Alignment.TopLeft]);
+            ModuleSliders[i] = new Slider(Engine.Line, new Vector2(10, y + 40f), new Vector2(100, 2), true, [Color.DarkCyan, UltraDark], GameplayGlobals, [(int)Alignment.TopLeft]);
         }
         Overlay = new Decal(Vector2.Zero, Assets.Get(Sprites.Overlay), TerminalMenu, [0, 1, 2]) { color = Color.White * 0.5f };
     }

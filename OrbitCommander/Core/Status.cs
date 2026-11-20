@@ -213,7 +213,7 @@ public class Berserk(float _timeLeft) : Status(Sprites.Knob)
     }
     public override void Reset()
     {
-        timeLeft = 10;
+        timeLeft = _timeLeft;
         bonus = true;
     }
     public override int SensingChange() => -1;

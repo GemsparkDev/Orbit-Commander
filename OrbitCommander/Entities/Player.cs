@@ -319,7 +319,7 @@ public class Player : Entity
         float maxHealth = modules.Values.Sum(x => x.MaxHealth);
         for(int i = 0; i < modules.Count; i++)
         {
-            UI.HealthSliders[i].SetInterval(modules[(ModuleType)i].MaxHealth - modules[(ModuleType)i].Health, modules[(ModuleType)i].MaxHealth, 0);
+            UI.HealthSliders[i].SetInterval(modules[(ModuleType)i].Health, modules[(ModuleType)i].MaxHealth);
         }
         if (Gun.CritCondition)
         {
