@@ -153,6 +153,8 @@ public class Cursor(Vector2 _center)
         Vector2 offset = Vector2.Zero;
         float handAngle;
         Texture2D handTexture;
+        Color color = Color.White;
+        float rightHandTransparency = 1;
         if (Engine.RealUI.FocusedWidget == UI.TerminalClose || !HandMode)
         {
             handTexture = Assets.Get(Sprites.Grip);
@@ -174,6 +176,7 @@ public class Cursor(Vector2 _center)
         {
             handTexture = Assets.Get(Sprites.Pinch);
             handAngle = Util.ToAngle(HandPosition - new Vector2(Engine.BackBuffer.X * 3 / 4, Engine.BackBuffer.Y * 2));
+            rightHandTransparency = 0.5f;
             offset = new Vector2(0, 23);
         }
         else
@@ -181,7 +184,6 @@ public class Cursor(Vector2 _center)
             handTexture = Assets.Get(Sprites.Hand);
             handAngle = Util.ToAngle(HandPosition - new Vector2(Engine.BackBuffer.X * 3 / 4, Engine.BackBuffer.Y * 2));
         }
-        Color color = Color.White;
         if(!HandMode)
         {
             color = new Color(0.1f, 0.1f, 0.1f);
@@ -203,6 +205,6 @@ public class Cursor(Vector2 _center)
 
         _spriteBatch.Draw(Assets.Get(Sprites.Stick), new Vector2(Engine.BackBuffer.X / 2 * 1.2f, Engine.BackBuffer.Y - Assets.DimsOf(Sprites.StickBase).Y * 0.6f * UIManager.UIScale), null, color, MathF.Atan(CursorPosition.X / Engine.BackBuffer.X - 0.5f), stickOffset, UIManager.UIScale, 0, 0);
         _spriteBatch.Draw(handTexture, HandPosition + UIManager.DimsOf(handTexture) / 2, null, Color.Black * 0.2f, handAngle, offset, UIManager.UIScale, 0, 0);
-        _spriteBatch.Draw(handTexture, HandPosition, null, color, handAngle, offset, UIManager.UIScale, 0, 0);
+        _spriteBatch.Draw(handTexture, HandPosition, null, color * rightHandTransparency, handAngle, offset, UIManager.UIScale, 0, 0);
     }
 }

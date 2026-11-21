@@ -226,6 +226,7 @@ public enum Sprites
     TurnableHands,
     Stick,
     StickBase,
+    WindowType,
 
     SmeltIcon,
     RepairIcon,

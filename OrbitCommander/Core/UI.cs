@@ -45,7 +45,7 @@ public static class UI
     public static Dial SelectResolution { get; } = new Dial(Assets.Get(Sprites.TurnableHands), new Vector2(60, TerminalMenu.Size.Y / 2 / 10), Assets.Get(Sprites.TurnableDial), TerminalMenu, [0]) { Range = MathF.PI / 2 };
     public static Decal Resolution { get; } = new Decal(new Vector2(TerminalMenu.Size.X / 2.667f, TerminalMenu.Size.Y / 2 / 10), null, Assets.Ithica, "1920 x 1080", Color.White, 6, TerminalMenu, [0]);
     public static Dial SelectWindowType { get; } = new Dial(Assets.Get(Sprites.TurnableHands), new Vector2(60, TerminalMenu.Size.Y / 2 * 3 / 10), Assets.Get(Sprites.TurnableDial), TerminalMenu, [0]) { Range = MathF.PI / 2 };
-    public static Decal WindowType { get; } = new Decal(new Vector2(TerminalMenu.Size.X / 3.5f, TerminalMenu.Size.Y / 2 * 3 / 10), null, Assets.Ithica, "Borderless Window", Color.White, 6, TerminalMenu, [0]);
+    public static Decal WindowType { get; } = new Decal(new Vector2(60, TerminalMenu.Size.Y / 2 * 3 / 10), Assets.Get(Sprites.WindowType), TerminalMenu, [0]);
     public static Button ApplyChanges { get; } = new Button(new Vector2(TerminalMenu.Size.X / 3.5f, TerminalMenu.Size.Y / 2 * 6 / 10), Assets.Get(Sprites.Plate), Assets.Ithica, "Apply changes", Color.White, 6, TerminalMenu, [0]);
 
     //Terminal Screen
@@ -216,20 +216,6 @@ public static class UI
         {
             const int max = 2;
             windowType = (int)Math.Round(SelectWindowType.Value * max);
-            switch (windowType)
-            {
-                case 0:
-                    WindowType.Text = "Windowed";
-                    break;
-                case 1:
-                    WindowType.Text = "Borderless Windowed";
-                    break;
-                case max:
-                    WindowType.Text = "Fullscreen";
-                    break;
-                default:
-                    break;
-            }
         }; //Write to config?
         SelectResolution.ContinuousInteract += delegate
         {

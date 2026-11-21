@@ -266,6 +266,7 @@ public static class Assets
         Add(Core.Sprites.Fuse, Content.Load<Texture2D>("Images/UI_29"));
         Add(Core.Sprites.Stick, Content.Load<Texture2D>("Images/UI_30"));
         Add(Core.Sprites.StickBase, Content.Load<Texture2D>("Images/UI_31"));
+        Add(Core.Sprites.WindowType, Content.Load<Texture2D>("Images/UI_28"));
 
         Add(Core.Sprites.Dot, Content.Load<Texture2D>("Images/Particle_0"));
         Add(Core.Sprites.Circle, Content.Load<Texture2D>("Images/Particle_2"));
