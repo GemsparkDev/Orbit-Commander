@@ -975,11 +975,6 @@ public class PrismArray() : Weapon(Modules.PrismArray, Sprites.PrismArray, "Pris
     {
         var proj = Player.Modify(NewAssassinShot(Player.Position, Player.Direction * 50, Util.ToAngle(Player.Direction), 0, Player.Team, 2, 0), 2, CritCondition);
         isFiring = 1;
-        timeLeft += Engine.DeltaSeconds;
-        if (timeLeft > duration)
-        {
-            timeLeft = 0;
-        }
         Vector2 dir = Util.ToUnitVector(Util.ToAngle(Player.Direction));
         List<Entity> enemies = Engine.SaveGame.CurrentMission.Hitscan(Player.Position, dir, 250, true, out Vector2 _end, null);
         float end = (_end - Player.Position - dir * 10).Length() / 5;
@@ -1011,6 +1006,11 @@ public class PrismArray() : Weapon(Modules.PrismArray, Sprites.PrismArray, "Pris
     {
         if (isFiring > 0)
         {
+            timeLeft += Engine.DeltaSeconds;
+            if (timeLeft > duration)
+            {
+                timeLeft = 0;
+            }
             //Interpolating looped sound effect with new sound prevents noticable sound jumping
             float lerp = 1;
             if (timeLeft < 1)
