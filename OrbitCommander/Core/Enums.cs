@@ -227,6 +227,8 @@ public enum Sprites
     Stick,
     StickBase,
     WindowType,
+    ApplyButton,
+    PressedApply,
 
     SmeltIcon,
     RepairIcon,
