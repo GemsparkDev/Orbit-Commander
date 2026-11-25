@@ -42,12 +42,12 @@ public static class UI
     public static Decal SFXVolume { get; } = new Decal(new Vector2(TerminalMenu.Size.X / 3.4f, -TerminalMenu.Size.Y / 2 * 4 / 10), Assets.Ithica, "Sound", Color.White, 5, TerminalMenu, [0]) { WidgetAlignment = Alignment.Right };
     public static Decal MusicVolume { get; } = new Decal(new Vector2(TerminalMenu.Size.X / 3.4f, -TerminalMenu.Size.Y / 2 * 2.5f / 10), Assets.Ithica, "Music", Color.White, 5, TerminalMenu, [0]) { WidgetAlignment = Alignment.Right };
     public static Decal UIScale { get; } = new Decal(new Vector2(TerminalMenu.Size.X / 3.4f, -TerminalMenu.Size.Y / 2 / 10), Assets.Ithica, "UI Scale", Color.White, 5, TerminalMenu, [0]) { WidgetAlignment = Alignment.Right };
-    public static Dial SelectResolution { get; } = new Dial(Assets.Get(Sprites.TurnableHands), new Vector2(60, TerminalMenu.Size.Y / 2 / 10), Assets.Get(Sprites.TurnableDial), TerminalMenu, [0]) { Range = MathF.PI / 2 };
+    public static Dial SelectResolution { get; } = new Dial(Assets.Get(Sprites.TurnableHands), new Vector2(TerminalMenu.Size.X / 5f, TerminalMenu.Size.Y / 2 / 10), Assets.Get(Sprites.TurnableDial), TerminalMenu, [0]) { Range = MathF.PI / 2 };
     public static Decal Resolution { get; } = new Decal(new Vector2(TerminalMenu.Size.X / 2.667f, TerminalMenu.Size.Y / 2 / 10), null, Assets.Ithica, "1920 x 1080", Color.White, 6, TerminalMenu, [0]);
-    public static Dial SelectWindowType { get; } = new Dial(Assets.Get(Sprites.TurnableHands), new Vector2(60, TerminalMenu.Size.Y / 2 * 3 / 10), Assets.Get(Sprites.TurnableDial), TerminalMenu, [0]) { Range = MathF.PI / 2 };
-    public static Decal WindowType { get; } = new Decal(new Vector2(60, TerminalMenu.Size.Y / 2 * 3 / 10), Assets.Get(Sprites.WindowType), TerminalMenu, [0]);
-    public static Decal ApplyLabel { get; } = new Decal(new Vector2(TerminalMenu.Size.X / 5f, TerminalMenu.Size.Y / 2 * 6 / 10), null, Assets.Ithica, "Apply", Color.White, 6, TerminalMenu, [0]);
-    public static Button ApplyChanges { get; } = new Button(new Vector2(TerminalMenu.Size.X / 3.5f, TerminalMenu.Size.Y / 2 * 6 / 10), Assets.Get(Sprites.ApplyButton), TerminalMenu, [0], Assets.Get(Sprites.PressedApply)) { IsSwitch = false };
+    public static Dial SelectWindowType { get; } = new Dial(Assets.Get(Sprites.TurnableHands), new Vector2(TerminalMenu.Size.X / 5f, TerminalMenu.Size.Y / 2 * 5 / 10), Assets.Get(Sprites.TurnableDial), TerminalMenu, [0]) { Range = MathF.PI / 2 };
+    public static Decal WindowType { get; } = new Decal(new Vector2(TerminalMenu.Size.X / 5f, TerminalMenu.Size.Y / 2 * 5 / 10), Assets.Get(Sprites.WindowType), TerminalMenu, [0]);
+    public static Decal ApplyLabel { get; } = new Decal(new Vector2(TerminalMenu.Size.X / 3f, TerminalMenu.Size.Y / 2 * 5 / 10), null, Assets.Ithica, "Apply", Color.White, 6, TerminalMenu, [0]);
+    public static Button ApplyChanges { get; } = new Button(new Vector2(TerminalMenu.Size.X / 2.333f, TerminalMenu.Size.Y / 2 * 5 / 10), Assets.Get(Sprites.ApplyButton), TerminalMenu, [0], Assets.Get(Sprites.PressedApply)) { IsSwitch = false };
 
     //Terminal Screen
     public static Slider EnemySlider { get; } = new Slider(Engine.Line, new Vector2(-130, -TerminalMenu.Size.Y / 3), new Vector2(50, 2), true, [Color.White, Color.Gray], TerminalScreen, [1]) { WidgetAlignment = Alignment.Left };
