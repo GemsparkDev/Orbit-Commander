@@ -49,11 +49,6 @@ public static class UI
     public static Decal ApplyLabel { get; } = new Decal(new Vector2(TerminalMenu.Size.X / 3f, TerminalMenu.Size.Y / 2 * 5 / 10), null, Assets.Ithica, "Apply", Color.White, 6, TerminalMenu, [0]);
     public static Button ApplyChanges { get; } = new Button(new Vector2(TerminalMenu.Size.X / 2.333f, TerminalMenu.Size.Y / 2 * 5 / 10), Assets.Get(Sprites.ApplyButton), TerminalMenu, [0], Assets.Get(Sprites.PressedApply)) { IsSwitch = false };
 
-    //Terminal Screen
-    public static Slider EnemySlider { get; } = new Slider(Engine.Line, new Vector2(-130, -TerminalMenu.Size.Y / 3), new Vector2(50, 2), true, [Color.White, Color.Gray], TerminalScreen, [1]) { WidgetAlignment = Alignment.Left };
-    public static Decal WaveText { get; } = new Decal(new Vector2(-120, -TerminalMenu.Size.Y / 4), Assets.Rasterforge, "0", Color.White, 10, TerminalScreen, [1]);
-    public static Decal EnemiesLeft { get; } = new Decal(new Vector2(-140, -TerminalMenu.Size.Y / 4), Assets.Rasterforge, "0", Color.Red, 10, TerminalScreen, [1]);
-
     //Fuse Menu
     public static Decal[] StatusLights { get; } = new Decal[5];
     public static Slider RestartSwitch { get; } = new Slider(Engine.Line, new Vector2(TerminalMenu.Size.X * 3 / 10, TerminalMenu.Size.Y * 3/10), Assets.DimsOf(Sprites.SwitchFive), false, [Color.Transparent, Color.Transparent], TerminalMenu, [1, 2]);
@@ -81,9 +76,12 @@ public static class UI
 
     //Gameplay Menu
     public static Decal Timer { get; } = new Decal(new Vector2(-50, 0), Assets.Rasterforge, $"{Engine.IngameTime.DrawText}", Color.White, 10, GameplayGlobals, [(int)Alignment.TopRight]);
-    public static Slider Thermometer { get; } = new Slider(Engine.Line, new Vector2(-120, -85), new Vector2(100, 10), true, [new Color(25, 25, 25), Color.Transparent, new Color(25, 25, 25)], TerminalScreen, [1]) { WidgetAlignment = Alignment.Left };
+    public static Slider Thermometer { get; } = new Slider(Engine.Line, new Vector2(Engine.BackBuffer.X/2, 20f), new Vector2(100, 10), true, [new Color(25, 25, 25), Color.Transparent, new Color(25, 25, 25)], GameplayGlobals, [(int)Alignment.TopLeft]);
     public static Slider[] HealthSliders { get; } = new Slider[5];
     public static Slider[] ModuleSliders { get; } = new Slider[5];
+    public static Slider EnemySlider { get; } = new Slider(Engine.Line, new Vector2(120, 20f), new Vector2(100, 4), true, [Color.Cyan, UltraDark], GameplayGlobals, [(int)Alignment.TopLeft]);
+    public static Decal WaveText { get; } = new Decal(new Vector2(230, 20f), Assets.Rasterforge, "0", Color.White, 10, GameplayGlobals, [(int)Alignment.TopLeft]);
+    public static Decal EnemiesLeft { get; } = new Decal(new Vector2(250, 20f), Assets.Rasterforge, "0", Color.Red, 10, GameplayGlobals, [(int)Alignment.TopLeft]);
 
     public static TerminalButton[] NextModule { get; } = new TerminalButton[5];
     public static TerminalButton[] PrevModule { get; } = new TerminalButton[5];
