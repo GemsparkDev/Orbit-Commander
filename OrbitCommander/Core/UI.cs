@@ -76,7 +76,7 @@ public static class UI
 
     //Gameplay Menu
     public static Decal Timer { get; } = new Decal(new Vector2(-50, 0), Assets.Rasterforge, $"{Engine.IngameTime.DrawText}", Color.White, 10, GameplayGlobals, [(int)Alignment.TopRight]);
-    public static Slider Thermometer { get; } = new Slider(Engine.Line, new Vector2(Engine.BackBuffer.X/2, 20f), new Vector2(100, 10), true, [new Color(25, 25, 25), Color.Transparent, new Color(25, 25, 25)], GameplayGlobals, [(int)Alignment.TopLeft]);
+    public static Slider Thermometer { get; } = new Slider(Engine.Line, new Vector2(0, 20f), new Vector2(100, 10), true, [new Color(25, 25, 25), Color.Transparent, new Color(25, 25, 25)], GameplayGlobals, [(int)Alignment.Top]);
     public static Slider[] HealthSliders { get; } = new Slider[5];
     public static Slider[] ModuleSliders { get; } = new Slider[5];
     public static Slider EnemySlider { get; } = new Slider(Engine.Line, new Vector2(120, 20f), new Vector2(100, 4), true, [Color.Cyan, UltraDark], GameplayGlobals, [(int)Alignment.TopLeft]);
@@ -579,8 +579,8 @@ public static class UI
             };
             ModulePower[i] = dial;
             float y = (i - 2) * 10 + 0.5f;
-            ModuleIcons[i] = new Decal(new Vector2(61f, y -37.5f), null, TerminalMenu, [1]);
-            StatusLights[i] = new Decal(new Vector2(44.5f, y-38), Assets.Get(Sprites.LEDGlow), TerminalMenu, [1]);
+            ModuleIcons[i] = new Decal(new Vector2(61f, (i-2)*20 -37f), null, TerminalMenu, [1]);
+            StatusLights[i] = new Decal(new Vector2(44.5f, (i - 2) * 20 - 37.5f), Assets.Get(Sprites.LEDGlow), TerminalMenu, [1]);
             HealthSliders[i] = new Slider(Engine.Line, new Vector2(10, y + 37.5f), new Vector2(100, 4), true, [Color.Cyan, UltraDark], GameplayGlobals, [(int)Alignment.TopLeft]);
             ModuleSliders[i] = new Slider(Engine.Line, new Vector2(10, y + 40f), new Vector2(100, 2), true, [Color.DarkCyan, UltraDark], GameplayGlobals, [(int)Alignment.TopLeft]);
         }
