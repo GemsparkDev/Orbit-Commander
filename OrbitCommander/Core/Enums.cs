@@ -230,6 +230,8 @@ public enum Sprites
     ApplyButton,
     PressedApply,
 
+    PressureIcon,
+
     SmeltIcon,
     RepairIcon,
     VictoryIcon,

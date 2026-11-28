@@ -165,6 +165,8 @@ public static class Assets
         Add(Core.Sprites.ConstructFighter, Content.Load<Texture2D>("Images/Items/Item_38"));
         Add(Core.Sprites.RealConstructFighter, Content.Load<Texture2D>("Images/Items/Item_38-1"));
 
+        Add(Core.Sprites.PressureIcon, Content.Load<Texture2D>("Images/Items/Debuff_0"));
+
         //Projectiles
         Add(Core.Sprites.SpiralShot, Content.Load<Texture2D>("Images/Projectile_0"));
         Add(Core.Sprites.PulseShot, Content.Load<Texture2D>("Images/Projectile_1"));

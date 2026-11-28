@@ -221,7 +221,7 @@ public class Berserk(float _timeLeft) : Status(Sprites.Knob)
     public override int FuseChange() => 1;
     public override int ModifyDamage(int _damage) => (int)(_damage * 1.5f);
 }
-public class Pressure(Color _color, bool _isFatal) : Status(Sprites.Knob)
+public class Pressure(Color _color, bool _isFatal) : Status(Sprites.PressureIcon)
 {
     float duration = Engine.DeltaSeconds * 2;
     float fireCooldown = 0.05f;

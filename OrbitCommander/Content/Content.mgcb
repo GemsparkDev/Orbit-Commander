@@ -51,6 +51,18 @@
 /processorParam:TextureFormat=Color
 /build:Images/Cursor_2.png
 
+#begin Images/Debuff_0.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:Images/Debuff_0.png
+
 #begin Images/Entity_1.png
 /importer:TextureImporter
 /processor:TextureProcessor
